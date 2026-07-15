@@ -1,0 +1,71 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//SVBB//Termine//DE
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:SV Bachum / Bergheim e.V. – Termine
+X-WR-TIMEZONE:Europe/Berlin
+REFRESH-INTERVAL;VALUE=DURATION:PT6H
+X-PUBLISHED-TTL:PT6H
+BEGIN:VTIMEZONE
+TZID:Europe/Berlin
+BEGIN:DAYLIGHT
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+TZNAME:CEST
+DTSTART:19700329T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+TZNAME:CET
+DTSTART:19701025T030000
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:seed-1@svbb-termine
+DTSTAMP:20260715T061831Z
+DTSTART;TZID=Europe/Berlin:20260819T190000
+DTEND;TZID=Europe/Berlin:20260819T210000
+SUMMARY:Sommerfest Jugend
+DESCRIPTION:Team: F-Jugend (1. Mannschaft)\nAnsprechpartner: Vorstand Adm
+ in\nInfo: Eltern willkommen
+LOCATION:Großspielfeld – Hälfte A\, Vereinsheim\, Theke
+URL:https://fcal1986.github.io/svbachumbergheimkalender/#t=seed-1
+END:VEVENT
+BEGIN:VEVENT
+UID:seed-2@svbb-termine
+DTSTAMP:20260715T061831Z
+DTSTART;TZID=Europe/Berlin:20260830T150000
+DTEND;TZID=Europe/Berlin:20260830T170000
+SUMMARY:Saisoneröffnung & Grillfest
+DESCRIPTION:Team: 1. Herren\nAnsprechpartner: Vorstand Admin
+LOCATION:Großspielfeld – ganz\, Vereinsheim\, Theke
+URL:https://fcal1986.github.io/svbachumbergheimkalender/#t=seed-2
+END:VEVENT
+BEGIN:VEVENT
+UID:seed-3@svbb-termine
+DTSTAMP:20260715T061831Z
+DTSTART;TZID=Europe/Berlin:20261212T183000
+DTEND;TZID=Europe/Berlin:20261212T203000
+SUMMARY:Weihnachtsfeier
+DESCRIPTION:Team: Alle Teams\nAnsprechpartner: Vorstand Admin\nInfo: Alle
+  Mannschaften + Familien
+LOCATION:Vereinsheim\, Theke
+URL:https://fcal1986.github.io/svbachumbergheimkalender/#t=seed-3
+END:VEVENT
+BEGIN:VEVENT
+UID:8d9170ce-5ed9-451c-932e-833b30ed3b68@svbb-termine
+DTSTAMP:20260715T061831Z
+DTSTART;TZID=Europe/Berlin:20260715T150000
+DTEND;TZID=Europe/Berlin:20260715T170000
+SUMMARY:Test
+DESCRIPTION:Team: F-Jugend (1. Mannschaft)\nAnsprechpartner: Fabrizio Cal
+ cagno
+LOCATION:Großspielfeld – ganz
+URL:https://fcal1986.github.io/svbachumbergheimkalender/#t=8d9170ce-5ed9-
+ 451c-932e-833b30ed3b68
+END:VEVENT
+END:VCALENDAR
