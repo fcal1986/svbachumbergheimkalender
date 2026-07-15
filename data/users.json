@@ -12,6 +12,19 @@
       },
       "created": "2026-07-15T06:12:45.752Z",
       "admin": true
+    },
+    {
+      "id": "a30f8c9b-96f9-4557-b28b-619e122080ea",
+      "first": "David",
+      "last": "Skwara",
+      "email": "david.skwara@gmx.de",
+      "admin": true,
+      "enc": {
+        "salt": "PgZUCE/nu77Sxd3B9E4bdA==",
+        "iv": "9HdlS5B2U6loacn/",
+        "cipher": "838yGYUXZ6lr4byW2x+7tvzBv2JGwWovXar0N6J9dOJ9IQ63BW+LCCiPIck9V3fFlctIQpumIOUuUJRXyn3pPw+1AmOxiPKp0HiT2OZhHhXMwCxvvU1CYlo6B4CryRo8EhjacpJ4VXcYlt157g=="
+      },
+      "created": "2026-07-15T12:41:31.636Z"
     }
   ]
 }
