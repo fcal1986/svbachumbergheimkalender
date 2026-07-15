@@ -36,7 +36,7 @@
   .user-chip{background:rgba(255,255,255,.13);border:none;color:#fff;font-family:'Poppins';font-size:11px;font-weight:600;padding:8px 12px;border-radius:20px;cursor:pointer;position:relative;z-index:2;white-space:nowrap;}
   .user-chip.in{background:var(--yellow);color:var(--ink);font-weight:700;}
 
-  .content{flex:1;overflow-y:auto;padding:14px 18px calc(84px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch;}
+  .content{flex:1 1 auto;min-height:0;overflow-y:auto;padding:14px 18px calc(96px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch;}
   .content::-webkit-scrollbar{width:0;}
 
   .navbar{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-around;background:#fff;border-top:1px solid var(--line);padding:8px 6px calc(8px + env(safe-area-inset-bottom));z-index:10;}
@@ -48,7 +48,7 @@
   .navbtn.active .dot{opacity:1;}
 
   .pane{display:none;}
-  .pane.active{display:block;animation:fade .18s ease;}
+  .pane.active{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;animation:fade .18s ease;}
   @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
 
   .section-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin:18px 0 10px;}
@@ -392,11 +392,7 @@
   <!-- ============ KONTO ============ -->
   <div class="pane" data-pane="konto">
     <div class="content">
-      <div id="ical-card"></div>
-      <div id="pwa-card"></div>
-      <div id="me-card"></div>
-      <div id="bio-card"></div>
-      <div id="admin-area"></div>
+      <div id="konto-body"></div>
       <p class="helptext" style="text-align:center;margin-top:14px;" id="ver-note"></p>
     </div>
   </div>
@@ -1079,57 +1075,41 @@ function deleteEvent(id){
 }
 
 /* ---------------- Konto ---------------- */
-function renderKonto(){
-  // Kalender-Abo: für alle sichtbar
-  document.getElementById('ical-card').innerHTML=
-    '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>Kalender abonnieren</h4>'+
-    '<p class="sub">Einmal einrichten – danach erscheinen alle Vereinstermine automatisch im Handy-Kalender und aktualisieren sich von selbst.</p>'+
+function icalCard(){
+  return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>Kalender abonnieren</h4>'+
+    '<p class="sub">Einmal einrichten &ndash; danach erscheinen alle Vereinstermine automatisch im Handy-Kalender und aktualisieren sich von selbst.</p>'+
     '<div class="urlbox">'+esc(baseUrl()+'termine.ics')+'</div>'+
     '<button class="ghost-btn" style="margin-top:0;" onclick="copyIcsUrl()">Abo-Link kopieren</button>'+
     '<button class="ghost-btn" onclick="downloadICS()">Als Datei herunterladen (einmalig)</button>'+
-    '<p class="helptext">iPhone: Einstellungen → Kalender → Accounts → Account hinzufügen → Andere → Kalenderabo. Android: Google Kalender am PC → Weitere Kalender → Per URL.</p></div>';
-
-  // Startbildschirm
-  document.getElementById('pwa-card').innerHTML=
-    '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>Als App speichern</h4>'+
-    '<p class="sub">iPhone: Teilen-Symbol → „Zum Home-Bildschirm". Android: Menü ⋮ → „App installieren". Danach startet sie wie eine normale App.</p></div>';
-
-  // Konto
-  const me=document.getElementById('me-card');
-  if(!session){
-    me.innerHTML='<div class="card"><h4>Nicht angemeldet</h4><p class="sub">Termine ansehen geht ohne Anmeldung. Zum Eintragen, Ändern oder Löschen brauchst du einen Zugang vom Vorstand.</p>'+
-      '<button class="submit-btn" onclick="openLogin()"><span>Anmelden</span></button></div>';
-    document.getElementById('bio-card').innerHTML='';
-    document.getElementById('admin-area').innerHTML='';
-    return;
-  }
-  me.innerHTML='<div class="card"><h4>'+esc(session.name)+'</h4><p class="sub">'+esc(session.email)+(session.isAdmin?' · Superuser':'')+'</p>'+
-    '<button class="cancel-btn" onclick="logout()">Abmelden</button></div>';
-
-  const bio=document.getElementById('bio-card');
-  if(!bioAvailable()){
-    bio.innerHTML='<div class="card"><h4>Fingerabdruck</h4><p class="sub">Dieses Gerät oder dieser Browser unterstützt das nicht.</p></div>';
-  }else if(bioStored()){
-    bio.innerHTML='<div class="card"><h4>Fingerabdruck aktiv</h4><p class="sub">Beim nächsten Anmelden reicht Finger oder Face-ID auf diesem Gerät.</p>'+
+    '<p class="helptext">iPhone: Einstellungen &rarr; Kalender &rarr; Accounts &rarr; Account hinzuf&uuml;gen &rarr; Andere &rarr; Kalenderabo. Android: Google Kalender am PC &rarr; Weitere Kalender &rarr; Per URL.</p></div>';
+}
+function pwaCard(){
+  return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>Als App speichern</h4>'+
+    '<p class="sub">iPhone: Teilen-Symbol &rarr; &bdquo;Zum Home-Bildschirm&ldquo;. Android: Men&uuml; &#8942; &rarr; &bdquo;App installieren&ldquo;. Danach startet sie wie eine normale App.</p></div>';
+}
+function bioCard(){
+  if(!bioAvailable())
+    return '<div class="card"><h4>Fingerabdruck</h4><p class="sub">Dieses Ger&auml;t oder dieser Browser unterst&uuml;tzt das nicht.</p></div>';
+  if(bioStored())
+    return '<div class="card"><h4>Fingerabdruck aktiv</h4><p class="sub">Beim n&auml;chsten Anmelden reicht Finger oder Face-ID auf diesem Ger&auml;t.</p>'+
       '<button class="cancel-btn" onclick="bioRemove()">Entfernen</button></div>';
-  }else{
-    bio.innerHTML='<div class="card"><h4>Anmeldung per Fingerabdruck</h4><p class="sub">Einmal einrichten – danach reicht Finger oder Gesicht. Nur auf dem eigenen Handy einrichten.</p>'+
-      '<button class="ghost-btn" style="margin-top:0;" onclick="bioSetup()">Jetzt einrichten</button></div>';
-  }
-
-  const a=document.getElementById('admin-area');
-  if(!session.isAdmin){ a.innerHTML=''; return; }
-  let h='<p class="section-label">Admin</p>';
+  return '<div class="card"><h4>Anmeldung per Fingerabdruck</h4><p class="sub">Einmal einrichten &ndash; danach reicht Finger oder Gesicht. Nur auf dem eigenen Handy einrichten.</p>'+
+    '<button class="ghost-btn" style="margin-top:0;" onclick="bioSetup()">Jetzt einrichten</button></div>';
+}
+function adminCards(){
+  let h='<p class="section-label">Admin-Bereich</p>';
   h+=session.token
-    ?'<div class="banner ok">Schreib-Token ist auf diesem Gerät hinterlegt.</div>'
-    :'<div class="banner warn"><b>Kein Schreib-Token hinterlegt.</b> Ohne Token kann die App nichts speichern.</div>';
-  h+='<div class="card"><h4>GitHub-Token</h4><p class="sub">Fine-grained Token mit Contents: Read&nbsp;and&nbsp;write auf <b>'+esc(CFG.repo)+'</b>. Nur lokal gespeichert, nie ins Repo geschrieben.</p>'+
-     '<div class="field" style="margin:10px 0 0;"><input type="password" id="ad-token" placeholder="github_pat_…" autocomplete="off"></div>'+
-     '<button class="ghost-btn" onclick="saveAdminToken()">Token speichern</button></div>';
-  h+='<div class="card"><h4>Neuen Trainer anlegen</h4><p class="sub">Er meldet sich danach mit E-Mail und diesem Passwort an.</p>'+
+    ? '<div class="banner ok">Schreib-Token ist auf diesem Ger&auml;t hinterlegt. Du kannst Termine und Trainer anlegen.</div>'
+    : '<div class="banner warn"><b>Schritt 1: Schreib-Token fehlt.</b> Ohne Token kann die App nichts speichern &ndash; weder Termine noch Trainer. Trage ihn gleich hier unten ein.</div>';
+  h+='<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>GitHub-Token</h4>'+
+     '<p class="sub">Fine-grained Token mit <b>Contents: Read and write</b> auf <b>'+esc(CFG.repo)+'</b>. Wird nur auf diesem Ger&auml;t gespeichert, nie ins Repo geschrieben.</p>'+
+     '<div class="field" style="margin:10px 0 0;"><input type="password" id="ad-token" placeholder="github_pat_&hellip;" autocomplete="off"></div>'+
+     '<button class="ghost-btn" style="margin-top:0;" onclick="saveAdminToken()">Token speichern</button></div>';
+  h+='<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Neuen Trainer anlegen</h4>'+
+     '<p class="sub">Er meldet sich danach mit E-Mail und diesem Passwort an.</p>'+
      '<div class="field" style="margin:10px 0 8px;"><input type="text" id="nu-first" placeholder="Vorname"></div>'+
      '<div class="field" style="margin-bottom:8px;"><input type="text" id="nu-last" placeholder="Nachname"></div>'+
-     '<div class="field" style="margin-bottom:8px;"><input type="email" id="nu-mail" placeholder="E-Mail" autocapitalize="none"></div>'+
+     '<div class="field" style="margin-bottom:8px;"><input type="email" id="nu-mail" placeholder="E-Mail" autocapitalize="none" spellcheck="false"></div>'+
      '<div class="field" style="margin-bottom:8px;"><input type="text" id="nu-pass" placeholder="Start-Passwort (min. 8 Zeichen)"></div>'+
      '<button class="submit-btn" id="nu-btn" onclick="createUser()"><span id="nu-label">Trainer anlegen</span></button></div>';
   h+='<div class="card"><h4>Trainer ('+USERS.length+')</h4>';
@@ -1137,10 +1117,26 @@ function renderKonto(){
   USERS.forEach(u=>{
     h+='<div class="user-row"><div class="avatar">'+initials(u.first+' '+u.last)+'</div>'+
        '<div class="user-info"><div class="n">'+esc(u.first+' '+u.last)+'</div><div class="e">'+esc(u.email)+'</div></div>'+
-       '<button class="ibtn del" onclick="deleteUser(\''+u.id+'\')" aria-label="Löschen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>';
+       '<button class="ibtn del" onclick="deleteUser(\''+u.id+'\')" aria-label="L&ouml;schen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>';
   });
   h+='</div>';
-  a.innerHTML=h;
+  return h;
+}
+function renderKonto(){
+  const box=document.getElementById('konto-body');
+  let h='';
+  if(!session){
+    h+='<div class="card"><h4>Nicht angemeldet</h4><p class="sub">Termine ansehen geht ohne Anmeldung. Zum Eintragen, &Auml;ndern oder L&ouml;schen brauchst du einen Zugang vom Vorstand.</p>'+
+       '<button class="submit-btn" onclick="openLogin()"><span>Anmelden</span></button></div>';
+    h+=icalCard()+pwaCard();
+    box.innerHTML=h;
+    return;
+  }
+  h+='<div class="card"><h4>'+esc(session.name)+'</h4><p class="sub">'+esc(session.email)+(session.isAdmin?' &middot; Superuser':'')+'</p>'+
+     '<button class="cancel-btn" onclick="logout()">Abmelden</button></div>';
+  if(session.isAdmin) h+=adminCards();
+  h+=bioCard()+icalCard()+pwaCard();
+  box.innerHTML=h;
 }
 function saveAdminToken(){
   const t=document.getElementById('ad-token').value.trim();
