@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0E2A5C">
+<meta name="description" content="Termine des SV Bachum/Bergheim – Spiele, Feste und Veranstaltungen auf einen Blick.">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SVBB Termine">
+<title>SV Bachum/Bergheim – Termine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue-deep:#0E2A5C; --blue:#1D4E9E; --blue-bright:#3D6FC4;
+    --chalk:#F4F6FA; --chalk-dim:#E8ECF4;
+    --yellow:#FFD24A; --yellow-soft:#FFF1C2; --yellow-deep:#E8B400;
+    --ink:#131B2C; --ink-soft:#5B6474; --line:#DCE1EB; --white:#FFF; --gray:#9AA3B5;
+    --grass:#2F7A46; --grass-dim:#DCEBE1; --warn:#C0392B; --ok:#25A55A;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{font-family:'Poppins',sans-serif;color:var(--ink);background:var(--chalk);overscroll-behavior:none;}
+  #app{display:flex;flex-direction:column;height:100dvh;max-width:520px;margin:0 auto;background:var(--chalk);position:relative;overflow:hidden;}
+
+  .appheader{flex:none;background:var(--blue-deep);padding:calc(12px + env(safe-area-inset-top)) 18px 14px;position:relative;overflow:hidden;}
+  .appheader::after{content:"";position:absolute;right:-50px;top:-50px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.05);}
+  .appheader::before{content:"";position:absolute;left:-30px;bottom:-70px;width:160px;height:160px;border-radius:50%;background:rgba(255,210,74,.10);}
+  .head-row{display:flex;align-items:center;gap:12px;position:relative;z-index:2;}
+  .crest{width:42px;height:46px;flex:none;}
+  .head-text{flex:1;min-width:0;}
+  .head-text .club{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--yellow);}
+  .head-text h2{font-weight:700;font-size:21px;color:#fff;margin:1px 0 0;line-height:1.15;}
+  .user-chip{background:rgba(255,255,255,.13);border:none;color:#fff;font-family:'Poppins';font-size:11px;font-weight:600;padding:8px 12px;border-radius:20px;cursor:pointer;position:relative;z-index:2;white-space:nowrap;}
+  .user-chip.in{background:var(--yellow);color:var(--ink);font-weight:700;}
+
+  .content{flex:1;overflow-y:auto;padding:14px 18px calc(84px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch;}
+  .content::-webkit-scrollbar{width:0;}
+
+  .navbar{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-around;background:#fff;border-top:1px solid var(--line);padding:8px 6px calc(8px + env(safe-area-inset-bottom));z-index:10;}
+  .navbtn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--gray);font-family:'Poppins';font-size:10px;font-weight:600;cursor:pointer;padding:4px 12px;}
+  .navbtn svg{width:21px;height:21px;stroke:var(--gray);}
+  .navbtn.active{color:var(--blue-deep);}
+  .navbtn.active svg{stroke:var(--blue-deep);}
+  .navbtn .dot{width:4px;height:4px;border-radius:50%;background:var(--yellow-deep);opacity:0;}
+  .navbtn.active .dot{opacity:1;}
+
+  .pane{display:none;}
+  .pane.active{display:block;animation:fade .18s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .section-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin:18px 0 10px;}
+  .section-label:first-child{margin-top:0;}
+
+  /* LOGIN OVERLAY */
+  #login{position:fixed;inset:0;z-index:60;background:var(--blue-deep);display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow-y:auto;}
+  #login.show{display:flex;}
+  .login-close{position:absolute;top:calc(14px + env(safe-area-inset-top));right:16px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.12);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .login-close svg{width:18px;height:18px;stroke:#fff;}
+  .login-box{width:100%;max-width:340px;}
+  .login-crest{width:66px;height:72px;margin:0 auto 14px;display:block;}
+  .login-box h1{color:#fff;font-size:22px;font-weight:700;text-align:center;margin:0 0 4px;}
+  .login-box .sub{color:#AFC3E6;font-size:12.5px;text-align:center;margin:0 0 22px;line-height:1.5;}
+  .login-box input{width:100%;border:1.5px solid rgba(255,255,255,.18);border-radius:12px;padding:13px 14px;font-family:'Poppins';font-size:14px;background:rgba(255,255,255,.08);color:#fff;outline:none;margin-bottom:10px;}
+  .login-box input::placeholder{color:#8FA6CC;}
+  .login-box input:focus{border-color:var(--yellow);background:rgba(255,255,255,.14);}
+  .login-err{background:rgba(192,57,43,.22);border:1px solid rgba(255,140,120,.4);color:#FFD5CE;font-size:12px;padding:10px 12px;border-radius:10px;margin-bottom:10px;display:none;line-height:1.45;}
+  .login-err.show{display:block;}
+  .btn-yellow{width:100%;background:var(--yellow);color:var(--ink);border:none;border-radius:12px;padding:14px;font-family:'Poppins';font-weight:700;font-size:14px;cursor:pointer;}
+  .btn-ghost-light{width:100%;background:transparent;border:1.5px solid rgba(255,255,255,.22);color:#fff;border-radius:12px;padding:13px;font-family:'Poppins';font-weight:600;font-size:13px;cursor:pointer;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-ghost-light svg{width:17px;height:17px;stroke:var(--yellow);}
+  .login-foot{color:#7E96C0;font-size:11px;text-align:center;margin-top:20px;line-height:1.6;}
+
+  /* CARDS / ROWS */
+  .stat-row{display:flex;gap:10px;margin-bottom:6px;}
+  .stat-card{flex:1;background:var(--blue-deep);border-radius:16px;padding:14px;color:#fff;}
+  .stat-card .num{font-weight:700;font-size:26px;line-height:1;}
+  .stat-card .lbl{font-size:11px;color:#AFC3E6;margin-top:4px;}
+  .stat-card.yellow{background:var(--yellow);color:var(--ink);}
+  .stat-card.yellow .lbl{color:#6E5A0C;}
+
+  .next-card{background:#fff;border:1px solid var(--line);border-left:4px solid var(--yellow-deep);border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 6px 16px rgba(14,42,92,.05);}
+  .next-card .when{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;}
+  .next-card h3{font-size:16px;font-weight:700;margin:4px 0 6px;}
+  .next-card .meta{font-size:11.5px;color:var(--ink-soft);}
+
+  .event-row{display:flex;gap:12px;padding:11px 4px;border-bottom:1px solid var(--line);position:relative;}
+  .event-row:last-child{border-bottom:none;}
+  .event-row.hl{background:var(--yellow-soft);border-radius:10px;padding-left:8px;padding-right:8px;}
+  .event-time{font-size:12.5px;font-weight:700;width:44px;flex:none;padding-top:2px;line-height:1.35;}
+  .event-main{flex:1;min-width:0;}
+  .event-main h4{margin:0 0 3px;font-size:14.5px;font-weight:700;padding-right:104px;}
+  .event-meta{font-size:11.5px;color:var(--ink-soft);}
+  .badges{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;align-items:center;}
+  .badge-team{font-size:10px;font-weight:700;padding:3px 9px;border-radius:16px;background:var(--blue-deep);color:#fff;}
+  .badge-team.senioren{background:var(--blue);}
+  .badge-team.verein{background:var(--gray);}
+  .badge-squad{font-size:10px;font-weight:700;padding:3px 9px;border-radius:16px;background:var(--yellow-soft);color:#6E5A0C;}
+  .badge-res{font-size:10px;font-weight:600;padding:3px 8px;border-radius:16px;background:var(--chalk-dim);color:var(--ink-soft);}
+  .badge-res.pitch{background:var(--grass-dim);color:#1E5730;}
+  .badge-mine{font-size:10px;font-weight:700;padding:3px 8px;border-radius:16px;background:#E3F3E9;color:#1E5730;}
+  .row-acts{position:absolute;top:8px;right:0;display:flex;gap:4px;}
+  .ibtn{width:29px;height:29px;border-radius:9px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
+  .ibtn svg{width:14px;height:14px;stroke:var(--ink-soft);}
+  .ibtn.share svg{stroke:var(--ok);}
+  .ibtn.del svg{stroke:var(--warn);}
+
+  .day-head{font-size:11.5px;font-weight:700;color:var(--blue-deep);background:var(--chalk-dim);padding:6px 11px;border-radius:8px;margin:14px 0 4px;display:inline-block;}
+  .day-group:first-of-type .day-head{margin-top:2px;}
+
+  .chip-scroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:8px;}
+  .chip-scroll::-webkit-scrollbar{display:none;}
+  .filter-chip{flex:none;font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:20px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);white-space:nowrap;cursor:pointer;}
+  .filter-chip.on{background:var(--blue-deep);border-color:var(--blue-deep);color:#fff;}
+  .viewseg{display:flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;margin-bottom:12px;}
+  .viewseg button{flex:1;border:none;background:none;padding:9px 0;font-family:'Poppins';font-size:12.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;border-right:1.5px solid var(--line);}
+  .viewseg button:last-child{border-right:none;}
+  .viewseg button.on{background:var(--yellow);color:var(--ink);}
+
+  /* CALENDAR */
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin:2px 0 10px;}
+  .cal-title{font-weight:700;font-size:16px;color:var(--blue-deep);}
+  .cal-btns{display:flex;gap:6px;}
+  .cal-btn{width:32px;height:32px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:16px;font-weight:700;color:var(--blue-deep);display:flex;align-items:center;justify-content:center;line-height:1;}
+  .today-chip{font-size:11px;font-weight:700;padding:7px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--blue-deep);cursor:pointer;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .cal-dow{font-size:10px;font-weight:600;color:var(--ink-soft);text-align:center;padding:2px 0 4px;}
+  .cal-day{aspect-ratio:1/1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;cursor:pointer;background:#fff;border:1px solid var(--line);position:relative;}
+  .cal-day.other{opacity:.32;}
+  .cal-day.today{border:2px solid var(--yellow-deep);}
+  .cal-day.sel{background:var(--blue-deep);border-color:var(--blue-deep);color:#fff;}
+  .cal-day.full::after{content:"";position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:var(--warn);}
+  .cal-dots{display:flex;gap:3px;height:5px;margin-top:3px;}
+  .cdot{width:5px;height:5px;border-radius:50%;}
+  .cdot.jugend{background:var(--blue-bright);}
+  .cal-day.sel .cdot.jugend{background:#9FC0F2;}
+  .cdot.senioren{background:var(--yellow-deep);}
+  .cdot.verein{background:var(--gray);}
+  .cal-legend{display:flex;gap:12px;margin:10px 2px 0;font-size:10.5px;color:var(--ink-soft);flex-wrap:wrap;}
+  .cal-legend span{display:flex;align-items:center;gap:5px;}
+  .cal-legend .cdot{width:7px;height:7px;}
+  .cal-legend .warn-dot{width:7px;height:7px;border-radius:50%;background:var(--warn);}
+
+  .cap-bar{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:12px;display:flex;align-items:center;gap:10px;}
+  .cap-mini{width:44px;height:30px;flex:none;border-radius:5px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1.5px;background:var(--line);}
+  .cap-q{background:var(--grass-dim);}
+  .cap-q.used{background:var(--grass);}
+  .cap-text{font-size:11.5px;color:var(--ink-soft);line-height:1.45;}
+  .cap-text b{color:var(--ink);}
+  .empty-day{font-size:12px;color:var(--ink-soft);padding:12px 4px;}
+  .ghost-btn{width:100%;margin-top:10px;background:#fff;border:1.5px dashed var(--blue-bright);color:var(--blue);border-radius:12px;padding:11px;font-family:'Poppins';font-size:12.5px;font-weight:600;cursor:pointer;}
+
+  .year-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .mini-month{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 7px 9px;cursor:pointer;}
+  .mini-title{font-size:11px;font-weight:700;color:var(--blue-deep);text-align:center;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:5px;}
+  .mini-count{font-size:9px;font-weight:700;background:var(--yellow);color:var(--ink);border-radius:10px;padding:1px 6px;}
+  .mini-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .mini-day{aspect-ratio:1/1;border-radius:3px;background:var(--chalk-dim);}
+  .mini-day.blank{background:transparent;}
+  .mini-day.jugend{background:var(--blue-bright);}
+  .mini-day.senioren{background:var(--yellow-deep);}
+  .mini-day.verein{background:var(--gray);}
+  .mini-day.multi{background:linear-gradient(135deg,var(--blue-bright) 50%,var(--yellow-deep) 50%);}
+  .mini-day.today{outline:2px solid var(--blue-deep);outline-offset:-1px;}
+  .year-sum{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:12px;color:var(--ink-soft);line-height:1.6;}
+  .year-sum b{color:var(--ink);}
+
+  /* FORM */
+  .field{margin-bottom:16px;}
+  .field label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;margin-bottom:6px;}
+  .req-dot{width:7px;height:7px;border-radius:50%;background:var(--yellow-deep);flex:none;box-shadow:0 0 0 3px var(--yellow-soft);}
+  .field input,.field textarea,.field select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;font-family:'Poppins';font-size:14px;color:var(--ink);background:#fff;outline:none;appearance:none;-webkit-appearance:none;}
+  .field select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235B6474' stroke-width='2.4'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;}
+  .field.required input,.field.required select{border-color:var(--yellow-deep);background:#FFFCF2;}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue-bright);box-shadow:0 0 0 3px rgba(61,111,196,.15);}
+  .field textarea{resize:none;height:64px;}
+  .readonly-pill{display:inline-flex;align-items:center;gap:6px;background:var(--chalk-dim);border-radius:10px;padding:9px 12px;font-size:13px;font-weight:600;color:var(--ink-soft);}
+  .chip-group{display:flex;gap:8px;flex-wrap:wrap;}
+  .res-chip{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:12px;padding:9px 13px;font-size:12.5px;font-weight:600;color:var(--ink-soft);background:#fff;cursor:pointer;user-select:none;}
+  .res-chip svg{width:14px;height:14px;stroke:var(--ink-soft);}
+  .res-chip.on{background:var(--blue-deep);border-color:var(--blue-deep);color:#fff;}
+  .res-chip.on svg{stroke:#fff;}
+  .seg{display:flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;}
+  .seg button{flex:1;border:none;background:none;padding:11px 0;font-family:'Poppins';font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer;border-right:1.5px solid var(--line);}
+  .seg button:last-child{border-right:none;}
+  .seg button.on{background:var(--yellow);color:var(--ink);}
+
+  .pitch-box{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px;}
+  .pitch-modes{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:12px;}
+  .pitch-modes button{flex:1;border:none;background:none;padding:9px 0;font-family:'Poppins';font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer;border-right:1.5px solid var(--line);}
+  .pitch-modes button:last-child{border-right:none;}
+  .pitch-modes button.on{background:var(--grass);color:#fff;}
+  .pitch{position:relative;aspect-ratio:16/10;border-radius:8px;background:var(--grass-dim);border:2px solid var(--grass);display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;overflow:hidden;}
+  .pitch::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--grass);opacity:.55;transform:translateX(-1px);pointer-events:none;z-index:3;}
+  .pq{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#4E7A5C;cursor:pointer;border:1px dashed rgba(47,122,70,.35);}
+  .pq.sel{background:var(--grass);color:#fff;border-color:var(--grass);}
+  .pq.busy{background:repeating-linear-gradient(45deg,#F2C9C4,#F2C9C4 4px,#FBE3E0 4px,#FBE3E0 8px);color:#9B3227;}
+  .pq.sel.busy{background:repeating-linear-gradient(45deg,var(--warn),var(--warn) 5px,#A83326 5px,#A83326 10px);color:#fff;}
+  .pitch-cap{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:11px;color:var(--ink-soft);gap:8px;}
+  .pitch-cap b{color:var(--ink);}
+  .warnpill{background:#FBE3E0;color:#9B3227;font-weight:700;padding:3px 9px;border-radius:12px;font-size:10px;flex:none;}
+  .okpill{background:var(--grass-dim);color:#1E5730;font-weight:700;padding:3px 9px;border-radius:12px;font-size:10px;flex:none;}
+
+  .helptext{font-size:10.5px;color:var(--ink-soft);margin-top:6px;line-height:1.5;}
+  .submit-btn{width:100%;background:var(--blue-deep);color:#fff;border:none;border-radius:12px;padding:14px;font-family:'Poppins';font-weight:700;font-size:14px;cursor:pointer;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .submit-btn svg{width:16px;height:16px;stroke:#fff;}
+  .submit-btn:disabled{opacity:.55;}
+  .cancel-btn{width:100%;background:none;border:1.5px solid var(--line);color:var(--ink-soft);border-radius:12px;padding:12px;font-family:'Poppins';font-weight:600;font-size:13px;cursor:pointer;margin-top:8px;}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px;}
+  .card h4{margin:0 0 4px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;}
+  .card h4 svg{width:16px;height:16px;stroke:var(--blue);}
+  .card .sub{font-size:11.5px;color:var(--ink-soft);line-height:1.55;}
+  .user-row{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--line);}
+  .user-row:last-child{border-bottom:none;}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--blue-deep);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none;}
+  .user-info{flex:1;min-width:0;}
+  .user-info .n{font-size:13.5px;font-weight:600;}
+  .user-info .e{font-size:11px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .banner{border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.55;margin-bottom:12px;}
+  .banner.warn{background:#FDECEA;border:1px solid #F5C6C0;color:#8E2A1D;}
+  .banner.info{background:var(--yellow-soft);border:1px solid #F0DA9B;color:#6E5A0C;}
+  .banner.ok{background:#E3F3E9;border:1px solid #B9DFC8;color:#1E5730;}
+  .banner b{font-weight:700;}
+  .urlbox{background:var(--chalk-dim);border-radius:9px;padding:9px 11px;font-size:10.5px;color:var(--ink-soft);word-break:break-all;margin:10px 0;font-family:ui-monospace,monospace;}
+
+  .toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(84px + env(safe-area-inset-bottom));width:calc(100% - 36px);max-width:484px;background:var(--ink);color:var(--chalk);padding:12px 14px;border-radius:12px;font-size:12px;display:flex;align-items:flex-start;gap:8px;opacity:0;transition:all .25s;pointer-events:none;z-index:80;line-height:1.45;}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+  .toast svg{width:15px;height:15px;stroke:var(--yellow);flex:none;margin-top:1px;}
+
+  .modal{position:fixed;inset:0;background:rgba(11,18,32,.6);display:none;align-items:center;justify-content:center;padding:24px;z-index:90;}
+  .modal.show{display:flex;}
+  .modal-box{background:#fff;border-radius:16px;padding:20px;width:100%;max-width:320px;}
+  .modal-box h3{margin:0 0 8px;font-size:16px;font-weight:700;}
+  .modal-box p{margin:0 0 16px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;}
+  .modal-acts{display:flex;gap:8px;}
+  .modal-acts button{flex:1;border-radius:10px;padding:11px;font-family:'Poppins';font-size:13px;font-weight:600;cursor:pointer;border:none;}
+  .modal-acts .no{background:var(--chalk-dim);color:var(--ink-soft);}
+  .modal-acts .yes{background:var(--warn);color:#fff;}
+
+  .spinner{width:15px;height:15px;border:2px solid rgba(0,0,0,.2);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ============ HEADER ============ -->
+  <div class="appheader">
+    <div class="head-row">
+      <svg class="crest" viewBox="0 0 44 48" fill="none">
+        <path d="M22 1 L42 8 V25 C42 38 22 47 22 47 C22 47 2 38 2 25 V8 Z" fill="#0E2A5C" stroke="#FFD24A" stroke-width="1.6"/>
+        <path d="M22 1 L42 8 V25 C42 38 22 47 22 47 V1 Z" fill="#1D4E9E"/>
+        <text x="22" y="24" font-family="Poppins" font-weight="700" font-size="9" fill="#FFD24A" text-anchor="middle">SVBB</text>
+        <text x="22" y="36" font-family="Poppins" font-weight="600" font-size="6" fill="#C7D3EA" text-anchor="middle">B/B</text>
+      </svg>
+      <div class="head-text">
+        <div class="club" id="hd-club">SV Bachum / Bergheim e.V.</div>
+        <h2 id="hd-title">Termine</h2>
+      </div>
+      <button class="user-chip" id="hd-user" onclick="headerAction()">Anmelden</button>
+    </div>
+  </div>
+
+  <!-- ============ START ============ -->
+  <div class="pane active" data-pane="start">
+    <div class="content">
+      <div class="stat-row">
+        <div class="stat-card"><div class="num" id="st-count">–</div><div class="lbl">Termine diesen Monat</div></div>
+        <div class="stat-card yellow"><div class="num" id="st-b">–</div><div class="lbl" id="st-b-lbl">Kommende Termine</div></div>
+      </div>
+      <p class="section-label">Nächster Termin</p>
+      <div id="nx-box"></div>
+      <p class="section-label">Demnächst</p>
+      <div id="up-list"></div>
+      <p class="section-label">Schnellzugriff</p>
+      <div class="chip-scroll">
+        <span class="filter-chip on" onclick="newEvent()">+ Neuer Termin</span>
+        <span class="filter-chip" onclick="goto('termine');setView('monat')">Monat</span>
+        <span class="filter-chip" onclick="goto('termine');setView('jahr')">Jahr</span>
+        <span class="filter-chip" onclick="goto('konto')">Kalender abonnieren</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TERMINE ============ -->
+  <div class="pane" data-pane="termine">
+    <div class="content">
+      <div class="viewseg" id="viewseg">
+        <button type="button" data-view="liste" onclick="setView('liste')">Liste</button>
+        <button type="button" data-view="monat" class="on" onclick="setView('monat')">Monat</button>
+        <button type="button" data-view="jahr" onclick="setView('jahr')">Jahr</button>
+      </div>
+      <div class="chip-scroll" id="filterbar"></div>
+      <div id="view-liste" style="display:none;"></div>
+      <div id="view-monat" style="display:none;"></div>
+      <div id="view-jahr" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- ============ NEU / BEARBEITEN ============ -->
+  <div class="pane" data-pane="neu">
+    <div class="content">
+      <div class="banner info" id="owner-note">
+        Als Ansprechpartner wird automatisch <b id="owner-name">–</b> eingetragen.
+      </div>
+
+      <p class="section-label">Pflichtangaben</p>
+      <div class="field required"><label><span class="req-dot"></span>Datum</label><input type="date" id="f-datum"></div>
+      <div class="field"><label>Wochentag</label><span class="readonly-pill" id="f-wochentag">–</span></div>
+      <div class="field required"><label><span class="req-dot"></span>Anlass</label><input type="text" id="f-anlass" placeholder="z. B. Sommerfest, Turnier, Testspiel"></div>
+      <div class="field required"><label><span class="req-dot"></span>Uhrzeit</label><input type="time" id="f-zeit" value="15:00"></div>
+
+      <p class="section-label">Team-Zuordnung</p>
+      <div class="field required">
+        <label><span class="req-dot"></span>Team / Altersklasse</label>
+        <select id="f-team" onchange="onTeamChange()">
+          <optgroup label="Jugend">
+            <option>G-Jugend</option><option selected>F-Jugend</option><option>E-Jugend</option>
+            <option>D-Jugend</option><option>C-Jugend</option><option>B-Jugend</option><option>A-Jugend</option>
+          </optgroup>
+          <optgroup label="Senioren">
+            <option>1. Herren</option><option>2. Herren</option><option>3. Herren</option>
+          </optgroup>
+          <optgroup label="Sonstige">
+            <option>Alle Teams</option><option>Vorstand</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="field" id="f-squad-field">
+        <label>Mannschaft der Altersklasse</label>
+        <div class="seg" id="f-squad">
+          <button type="button" class="on" onclick="setSquad(this)">1. Mannschaft</button>
+          <button type="button" onclick="setSquad(this)">2. Mannschaft</button>
+          <button type="button" onclick="setSquad(this)">3. Mannschaft</button>
+        </div>
+      </div>
+
+      <p class="section-label">Ressourcen</p>
+      <div class="field">
+        <label>Was wird gebraucht? (mehrere möglich)</label>
+        <div class="chip-group" id="f-res">
+          <div class="res-chip on" data-res="Großspielfeld" onclick="toggleRes(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="1.5"/><path d="M12 5v14"/><circle cx="12" cy="12" r="2.5"/></svg>Großspielfeld
+          </div>
+          <div class="res-chip" data-res="Kleinspielfeld" onclick="toggleRes(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/></svg>Kleinspielfeld
+          </div>
+          <div class="res-chip" data-res="Vereinsheim" onclick="toggleRes(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Vereinsheim
+          </div>
+          <div class="res-chip" data-res="Theke" onclick="toggleRes(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 3h12l-1 4H7L6 3z"/><path d="M7 7l3.5 5v7"/><path d="M17 7l-3.5 5v7"/><path d="M8 21h8"/></svg>Theke
+          </div>
+        </div>
+      </div>
+
+      <div class="field" id="f-pitch-field">
+        <label>Wie viel vom Großspielfeld?</label>
+        <div class="pitch-box">
+          <div class="pitch-modes" id="pitch-modes">
+            <button type="button" data-mode="ganz" class="on" onclick="setPitchMode('ganz')">Ganzer Platz</button>
+            <button type="button" data-mode="haelfte" onclick="setPitchMode('haelfte')">Hälfte</button>
+            <button type="button" data-mode="viertel" onclick="setPitchMode('viertel')">Viertel</button>
+          </div>
+          <div class="pitch" id="pitch">
+            <div class="pq" data-q="1" onclick="pickPitch(1)">1</div>
+            <div class="pq" data-q="3" onclick="pickPitch(3)">3</div>
+            <div class="pq" data-q="2" onclick="pickPitch(2)">2</div>
+            <div class="pq" data-q="4" onclick="pickPitch(4)">4</div>
+          </div>
+          <div class="pitch-cap" id="pitch-cap"></div>
+        </div>
+        <p class="helptext">Nur eine Aufteilung pro Termin. Schraffiert = an diesem Tag schon belegt.</p>
+      </div>
+
+      <p class="section-label">Optional</p>
+      <div class="field"><label>Bemerkung</label><textarea id="f-bem" placeholder="z. B. Getränke, Aufbau, Besonderheiten"></textarea></div>
+      <p class="helptext" style="margin:-8px 0 16px;">Bemerkungen sind öffentlich sichtbar – bitte keine Telefonnummern oder privaten Daten.</p>
+
+      <button class="submit-btn" id="save-btn" onclick="submitEvent()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+        <span id="save-label">Termin speichern</span>
+      </button>
+      <button class="cancel-btn" id="cancel-btn" style="display:none;" onclick="cancelEdit()">Abbrechen</button>
+    </div>
+  </div>
+
+  <!-- ============ KONTO ============ -->
+  <div class="pane" data-pane="konto">
+    <div class="content">
+      <div id="ical-card"></div>
+      <div id="pwa-card"></div>
+      <div id="me-card"></div>
+      <div id="bio-card"></div>
+      <div id="admin-area"></div>
+      <p class="helptext" style="text-align:center;margin-top:14px;" id="ver-note"></p>
+    </div>
+  </div>
+
+  <!-- ============ NAV ============ -->
+  <div class="navbar">
+    <button class="navbtn active" data-nav="start" onclick="goto('start')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg><span class="dot"></span>Start
+    </button>
+    <button class="navbtn" data-nav="termine" onclick="goto('termine')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg><span class="dot"></span>Termine
+    </button>
+    <button class="navbtn" data-nav="neu" onclick="newEvent()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><span class="dot"></span>Neu
+    </button>
+    <button class="navbtn" data-nav="konto" onclick="goto('konto')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg><span class="dot"></span>Konto
+    </button>
+  </div>
+</div>
+
+<!-- ============ LOGIN OVERLAY ============ -->
+<div id="login">
+  <button class="login-close" onclick="closeLogin()" aria-label="Schließen">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  <div class="login-box">
+    <svg class="login-crest" viewBox="0 0 44 48" fill="none">
+      <path d="M22 1 L42 8 V25 C42 38 22 47 22 47 C22 47 2 38 2 25 V8 Z" fill="#0E2A5C" stroke="#FFD24A" stroke-width="1.6"/>
+      <path d="M22 1 L42 8 V25 C42 38 22 47 22 47 V1 Z" fill="#1D4E9E"/>
+      <text x="22" y="24" font-family="Poppins" font-weight="700" font-size="9" fill="#FFD24A" text-anchor="middle">SVBB</text>
+      <text x="22" y="36" font-family="Poppins" font-weight="600" font-size="6" fill="#C7D3EA" text-anchor="middle">B/B</text>
+    </svg>
+    <h1>Anmelden</h1>
+    <p class="sub">Zum Ansehen brauchst du keinen Zugang.<br>Nur zum Eintragen und Ändern.</p>
+    <div class="login-err" id="login-err"></div>
+    <input type="text" id="li-user" placeholder="E-Mail oder Benutzername" autocomplete="username" autocapitalize="none" spellcheck="false">
+    <input type="password" id="li-pass" placeholder="Passwort" autocomplete="current-password">
+    <button class="btn-yellow" id="li-btn" onclick="doLogin()">Anmelden</button>
+    <button class="btn-ghost-light" id="bio-btn" style="display:none;" onclick="bioLogin()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 11v3a4 4 0 0 1-1 2.5"/><path d="M8.5 8.5a5 5 0 0 1 7 4.5v1"/><path d="M5.5 6.5a9 9 0 0 1 13 6.5v2"/><path d="M15.5 19a12 12 0 0 0 1-5"/><path d="M8 20a8 8 0 0 0 1.5-6"/></svg>
+      <span id="bio-label">Mit Fingerabdruck anmelden</span>
+    </button>
+    <p class="login-foot" id="login-foot">Zugang bekommst du vom Vorstand.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span id="toast-text"></span></div>
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h3 id="mo-title">Löschen?</h3>
+    <p id="mo-text">Wird dauerhaft entfernt.</p>
+    <div class="modal-acts">
+      <button class="no" onclick="closeModal()">Abbrechen</button>
+      <button class="yes" id="mo-yes">Löschen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   SVBB Termine
+   Lesen: für alle, ohne Anmeldung.
+   Eintragen/Ändern: nur angemeldet.
+   Speicher: JSON + ICS im GitHub-Repo (Contents API)
+   ========================================================= */
+
+let CFG=null, EVENTS=[], USERS=[], session=null;
+
+const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const MONTHS_S=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+const DAYS=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+const DAYS_S=['SO','MO','DI','MI','DO','FR','SA'];
+const DOW=['Mo','Di','Mi','Do','Fr','Sa','So'];
+const HALF={A:[1,2],B:[3,4]};
+
+const today=new Date(), todayStr=ymd(today);
+let view='monat', filter='alle';
+let curY=today.getFullYear(), curM=today.getMonth(), yearShown=today.getFullYear();
+let selDate=todayStr, pitchMode='ganz', pitchPart=null, editingId=null, highlightId=null;
+
+/* ---------------- Helpers ---------------- */
+function ymd(dt){return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}
+function cat(t){return t.indexOf('Jugend')>=0?'jugend':(t.indexOf('Herren')>=0?'senioren':'verein');}
+function isJugend(t){return t.indexOf('Jugend')>=0;}
+function halfOf(q){return q<=2?'A':'B';}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function pitchQuarters(p){if(!p)return[];if(p.mode==='ganz')return[1,2,3,4];if(p.mode==='haelfte')return HALF[p.part]||[];return[p.part];}
+function pitchLabel(p){if(!p)return'';if(p.mode==='ganz')return'Platz: ganz';if(p.mode==='haelfte')return'Platz: Hälfte '+p.part;return'Platz: Viertel '+p.part;}
+function fmtHead(d){const dt=new Date(d+'T00:00:00');return DAYS_S[dt.getDay()]+' · '+dt.getDate()+'. '+MONTHS[dt.getMonth()].toUpperCase()+(dt.getFullYear()!==today.getFullYear()?' '+dt.getFullYear():'');}
+function fmtShort(d){const dt=new Date(d+'T00:00:00');return String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0')+'.'+dt.getFullYear();}
+function fmtShare(d){const dt=new Date(d+'T00:00:00');return DAYS[dt.getDay()]+', '+fmtShort(d);}
+function initials(n){return n.split(' ').filter(Boolean).slice(0,2).map(x=>x[0].toUpperCase()).join('');}
+function baseUrl(){return location.origin+location.pathname.replace(/index\.html$/,'');}
+
+function showToast(m,ms){
+  document.getElementById('toast-text').textContent=m;
+  const t=document.getElementById('toast');
+  t.classList.add('show'); clearTimeout(t._h);
+  t._h=setTimeout(()=>t.classList.remove('show'),ms||2800);
+}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+function askConfirm(title,text,yesLabel,cb){
+  document.getElementById('mo-title').textContent=title;
+  document.getElementById('mo-text').textContent=text;
+  const y=document.getElementById('mo-yes');
+  y.textContent=yesLabel; y.onclick=()=>{closeModal();cb();};
+  document.getElementById('modal').classList.add('show');
+}
+
+/* ---------------- Krypto ---------------- */
+const enc=new TextEncoder(), dec=new TextDecoder();
+function b64(buf){let s='';const b=new Uint8Array(buf);const CH=0x8000;
+  for(let i=0;i<b.length;i+=CH)s+=String.fromCharCode.apply(null,b.subarray(i,i+CH));
+  return btoa(s);}
+function unb64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0));}
+async function deriveKey(password,salt){
+  const base=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:310000,hash:'SHA-256'},
+    base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function encryptToken(token,password){
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await deriveKey(password,salt);
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(token));
+  return {salt:b64(salt),iv:b64(iv),cipher:b64(ct)};
+}
+async function decryptToken(rec,password){
+  const key=await deriveKey(password,unb64(rec.salt));
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(rec.iv)},key,unb64(rec.cipher));
+  return dec.decode(pt);
+}
+
+/* ---------------- Storage ---------------- */
+async function loadJSON(path){
+  const r=await fetch(path+'?t='+Date.now(),{cache:'no-store'});
+  if(!r.ok) throw new Error(path+' nicht ladbar ('+r.status+')');
+  return r.json();
+}
+async function ghSha(path){
+  const r=await fetch(`https://api.github.com/repos/${CFG.repo}/contents/${path}?ref=${CFG.branch}`,{
+    headers:{Authorization:'Bearer '+session.token,Accept:'application/vnd.github+json'},cache:'no-store'});
+  if(r.status===404) return null;
+  if(!r.ok) throw new Error('GitHub-Lesefehler '+r.status);
+  return (await r.json()).sha;
+}
+async function ghPutRaw(path,text,msg){
+  if(!session||!session.token) throw new Error('Kein Schreib-Token. Bitte neu anmelden.');
+  const sha=await ghSha(path);
+  const body={message:msg,content:b64(enc.encode(text)),branch:CFG.branch};
+  if(sha) body.sha=sha;
+  const r=await fetch(`https://api.github.com/repos/${CFG.repo}/contents/${path}`,{
+    method:'PUT',
+    headers:{Authorization:'Bearer '+session.token,Accept:'application/vnd.github+json','Content-Type':'application/json'},
+    body:JSON.stringify(body)});
+  if(!r.ok){
+    const e=await r.json().catch(()=>({}));
+    throw new Error(r.status===401?'Token ungültig oder abgelaufen.':
+                    r.status===403?'Token hat keine Schreibrechte auf das Repo.':
+                    (e.message||'Speichern fehlgeschlagen ('+r.status+')'));
+  }
+}
+async function saveEvents(msg){
+  await ghPutRaw('data/events.json',JSON.stringify({events:EVENTS},null,2),msg);
+  try{ await ghPutRaw('termine.ics',buildICS(),'Kalender aktualisiert'); }
+  catch(e){ showToast('Termin gespeichert, aber Kalender-Abo-Datei nicht: '+e.message,4500); }
+}
+async function saveUsers(msg){ await ghPutRaw('data/users.json',JSON.stringify({users:USERS},null,2),msg); }
+
+/* ---------------- iCal ---------------- */
+function icsEsc(s){return String(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n');}
+function icsFold(line){
+  if(line.length<=73) return line;
+  let out='',cur='';
+  for(const ch of line){
+    if((cur+ch).length>73){ out+=cur+'\r\n '; cur=''; }
+    cur+=ch;
+  }
+  return out+cur;
+}
+function icsStamp(){
+  const d=new Date();
+  const p=n=>String(n).padStart(2,'0');
+  return d.getUTCFullYear()+p(d.getUTCMonth()+1)+p(d.getUTCDate())+'T'+p(d.getUTCHours())+p(d.getUTCMinutes())+p(d.getUTCSeconds())+'Z';
+}
+function icsLocal(d,t,addH){
+  const dt=new Date(d+'T'+t+':00');
+  if(addH) dt.setHours(dt.getHours()+addH);
+  const p=n=>String(n).padStart(2,'0');
+  return dt.getFullYear()+p(dt.getMonth()+1)+p(dt.getDate())+'T'+p(dt.getHours())+p(dt.getMinutes())+'00';
+}
+function buildICS(){
+  const L=[
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//SVBB//Termine//DE','CALSCALE:GREGORIAN','METHOD:PUBLISH',
+    'X-WR-CALNAME:'+icsEsc(CFG.clubName+' – Termine'),
+    'X-WR-TIMEZONE:Europe/Berlin',
+    'REFRESH-INTERVAL;VALUE=DURATION:PT6H','X-PUBLISHED-TTL:PT6H',
+    'BEGIN:VTIMEZONE','TZID:Europe/Berlin',
+    'BEGIN:DAYLIGHT','TZOFFSETFROM:+0100','TZOFFSETTO:+0200','TZNAME:CEST',
+    'DTSTART:19700329T020000','RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU','END:DAYLIGHT',
+    'BEGIN:STANDARD','TZOFFSETFROM:+0200','TZOFFSETTO:+0100','TZNAME:CET',
+    'DTSTART:19701025T030000','RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU','END:STANDARD',
+    'END:VTIMEZONE'
+  ];
+  const stamp=icsStamp();
+  EVENTS.forEach(e=>{
+    let ort=[];
+    if(e.pitch) ort.push('Großspielfeld – '+pitchLabel(e.pitch).replace('Platz: ',''));
+    ort=ort.concat(e.res||[]);
+    const desc=['Team: '+e.team+(isJugend(e.team)?' ('+e.squad+'. Mannschaft)':''),
+      'Ansprechpartner: '+(e.ownerName||'–'), e.note?'Info: '+e.note:''].filter(Boolean).join('\n');
+    L.push('BEGIN:VEVENT');
+    L.push('UID:'+e.id+'@svbb-termine');
+    L.push('DTSTAMP:'+stamp);
+    L.push('DTSTART;TZID=Europe/Berlin:'+icsLocal(e.d,e.t));
+    L.push('DTEND;TZID=Europe/Berlin:'+icsLocal(e.d,e.t,2));
+    L.push('SUMMARY:'+icsEsc(e.title));
+    L.push('DESCRIPTION:'+icsEsc(desc));
+    if(ort.length) L.push('LOCATION:'+icsEsc(ort.join(', ')));
+    L.push('URL:'+baseUrl()+'#t='+e.id);
+    L.push('END:VEVENT');
+  });
+  L.push('END:VCALENDAR');
+  return L.map(icsFold).join('\r\n')+'\r\n';
+}
+function downloadICS(){
+  const blob=new Blob([buildICS()],{type:'text/calendar;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='svbb-termine.ics'; a.click();
+  URL.revokeObjectURL(a.href);
+}
+function copyIcsUrl(){
+  const url=baseUrl()+'termine.ics';
+  navigator.clipboard.writeText(url).then(()=>showToast('Abo-Link kopiert. In der Kalender-App als Abo einfügen.'))
+    .catch(()=>showToast('Link: '+url,6000));
+}
+
+/* ---------------- Login ---------------- */
+function openLogin(hint){
+  document.getElementById('login').classList.add('show');
+  loginErr(hint||'');
+  refreshBioBtn();
+}
+function closeLogin(){ document.getElementById('login').classList.remove('show'); loginErr(''); }
+function headerAction(){ session?goto('konto'):openLogin(); }
+function loginErr(m){
+  const e=document.getElementById('login-err');
+  if(!m){e.classList.remove('show');return;}
+  e.textContent=m; e.classList.add('show');
+}
+async function doLogin(){
+  loginErr('');
+  const u=document.getElementById('li-user').value.trim().toLowerCase();
+  const p=document.getElementById('li-pass').value;
+  if(!u||!p){loginErr('Bitte Benutzer und Passwort eingeben.');return;}
+  const btn=document.getElementById('li-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
+  try{
+    if(u===CFG.admin.user.toLowerCase()){
+      if(p!==CFG.admin.password) throw new Error('Passwort stimmt nicht.');
+      session={id:'admin',name:CFG.admin.first+' '+CFG.admin.last,email:CFG.admin.user,isAdmin:true,
+               token:localStorage.getItem('svbb_admin_token')||''};
+    }else{
+      const rec=USERS.find(x=>x.email.toLowerCase()===u);
+      if(!rec) throw new Error('Kein Benutzer mit dieser E-Mail.');
+      let token;
+      try{ token=await decryptToken(rec.enc,p); }
+      catch(e){ throw new Error('Passwort stimmt nicht.'); }
+      session={id:rec.id,name:rec.first+' '+rec.last,email:rec.email,isAdmin:false,token};
+    }
+    afterLogin();
+  }catch(e){ loginErr(e.message); }
+  finally{ btn.disabled=false; btn.textContent='Anmelden'; }
+}
+function afterLogin(){
+  sessionStorage.setItem('svbb_session',JSON.stringify(session));
+  document.getElementById('li-pass').value='';
+  closeLogin();
+  refreshHeader(); buildFilters(); renderAll();
+  if(session.isAdmin && !session.token)
+    showToast('Als Admin angemeldet. Zum Speichern fehlt noch der GitHub-Token → Konto.',5000);
+  else showToast('Angemeldet als '+session.name.split(' ')[0]+'.');
+}
+function logout(){
+  session=null;
+  sessionStorage.removeItem('svbb_session');
+  refreshHeader(); buildFilters();
+  if(filter==='meine') filter='alle';
+  renderAll(); renderKonto();
+  showToast('Abgemeldet. Termine kannst du weiter ansehen.');
+}
+function refreshHeader(){
+  const b=document.getElementById('hd-user');
+  if(session){ b.textContent=initials(session.name); b.classList.add('in'); }
+  else{ b.textContent='Anmelden'; b.classList.remove('in'); }
+}
+
+/* ---------------- Fingerabdruck ---------------- */
+function bioAvailable(){return !!(window.PublicKeyCredential&&navigator.credentials);}
+function bioStored(){try{return JSON.parse(localStorage.getItem('svbb_bio'));}catch(e){return null;}}
+async function bioSetup(){
+  if(!bioAvailable()){showToast('Dieses Gerät unterstützt das nicht.');return;}
+  try{
+    const cred=await navigator.credentials.create({publicKey:{
+      challenge:crypto.getRandomValues(new Uint8Array(32)),
+      rp:{name:'SVBB Termine',id:location.hostname},
+      user:{id:enc.encode(session.id),name:session.email,displayName:session.name},
+      pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+      authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'preferred'},
+      timeout:60000,attestation:'none'}});
+    localStorage.setItem('svbb_bio',JSON.stringify({credId:b64(cred.rawId),
+      session:{id:session.id,name:session.name,email:session.email,isAdmin:session.isAdmin,token:session.token}}));
+    showToast('Fingerabdruck eingerichtet.');
+    renderKonto();
+  }catch(e){ showToast('Einrichtung abgebrochen.'); }
+}
+function bioRemove(){ localStorage.removeItem('svbb_bio'); showToast('Entfernt.'); renderKonto(); refreshBioBtn(); }
+async function bioLogin(){
+  const st=bioStored(); if(!st)return;
+  try{
+    await navigator.credentials.get({publicKey:{
+      challenge:crypto.getRandomValues(new Uint8Array(32)),
+      allowCredentials:[{type:'public-key',id:unb64(st.credId)}],
+      userVerification:'required',timeout:60000,rpId:location.hostname}});
+    session={...st.session}; afterLogin();
+  }catch(e){ loginErr('Fingerabdruck nicht erkannt. Bitte Passwort nutzen.'); }
+}
+function refreshBioBtn(){
+  const st=bioStored(), b=document.getElementById('bio-btn');
+  if(st&&bioAvailable()&&!session){
+    b.style.display='flex';
+    document.getElementById('bio-label').textContent='Anmelden als '+st.session.name.split(' ')[0];
+  } else b.style.display='none';
+}
+
+/* ---------------- Navigation ---------------- */
+function goto(n){
+  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.dataset.pane===n));
+  document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.nav===n));
+  const titles={start:'Termine',termine:'Terminübersicht',neu:editingId?'Termin bearbeiten':'Neuer Termin',konto:session?'Mein Konto':'Kalender & Konto'};
+  document.getElementById('hd-title').textContent=titles[n]||'Termine';
+  document.querySelectorAll('.pane.active .content').forEach(c=>c.scrollTop=0);
+  if(n==='konto') renderKonto();
+}
+function setView(v){
+  view=v;
+  document.querySelectorAll('#viewseg button').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
+  ['liste','monat','jahr'].forEach(k=>document.getElementById('view-'+k).style.display=(k===v?'block':'none'));
+  render();
+}
+function setFilter(f){
+  filter=f;
+  document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f===f));
+  render(); renderStart();
+}
+function buildFilters(){
+  const fs=[['alle','Alle']];
+  if(session) fs.push(['meine','Meine']);
+  fs.push(['jugend','Jugend'],['senioren','Senioren'],['verein','Verein']);
+  document.getElementById('filterbar').innerHTML=fs.map(([k,l])=>
+    '<span class="filter-chip'+(k===filter?' on':'')+'" data-f="'+k+'" onclick="setFilter(\''+k+'\')">'+l+'</span>').join('');
+}
+
+/* ---------------- Sichten ---------------- */
+function filtered(){
+  return EVENTS.filter(e=>{
+    if(filter==='alle') return true;
+    if(filter==='meine') return session&&e.ownerId===session.id;
+    return cat(e.team)===filter;
+  });
+}
+function eventsOn(d){return filtered().filter(e=>e.d===d).sort((a,b)=>a.t.localeCompare(b.t));}
+function usedQuarters(d,skipId){
+  const s=new Set();
+  EVENTS.filter(e=>e.d===d&&e.id!==skipId).forEach(e=>pitchQuarters(e.pitch).forEach(q=>s.add(q)));
+  return s;
+}
+function canEdit(e){ return session&&(session.isAdmin||e.ownerId===session.id); }
+
+function rowHTML(e){
+  let b='<span class="badge-team '+cat(e.team)+'">'+esc(e.team)+'</span>';
+  if(isJugend(e.team)) b+='<span class="badge-squad">'+e.squad+'. Mannschaft</span>';
+  if(e.pitch) b+='<span class="badge-res pitch">'+pitchLabel(e.pitch)+'</span>';
+  (e.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
+  if(session&&e.ownerId===session.id) b+='<span class="badge-mine">Mein Termin</span>';
+  const meta=['Ansprechpartner: '+esc(e.ownerName||'–'),esc(e.note)].filter(Boolean).join(' · ');
+  let acts='<button class="ibtn share" onclick="shareEvent(\''+e.id+'\')" aria-label="Teilen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"/></svg></button>';
+  if(session) acts+='<button class="ibtn" onclick="duplicateEvent(\''+e.id+'\')" aria-label="Duplizieren"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>';
+  if(canEdit(e)){
+    acts+='<button class="ibtn" onclick="editEvent(\''+e.id+'\')" aria-label="Bearbeiten"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>';
+    acts+='<button class="ibtn del" onclick="deleteEvent(\''+e.id+'\')" aria-label="Löschen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>';
+  }
+  const hl=(e.id===highlightId)?' hl':'';
+  return '<div class="event-row'+hl+'" id="ev-'+e.id+'"><div class="event-time">'+e.t+'</div>'+
+    '<div class="event-main"><h4>'+esc(e.title)+'</h4><div class="event-meta">'+meta+'</div><div class="badges">'+b+'</div></div>'+
+    '<div class="row-acts">'+acts+'</div></div>';
+}
+function shareEvent(id){
+  const e=EVENTS.find(x=>x.id===id); if(!e)return;
+  let ort=[];
+  if(e.pitch) ort.push('Großspielfeld – '+pitchLabel(e.pitch).replace('Platz: ',''));
+  ort=ort.concat(e.res||[]);
+  const txt='📅 *'+e.title+'*\n'+fmtShare(e.d)+' · '+e.t+' Uhr\n'+
+    'Team: '+e.team+(isJugend(e.team)?' ('+e.squad+'. Mannschaft)':'')+'\n'+
+    (ort.length?'Ort: '+ort.join(', ')+'\n':'')+
+    'Ansprechpartner: '+(e.ownerName||'–')+'\n'+
+    (e.note?'Info: '+e.note+'\n':'')+
+    baseUrl()+'#t='+e.id;
+  window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
+}
+
+/* ---------------- Liste / Monat / Jahr ---------------- */
+function renderList(){
+  const box=document.getElementById('view-liste');
+  const evs=filtered().slice().sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t));
+  if(!evs.length){box.innerHTML='<div class="empty-day">Keine Termine für diesen Filter.</div>';return;}
+  let h='',last='';
+  evs.forEach(e=>{
+    if(e.d!==last){ if(last)h+='</div>'; h+='<div class="day-group"><span class="day-head">'+fmtHead(e.d)+'</span>'; last=e.d; }
+    h+=rowHTML(e);
+  });
+  box.innerHTML=h+'</div>';
+}
+function moveMonth(s){curM+=s;if(curM<0){curM=11;curY--;}if(curM>11){curM=0;curY++;}render();}
+function gotoToday(){curY=today.getFullYear();curM=today.getMonth();selDate=todayStr;render();}
+function selectDay(d){selDate=d;const dt=new Date(d+'T00:00:00');curY=dt.getFullYear();curM=dt.getMonth();render();}
+function capBarHTML(d){
+  const used=usedQuarters(d);
+  let mini='';
+  [1,3,2,4].forEach(q=>mini+='<div class="cap-q'+(used.has(q)?' used':'')+'"></div>');
+  const free=4-used.size;
+  const txt=used.size===0?'<b>Großspielfeld komplett frei</b>':(free===0?'<b>Großspielfeld voll belegt</b>':'<b>'+free+' von 4 Vierteln frei</b>');
+  return '<div class="cap-bar"><div class="cap-mini">'+mini+'</div><div class="cap-text">'+txt+'<br>Hälfte A = Viertel 1+2 · Hälfte B = Viertel 3+4</div></div>';
+}
+function renderMonth(){
+  const box=document.getElementById('view-monat');
+  let h='<div class="cal-head"><div class="cal-title">'+MONTHS[curM]+' '+curY+'</div><div class="cal-btns">'+
+    '<button class="today-chip" onclick="gotoToday()">Heute</button>'+
+    '<button class="cal-btn" onclick="moveMonth(-1)">‹</button><button class="cal-btn" onclick="moveMonth(1)">›</button></div></div><div class="cal-grid">';
+  DOW.forEach(d=>h+='<div class="cal-dow">'+d+'</div>');
+  const offset=(new Date(curY,curM,1).getDay()+6)%7;
+  const daysIn=new Date(curY,curM+1,0).getDate(), prevDays=new Date(curY,curM,0).getDate();
+  const cells=Math.ceil((offset+daysIn)/7)*7;
+  for(let i=0;i<cells;i++){
+    let d,m=curM,y=curY,other=false;
+    if(i<offset){d=prevDays-offset+1+i;m=curM-1;other=true;}
+    else if(i>=offset+daysIn){d=i-offset-daysIn+1;m=curM+1;other=true;}
+    else d=i-offset+1;
+    const dt=new Date(y,m,d), ds=ymd(dt), evs=eventsOn(ds);
+    const cats=[...new Set(evs.map(e=>cat(e.team)))];
+    const full=usedQuarters(ds).size===4;
+    const cls='cal-day'+(other?' other':'')+(ds===todayStr?' today':'')+(ds===selDate?' sel':'')+(full?' full':'');
+    h+='<div class="'+cls+'" onclick="selectDay(\''+ds+'\')">'+dt.getDate()+'<div class="cal-dots">'+
+      cats.slice(0,3).map(c=>'<span class="cdot '+c+'"></span>').join('')+'</div></div>';
+  }
+  h+='</div><div class="cal-legend"><span><span class="cdot jugend"></span>Jugend</span><span><span class="cdot senioren"></span>Senioren</span><span><span class="cdot verein"></span>Verein</span><span><span class="warn-dot"></span>Platz voll</span></div>';
+  h+=capBarHTML(selDate);
+  const evs=eventsOn(selDate);
+  h+='<div style="margin-top:14px;"><p class="section-label">'+fmtHead(selDate)+'</p>';
+  h+=evs.length?evs.map(rowHTML).join(''):'<div class="empty-day">Kein Termin an diesem Tag.</div>';
+  h+='<button class="ghost-btn" onclick="newForDay()">＋ Termin für diesen Tag eintragen</button></div>';
+  box.innerHTML=h;
+}
+function newForDay(){ newEvent(selDate); }
+function moveYear(s){yearShown+=s;render();}
+function renderYear(){
+  const box=document.getElementById('view-jahr');
+  const evs=filtered().filter(e=>e.d.slice(0,4)==yearShown);
+  let h='<div class="cal-head"><div class="cal-title">Jahresübersicht '+yearShown+'</div><div class="cal-btns">'+
+    '<button class="cal-btn" onclick="moveYear(-1)">‹</button><button class="cal-btn" onclick="moveYear(1)">›</button></div></div><div class="year-grid">';
+  for(let m=0;m<12;m++){
+    const me=evs.filter(e=>parseInt(e.d.slice(5,7))===m+1), cnt=me.length;
+    h+='<div class="mini-month" onclick="curY='+yearShown+';curM='+m+';setView(\'monat\')"><div class="mini-title">'+MONTHS_S[m]+(cnt?'<span class="mini-count">'+cnt+'</span>':'')+'</div><div class="mini-grid">';
+    const offset=(new Date(yearShown,m,1).getDay()+6)%7, daysIn=new Date(yearShown,m+1,0).getDate();
+    for(let b=0;b<offset;b++)h+='<div class="mini-day blank"></div>';
+    for(let d=1;d<=daysIn;d++){
+      const ds=yearShown+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      const cats=[...new Set(me.filter(e=>e.d===ds).map(e=>cat(e.team)))];
+      let cls='mini-day';
+      if(cats.length>1)cls+=' multi'; else if(cats.length===1)cls+=' '+cats[0];
+      if(ds===todayStr)cls+=' today';
+      h+='<div class="'+cls+'"></div>';
+    }
+    h+='</div></div>';
+  }
+  h+='</div>';
+  let best=-1,bi=-1;
+  for(let m=0;m<12;m++){const c=evs.filter(e=>parseInt(e.d.slice(5,7))===m+1).length;if(c>best){best=c;bi=m;}}
+  h+='<div class="year-sum"><b>'+evs.length+' Termine</b> in '+yearShown+' · Voller Monat: <b>'+(best>0?MONTHS[bi]+' ('+best+')':'–')+'</b><br>Monat antippen für die Monatsansicht.</div>';
+  box.innerHTML=h;
+}
+function renderStart(){
+  const all=EVENTS.slice().sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t));
+  const future=all.filter(e=>e.d>=todayStr);
+  document.getElementById('st-count').textContent=all.filter(e=>e.d.slice(0,7)===todayStr.slice(0,7)).length;
+  if(session){
+    document.getElementById('st-b').textContent=future.filter(e=>e.ownerId===session.id).length;
+    document.getElementById('st-b-lbl').textContent='Meine Termine';
+  }else{
+    document.getElementById('st-b').textContent=future.length;
+    document.getElementById('st-b-lbl').textContent='Kommende Termine';
+  }
+  const nx=future[0], box=document.getElementById('nx-box');
+  if(nx){
+    let b='<span class="badge-team '+cat(nx.team)+'">'+esc(nx.team)+'</span>';
+    if(isJugend(nx.team))b+='<span class="badge-squad">'+nx.squad+'. Mannschaft</span>';
+    if(nx.pitch)b+='<span class="badge-res pitch">'+pitchLabel(nx.pitch)+'</span>';
+    (nx.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
+    box.innerHTML='<div class="next-card"><div class="when">'+fmtHead(nx.d)+' · '+nx.t+'</div>'+
+      '<h3>'+esc(nx.title)+'</h3><div class="meta">Ansprechpartner: '+esc(nx.ownerName||'–')+(nx.note?' · '+esc(nx.note):'')+'</div>'+
+      '<div class="badges">'+b+'</div></div>';
+  } else box.innerHTML='<div class="empty-day">Keine kommenden Termine.</div>';
+  document.getElementById('up-list').innerHTML=future.slice(1,4).map(rowHTML).join('')||'<div class="empty-day">Keine weiteren Termine.</div>';
+}
+
+/* ---------------- Formular ---------------- */
+const dateInput=()=>document.getElementById('f-datum');
+function updateWeekday(){
+  const v=dateInput().value; if(!v)return;
+  document.getElementById('f-wochentag').textContent=DAYS[new Date(v+'T00:00:00').getDay()]+' · automatisch';
+}
+function setSquad(b){b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');}
+function onTeamChange(){document.getElementById('f-squad-field').style.display=isJugend(document.getElementById('f-team').value)?'block':'none';}
+function toggleRes(el){el.classList.toggle('on');if(el.dataset.res==='Großspielfeld')renderPitch();}
+function pitchOn(){return document.querySelector('#f-res .res-chip[data-res="Großspielfeld"]').classList.contains('on');}
+function setPitchMode(m){
+  pitchMode=m; pitchPart=m==='ganz'?null:(m==='haelfte'?'A':1);
+  document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  renderPitch();
+}
+function pickPitch(q){ if(pitchMode==='ganz')return; pitchPart=pitchMode==='haelfte'?halfOf(q):q; renderPitch(); }
+function curPitch(){return pitchMode==='ganz'?{mode:'ganz'}:{mode:pitchMode,part:pitchPart};}
+function renderPitch(){
+  const f=document.getElementById('f-pitch-field');
+  f.style.display=pitchOn()?'block':'none';
+  if(!pitchOn())return;
+  const sel=new Set(pitchQuarters(curPitch()));
+  const busy=usedQuarters(dateInput().value,editingId);
+  document.querySelectorAll('#pitch .pq').forEach(el=>{
+    const q=parseInt(el.dataset.q);
+    el.classList.toggle('sel',sel.has(q));
+    el.classList.toggle('busy',busy.has(q));
+  });
+  const clash=[...sel].filter(q=>busy.has(q));
+  document.getElementById('pitch-cap').innerHTML=
+    '<span>Am '+fmtShort(dateInput().value)+': <b>'+(4-busy.size)+'/4 Viertel frei</b></span>'+
+    (clash.length?'<span class="warnpill">Überschneidung: Viertel '+clash.join(', ')+'</span>':'<span class="okpill">Passt</span>');
+}
+function resetForm(){
+  document.getElementById('f-anlass').value='';
+  document.getElementById('f-bem').value='';
+  document.getElementById('f-zeit').value='15:00';
+  document.getElementById('f-team').value='F-Jugend';
+  document.querySelectorAll('#f-squad button').forEach((b,i)=>b.classList.toggle('on',i===0));
+  document.querySelectorAll('#f-res .res-chip').forEach(c=>c.classList.toggle('on',c.dataset.res==='Großspielfeld'));
+  setPitchMode('ganz'); onTeamChange();
+}
+function requireLogin(){
+  if(session) return true;
+  openLogin('Zum Eintragen und Ändern bitte anmelden. Ansehen geht ohne.');
+  return false;
+}
+function newEvent(d){
+  if(!requireLogin()) return;
+  editingId=null; resetForm();
+  dateInput().value=d||todayStr;
+  updateWeekday(); renderPitch();
+  document.getElementById('save-label').textContent='Termin speichern';
+  document.getElementById('cancel-btn').style.display='none';
+  document.getElementById('owner-name').textContent=session.name;
+  goto('neu');
+}
+function fillForm(e){
+  dateInput().value=e.d;
+  document.getElementById('f-zeit').value=e.t;
+  document.getElementById('f-anlass').value=e.title;
+  document.getElementById('f-bem').value=e.note||'';
+  document.getElementById('f-team').value=e.team;
+  document.querySelectorAll('#f-squad button').forEach((b,i)=>b.classList.toggle('on',i===(e.squad-1)));
+  document.querySelectorAll('#f-res .res-chip').forEach(c=>{
+    if(c.dataset.res==='Großspielfeld') c.classList.toggle('on',!!e.pitch);
+    else c.classList.toggle('on',(e.res||[]).includes(c.dataset.res));
+  });
+  if(e.pitch){ pitchMode=e.pitch.mode; pitchPart=e.pitch.part||null;
+    document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode===pitchMode));
+  } else setPitchMode('ganz');
+  onTeamChange(); updateWeekday(); renderPitch();
+}
+function editEvent(id){
+  if(!requireLogin()) return;
+  const e=EVENTS.find(x=>x.id===id); if(!e)return;
+  if(!canEdit(e)){showToast('Das ist nicht dein Termin.');return;}
+  editingId=id; fillForm(e);
+  document.getElementById('save-label').textContent='Änderungen speichern';
+  document.getElementById('cancel-btn').style.display='block';
+  document.getElementById('owner-name').textContent=e.ownerName||'–';
+  goto('neu');
+}
+function duplicateEvent(id){
+  if(!requireLogin()) return;
+  const e=EVENTS.find(x=>x.id===id); if(!e)return;
+  editingId=null; fillForm(e);
+  const d=new Date(e.d+'T00:00:00'); d.setFullYear(d.getFullYear()+1);
+  dateInput().value=ymd(d); updateWeekday(); renderPitch();
+  document.getElementById('save-label').textContent='Als neuen Termin speichern';
+  document.getElementById('cancel-btn').style.display='block';
+  document.getElementById('owner-name').textContent=session.name;
+  goto('neu');
+  showToast('Kopie erstellt – Datum steht auf nächstes Jahr, bitte prüfen.',4000);
+}
+function cancelEdit(){ editingId=null; goto('termine'); }
+
+async function submitEvent(){
+  if(!requireLogin()) return;
+  const title=document.getElementById('f-anlass').value.trim();
+  if(!title){showToast('Bitte einen Anlass eintragen.');return;}
+  const d=dateInput().value;
+  if(!d){showToast('Bitte ein Datum wählen.');return;}
+  const t=document.getElementById('f-zeit').value||'15:00';
+  const team=document.getElementById('f-team').value;
+  const sb=document.querySelector('#f-squad button.on');
+  const squad=sb?parseInt(sb.textContent):1;
+  const res=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res).filter(r=>r!=='Großspielfeld');
+  const pitch=pitchOn()?curPitch():null;
+  const note=document.getElementById('f-bem').value.trim();
+
+  const warn=[];
+  if(pitch){
+    const mine=new Set(pitchQuarters(pitch));
+    EVENTS.filter(e=>e.d===d&&e.pitch&&e.id!==editingId).forEach(e=>{
+      const hit=pitchQuarters(e.pitch).filter(q=>mine.has(q));
+      if(hit.length) warn.push('Platz-Viertel '+hit.join('/')+' läuft schon „'+e.title+'" ('+e.t+')');
+    });
+  }
+  EVENTS.filter(e=>e.d===d&&e.id!==editingId).forEach(e=>{
+    const hit=(e.res||[]).filter(r=>res.includes(r));
+    if(hit.length) warn.push(hit.join(', ')+' belegt durch „'+e.title+'" ('+e.t+')');
+  });
+
+  const btn=document.getElementById('save-btn'), lblEl=document.getElementById('save-label');
+  const lbl=lblEl.textContent;
+  btn.disabled=true; lblEl.textContent='Speichere …';
+  const backup=JSON.stringify(EVENTS);
+  try{
+    if(editingId){
+      Object.assign(EVENTS.find(x=>x.id===editingId),{d,t,title,team,squad,pitch,res,note});
+    }else{
+      EVENTS.push({id:crypto.randomUUID(),d,t,title,team,squad,pitch,res,note,
+        ownerId:session.id,ownerName:session.name});
+    }
+    await saveEvents((editingId?'Termin geändert: ':'Neuer Termin: ')+title+' ('+fmtShort(d)+') – '+session.name);
+    editingId=null;
+    document.getElementById('cancel-btn').style.display='none';
+    selDate=d;
+    const dt=new Date(d+'T00:00:00'); curY=dt.getFullYear(); curM=dt.getMonth(); yearShown=curY;
+    goto('termine'); setView('monat'); renderStart(); resetForm();
+    if(warn.length) showToast('⚠ Gespeichert – Achtung: '+warn[0],5000);
+    else showToast('Gespeichert: '+title);
+  }catch(err){
+    EVENTS=JSON.parse(backup);
+    showToast('Fehler: '+err.message,5000);
+  }finally{
+    btn.disabled=false; lblEl.textContent=lbl;
+  }
+}
+function deleteEvent(id){
+  if(!requireLogin()) return;
+  const e=EVENTS.find(x=>x.id===id); if(!e)return;
+  if(!canEdit(e)){showToast('Das ist nicht dein Termin.');return;}
+  askConfirm('Termin löschen?','„'+e.title+'" am '+fmtShort(e.d)+' wird dauerhaft entfernt.','Löschen',async()=>{
+    const backup=JSON.stringify(EVENTS);
+    EVENTS=EVENTS.filter(x=>x.id!==id);
+    try{
+      await saveEvents('Termin gelöscht: '+e.title+' ('+fmtShort(e.d)+') – '+session.name);
+      render(); renderStart(); showToast('Termin gelöscht.');
+    }catch(err){ EVENTS=JSON.parse(backup); showToast('Fehler: '+err.message,5000); }
+  });
+}
+
+/* ---------------- Konto ---------------- */
+function renderKonto(){
+  // Kalender-Abo: für alle sichtbar
+  document.getElementById('ical-card').innerHTML=
+    '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>Kalender abonnieren</h4>'+
+    '<p class="sub">Einmal einrichten – danach erscheinen alle Vereinstermine automatisch im Handy-Kalender und aktualisieren sich von selbst.</p>'+
+    '<div class="urlbox">'+esc(baseUrl()+'termine.ics')+'</div>'+
+    '<button class="ghost-btn" style="margin-top:0;" onclick="copyIcsUrl()">Abo-Link kopieren</button>'+
+    '<button class="ghost-btn" onclick="downloadICS()">Als Datei herunterladen (einmalig)</button>'+
+    '<p class="helptext">iPhone: Einstellungen → Kalender → Accounts → Account hinzufügen → Andere → Kalenderabo. Android: Google Kalender am PC → Weitere Kalender → Per URL.</p></div>';
+
+  // Startbildschirm
+  document.getElementById('pwa-card').innerHTML=
+    '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>Als App speichern</h4>'+
+    '<p class="sub">iPhone: Teilen-Symbol → „Zum Home-Bildschirm". Android: Menü ⋮ → „App installieren". Danach startet sie wie eine normale App.</p></div>';
+
+  // Konto
+  const me=document.getElementById('me-card');
+  if(!session){
+    me.innerHTML='<div class="card"><h4>Nicht angemeldet</h4><p class="sub">Termine ansehen geht ohne Anmeldung. Zum Eintragen, Ändern oder Löschen brauchst du einen Zugang vom Vorstand.</p>'+
+      '<button class="submit-btn" onclick="openLogin()"><span>Anmelden</span></button></div>';
+    document.getElementById('bio-card').innerHTML='';
+    document.getElementById('admin-area').innerHTML='';
+    return;
+  }
+  me.innerHTML='<div class="card"><h4>'+esc(session.name)+'</h4><p class="sub">'+esc(session.email)+(session.isAdmin?' · Superuser':'')+'</p>'+
+    '<button class="cancel-btn" onclick="logout()">Abmelden</button></div>';
+
+  const bio=document.getElementById('bio-card');
+  if(!bioAvailable()){
+    bio.innerHTML='<div class="card"><h4>Fingerabdruck</h4><p class="sub">Dieses Gerät oder dieser Browser unterstützt das nicht.</p></div>';
+  }else if(bioStored()){
+    bio.innerHTML='<div class="card"><h4>Fingerabdruck aktiv</h4><p class="sub">Beim nächsten Anmelden reicht Finger oder Face-ID auf diesem Gerät.</p>'+
+      '<button class="cancel-btn" onclick="bioRemove()">Entfernen</button></div>';
+  }else{
+    bio.innerHTML='<div class="card"><h4>Anmeldung per Fingerabdruck</h4><p class="sub">Einmal einrichten – danach reicht Finger oder Gesicht. Nur auf dem eigenen Handy einrichten.</p>'+
+      '<button class="ghost-btn" style="margin-top:0;" onclick="bioSetup()">Jetzt einrichten</button></div>';
+  }
+
+  const a=document.getElementById('admin-area');
+  if(!session.isAdmin){ a.innerHTML=''; return; }
+  let h='<p class="section-label">Admin</p>';
+  h+=session.token
+    ?'<div class="banner ok">Schreib-Token ist auf diesem Gerät hinterlegt.</div>'
+    :'<div class="banner warn"><b>Kein Schreib-Token hinterlegt.</b> Ohne Token kann die App nichts speichern.</div>';
+  h+='<div class="card"><h4>GitHub-Token</h4><p class="sub">Fine-grained Token mit Contents: Read&nbsp;and&nbsp;write auf <b>'+esc(CFG.repo)+'</b>. Nur lokal gespeichert, nie ins Repo geschrieben.</p>'+
+     '<div class="field" style="margin:10px 0 0;"><input type="password" id="ad-token" placeholder="github_pat_…" autocomplete="off"></div>'+
+     '<button class="ghost-btn" onclick="saveAdminToken()">Token speichern</button></div>';
+  h+='<div class="card"><h4>Neuen Trainer anlegen</h4><p class="sub">Er meldet sich danach mit E-Mail und diesem Passwort an.</p>'+
+     '<div class="field" style="margin:10px 0 8px;"><input type="text" id="nu-first" placeholder="Vorname"></div>'+
+     '<div class="field" style="margin-bottom:8px;"><input type="text" id="nu-last" placeholder="Nachname"></div>'+
+     '<div class="field" style="margin-bottom:8px;"><input type="email" id="nu-mail" placeholder="E-Mail" autocapitalize="none"></div>'+
+     '<div class="field" style="margin-bottom:8px;"><input type="text" id="nu-pass" placeholder="Start-Passwort (min. 8 Zeichen)"></div>'+
+     '<button class="submit-btn" id="nu-btn" onclick="createUser()"><span id="nu-label">Trainer anlegen</span></button></div>';
+  h+='<div class="card"><h4>Trainer ('+USERS.length+')</h4>';
+  if(!USERS.length) h+='<p class="sub">Noch keine Trainer angelegt.</p>';
+  USERS.forEach(u=>{
+    h+='<div class="user-row"><div class="avatar">'+initials(u.first+' '+u.last)+'</div>'+
+       '<div class="user-info"><div class="n">'+esc(u.first+' '+u.last)+'</div><div class="e">'+esc(u.email)+'</div></div>'+
+       '<button class="ibtn del" onclick="deleteUser(\''+u.id+'\')" aria-label="Löschen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>';
+  });
+  h+='</div>';
+  a.innerHTML=h;
+}
+function saveAdminToken(){
+  const t=document.getElementById('ad-token').value.trim();
+  if(!t){showToast('Bitte Token eingeben.');return;}
+  localStorage.setItem('svbb_admin_token',t);
+  session.token=t;
+  sessionStorage.setItem('svbb_session',JSON.stringify(session));
+  showToast('Token gespeichert.'); renderKonto();
+}
+async function createUser(){
+  if(!session.token){showToast('Erst den GitHub-Token hinterlegen.');return;}
+  const first=document.getElementById('nu-first').value.trim();
+  const last=document.getElementById('nu-last').value.trim();
+  const mail=document.getElementById('nu-mail').value.trim().toLowerCase();
+  const pass=document.getElementById('nu-pass').value;
+  if(!first||!last||!mail){showToast('Bitte Vorname, Nachname und E-Mail ausfüllen.');return;}
+  if(!/^\S+@\S+\.\S+$/.test(mail)){showToast('E-Mail sieht nicht gültig aus.');return;}
+  if(pass.length<8){showToast('Passwort braucht mindestens 8 Zeichen.');return;}
+  if(USERS.some(u=>u.email.toLowerCase()===mail)){showToast('Diese E-Mail gibt es schon.');return;}
+  const btn=document.getElementById('nu-btn');
+  btn.disabled=true; document.getElementById('nu-label').textContent='Lege an …';
+  const backup=JSON.stringify(USERS);
+  try{
+    const encRec=await encryptToken(session.token,pass);
+    USERS.push({id:crypto.randomUUID(),first,last,email:mail,enc:encRec,created:new Date().toISOString()});
+    await saveUsers('Trainer angelegt: '+first+' '+last);
+    ['nu-first','nu-last','nu-mail','nu-pass'].forEach(i=>document.getElementById(i).value='');
+    showToast(first+' kann sich jetzt anmelden.'); renderKonto();
+  }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,5000); }
+  finally{ btn.disabled=false; const l=document.getElementById('nu-label'); if(l)l.textContent='Trainer anlegen'; }
+}
+function deleteUser(id){
+  const u=USERS.find(x=>x.id===id); if(!u)return;
+  askConfirm('Trainer löschen?',u.first+' '+u.last+' kann sich dann nicht mehr anmelden. Seine Termine bleiben.','Löschen',async()=>{
+    const backup=JSON.stringify(USERS);
+    USERS=USERS.filter(x=>x.id!==id);
+    try{ await saveUsers('Trainer gelöscht: '+u.first+' '+u.last); showToast('Trainer gelöscht.'); renderKonto(); }
+    catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,5000); }
+  });
+}
+
+/* ---------------- Deep Link ---------------- */
+function openHashEvent(){
+  const m=location.hash.match(/^#t=(.+)$/);
+  if(!m) return;
+  const e=EVENTS.find(x=>x.id===m[1]);
+  if(!e){ showToast('Dieser Termin existiert nicht mehr.'); return; }
+  highlightId=e.id; selDate=e.d;
+  const dt=new Date(e.d+'T00:00:00');
+  curY=dt.getFullYear(); curM=dt.getMonth(); yearShown=curY;
+  goto('termine'); setView('monat');
+  setTimeout(()=>{
+    const el=document.getElementById('ev-'+e.id);
+    if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
+  },250);
+  setTimeout(()=>{ highlightId=null; render(); },5000);
+}
+
+/* ---------------- Boot ---------------- */
+function render(){
+  if(view==='liste')renderList();
+  if(view==='monat')renderMonth();
+  if(view==='jahr')renderYear();
+}
+function renderAll(){ render(); renderStart(); }
+
+async function boot(){
+  try{
+    CFG=await loadJSON('data/config.json');
+    document.getElementById('hd-club').textContent=CFG.clubName;
+  }catch(e){
+    document.getElementById('nx-box').innerHTML='<div class="banner warn">data/config.json fehlt oder ist fehlerhaft.</div>';
+    return;
+  }
+  try{
+    const [ev,us]=await Promise.all([loadJSON('data/events.json'),loadJSON('data/users.json')]);
+    EVENTS=ev.events||[]; USERS=us.users||[];
+  }catch(e){
+    document.getElementById('nx-box').innerHTML='<div class="banner warn">Daten konnten nicht geladen werden: '+esc(e.message)+'</div>';
+    return;
+  }
+  document.getElementById('login-foot').textContent=
+    USERS.length?'Zugang bekommst du vom Vorstand.':'Noch keine Trainer angelegt – bitte als Admin anmelden.';
+
+  try{
+    const s=JSON.parse(sessionStorage.getItem('svbb_session'));
+    if(s&&s.id) session=s;
+  }catch(e){}
+
+  dateInput().value=todayStr;
+  dateInput().addEventListener('change',()=>{updateWeekday();renderPitch();});
+  updateWeekday(); onTeamChange(); setPitchMode('ganz');
+  document.getElementById('li-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+  document.getElementById('ver-note').textContent='Daten: '+CFG.repo;
+
+  refreshHeader(); refreshBioBtn(); buildFilters();
+  setView('monat'); renderStart();
+  openHashEvent();
+  window.addEventListener('hashchange',openHashEvent);
+}
+boot();
+</script>
+</body>
+</html>

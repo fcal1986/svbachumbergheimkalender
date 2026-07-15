@@ -1,0 +1,17 @@
+{
+  "name": "SV Bachum/Bergheim – Termine",
+  "short_name": "SVBB Termine",
+  "description": "Termine des SV Bachum/Bergheim – Spiele, Feste und Veranstaltungen.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0E2A5C",
+  "theme_color": "#0E2A5C",
+  "lang": "de",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
