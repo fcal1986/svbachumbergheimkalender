@@ -1,0 +1,10 @@
+{
+  "slots": [
+    { "id": "tr-1", "day": 1, "from": "16:30", "to": "18:00", "team": "F-Jugend", "squad": 1, "pitch": { "mode": "haelfte", "part": "A" }, "res": ["Kleinspielfeld"], "note": "Beispiel – bitte anpassen" },
+    { "id": "tr-2", "day": 1, "from": "18:00", "to": "19:30", "team": "B-Jugend", "squad": 1, "pitch": { "mode": "haelfte", "part": "B" }, "res": [], "note": "" },
+    { "id": "tr-3", "day": 1, "from": "19:30", "to": "21:00", "team": "1. Herren", "squad": 1, "pitch": { "mode": "ganz" }, "res": [], "note": "" },
+    { "id": "tr-4", "day": 3, "from": "16:30", "to": "18:00", "team": "E-Jugend", "squad": 1, "pitch": { "mode": "viertel", "part": 1 }, "res": [], "note": "" },
+    { "id": "tr-5", "day": 3, "from": "18:00", "to": "19:30", "team": "C-Jugend", "squad": 1, "pitch": { "mode": "haelfte", "part": "B" }, "res": [], "note": "" },
+    { "id": "tr-6", "day": 5, "from": "18:00", "to": "19:30", "team": "2. Herren", "squad": 1, "pitch": { "mode": "ganz" }, "res": [], "note": "" }
+  ]
+}
