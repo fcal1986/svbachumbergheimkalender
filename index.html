@@ -18,7 +18,7 @@
     --chalk:#F4F6FA; --chalk-dim:#E8ECF4;
     --yellow:#FFD24A; --yellow-soft:#FFF1C2; --yellow-deep:#E8B400;
     --ink:#131B2C; --ink-soft:#5B6474; --line:#DCE1EB; --white:#FFF; --gray:#9AA3B5;
-    --grass:#2F7A46; --grass-dim:#DCEBE1; --warn:#C0392B; --ok:#25A55A;
+    --grass:#2F7A46; --grass-dim:#E6F1E9; --warn:#C0392B; --ok:#25A55A;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;height:100%;}
@@ -73,6 +73,13 @@
   .btn-ghost-light svg{width:17px;height:17px;stroke:var(--yellow);}
   .login-foot{color:#7E96C0;font-size:11px;text-align:center;margin-top:20px;line-height:1.6;}
 
+  /* MINI-SPIELFELD */
+  .mini-pitch{display:inline-grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1.5px;width:24px;height:15px;border:1.5px solid var(--grass);border-radius:3px;background:var(--grass);overflow:hidden;flex:none;vertical-align:middle;}
+  .mini-pitch i{background:#F5FAF6;}
+  .mini-pitch i.on{background:var(--grass);}
+  .mini-pitch.lg{width:36px;height:23px;border-radius:4px;}
+  .badge-pitch{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;padding:3px 10px 3px 5px;border-radius:16px;background:var(--grass-dim);color:#1E5730;}
+
   /* CARDS */
   .stat-row{display:flex;gap:10px;margin-bottom:6px;}
   .stat-card{flex:1;background:var(--blue-deep);border-radius:16px;padding:14px;color:#fff;}
@@ -82,27 +89,30 @@
   .stat-card.yellow .lbl{color:#6E5A0C;}
   .next-card{background:#fff;border:1px solid var(--line);border-left:4px solid var(--yellow-deep);border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 6px 16px rgba(14,42,92,.05);}
   .next-card .when{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;}
-  .next-card h3{font-size:16px;font-weight:700;margin:4px 0 6px;}
+  .next-card h3{font-size:17px;font-weight:700;margin:4px 0 6px;}
   .next-card .meta{font-size:11.5px;color:var(--ink-soft);}
+  .next-pitch{display:flex;align-items:center;gap:10px;background:var(--grass-dim);border-radius:10px;padding:8px 10px;margin-top:10px;}
+  .next-pitch .np-t{font-size:11.5px;font-weight:700;color:#1E5730;}
+  .next-pitch .np-s{font-size:10px;color:#4E7A5C;margin-top:1px;}
 
-  .event-row{display:flex;gap:12px;padding:11px 4px;border-bottom:1px solid var(--line);position:relative;}
+  .event-row{display:flex;gap:11px;padding:12px 4px;border-bottom:1px solid var(--line);position:relative;}
   .event-row:last-child{border-bottom:none;}
+  .event-row.mine{border-left:3px solid var(--ok);padding-left:9px;border-radius:0 8px 8px 0;}
   .event-row.hl{background:var(--yellow-soft);border-radius:10px;padding-left:8px;padding-right:8px;}
   .event-time{font-size:12.5px;font-weight:700;width:44px;flex:none;padding-top:2px;line-height:1.35;}
   .event-main{flex:1;min-width:0;}
-  .event-main h4{margin:0 0 3px;font-size:14.5px;font-weight:700;padding-right:104px;}
-  .event-meta{font-size:11.5px;color:var(--ink-soft);}
-  .badges{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;align-items:center;}
+  .event-main h4{margin:0 0 3px;font-size:14.5px;font-weight:700;padding-right:96px;line-height:1.3;}
+  .event-meta{font-size:11.5px;color:var(--ink-soft);line-height:1.4;}
+  .badges{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;align-items:center;}
   .badge-team{font-size:10px;font-weight:700;padding:3px 9px;border-radius:16px;background:var(--blue-deep);color:#fff;}
   .badge-team.senioren{background:var(--blue);}
   .badge-team.verein{background:var(--gray);}
   .badge-squad{font-size:10px;font-weight:700;padding:3px 9px;border-radius:16px;background:var(--yellow-soft);color:#6E5A0C;}
-  .badge-res{font-size:10px;font-weight:600;padding:3px 8px;border-radius:16px;background:var(--chalk-dim);color:var(--ink-soft);}
-  .badge-res.pitch{background:var(--grass-dim);color:#1E5730;}
-  .badge-mine{font-size:10px;font-weight:700;padding:3px 8px;border-radius:16px;background:#E3F3E9;color:#1E5730;}
-  .row-acts{position:absolute;top:8px;right:0;display:flex;gap:4px;}
-  .ibtn{width:29px;height:29px;border-radius:9px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex:none;}
-  .ibtn svg{width:14px;height:14px;stroke:var(--ink-soft);}
+  .badge-res{font-size:10px;font-weight:600;padding:3px 9px;border-radius:16px;background:var(--chalk-dim);color:var(--ink-soft);}
+  .badge-admin{font-size:9px;font-weight:700;padding:2px 7px;border-radius:12px;background:var(--yellow);color:var(--ink);}
+  .row-acts{position:absolute;top:9px;right:0;display:flex;gap:4px;}
+  .ibtn{width:27px;height:27px;border-radius:8px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex:none;}
+  .ibtn svg{width:13px;height:13px;stroke:var(--ink-soft);}
   .ibtn.share svg{stroke:var(--ok);}
   .ibtn.del svg{stroke:var(--warn);}
 
@@ -130,23 +140,25 @@
   .cal-day.other{opacity:.32;}
   .cal-day.today{border:2px solid var(--yellow-deep);}
   .cal-day.sel{background:var(--blue-deep);border-color:var(--blue-deep);color:#fff;}
-  .cal-day.full::after{content:"";position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:var(--warn);}
+  .cal-day .load{position:absolute;top:3px;right:3px;width:9px;height:6px;border-radius:1.5px;border:1px solid var(--grass);display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:.5px;background:var(--grass);overflow:hidden;}
+  .cal-day .load i{background:#fff;}
+  .cal-day .load i.on{background:var(--grass);}
+  .cal-day.sel .load{border-color:#9FD6B2;background:#9FD6B2;}
+  .cal-day.sel .load i{background:var(--blue-deep);}
+  .cal-day.sel .load i.on{background:#9FD6B2;}
   .cal-dots{display:flex;gap:3px;height:5px;margin-top:3px;}
   .cdot{width:5px;height:5px;border-radius:50%;}
   .cdot.jugend{background:var(--blue-bright);}
   .cal-day.sel .cdot.jugend{background:#9FC0F2;}
   .cdot.senioren{background:var(--yellow-deep);}
   .cdot.verein{background:var(--gray);}
-  .cal-legend{display:flex;gap:12px;margin:10px 2px 0;font-size:10.5px;color:var(--ink-soft);flex-wrap:wrap;}
+  .cal-legend{display:flex;gap:12px;margin:10px 2px 0;font-size:10.5px;color:var(--ink-soft);flex-wrap:wrap;align-items:center;}
   .cal-legend span{display:flex;align-items:center;gap:5px;}
   .cal-legend .cdot{width:7px;height:7px;}
-  .cal-legend .warn-dot{width:7px;height:7px;border-radius:50%;background:var(--warn);}
-  .cap-bar{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:12px;display:flex;align-items:center;gap:10px;}
-  .cap-mini{width:44px;height:30px;flex:none;border-radius:5px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1.5px;background:var(--line);}
-  .cap-q{background:var(--grass-dim);}
-  .cap-q.used{background:var(--grass);}
-  .cap-text{font-size:11.5px;color:var(--ink-soft);line-height:1.45;}
-  .cap-text b{color:var(--ink);}
+
+  .cap-bar{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-top:12px;display:flex;align-items:center;gap:12px;}
+  .cap-text{font-size:11.5px;color:var(--ink-soft);line-height:1.45;flex:1;}
+  .cap-text b{color:var(--ink);font-size:12.5px;}
   .empty-day{font-size:12px;color:var(--ink-soft);padding:12px 4px;}
   .ghost-btn{width:100%;margin-top:10px;background:#fff;border:1.5px dashed var(--blue-bright);color:var(--blue);border-radius:12px;padding:11px;font-family:'Poppins';font-size:12.5px;font-weight:600;cursor:pointer;}
 
@@ -175,7 +187,7 @@
   .train-slot{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;}
   .train-slot .tinfo{flex:1;min-width:0;}
   .train-slot .team{font-size:13.5px;font-weight:600;}
-  .train-slot .loc{font-size:10.5px;color:var(--ink-soft);margin-top:2px;}
+  .train-slot .loc{margin-top:5px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
   .train-slot .time{font-size:12px;font-weight:700;color:var(--blue-deep);flex:none;white-space:nowrap;}
   .train-slot .tacts{display:flex;gap:4px;flex:none;}
   .train-empty{font-size:11.5px;color:var(--gray);padding:0 2px 8px;}
@@ -205,8 +217,8 @@
   .pitch-modes button{flex:1;border:none;background:none;padding:9px 0;font-family:'Poppins';font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer;border-right:1.5px solid var(--line);}
   .pitch-modes button:last-child{border-right:none;}
   .pitch-modes button.on{background:var(--grass);color:#fff;}
-  .pitch{position:relative;aspect-ratio:16/10;border-radius:8px;background:var(--grass-dim);border:2px solid var(--grass);display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;overflow:hidden;}
-  .pitch::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--grass);opacity:.55;transform:translateX(-1px);pointer-events:none;z-index:3;}
+  .pitch-box .pitch{position:relative;aspect-ratio:16/10;border-radius:8px;background:var(--grass-dim);border:2px solid var(--grass);display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;overflow:hidden;}
+  .pitch-box .pitch::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--grass);opacity:.55;transform:translateX(-1px);pointer-events:none;z-index:3;}
   .pq{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#4E7A5C;cursor:pointer;border:1px dashed rgba(47,122,70,.35);}
   .pq.sel{background:var(--grass);color:#fff;border-color:var(--grass);}
   .pq.busy{background:repeating-linear-gradient(45deg,#F2C9C4,#F2C9C4 4px,#FBE3E0 4px,#FBE3E0 8px);color:#9B3227;}
@@ -229,8 +241,9 @@
   .user-row{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--line);}
   .user-row:last-child{border-bottom:none;}
   .avatar{width:34px;height:34px;border-radius:50%;background:var(--blue-deep);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none;}
+  .avatar.adm{background:var(--yellow);color:var(--ink);}
   .user-info{flex:1;min-width:0;}
-  .user-info .n{font-size:13.5px;font-weight:600;}
+  .user-info .n{font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:6px;}
   .user-info .e{font-size:11px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .banner{border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.55;margin-bottom:12px;}
   .banner.warn{background:#FDECEA;border:1px solid #F5C6C0;color:#8E2A1D;}
@@ -318,7 +331,7 @@
     <div class="content"><div id="train-body"></div></div>
   </div>
 
-  <!-- TRAININGSZEIT BEARBEITEN -->
+  <!-- TRAININGSZEIT -->
   <div class="pane" data-pane="tform">
     <div class="content">
       <p class="section-label">Trainingszeit</p>
@@ -553,8 +566,8 @@
 <script>
 /* =========================================================
    SVBB Termine
-   Lesen: für alle. Eintragen/Ändern: angemeldet.
-   Trainingszeiten: nur Admin.
+   Lesen: alle. Eintragen/Ändern: angemeldet.
+   Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], session=null;
@@ -580,7 +593,23 @@ function isJugend(t){return t.indexOf('Jugend')>=0;}
 function halfOf(q){return q<=2?'A':'B';}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function pitchQuarters(p){if(!p)return[];if(p.mode==='ganz')return[1,2,3,4];if(p.mode==='haelfte')return HALF[p.part]||[];return[p.part];}
-function pitchLabel(p){if(!p)return'';if(p.mode==='ganz')return'Platz: ganz';if(p.mode==='haelfte')return'Platz: Hälfte '+p.part;return'Platz: Viertel '+p.part;}
+function pitchShort(p){
+  if(!p) return '';
+  if(p.mode==='ganz') return 'Ganzer Platz';
+  if(p.mode==='haelfte') return 'Hälfte '+p.part;
+  return 'Viertel '+p.part;
+}
+function pitchLabel(p){ return p?('Platz: '+pitchShort(p).replace('Ganzer Platz','ganz')):''; }
+/* Mini-Spielfeld: Kacheln in der Reihenfolge 1|3 / 2|4 – genau wie im Auswahlfeld */
+function miniPitch(quarters,big){
+  const on=new Set(quarters||[]);
+  return '<span class="mini-pitch'+(big?' lg':'')+'">'+
+    [1,3,2,4].map(q=>'<i'+(on.has(q)?' class="on"':'')+'></i>').join('')+'</span>';
+}
+function pitchBadge(p){
+  if(!p) return '';
+  return '<span class="badge-pitch">'+miniPitch(pitchQuarters(p))+esc(pitchShort(p))+'</span>';
+}
 function fmtHead(d){const dt=new Date(d+'T00:00:00');return DAYS_S[dt.getDay()]+' · '+dt.getDate()+'. '+MONTHS[dt.getMonth()].toUpperCase()+(dt.getFullYear()!==today.getFullYear()?' '+dt.getFullYear():'');}
 function fmtShort(d){const dt=new Date(d+'T00:00:00');return String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0')+'.'+dt.getFullYear();}
 function fmtShare(d){const dt=new Date(d+'T00:00:00');return DAYS[dt.getDay()]+', '+fmtShort(d);}
@@ -641,7 +670,7 @@ async function ghSha(path){
   return (await r.json()).sha;
 }
 async function ghPutRaw(path,text,msg){
-  if(!session||!session.token) throw new Error('Kein Schreib-Token. Bitte im Konto hinterlegen.');
+  if(!session||!session.token) throw new Error('Kein Schreib-Token vorhanden.');
   const sha=await ghSha(path);
   const body={message:msg,content:b64(enc.encode(text)),branch:CFG.branch};
   if(sha) body.sha=sha;
@@ -651,7 +680,7 @@ async function ghPutRaw(path,text,msg){
     body:JSON.stringify(body)});
   if(!r.ok){
     const e=await r.json().catch(()=>({}));
-    if(r.status===404) throw new Error('Repo „'+CFG.repo+'" nicht gefunden. Prüfe repo in data/config.json und die Token-Rechte.');
+    if(r.status===404) throw new Error('Repo „'+CFG.repo+'" nicht gefunden. Prüfe „repo" in data/config.json und die Token-Rechte.');
     if(r.status===401) throw new Error('Token ungültig oder abgelaufen.');
     if(r.status===403) throw new Error('Token hat keine Schreibrechte (Contents: Read and write).');
     throw new Error(e.message||'Speichern fehlgeschlagen ('+r.status+')');
@@ -695,7 +724,7 @@ function buildICS(){
   const stamp=icsStamp();
   EVENTS.forEach(e=>{
     let ort=[];
-    if(e.pitch) ort.push('Großspielfeld – '+pitchLabel(e.pitch).replace('Platz: ',''));
+    if(e.pitch) ort.push('Großspielfeld: '+pitchShort(e.pitch));
     ort=ort.concat(e.res||[]);
     const desc=['Team: '+e.team+(isJugend(e.team)?' ('+e.squad+'. Mannschaft)':''),
       'Ansprechpartner: '+(e.ownerName||'–'), e.note?'Info: '+e.note:''].filter(Boolean).join('\n');
@@ -739,14 +768,15 @@ async function doLogin(){
   try{
     if(u===CFG.admin.user.toLowerCase()){
       if(p!==CFG.admin.password) throw new Error('Passwort stimmt nicht.');
-      session={id:'admin',name:CFG.admin.first+' '+CFG.admin.last,email:CFG.admin.user,isAdmin:true,
-               token:localStorage.getItem('svbb_admin_token')||''};
+      session={id:'admin',name:CFG.admin.first+' '+CFG.admin.last,email:CFG.admin.user,
+               isAdmin:true,isSuper:true,token:localStorage.getItem('svbb_admin_token')||''};
     }else{
       const rec=USERS.find(x=>x.email.toLowerCase()===u);
       if(!rec) throw new Error('Kein Benutzer mit dieser E-Mail.');
       let token;
       try{ token=await decryptToken(rec.enc,p); }catch(e){ throw new Error('Passwort stimmt nicht.'); }
-      session={id:rec.id,name:rec.first+' '+rec.last,email:rec.email,isAdmin:false,token};
+      session={id:rec.id,name:rec.first+' '+rec.last,email:rec.email,
+               isAdmin:rec.admin===true,isSuper:false,token:token};
     }
     afterLogin();
   }catch(e){ loginErr(e.message); }
@@ -756,7 +786,7 @@ function afterLogin(){
   sessionStorage.setItem('svbb_session',JSON.stringify(session));
   document.getElementById('li-pass').value='';
   closeLogin(); refreshHeader(); buildFilters(); renderAll();
-  if(session.isAdmin && !session.token) showToast('Angemeldet. Zum Speichern fehlt noch der GitHub-Token → Konto.',5000);
+  if(session.isSuper && !session.token) showToast('Angemeldet. Zum Speichern fehlt noch der GitHub-Token → Konto.',5000);
   else showToast('Angemeldet als '+session.name.split(' ')[0]+'.');
 }
 function logout(){
@@ -784,8 +814,7 @@ async function bioSetup(){
       pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
       authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'preferred'},
       timeout:60000,attestation:'none'}});
-    localStorage.setItem('svbb_bio',JSON.stringify({credId:b64(cred.rawId),
-      session:{id:session.id,name:session.name,email:session.email,isAdmin:session.isAdmin,token:session.token}}));
+    localStorage.setItem('svbb_bio',JSON.stringify({credId:b64(cred.rawId),session:{...session}}));
     showToast('Fingerabdruck eingerichtet.'); renderKonto();
   }catch(e){ showToast('Einrichtung abgebrochen.'); }
 }
@@ -858,24 +887,25 @@ function canEdit(e){ return session&&(session.isAdmin||e.ownerId===session.id); 
 function rowHTML(e){
   let b='<span class="badge-team '+cat(e.team)+'">'+esc(e.team)+'</span>';
   if(isJugend(e.team)) b+='<span class="badge-squad">'+e.squad+'. Mannschaft</span>';
-  if(e.pitch) b+='<span class="badge-res pitch">'+pitchLabel(e.pitch)+'</span>';
+  if(e.pitch) b+=pitchBadge(e.pitch);
   (e.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
-  if(session&&e.ownerId===session.id) b+='<span class="badge-mine">Mein Termin</span>';
-  const meta=['Ansprechpartner: '+esc(e.ownerName||'–'),esc(e.note)].filter(Boolean).join(' · ');
+  const meta=[esc(e.ownerName||'–'),esc(e.note)].filter(Boolean).join(' · ');
   let acts='<button class="ibtn share" onclick="shareEvent(\''+e.id+'\')" aria-label="Teilen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"/></svg></button>';
   if(session) acts+='<button class="ibtn" onclick="duplicateEvent(\''+e.id+'\')" aria-label="Duplizieren"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>';
   if(canEdit(e)){
     acts+='<button class="ibtn" onclick="editEvent(\''+e.id+'\')" aria-label="Bearbeiten"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>';
     acts+='<button class="ibtn del" onclick="deleteEvent(\''+e.id+'\')" aria-label="Löschen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>';
   }
-  return '<div class="event-row'+(e.id===highlightId?' hl':'')+'" id="ev-'+e.id+'"><div class="event-time">'+e.t+'</div>'+
-    '<div class="event-main"><h4>'+esc(e.title)+'</h4><div class="event-meta">'+meta+'</div><div class="badges">'+b+'</div></div>'+
-    '<div class="row-acts">'+acts+'</div></div>';
+  const mine=(session&&e.ownerId===session.id)?' mine':'';
+  const hl=(e.id===highlightId)?' hl':'';
+  return '<div class="event-row'+mine+hl+'" id="ev-'+e.id+'"><div class="event-time">'+e.t+'</div>'+
+    '<div class="event-main"><h4>'+esc(e.title)+'</h4><div class="event-meta">'+meta+'</div>'+
+    '<div class="badges">'+b+'</div></div><div class="row-acts">'+acts+'</div></div>';
 }
 function shareEvent(id){
   const e=EVENTS.find(x=>x.id===id); if(!e)return;
   let ort=[];
-  if(e.pitch) ort.push('Großspielfeld – '+pitchLabel(e.pitch).replace('Platz: ',''));
+  if(e.pitch) ort.push('Großspielfeld: '+pitchShort(e.pitch));
   ort=ort.concat(e.res||[]);
   const txt='📅 *'+e.title+'*\n'+fmtShare(e.d)+' · '+e.t+' Uhr\n'+
     'Team: '+e.team+(isJugend(e.team)?' ('+e.squad+'. Mannschaft)':'')+'\n'+
@@ -899,11 +929,11 @@ function gotoToday(){curY=today.getFullYear();curM=today.getMonth();selDate=toda
 function selectDay(d){selDate=d;const dt=new Date(d+'T00:00:00');curY=dt.getFullYear();curM=dt.getMonth();render();}
 function capBarHTML(d){
   const used=usedQuarters(d);
-  let mini='';
-  [1,3,2,4].forEach(q=>mini+='<div class="cap-q'+(used.has(q)?' used':'')+'"></div>');
   const free=4-used.size;
-  const txt=used.size===0?'<b>Großspielfeld komplett frei</b>':(free===0?'<b>Großspielfeld voll belegt</b>':'<b>'+free+' von 4 Vierteln frei</b>');
-  return '<div class="cap-bar"><div class="cap-mini">'+mini+'</div><div class="cap-text">'+txt+'<br>Hälfte A = Viertel 1+2 · Hälfte B = Viertel 3+4</div></div>';
+  const txt=used.size===0?'<b>Großspielfeld komplett frei</b><br>Kein Termin belegt an diesem Tag den Platz.'
+    :(free===0?'<b>Großspielfeld voll belegt</b><br>Alle vier Viertel sind vergeben.'
+    :'<b>'+free+' von 4 Vierteln frei</b><br>Grün = belegt · Hälfte A links, Hälfte B rechts');
+  return '<div class="cap-bar">'+miniPitch([...used],true)+'<div class="cap-text">'+txt+'</div></div>';
 }
 function renderMonth(){
   const box=document.getElementById('view-monat');
@@ -921,12 +951,14 @@ function renderMonth(){
     else d=i-offset+1;
     const dt=new Date(y,m,d), ds=ymd(dt), evs=eventsOn(ds);
     const cats=[...new Set(evs.map(e=>cat(e.team)))];
-    const full=usedQuarters(ds).size===4;
-    const cls='cal-day'+(other?' other':'')+(ds===todayStr?' today':'')+(ds===selDate?' sel':'')+(full?' full':'');
-    h+='<div class="'+cls+'" onclick="selectDay(\''+ds+'\')">'+dt.getDate()+'<div class="cal-dots">'+
+    const used=usedQuarters(ds);
+    const cls='cal-day'+(other?' other':'')+(ds===todayStr?' today':'')+(ds===selDate?' sel':'');
+    let load='';
+    if(used.size) load='<span class="load">'+[1,3,2,4].map(q=>'<i'+(used.has(q)?' class="on"':'')+'></i>').join('')+'</span>';
+    h+='<div class="'+cls+'" onclick="selectDay(\''+ds+'\')">'+load+dt.getDate()+'<div class="cal-dots">'+
       cats.slice(0,3).map(c=>'<span class="cdot '+c+'"></span>').join('')+'</div></div>';
   }
-  h+='</div><div class="cal-legend"><span><span class="cdot jugend"></span>Jugend</span><span><span class="cdot senioren"></span>Senioren</span><span><span class="cdot verein"></span>Verein</span><span><span class="warn-dot"></span>Platz voll</span></div>';
+  h+='</div><div class="cal-legend"><span><span class="cdot jugend"></span>Jugend</span><span><span class="cdot senioren"></span>Senioren</span><span><span class="cdot verein"></span>Verein</span><span>'+miniPitch([1,2])+'Platzbelegung</span></div>';
   h+=capBarHTML(selDate);
   const evs=eventsOn(selDate);
   h+='<div style="margin-top:14px;"><p class="section-label">'+fmtHead(selDate)+'</p>';
@@ -977,11 +1009,14 @@ function renderStart(){
   if(nx){
     let b='<span class="badge-team '+cat(nx.team)+'">'+esc(nx.team)+'</span>';
     if(isJugend(nx.team))b+='<span class="badge-squad">'+nx.squad+'. Mannschaft</span>';
-    if(nx.pitch)b+='<span class="badge-res pitch">'+pitchLabel(nx.pitch)+'</span>';
     (nx.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
+    let pitchRow='';
+    if(nx.pitch) pitchRow='<div class="next-pitch">'+miniPitch(pitchQuarters(nx.pitch),true)+
+      '<div><div class="np-t">Großspielfeld: '+esc(pitchShort(nx.pitch))+'</div>'+
+      '<div class="np-s">Hälfte A links · Hälfte B rechts</div></div></div>';
     box.innerHTML='<div class="next-card"><div class="when">'+fmtHead(nx.d)+' · '+nx.t+'</div>'+
       '<h3>'+esc(nx.title)+'</h3><div class="meta">Ansprechpartner: '+esc(nx.ownerName||'–')+(nx.note?' · '+esc(nx.note):'')+'</div>'+
-      '<div class="badges">'+b+'</div></div>';
+      '<div class="badges">'+b+'</div>'+pitchRow+'</div>';
   } else box.innerHTML='<div class="empty-day">Keine kommenden Termine.</div>';
   document.getElementById('up-list').innerHTML=future.slice(1,4).map(rowHTML).join('')||'<div class="empty-day">Keine weiteren Termine.</div>';
 }
@@ -1139,11 +1174,12 @@ function deleteEvent(id){
 
 /* ---------- Training ---------- */
 function trainName(s){ return s.team+(isJugend(s.team)&&s.squad>1?' '+s.squad:''); }
-function trainLoc(s){
-  let p=[];
-  if(s.pitch) p.push('Großspielfeld – '+pitchLabel(s.pitch).replace('Platz: ',''));
-  p=p.concat(s.res||[]);
-  return p.join(' · ')||'–';
+function trainLocHTML(s){
+  let h='';
+  if(s.pitch) h+=pitchBadge(s.pitch);
+  (s.res||[]).forEach(r=>h+='<span class="badge-res">'+esc(r)+'</span>');
+  if(s.note) h+='<span class="badge-res">'+esc(s.note)+'</span>';
+  return h||'<span class="badge-res">–</span>';
 }
 function tUsedQuarters(day,from,to,skipId){
   const set=new Set();
@@ -1172,7 +1208,7 @@ function renderTraining(){
     if(!slots.length) h+='<div class="train-empty">Kein Training</div>';
     slots.forEach(s=>{
       h+='<div class="train-slot"><div class="tinfo"><div class="team">'+esc(trainName(s))+'</div>'+
-         '<div class="loc">'+esc(trainLoc(s))+(s.note?' · '+esc(s.note):'')+'</div></div>'+
+         '<div class="loc">'+trainLocHTML(s)+'</div></div>'+
          '<div class="time">'+s.from+'–'+s.to+'</div>';
       if(admin) h+='<div class="tacts">'+
         '<button class="ibtn" onclick="editTrainingSlot(\''+s.id+'\')" aria-label="Bearbeiten"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>'+
@@ -1314,27 +1350,38 @@ function bioCard(){
   return '<div class="card"><h4>Anmeldung per Fingerabdruck</h4><p class="sub">Einmal einrichten – danach reicht Finger oder Gesicht. Nur auf dem eigenen Handy.</p>'+
     '<button class="ghost-btn" style="margin-top:0;" onclick="bioSetup()">Jetzt einrichten</button></div>';
 }
-function adminCards(){
-  let h='<p class="section-label">Admin-Bereich</p>';
-  h+=session.token
-    ? '<div class="banner ok">Schreib-Token ist auf diesem Gerät hinterlegt.</div>'
+function tokenCard(){
+  if(!session.isSuper){
+    return '<div class="banner ok">Dein Zugang enthält den Schreib-Token bereits – er hängt an deinem Passwort. Du kannst dich auf jedem Gerät anmelden, ohne etwas einzurichten.</div>';
+  }
+  let h = session.token
+    ? '<div class="banner ok"><b>Token ist auf diesem Gerät hinterlegt.</b> Auf einem anderen Gerät musst du ihn als „admin" erneut eintragen – oder besser: leg dir unten ein eigenes Konto mit Admin-Recht an.</div>'
     : '<div class="banner warn"><b>Schritt 1: Schreib-Token fehlt.</b> Ohne Token kann nichts gespeichert werden.</div>';
   h+='<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>GitHub-Token</h4>'+
-     '<p class="sub">Fine-grained Token mit <b>Contents: Read and write</b> auf <b>'+esc(CFG.repo)+'</b>. Nur lokal gespeichert.</p>'+
-     '<div class="field" style="margin:10px 0 0;"><input type="password" id="ad-token" placeholder="github_pat_…" autocomplete="off"></div>'+
+     '<p class="sub">Fine-grained Token mit <b>Contents: Read and write</b> auf <b>'+esc(CFG.repo)+'</b>.</p>'+
+     '<div class="field" style="margin:10px 0 0;"><input type="password" id="ad-token" placeholder="'+(session.token?'Token ersetzen …':'github_pat_…')+'" autocomplete="off"></div>'+
      '<button class="ghost-btn" style="margin-top:0;" onclick="saveAdminToken()">Token speichern</button></div>';
-  h+='<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Neuen Trainer anlegen</h4>'+
-     '<p class="sub">Er meldet sich danach mit E-Mail und diesem Passwort an.</p>'+
+  return h;
+}
+function adminCards(){
+  let h='<p class="section-label">Admin-Bereich</p>'+tokenCard();
+  h+='<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Neuen Zugang anlegen</h4>'+
+     '<p class="sub">Anmeldung danach mit E-Mail und diesem Passwort – auf jedem Gerät.</p>'+
      '<div class="field" style="margin:10px 0 8px;"><input type="text" id="nu-first" placeholder="Vorname"></div>'+
      '<div class="field" style="margin-bottom:8px;"><input type="text" id="nu-last" placeholder="Nachname"></div>'+
      '<div class="field" style="margin-bottom:8px;"><input type="email" id="nu-mail" placeholder="E-Mail" autocapitalize="none" spellcheck="false"></div>'+
-     '<div class="field" style="margin-bottom:8px;"><input type="text" id="nu-pass" placeholder="Start-Passwort (min. 8 Zeichen)"></div>'+
-     '<button class="submit-btn" id="nu-btn" onclick="createUser()"><span id="nu-label">Trainer anlegen</span></button></div>';
-  h+='<div class="card"><h4>Trainer ('+USERS.length+')</h4>';
-  if(!USERS.length) h+='<p class="sub">Noch keine Trainer angelegt.</p>';
+     '<div class="field" style="margin-bottom:10px;"><input type="text" id="nu-pass" placeholder="Start-Passwort (min. 8 Zeichen)"></div>'+
+     '<div class="res-chip" id="nu-admin" onclick="this.classList.toggle(\'on\')" style="margin-bottom:12px;">'+
+     '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg>Darf alles verwalten (Admin)</div>'+
+     '<button class="submit-btn" id="nu-btn" onclick="createUser()"><span id="nu-label">Zugang anlegen</span></button>'+
+     '<p class="helptext">Admin darf zusätzlich Trainingszeiten pflegen, Zugänge anlegen und alle Termine ändern.</p></div>';
+  h+='<div class="card"><h4>Zugänge ('+USERS.length+')</h4>';
+  if(!USERS.length) h+='<p class="sub">Noch keine Zugänge angelegt.</p>';
   USERS.forEach(u=>{
-    h+='<div class="user-row"><div class="avatar">'+initials(u.first+' '+u.last)+'</div>'+
-       '<div class="user-info"><div class="n">'+esc(u.first+' '+u.last)+'</div><div class="e">'+esc(u.email)+'</div></div>'+
+    h+='<div class="user-row"><div class="avatar'+(u.admin?' adm':'')+'">'+initials(u.first+' '+u.last)+'</div>'+
+       '<div class="user-info"><div class="n">'+esc(u.first+' '+u.last)+(u.admin?'<span class="badge-admin">Admin</span>':'')+'</div>'+
+       '<div class="e">'+esc(u.email)+'</div></div>'+
+       '<button class="ibtn" onclick="toggleUserAdmin(\''+u.id+'\')" aria-label="Admin-Recht"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg></button>'+
        '<button class="ibtn del" onclick="deleteUser(\''+u.id+'\')" aria-label="Löschen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>';
   });
   return h+'</div>';
@@ -1348,7 +1395,8 @@ function renderKonto(){
     box.innerHTML=h+icalCard()+pwaCard();
     return;
   }
-  h+='<div class="card"><h4>'+esc(session.name)+'</h4><p class="sub">'+esc(session.email)+(session.isAdmin?' · Superuser':'')+'</p>'+
+  h+='<div class="card"><h4>'+esc(session.name)+(session.isAdmin?'<span class="badge-admin">Admin</span>':'')+'</h4>'+
+     '<p class="sub">'+esc(session.email)+(session.isSuper?' · Notzugang':'')+'</p>'+
      '<button class="cancel-btn" onclick="logout()">Abmelden</button></div>';
   if(session.isAdmin) h+=adminCards();
   box.innerHTML=h+bioCard()+icalCard()+pwaCard();
@@ -1367,6 +1415,7 @@ async function createUser(){
   const last=document.getElementById('nu-last').value.trim();
   const mail=document.getElementById('nu-mail').value.trim().toLowerCase();
   const pass=document.getElementById('nu-pass').value;
+  const isAdm=document.getElementById('nu-admin').classList.contains('on');
   if(!first||!last||!mail){showToast('Bitte Vorname, Nachname und E-Mail ausfüllen.');return;}
   if(!/^\S+@\S+\.\S+$/.test(mail)){showToast('E-Mail sieht nicht gültig aus.');return;}
   if(pass.length<8){showToast('Passwort braucht mindestens 8 Zeichen.');return;}
@@ -1376,20 +1425,35 @@ async function createUser(){
   const backup=JSON.stringify(USERS);
   try{
     const encRec=await encryptToken(session.token,pass);
-    USERS.push({id:crypto.randomUUID(),first,last,email:mail,enc:encRec,created:new Date().toISOString()});
-    await saveUsers('Trainer angelegt: '+first+' '+last);
-    showToast(first+' kann sich jetzt anmelden.'); renderKonto();
-  }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000);
-    const l=document.getElementById('nu-label'); if(l)l.textContent='Trainer anlegen';
+    USERS.push({id:crypto.randomUUID(),first,last,email:mail,admin:isAdm,enc:encRec,created:new Date().toISOString()});
+    await saveUsers('Zugang angelegt: '+first+' '+last+(isAdm?' (Admin)':''));
+    showToast(first+' kann sich jetzt anmelden'+(isAdm?' und darf alles verwalten.':'.'));
+    renderKonto();
+  }catch(e){
+    USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000);
+    const l=document.getElementById('nu-label'); if(l)l.textContent='Zugang anlegen';
     const b=document.getElementById('nu-btn'); if(b)b.disabled=false;
   }
 }
+function toggleUserAdmin(id){
+  const u=USERS.find(x=>x.id===id); if(!u)return;
+  const now=!u.admin;
+  askConfirm(now?'Admin-Recht geben?':'Admin-Recht entziehen?',
+    u.first+' '+u.last+(now?' darf danach Trainingszeiten pflegen, Zugänge anlegen und alle Termine ändern.':' kann danach nur noch eigene Termine verwalten.'),
+    now?'Zum Admin machen':'Recht entziehen', async()=>{
+      const backup=JSON.stringify(USERS);
+      u.admin=now;
+      try{ await saveUsers((now?'Admin-Recht vergeben: ':'Admin-Recht entzogen: ')+u.first+' '+u.last);
+        showToast('Gespeichert.'); renderKonto();
+      }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
+    });
+}
 function deleteUser(id){
   const u=USERS.find(x=>x.id===id); if(!u)return;
-  askConfirm('Trainer löschen?',u.first+' '+u.last+' kann sich dann nicht mehr anmelden. Seine Termine bleiben.','Löschen',async()=>{
+  askConfirm('Zugang löschen?',u.first+' '+u.last+' kann sich dann nicht mehr anmelden. Seine Termine bleiben.','Löschen',async()=>{
     const backup=JSON.stringify(USERS);
     USERS=USERS.filter(x=>x.id!==id);
-    try{ await saveUsers('Trainer gelöscht: '+u.first+' '+u.last); showToast('Trainer gelöscht.'); renderKonto(); }
+    try{ await saveUsers('Zugang gelöscht: '+u.first+' '+u.last); showToast('Gelöscht.'); renderKonto(); }
     catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   });
 }
@@ -1435,7 +1499,7 @@ async function boot(){
   catch(e){ TRAINING=[]; }
 
   document.getElementById('login-foot').textContent=
-    USERS.length?'Zugang bekommst du vom Vorstand.':'Noch keine Trainer angelegt – bitte als Admin anmelden.';
+    USERS.length?'Zugang bekommst du vom Vorstand.':'Noch keine Zugänge angelegt – bitte als Admin anmelden.';
   try{ const s=JSON.parse(sessionStorage.getItem('svbb_session')); if(s&&s.id) session=s; }catch(e){}
 
   dateInput().value=todayStr;
