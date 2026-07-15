@@ -1,1 +1,11 @@
-
+{
+  "repo": "DEIN-GITHUB-NAME/svbb-termine",
+  "branch": "main",
+  "clubName": "SV Bachum / Bergheim e.V.",
+  "admin": {
+    "user": "admin",
+    "password": "svbachumbergheim",
+    "first": "Vorstand",
+    "last": "Admin"
+  }
+}
