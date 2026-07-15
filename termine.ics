@@ -26,7 +26,7 @@ END:STANDARD
 END:VTIMEZONE
 BEGIN:VEVENT
 UID:seed-1@svbb-termine
-DTSTAMP:20260715T061831Z
+DTSTAMP:20260715T061902Z
 DTSTART;TZID=Europe/Berlin:20260819T190000
 DTEND;TZID=Europe/Berlin:20260819T210000
 SUMMARY:Sommerfest Jugend
@@ -37,7 +37,7 @@ URL:https://fcal1986.github.io/svbachumbergheimkalender/#t=seed-1
 END:VEVENT
 BEGIN:VEVENT
 UID:seed-2@svbb-termine
-DTSTAMP:20260715T061831Z
+DTSTAMP:20260715T061902Z
 DTSTART;TZID=Europe/Berlin:20260830T150000
 DTEND;TZID=Europe/Berlin:20260830T170000
 SUMMARY:Saisoneröffnung & Grillfest
@@ -47,7 +47,7 @@ URL:https://fcal1986.github.io/svbachumbergheimkalender/#t=seed-2
 END:VEVENT
 BEGIN:VEVENT
 UID:seed-3@svbb-termine
-DTSTAMP:20260715T061831Z
+DTSTAMP:20260715T061902Z
 DTSTART;TZID=Europe/Berlin:20261212T183000
 DTEND;TZID=Europe/Berlin:20261212T203000
 SUMMARY:Weihnachtsfeier
@@ -58,7 +58,7 @@ URL:https://fcal1986.github.io/svbachumbergheimkalender/#t=seed-3
 END:VEVENT
 BEGIN:VEVENT
 UID:8d9170ce-5ed9-451c-932e-833b30ed3b68@svbb-termine
-DTSTAMP:20260715T061831Z
+DTSTAMP:20260715T061902Z
 DTSTART;TZID=Europe/Berlin:20260715T150000
 DTEND;TZID=Europe/Berlin:20260715T170000
 SUMMARY:Test
@@ -67,5 +67,17 @@ DESCRIPTION:Team: F-Jugend (1. Mannschaft)\nAnsprechpartner: Fabrizio Cal
 LOCATION:Großspielfeld – ganz
 URL:https://fcal1986.github.io/svbachumbergheimkalender/#t=8d9170ce-5ed9-
  451c-932e-833b30ed3b68
+END:VEVENT
+BEGIN:VEVENT
+UID:62977977-0797-4d79-82c7-5fef126ff8cd@svbb-termine
+DTSTAMP:20260715T061902Z
+DTSTART;TZID=Europe/Berlin:20260715T150000
+DTEND;TZID=Europe/Berlin:20260715T170000
+SUMMARY:Test
+DESCRIPTION:Team: F-Jugend (1. Mannschaft)\nAnsprechpartner: Fabrizio Cal
+ cagno
+LOCATION:Großspielfeld – ganz
+URL:https://fcal1986.github.io/svbachumbergheimkalender/#t=62977977-0797-
+ 4d79-82c7-5fef126ff8cd
 END:VEVENT
 END:VCALENDAR
