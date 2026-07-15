@@ -67,6 +67,21 @@
       "note": "",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
       "ownerName": "Fabrizio Calcagno"
+    },
+    {
+      "id": "62977977-0797-4d79-82c7-5fef126ff8cd",
+      "d": "2026-07-15",
+      "t": "15:00",
+      "title": "Test",
+      "team": "F-Jugend",
+      "squad": 1,
+      "pitch": {
+        "mode": "ganz"
+      },
+      "res": [],
+      "note": "",
+      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
+      "ownerName": "Fabrizio Calcagno"
     }
   ]
 }
