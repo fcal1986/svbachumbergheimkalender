@@ -7,8 +7,14 @@
       "title": "Sommerfest Jugend",
       "team": "F-Jugend",
       "squad": 1,
-      "pitch": { "mode": "haelfte", "part": "A" },
-      "res": ["Vereinsheim", "Theke"],
+      "pitch": {
+        "mode": "haelfte",
+        "part": "A"
+      },
+      "res": [
+        "Vereinsheim",
+        "Theke"
+      ],
       "note": "Eltern willkommen",
       "ownerId": "admin",
       "ownerName": "Vorstand Admin"
@@ -20,8 +26,13 @@
       "title": "Saisoneröffnung & Grillfest",
       "team": "1. Herren",
       "squad": 1,
-      "pitch": { "mode": "ganz" },
-      "res": ["Vereinsheim", "Theke"],
+      "pitch": {
+        "mode": "ganz"
+      },
+      "res": [
+        "Vereinsheim",
+        "Theke"
+      ],
       "note": "",
       "ownerId": "admin",
       "ownerName": "Vorstand Admin"
@@ -34,10 +45,28 @@
       "team": "Alle Teams",
       "squad": 1,
       "pitch": null,
-      "res": ["Vereinsheim", "Theke"],
+      "res": [
+        "Vereinsheim",
+        "Theke"
+      ],
       "note": "Alle Mannschaften + Familien",
       "ownerId": "admin",
       "ownerName": "Vorstand Admin"
+    },
+    {
+      "id": "8d9170ce-5ed9-451c-932e-833b30ed3b68",
+      "d": "2026-07-15",
+      "t": "15:00",
+      "title": "Test",
+      "team": "F-Jugend",
+      "squad": 1,
+      "pitch": {
+        "mode": "ganz"
+      },
+      "res": [],
+      "note": "",
+      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
+      "ownerName": "Fabrizio Calcagno"
     }
   ]
 }
