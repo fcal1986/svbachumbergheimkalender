@@ -10,7 +10,8 @@
         "iv": "QHMN8dJhCTiv5KJw",
         "cipher": "VDalajpdz9WQjNqfqtpEZ11RAs6e40ZZQ1CzSY9yIa8Nf6goO+r8ssH4y9g6zcfw4Qs0kq+urHEd2ObcHxXEp7cSUsB1+IOUW+x+sc6GzsIP/0lGysgdF5gEBLMiwxXKLkNxJINLW1zqDyNvNQ=="
       },
-      "created": "2026-07-15T06:12:45.752Z"
+      "created": "2026-07-15T06:12:45.752Z",
+      "admin": true
     }
   ]
 }
