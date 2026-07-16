@@ -117,6 +117,24 @@
       "note": "",
       "ownerId": "admin",
       "ownerName": "Vorstand Admin"
+    },
+    {
+      "id": "9a42238b-3bcd-4cb3-a80a-ee8749fb52ac",
+      "d": "2026-07-17",
+      "t": "15:00",
+      "bis": "17:00",
+      "title": "Test Konflikt",
+      "team": "F-Jugend",
+      "squad": 1,
+      "pitch": {
+        "mode": "viertel",
+        "part": 4
+      },
+      "halle": null,
+      "res": [],
+      "note": "",
+      "ownerId": "admin",
+      "ownerName": "Vorstand Admin"
     }
   ]
 }
