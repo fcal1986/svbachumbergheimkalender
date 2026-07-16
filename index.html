@@ -195,6 +195,20 @@
   .train-slot .time{font-size:13px;font-weight:800;color:var(--ink);flex:none;}
   .train-slot .tacts{display:flex;gap:4px;}
   .train-empty{font-size:11.5px;color:var(--ink-soft);padding:0 2px 8px;}
+  .heute-card{background:var(--white);border-radius:14px;box-shadow:var(--card-shadow);padding:14px 15px;margin-bottom:18px;border-left:4px solid var(--green);}
+  .heute-card .hc-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-bottom:10px;}
+  .heute-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);}
+  .heute-row:last-child{border-bottom:none;}
+  .heute-row .ht{font-size:14px;font-weight:800;color:var(--ink);flex:none;width:78px;}
+  .heute-row .hteam{flex:1;min-width:0;font-size:13px;font-weight:600;}
+  .heute-row.off .hteam{color:var(--ink-soft);text-decoration:line-through;}
+  .heute-row .hoff-pill{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:10px;background:#FDECEA;color:#9B3227;flex:none;}
+  .heute-empty{font-size:12.5px;color:var(--ink-soft);padding:4px 0;}
+  .valid-badge{font-size:9.5px;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--bg);color:var(--ink-soft);}
+  .cancel-chip{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:600;padding:3px 6px 3px 9px;border-radius:10px;background:#FDECEA;color:#9B3227;}
+  .cancel-chip button{border:none;background:none;color:#9B3227;font-size:12px;line-height:1;cursor:pointer;padding:2px;font-weight:800;}
+  .train-cancels{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+  .cancel-link{font-size:10.5px;font-weight:600;color:var(--ink-soft);background:none;border:1px dashed var(--line);border-radius:8px;padding:4px 8px;cursor:pointer;font-family:'Poppins';}
 
   /* ── FORM ── */
   .field{margin-bottom:16px;}
@@ -341,6 +355,7 @@
         <div class="stat-card"><div class="num" id="st-count">–</div><div class="lbl">Termine diesen Monat</div></div>
         <div class="stat-card green"><div class="num" id="st-b">–</div><div class="lbl" id="st-b-lbl">Kommende</div></div>
       </div>
+      <div id="st-heute"></div>
       <p class="section-label">Nächster Termin</p>
       <div id="nx-box"></div>
       <p class="section-label">Demnächst</p>
@@ -428,6 +443,12 @@
           <div class="pitch-cap" id="tf-pitch-cap"></div>
         </div>
       </div>
+      <p class="section-label">Gültigkeit</p>
+      <div style="display:flex;gap:10px;">
+        <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Gültig ab</label><input type="date" id="tf-validfrom"></div>
+        <div class="field" style="flex:1;"><label>Gültig bis</label><input type="date" id="tf-validuntil"></div>
+      </div>
+      <p class="helptext" style="margin:-8px 0 16px;">„Gültig bis" leer lassen = bis auf Weiteres. So ist immer klar, ab und bis wann eine Zeit gilt – z. B. bei einem Saisonwechsel.</p>
       <p class="section-label">Optional</p>
       <div class="field"><label>Bemerkung</label><input type="text" id="tf-note" placeholder="z. B. nur im Sommer"></div>
       <button class="submit-btn" id="tf-save" onclick="saveTrainingSlot()"><span id="tf-label">Speichern</span></button>
@@ -580,6 +601,18 @@
     <div class="modal-acts">
       <button class="no" onclick="closeModal()">Abbrechen</button>
       <button class="yes" id="mo-yes">Löschen</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="cancel-modal">
+  <div class="modal-box">
+    <h3>Training absagen</h3>
+    <p id="cm-text">Für welchen Tag soll das Training ausfallen?</p>
+    <div class="field" style="margin-bottom:14px;"><label>Datum</label><input type="date" id="cm-date"></div>
+    <div class="modal-acts">
+      <button class="no" onclick="closeCancelModal()">Abbrechen</button>
+      <button class="yes" onclick="doCancelSlot()">Absagen</button>
     </div>
   </div>
 </div>
@@ -1083,6 +1116,8 @@ function renderStart(){
   document.getElementById('st-count').textContent=all.filter(e=>e.d.slice(0,7)===todayStr.slice(0,7)).length;
   if(session){document.getElementById('st-b').textContent=future.filter(e=>e.ownerId===session.id).length;document.getElementById('st-b-lbl').textContent='Meine';}
   else{document.getElementById('st-b').textContent=future.length;document.getElementById('st-b-lbl').textContent='Kommend';}
+  const stHeute=document.getElementById('st-heute');
+  if(stHeute) stHeute.innerHTML='<div onclick="goto(\'training\')" style="cursor:pointer;">'+todaysTrainingHTML()+'</div>';
   const nx=future[0],box=document.getElementById('nx-box');
   if(nx){
     const dt=new Date(nx.d+'T00:00:00'),dow=DAYS_S[dt.getDay()],dd=String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0');
@@ -1271,6 +1306,83 @@ function deleteEvent(id){
 }
 
 /* ---------- Training ---------- */
+/* Gültigkeit & Absagen */
+function dowOf(dateStr){ const g=new Date(dateStr+'T00:00:00').getDay(); return g===0?7:g; }
+function slotInRange(s,dateStr){
+  if(dowOf(dateStr)!==s.day) return false;
+  if(s.validFrom && dateStr<s.validFrom) return false;
+  if(s.validUntil && dateStr>s.validUntil) return false;
+  return true;
+}
+function slotActiveOn(s,dateStr){ return slotInRange(s,dateStr) && !(s.cancelled||[]).includes(dateStr); }
+function validityBadge(s){
+  if(s.validFrom && s.validUntil) return '<span class="valid-badge">'+fmtShort(s.validFrom)+' – '+fmtShort(s.validUntil)+'</span>';
+  if(s.validFrom) return '<span class="valid-badge">ab '+fmtShort(s.validFrom)+'</span>';
+  if(s.validUntil) return '<span class="valid-badge">bis '+fmtShort(s.validUntil)+'</span>';
+  return '';
+}
+function todaysTrainingHTML(){
+  const dow=dowOf(todayStr);
+  const active=TRAINING.filter(s=>slotActiveOn(s,todayStr)).sort((a,b)=>a.from.localeCompare(b.from));
+  const cancelledToday=TRAINING.filter(s=>slotInRange(s,todayStr)&&(s.cancelled||[]).includes(todayStr)).sort((a,b)=>a.from.localeCompare(b.from));
+  let h='<div class="heute-card"><div class="hc-title">Heute · '+DAYS[new Date(todayStr+'T00:00:00').getDay()]+', '+fmtShort(todayStr)+'</div>';
+  if(!active.length&&!cancelledToday.length){
+    h+='<div class="heute-empty">Heute ist laut Plan kein Training angesetzt.</div>';
+  }else{
+    active.forEach(s=>{
+      h+='<div class="heute-row"><div class="ht">'+s.from+'–'+s.to+'</div><div class="hteam">'+esc(trainName(s))+'</div></div>';
+    });
+    cancelledToday.forEach(s=>{
+      h+='<div class="heute-row off"><div class="ht">'+s.from+'–'+s.to+'</div><div class="hteam">'+esc(trainName(s))+'</div><span class="hoff-pill">Abgesagt</span></div>';
+    });
+  }
+  h+='</div>';
+  return h;
+}
+function nextOccurrenceDate(s){
+  for(let i=0;i<21;i++){
+    const dt=new Date(); dt.setDate(dt.getDate()+i);
+    const ds=ymd(dt);
+    if(slotInRange(s,ds)) return ds;
+  }
+  return todayStr;
+}
+let cancelSlotId=null;
+function openCancelModal(id){
+  const s=TRAINING.find(x=>x.id===id); if(!s)return;
+  cancelSlotId=id;
+  document.getElementById('cm-text').textContent='Für welchen '+WDAYS[s.day]+' soll „'+trainName(s)+'" ('+s.from+'–'+s.to+') ausfallen?';
+  const inp=document.getElementById('cm-date');
+  inp.value=nextOccurrenceDate(s);
+  if(s.validFrom) inp.min=s.validFrom;
+  if(s.validUntil) inp.max=s.validUntil;
+  document.getElementById('cancel-modal').classList.add('show');
+}
+function closeCancelModal(){ document.getElementById('cancel-modal').classList.remove('show'); cancelSlotId=null; }
+async function doCancelSlot(){
+  const s=TRAINING.find(x=>x.id===cancelSlotId); if(!s)return;
+  const date=document.getElementById('cm-date').value;
+  if(!date){ showToast('Bitte ein Datum wählen.'); return; }
+  if(dowOf(date)!==s.day){ showToast('Das Datum fällt nicht auf einen '+WDAYS[s.day]+'.'); return; }
+  if(!slotInRange(s,date)){ showToast('Datum liegt außerhalb der Gültigkeit dieser Trainingszeit.'); return; }
+  if((s.cancelled||[]).includes(date)){ showToast('Ist bereits als abgesagt markiert.'); closeCancelModal(); return; }
+  const backup=JSON.stringify(TRAINING);
+  s.cancelled=[...(s.cancelled||[]),date].sort();
+  try{
+    await saveTraining('Training abgesagt: '+trainName(s)+' am '+fmtShort(date));
+    closeCancelModal(); renderTraining();
+    showToast('Training am '+fmtShort(date)+' abgesagt.');
+  }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
+}
+async function reactivateCancelled(id,date){
+  const s=TRAINING.find(x=>x.id===id); if(!s)return;
+  const backup=JSON.stringify(TRAINING);
+  s.cancelled=(s.cancelled||[]).filter(d=>d!==date);
+  try{
+    await saveTraining('Absage zurückgenommen: '+trainName(s)+' am '+fmtShort(date));
+    renderTraining(); showToast('Training am '+fmtShort(date)+' findet wieder statt.');
+  }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
+}
 function trainName(s){ return s.team+(isJugend(s.team)&&s.squad>1?' '+s.squad:''); }
 function trainLocHTML(s){
   let h='';
@@ -1294,7 +1406,8 @@ function requireAdmin(){
 function renderTraining(){
   const box=document.getElementById('train-body');
   const admin=session&&session.isAdmin;
-  let h = admin
+  let h=todaysTrainingHTML();
+  h += admin
     ? '<div class="banner info">Als Admin pflegst du hier die feste Belegung. Alle anderen sehen sie nur.</div>'
     : '<div class="lock-note"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Feste wöchentliche Belegung · nur vom Vorstand änderbar</div>';
   const days=admin?[1,2,3,4,5,6,7]:[1,2,3,4,5,6,7].filter(d=>TRAINING.some(s=>s.day===d));
@@ -1305,8 +1418,16 @@ function renderTraining(){
        (admin?'<button class="addlink" onclick="newTrainingSlot('+d+')">+ Zeit</button>':'')+'</div>';
     if(!slots.length) h+='<div class="train-empty">Kein Training</div>';
     slots.forEach(s=>{
+      const cancelled=(s.cancelled||[]).filter(dt=>!s.validUntil||dt<=s.validUntil).sort();
       h+='<div class="train-slot"><div class="tinfo"><div class="team">'+esc(trainName(s))+'</div>'+
-         '<div class="loc">'+trainLocHTML(s)+'</div></div>'+
+         '<div class="loc">'+trainLocHTML(s)+validityBadge(s)+'</div>';
+      if(cancelled.length){
+        h+='<div class="train-cancels">'+cancelled.map(dt=>
+          '<span class="cancel-chip">Abgesagt: '+fmtShort(dt)+(admin?'<button onclick="reactivateCancelled(\''+s.id+'\',\''+dt+'\')" aria-label="Absage zurücknehmen">×</button>':'')+'</span>'
+        ).join('')+'</div>';
+      }
+      if(admin) h+='<button class="cancel-link" style="margin-top:8px;" onclick="openCancelModal(\''+s.id+'\')">Einzelnen Termin absagen</button>';
+      h+='</div>'+
          '<div class="time">'+s.from+'–'+s.to+'</div>';
       if(admin) h+='<div class="tacts">'+
         '<button class="ibtn" onclick="editTrainingSlot(\''+s.id+'\')" aria-label="Bearbeiten"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>'+
@@ -1352,6 +1473,8 @@ function tfFill(s){
   document.getElementById('tf-day').value=s.day;
   document.getElementById('tf-from').value=s.from;
   document.getElementById('tf-to').value=s.to;
+  document.getElementById('tf-validfrom').value=s.validFrom||todayStr;
+  document.getElementById('tf-validuntil').value=s.validUntil||'';
   document.getElementById('tf-team').value=s.team;
   document.querySelectorAll('#tf-squad button').forEach((b,i)=>b.classList.toggle('on',i===((s.squad||1)-1)));
   document.querySelectorAll('#tf-res .res-chip').forEach(c=>{
@@ -1367,7 +1490,7 @@ function tfFill(s){
 function newTrainingSlot(day){
   if(!requireAdmin()) return;
   tEditId=null;
-  tfFill({day:day||1,from:'16:30',to:'18:00',team:'F-Jugend',squad:1,pitch:{mode:'ganz'},res:[],note:''});
+  tfFill({day:day||1,from:'16:30',to:'18:00',team:'F-Jugend',squad:1,pitch:{mode:'ganz'},res:[],note:'',validFrom:todayStr,validUntil:'',cancelled:[]});
   document.getElementById('tf-label').textContent='Trainingszeit anlegen';
   goto('tform');
 }
@@ -1385,6 +1508,10 @@ async function saveTrainingSlot(){
   const to=document.getElementById('tf-to').value;
   if(!from||!to){ showToast('Bitte Von- und Bis-Zeit angeben.'); return; }
   if(from>=to){ showToast('Die Bis-Zeit muss nach der Von-Zeit liegen.'); return; }
+  const validFrom=document.getElementById('tf-validfrom').value;
+  const validUntil=document.getElementById('tf-validuntil').value;
+  if(!validFrom){ showToast('Bitte angeben, ab wann diese Zeit gilt.'); return; }
+  if(validUntil&&validUntil<validFrom){ showToast('„Gültig bis" muss nach „Gültig ab" liegen.'); return; }
   const team=document.getElementById('tf-team').value;
   const sb=document.querySelector('#tf-squad button.on');
   const squad=sb?parseInt(sb.textContent):1;
@@ -1405,9 +1532,13 @@ async function saveTrainingSlot(){
   btn.disabled=true; lbl.textContent='Speichere …';
   const backup=JSON.stringify(TRAINING);
   try{
-    if(tEditId) Object.assign(TRAINING.find(x=>x.id===tEditId),{day,from,to,team,squad,pitch,res,note});
-    else TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,pitch,res,note});
-    await saveTraining((tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+team);
+    if(tEditId){
+      const existing=TRAINING.find(x=>x.id===tEditId);
+      Object.assign(existing,{day,from,to,team,squad,pitch,res,note,validFrom,validUntil:validUntil||null});
+    }else{
+      TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[]});
+    }
+    await saveTraining((tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+team+' (ab '+fmtShort(validFrom)+')');
     tEditId=null; goto('training');
     if(warn.length) showToast('⚠ Gespeichert – Achtung: '+warn[0],5000);
     else showToast('Trainingszeit gespeichert.');
