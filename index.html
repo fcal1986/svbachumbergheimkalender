@@ -1448,6 +1448,18 @@ function bioCard(){
   return '<div class="card"><h4>Anmeldung per Fingerabdruck</h4><p class="sub">Einmal einrichten – danach reicht Finger oder Gesicht. Nur auf dem eigenen Handy.</p>'+
     '<button class="ghost-btn" style="margin-top:0;" onclick="bioSetup()">Jetzt einrichten</button></div>';
 }
+function pwCard(){
+  if(session.isSuper){
+    return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Passwort ändern</h4>'+
+      '<p class="sub">Das Notzugang-Passwort steht fest in <b>data/config.json</b> und lässt sich nicht hier in der App ändern. Zum Ändern die Datei im Repo bearbeiten (Feld „password").</p></div>';
+  }
+  return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Passwort ändern</h4>'+
+    '<p class="sub">Dein Schreib-Token hängt am Passwort. Beim Ändern wird er neu verschlüsselt.</p>'+
+    '<div class="field" style="margin:10px 0 8px;"><input type="password" id="pw-old" placeholder="Aktuelles Passwort" autocomplete="current-password"></div>'+
+    '<div class="field" style="margin-bottom:8px;"><input type="password" id="pw-new" placeholder="Neues Passwort (min. 8 Zeichen)" autocomplete="new-password"></div>'+
+    '<div class="field" style="margin-bottom:10px;"><input type="password" id="pw-new2" placeholder="Neues Passwort wiederholen" autocomplete="new-password"></div>'+
+    '<button class="submit-btn" id="pw-btn" onclick="changePassword()"><span id="pw-label">Passwort ändern</span></button></div>';
+}
 function tokenCard(){
   if(!session.isSuper){
     return '<div class="banner ok">Dein Zugang enthält den Schreib-Token bereits – er hängt an deinem Passwort. Du kannst dich auf jedem Gerät anmelden, ohne etwas einzurichten.</div>';
@@ -1497,7 +1509,7 @@ function renderKonto(){
      '<p class="sub">'+esc(session.email)+(session.isSuper?' · Notzugang':'')+'</p>'+
      '<button class="cancel-btn" onclick="logout()">Abmelden</button></div>';
   if(session.isAdmin) h+=adminCards();
-  box.innerHTML=h+bioCard()+icalCard()+pwaCard();
+  box.innerHTML=h+pwCard()+bioCard()+icalCard()+pwaCard();
 }
 function saveAdminToken(){
   const t=document.getElementById('ad-token').value.trim();
@@ -1554,6 +1566,35 @@ function deleteUser(id){
     try{ await saveUsers('Zugang gelöscht: '+u.first+' '+u.last); showToast('Gelöscht.'); renderKonto(); }
     catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   });
+}
+async function changePassword(){
+  if(session.isSuper){ showToast('Das Notzugang-Passwort steht in data/config.json.'); return; }
+  const oldPw=document.getElementById('pw-old').value;
+  const newPw=document.getElementById('pw-new').value;
+  const newPw2=document.getElementById('pw-new2').value;
+  if(!oldPw||!newPw||!newPw2){ showToast('Bitte alle drei Felder ausfüllen.'); return; }
+  if(newPw.length<8){ showToast('Neues Passwort braucht mindestens 8 Zeichen.'); return; }
+  if(newPw!==newPw2){ showToast('Die beiden neuen Passwörter stimmen nicht überein.'); return; }
+  if(newPw===oldPw){ showToast('Das neue Passwort entspricht dem alten.'); return; }
+  const u=USERS.find(x=>x.id===session.id);
+  if(!u){ showToast('Zugang nicht gefunden.'); return; }
+  const btn=document.getElementById('pw-btn'), lbl=document.getElementById('pw-label');
+  const old=lbl.textContent; btn.disabled=true; lbl.textContent='Ändere …';
+  const backup=JSON.stringify(USERS);
+  try{
+    let token;
+    try{ token=await decryptToken(u.enc,oldPw); }
+    catch(e){ throw new Error('Aktuelles Passwort stimmt nicht.'); }
+    u.enc=await encryptToken(token,newPw);
+    await saveUsers('Passwort geändert: '+u.first+' '+u.last);
+    session.token=token;
+    sessionStorage.setItem('svbb_session',JSON.stringify(session));
+    document.getElementById('pw-old').value='';
+    document.getElementById('pw-new').value='';
+    document.getElementById('pw-new2').value='';
+    showToast('Passwort geändert. Bitte merken – es lässt sich nicht wiederherstellen.',5000);
+  }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
+  finally{ btn.disabled=false; lbl.textContent=old; }
 }
 
 /* ---------- Deep Link ---------- */
