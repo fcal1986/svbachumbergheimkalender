@@ -153,6 +153,24 @@
       "note": "",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
       "ownerName": "Fabrizio Calcagno"
+    },
+    {
+      "id": "ca6ea03e-f10d-4bcc-a319-04c7e32b2079",
+      "d": "2026-07-19",
+      "t": "10:00",
+      "bis": "12:00",
+      "title": "Vorbereitung",
+      "team": "E-Jugend",
+      "squad": 2,
+      "pitch": {
+        "mode": "haelfte",
+        "part": "A"
+      },
+      "halle": null,
+      "res": [],
+      "note": "",
+      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
+      "ownerName": "Fabrizio Calcagno"
     }
   ]
 }
