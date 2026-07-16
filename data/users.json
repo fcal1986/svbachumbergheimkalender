@@ -25,6 +25,19 @@
         "cipher": "838yGYUXZ6lr4byW2x+7tvzBv2JGwWovXar0N6J9dOJ9IQ63BW+LCCiPIck9V3fFlctIQpumIOUuUJRXyn3pPw+1AmOxiPKp0HiT2OZhHhXMwCxvvU1CYlo6B4CryRo8EhjacpJ4VXcYlt157g=="
       },
       "created": "2026-07-15T12:41:31.636Z"
+    },
+    {
+      "id": "89d70bbf-9008-4563-b6ee-9724ed48fe7f",
+      "first": "Damian",
+      "last": "Cvetkov",
+      "email": "damian.cvetkov@gmail.com",
+      "admin": true,
+      "enc": {
+        "salt": "f2DhE0jbDu/YrAPg0zB5uw==",
+        "iv": "4U7qPqM5OFR5wYFA",
+        "cipher": "vpzy4u5z2Z2+p6v+PCs6z3IXhqV3KFt2omv33bYYDLZ8slVCHF5/DbP2smfhCSvYfZkISyFOnI5FX6wdJ3RLXguwPKnqOLXnXKKQmBWgtgYEFLvrCI9BuBXafCtOnm9mqOrKNg0hyoL9KDjExA=="
+      },
+      "created": "2026-07-16T05:32:32.513Z"
     }
   ]
 }
