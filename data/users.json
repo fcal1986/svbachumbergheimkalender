@@ -12,9 +12,11 @@
       },
       "created": "2026-07-15T06:12:45.752Z",
       "admin": false,
-      "classes": [
-        "E-Jugend"
-      ]
+      "classes": {
+        "E-Jugend": [
+          2
+        ]
+      }
     },
     {
       "id": "a30f8c9b-96f9-4557-b28b-619e122080ea",
