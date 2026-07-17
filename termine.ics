@@ -26,7 +26,7 @@ END:STANDARD
 END:VTIMEZONE
 BEGIN:VEVENT
 UID:seed-2@svbb-termine
-DTSTAMP:20260717T111016Z
+DTSTAMP:20260717T125119Z
 DTSTART;TZID=Europe/Berlin:20260830T150000
 DTEND;TZID=Europe/Berlin:20260830T170000
 SUMMARY:Saisoneröffnung & Grillfest
@@ -36,7 +36,7 @@ URL:https://fcal1986.github.io/svbachumbergheimkalender/#t=seed-2
 END:VEVENT
 BEGIN:VEVENT
 UID:seed-3@svbb-termine
-DTSTAMP:20260717T111016Z
+DTSTAMP:20260717T125119Z
 DTSTART;TZID=Europe/Berlin:20261212T183000
 DTEND;TZID=Europe/Berlin:20261212T203000
 SUMMARY:Weihnachtsfeier
@@ -47,7 +47,7 @@ URL:https://fcal1986.github.io/svbachumbergheimkalender/#t=seed-3
 END:VEVENT
 BEGIN:VEVENT
 UID:8d9170ce-5ed9-451c-932e-833b30ed3b68@svbb-termine
-DTSTAMP:20260717T111016Z
+DTSTAMP:20260717T125119Z
 DTSTART;TZID=Europe/Berlin:20260715T150000
 DTEND;TZID=Europe/Berlin:20260715T170000
 SUMMARY:Test
@@ -58,7 +58,7 @@ URL:https://fcal1986.github.io/svbachumbergheimkalender/#t=8d9170ce-5ed9-
 END:VEVENT
 BEGIN:VEVENT
 UID:62977977-0797-4d79-82c7-5fef126ff8cd@svbb-termine
-DTSTAMP:20260717T111016Z
+DTSTAMP:20260717T125119Z
 DTSTART;TZID=Europe/Berlin:20260715T150000
 DTEND;TZID=Europe/Berlin:20260715T170000
 SUMMARY:Test
@@ -66,5 +66,16 @@ DESCRIPTION:Team: F1-Jugend\nAnsprechpartner: Fabrizio Calcagno
 LOCATION:Großspielfeld: Ganzer Platz
 URL:https://fcal1986.github.io/svbachumbergheimkalender/#t=62977977-0797-
  4d79-82c7-5fef126ff8cd
+END:VEVENT
+BEGIN:VEVENT
+UID:f8d4f92a-01cc-44ae-aef4-3691966d4757@svbb-termine
+DTSTAMP:20260717T125119Z
+DTSTART;TZID=Europe/Berlin:20260718T150000
+DTEND;TZID=Europe/Berlin:20260718T170000
+SUMMARY:Test Löschung Event
+DESCRIPTION:Team: E2-Jugend\nAnsprechpartner: Fabrizio Calcagno
+LOCATION:Großspielfeld: Hälfte A
+URL:https://fcal1986.github.io/svbachumbergheimkalender/#t=f8d4f92a-01cc-
+ 44ae-aef4-3691966d4757
 END:VEVENT
 END:VCALENDAR
