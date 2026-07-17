@@ -30,9 +30,11 @@
         "cipher": "838yGYUXZ6lr4byW2x+7tvzBv2JGwWovXar0N6J9dOJ9IQ63BW+LCCiPIck9V3fFlctIQpumIOUuUJRXyn3pPw+1AmOxiPKp0HiT2OZhHhXMwCxvvU1CYlo6B4CryRo8EhjacpJ4VXcYlt157g=="
       },
       "created": "2026-07-15T12:41:31.636Z",
-      "classes": [
-        "E-Jugend"
-      ]
+      "classes": {
+        "E-Jugend": [
+          2
+        ]
+      }
     },
     {
       "id": "89d70bbf-9008-4563-b6ee-9724ed48fe7f",
