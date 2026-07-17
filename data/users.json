@@ -22,7 +22,8 @@
         ]
       },
       "phone": "015224897699",
-      "contactPublic": "phone"
+      "contactPublic": "phone",
+      "contactEmail": "test@info.com"
     },
     {
       "id": "a30f8c9b-96f9-4557-b28b-619e122080ea",
