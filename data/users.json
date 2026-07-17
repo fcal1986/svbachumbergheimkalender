@@ -47,7 +47,12 @@
         "iv": "4U7qPqM5OFR5wYFA",
         "cipher": "vpzy4u5z2Z2+p6v+PCs6z3IXhqV3KFt2omv33bYYDLZ8slVCHF5/DbP2smfhCSvYfZkISyFOnI5FX6wdJ3RLXguwPKnqOLXnXKKQmBWgtgYEFLvrCI9BuBXafCtOnm9mqOrKNg0hyoL9KDjExA=="
       },
-      "created": "2026-07-16T05:32:32.513Z"
+      "created": "2026-07-16T05:32:32.513Z",
+      "classes": {
+        "C-Jugend": [
+          1
+        ]
+      }
     }
   ]
 }
