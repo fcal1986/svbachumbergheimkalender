@@ -408,7 +408,11 @@
       "note": "",
       "cancelled": [
         "2026-07-17"
-      ]
+      ],
+      "trainerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
+      "trainerName": "David Skwara",
+      "validFrom": "2026-07-17",
+      "validUntil": null
     },
     {
       "id": "2aec6df0-a5f2-4dbb-8efb-48a85579ed37",
