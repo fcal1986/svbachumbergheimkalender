@@ -47,23 +47,6 @@
       "note": "",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
       "ownerName": "Fabrizio Calcagno"
-    },
-    {
-      "id": "7751259e-f576-4a63-84e2-ec5cd3d9b59d",
-      "d": "2026-07-19",
-      "t": "15:00",
-      "bis": "17:00",
-      "title": "Test Aenderung",
-      "team": "E-Jugend",
-      "squad": 2,
-      "pitch": {
-        "mode": "ganz"
-      },
-      "halle": null,
-      "res": [],
-      "note": "",
-      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "ownerName": "Fabrizio Calcagno"
     }
   ]
 }
