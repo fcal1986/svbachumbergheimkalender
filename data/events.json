@@ -1,6 +1,25 @@
 {
   "events": [
     {
+      "id": "seed-1",
+      "d": "2026-08-19",
+      "t": "19:00",
+      "title": "Sommerfest Jugend",
+      "team": "F-Jugend",
+      "squad": 1,
+      "pitch": {
+        "mode": "haelfte",
+        "part": "A"
+      },
+      "res": [
+        "Vereinsheim",
+        "Theke"
+      ],
+      "note": "Eltern willkommen",
+      "ownerId": "admin",
+      "ownerName": "Vorstand Admin"
+    },
+    {
       "id": "seed-2",
       "d": "2026-08-30",
       "t": "15:00",
@@ -63,25 +82,6 @@
       "note": "",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
       "ownerName": "Fabrizio Calcagno"
-    },
-    {
-      "id": "ac3d4de3-c75c-447b-b77d-909553e2e183",
-      "d": "2026-07-17",
-      "t": "15:00",
-      "title": "Sommerfest",
-      "team": "D-Jugend",
-      "squad": 1,
-      "pitch": {
-        "mode": "viertel",
-        "part": 2
-      },
-      "res": [
-        "Vereinsheim",
-        "Theke"
-      ],
-      "note": "",
-      "ownerId": "admin",
-      "ownerName": "Vorstand Admin"
     },
     {
       "id": "945aad9b-522f-44f0-85be-a99e5be6c7a8",
