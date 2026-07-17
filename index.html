@@ -339,6 +339,8 @@
   .modal-acts button{flex:1;border-radius:10px;padding:11px;font-family:'Poppins';font-size:13px;font-weight:600;cursor:pointer;border:none;}
   .modal-acts .no{background:var(--bg);color:var(--ink-soft);}
   .modal-acts .yes{background:var(--warn);color:#fff;}
+  #saving-pill{position:fixed;bottom:calc(82px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:20px;font-family:'Poppins';font-size:12px;font-weight:600;display:none;align-items:center;gap:9px;z-index:75;box-shadow:0 4px 16px rgba(0,0,0,.25);white-space:nowrap;transition:opacity .2s;}
+  #saving-pill.show{display:flex;}
   .spinner{width:15px;height:15px;border:2px solid rgba(0,0,0,.15);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
   @keyframes spin{to{transform:rotate(360deg);}}
 
@@ -615,6 +617,7 @@
   </div>
 </div>
 
+<div id="saving-pill"><span class="spinner" style="border-color:rgba(255,255,255,.3);border-top-color:#fff;width:13px;height:13px;"></span><span id="saving-msg">Wird gespeichert …</span></div>
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span id="toast-text"></span></div>
 <div class="modal" id="modal">
   <div class="modal-box">
@@ -634,7 +637,7 @@
     <div class="field" style="margin-bottom:14px;"><label>Datum</label><input type="date" id="cm-date"></div>
     <div class="modal-acts">
       <button class="no" onclick="closeCancelModal()">Abbrechen</button>
-      <button class="yes" onclick="doCancelSlot()">Absagen</button>
+      <button class="yes" id="cm-yes" onclick="doCancelSlot()">Absagen</button>
     </div>
   </div>
 </div>
@@ -664,6 +667,7 @@ let curY=today.getFullYear(), curM=today.getMonth(), yearShown=today.getFullYear
 let selDate=todayStr, pitchMode='ganz', pitchPart=null, editingId=null, highlightId=null;
 let tPitchMode='ganz', tPitchPart=null, tEditId=null;
 let halleThirds=[];
+let formDirty=false;
 
 /* ---------- Helpers ---------- */
 function ymd(dt){return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}
@@ -762,6 +766,12 @@ function fmtShort(d){const dt=new Date(d+'T00:00:00');return String(dt.getDate()
 function fmtShare(d){const dt=new Date(d+'T00:00:00');return DAYS[dt.getDay()]+', '+fmtShort(d);}
 function initials(n){return n.split(' ').filter(Boolean).slice(0,2).map(x=>x[0].toUpperCase()).join('');}
 function baseUrl(){return location.origin+location.pathname.replace(/index\.html$/,'');}
+function showSaving(msg){
+  const p=document.getElementById('saving-pill');
+  document.getElementById('saving-msg').textContent=msg||'Wird gespeichert …';
+  p.classList.add('show');
+}
+function hideSaving(){ document.getElementById('saving-pill').classList.remove('show'); }
 function showToast(m,ms){
   document.getElementById('toast-text').textContent=m;
   const t=document.getElementById('toast');
@@ -773,7 +783,13 @@ function askConfirm(title,text,yesLabel,cb){
   document.getElementById('mo-title').textContent=title;
   document.getElementById('mo-text').textContent=text;
   const y=document.getElementById('mo-yes');
-  y.textContent=yesLabel; y.onclick=()=>{closeModal();cb();};
+  y.textContent=yesLabel; y.disabled=false;
+  y.onclick=async()=>{
+    y.disabled=true;
+    y.innerHTML='<span class="spinner" style="width:13px;height:13px;border-color:rgba(255,255,255,.3);border-top-color:#fff;display:inline-block;vertical-align:middle;margin-right:4px;"></span>'+yesLabel;
+    try{ await cb(); }catch(e){}
+    finally{ y.disabled=false; y.textContent=yesLabel; closeModal(); }
+  };
   document.getElementById('modal').classList.add('show');
 }
 function setSquad(b){b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');}
@@ -1284,7 +1300,7 @@ function resetForm(){
   document.querySelectorAll('#f-squad button').forEach((b,i)=>b.classList.toggle('on',i===0));
   document.querySelectorAll('#f-res .res-chip').forEach(c=>c.classList.toggle('on',c.dataset.res==='Großspielfeld'));
   pitchMode='ganz';pitchPart=null;document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode==='ganz'));
-  halleThirds=[];onTeamChange();renderPitch();renderHalle();hideConflicts();
+  halleThirds=[];onTeamChange();renderPitch();renderHalle();hideConflicts();formDirty=false;
 }
 function requireLogin(){
   if(session) return true;
@@ -1436,6 +1452,7 @@ async function submitEvent(){
   const spinEl=document.getElementById('save-spin'),checkEl=document.getElementById('save-check');
   const lbl=lblEl.textContent;btn.disabled=true;lblEl.textContent='Speichere …';
   if(spinEl){spinEl.style.display='inline-block';}if(checkEl){checkEl.style.display='none';}
+  showSaving(editingId?'Termin wird geändert …':'Termin wird gespeichert …');
   const backup=JSON.stringify(EVENTS);
   try{
     if(editingId)Object.assign(EVENTS.find(x=>x.id===editingId),{d,t:von,bis,title,team,squad,pitch,halle,res,note});
@@ -1446,7 +1463,7 @@ async function submitEvent(){
     goto('termine');setView('monat');renderStart();resetForm();
     showToast('Gespeichert: '+title);
   }catch(err){EVENTS=JSON.parse(backup);showToast('Fehler: '+err.message,6000);}
-  finally{btn.disabled=false;lblEl.textContent=lbl;if(spinEl){spinEl.style.display='none';}if(checkEl){checkEl.style.display='inline';}}
+  finally{btn.disabled=false;lblEl.textContent=lbl;if(spinEl){spinEl.style.display='none';}if(checkEl){checkEl.style.display='inline';}hideSaving();}
 }
 function deleteEvent(id){
   if(!requireLogin()) return;
@@ -1528,6 +1545,8 @@ async function doCancelSlot(){
   if(dowOf(date)!==s.day){ showToast('Das Datum fällt nicht auf einen '+WDAYS[s.day]+'.'); return; }
   if(!slotInRange(s,date)){ showToast('Datum liegt außerhalb der Gültigkeit dieser Trainingszeit.'); return; }
   if((s.cancelled||[]).includes(date)){ showToast('Ist bereits als abgesagt markiert.'); closeCancelModal(); return; }
+  const cmBtn=document.getElementById('cm-yes');
+  if(cmBtn){ cmBtn.disabled=true; cmBtn.innerHTML='<span class="spinner" style="width:13px;height:13px;border-color:rgba(255,255,255,.3);border-top-color:#fff;display:inline-block;vertical-align:middle;"></span>'; }
   const backup=JSON.stringify(TRAINING);
   s.cancelled=[...(s.cancelled||[]),date].sort();
   try{
@@ -1535,15 +1554,18 @@ async function doCancelSlot(){
     closeCancelModal(); renderTraining();
     showToast('Training am '+fmtShort(date)+' abgesagt.');
   }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
+  finally{ if(cmBtn){ cmBtn.disabled=false; cmBtn.textContent='Absagen'; } }
 }
 async function reactivateCancelled(id,date){
   const s=TRAINING.find(x=>x.id===id); if(!s)return;
+  showSaving('Absage wird zurückgenommen …');
   const backup=JSON.stringify(TRAINING);
   s.cancelled=(s.cancelled||[]).filter(d=>d!==date);
   try{
     await saveTraining('Absage zurückgenommen: '+trainName(s)+' am '+fmtShort(date));
     renderTraining(); showToast('Training am '+fmtShort(date)+' findet wieder statt.');
   }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
+  finally{ hideSaving(); }
 }
 function trainName(s){ return teamLabel(s.team,s.squad); }
 function trainerLabel(s){
@@ -1716,8 +1738,8 @@ async function saveTrainingSlot(){
     if(rh.length) warn.push(rh.join(', ')+' nutzt schon '+trainName(s)+' ('+s.from+'–'+s.to+')');
   });
   const btn=document.getElementById('tf-save'), lbl=document.getElementById('tf-label');
-  const old=lbl.textContent;
-  btn.disabled=true; lbl.textContent='Speichere …';
+  const old=lbl.textContent; btn.disabled=true;
+  lbl.innerHTML='<span class="spinner" style="width:13px;height:13px;border-color:rgba(0,0,0,.15);border-top-color:var(--ink);display:inline-block;vertical-align:middle;margin-right:5px;"></span>Speichere …';
   const backup=JSON.stringify(TRAINING);
   try{
     if(tEditId){
@@ -1976,7 +1998,8 @@ async function createUser(){
   if(pass.length<8){showToast('Passwort braucht mindestens 8 Zeichen.');return;}
   if(USERS.some(u=>u.email.toLowerCase()===mail)){showToast('Diese E-Mail gibt es schon.');return;}
   const btn=document.getElementById('nu-btn');
-  btn.disabled=true; document.getElementById('nu-label').textContent='Lege an …';
+  btn.disabled=true;
+  document.getElementById('nu-label').innerHTML='<span class="spinner" style="width:13px;height:13px;border-color:rgba(0,0,0,.15);border-top-color:var(--ink);display:inline-block;vertical-align:middle;margin-right:5px;"></span>Lege an …';
   const backup=JSON.stringify(USERS);
   try{
     const encRec=await encryptToken(session.token,pass);
@@ -2015,6 +2038,7 @@ function toggleUserSquad(id,team,squad){
 }
 async function saveUserClasses(id){
   const u=USERS.find(x=>x.id===id); if(!u)return;
+  showSaving('Mannschaften werden gespeichert …');
   const backup=JSON.stringify(USERS);
   try{
     const cls=normalizeClasses(u.classes||{});
@@ -2024,6 +2048,7 @@ async function saveUserClasses(id){
     showToast('Altersklassen gespeichert.');
     renderKonto();
   }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); renderKonto(); }
+  finally{ hideSaving(); }
 }
 function toggleUserAdmin(id){
   const u=USERS.find(x=>x.id===id); if(!u)return;
@@ -2067,7 +2092,8 @@ async function changePassword(){
   const u=USERS.find(x=>x.id===session.id);
   if(!u){ showToast('Zugang nicht gefunden.'); return; }
   const btn=document.getElementById('pw-btn'), lbl=document.getElementById('pw-label');
-  const old=lbl.textContent; btn.disabled=true; lbl.textContent='Ändere …';
+  const old=lbl.textContent; btn.disabled=true;
+  lbl.innerHTML='<span class="spinner" style="width:13px;height:13px;border-color:rgba(255,255,255,.3);border-top-color:#fff;display:inline-block;vertical-align:middle;margin-right:5px;"></span>Ändere …';
   const backup=JSON.stringify(USERS);
   try{
     let token;
