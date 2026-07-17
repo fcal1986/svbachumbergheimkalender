@@ -19,22 +19,6 @@
       "ownerName": "Vorstand Admin"
     },
     {
-      "id": "seed-3",
-      "d": "2026-12-12",
-      "t": "18:30",
-      "title": "Weihnachtsfeier",
-      "team": "Alle Teams",
-      "squad": 1,
-      "pitch": null,
-      "res": [
-        "Vereinsheim",
-        "Theke"
-      ],
-      "note": "Alle Mannschaften + Familien",
-      "ownerId": "admin",
-      "ownerName": "Vorstand Admin"
-    },
-    {
       "id": "8d9170ce-5ed9-451c-932e-833b30ed3b68",
       "d": "2026-07-15",
       "t": "15:00",
