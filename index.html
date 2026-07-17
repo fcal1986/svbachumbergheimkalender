@@ -2316,6 +2316,7 @@ async function boot(){
   ['tf-day','tf-from','tf-to'].forEach(id=>document.getElementById(id).addEventListener('change',tfRenderPitch));
   updateWeekday(); onTeamChange(); setPitchMode('ganz');
   tfTeamChange(); tfSetPitchMode('ganz');
+  renderTrainerChips(document.getElementById('tf-team').value,1,[]);
   document.getElementById('ver-note').textContent='Daten: '+CFG.repo;
 
   refreshHeader(); refreshBioBtn(); buildFilters();
