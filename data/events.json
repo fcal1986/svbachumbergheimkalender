@@ -100,25 +100,6 @@
       "ownerName": "Vorstand Admin"
     },
     {
-      "id": "ac3d4de3-c75c-447b-b77d-909553e2e183",
-      "d": "2026-07-17",
-      "t": "15:00",
-      "title": "Sommerfest",
-      "team": "D-Jugend",
-      "squad": 1,
-      "pitch": {
-        "mode": "viertel",
-        "part": 2
-      },
-      "res": [
-        "Vereinsheim",
-        "Theke"
-      ],
-      "note": "",
-      "ownerId": "admin",
-      "ownerName": "Vorstand Admin"
-    },
-    {
       "id": "9a42238b-3bcd-4cb3-a80a-ee8749fb52ac",
       "d": "2026-07-17",
       "t": "15:00",
