@@ -1830,11 +1830,16 @@ function icalCard(){
 function profileCard(){
   const u=USERS.find(x=>x.id===session.id)||{};
   const phone=u.phone||'';
+  const contactEmail=u.contactEmail||'';
   const vis=u.contactPublic||'none';
+  const fld=(id,lbl,type,ph,val)=>'<div class="field" style="margin:10px 0 10px;">'+
+    '<label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">'+lbl+'</label>'+
+    '<input type="'+type+'" id="'+id+'" autocomplete="off" placeholder="'+ph+'" value="'+esc(val)+'">'+
+    '<div id="'+id+'-err" style="display:none;color:var(--warn);font-size:11px;margin-top:4px;padding:2px 0;"></div></div>';
   return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:16px;height:16px;stroke:var(--green)"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Mein Profil & Kontakt</h4>'+
     '<p class="sub">Kontaktdaten erscheinen bei deinen Terminen neben deinem Namen – wenn du es erlaubst.</p>'+
-    '<div class="field" style="margin:10px 0 10px;"><label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">Telefonnummer</label>'+
-    '<input type="tel" id="prof-phone" autocomplete="off" placeholder="z. B. 0172 1234567" value="'+esc(phone)+'"></div>'+
+    fld('prof-phone','Telefonnummer','tel','z. B. 0172 1234567',phone)+
+    fld('prof-email','Kontakt-E-Mail','email','z. B. trainer@svbb.de',contactEmail)+
     '<div class="field" style="margin-bottom:14px;"><label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:8px;">Anzeigen bei Terminen</label>'+
     '<div class="seg" id="prof-vis-seg">'+
     '<button type="button" data-val="none"'+(vis==='none'?' class="on"':'')+' onclick="setContactVis(this)">Nein</button>'+
@@ -1933,7 +1938,7 @@ function adminCards(){
 
 /* ── Protokoll / Audit-Log ──────────────────────────────────────────── */
 let LOG_CACHE=null, LOG_LOADING=false;
-let logSearch='', logCat='alle';
+let logSearch='', logCat='alle', logExpanded=false;
 
 function getContactDisplay(ownerId){
   if(!ownerId)return '';
@@ -1941,7 +1946,8 @@ function getContactDisplay(ownerId){
   const u=(session&&session.id===ownerId)?Object.assign({},uDb||{},session):uDb;
   if(!u)return '';
   const parts=[];
-  if((u.contactPublic==='email'||u.contactPublic==='both')&&u.email) parts.push(u.email);
+  const displayEmail=u.contactEmail||u.email;
+  if((u.contactPublic==='email'||u.contactPublic==='both')&&displayEmail) parts.push(displayEmail);
   if((u.contactPublic==='phone'||u.contactPublic==='both')&&u.phone) parts.push(u.phone);
   return parts.join(' · ');
 }
@@ -1966,6 +1972,15 @@ function fmtLogTime(ts){
   const pad=n=>String(n).padStart(2,'0');
   return pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+
          ' · '+pad(d.getHours())+':'+pad(d.getMinutes())+' Uhr';
+}
+function toggleLog(){
+  logExpanded=!logExpanded;
+  renderKonto();
+}
+function refreshLog(){
+  LOG_CACHE=null; LOG_LOADING=false;
+  if(logExpanded) loadLogIfNeeded();
+  else{ logExpanded=true; renderKonto(); }
 }
 async function loadLogIfNeeded(){
   if(LOG_CACHE!==null||LOG_LOADING)return;
@@ -2028,13 +2043,25 @@ function renderLogList(){
   (entries.length>80?'<div class="log-more">… '+( entries.length-80)+' ältere Einträge (GitHub → Commits)</div>':'');
 }
 function logCard(){
+  const icnRefresh='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>';
+  const icnChevron='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;transition:transform .2s;transform:'+(logExpanded?'rotate(180deg)':'rotate(0)')+';"><path d="M6 9l6 6 6-6"/></svg>';
+  const hdr='<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleLog()">'+
+    '<h4 style="margin:0;display:flex;align-items:center;gap:7px;"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:16px;height:16px;stroke:var(--green)"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>Protokoll</h4>'+
+    '<div style="display:flex;align-items:center;gap:4px;">'+
+    '<button onclick="event.stopPropagation();refreshLog()" title="Aktualisieren" style="background:none;border:none;cursor:pointer;padding:5px;color:var(--ink-soft);display:flex;align-items:center;border-radius:8px;">'+icnRefresh+'</button>'+
+    '<span style="color:var(--ink-soft);padding:2px;">'+icnChevron+'</span>'+
+    '</div></div>';
+  if(!logExpanded){
+    return '<div class="card">'+hdr+
+      '<p class="sub" style="margin-top:8px;margin-bottom:0;">Alle Änderungen an Terminen, Training und Zugängen – schreibgeschützt.</p></div>';
+  }
   const catBtns=['alle','Termin','Training','Zugang'].map(cat=>
-    '<button class="filter-chip'+(logCat===cat?' on':'')+'" onclick="logCat=\''+cat+'\';renderLogList();renderKonto()">'+
+    '<button class="filter-chip'+(logCat===cat?' on':'')+'" onclick="logCat=\''+cat+'\';renderLogList()">'+
     (cat==='alle'?'Alle':cat)+'</button>'
   ).join('');
-  return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:16px;height:16px;stroke:var(--green)"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>Protokoll</h4>'+
-    '<p class="sub">Alle gespeicherten Änderungen – schreibgeschützt. Ladet direkt aus den GitHub-Commits.</p>'+
-    '<input type="search" id="log-search" placeholder="Suche nach Name, Datum, Aktion …" value="'+esc(logSearch)+'" oninput="logSearch=this.value;renderLogList()" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-family:\'Poppins\';font-size:13px;margin:10px 0 8px;background:var(--bg);outline:none;" onfocus="this.style.borderColor=\'var(--green)\'" onblur="this.style.borderColor=\'var(--line)\'">'+
+  return '<div class="card">'+hdr+
+    '<p class="sub" style="margin-top:8px;">Alle Änderungen – schreibgeschützt. Aus GitHub-Commits.</p>'+
+    '<input type="search" id="log-search" placeholder="Suche nach Name, Datum, Aktion …" value="'+esc(logSearch)+'" oninput="logSearch=this.value;renderLogList()" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-family:Poppins;font-size:13px;margin:10px 0 8px;background:var(--bg);outline:none;" >'+
     '<div class="chip-scroll" style="margin-bottom:10px;">'+catBtns+'</div>'+
     '<div id="log-list"></div></div>';
 }
@@ -2053,7 +2080,7 @@ function renderKonto(){
   if(session.isAdmin) h+=adminCards();
   if(!session.isSuper) h+=profileCard();
   box.innerHTML=h+logCard()+pwCard()+bioCard()+icalCard()+pwaCard();
-  loadLogIfNeeded();
+  if(logExpanded) loadLogIfNeeded();
 }
 function saveAdminToken(){
   const t=document.getElementById('ad-token').value.trim();
@@ -2133,12 +2160,28 @@ function setContactVis(b){b.parentElement.querySelectorAll('button').forEach(x=>
 async function saveProfile(){
   const u=USERS.find(x=>x.id===session.id); if(!u)return;
   const phone=document.getElementById('prof-phone').value.trim();
+  const contactEmail=document.getElementById('prof-email').value.trim();
+  // ── Validierung ──
+  let valid=true;
+  function setFieldErr(id,msg){
+    const el=document.getElementById(id+'-err');
+    if(!el)return;
+    if(msg){el.textContent=msg;el.style.display='block';valid=false;}
+    else{el.textContent='';el.style.display='none';}
+  }
+  if(phone&&!/^[+\d][\d\s\-\(\)]{5,18}$/.test(phone)){
+    setFieldErr('prof-phone','Bitte eine gültige Telefonnummer eingeben (z. B. 0172 1234567 oder +49 172 1234567).');
+  }else{setFieldErr('prof-phone','');}
+  if(contactEmail&&!/^\S+@\S+\.\S+$/.test(contactEmail)){
+    setFieldErr('prof-email','Bitte eine gültige E-Mail-Adresse eingeben (z. B. name@example.de).');
+  }else{setFieldErr('prof-email','');}
+  if(!valid)return;
   const vis=document.querySelector('#prof-vis-seg button.on');
   const contactPublic=vis?vis.dataset.val:'none';
   showSaving('Profil wird gespeichert …');
   const backup=JSON.stringify(USERS);
-  u.phone=phone; u.contactPublic=contactPublic;
-  session.phone=phone; session.contactPublic=contactPublic;
+  u.phone=phone; u.contactEmail=contactEmail; u.contactPublic=contactPublic;
+  session.phone=phone; session.contactEmail=contactEmail; session.contactPublic=contactPublic;
   sessionStorage.setItem('svbb_session',JSON.stringify(session));
   try{
     await saveUsers('Profil geändert: '+u.first+' '+u.last);
