@@ -47,6 +47,23 @@
       "note": "",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
       "ownerName": "Fabrizio Calcagno"
+    },
+    {
+      "id": "457091b0-6fec-47ed-95f1-d69f0ef436f1",
+      "d": "2026-07-18",
+      "t": "15:00",
+      "bis": "17:00",
+      "title": "Kontakt",
+      "team": "E-Jugend",
+      "squad": 1,
+      "pitch": {
+        "mode": "ganz"
+      },
+      "halle": null,
+      "res": [],
+      "note": "",
+      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
+      "ownerName": "Fabrizio Calcagno"
     }
   ]
 }
