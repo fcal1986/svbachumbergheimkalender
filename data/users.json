@@ -41,7 +41,7 @@
       "first": "Damian",
       "last": "Cvetkov",
       "email": "damian.cvetkov@gmail.com",
-      "admin": true,
+      "admin": false,
       "enc": {
         "salt": "f2DhE0jbDu/YrAPg0zB5uw==",
         "iv": "4U7qPqM5OFR5wYFA",
