@@ -405,7 +405,10 @@
         "part": "A"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "cancelled": [
+        "2026-07-17"
+      ]
     },
     {
       "id": "2aec6df0-a5f2-4dbb-8efb-48a85579ed37",
