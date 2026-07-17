@@ -113,6 +113,8 @@
   .log-msg{font-size:12px;font-weight:600;color:var(--ink);line-height:1.4;}
   .log-time{font-size:10.5px;color:var(--ink-soft);margin-top:3px;display:flex;align-items:center;gap:6px;}
   .log-cat{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:1px 7px;font-size:9.5px;font-weight:700;color:var(--ink-soft);}
+  .squad-sq-chip{font-size:10px;font-weight:700;padding:4px 8px;border-radius:8px;background:var(--bg);border:1.5px solid var(--line);color:var(--ink-soft);cursor:pointer;user-select:none;}
+  .squad-sq-chip.on{background:var(--green);border-color:var(--green);color:#fff;}
   .log-more{font-size:11px;color:var(--ink-soft);padding:10px 2px;text-align:center;}
   .badge-res{font-size:10px;font-weight:600;padding:3px 9px;border-radius:16px;background:var(--bg);color:var(--ink-soft);}
   .badge-admin{font-size:9px;font-weight:700;padding:2px 7px;border-radius:12px;background:var(--green);color:#fff;}
@@ -482,7 +484,7 @@
       <p class="section-label">Pflichtangaben</p>
       <div class="field required"><label><span class="req-dot"></span>Datum</label><input type="date" id="f-datum"></div>
       <div class="field"><label>Wochentag</label><span class="readonly-pill" id="f-wochentag">–</span></div>
-      <div class="field required"><label><span class="req-dot"></span>Anlass</label><input type="text" id="f-anlass" placeholder="z. B. Sommerfest, Turnier, Testspiel"></div>
+      <div class="field required"><label><span class="req-dot"></span>Anlass</label><input type="text" id="f-anlass" autocomplete="off" oninput="formDirty=true" placeholder="z. B. Sommerfest, Turnier, Testspiel"></div>
       <div style="display:flex;gap:10px;">
         <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Von</label><input type="time" id="f-von" value="15:00" onchange="onTimeChange()"></div>
         <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Bis</label><input type="time" id="f-bis" value="17:00" onchange="onTimeChange()"></div>
@@ -551,7 +553,8 @@
         <div id="conflict-list"></div>
       </div>
       <button class="submit-btn" id="save-btn" onclick="submitEvent()">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+        <svg id="save-check" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+        <span id="save-spin" class="spinner" style="display:none;border-color:rgba(255,255,255,.3);border-top-color:#fff;width:15px;height:15px;"></span>
         <span id="save-label">Termin speichern</span>
       </button>
       <button class="cancel-btn" id="cancel-btn" style="display:none;" onclick="cancelEdit()">Abbrechen</button>
@@ -577,7 +580,7 @@
     <button class="navbtn" data-nav="training" onclick="goto('training')">
       <div class="nbico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>Training
     </button>
-    <button class="navbtn" data-nav="neu" onclick="newEvent()">
+    <button class="navbtn" data-nav="neu" onclick="navToNeu()">
       <div class="nbico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg></div>Neu
     </button>
     <button class="navbtn" data-nav="konto" onclick="goto('konto')">
@@ -920,7 +923,7 @@ async function doLogin(){
       let token;
       try{ token=await decryptToken(rec.enc,p); }catch(e){ throw new Error('Passwort stimmt nicht.'); }
       session={id:rec.id,name:rec.first+' '+rec.last,email:rec.email,
-               isAdmin:rec.admin===true,isSuper:false,classes:rec.classes||[],token:token};
+               isAdmin:rec.admin===true,isSuper:false,classes:normalizeClasses(rec.classes||{}),token:token};
     }
     afterLogin();
   }catch(e){ loginErr(e.message); }
@@ -929,9 +932,9 @@ async function doLogin(){
 function afterLogin(){
   sessionStorage.setItem('svbb_session',JSON.stringify(session));
   document.getElementById('li-pass').value='';
-  closeLogin(); refreshHeader(); buildFilters(); renderAll();
-  if(session.isSuper && !session.token) showToast('Angemeldet. Zum Speichern fehlt noch der GitHub-Token → Konto.',5000);
-  else showToast('Angemeldet als '+session.name.split(' ')[0]+'.');
+  closeLogin();
+  showToast('Angemeldet als '+session.name.split(' ')[0]+'. Seite wird neu geladen …',1800);
+  setTimeout(()=>location.reload(),1200);
 }
 function logout(){
   session=null; sessionStorage.removeItem('svbb_session');
@@ -1192,8 +1195,13 @@ function renderStart(){
       +'<div class="ev-head">'
       +'<div class="ev-date-box"><span class="ev-dow">'+dow+'</span><span class="ev-day">'+dd+'</span></div>'
       +'<div class="ev-sep"></div>'
-      +'<div class="ev-title-box"><h4>'+esc(nx.title)+'</h4><div class="ev-sub">'+esc(teamLabel(nx.team,nx.squad))+'</div></div>'
-      +'<button class="ibtn share" onclick="shareEvent(\''+nx.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"/></svg></button>'
+      +'<div class="ev-title-box"><h4>'+esc(nx.title)+'</h4>'
+      +'<div class="ev-sub">'+esc(teamLabel(nx.team,nx.squad))+(nx.ownerName?' · von '+esc(nx.ownerName):'')+'</div></div>'
+      +(()=>{ let a='<button class="ibtn share" onclick="shareEvent(\''+nx.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"/></svg></button>';
+        if(session)a+='<button class="ibtn" onclick="duplicateEvent(\''+nx.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>';
+        if(canEdit(nx)){a+='<button class="ibtn" onclick="editEvent(\''+nx.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>';
+        a+='<button class="ibtn del" onclick="deleteEvent(\''+nx.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>';}
+        return '<div class="row-acts">'+a+'</div>';})()
       +'</div>'
       +'<div class="ev-body">'
       +'<div class="ev-times">'
@@ -1222,6 +1230,7 @@ function onTeamChange(){
   const team=document.getElementById('f-team').value;
   document.getElementById('f-squad-field').style.display=isJugend(team)?'block':'none';
   relabelSquad('f-squad',team);
+  applySquadRestrictions('f-squad',team);
 }
 function onTimeChange(){hideConflicts();renderPitch();renderHalle();}
 function toggleRes(el){el.classList.toggle('on');hideConflicts();if(el.dataset.res==='Großspielfeld')renderPitch();
@@ -1282,16 +1291,58 @@ function requireLogin(){
   openLogin('Zum Eintragen und Ändern bitte anmelden. Ansehen geht ohne.');
   return false;
 }
-function canBookTeam(team){
+function normalizeClasses(cls){
+  if(!cls)return {};
+  if(Array.isArray(cls)){const o={};cls.forEach(c=>{o[c]=[];});return o;}
+  return cls;
+}
+function navToNeu(){
+  if(!requireLogin())return;
+  if(formDirty||editingId){
+    goto('neu');
+    if(formDirty&&!editingId)showToast('Entwurf noch vorhanden – nicht gespeichert.',2500);
+  }else{
+    newEvent();
+  }
+}
+function canBookAnyOfTeam(team){
   if(!session)return false;
   if(session.isAdmin)return true;
-  return (session.classes||[]).includes(team);
+  const cls=normalizeClasses(session.classes);
+  return cls.hasOwnProperty(team);
+}
+function canBookTeam(team,squad){
+  if(!session)return false;
+  if(session.isAdmin)return true;
+  const cls=normalizeClasses(session.classes);
+  if(!cls.hasOwnProperty(team))return false;
+  if(!isJugend(team))return true;
+  const sq=cls[team]||[];
+  if(!sq.length)return true;
+  return sq.includes(squad||1);
+}
+function applySquadRestrictions(segId,team){
+  if(!session||session.isAdmin)return;
+  const cls=normalizeClasses(session.classes);
+  const sq=cls[team]||[];
+  if(!sq.length)return;
+  document.querySelectorAll('#'+segId+' button').forEach(b=>{
+    const n=parseInt(b.dataset.squad);
+    const ok=sq.includes(n);
+    b.disabled=!ok;
+    b.style.opacity=ok?'1':'0.3';
+    if(!ok&&b.classList.contains('on')){
+      b.classList.remove('on');
+      const first=document.querySelector('#'+segId+' button:not(:disabled)');
+      if(first)first.classList.add('on');
+    }
+  });
 }
 function filterTeamOptions(){
   const sel=document.getElementById('f-team');
   let firstAllowed=null;
   [...sel.options].forEach(o=>{
-    const allowed=canBookTeam(o.value);
+    const allowed=canBookAnyOfTeam(o.value);
     o.disabled=!allowed; o.hidden=!allowed;
     if(allowed&&!firstAllowed)firstAllowed=o.value;
   });
@@ -1301,7 +1352,7 @@ function filterTeamOptions(){
 }
 function newEvent(d){
   if(!requireLogin()) return;
-  if(!session.isAdmin&&!(session.classes||[]).length){
+  if(!session.isAdmin&&!Object.keys(normalizeClasses(session.classes||{})).length){
     showToast('Dir ist noch keine Altersklasse zugeordnet. Bitte beim Vorstand melden.',5000);
     return;
   }
@@ -1354,7 +1405,7 @@ function duplicateEvent(id){
   goto('neu');
   showToast('Kopie erstellt – Datum steht auf nächstes Jahr, bitte prüfen.',4000);
 }
-function cancelEdit(){ editingId=null; goto('termine'); }
+function cancelEdit(){ editingId=null; formDirty=false; goto('termine'); }
 async function submitEvent(){
   if(!requireLogin())return;
   const title=document.getElementById('f-anlass').value.trim();
@@ -1365,11 +1416,13 @@ async function submitEvent(){
   if(!von||!bis){showToast('Bitte Von- und Bis-Zeit eintragen.');return;}
   if(von>=bis){showToast('Die Bis-Zeit muss nach der Von-Zeit liegen.');return;}
   const team=document.getElementById('f-team').value;
-  if(!canBookTeam(team)){
-    showToast('Du darfst nur Termine für deine Altersklasse(n) anlegen: '+((session.classes||[]).join(', ')||'keine zugeordnet')+'.',5500);
-    return;
-  }
   const sb=document.querySelector('#f-squad button.on');const squad=sb?parseInt(sb.dataset.squad):1;
+  if(!canBookTeam(team,squad)){
+    const cls=normalizeClasses(session.classes||{});
+    const sq=cls[team]||[];
+    const msg=sq.length?'Nur Mannschaft '+sq.map(s=>jugendLetter(team)+s).join(', ')+' erlaubt.':'Diese Altersklasse ist dir nicht zugewiesen.';
+    showToast(msg,5000);return;
+  }
   const res=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res).filter(r=>r!=='Großspielfeld'&&r!=='Halle');
   const pitch=pitchOn()?curPitch():null;
   const halle=halleResOn()&&halleThirds.length?{thirds:[...halleThirds].sort((a,b)=>a-b)}:null;
@@ -1380,18 +1433,20 @@ async function submitEvent(){
   if(conflicts.length){showConflicts(conflicts);return;}
   hideConflicts();
   const btn=document.getElementById('save-btn'),lblEl=document.getElementById('save-label');
+  const spinEl=document.getElementById('save-spin'),checkEl=document.getElementById('save-check');
   const lbl=lblEl.textContent;btn.disabled=true;lblEl.textContent='Speichere …';
+  if(spinEl){spinEl.style.display='inline-block';}if(checkEl){checkEl.style.display='none';}
   const backup=JSON.stringify(EVENTS);
   try{
     if(editingId)Object.assign(EVENTS.find(x=>x.id===editingId),{d,t:von,bis,title,team,squad,pitch,halle,res,note});
     else EVENTS.push({id:crypto.randomUUID(),d,t:von,bis,title,team,squad,pitch,halle,res,note,ownerId:session.id,ownerName:session.name});
-    await saveEvents((editingId?'Termin geändert: ':'Neuer Termin: ')+title+' ('+fmtShort(d)+') – '+session.name);
-    editingId=null;document.getElementById('cancel-btn').style.display='none';
+    await saveEvents((editingId?'Termin geändert: ':'Neuer Termin: ')+title+' – '+teamLabel(team,squad)+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name);
+    editingId=null;formDirty=false;document.getElementById('cancel-btn').style.display='none';
     selDate=d;const dt=new Date(d+'T00:00:00');curY=dt.getFullYear();curM=dt.getMonth();yearShown=curY;
     goto('termine');setView('monat');renderStart();resetForm();
     showToast('Gespeichert: '+title);
   }catch(err){EVENTS=JSON.parse(backup);showToast('Fehler: '+err.message,6000);}
-  finally{btn.disabled=false;lblEl.textContent=lbl;}
+  finally{btn.disabled=false;lblEl.textContent=lbl;if(spinEl){spinEl.style.display='none';}if(checkEl){checkEl.style.display='inline';}}
 }
 function deleteEvent(id){
   if(!requireLogin()) return;
@@ -1400,7 +1455,7 @@ function deleteEvent(id){
   askConfirm('Termin löschen?','„'+e.title+'" am '+fmtShort(e.d)+' wird dauerhaft entfernt.','Löschen',async()=>{
     const backup=JSON.stringify(EVENTS);
     EVENTS=EVENTS.filter(x=>x.id!==id);
-    try{ await saveEvents('Termin gelöscht: '+e.title+' ('+fmtShort(e.d)+') – '+session.name);
+    try{ await saveEvents('Termin gelöscht: '+e.title+' – '+teamLabel(e.team,e.squad)+' · '+e.t+'–'+eventBis(e)+' · '+fmtShort(e.d)+' – '+session.name);
       render(); renderStart(); showToast('Termin gelöscht.');
     }catch(err){ EVENTS=JSON.parse(backup); showToast('Fehler: '+err.message,6000); }
   });
@@ -1756,11 +1811,32 @@ function adminCards(){
     h+='<div class="user-row"><div class="avatar'+(u.admin?' adm':'')+'">'+initials(u.first+' '+u.last)+'</div>'+
        '<div class="user-info"><div class="n">'+esc(u.first+' '+u.last)+(u.admin?'<span class="badge-admin">Admin</span>':'')+'</div>'+
        '<div class="e">'+esc(u.email)+'</div>'+
-       ((u.classes||[]).length?'<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;">'+(u.classes||[]).map(cl=>'<span class="badge-res" style="font-size:8.5px;padding:2px 6px;">'+esc(cl)+'</span>').join('')+'</div>':'')+'</div>'+
+       (()=>{ const cls=normalizeClasses(u.classes||{});const keys=Object.keys(cls);if(!keys.length)return '</div>';return '<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;">'+keys.map(t=>{const sq=cls[t]||[];const sqLabel=isJugend(t)&&sq.length?(' · '+sq.map(s=>jugendLetter(t)+s).join(',')):'';return '<span class="badge-res" style="font-size:8px;padding:2px 6px;">'+esc(t)+esc(sqLabel)+'</span>';}).join('')+'</div></div>';})()+
        '<button class="ibtn" onclick="toggleClassEditor(\''+u.id+'\')" aria-label="Altersklassen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg></button>'+
        '<button class="ibtn" onclick="toggleUserAdmin(\''+u.id+'\')" aria-label="Admin-Recht"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg></button>'+
        '<button class="ibtn del" onclick="deleteUser(\''+u.id+'\')" aria-label="Löschen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>'+
-       (classEditorOpen===u.id?'<div style="padding:8px 2px 12px;border-bottom:1px solid var(--line);"><div class="chip-group">'+ALL_CLASSES.map(cl=>'<div class="res-chip'+((u.classes||[]).includes(cl)?' on':'')+'" onclick="toggleUserClass(\''+u.id+'\',\''+cl+'\')" style="padding:6px 10px;font-size:11px;">'+cl+'</div>').join('')+'</div><button class="ghost-btn" style="margin-top:8px;" onclick="saveUserClasses(\''+u.id+'\')">Altersklassen speichern</button></div>':'');
+       (classEditorOpen===u.id?(()=>{
+  const cls=normalizeClasses(u.classes||{});
+  let eh='<div style="padding:8px 2px 14px;border-bottom:1px solid var(--line);">';
+  ALL_CLASSES.forEach(team=>{
+    const on=cls.hasOwnProperty(team);
+    const sq=on?(cls[team]||[]):[];
+    const isJ=isJugend(team);
+    const L=jugendLetter(team);
+    eh+='<div style="margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">';
+    eh+='<div class="res-chip'+(on?' on':'')+'" onclick="toggleUserTeam(\''+u.id+'\',\''+team+'\')" style="padding:6px 11px;font-size:11.5px;">'+esc(team)+'</div>';
+    if(on&&isJ){
+      [1,2,3].forEach(n=>{
+        const sqOn=!sq.length||sq.includes(n);
+        eh+='<span class="squad-sq-chip'+(sqOn?' on':'')+'" onclick="toggleUserSquad(\''+u.id+'\',\''+team+'\','+n+')">'+L+n+'</span>';
+      });
+      eh+='<span style="font-size:9.5px;color:var(--ink-soft);">'+(sq.length?sq.map(s=>L+s+'-Jugend').join(', '):'alle Mannschaften')+'</span>';
+    }
+    eh+='</div>';
+  });
+  eh+='<button class="ghost-btn" style="margin-top:4px;" onclick="saveUserClasses(\''+u.id+'\')">Zuweisungen speichern</button></div>';
+  return eh;
+})():'');
   });
   return h+'</div>';
 }
@@ -1893,7 +1969,8 @@ async function createUser(){
   const mail=document.getElementById('nu-mail').value.trim().toLowerCase();
   const pass=document.getElementById('nu-pass').value;
   const isAdm=document.getElementById('nu-admin').classList.contains('on');
-  const classes=[...document.querySelectorAll('#nu-classes .res-chip.on')].map(x=>x.dataset.cl);
+  const classArr=[...document.querySelectorAll('#nu-classes .res-chip.on')].map(x=>x.dataset.cl);
+  const classes={}; classArr.forEach(t=>{classes[t]=[];});
   if(!first||!last||!mail){showToast('Bitte Vorname, Nachname und E-Mail ausfüllen.');return;}
   if(!/^\S+@\S+\.\S+$/.test(mail)){showToast('E-Mail sieht nicht gültig aus.');return;}
   if(pass.length<8){showToast('Passwort braucht mindestens 8 Zeichen.');return;}
@@ -1918,18 +1995,31 @@ function toggleClassEditor(id){
   classEditorOpen=(classEditorOpen===id)?null:id;
   renderKonto();
 }
-function toggleUserClass(id,cl){
+function toggleUserTeam(id,team){
   const u=USERS.find(x=>x.id===id); if(!u)return;
-  u.classes=u.classes||[];
-  const i=u.classes.indexOf(cl);
-  if(i>=0)u.classes.splice(i,1); else u.classes.push(cl);
+  u.classes=normalizeClasses(u.classes||{});
+  if(u.classes.hasOwnProperty(team))delete u.classes[team]; else u.classes[team]=[];
+  renderKonto();
+}
+function toggleUserSquad(id,team,squad){
+  const u=USERS.find(x=>x.id===id); if(!u)return;
+  u.classes=normalizeClasses(u.classes||{});
+  if(!u.classes.hasOwnProperty(team))u.classes[team]=[];
+  const sq=[...(u.classes[team]||[])];
+  const expanded=sq.length?sq:[1,2,3];
+  const i=expanded.indexOf(squad);
+  if(i>=0)expanded.splice(i,1); else expanded.push(squad);
+  expanded.sort((a,b)=>a-b);
+  u.classes[team]=expanded.length===3?[]:expanded;
   renderKonto();
 }
 async function saveUserClasses(id){
   const u=USERS.find(x=>x.id===id); if(!u)return;
   const backup=JSON.stringify(USERS);
   try{
-    await saveUsers('Altersklassen geändert: '+u.first+' '+u.last+' → '+((u.classes||[]).join(', ')||'keine'));
+    const cls=normalizeClasses(u.classes||{});
+    const clsLabel=Object.keys(cls).length?Object.keys(cls).map(t=>{const sq=cls[t]||[];return t+(isJugend(t)&&sq.length?'('+sq.map(s=>jugendLetter(t)+s).join(',')+')':(isJugend(t)?'(alle)':''));}).join(', '):'keine';
+    await saveUsers('Mannschaften zugewiesen: '+u.first+' '+u.last+' → '+clsLabel);
     classEditorOpen=null;
     showToast('Altersklassen gespeichert.');
     renderKonto();
