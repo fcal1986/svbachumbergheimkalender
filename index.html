@@ -1014,13 +1014,13 @@ function goto(n){
   if(n==='training') renderTraining();
 }
 function setView(v){
-  view=v;
+  view=v; if(v==='liste') listDaysLoaded=30;
   document.querySelectorAll('#viewseg button').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
   ['liste','monat','jahr'].forEach(k=>document.getElementById('view-'+k).style.display=(k===v?'block':'none'));
   render();
 }
 function setFilter(f){
-  filter=f;
+  filter=f; listDaysLoaded=30;
   document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f===f));
   render(); renderStart();
 }
@@ -1136,21 +1136,46 @@ function shareEvent(id){
     (e.note?'Info: '+e.note+'\n':'')+baseUrl()+'#t='+e.id;
   window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
 }
+let listDaysLoaded = 30; // wie viele Tage ab heute geladen sind
+
 function renderList(){
   const box=document.getElementById('view-liste');
-  let evs=filtered().slice();
-  for(let i=0;i<30;i++){
+  // Events ab heute
+  let evs=filtered().filter(e=>e.d>=todayStr).slice();
+  // Trainings für geladene Tage
+  for(let i=0;i<listDaysLoaded;i++){
     const dt=new Date(); dt.setDate(dt.getDate()+i);
     evs=evs.concat(trainingInstancesOn(ymd(dt)).filter(passesFilter));
   }
+  // cutoff-Datum berechnen
+  const cutoff=new Date(); cutoff.setDate(cutoff.getDate()+listDaysLoaded);
+  const cutoffStr=ymd(cutoff);
+  evs=evs.filter(e=>e.d<cutoffStr);
   evs.sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t));
-  if(!evs.length){box.innerHTML='<div class="empty-day">Keine Termine für diesen Filter.</div>';return;}
+  if(!evs.length){
+    box.innerHTML='<div class="empty-day">Keine Termine für diesen Filter.</div>'
+      +'<button class="ghost-btn" onclick="loadMoreDays()">+ Weitere 30 Tage laden</button>';
+    return;
+  }
   let h='',last='';
   evs.forEach(e=>{
     if(e.d!==last){ if(last)h+='</div>'; h+='<div class="day-group"><span class="day-head">'+fmtHead(e.d)+'</span>'; last=e.d; }
     h+=rowHTML(e);
   });
-  box.innerHTML=h+'</div>';
+  h+='</div>';
+  // Lade-mehr-Button + Info
+  const rangeEnd=cutoff.getDate()+'. '+MONTHS[cutoff.getMonth()];
+  h+='<div style="text-align:center;padding:6px 0 4px;font-size:11px;color:var(--ink-soft);">Angezeigt bis '+rangeEnd+'</div>'
+    +'<button class="ghost-btn" onclick="loadMoreDays()">+ Weitere 30 Tage laden</button>';
+  box.innerHTML=h;
+}
+
+function loadMoreDays(){
+  listDaysLoaded+=30;
+  renderList();
+  // Scroll zum Ende des bisherigen Inhalts
+  const box=document.getElementById('view-liste');
+  if(box) box.lastElementChild?.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function moveMonth(s){curM+=s;if(curM<0){curM=11;curY--;}if(curM>11){curM=0;curY++;}render();}
 function gotoToday(){curY=today.getFullYear();curM=today.getMonth();selDate=todayStr;render();}
@@ -1238,7 +1263,7 @@ function renderStart(){
       +'<div class="ev-date-box"><span class="ev-dow">'+dow+'</span><span class="ev-day">'+dd+'</span></div>'
       +'<div class="ev-sep"></div>'
       +'<div class="ev-title-box"><h4>'+esc(nx.title)+'</h4>'
-      +(()=>{ const nxC=nx.ownerId?getContactDisplay(nx.ownerId):''; return '<div class="ev-sub">'+nx.t+'–'+eventBis(nx)+' · '+esc(teamLabel(nx.team,nx.squad))+(nx.ownerName?' · '+esc(nx.ownerName):'')+(nxC?' · '+esc(nxC):'')+'</div></div>'; })()
+      +(()=>{ const nxC=nx.ownerId?getContactDisplay(nx.ownerId):''; return '<div class="ev-sub">'+nx.t+'–'+eventBis(nx)+' · '+esc(nx.ownerName||'–')+(nxC?' · '+esc(nxC):'')+'</div></div>'; })()
       +(()=>{ let a='<button class="ibtn share" onclick="shareEvent(\''+nx.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"/></svg></button>';
         if(session)a+='<button class="ibtn" onclick="duplicateEvent(\''+nx.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>';
         if(canEdit(nx)){a+='<button class="ibtn" onclick="editEvent(\''+nx.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>';
