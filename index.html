@@ -105,6 +105,15 @@
   .badge-team.verein{background:var(--ink-soft);}
   .badge-squad{font-size:10px;font-weight:700;padding:3px 9px;border-radius:16px;background:var(--yellow-soft);color:#6E5A0C;}
   .badge-training{font-size:10px;font-weight:700;padding:3px 9px;border-radius:16px;background:var(--green-dim);color:#1E5730;}
+  .log-row{display:flex;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line);align-items:flex-start;}
+  .log-row:last-child{border-bottom:none;}
+  .log-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:none;}
+  .log-icon svg{width:15px;height:15px;}
+  .log-body{flex:1;min-width:0;}
+  .log-msg{font-size:12px;font-weight:600;color:var(--ink);line-height:1.4;}
+  .log-time{font-size:10.5px;color:var(--ink-soft);margin-top:3px;display:flex;align-items:center;gap:6px;}
+  .log-cat{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:1px 7px;font-size:9.5px;font-weight:700;color:var(--ink-soft);}
+  .log-more{font-size:11px;color:var(--ink-soft);padding:10px 2px;text-align:center;}
   .badge-res{font-size:10px;font-weight:600;padding:3px 9px;border-radius:16px;background:var(--bg);color:var(--ink-soft);}
   .badge-admin{font-size:9px;font-weight:700;padding:2px 7px;border-radius:12px;background:var(--green);color:#fff;}
 
@@ -1130,7 +1139,6 @@ function renderMonth(){
       cats.slice(0,3).map(c=>'<span class="cdot '+c+'"></span>').join('')+'</div></div>';
   }
   h+='</div><div class="cal-legend"><span><span class="cdot jugend"></span>Jugend</span><span><span class="cdot senioren"></span>Senioren</span><span><span class="cdot verein"></span>Verein</span><span>'+miniPitch([1,2])+'Platzbelegung</span></div>';
-  h+=capBarHTML(selDate);
   const evs=eventsOn(selDate);
   h+='<div style="margin-top:14px;"><p class="section-label">'+fmtHead(selDate)+'</p>';
   h+=evs.length?evs.map(rowHTML).join(''):'<div class="empty-day">Kein Termin an diesem Tag.</div>';
@@ -1756,6 +1764,104 @@ function adminCards(){
   });
   return h+'</div>';
 }
+
+/* ── Protokoll / Audit-Log ──────────────────────────────────────────── */
+let LOG_CACHE=null, LOG_LOADING=false;
+let logSearch='', logCat='alle';
+
+function logMeta(msg){
+  const m=msg.trim();
+  if(m.startsWith('Neuer Termin'))       return{cat:'Termin',col:'var(--ok)',    icon:'M12 5v14M5 12h14'};
+  if(m.startsWith('Termin geändert'))    return{cat:'Termin',col:'var(--blue)',  icon:'M4 20h4l10-10-4-4L4 16v4zM13.5 6.5l4 4'};
+  if(m.startsWith('Termin gelöscht'))    return{cat:'Termin',col:'var(--warn)',  icon:'M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13'};
+  if(m.startsWith('Training abgesagt'))  return{cat:'Training',col:'var(--warn)',icon:'M6 6l12 12M18 6L6 18'};
+  if(m.startsWith('Absage zurück'))      return{cat:'Training',col:'var(--ok)', icon:'M20 6L9 17l-5-5'};
+  if(m.startsWith('Trainingszeit'))      return{cat:'Training',col:'var(--blue)',icon:'M12 7v5l3 3M12 3a9 9 0 100 18A9 9 0 0012 3'};
+  if(m.startsWith('Zugang angelegt'))    return{cat:'Zugang',col:'var(--ok)',   icon:'M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3M21 21c0-3.3-2.7-6-6-6H9c-3.3 0-6 2.7-6 6'};
+  if(m.startsWith('Zugang gelöscht'))    return{cat:'Zugang',col:'var(--warn)', icon:'M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13'};
+  if(m.startsWith('Admin'))              return{cat:'Zugang',col:'var(--blue)', icon:'M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z'};
+  if(m.startsWith('Passwort'))           return{cat:'Zugang',col:'var(--ink-soft)',icon:'M16 10h2a2 2 0 012 2v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7a2 2 0 012-2h2M12 3a4 4 0 014 4v3H8V7a4 4 0 014-4z'};
+  if(m.startsWith('Altersklassen'))      return{cat:'Zugang',col:'var(--blue)', icon:'M4 20h4l10-10-4-4L4 16v4zM13.5 6.5l4 4'};
+  if(m.startsWith('Trainer-Zuordnung'))  return{cat:'Zugang',col:'var(--ink-soft)',icon:'M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3M21 21c0-3.3-2.7-6-6-6H9c-3.3 0-6 2.7-6 6'};
+  return{cat:'Sonstig',col:'var(--gray)',icon:'M12 12m-1 0a1 1 0 102 0 1 1 0 10-2 0'};
+}
+function fmtLogTime(ts){
+  const d=new Date(ts);
+  const pad=n=>String(n).padStart(2,'0');
+  return pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+
+         ' · '+pad(d.getHours())+':'+pad(d.getMinutes())+' Uhr';
+}
+async function loadLogIfNeeded(){
+  if(LOG_CACHE!==null||LOG_LOADING)return;
+  LOG_LOADING=true;
+  const el=document.getElementById('log-list');
+  if(el)el.innerHTML='<div style="text-align:center;padding:20px;font-size:12px;color:var(--ink-soft);">Wird geladen …</div>';
+  try{
+    const hdr={Accept:'application/vnd.github+json'};
+    if(session&&session.token)hdr.Authorization='Bearer '+session.token;
+    const paths=['data/events.json','data/training.json','data/users.json'];
+    const all=[];
+    await Promise.all(paths.map(async path=>{
+      try{
+        const r=await fetch('https://api.github.com/repos/'+CFG.repo+'/commits?path='+path+'&per_page=80',{headers:hdr,cache:'no-store'});
+        if(!r.ok)return;
+        const commits=await r.json();
+        commits.forEach(cm=>all.push({
+          sha:cm.sha.slice(0,7),
+          ts:cm.commit.author.date,
+          msg:cm.commit.message.trim()
+        }));
+      }catch(e){}
+    }));
+    const seen=new Set();
+    all.sort((a,b)=>b.ts.localeCompare(a.ts));
+    LOG_CACHE=all.filter(e=>{ if(seen.has(e.sha))return false; seen.add(e.sha); return true; })
+                  .filter(e=>e.msg&&!e.msg.startsWith('Initial'));
+  }catch(e){ LOG_CACHE=[]; }
+  LOG_LOADING=false;
+  renderLogList();
+}
+function renderLogList(){
+  const el=document.getElementById('log-list'); if(!el)return;
+  if(!LOG_CACHE){ el.innerHTML=''; return; }
+  const q=logSearch.toLowerCase().trim();
+  const cats=['alle','Termin','Training','Zugang'];
+  let entries=LOG_CACHE.filter(e=>{
+    const meta=logMeta(e.msg);
+    if(logCat!=='alle'&&meta.cat!==logCat)return false;
+    if(!q)return true;
+    return e.msg.toLowerCase().includes(q)||fmtLogTime(e.ts).includes(q);
+  });
+  if(!entries.length){
+    el.innerHTML='<div style="font-size:11.5px;color:var(--ink-soft);padding:12px 2px;">Keine Einträge für diese Suche.</div>';
+    return;
+  }
+  const shown=entries.slice(0,80);
+  el.innerHTML=shown.map(e=>{
+    const m=logMeta(e.msg);
+    return '<div class="log-row">'+
+      '<div class="log-icon" style="background:'+m.col+'20;border:1.5px solid '+m.col+'40;">'+
+        '<svg viewBox="0 0 24 24" fill="none" stroke="'+m.col+'" stroke-width="2"><path d="'+m.icon+'"/></svg>'+
+      '</div>'+
+      '<div class="log-body">'+
+        '<div class="log-msg">'+esc(e.msg)+'</div>'+
+        '<div class="log-time">'+fmtLogTime(e.ts)+'<span class="log-cat">'+m.cat+'</span></div>'+
+      '</div>'+
+    '</div>';
+  }).join('')+
+  (entries.length>80?'<div class="log-more">… '+( entries.length-80)+' ältere Einträge (GitHub → Commits)</div>':'');
+}
+function logCard(){
+  const catBtns=['alle','Termin','Training','Zugang'].map(cat=>
+    '<button class="filter-chip'+(logCat===cat?' on':'')+'" onclick="logCat=\''+cat+'\';renderLogList();renderKonto()">'+
+    (cat==='alle'?'Alle':cat)+'</button>'
+  ).join('');
+  return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:16px;height:16px;stroke:var(--green)"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>Protokoll</h4>'+
+    '<p class="sub">Alle gespeicherten Änderungen – schreibgeschützt. Ladet direkt aus den GitHub-Commits.</p>'+
+    '<input type="search" id="log-search" placeholder="Suche nach Name, Datum, Aktion …" value="'+esc(logSearch)+'" oninput="logSearch=this.value;renderLogList()" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-family:\'Poppins\';font-size:13px;margin:10px 0 8px;background:var(--bg);outline:none;" onfocus="this.style.borderColor=\'var(--green)\'" onblur="this.style.borderColor=\'var(--line)\'">'+
+    '<div class="chip-scroll" style="margin-bottom:10px;">'+catBtns+'</div>'+
+    '<div id="log-list"></div></div>';
+}
 function renderKonto(){
   const box=document.getElementById('konto-body');
   let h='';
@@ -1769,7 +1875,8 @@ function renderKonto(){
      '<p class="sub">'+esc(session.email)+(session.isSuper?' · Notzugang':'')+'</p>'+
      '<button class="cancel-btn" onclick="logout()">Abmelden</button></div>';
   if(session.isAdmin) h+=adminCards();
-  box.innerHTML=h+pwCard()+bioCard()+icalCard()+pwaCard();
+  box.innerHTML=h+logCard()+pwCard()+bioCard()+icalCard()+pwaCard();
+  loadLogIfNeeded();
 }
 function saveAdminToken(){
   const t=document.getElementById('ad-token').value.trim();
