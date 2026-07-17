@@ -47,6 +47,23 @@
       "note": "",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
       "ownerName": "Fabrizio Calcagno"
+    },
+    {
+      "id": "0d44972e-5b1d-4c00-9bf3-b388a0b774d4",
+      "d": "2026-07-19",
+      "t": "15:00",
+      "bis": "17:00",
+      "title": "Test A",
+      "team": "A-Jugend",
+      "squad": 2,
+      "pitch": {
+        "mode": "ganz"
+      },
+      "halle": null,
+      "res": [],
+      "note": "",
+      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
+      "ownerName": "Fabrizio Calcagno"
     }
   ]
 }
