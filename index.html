@@ -91,8 +91,10 @@
   .ev-t{font-size:16px;font-weight:800;color:var(--ink);line-height:1.1;}
   .ev-tl{font-size:9.5px;color:var(--ink-soft);margin-top:2px;font-weight:600;text-transform:uppercase;}
   .ev-note{font-size:11px;color:var(--ink-soft);margin-top:8px;padding:7px 10px;background:var(--bg);border-radius:8px;}
-  .ev-contact{font-size:11.5px;margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-  .ev-contact a{color:var(--blue);text-decoration:none;background:var(--chalk-dim,#E8ECF4);padding:4px 10px 4px 8px;border-radius:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px;}
+  .ev-contact{font-size:11.5px;margin-top:8px;display:flex;align-items:center;flex-wrap:wrap;row-gap:5px;column-gap:0;}
+  .ci-link{color:var(--blue);text-decoration:none;display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:600;padding:2px 0;}
+  .ci-link svg{width:12px;height:12px;stroke:currentColor;flex:none;}
+  .ci-sep{color:var(--ink-soft);margin:0 7px;font-size:10px;}
   .row-acts{display:flex;gap:4px;flex:none;}
   .ibtn{width:28px;height:28px;border-radius:8px;border:1.5px solid var(--line);background:var(--white);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
   .ibtn svg{width:13px;height:13px;stroke:var(--ink-soft);}
@@ -1519,11 +1521,13 @@ async function submitEvent(){
   try{
     if(editingId)Object.assign(EVENTS.find(x=>x.id===editingId),{d,t:von,bis,title,team,squad,pitch,halle,res,note});
     else EVENTS.push({id:crypto.randomUUID(),d,t:von,bis,title,team,squad,pitch,halle,res,note,ownerId:session.id,ownerName:session.name});
-    await saveEvents((editingId?'Termin geändert: ':'Neuer Termin: ')+title+' – '+teamLabel(team,squad)+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name);
+    const wasEditing=!!editingId;
+    const logMsg=(wasEditing?'Termin geändert: ':'Neuer Termin: ')+title+' – '+teamLabel(team,squad)+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name;
     editingId=null;formDirty=false;document.getElementById('cancel-btn').style.display='none';
     selDate=d;const dt=new Date(d+'T00:00:00');curY=dt.getFullYear();curM=dt.getMonth();yearShown=curY;
-    goto('termine');setView('monat');renderStart();resetForm();
+    goto('termine');setView('monat');render();renderStart();resetForm();
     showToast('Gespeichert: '+title);
+    saveEvents(logMsg).catch(err=>{ EVENTS=JSON.parse(backup);render();renderStart();showToast('Speichern fehlgeschlagen: '+err.message,6000); });
   }catch(err){EVENTS=JSON.parse(backup);showToast('Fehler: '+err.message,6000);}
   finally{btn.disabled=false;lblEl.textContent=lbl;if(spinEl){spinEl.style.display='none';}if(checkEl){checkEl.style.display='inline';}hideSaving();}
 }
@@ -1534,9 +1538,9 @@ function deleteEvent(id){
   askConfirm('Termin löschen?','„'+e.title+'" am '+fmtShort(e.d)+' wird dauerhaft entfernt.','Löschen',async()=>{
     const backup=JSON.stringify(EVENTS);
     EVENTS=EVENTS.filter(x=>x.id!==id);
-    try{ await saveEvents('Termin gelöscht: '+e.title+' – '+teamLabel(e.team,e.squad)+' · '+e.t+'–'+eventBis(e)+' · '+fmtShort(e.d)+' – '+session.name);
-      render(); renderStart(); showToast('Termin gelöscht.');
-    }catch(err){ EVENTS=JSON.parse(backup); showToast('Fehler: '+err.message,6000); }
+    render(); renderStart(); showToast('Termin gelöscht.');
+    saveEvents('Termin gelöscht: '+e.title+' – '+teamLabel(e.team,e.squad)+' · '+e.t+'–'+eventBis(e)+' · '+fmtShort(e.d)+' – '+session.name)
+      .catch(err=>{ EVENTS=JSON.parse(backup);render();renderStart();showToast('Rückgängig – Fehler: '+err.message,6000); });
   });
 }
 
@@ -1557,26 +1561,17 @@ function validityBadge(s){
   return '';
 }
 function todaysTrainingHTML(){
-  const dow=dowOf(todayStr);
-  const active=TRAINING.filter(s=>slotActiveOn(s,todayStr)).sort((a,b)=>a.from.localeCompare(b.from));
-  const cancelledToday=TRAINING.filter(s=>slotInRange(s,todayStr)&&(s.cancelled||[]).includes(todayStr)).sort((a,b)=>a.from.localeCompare(b.from));
-  let h='<div class="heute-card"><div class="hc-title">Heute · '+DAYS[new Date(todayStr+'T00:00:00').getDay()]+', '+fmtShort(todayStr)+'</div>';
-  if(!active.length&&!cancelledToday.length){
-    h+='<div class="heute-empty">Heute ist laut Plan kein Training angesetzt.</div>';
-  }else{
-    active.forEach(s=>{
-      h+='<div class="heute-row"><div class="ht">'+s.from+'–'+s.to+'</div>'+
-         '<div class="hteam">'+esc(trainName(s))+
-         '<div class="hsub">'+trainResBadges(s)+getTrainerNames(s).map(n=>'<span class="htrainer">'+esc(n)+'</span>').join('')+'</div></div>';
-    });
-    cancelledToday.forEach(s=>{
-      h+='<div class="heute-row off"><div class="ht">'+s.from+'–'+s.to+'</div>'+
-         '<div class="hteam">'+esc(trainName(s))+
-         '<div class="hsub">'+trainResBadges(s)+getTrainerNames(s).map(n=>'<span class="htrainer">'+esc(n)+'</span>').join('')+'</div><span class="hoff-pill">Abgesagt</span></div>';
-    });
-  }
-  h+='</div>';
-  return h;
+  const instances=trainingInstancesOn(todayStr)
+    .concat(TRAINING.filter(s=>slotInRange(s,todayStr)&&(s.cancelled||[]).includes(todayStr)).map(s=>({
+      ...trainingInstancesOn(todayStr).find(x=>x.trainingSlotId===s.id)||
+      {id:'cancelled-'+s.id,d:todayStr,t:s.from,bis:s.to,title:'Training',team:s.team,squad:s.squad||1,
+       pitch:s.pitch||null,halle:null,res:s.res||[],note:s.note||'',
+       ownerId:getTrainerIds(s)[0]||null,ownerName:getTrainerNames(s)[0]||'Vorstand',
+       trainerIds:getTrainerIds(s),trainerNames:getTrainerNames(s),isTraining:true,trainingSlotId:s.id},
+      cancelled:true
+    }))).filter((e,i,a)=>a.findIndex(x=>x.trainingSlotId===e.trainingSlotId)===i);
+  if(!instances.length)return '<div class="heute-card"><div class="hc-title">Heute · '+DAYS[new Date(todayStr+'T00:00:00').getDay()]+', '+fmtShort(todayStr)+'</div><div class="heute-empty">Heute ist laut Plan kein Training angesetzt.</div></div>';
+  return '<div class="heute-card"><div class="hc-title">Heute · '+DAYS[new Date(todayStr+'T00:00:00').getDay()]+', '+fmtShort(todayStr)+'</div>'+instances.map(e=>rowHTML(e)).join('')+'</div>';
 }
 function nextOccurrenceDate(s){
   for(let i=0;i<21;i++){
@@ -1610,9 +1605,10 @@ async function doCancelSlot(){
   const backup=JSON.stringify(TRAINING);
   s.cancelled=[...(s.cancelled||[]),date].sort();
   try{
-    await saveTraining('Training abgesagt: '+trainName(s)+' am '+fmtShort(date));
-    closeCancelModal(); renderTraining();
+    closeCancelModal(); renderTraining(); renderStart();
     showToast('Training am '+fmtShort(date)+' abgesagt.');
+    saveTraining('Training abgesagt: '+trainName(s)+' am '+fmtShort(date))
+      .catch(e=>{ TRAINING=JSON.parse(backup);renderTraining();renderStart();showToast('Fehler: '+e.message,6000); });
   }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   finally{ if(cmBtn){ cmBtn.disabled=false; cmBtn.textContent='Absagen'; } }
 }
@@ -1622,8 +1618,9 @@ async function reactivateCancelled(id,date){
   const backup=JSON.stringify(TRAINING);
   s.cancelled=(s.cancelled||[]).filter(d=>d!==date);
   try{
-    await saveTraining('Absage zurückgenommen: '+trainName(s)+' am '+fmtShort(date));
-    renderTraining(); showToast('Training am '+fmtShort(date)+' findet wieder statt.');
+    renderTraining(); renderStart(); showToast('Training am '+fmtShort(date)+' findet wieder statt.');
+    saveTraining('Absage zurückgenommen: '+trainName(s)+' am '+fmtShort(date))
+      .catch(e=>{ TRAINING=JSON.parse(backup);renderTraining();renderStart();showToast('Fehler: '+e.message,6000); });
   }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   finally{ hideSaving(); }
 }
@@ -1651,12 +1648,13 @@ function canTrainTeam(u,team,squad){
 }
 function getTrainersContactHTML(s){
   const names=getTrainerNames(s),ids=getTrainerIds(s);
-  const ico='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:12px;height:12px;stroke:var(--ink-soft)"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>';
-  if(!names.length)return '<div class="trainer-row"><div class="trainer-lbl">'+ico+'<em style="color:var(--ink-soft);font-weight:400;">wird bald ergänzt</em></div></div>';
+  const ico='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:12px;height:12px;stroke:var(--ink-soft);flex:none;"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>';
+  if(!names.length)return '<div style="font-size:11.5px;color:var(--ink-soft);margin-top:6px;">'+ico+' wird bald ergänzt</div>';
   return '<div class="trainers-block">'+names.map((name,i)=>{
-    const uid=ids[i]||null;
-    const ch=uid?getContactHTML(uid):'';
-    return'<div class="trainer-row"><div class="trainer-lbl">'+ico+esc(name)+'</div>'+(ch?'<div class="trainer-contacts">'+ch+'</div>':'')+' </div>';
+    const ch=ids[i]?getContactHTML(ids[i]):'';
+    return '<div class="trainer-row"><div class="trainer-lbl">'+ico+esc(name)+'</div>'+
+      (ch?'<div class="ev-contact" style="margin-top:4px;padding-left:16px;">'+ch+'</div>':'')+
+      '</div>';
   }).join('')+'</div>';
 }
 function renderTrainerChips(team,squad,selectedIds){
@@ -1703,37 +1701,52 @@ function requireAdmin(){
 function renderTraining(){
   const box=document.getElementById('train-body');
   const admin=session&&session.isAdmin;
+  // ── Heute ──
   let h=todaysTrainingHTML();
-  h += admin
-    ? '<div class="banner info">Als Admin pflegst du hier die feste Belegung. Alle anderen sehen sie nur.</div>'
-    : '<div class="lock-note"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Feste wöchentliche Belegung · nur vom Vorstand änderbar</div>';
-  const days=admin?[1,2,3,4,5,6,7]:[1,2,3,4,5,6,7].filter(d=>TRAINING.some(s=>s.day===d));
-  if(!days.length){ box.innerHTML=h+'<div class="empty-day">Noch keine Trainingszeiten hinterlegt.</div>'; return; }
-  days.forEach(d=>{
-    const slots=TRAINING.filter(s=>s.day===d).sort((a,b)=>a.from.localeCompare(b.from));
-    h+='<div class="train-day"><div class="d">'+WDAYS[d]+'<span class="line"></span>'+
-       (admin?'<button class="addlink" onclick="newTrainingSlot('+d+')">+ Zeit</button>':'')+'</div>';
-    if(!slots.length) h+='<div class="train-empty">Kein Training</div>';
-    slots.forEach(s=>{
-      const cancelled=(s.cancelled||[]).filter(dt=>!s.validUntil||dt<=s.validUntil).sort();
-      h+='<div class="train-slot"><div class="tinfo"><div class="team">'+esc(trainName(s))+'</div>'+
-         '<div class="loc">'+trainLocHTML(s)+validityBadge(s)+'</div>'+
-         getTrainersContactHTML(s);
-      if(cancelled.length){
-        h+='<div class="train-cancels">'+cancelled.map(dt=>
-          '<span class="cancel-chip">Abgesagt: '+fmtShort(dt)+(admin?'<button onclick="reactivateCancelled(\''+s.id+'\',\''+dt+'\')" aria-label="Absage zurücknehmen">×</button>':'')+'</span>'
-        ).join('')+'</div>';
-      }
-      if(admin) h+=(admin||(session&&canBookTeam(s.team,s.squad||1)))?'<button class="cancel-link" style="margin-top:8px;" onclick="openCancelModal(\''+s.id+'\')">Einzelnen Termin absagen</button>':'';
-      h+='</div>'+
-         '<div class="time">'+s.from+'–'+s.to+'</div>';
-      if(admin) h+='<div class="tacts">'+
-        '<button class="ibtn" onclick="editTrainingSlot(\''+s.id+'\')" aria-label="Bearbeiten"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>'+
-        '<button class="ibtn del" onclick="deleteTrainingSlot(\''+s.id+'\')" aria-label="Löschen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>';
+  // ── Banner ──
+  h+=admin?'<div class="banner info">Als Admin pflegst du hier die feste Belegung.</div>':
+    '<div class="lock-note"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>Feste wöchentliche Belegung · nur vom Vorstand änderbar</div>';
+  // ── Nächste 14 Tage (einheitliche Karten via rowHTML) ──
+  const planDays=[];
+  for(let i=1;i<15;i++){
+    const dt=new Date();dt.setDate(dt.getDate()+i);
+    const d=ymd(dt);
+    const evs=trainingInstancesOn(d).filter(passesFilter);
+    if(evs.length)planDays.push({d,evs});
+  }
+  if(planDays.length){
+    h+='<h3 style="font-size:13px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 8px;">Nächste 14 Tage</h3>';
+    planDays.forEach(({d,evs})=>{
+      h+='<div class="day-group"><span class="day-head">'+fmtHead(d)+'</span>';
+      evs.forEach(e=>{h+=rowHTML(e);});
       h+='</div>';
     });
-    h+='</div>';
-  });
+  }
+  // ── Admin: Slot-Definitionen (bearbeitbar) ──
+  if(admin){
+    h+='<details style="margin-top:16px;"><summary style="font-size:13px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;cursor:pointer;padding:4px 0 8px;list-style:none;display:flex;align-items:center;gap:6px;"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:14px;height:14px;stroke:var(--ink-soft)"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Trainingszeiten verwalten</summary>';
+    h+='<div style="margin-top:8px;">';
+    WDAYS.slice(1).forEach((wd,idx)=>{
+      const day=idx+1;
+      const slots=TRAINING.filter(s=>s.day===day).sort((a,b)=>a.from.localeCompare(b.from));
+      if(!slots.length)return;
+      h+='<h4 style="font-size:12px;font-weight:700;color:var(--ink-soft);margin:10px 0 4px;">'+wd+'</h4>';
+      slots.forEach(s=>{
+        h+='<div style="background:var(--white);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,.06);">';
+        h+='<div><div style="font-size:13px;font-weight:700;">'+esc(trainName(s))+'</div>';
+        h+='<div style="font-size:11px;color:var(--ink-soft);">'+s.from+'–'+s.to+' · '+trainLocHTML(s)+'</div>';
+        h+='<div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">'+trainerLabel(s)+'</div></div>';
+        h+='<div class="row-acts">';
+        h+=(admin||(session&&canBookTeam(s.team,s.squad||1)))?'<button class="cancel-link" style="font-size:11px;border:none;background:none;cursor:pointer;color:var(--warn);" onclick="openCancelModal(''+s.id+'')">Absagen</button>':'';
+        h+='<button class="ibtn" onclick="editTrainingSlot(''+s.id+'')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>';
+        h+='<button class="ibtn del" onclick="deleteTrainingSlot(''+s.id+'')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>';
+        h+='</div></div>';
+      });
+    });
+    // ── Admin: neuen Slot anlegen ──
+    h+='</div></details>';
+    
+  }
   box.innerHTML=h;
 }
 function tfTeamChange(){
@@ -1844,10 +1857,11 @@ async function saveTrainingSlot(){
     }else{
       TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[]});
     }
-    await saveTraining((tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+team+' (ab '+fmtShort(validFrom)+')');
-    tEditId=null; goto('training');
+    const tMsg=(tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+team+' (ab '+fmtShort(validFrom)+')';
+    tEditId=null; renderTraining(); renderStart(); goto('training');
     if(warn.length) showToast('⚠ Gespeichert – Achtung: '+warn[0],5000);
     else showToast('Trainingszeit gespeichert.');
+    saveTraining(tMsg).catch(e=>{ showToast('GitHub-Fehler: '+e.message,6000); });
   }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   finally{ btn.disabled=false; lbl.textContent=old; }
 }
@@ -1990,13 +2004,15 @@ function getContactHTML(ownerId){
   const uDb=USERS.find(x=>x.id===ownerId);
   const u=(session&&session.id===ownerId)?Object.assign({},uDb||{},session):uDb;
   if(!u)return '';
-  const parts=[];
+  const tel='<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.8 19.8 0 01-8.63-3.07A19.5 19.5 0 013.07 10a19.8 19.8 0 01-3.07-8.67A2 2 0 012 1.19h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>';
+  const mail='<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>';
   const displayEmail=u.contactEmail||u.email;
+  const parts=[];
   if((u.contactPublic==='phone'||u.contactPublic==='both')&&u.phone)
-    parts.push('<a href="tel:'+esc(u.phone)+'" style="color:var(--blue);text-decoration:none;display:inline-flex;align-items:center;gap:3px;"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" style=\"width:12px;height:12px;\"><path d=\"M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10a19.79 19.79 0 01-3.07-8.67A2 2 0 012 1.19h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z\"/></svg>'+esc(u.phone)+'</a>');
+    parts.push('<a href="tel:'+esc(u.phone)+'" class="ci-link ci-phone">'+tel+esc(u.phone)+'</a>');
   if((u.contactPublic==='email'||u.contactPublic==='both')&&displayEmail)
-    parts.push('<a href="mailto:'+esc(displayEmail)+'" style="color:var(--blue);text-decoration:none;display:inline-flex;align-items:center;gap:3px;"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" style=\"width:12px;height:12px;\"><path d=\"M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z\"/><polyline points=\"22,6 12,13 2,6\"/></svg>'+esc(displayEmail)+'</a>');
-  return parts.join('<span style=\"color:var(--line);margin:0 6px;\">·</span>');
+    parts.push('<a href="mailto:'+esc(displayEmail)+'" class="ci-link ci-email">'+mail+esc(displayEmail)+'</a>');
+  return parts.join('<span class="ci-sep">·</span>');
 }
 function getContactDisplay(ownerId){
   if(!ownerId)return '';
