@@ -66,7 +66,13 @@
         "part": "A"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [
+        "89d70bbf-9008-4563-b6ee-9724ed48fe7f"
+      ],
+      "trainerNames": [
+        "Damian Cvetkov"
+      ]
     },
     {
       "id": "39c5be5c-b23c-41a0-88d1-76e4b5fe474e",
@@ -80,7 +86,13 @@
         "part": "B"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [
+        "89d70bbf-9008-4563-b6ee-9724ed48fe7f"
+      ],
+      "trainerNames": [
+        "Damian Cvetkov"
+      ]
     },
     {
       "id": "56d7534c-ebee-4fe3-80e9-3aa0663e8d67",
@@ -248,7 +260,13 @@
         "part": "A"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [
+        "89d70bbf-9008-4563-b6ee-9724ed48fe7f"
+      ],
+      "trainerNames": [
+        "Damian Cvetkov"
+      ]
     },
     {
       "id": "8f1459db-27b3-42bf-be36-78c483ddcc58",
@@ -262,7 +280,13 @@
         "part": "B"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [
+        "89d70bbf-9008-4563-b6ee-9724ed48fe7f"
+      ],
+      "trainerNames": [
+        "Damian Cvetkov"
+      ]
     },
     {
       "id": "4607193e-c5e6-40a3-b78e-ab9d668bc2f2",
