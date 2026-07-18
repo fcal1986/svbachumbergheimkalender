@@ -89,12 +89,10 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [
-        "89d70bbf-9008-4563-b6ee-9724ed48fe7f"
-      ],
-      "trainerNames": [
-        "Damian Cvetkov"
-      ]
+      "trainerIds": [],
+      "trainerNames": [],
+      "validFrom": "2026-07-18",
+      "validUntil": null
     },
     {
       "id": "56d7534c-ebee-4fe3-80e9-3aa0663e8d67",
