@@ -136,7 +136,13 @@
         "part": "A"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [
+        "935d13de-b21e-43c5-a35f-405bfaf4cc6c"
+      ],
+      "trainerNames": [
+        "Fabrizio Calcagno"
+      ]
     },
     {
       "id": "ca2dc0b4-a484-4593-98eb-4b55d8a60d93",
@@ -332,7 +338,13 @@
         "part": "A"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [
+        "935d13de-b21e-43c5-a35f-405bfaf4cc6c"
+      ],
+      "trainerNames": [
+        "Fabrizio Calcagno"
+      ]
     },
     {
       "id": "e4ade27c-8118-4432-8004-4a83c2a4ac45",
@@ -444,7 +456,17 @@
         "part": "A"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [
+        "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
+        "a30f8c9b-96f9-4557-b28b-619e122080ea",
+        "fad91661-65cb-45d2-8da7-df79447471b6"
+      ],
+      "trainerNames": [
+        "Fabrizio Calcagno",
+        "David Skwara",
+        "Fabrizio 2 Test"
+      ]
     },
     {
       "id": "2aec6df0-a5f2-4dbb-8efb-48a85579ed37",
