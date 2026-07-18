@@ -12,48 +12,35 @@
         "part": "A"
       },
       "res": [],
-      "note": "",
-      "cancelled": [],
-      "trainerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
-      "trainerName": "David Skwara",
-      "validFrom": "2026-07-17",
-      "validUntil": null
+      "note": ""
     },
     {
       "id": "e008b81c-e045-47f1-b364-e34ca4aa9bc4",
       "day": 1,
       "from": "16:30",
-      "to": "18:00",
+      "to": "17:15",
       "team": "E-Jugend",
       "squad": 3,
       "pitch": {
-        "mode": "viertel",
-        "part": 4
+        "mode": "haelfte",
+        "part": "B"
       },
       "res": [],
-      "note": "",
-      "trainerId": null,
-      "trainerName": "",
-      "validFrom": "2026-07-17",
-      "validUntil": null
+      "note": ""
     },
     {
       "id": "0b93dc4f-9902-4f11-9379-e690ff361c09",
       "day": 1,
-      "from": "16:30",
+      "from": "17:15",
       "to": "18:00",
       "team": "F-Jugend",
       "squad": 1,
       "pitch": {
-        "mode": "viertel",
-        "part": 3
+        "mode": "haelfte",
+        "part": "B"
       },
       "res": [],
-      "note": "",
-      "trainerId": null,
-      "trainerName": "",
-      "validFrom": "2026-07-17",
-      "validUntil": null
+      "note": ""
     },
     {
       "id": "c7db27ed-3365-4fc2-a27e-a04753b9e48b",
@@ -417,14 +404,7 @@
         "part": "A"
       },
       "res": [],
-      "note": "",
-      "cancelled": [
-        "2026-07-17"
-      ],
-      "trainerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
-      "trainerName": "David Skwara",
-      "validFrom": "2026-07-17",
-      "validUntil": null
+      "note": ""
     },
     {
       "id": "2aec6df0-a5f2-4dbb-8efb-48a85579ed37",
