@@ -1561,17 +1561,20 @@ function validityBadge(s){
   return '';
 }
 function todaysTrainingHTML(){
-  const instances=trainingInstancesOn(todayStr)
-    .concat(TRAINING.filter(s=>slotInRange(s,todayStr)&&(s.cancelled||[]).includes(todayStr)).map(s=>({
-      ...trainingInstancesOn(todayStr).find(x=>x.trainingSlotId===s.id)||
-      {id:'cancelled-'+s.id,d:todayStr,t:s.from,bis:s.to,title:'Training',team:s.team,squad:s.squad||1,
-       pitch:s.pitch||null,halle:null,res:s.res||[],note:s.note||'',
-       ownerId:getTrainerIds(s)[0]||null,ownerName:getTrainerNames(s)[0]||'Vorstand',
-       trainerIds:getTrainerIds(s),trainerNames:getTrainerNames(s),isTraining:true,trainingSlotId:s.id},
-      cancelled:true
-    }))).filter((e,i,a)=>a.findIndex(x=>x.trainingSlotId===e.trainingSlotId)===i);
-  if(!instances.length)return '<div class="heute-card"><div class="hc-title">Heute · '+DAYS[new Date(todayStr+'T00:00:00').getDay()]+', '+fmtShort(todayStr)+'</div><div class="heute-empty">Heute ist laut Plan kein Training angesetzt.</div></div>';
-  return '<div class="heute-card"><div class="hc-title">Heute · '+DAYS[new Date(todayStr+'T00:00:00').getDay()]+', '+fmtShort(todayStr)+'</div>'+instances.map(e=>rowHTML(e)).join('')+'</div>';
+  const active=trainingInstancesOn(todayStr).sort((a,b)=>a.t.localeCompare(b.t));
+  const cancelledSlots=TRAINING.filter(s=>
+    slotInRange(s,todayStr)&&dowOf(todayStr)===s.day&&(s.cancelled||[]).includes(todayStr)
+  ).sort((a,b)=>a.from.localeCompare(b.from));
+  const title='<div class="hc-title">Heute · '+DAYS[new Date(todayStr+'T00:00:00').getDay()]+', '+fmtShort(todayStr)+'</div>';
+  if(!active.length&&!cancelledSlots.length)
+    return '<div class="heute-card">'+title+'<div class="heute-empty">Heute ist laut Plan kein Training angesetzt.</div></div>';
+  let h='<div class="heute-card">'+title;
+  h+=active.map(e=>rowHTML(e)).join('');
+  if(cancelledSlots.length){
+    h+=cancelledSlots.map(s=>'<div class="today-cancelled"><span class="hoff-pill">Abgesagt</span>'+esc(trainName(s))+'</div>').join('');
+  }
+  h+='</div>';
+  return h;
 }
 function nextOccurrenceDate(s){
   for(let i=0;i<21;i++){
@@ -1737,9 +1740,9 @@ function renderTraining(){
         h+='<div style="font-size:11px;color:var(--ink-soft);">'+s.from+'–'+s.to+' · '+trainLocHTML(s)+'</div>';
         h+='<div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">'+trainerLabel(s)+'</div></div>';
         h+='<div class="row-acts">';
-        h+=(admin||(session&&canBookTeam(s.team,s.squad||1)))?'<button class="cancel-link" style="font-size:11px;border:none;background:none;cursor:pointer;color:var(--warn);" onclick="openCancelModal(''+s.id+'')">Absagen</button>':'';
-        h+='<button class="ibtn" onclick="editTrainingSlot(''+s.id+'')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>';
-        h+='<button class="ibtn del" onclick="deleteTrainingSlot(''+s.id+'')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>';
+        h+=(admin||(session&&canBookTeam(s.team,s.squad||1)))?'<button class="cancel-link" style="font-size:11px;border:none;background:none;cursor:pointer;color:var(--warn);" onclick="openCancelModal(\''+s.id+'\')">Absagen</button>':'';
+        h+='<button class="ibtn" onclick="editTrainingSlot(\''+s.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>';
+        h+='<button class="ibtn del" onclick="deleteTrainingSlot(\''+s.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>';
         h+='</div></div>';
       });
     });
