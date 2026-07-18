@@ -77,7 +77,10 @@
         "iv": "RJDWGUAjcobVITOa",
         "cipher": "mLbXQIYZE0LLgYWZrT+FpykOaGnBL10rjsdgm7E2VMW6qQw9NrwfVRNi01L+uXgg9gRDTCrXYAGQTcbBmY5SKFjPzD8Lf1adzG3H5TgLAXurIZA8W1JtVpZR6A74fosZ9+FWvJW0z0DKW2a0KA=="
       },
-      "created": "2026-07-18T04:50:52.703Z"
+      "created": "2026-07-18T04:50:52.703Z",
+      "phone": "01729913002",
+      "contactEmail": "test@test.de",
+      "contactPublic": "both"
     }
   ]
 }
