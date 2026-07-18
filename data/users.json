@@ -92,7 +92,9 @@
       "email": "michael.raneck@sv-bachum-bergheim.de",
       "admin": true,
       "classes": {
-        "C-Jugend": []
+        "C-Jugend": [
+          1
+        ]
       },
       "enc": {
         "salt": "FfIFswLQ2VoE29WZjHkQcQ==",
