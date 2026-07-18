@@ -12,7 +12,19 @@
         "part": "A"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [
+        "a30f8c9b-96f9-4557-b28b-619e122080ea",
+        "fad91661-65cb-45d2-8da7-df79447471b6",
+        "935d13de-b21e-43c5-a35f-405bfaf4cc6c"
+      ],
+      "trainerNames": [
+        "David Skwara",
+        "Fabrizio 2 Test",
+        "Fabrizio Calcagno"
+      ],
+      "validFrom": "2026-07-18",
+      "validUntil": null
     },
     {
       "id": "e008b81c-e045-47f1-b364-e34ca4aa9bc4",
