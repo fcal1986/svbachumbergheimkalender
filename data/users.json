@@ -68,7 +68,9 @@
       "email": "test@test.de",
       "admin": false,
       "classes": {
-        "E-Jugend": []
+        "E-Jugend": [
+          2
+        ]
       },
       "enc": {
         "salt": "uig4lwrEznQI2UfJho5olw==",
