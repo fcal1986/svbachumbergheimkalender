@@ -222,6 +222,13 @@
   .htrainer{font-size:10px;font-weight:600;color:var(--ink-soft);}
   .ttrainer{font-size:10.5px;font-weight:600;color:var(--ink-soft);margin-top:4px;display:flex;align-items:center;gap:5px;}
   .ttrainer svg{width:11px;height:11px;stroke:var(--ink-soft);flex:none;}
+  .trainers-block{margin-top:8px;border-top:1px solid var(--line);padding-top:6px;}
+  .trainer-row{display:flex;flex-direction:column;gap:2px;padding:4px 0 2px;border-bottom:1px solid var(--line);}
+  .trainer-row:last-child{border-bottom:none;}
+  .trainer-lbl{font-size:12px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:4px;}
+  .trainer-lbl svg{width:12px;height:12px;stroke:var(--ink-soft);flex:none;}
+  .trainer-contacts{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px;padding-left:16px;}
+  .trainer-chips-wrap{min-height:36px;}
   .valid-badge{font-size:9.5px;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--bg);color:var(--ink-soft);}
   .cancel-chip{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:600;padding:3px 6px 3px 9px;border-radius:10px;background:#FDECEA;color:#9B3227;}
   .cancel-chip button{border:none;background:none;color:#9B3227;font-size:12px;line-height:1;cursor:pointer;padding:2px;font-weight:800;}
@@ -434,14 +441,14 @@
       <div class="field" id="tf-squad-field">
         <label>Mannschaft der Altersklasse</label>
         <div class="seg" id="tf-squad">
-          <button type="button" class="on" data-squad="1" onclick="setSquad(this)">1</button>
-          <button type="button" data-squad="2" onclick="setSquad(this)">2</button>
-          <button type="button" data-squad="3" onclick="setSquad(this)">3</button>
+          <button type="button" class="on" data-squad="1" onclick="setSquad(this);refreshTrainerChips()">1</button>
+          <button type="button" data-squad="2" onclick="setSquad(this);refreshTrainerChips()">2</button>
+          <button type="button" data-squad="3" onclick="setSquad(this);refreshTrainerChips()">3</button>
         </div>
       </div>
       <div class="field required">
         <label><span class="req-dot"></span>Trainer</label>
-        <select id="tf-trainer"></select>
+        <div id="tf-trainers-chips" class="chip-group trainer-chips-wrap"></div>
         <p class="helptext">Nur in der App angemeldete Zugänge wählbar. Noch nicht dabei? Erst unter Konto anlegen – bis dahin gilt „wird bald ergänzt".</p>
       </div>
       <p class="section-label">Ressourcen</p>
@@ -717,9 +724,10 @@ function trainingInstancesOn(d){
     id:'tr-'+s.id+'-'+d, d:d, t:s.from, bis:s.to,
     title:'Training', team:s.team, squad:s.squad||1,
     pitch:s.pitch||null, halle:null, res:s.res||[], note:s.note||'',
-    ownerId:s.trainerId||null,
-    ownerName:s.trainerName||'Vorstand',
-    trainerName:s.trainerName||'',
+    ownerId:getTrainerIds(s)[0]||null,
+    ownerName:getTrainerNames(s)[0]||'Vorstand',
+    trainerIds:getTrainerIds(s),
+    trainerNames:getTrainerNames(s),
     isTraining:true, trainingSlotId:s.id
   })).sort((a,b)=>a.t.localeCompare(b.t));
 }
@@ -1559,14 +1567,12 @@ function todaysTrainingHTML(){
     active.forEach(s=>{
       h+='<div class="heute-row"><div class="ht">'+s.from+'–'+s.to+'</div>'+
          '<div class="hteam">'+esc(trainName(s))+
-         '<div class="hsub">'+trainResBadges(s)+'<span class="htrainer">Trainer: '+trainerLabel(s)+'</span></div>'+
-         '</div></div>';
+         '<div class="hsub">'+trainResBadges(s)+getTrainerNames(s).map(n=>'<span class="htrainer">'+esc(n)+'</span>').join('')+'</div></div>';
     });
     cancelledToday.forEach(s=>{
       h+='<div class="heute-row off"><div class="ht">'+s.from+'–'+s.to+'</div>'+
          '<div class="hteam">'+esc(trainName(s))+
-         '<div class="hsub">'+trainResBadges(s)+'<span class="htrainer">Trainer: '+trainerLabel(s)+'</span></div>'+
-         '</div><span class="hoff-pill">Abgesagt</span></div>';
+         '<div class="hsub">'+trainResBadges(s)+getTrainerNames(s).map(n=>'<span class="htrainer">'+esc(n)+'</span>').join('')+'</div><span class="hoff-pill">Abgesagt</span></div>';
     });
   }
   h+='</div>';
@@ -1622,8 +1628,50 @@ async function reactivateCancelled(id,date){
   finally{ hideSaving(); }
 }
 function trainName(s){ return teamLabel(s.team,s.squad); }
+function getTrainerIds(s){
+  if(s&&s.trainerIds&&s.trainerIds.length)return s.trainerIds;
+  if(s&&s.trainerId)return[s.trainerId];
+  return[];
+}
+function getTrainerNames(s){
+  if(s&&s.trainerNames&&s.trainerNames.length)return s.trainerNames;
+  if(s&&s.trainerName)return[s.trainerName];
+  return[];
+}
 function trainerLabel(s){
-  return s&&s.trainerName?esc(s.trainerName):'wird bald ergänzt …';
+  const n=getTrainerNames(s);
+  return n.length?n.map(esc).join(', '):'wird bald ergänzt …';
+}
+function canTrainTeam(u,team,squad){
+  const cls=normalizeClasses(u.classes||{});
+  if(!cls.hasOwnProperty(team))return false;
+  if(!isJugend(team))return true;
+  const sq=cls[team]||[];
+  return!sq.length||sq.includes(squad||1);
+}
+function getTrainersContactHTML(s){
+  const names=getTrainerNames(s),ids=getTrainerIds(s);
+  const ico='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:12px;height:12px;stroke:var(--ink-soft)"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>';
+  if(!names.length)return '<div class="trainer-row"><div class="trainer-lbl">'+ico+'<em style="color:var(--ink-soft);font-weight:400;">wird bald ergänzt</em></div></div>';
+  return '<div class="trainers-block">'+names.map((name,i)=>{
+    const uid=ids[i]||null;
+    const ch=uid?getContactHTML(uid):'';
+    return'<div class="trainer-row"><div class="trainer-lbl">'+ico+esc(name)+'</div>'+(ch?'<div class="trainer-contacts">'+ch+'</div>':'')+' </div>';
+  }).join('')+'</div>';
+}
+function renderTrainerChips(team,squad,selectedIds){
+  const el=document.getElementById('tf-trainers-chips');if(!el)return;
+  const eligible=USERS.filter(u=>canTrainTeam(u,team,squad)).sort((a,b)=>(a.first+a.last).localeCompare(b.first+b.last));
+  const ids=new Set(selectedIds||[]);
+  if(!eligible.length){el.innerHTML='<p class="helptext" style="margin:0;color:var(--ink-soft);">Noch kein Trainer dieser Mannschaft zugeordnet – unter Konto anlegen.</p>';return;}
+  el.innerHTML=eligible.map(u=>'<div class="res-chip'+(ids.has(u.id)?' on':'')+'" data-id="'+u.id+'" onclick="this.classList.toggle(\'on\')">'+esc(u.first+' '+u.last)+'</div>').join('');
+}
+function refreshTrainerChips(){
+  const team=document.getElementById('tf-team').value;
+  const sb=document.querySelector('#tf-squad button.on');
+  const squad=sb?parseInt(sb.dataset.squad):1;
+  const cur=[...document.querySelectorAll('#tf-trainers-chips .res-chip.on')].map(x=>x.dataset.id);
+  renderTrainerChips(team,squad,cur);
 }
 function trainResBadges(s){
   let h='';
@@ -1632,15 +1680,7 @@ function trainResBadges(s){
   (s.res||[]).forEach(r=>h+='<span class="badge-res">'+esc(r)+'</span>');
   return h;
 }
-function fillTrainerSelect(selectedId){
-  const sel=document.getElementById('tf-trainer'); if(!sel)return;
-  let opts='<option value="">Wird bald ergänzt …</option>';
-  USERS.slice().sort((a,b)=>(a.first+a.last).localeCompare(b.first+b.last)).forEach(u=>{
-    opts+='<option value="'+u.id+'"'+(u.id===selectedId?' selected':'')+'>'+esc(u.first+' '+u.last)+'</option>';
-  });
-  sel.innerHTML=opts;
-  if(!selectedId) sel.value='';
-}
+function fillTrainerSelect(selectedId){ renderTrainerChips(document.getElementById('tf-team')?.value||'F-Jugend',1,selectedId?[selectedId]:[]); }
 function trainLocHTML(s){
   let h='';
   if(s.pitch) h+=pitchBadge(s.pitch);
@@ -1678,7 +1718,7 @@ function renderTraining(){
       const cancelled=(s.cancelled||[]).filter(dt=>!s.validUntil||dt<=s.validUntil).sort();
       h+='<div class="train-slot"><div class="tinfo"><div class="team">'+esc(trainName(s))+'</div>'+
          '<div class="loc">'+trainLocHTML(s)+validityBadge(s)+'</div>'+
-         '<div class="ttrainer"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Trainer: '+trainerLabel(s)+'</div>';
+         getTrainersContactHTML(s);
       if(cancelled.length){
         h+='<div class="train-cancels">'+cancelled.map(dt=>
           '<span class="cancel-chip">Abgesagt: '+fmtShort(dt)+(admin?'<button onclick="reactivateCancelled(\''+s.id+'\',\''+dt+'\')" aria-label="Absage zurücknehmen">×</button>':'')+'</span>'
@@ -1700,6 +1740,7 @@ function tfTeamChange(){
   const team=document.getElementById('tf-team').value;
   document.getElementById('tf-squad-field').style.display=isJugend(team)?'block':'none';
   relabelSquad('tf-squad',team);
+  setTimeout(refreshTrainerChips,0);
 }
 function tfToggleRes(el){ el.classList.toggle('on'); if(el.dataset.res==='Großspielfeld') tfRenderPitch(); }
 function tfPitchOn(){ return document.querySelector('#tf-res .res-chip[data-res="Großspielfeld"]').classList.contains('on'); }
@@ -1736,7 +1777,7 @@ function tfFill(s){
   document.getElementById('tf-validfrom').value=s.validFrom||todayStr;
   document.getElementById('tf-validuntil').value=s.validUntil||'';
   document.getElementById('tf-team').value=s.team;
-  fillTrainerSelect(s.trainerId||'');
+  // trainer chips werden nach tfTeamChange gesetzt
   document.querySelectorAll('#tf-squad button').forEach((b,i)=>b.classList.toggle('on',i===((s.squad||1)-1)));
   document.querySelectorAll('#tf-res .res-chip').forEach(c=>{
     if(c.dataset.res==='Großspielfeld') c.classList.toggle('on',!!s.pitch);
@@ -1747,6 +1788,7 @@ function tfFill(s){
   } else tfSetPitchMode('ganz');
   document.getElementById('tf-note').value=s.note||'';
   tfTeamChange(); tfRenderPitch();
+  renderTrainerChips(s.team,s.squad||1,getTrainerIds(s));
 }
 function newTrainingSlot(day){
   if(!requireAdmin()) return;
@@ -1776,9 +1818,9 @@ async function saveTrainingSlot(){
   const team=document.getElementById('tf-team').value;
   const sb=document.querySelector('#tf-squad button.on');
   const squad=sb?parseInt(sb.dataset.squad):1;
-  const trainerId=document.getElementById('tf-trainer').value||null;
-  const trainerUser=trainerId?USERS.find(u=>u.id===trainerId):null;
-  const trainerName=trainerUser?(trainerUser.first+' '+trainerUser.last):'';
+  const trainerChips=[...document.querySelectorAll('#tf-trainers-chips .res-chip.on')];
+  const trainerIds=trainerChips.map(x=>x.dataset.id).filter(Boolean);
+  const trainerNames=trainerIds.map(id=>{const u=USERS.find(x=>x.id===id);return u?(u.first+' '+u.last):'';}).filter(Boolean);
   const res=[...document.querySelectorAll('#tf-res .res-chip.on')].map(c=>c.dataset.res).filter(r=>r!=='Großspielfeld');
   const pitch=tfPitchOn()?tfCurPitch():null;
   const note=document.getElementById('tf-note').value.trim();
@@ -1798,9 +1840,9 @@ async function saveTrainingSlot(){
   try{
     if(tEditId){
       const existing=TRAINING.find(x=>x.id===tEditId);
-      Object.assign(existing,{day,from,to,team,squad,trainerId,trainerName,pitch,res,note,validFrom,validUntil:validUntil||null});
+      Object.assign(existing,{day,from,to,team,squad,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null});
     }else{
-      TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,trainerId,trainerName,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[]});
+      TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[]});
     }
     await saveTraining((tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+team+' (ab '+fmtShort(validFrom)+')');
     tEditId=null; goto('training');
@@ -2225,8 +2267,11 @@ function deleteUser(id){
     const backup=JSON.stringify(USERS);
     const tBackup=JSON.stringify(TRAINING);
     USERS=USERS.filter(x=>x.id!==id);
-    const affected=TRAINING.filter(s=>s.trainerId===id);
-    affected.forEach(s=>{ s.trainerId=null; s.trainerName=''; });
+    const affected=TRAINING.filter(s=>s.trainerId===id||(s.trainerIds||[]).includes(id));
+    affected.forEach(s=>{
+      s.trainerId=null; s.trainerName='';
+      if(s.trainerIds){const i=s.trainerIds.indexOf(id);if(i>=0){s.trainerIds.splice(i,1);if(s.trainerNames)s.trainerNames.splice(i,1);}}
+    });
     try{
       await saveUsers('Zugang gelöscht: '+u.first+' '+u.last);
       if(affected.length) await saveTraining('Trainer-Zuordnung entfernt: '+u.first+' '+u.last);
