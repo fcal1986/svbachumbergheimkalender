@@ -219,6 +219,7 @@
   .heute-row .hteam{flex:1;min-width:0;font-size:13px;font-weight:600;}
   .heute-row.off .hteam{color:var(--ink-soft);text-decoration:line-through;}
   .heute-row .hoff-pill{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:10px;background:#FDECEA;color:#9B3227;flex:none;}
+  .today-cancelled{font-size:12px;font-weight:600;color:var(--ink-soft);padding:6px 12px;display:flex;align-items:center;gap:6px;border-top:1px solid var(--line);}
   .heute-empty{font-size:12.5px;color:var(--ink-soft);padding:4px 0;}
   .heute-row .hsub{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:4px;}
   .htrainer{font-size:10px;font-weight:600;color:var(--ink-soft);}
@@ -1102,7 +1103,7 @@ function rowHTML(e){
   (e.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
   const bis=eventBis(e);
   const sub=e.t+'–'+bis+' · '+(e.isTraining?('Trainer: '+trainerLabel(e)):esc(e.ownerName||'–'));
-  const contactHtml=(!e.isTraining&&e.ownerId)?getContactHTML(e.ownerId):'';
+  const contactHtml=e.isTraining?getTrainersContactHTML(e):(e.ownerId?getContactHTML(e.ownerId):'');
   let acts='';
   if(e.isTraining){
     if(session&&(session.isAdmin||canBookAnyOfTeam(e.team))){
@@ -1727,6 +1728,7 @@ function renderTraining(){
   }
   // ── Admin: Slot-Definitionen (bearbeitbar) ──
   if(admin){
+    h+='<div style="display:flex;justify-content:flex-end;margin:8px 0 2px;"><button class="ghost-btn" style="font-size:11px;padding:6px 14px;" onclick="autoAssignAllTrainers()">↻ Trainer-Zuordnungen aktualisieren</button></div>';
     h+='<details style="margin-top:16px;"><summary style="font-size:13px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;cursor:pointer;padding:4px 0 8px;list-style:none;display:flex;align-items:center;gap:6px;"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:14px;height:14px;stroke:var(--ink-soft)"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Trainingszeiten verwalten</summary>';
     h+='<div style="margin-top:8px;">';
     WDAYS.slice(1).forEach((wd,idx)=>{
@@ -2188,6 +2190,7 @@ async function createUser(){
     const encRec=await encryptToken(session.token,pass);
     USERS.push({id:crypto.randomUUID(),first,last,email:mail,admin:isAdm,classes,enc:encRec,created:new Date().toISOString()});
     await saveUsers('Zugang angelegt: '+first+' '+last+(isAdm?' (Admin)':''));
+    autoAssignTrainer(newU).then(n=>{ if(n>0) saveTraining('Trainer auto-zugewiesen: '+newU.first+' '+newU.last).catch(()=>{}); }).catch(()=>{});
     showToast(first+' kann sich jetzt anmelden'+(isAdm?' und darf alles verwalten.':'.'));
     renderKonto();
   }catch(e){
@@ -2227,6 +2230,7 @@ async function saveUserClasses(id){
     const cls=normalizeClasses(u.classes||{});
     const clsLabel=Object.keys(cls).length?Object.keys(cls).map(t=>{const sq=cls[t]||[];return t+(isJugend(t)&&sq.length?'('+sq.map(s=>jugendLetter(t)+s).join(',')+')':(isJugend(t)?'(alle)':''));}).join(', '):'keine';
     await saveUsers('Mannschaften zugewiesen: '+u.first+' '+u.last+' → '+clsLabel);
+    autoAssignTrainer(u).then(n=>{ if(n>0) saveTraining('Trainer auto-zugewiesen: '+u.first+' '+u.last).then(()=>renderTraining()).catch(()=>{}); }).catch(()=>{});
     classEditorOpen=null;
     showToast('Altersklassen gespeichert.');
     renderKonto();
@@ -2265,6 +2269,34 @@ async function saveProfile(){
     showToast('Kontaktdaten gespeichert.');
     renderKonto();
   }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
+  finally{ hideSaving(); }
+}
+async function autoAssignTrainer(u){
+  const cls=normalizeClasses(u.classes||{});
+  if(!Object.keys(cls).length)return 0;
+  let changed=0;
+  TRAINING.forEach(s=>{
+    if(!canTrainTeam(u,s.team,s.squad||1))return;
+    s.trainerIds=s.trainerIds||[]; s.trainerNames=s.trainerNames||[];
+    if(!s.trainerIds.includes(u.id)){
+      s.trainerIds.push(u.id); s.trainerNames.push(u.first+' '+u.last); changed++;
+    }
+  });
+  return changed;
+}
+async function autoAssignAllTrainers(){
+  showSaving('Trainer-Zuordnungen werden aktualisiert …');
+  let total=0;
+  for(const u of USERS){ total+=await autoAssignTrainer(u); }
+  try{
+    if(total>0){
+      await saveTraining('Trainer auto-zugewiesen ('+total+' Zuordnungen)');
+      showToast(total+' Trainer-Zuordnung'+(total>1?'en':'')+' gespeichert.');
+      renderTraining(); renderStart();
+    }else{
+      showToast('Alle Trainer sind bereits korrekt zugeordnet.');
+    }
+  }catch(e){ showToast('Fehler: '+e.message,6000); }
   finally{ hideSaving(); }
 }
 function toggleUserAdmin(id){
