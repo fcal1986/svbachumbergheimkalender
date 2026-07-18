@@ -84,6 +84,22 @@
       "phone": "01729913002",
       "contactEmail": "test@test.de",
       "contactPublic": "both"
+    },
+    {
+      "id": "2091328f-05b9-4c7b-a912-b1cf0c006592",
+      "first": "Michael",
+      "last": "Raneck",
+      "email": "michael.raneck@sv-bachum-bergheim.de",
+      "admin": true,
+      "classes": {
+        "C-Jugend": []
+      },
+      "enc": {
+        "salt": "FfIFswLQ2VoE29WZjHkQcQ==",
+        "iv": "3TAjTmBZvUpyQxUp",
+        "cipher": "JknscAo8evOS2jr/0iCfyoPy7uYcL570L4XsbcsVAm90pWccbmq1vyHFRzOXJgmnl2RI4fKRxXTJVRFXkN3dgT+kHnfFJIqZBnhWV8mwgjaSZvlX90GLCfYKwNThQbUScc3dtDF7GQhisyLFPg=="
+      },
+      "created": "2026-07-18T12:26:01.356Z"
     }
   ]
 }
