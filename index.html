@@ -483,6 +483,7 @@
           </div>
           <div class="pitch-cap" id="tf-pitch-cap"></div>
         </div>
+        <div id="free-slots-box-tf"></div>
       </div>
       <p class="section-label">Gültigkeit</p>
       <div style="display:flex;gap:10px;">
@@ -809,6 +810,43 @@ function renderFreeSlotsBox(boxId,d,von,bis,skipId){
     ).join('')+'</div>';
 }
 
+function applySlotTF(start,end){
+  const v=document.getElementById('tf-from'),b=document.getElementById('tf-to');
+  if(v&&b){v.value=start;b.value=end;}
+  const el=document.getElementById('free-slots-box-tf');if(el)el.innerHTML='';
+  tfRenderPitch();
+}
+function renderFreeSlotsBoxTF(d,von,bis,skipId){
+  const el=document.getElementById('free-slots-box-tf');if(!el||!d)return;
+  const neededMin=(von&&bis)?timeToMin(bis)-timeToMin(von):60;
+  if(neededMin<=0){el.innerHTML='';return;}
+  const slots=suggestFreeSlots(d,neededMin,skipId);
+  if(!slots.length){
+    el.innerHTML='<div class="free-slots-box" style="background:#FFF5F5;border-color:var(--warn);margin-top:8px;"><div class="fs-header" style="color:var(--warn);">⚠ Kein freies Fenster für '+neededMin+'min</div></div>';
+    return;
+  }
+  const ico='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:12px;height:12px;stroke:#1E5730"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
+  el.innerHTML='<div class="free-slots-box" style="margin-top:8px;"><div class="fs-header">'+ico+' Freie Zeitfenster (nächste Woche)</div>'+
+    slots.map(s=>'<div class="fs-item"><span class="fs-time">'+s.start+' – '+s.end+'</span>'+
+      '<button class="fs-btn" onclick="applySlotTF(\''+s.start+'\',' +'\''+s.end+'\')">↓ Übernehmen</button></div>'
+    ).join('')+'</div>';
+}
+function updateTFormFreeSlots(hasClash){
+  const el=document.getElementById('free-slots-box-tf');if(!el)return;
+  if(!hasClash){el.innerHTML='';return;}
+  const day=parseInt(document.getElementById('tf-day').value);
+  const from=document.getElementById('tf-from').value;
+  const to=document.getElementById('tf-to').value;
+  if(!from||!to)return;
+  // Nächstes Datum für diesen Wochentag ermitteln
+  for(let i=0;i<21;i++){
+    const dt=new Date();dt.setDate(dt.getDate()+i);
+    if((dt.getDay()===0?7:dt.getDay())===day){
+      renderFreeSlotsBoxTF(ymd(dt),from,to,tEditId);
+      return;
+    }
+  }
+}
 function applySlot(start,end){
   const v=document.getElementById('f-von'),b=document.getElementById('f-bis');
   if(v&&b){v.value=start;b.value=end;}
@@ -818,13 +856,14 @@ function applySlot(start,end){
 }
 
 function updateFreeSlotsOnConflict(){
-  const d=dateInput&&dateInput().value;
-  const von=document.getElementById('f-von')?.value;
-  const bis=document.getElementById('f-bis')?.value;
-  if(!d||!von||!bis)return;
-  const conflicts=findConflicts(d,von,bis,curPitch(),curHalle(),curRes(),editingId);
-  if(conflicts.length) renderFreeSlotsBox('free-slots-box',d,von,bis,editingId);
-  else{ const el=document.getElementById('free-slots-box');if(el)el.innerHTML=''; }
+  // Wird immer NUR aufgerufen wenn showConflicts() Konflikte gefunden hat
+  // → kein Re-Check nötig, direkt Vorschläge anzeigen
+  try{
+    const d=dateInput&&dateInput().value;
+    const von=document.getElementById('f-von')?.value;
+    const bis=document.getElementById('f-bis')?.value;
+    if(d&&von&&bis) renderFreeSlotsBox('free-slots-box',d,von,bis,editingId);
+  }catch(e){ console.warn('updateFreeSlotsOnConflict:',e); }
 }
 
 function showConflicts(conflicts){
@@ -838,7 +877,7 @@ function showConflicts(conflicts){
     '</div>'
   ).join('');
   box.style.display='block';
-  setTimeout(()=>{box.scrollIntoView({behavior:'smooth',block:'nearest'});updateFreeSlotsOnConflict();},80);
+  setTimeout(()=>{box.scrollIntoView({behavior:'smooth',block:'nearest'});setTimeout(updateFreeSlotsOnConflict,50);},80);
 }
 function hideConflicts(){
   document.getElementById('conflict-box').style.display='none';
@@ -1881,6 +1920,8 @@ function tfRenderPitch(){
   document.getElementById('tf-pitch-cap').innerHTML=
     '<span>'+WDAYS[day]+' '+from+'–'+to+': <b>'+(4-busy.size)+'/4 frei</b></span>'+
     (clash.length?'<span class="warnpill">Überschneidung: Viertel '+clash.join(', ')+'</span>':'<span class="okpill">Passt</span>');
+  // Freie Zeitfenster-Vorschläge für Training
+  setTimeout(()=>updateTFormFreeSlots(clash.length>0),100);
 }
 function tfFill(s){
   document.getElementById('tf-day').value=s.day;
