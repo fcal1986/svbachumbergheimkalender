@@ -1149,7 +1149,8 @@ function shareEvent(id){
     (e.note?'Info: '+e.note+'\n':'')+baseUrl()+'#t='+e.id;
   window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
 }
-let listDaysLoaded = 30; // wie viele Tage ab heute geladen sind
+let listDaysLoaded = 30;
+let trainingView = 'uebersicht'; // wie viele Tage ab heute geladen sind
 
 function renderList(){
   const box=document.getElementById('view-liste');
@@ -1705,12 +1706,54 @@ function requireAdmin(){
 function renderTraining(){
   const box=document.getElementById('train-body');
   const admin=session&&session.isAdmin;
-  // ── Heute ──
-  let h=todaysTrainingHTML();
-  // ── Banner ──
-  h+=admin?'<div class="banner info">Als Admin pflegst du hier die feste Belegung.</div>':
+  let h='';
+
+  // ── Tab-Switcher (nur Admin) ──
+  if(admin){
+    h+='<div class="seg" style="margin-bottom:12px;">'+
+      '<button type="button"'+(trainingView==='uebersicht'?' class="on"':'')+' onclick="trainingView=\'uebersicht\';renderTraining()">Übersicht</button>'+
+      '<button type="button"'+(trainingView==='verwaltung'?' class="on"':'')+' onclick="trainingView=\'verwaltung\';renderTraining()">Verwaltung</button>'+
+      '</div>';
+  }
+
+  // ── Verwaltung (nur Admin) ──
+  if(admin&&trainingView==='verwaltung'){
+    h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">'+
+      '<button class="submit-btn" style="flex:1;min-width:160px;" onclick="newTrainingSlot()">+ Neue Trainingszeit</button>'+
+      '<button class="ghost-btn" style="flex:1;min-width:160px;" onclick="autoAssignAllTrainers()">↻ Trainer-Zuordnungen</button>'+
+      '</div>';
+    WDAYS.slice(1).forEach((wd,idx)=>{
+      const day=idx+1;
+      const slots=TRAINING.filter(s=>s.day===day).sort((a,b)=>a.from.localeCompare(b.from));
+      if(!slots.length)return;
+      h+='<h4 style="font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;margin:14px 0 6px;">'+wd+'</h4>';
+      slots.forEach(s=>{
+        h+='<div style="background:var(--white);border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.07);display:flex;align-items:flex-start;gap:10px;">'+
+          '<div style="flex:1;min-width:0;">'+
+          '<div style="font-size:13px;font-weight:700;color:var(--ink);">'+esc(trainName(s))+'</div>'+
+          '<div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px;">'+s.from+'–'+s.to+' · '+trainLocHTML(s)+'</div>'+
+          '<div style="font-size:11.5px;color:var(--ink-soft);margin-top:1px;">'+esc(trainerLabel(s)||'Kein Trainer')+'</div>'+
+          validityBadge(s)+
+          '</div>'+
+          '<div class="row-acts" style="flex:none;">'+
+          ((admin||(session&&canBookTeam(s.team,s.squad||1)))?
+            '<button class="cancel-link" style="font-size:11px;border:none;background:none;cursor:pointer;color:var(--warn);padding:4px 6px;" onclick="openCancelModal(\''+s.id+'\')">Absagen</button>':'')+
+          '<button class="ibtn" onclick="editTrainingSlot(\''+s.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>'+
+          '<button class="ibtn del" onclick="deleteTrainingSlot(\''+s.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>'+
+          '</div>'+
+          '</div>';
+      });
+    });
+    box.innerHTML=h;
+    return;
+  }
+
+  // ── Übersicht ──
+  h+=todaysTrainingHTML();
+  h+=admin?'<div class="banner info">Als Admin pflegst du hier die feste Belegung. Wechsel zu <strong>Verwaltung</strong> zum Bearbeiten.</div>':
     '<div class="lock-note"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>Feste wöchentliche Belegung · nur vom Vorstand änderbar</div>';
-  // ── Nächste 14 Tage (einheitliche Karten via rowHTML) ──
+
+  // Nächste 14 Tage
   const planDays=[];
   for(let i=1;i<15;i++){
     const dt=new Date();dt.setDate(dt.getDate()+i);
@@ -1719,38 +1762,14 @@ function renderTraining(){
     if(evs.length)planDays.push({d,evs});
   }
   if(planDays.length){
-    h+='<h3 style="font-size:13px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 8px;">Nächste 14 Tage</h3>';
+    h+='<div class="day-label" style="margin:14px 0 6px;">Nächste 14 Tage</div>';
     planDays.forEach(({d,evs})=>{
       h+='<div class="day-group"><span class="day-head">'+fmtHead(d)+'</span>';
       evs.forEach(e=>{h+=rowHTML(e);});
       h+='</div>';
     });
-  }
-  // ── Admin: Slot-Definitionen (bearbeitbar) ──
-  if(admin){
-    h+='<div style="display:flex;justify-content:flex-end;margin:8px 0 2px;"><button class="ghost-btn" style="font-size:11px;padding:6px 14px;" onclick="autoAssignAllTrainers()">↻ Trainer-Zuordnungen aktualisieren</button></div>';
-    h+='<details style="margin-top:16px;"><summary style="font-size:13px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;cursor:pointer;padding:4px 0 8px;list-style:none;display:flex;align-items:center;gap:6px;"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:14px;height:14px;stroke:var(--ink-soft)"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Trainingszeiten verwalten</summary>';
-    h+='<div style="margin-top:8px;">';
-    WDAYS.slice(1).forEach((wd,idx)=>{
-      const day=idx+1;
-      const slots=TRAINING.filter(s=>s.day===day).sort((a,b)=>a.from.localeCompare(b.from));
-      if(!slots.length)return;
-      h+='<h4 style="font-size:12px;font-weight:700;color:var(--ink-soft);margin:10px 0 4px;">'+wd+'</h4>';
-      slots.forEach(s=>{
-        h+='<div style="background:var(--white);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,.06);">';
-        h+='<div><div style="font-size:13px;font-weight:700;">'+esc(trainName(s))+'</div>';
-        h+='<div style="font-size:11px;color:var(--ink-soft);">'+s.from+'–'+s.to+' · '+trainLocHTML(s)+'</div>';
-        h+='<div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">'+trainerLabel(s)+'</div></div>';
-        h+='<div class="row-acts">';
-        h+=(admin||(session&&canBookTeam(s.team,s.squad||1)))?'<button class="cancel-link" style="font-size:11px;border:none;background:none;cursor:pointer;color:var(--warn);" onclick="openCancelModal(\''+s.id+'\')">Absagen</button>':'';
-        h+='<button class="ibtn" onclick="editTrainingSlot(\''+s.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>';
-        h+='<button class="ibtn del" onclick="deleteTrainingSlot(\''+s.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>';
-        h+='</div></div>';
-      });
-    });
-    // ── Admin: neuen Slot anlegen ──
-    h+='</div></details>';
-    
+  }else{
+    h+='<div class="empty-day" style="margin-top:12px;">Keine Trainings in den nächsten 14 Tagen.</div>';
   }
   box.innerHTML=h;
 }
@@ -2190,7 +2209,7 @@ async function createUser(){
     const encRec=await encryptToken(session.token,pass);
     USERS.push({id:crypto.randomUUID(),first,last,email:mail,admin:isAdm,classes,enc:encRec,created:new Date().toISOString()});
     await saveUsers('Zugang angelegt: '+first+' '+last+(isAdm?' (Admin)':''));
-    autoAssignTrainer(newU).then(n=>{ if(n>0) saveTraining('Trainer auto-zugewiesen: '+newU.first+' '+newU.last).catch(()=>{}); }).catch(()=>{});
+    syncTrainerAssignments(newU).then(n=>{ if(n>0) saveTraining('Trainer-Zuordnung aktualisiert: '+newU.first+' '+newU.last).catch(()=>{}); }).catch(()=>{});
     showToast(first+' kann sich jetzt anmelden'+(isAdm?' und darf alles verwalten.':'.'));
     renderKonto();
   }catch(e){
@@ -2230,7 +2249,7 @@ async function saveUserClasses(id){
     const cls=normalizeClasses(u.classes||{});
     const clsLabel=Object.keys(cls).length?Object.keys(cls).map(t=>{const sq=cls[t]||[];return t+(isJugend(t)&&sq.length?'('+sq.map(s=>jugendLetter(t)+s).join(',')+')':(isJugend(t)?'(alle)':''));}).join(', '):'keine';
     await saveUsers('Mannschaften zugewiesen: '+u.first+' '+u.last+' → '+clsLabel);
-    autoAssignTrainer(u).then(n=>{ if(n>0) saveTraining('Trainer auto-zugewiesen: '+u.first+' '+u.last).then(()=>renderTraining()).catch(()=>{}); }).catch(()=>{});
+    syncTrainerAssignments(u).then(n=>{ if(n>0) saveTraining('Trainer-Zuordnung aktualisiert: '+u.first+' '+u.last).then(()=>{ renderTraining(); renderStart(); }).catch(()=>{}); }).catch(()=>{});
     classEditorOpen=null;
     showToast('Altersklassen gespeichert.');
     renderKonto();
@@ -2271,23 +2290,27 @@ async function saveProfile(){
   }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   finally{ hideSaving(); }
 }
-async function autoAssignTrainer(u){
-  const cls=normalizeClasses(u.classes||{});
-  if(!Object.keys(cls).length)return 0;
+async function syncTrainerAssignments(u){
+  // Fügt hinzu UND entfernt – immer vollständig synchron mit Klassenzuweisung
   let changed=0;
   TRAINING.forEach(s=>{
-    if(!canTrainTeam(u,s.team,s.squad||1))return;
+    const qualified=canTrainTeam(u,s.team,s.squad||1);
     s.trainerIds=s.trainerIds||[]; s.trainerNames=s.trainerNames||[];
-    if(!s.trainerIds.includes(u.id)){
+    const idx=s.trainerIds.indexOf(u.id);
+    if(qualified&&idx===-1){
       s.trainerIds.push(u.id); s.trainerNames.push(u.first+' '+u.last); changed++;
+    }else if(!qualified&&idx!==-1){
+      s.trainerIds.splice(idx,1); s.trainerNames.splice(idx,1); changed++;
     }
   });
   return changed;
 }
+// Alias für Abwärtskompatibilität
+async function autoAssignTrainer(u){ return syncTrainerAssignments(u); }
 async function autoAssignAllTrainers(){
   showSaving('Trainer-Zuordnungen werden aktualisiert …');
   let total=0;
-  for(const u of USERS){ total+=await autoAssignTrainer(u); }
+  for(const u of USERS){ total+=await syncTrainerAssignments(u); }
   try{
     if(total>0){
       await saveTraining('Trainer auto-zugewiesen ('+total+' Zuordnungen)');
