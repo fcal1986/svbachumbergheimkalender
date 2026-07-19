@@ -30,7 +30,7 @@
       "id": "e008b81c-e045-47f1-b364-e34ca4aa9bc4",
       "day": 1,
       "from": "16:30",
-      "to": "17:15",
+      "to": "18:00",
       "team": "E-Jugend",
       "squad": 3,
       "pitch": {
@@ -40,7 +40,9 @@
       "res": [],
       "note": "",
       "trainerIds": [],
-      "trainerNames": []
+      "trainerNames": [],
+      "validFrom": "2026-07-19",
+      "validUntil": null
     },
     {
       "id": "0b93dc4f-9902-4f11-9379-e690ff361c09",
