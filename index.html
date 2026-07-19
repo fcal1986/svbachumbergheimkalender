@@ -2639,7 +2639,7 @@ function renderKonto(){
   tabsH+='</div>'; h+=tabsH;
 
   // ── Saison-Warnung für Admins ohne aktive Saison ──
-  if(session.isAdmin&&SEASONS.length>0&&!isInActiveSeason(session.id)){
+  if(session.isAdmin&&!session.isSuper&&SEASONS.length>0&&!isInActiveSeason(session.id)){
     h+='<div class="banner warn" style="margin-bottom:10px;">⚠ Du bist keiner aktiven Saison zugeordnet – Termine und Trainings anlegen nicht möglich. <strong onclick="setKontoTab(\'saisons\')" style="cursor:pointer;text-decoration:underline;">Zur Saisonverwaltung →</strong></div>';
   }
 
@@ -2773,7 +2773,9 @@ function getSeasonDates(year){return{from:year+'-07-01',to:(year+1)+'-06-30'};}
 function getSeasonLabel(year){const y2=(year+1).toString().slice(-2);return 'Saison '+year+'/'+y2;}
 function getCurrentSeason(){return SEASONS.find(s=>s.from<=todayStr&&s.to>=todayStr)||null;}
 function isInActiveSeason(userId){
-  if(!SEASONS.length)return true;
+  if(!SEASONS.length)return true; // backward-compat: kein Saisonsystem → immer aktiv
+  // Notzugang (isSuper) darf immer alles
+  if(session&&session.isSuper)return true;
   return SEASONS.some(s=>s.from<=todayStr&&s.to>=todayStr&&(s.trainerIds||[]).includes(userId));
 }
 async function saveSeasons(msg){
@@ -2848,7 +2850,7 @@ function seasonManagementCard(){
     const trainers=(s.trainerIds||[]).map(id=>USERS.find(u=>u.id===id)).filter(Boolean);
     if(!trainers.length){h+='<div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px;">Noch keine Trainer zugeordnet.</div>';}
     else{h+='<div style="margin-bottom:10px;">'+trainers.map(u=>'<div class="season-trainer-row"><span style="font-weight:600;">'+esc(u.first+' '+u.last)+'</span><button class="ibtn del" onclick="removeUserFromSeason(\''+s.id+'\',' +'\''+u.id+'\')" title="Entfernen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>').join('')+'</div>';}
-    const avail=USERS.filter(u=>!(s.trainerIds||[]).includes(u.id)&&!u.admin);
+    const avail=USERS.filter(u=>!(s.trainerIds||[]).includes(u.id)); // alle User inkl. Admins
     if(avail.length){h+='<div style="display:flex;gap:6px;align-items:center;">'+
       '<select id="sadd-'+s.id+'" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-family:Poppins;font-size:12px;background:var(--bg);">'+
       '<option value="">Trainer wählen …</option>'+
