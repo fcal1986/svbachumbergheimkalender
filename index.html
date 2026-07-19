@@ -284,6 +284,12 @@
   .okpill{background:var(--green-dim);color:#1E5730;font-weight:700;padding:3px 9px;border-radius:12px;font-size:10px;}
 
   /* ── CONFLICT ── */
+  .free-slots-box{background:var(--green-dim,#EEF7F1);border:1.5px solid var(--green);border-radius:10px;padding:10px 14px;margin-top:10px;}
+  .fs-header{font-size:10.5px;font-weight:700;color:#1E5730;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+  .fs-item{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(0,100,50,.1);}
+  .fs-item:last-child{border-bottom:none;padding-bottom:0;}
+  .fs-time{font-size:13px;font-weight:700;color:var(--ink);}
+  .fs-btn{font-size:11px;font-weight:700;color:var(--green);background:var(--white);border:1.5px solid var(--green);border-radius:7px;cursor:pointer;padding:3px 10px;}
   .conflict-box{background:#FDECEA;border:1.5px solid #E8A9A0;border-radius:13px;padding:13px 15px;margin-bottom:16px;display:none;}
   .conflict-box h5{color:#8E2A1D;margin:0 0 12px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
   .conflict-box h5 svg{width:17px;height:17px;stroke:#C0392B;flex:none;}
@@ -566,6 +572,7 @@
         <h5><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Speichern nicht möglich – Überschneidung</h5>
         <div id="conflict-list"></div>
       </div>
+      <div id="free-slots-box"></div>
       <button class="submit-btn" id="save-btn" onclick="submitEvent()">
         <svg id="save-check" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
         <span id="save-spin" class="spinner" style="display:none;border-color:rgba(255,255,255,.3);border-top-color:#fff;width:15px;height:15px;"></span>
@@ -759,6 +766,67 @@ function findConflicts(d,von,bis,pitch,halle,res,skipId){
   });
   return result;
 }
+/* ── Freie Zeitfenster-Vorschläge ───────────────────────────── */
+function timeToMin(t){const p=t.split(':');return parseInt(p[0])*60+parseInt(p[1]||0);}
+function minToTime(m){return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');}
+
+function suggestFreeSlots(d,neededMin,skipId){
+  if(!d)return[];
+  neededMin=Math.max(neededMin||60,30);
+  const DS=timeToMin('07:00'),DE=timeToMin('22:00');
+  const busy=[];
+  EVENTS.filter(e=>e.d===d&&e.id!==skipId).concat(trainingInstancesOn(d)).forEach(e=>{
+    busy.push({s:timeToMin(e.t),e:timeToMin(eventBis(e))});
+  });
+  busy.sort((a,b)=>a.s-b.s);
+  const merged=[];
+  busy.forEach(b=>{
+    if(!merged.length||b.s>merged[merged.length-1].e)merged.push({...b});
+    else if(b.e>merged[merged.length-1].e)merged[merged.length-1].e=b.e;
+  });
+  const free=[];let cur=DS;
+  merged.forEach(b=>{
+    if(b.s>cur&&b.s-cur>=neededMin)free.push({start:minToTime(cur),end:minToTime(b.s)});
+    if(b.e>cur)cur=b.e;
+  });
+  if(DE>cur&&DE-cur>=neededMin)free.push({start:minToTime(cur),end:minToTime(DE)});
+  return free.slice(0,3);
+}
+
+function renderFreeSlotsBox(boxId,d,von,bis,skipId){
+  const el=document.getElementById(boxId);if(!el||!d)return;
+  const neededMin=(von&&bis)?timeToMin(bis)-timeToMin(von):60;
+  if(neededMin<=0){el.innerHTML='';return;}
+  const slots=suggestFreeSlots(d,neededMin,skipId);
+  if(!slots.length){
+    el.innerHTML='<div class="free-slots-box" style="background:#FFF5F5;border-color:var(--warn);"><div class="fs-header" style="color:var(--warn);">⚠ Kein freies Fenster für '+neededMin+'min am '+fmtShort(d)+'</div></div>';
+    return;
+  }
+  const ico='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:12px;height:12px;stroke:#1E5730"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
+  el.innerHTML='<div class="free-slots-box"><div class="fs-header">'+ico+' Freie Zeitfenster am '+fmtShort(d)+'</div>'+
+    slots.map(s=>'<div class="fs-item"><span class="fs-time">'+s.start+' – '+s.end+'</span>'+
+      '<button class="fs-btn" onclick="applySlot(\''+s.start+'\',\''+s.end+'\')">↓ Übernehmen</button></div>'
+    ).join('')+'</div>';
+}
+
+function applySlot(start,end){
+  const v=document.getElementById('f-von'),b=document.getElementById('f-bis');
+  if(v&&b){v.value=start;b.value=end;}
+  hideConflicts();
+  document.getElementById('free-slots-box').innerHTML='';
+  renderPitch();renderHalle();
+}
+
+function updateFreeSlotsOnConflict(){
+  const d=dateInput&&dateInput().value;
+  const von=document.getElementById('f-von')?.value;
+  const bis=document.getElementById('f-bis')?.value;
+  if(!d||!von||!bis)return;
+  const conflicts=findConflicts(d,von,bis,curPitch(),curHalle(),curRes(),editingId);
+  if(conflicts.length) renderFreeSlotsBox('free-slots-box',d,von,bis,editingId);
+  else{ const el=document.getElementById('free-slots-box');if(el)el.innerHTML=''; }
+}
+
 function showConflicts(conflicts){
   const box=document.getElementById('conflict-box'),list=document.getElementById('conflict-list');
   list.innerHTML=conflicts.map(({event:e,reasons})=>
@@ -770,9 +838,12 @@ function showConflicts(conflicts){
     '</div>'
   ).join('');
   box.style.display='block';
-  setTimeout(()=>box.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+  setTimeout(()=>{box.scrollIntoView({behavior:'smooth',block:'nearest'});updateFreeSlotsOnConflict();},80);
 }
-function hideConflicts(){document.getElementById('conflict-box').style.display='none';}
+function hideConflicts(){
+  document.getElementById('conflict-box').style.display='none';
+  const fs=document.getElementById('free-slots-box');if(fs)fs.innerHTML='';
+}
 
 function fmtHead(d){const dt=new Date(d+'T00:00:00');return DAYS_S[dt.getDay()]+' · '+dt.getDate()+'. '+MONTHS[dt.getMonth()].toUpperCase()+(dt.getFullYear()!==today.getFullYear()?' '+dt.getFullYear():'');}
 function fmtShort(d){const dt=new Date(d+'T00:00:00');return String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0')+'.'+dt.getFullYear();}
@@ -1314,7 +1385,11 @@ function onTeamChange(){
   relabelSquad('f-squad',team);
   applySquadRestrictions('f-squad',team);
 }
-function onTimeChange(){hideConflicts();renderPitch();renderHalle();}
+function onTimeChange(){
+  hideConflicts();renderPitch();renderHalle();
+  // Leichte Verzögerung, damit Pitch-Render zuerst fertig ist
+  setTimeout(updateFreeSlotsOnConflict,150);
+}
 function toggleRes(el){el.classList.toggle('on');hideConflicts();if(el.dataset.res==='Großspielfeld')renderPitch();
   if(el.dataset.res==='Halle'){halleThirds=[];renderHalle();}}
 function halleResOn(){return document.querySelector('#f-res .res-chip[data-res="Halle"]').classList.contains('on');}
@@ -1512,7 +1587,7 @@ async function submitEvent(){
   const note=document.getElementById('f-bem').value.trim();
   // HARTE KONFLIKTPRÜFUNG
   const conflicts=findConflicts(d,von,bis,pitch,halle,res,editingId);
-  if(conflicts.length){showConflicts(conflicts);return;}
+  if(conflicts.length){showConflicts(conflicts);renderFreeSlotsBox('free-slots-box',d,von,bis,editingId);return;}
   hideConflicts();
   const btn=document.getElementById('save-btn'),lblEl=document.getElementById('save-label');
   const spinEl=document.getElementById('save-spin'),checkEl=document.getElementById('save-check');
@@ -2431,7 +2506,7 @@ async function boot(){
   try{ const s=JSON.parse(sessionStorage.getItem('svbb_session')); if(s&&s.id) session=s; }catch(e){}
 
   dateInput().value=todayStr;
-  dateInput().addEventListener('change',()=>{updateWeekday();renderPitch();renderHalle();hideConflicts();});
+  dateInput().addEventListener('change',()=>{updateWeekday();renderPitch();renderHalle();hideConflicts();setTimeout(updateFreeSlotsOnConflict,150);});
   ['tf-day','tf-from','tf-to'].forEach(id=>document.getElementById(id).addEventListener('change',tfRenderPitch));
   updateWeekday(); onTeamChange(); setPitchMode('ganz');
   tfTeamChange(); tfSetPitchMode('ganz');
