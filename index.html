@@ -1754,8 +1754,10 @@ function canBookAnyOfTeam(team){
 }
 function canBookTeam(team,squad){
   if(!session)return false;
-  if(session.isAdmin)return true;
+  // Saisonprüfung gilt für ALLE – auch Admins (wenn Saisons definiert sind)
   if(!isInActiveSeason(session.id))return false;
+  // Admin darf jedes Team buchen (kein Klassenfilter)
+  if(session.isAdmin)return true;
   const cls=normalizeClasses(session.classes);
   if(!cls.hasOwnProperty(team))return false;
   if(!isJugend(team))return true;
@@ -1794,8 +1796,11 @@ function filterTeamOptions(){
 }
 function newEvent(d){
   if(!requireLogin()) return;
-  if(!session.isAdmin&&!isInActiveSeason(session.id)){
-    showToast('Du bist in keiner aktiven Saison – bitte den Vorstand kontaktieren.',5000);
+  // Saisonprüfung gilt für alle – Admins müssen sich selbst der Saison zuordnen
+  if(!isInActiveSeason(session.id)){
+    showToast(session.isAdmin
+      ?'Du bist in keiner aktiven Saison. Bitte im Konto → Saisons dich selbst hinzufügen.'
+      :'Du bist in keiner aktiven Saison – bitte den Vorstand kontaktieren.',5000);
     return;
   }
   if(!session.isAdmin&&!Object.keys(normalizeClasses(session.classes||{})).length){
@@ -1854,6 +1859,11 @@ function duplicateEvent(id){
 function cancelEdit(){ editingId=null; formDirty=false; goto('termine'); }
 async function submitEvent(){
   if(!requireLogin())return;
+  // Saisonprüfung als Sicherheitsnetz beim Speichern
+  if(!isInActiveSeason(session.id)){
+    showToast('Kein Saisoneintrag – Speichern nicht möglich.',4000);
+    return;
+  }
   const title=document.getElementById('f-anlass').value.trim();
   if(!title){showToast('Bitte einen Anlass eintragen.');return;}
   const d=dateInput().value;if(!d){showToast('Bitte ein Datum wählen.');return;}
@@ -2256,6 +2266,10 @@ function tfFill(s){
 }
 function newTrainingSlot(day){
   if(!requireAdmin()) return;
+  if(!isInActiveSeason(session.id)){
+    showToast('Du bist in keiner aktiven Saison. Bitte im Konto → Saisons dich selbst hinzufügen.',5000);
+    return;
+  }
   tEditId=null;
   tfFill({day:day||1,from:'16:30',to:'18:00',team:'F-Jugend',squad:1,pitch:{mode:'ganz'},res:[],note:'',validFrom:todayStr,validUntil:'',cancelled:[]});
   document.getElementById('tf-label').textContent='Trainingszeit anlegen';
@@ -2270,6 +2284,10 @@ function editTrainingSlot(id){
 }
 async function saveTrainingSlot(){
   if(!requireAdmin()) return;
+  if(!isInActiveSeason(session.id)){
+    showToast('Kein Saisoneintrag – Trainingszeit kann nicht gespeichert werden.',4000);
+    return;
+  }
   const day=parseInt(document.getElementById('tf-day').value);
   const from=document.getElementById('tf-from').value;
   const to=document.getElementById('tf-to').value;
@@ -2619,6 +2637,11 @@ function renderKonto(){
   let tabsH='<div class="seg" style="margin-bottom:12px;">';
   tabs.forEach(t=>{ const active=kontoTab===t.id; tabsH+='<button type="button"'+(active?' class="on"':'')+' onclick="setKontoTab(this.dataset.tab)" data-tab="'+t.id+'">'+t.label+'</button>'; });
   tabsH+='</div>'; h+=tabsH;
+
+  // ── Saison-Warnung für Admins ohne aktive Saison ──
+  if(session.isAdmin&&SEASONS.length>0&&!isInActiveSeason(session.id)){
+    h+='<div class="banner warn" style="margin-bottom:10px;">⚠ Du bist keiner aktiven Saison zugeordnet – Termine und Trainings anlegen nicht möglich. <strong onclick="setKontoTab(\'saisons\')" style="cursor:pointer;text-decoration:underline;">Zur Saisonverwaltung →</strong></div>';
+  }
 
   // ── Tab-Inhalt ──
   if(kontoTab==='profil'){
