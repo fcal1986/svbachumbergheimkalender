@@ -478,8 +478,8 @@
         </select>
       </div>
       <div style="display:flex;gap:10px;">
-        <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Von</label><input type="time" id="tf-from" value="16:30"></div>
-        <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Bis</label><input type="time" id="tf-to" value="18:00"></div>
+        <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Von</label><input type="time" id="tf-from" autocomplete="off" step="900" value="16:30" onchange="onSnapTime(this)"></div>
+        <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Bis</label><input type="time" id="tf-to" autocomplete="off" step="900" value="18:00" onchange="onSnapTime(this)"></div>
       </div>
       <div class="field required"><label><span class="req-dot"></span>Team</label>
         <select id="tf-team" onchange="tfTeamChange()">
@@ -548,8 +548,8 @@
       <div class="field"><label>Wochentag</label><span class="readonly-pill" id="f-wochentag">–</span></div>
       <div class="field required"><label><span class="req-dot"></span>Anlass</label><input type="text" id="f-anlass" autocomplete="off" oninput="formDirty=true" placeholder="z. B. Sommerfest, Turnier, Testspiel"></div>
       <div style="display:flex;gap:10px;">
-        <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Von</label><input type="time" id="f-von" value="15:00" onchange="onTimeChange()"></div>
-        <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Bis</label><input type="time" id="f-bis" value="17:00" onchange="onTimeChange()"></div>
+        <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Von</label><input type="time" id="f-von" autocomplete="off" step="900" value="15:00" onchange="onSnapTime(this)"></div>
+        <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Bis</label><input type="time" id="f-bis" autocomplete="off" step="900" value="17:00" onchange="onSnapTime(this)"></div>
       </div>
       <p class="section-label">Team</p>
       <div class="field required"><label><span class="req-dot"></span>Altersklasse</label>
@@ -809,6 +809,23 @@ function findConflicts(d,von,bis,pitch,halle,res,skipId){
   return result;
 }
 /* ── Freie Zeitfenster-Vorschläge ───────────────────────────── */
+function snapTo15(t){
+  if(!t)return t;
+  const[h,m]=t.split(':').map(Number);
+  const s=Math.round(m/15)*15;
+  if(s>=60)return String(h+1>=24?0:h+1).padStart(2,'0')+':00';
+  return String(h).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function onSnapTime(el){
+  const snapped=snapTo15(el.value);
+  if(snapped&&snapped!==el.value){
+    el.value=snapped;
+    el.style.borderColor='var(--green)';
+    setTimeout(()=>el.style.borderColor='',600);
+  }
+  if(el.id==='f-von'||el.id==='f-bis')onTimeChange();
+  if(el.id==='tf-from'||el.id==='tf-to'){tfRenderPitch();}
+}
 function timeToMin(t){const p=t.split(':');return parseInt(p[0])*60+parseInt(p[1]||0);}
 function minToTime(m){return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');}
 
@@ -858,7 +875,7 @@ function renderFreeSlotsBox(boxId,d,von,bis,skipId){
 
 function applySlotTF(start,end){
   const v=document.getElementById('tf-from'),b=document.getElementById('tf-to');
-  if(v&&b){v.value=start;b.value=end;}
+  if(v&&b){v.value=snapTo15(start)||start;b.value=snapTo15(end)||end;}
   const el=document.getElementById('free-slots-box-tf');if(el)el.innerHTML='';
   tfRenderPitch();
 }
@@ -881,8 +898,8 @@ function updateTFormFreeSlots(hasClash){
   const el=document.getElementById('free-slots-box-tf');if(!el)return;
   if(!hasClash){el.innerHTML='';return;}
   const day=parseInt(document.getElementById('tf-day').value);
-  const from=document.getElementById('tf-from').value;
-  const to=document.getElementById('tf-to').value;
+  const from=snapTo15(document.getElementById('tf-from').value)||document.getElementById('tf-from').value;
+  const to=snapTo15(document.getElementById('tf-to').value)||document.getElementById('tf-to').value;
   if(!from||!to)return;
   // Nächstes Datum für diesen Wochentag ermitteln
   for(let i=0;i<21;i++){
@@ -895,7 +912,7 @@ function updateTFormFreeSlots(hasClash){
 }
 function applySlot(start,end){
   const v=document.getElementById('f-von'),b=document.getElementById('f-bis');
-  if(v&&b){v.value=start;b.value=end;}
+  if(v&&b){v.value=snapTo15(start)||start;b.value=snapTo15(end)||end;}
   hideConflicts();
   document.getElementById('free-slots-box').innerHTML='';
   renderPitch();renderHalle();
@@ -1800,8 +1817,8 @@ async function submitEvent(){
   const title=document.getElementById('f-anlass').value.trim();
   if(!title){showToast('Bitte einen Anlass eintragen.');return;}
   const d=dateInput().value;if(!d){showToast('Bitte ein Datum wählen.');return;}
-  const von=document.getElementById('f-von').value;
-  const bis=document.getElementById('f-bis').value;
+  const von=snapTo15(document.getElementById('f-von').value)||document.getElementById('f-von').value;
+  const bis=snapTo15(document.getElementById('f-bis').value)||document.getElementById('f-bis').value;
   if(!von||!bis){showToast('Bitte Von- und Bis-Zeit eintragen.');return;}
   if(von>=bis){showToast('Die Bis-Zeit muss nach der Von-Zeit liegen.');return;}
   const team=document.getElementById('f-team').value;
