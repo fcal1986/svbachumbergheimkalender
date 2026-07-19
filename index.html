@@ -318,6 +318,14 @@
   .mncht-day{font-weight:700;color:var(--green);font-size:11px;text-transform:uppercase;padding-top:1px;}
   .mncht-time{font-weight:700;color:var(--ink);}
   .mncht-res{color:var(--ink-soft);}
+  .season-card{background:var(--bg);border-radius:12px;padding:12px;margin-bottom:10px;border:1.5px solid var(--line);}
+  .season-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .season-title{font-size:13px;font-weight:800;color:var(--ink);}
+  .season-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:12px;background:var(--green);color:#fff;}
+  .season-badge.past{background:var(--bg);color:var(--ink-soft);border:1px solid var(--line);}
+  .season-dates{font-size:11px;color:var(--ink-soft);margin-bottom:8px;}
+  .season-trainer-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line);font-size:12.5px;}
+  .season-trainer-row:last-of-type{border-bottom:none;}
   .mncht-trainer{grid-column:2/-1;color:var(--ink-soft);display:flex;align-items:center;gap:4px;font-size:11px;margin-top:1px;}
   .train-week-nav{background:var(--white);border-radius:16px;margin-bottom:12px;padding:12px 8px 10px;box-shadow:0 1px 5px rgba(0,0,0,.08);}
   .train-month-row{display:flex;align-items:center;justify-content:space-between;padding:0 6px 10px;}
@@ -726,7 +734,8 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-let CFG=null, EVENTS=[], USERS=[], TRAINING=[], session=null;
+let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], session=null;
+let selectedSeasonFilter='';
 
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const MONTHS_S=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
@@ -1742,6 +1751,7 @@ function canBookAnyOfTeam(team){
 function canBookTeam(team,squad){
   if(!session)return false;
   if(session.isAdmin)return true;
+  if(!isInActiveSeason(session.id))return false;
   const cls=normalizeClasses(session.classes);
   if(!cls.hasOwnProperty(team))return false;
   if(!isJugend(team))return true;
@@ -1780,6 +1790,10 @@ function filterTeamOptions(){
 }
 function newEvent(d){
   if(!requireLogin()) return;
+  if(!session.isAdmin&&!isInActiveSeason(session.id)){
+    showToast('Du bist in keiner aktiven Saison – bitte den Vorstand kontaktieren.',5000);
+    return;
+  }
   if(!session.isAdmin&&!Object.keys(normalizeClasses(session.classes||{})).length){
     showToast('Dir ist noch keine Altersklasse zugeordnet. Bitte beim Vorstand melden.',5000);
     return;
@@ -2064,6 +2078,16 @@ function renderTraining(){
 
   // ── Mannschaften-Tab ──
   if(trainingView==='mannschaften'){
+    const curSea=getCurrentSeason();
+    if(!selectedSeasonFilter&&curSea)selectedSeasonFilter=curSea.id;
+    const activeSeasTrs=SEASONS.length&&selectedSeasonFilter?
+      (SEASONS.find(s=>s.id===selectedSeasonFilter)?.trainerIds||null):null;
+    if(SEASONS.length){
+      h+='<select onchange="selectedSeasonFilter=this.value;renderTraining()" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px;font-family:Poppins;font-size:13px;background:var(--bg);margin-bottom:12px;">'+
+        '<option value="">Alle Saisons</option>'+
+        [...SEASONS].sort((a,b)=>b.startYear-a.startYear).map(s=>'<option value="'+s.id+'"'+(selectedSeasonFilter===s.id?' selected':'')+'>'+esc(s.label)+'</option>').join('')+
+        '</select>';
+    }
     const byTeam={};
     TRAINING.filter(s=>!s.validUntil||s.validUntil>=todayStr).forEach(s=>{
       const key=trainName(s);
@@ -2084,7 +2108,8 @@ function renderTraining(){
         h+='<div class="mncht-team-card'+(isMine?' mncht-mine':'')+'">';
         h+='<div class="mncht-team-name">'+(isMine?'<span class="mncht-mine-dot"></span>':'')+esc(label)+'</div>';
         slots.sort((a,b)=>a.day-b.day||(a.from.localeCompare(b.from))).forEach(s=>{
-          const trainers=getTrainerNames(s);
+          const tIds=getTrainerIds(s);
+        const trainers=getTrainerNames(s).filter((_,i)=>!activeSeasTrs||activeSeasTrs.includes(tIds[i]));
           h+='<div class="mncht-slot">'+
             '<div class="mncht-day">'+esc((WDAYS[s.day]||'').slice(0,2))+'</div>'+
             '<div class="mncht-time">'+s.from+'–'+s.to+'</div>'+
@@ -2369,7 +2394,7 @@ function tokenCard(){
   return h;
 }
 function adminCards(){
-  let h='<p class="section-label">Admin-Bereich</p>'+tokenCard();
+  let h='<p class="section-label">Admin-Bereich</p>'+tokenCard()+seasonManagementCard();
   h+='<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Neuen Zugang anlegen</h4>'+
      '<p class="sub">Anmeldung danach mit E-Mail und diesem Passwort – auf jedem Gerät.</p>'+
      '<div class="field" style="margin:10px 0 8px;"><input type="text" id="nu-first" placeholder="Vorname"></div>'+
@@ -2688,6 +2713,94 @@ async function saveProfile(){
   }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   finally{ hideSaving(); }
 }
+function getSeasonDates(year){return{from:year+'-07-01',to:(year+1)+'-06-30'};}
+function getSeasonLabel(year){const y2=(year+1).toString().slice(-2);return 'Saison '+year+'/'+y2;}
+function getCurrentSeason(){return SEASONS.find(s=>s.from<=todayStr&&s.to>=todayStr)||null;}
+function isInActiveSeason(userId){
+  if(!SEASONS.length)return true;
+  return SEASONS.some(s=>s.from<=todayStr&&s.to>=todayStr&&(s.trainerIds||[]).includes(userId));
+}
+async function saveSeasons(msg){
+  await ghPutRaw('data/seasons.json',JSON.stringify({seasons:SEASONS},null,2),msg||'Saison aktualisiert');
+}
+async function createSeason(year){
+  year=parseInt(year);if(!year||year<2020||year>2050){showToast('Ungültiges Jahr.');return;}
+  const id=year+'-'+(year+1);
+  if(SEASONS.find(s=>s.id===id)){showToast('Saison '+id+' existiert bereits.');return;}
+  const{from,to}=getSeasonDates(year);
+  const newS={id,label:getSeasonLabel(year),startYear:year,from,to,trainerIds:[]};
+  SEASONS.push(newS);SEASONS.sort((a,b)=>b.startYear-a.startYear);
+  showSaving('Saison wird angelegt …');
+  try{await saveSeasons('Saison angelegt: '+newS.label);showToast(newS.label+' angelegt.');renderKonto();}
+  catch(e){SEASONS=SEASONS.filter(s=>s.id!==id);showToast('Fehler: '+e.message,6000);}
+  finally{hideSaving();}
+}
+async function addUserToSeason(seasonId,userId){
+  const s=SEASONS.find(x=>x.id===seasonId);if(!s)return;
+  if((s.trainerIds||[]).includes(userId)){showToast('Bereits zugeordnet.');return;}
+  s.trainerIds=s.trainerIds||[];s.trainerIds.push(userId);
+  showSaving('Wird hinzugefügt …');
+  try{await saveSeasons('Trainer zur Saison hinzugefügt');showToast('Trainer hinzugefügt.');renderKonto();}
+  catch(e){s.trainerIds.pop();showToast('Fehler: '+e.message,6000);}
+  finally{hideSaving();}
+}
+async function removeUserFromSeason(seasonId,userId){
+  const s=SEASONS.find(x=>x.id===seasonId);if(!s)return;
+  const idx=(s.trainerIds||[]).indexOf(userId);if(idx===-1)return;
+  const backup=[...s.trainerIds];s.trainerIds.splice(idx,1);
+  showSaving('Wird entfernt …');
+  try{await saveSeasons('Trainer aus Saison entfernt');showToast('Trainer entfernt.');renderKonto();}
+  catch(e){s.trainerIds=backup;showToast('Fehler: '+e.message,6000);}
+  finally{hideSaving();}
+}
+async function deleteSeason(seasonId){
+  const s=SEASONS.find(x=>x.id===seasonId);if(!s)return;
+  if((s.trainerIds||[]).length){showToast('Saison hat noch Trainer – bitte zuerst entfernen.',5000);return;}
+  askConfirm('Saison löschen?',s.label+' endgültig entfernen?','Löschen',async()=>{
+    const backup=[...SEASONS];SEASONS=SEASONS.filter(x=>x.id!==seasonId);
+    showSaving('Saison wird gelöscht …');
+    try{await saveSeasons('Saison gelöscht: '+s.label);showToast('Saison gelöscht.');renderKonto();}
+    catch(e){SEASONS=backup;showToast('Fehler: '+e.message,6000);}
+    finally{hideSaving();}
+  });
+}
+function seasonManagementCard(){
+  const ico='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:16px;height:16px;stroke:var(--green)"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>';
+  let h='<div class="card"><h4>'+ico+'Saisons</h4><p class="sub">Definiert, welche Trainer in welcher Spielzeit aktiv sind.</p>';
+  const sorted=[...SEASONS].sort((a,b)=>b.startYear-a.startYear);
+  if(!sorted.length){h+='<div style="font-size:12px;color:var(--ink-soft);margin:8px 0 12px;">Noch keine Saisons.</div>';}
+  sorted.forEach(s=>{
+    const active=s.from<=todayStr&&s.to>=todayStr;
+    const future=s.from>todayStr;
+    const lbl=active?'Aktiv':future?'Kommend':'Vergangen';
+    const bc='season-badge'+(active?'':' past');
+    h+='<div class="season-card"><div class="season-header">'+
+      '<div><div class="season-title">'+esc(s.label)+'</div>'+
+      '<div class="season-dates">'+fmtShort(s.from)+' – '+fmtShort(s.to)+'</div></div>'+
+      '<div style="display:flex;gap:6px;align-items:center;"><span class="'+bc+'">'+lbl+'</span>'+
+      (!(s.trainerIds||[]).length?'<button class="ibtn del" onclick="deleteSeason(''+s.id+'')" title="Löschen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>':'')+
+      '</div></div>';
+    const trainers=(s.trainerIds||[]).map(id=>USERS.find(u=>u.id===id)).filter(Boolean);
+    if(!trainers.length){h+='<div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px;">Noch keine Trainer zugeordnet.</div>';}
+    else{h+='<div style="margin-bottom:10px;">'+trainers.map(u=>'<div class="season-trainer-row"><span style="font-weight:600;">'+esc(u.first+' '+u.last)+'</span><button class="ibtn del" onclick="removeUserFromSeason(''+s.id+'',''+u.id+'')" title="Entfernen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>').join('')+'</div>';}
+    const avail=USERS.filter(u=>!(s.trainerIds||[]).includes(u.id)&&!u.admin);
+    if(avail.length){h+='<div style="display:flex;gap:6px;align-items:center;">'+
+      '<select id="sadd-'+s.id+'" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-family:Poppins;font-size:12px;background:var(--bg);">'+
+      '<option value="">Trainer wählen …</option>'+
+      avail.sort((a,b)=>(a.first+a.last).localeCompare(b.first+b.last)).map(u=>'<option value="'+u.id+'">'+esc(u.first+' '+u.last)+'</option>').join('')+
+      '</select><button class="ghost-btn" style="padding:8px 14px;white-space:nowrap;" onclick="const el=document.getElementById('sadd-'+s.id+'');if(el.value)addUserToSeason(''+s.id+'',el.value)">+ Hinzu</button></div>';}
+    h+='</div>';
+  });
+  const nextY=getCurrentSeason()?getCurrentSeason().startYear+1:new Date().getFullYear();
+  h+='<div style="border-top:1px solid var(--line);margin-top:14px;padding-top:14px;">'+
+    '<div style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Neue Saison anlegen</div>'+
+    '<div style="display:flex;gap:8px;align-items:center;">'+
+    '<select id="new-season-year" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:9px;font-family:Poppins;font-size:12px;background:var(--bg);">'+
+    [0,1,2,3].map(i=>{const y=new Date().getFullYear()+i;return'<option value="'+y+'"'+(y===nextY?' selected':'')+'>'+getSeasonLabel(y)+'</option>';}).join('')+
+    '</select><button class="submit-btn" style="padding:9px 16px;white-space:nowrap;" onclick="createSeason(document.getElementById('new-season-year').value)">Anlegen</button>'+
+    '</div></div></div>';
+  return h;
+}
 async function syncTrainerAssignments(u){
   // Fügt hinzu UND entfernt – immer vollständig synchron mit Klassenzuweisung
   let changed=0;
@@ -2823,6 +2936,8 @@ async function boot(){
   }
   try{ const tr=await loadJSON('data/training.json'); TRAINING=tr.slots||[]; }
   catch(e){ TRAINING=[]; }
+  try{ const sea=await loadJSON('data/seasons.json'); SEASONS=sea.seasons||[]; }
+  catch(e){ SEASONS=[]; }
 
   document.getElementById('login-foot').textContent=
     USERS.length?'Zugang bekommst du vom Vorstand.':'Noch keine Zugänge angelegt – bitte als Admin anmelden.';
