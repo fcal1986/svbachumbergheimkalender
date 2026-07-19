@@ -38,7 +38,9 @@
         "part": "B"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "0b93dc4f-9902-4f11-9379-e690ff361c09",
@@ -52,7 +54,9 @@
         "part": "B"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "c7db27ed-3365-4fc2-a27e-a04753b9e48b",
@@ -106,7 +110,9 @@
         "part": "A"
       },
       "res": [],
-      "note": "Bei Wochenendspiel endet Training um 19:00 Uhr"
+      "note": "Bei Wochenendspiel endet Training um 19:00 Uhr",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "3bc5eb93-4747-4202-8de0-65b5a74a4692",
@@ -120,7 +126,9 @@
         "part": "B"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "0762da36-6387-4fc7-bc41-2d256a677a30",
@@ -135,12 +143,8 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [
-        "935d13de-b21e-43c5-a35f-405bfaf4cc6c"
-      ],
-      "trainerNames": [
-        "Fabrizio Calcagno"
-      ],
+      "trainerIds": [],
+      "trainerNames": [],
       "validFrom": "2026-07-19",
       "validUntil": null
     },
@@ -156,7 +160,9 @@
         "part": "B"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "89485bc0-5f67-4a6d-b1a5-f83aa909f1f7",
@@ -170,7 +176,9 @@
         "part": "A"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "c9f4e22e-daeb-43b8-914b-eae6f1db049e",
@@ -184,7 +192,9 @@
         "part": "B"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "6b8092f0-ad1d-47fa-b201-35ce36912eeb",
@@ -198,7 +208,9 @@
         "part": "B"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "a0fba6c3-540b-44c1-aa2f-ee7d4d6f5907",
@@ -212,7 +224,9 @@
         "part": "A"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "df0d5d76-b4b5-4cf6-8e20-402aa99a476b",
@@ -226,7 +240,9 @@
         "part": "B"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "c942837f-3499-40c5-a6a3-52c977f23117",
@@ -240,7 +256,9 @@
         "part": "A"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "ae20704e-735d-4f97-b7a1-cc8393bfd520",
@@ -254,7 +272,9 @@
         "part": "B"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "6a32ba38-5406-4849-973b-b738f3b78ab7",
@@ -291,12 +311,8 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [
-        "89d70bbf-9008-4563-b6ee-9724ed48fe7f"
-      ],
-      "trainerNames": [
-        "Damian Cvetkov"
-      ]
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "4607193e-c5e6-40a3-b78e-ab9d668bc2f2",
@@ -310,7 +326,9 @@
         "part": "A"
       },
       "res": [],
-      "note": "Bei Wochenendspiel endet Training um 19:00 Uhr"
+      "note": "Bei Wochenendspiel endet Training um 19:00 Uhr",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "1b6e5d01-f80f-451d-94f4-766ecbb7fe79",
@@ -324,7 +342,9 @@
         "part": "B"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "43b94d34-c477-4108-b2b6-750164cd46ff",
@@ -356,7 +376,9 @@
         "part": "B"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "a85e3705-d2cf-47bd-8389-d94bbe89cf4f",
@@ -370,7 +392,9 @@
         "part": "A"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "a4dbb675-3e10-40c6-afa2-40c2ca82a21c",
@@ -384,7 +408,9 @@
         "part": "B"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "97a34d14-a08f-46f6-a7de-addf6595ed3e",
@@ -398,7 +424,9 @@
         "part": "B"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "7f185be8-1d5e-4371-9fca-35974369c05d",
@@ -412,7 +440,9 @@
         "part": "A"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "15b3cbb6-e38f-4b97-9865-9daa5d46b587",
@@ -426,7 +456,9 @@
         "part": "B"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "547a1e4b-4a57-4206-9d53-8d749803ac0b",
@@ -440,7 +472,9 @@
         "part": "B"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "c48dfe28-58b5-4e17-8cfe-41926fb33bbc",
@@ -478,7 +512,9 @@
         "part": "A"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "be7f7f77-b1b2-4f7a-a05d-72c72faf0e05",
@@ -492,7 +528,9 @@
         "part": "B"
       },
       "res": [],
-      "note": ""
+      "note": "",
+      "trainerIds": [],
+      "trainerNames": []
     }
   ]
 }
