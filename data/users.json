@@ -29,7 +29,7 @@
       "first": "David",
       "last": "Skwara",
       "email": "david.skwara@gmx.de",
-      "admin": false,
+      "admin": true,
       "enc": {
         "salt": "PgZUCE/nu77Sxd3B9E4bdA==",
         "iv": "9HdlS5B2U6loacn/",
