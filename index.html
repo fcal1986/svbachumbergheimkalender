@@ -284,6 +284,30 @@
   .okpill{background:var(--green-dim);color:#1E5730;font-weight:700;padding:3px 9px;border-radius:12px;font-size:10px;}
 
   /* ── CONFLICT ── */
+  /* Monats-Picker */
+  .month-picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end;justify-content:center;}
+  .month-picker-sheet{background:var(--white);border-radius:22px 22px 0 0;width:100%;max-width:480px;padding:16px 16px 32px;box-shadow:0 -4px 24px rgba(0,0,0,.18);animation:slideUp .22s ease;}
+  @keyframes slideUp{from{transform:translateY(60px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  .mp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .mp-month-nav{display:flex;align-items:center;gap:8px;}
+  .mp-month-label{font-size:16px;font-weight:700;color:var(--ink);}
+  .mp-nav-btn{background:none;border:none;font-size:22px;color:var(--ink-soft);cursor:pointer;padding:2px 8px;line-height:1;border-radius:8px;}
+  .mp-nav-btn:active{background:var(--bg);}
+  .mp-close{background:none;border:none;font-size:20px;color:var(--ink-soft);cursor:pointer;padding:4px 8px;}
+  .mp-weekdays{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;}
+  .mp-wd{text-align:center;font-size:10.5px;font-weight:700;color:var(--ink-soft);padding:4px 0;text-transform:uppercase;letter-spacing:.05em;}
+  .mp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .mp-day{text-align:center;font-size:14px;font-weight:600;color:var(--ink);padding:10px 2px;border-radius:8px;cursor:pointer;transition:background .12s;}
+  .mp-day:hover{background:var(--bg);}
+  .mp-day.mp-empty{cursor:default;}
+  .mp-day.mp-week-row{background:var(--green-dim,#EEF7F1);color:var(--green);}
+  .mp-day.mp-selected-week{background:var(--green);color:#fff;border-radius:0;}
+  .mp-day.mp-selected-week:first-child,.mp-day.mp-sel-first{border-radius:10px 0 0 10px;}
+  .mp-day.mp-selected-week:last-child,.mp-day.mp-sel-last{border-radius:0 10px 10px 0;}
+  .mp-day.mp-today{position:relative;}
+  .mp-day.mp-today::after{content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--green);}
+  .mp-day.mp-selected-week.mp-today::after{background:#fff;}
+  .mp-accept{display:block;width:100%;background:var(--green);color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px;font-family:inherit;}
   /* Wochenstreifen */
   .train-week-nav{background:var(--white);border-radius:16px;margin-bottom:12px;padding:12px 8px 10px;box-shadow:0 1px 5px rgba(0,0,0,.08);}
   .train-month-row{display:flex;align-items:center;justify-content:space-between;padding:0 6px 10px;}
@@ -1280,6 +1304,102 @@ let listDaysLoaded = 30;
 let trainingView = 'uebersicht';
 let trainingSelectedDate = '';  // wird in boot gesetzt
 
+/* ── Monats-Picker ─────────────────────────────────────────── */
+let mpYear=0, mpMonth=0, mpSelectedWeekDate='';
+
+function openMonthPicker(){
+  const anchor=trainingSelectedDate||todayStr;
+  const dt=new Date(anchor+'T00:00:00');
+  mpYear=dt.getFullYear(); mpMonth=dt.getMonth();
+  mpSelectedWeekDate=anchor;
+  renderMonthPicker();
+}
+function closeMonthPicker(){
+  const el=document.getElementById('month-picker-overlay');
+  if(el)el.remove();
+}
+function mpNavigate(delta){
+  mpMonth+=delta;
+  if(mpMonth<0){mpMonth=11;mpYear--;}
+  if(mpMonth>11){mpMonth=0;mpYear++;}
+  renderMonthPicker();
+}
+function mpSelectWeek(mondayDate){
+  mpSelectedWeekDate=mondayDate;
+  renderMonthPicker();
+}
+function mpAccept(){
+  if(mpSelectedWeekDate){
+    trainingSelectedDate=mpSelectedWeekDate;
+    renderTraining();
+  }
+  closeMonthPicker();
+}
+function renderMonthPicker(){
+  const existing=document.getElementById('month-picker-overlay');
+  const DAY_S=['Mo','Di','Mi','Do','Fr','Sa','So'];
+  
+  // Erster Tag des Monats (Montag-basiert)
+  const firstDay=new Date(mpYear,mpMonth,1);
+  const lastDay=new Date(mpYear,mpMonth+1,0);
+  const startDow=firstDay.getDay()===0?6:firstDay.getDay()-1; // Mo=0
+  
+  // Ausgewählte Woche ermitteln (Montag der Woche von mpSelectedWeekDate)
+  let selMon='';
+  if(mpSelectedWeekDate){
+    const dt=new Date(mpSelectedWeekDate+'T00:00:00');
+    const dow=dt.getDay()===0?6:dt.getDay()-1;
+    const mon=new Date(dt); mon.setDate(dt.getDate()-dow);
+    selMon=ymd(mon);
+  }
+  
+  // Kalendertage aufbauen
+  let cells=[];
+  for(let i=0;i<startDow;i++) cells.push({empty:true});
+  for(let d=1;d<=lastDay.getDate();d++){
+    const dt=new Date(mpYear,mpMonth,d);
+    const ds=ymd(dt);
+    // Montag dieser Woche
+    const dow=dt.getDay()===0?6:dt.getDay()-1;
+    const mon=new Date(dt); mon.setDate(d-dow);
+    const monStr=ymd(mon);
+    cells.push({d,ds,monStr,isToday:ds===todayStr,inSelWeek:monStr===selMon,dow});
+  }
+  
+  // Zeilen aufbauen (immer 7er-Gruppen)
+  while(cells.length%7!==0) cells.push({empty:true});
+  
+  let gridHtml='';
+  for(let i=0;i<cells.length;i++){
+    const cell=cells[i];
+    if(cell.empty){gridHtml+='<div class="mp-day mp-empty"></div>';continue;}
+    // Ist diese Zelle Teil der selektierten Woche?
+    const inSel=cell.inSelWeek;
+    const isFirst=inSel&&(i%7===0||cells[i-1]?.empty||!cells[i-1]?.inSelWeek);
+    const isLast=inSel&&(i%7===6||!cells[i+1]||cells[i+1]?.empty||!cells[i+1]?.inSelWeek);
+    let cls='mp-day'+(inSel?' mp-selected-week':'')+(isFirst?' mp-sel-first':'')+(isLast?' mp-sel-last':'')+(cell.isToday?' mp-today':'');
+    gridHtml+='<div class="'+cls+'" onclick="mpSelectWeek(\''+cell.monStr+'\')">'+(cell.empty?'':cell.d)+'</div>';
+  }
+  
+  const html='<div class="month-picker-overlay" id="month-picker-overlay" onclick="if(event.target===this)closeMonthPicker()">'+
+    '<div class="month-picker-sheet">'+
+    '<div class="mp-header">'+
+    '<div class="mp-month-nav">'+
+    '<button class="mp-nav-btn" onclick="mpNavigate(-1)">&#8249;</button>'+
+    '<span class="mp-month-label">'+MONTHS[mpMonth]+' '+mpYear+'</span>'+
+    '<button class="mp-nav-btn" onclick="mpNavigate(1)">&#8250;</button>'+
+    '</div>'+
+    '<button class="mp-close" onclick="closeMonthPicker()" aria-label="Schließen">✕</button>'+
+    '</div>'+
+    '<div class="mp-weekdays">'+DAY_S.map(d=>'<div class="mp-wd">'+d+'</div>').join('')+'</div>'+
+    '<div class="mp-grid">'+gridHtml+'</div>'+
+    '<button class="mp-accept" onclick="mpAccept()">Übernehmen</button>'+
+    '</div></div>';
+  
+  if(existing) existing.outerHTML=html;
+  else document.body.insertAdjacentHTML('beforeend',html);
+}
+
 function getWeekDates(anchorDate){
   const dt=new Date((anchorDate||todayStr)+'T00:00:00');
   const dow=dt.getDay(); // 0=Sun
@@ -1308,7 +1428,10 @@ function renderWeekNav(){
   let h='<div class="train-week-nav">'+
     '<div class="train-month-row">'+
     '<button class="twn-btn" onclick="prevTrainingWeek()" aria-label="Vorwoche">&#8249;</button>'+
+    '<button style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;padding:4px 8px;border-radius:10px;" onclick="openMonthPicker()" aria-label="Monat wählen">'+
     '<span class="train-month-label">'+esc(monthLabel)+'</span>'+
+    '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" style="width:13px;height:13px;stroke:var(--ink-soft)"><path d="M6 9l6 6 6-6"/></svg>'+
+    '</button>'+
     '<button class="twn-btn" onclick="nextTrainingWeek()" aria-label="Nächste Woche">&#8250;</button>'+
     '</div><div class="train-week-row">';
   dates.forEach(d=>{
