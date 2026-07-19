@@ -1,14 +1,6 @@
 {
   "seasons": [
     {
-      "id": "2027-2028",
-      "label": "Saison 2027/28",
-      "startYear": 2027,
-      "from": "2027-07-01",
-      "to": "2028-06-30",
-      "trainerIds": []
-    },
-    {
       "id": "2026-2027",
       "label": "Saison 2026/27",
       "startYear": 2026,
