@@ -314,7 +314,7 @@
   .mncht-team-card.mncht-mine{border-left-color:var(--green);}
   .mncht-team-name{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
   .mncht-mine-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none;}
-  .mncht-slot{display:grid;grid-template-columns:28px 90px 1fr;gap:4px;align-items:start;padding:6px 0;border-top:1px solid var(--line);font-size:12px;}
+  .mncht-slot{display:grid;grid-template-columns:28px 90px 1fr;gap:4px;align-items:start;padding:8px 0;border-top:1px solid var(--line);font-size:12px;}
   .mncht-day{font-weight:700;color:var(--green);font-size:11px;text-transform:uppercase;padding-top:1px;}
   .mncht-time{font-weight:700;color:var(--ink);}
   .mncht-res{color:var(--ink-soft);}
@@ -329,6 +329,9 @@
   .season-trainer-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line);font-size:12.5px;}
   .season-trainer-row:last-of-type{border-bottom:none;}
   .mncht-trainer{grid-column:2/-1;color:var(--ink-soft);display:flex;align-items:center;gap:4px;font-size:11px;margin-top:1px;}
+  .mncht-contacts{grid-column:1/-1;margin-top:4px;padding-top:2px;}
+  .mncht-contact-row{display:flex;flex-direction:column;padding:4px 0 3px;border-bottom:1px solid var(--line);font-size:11.5px;}
+  .mncht-contact-row:last-child{border-bottom:none;}
   .train-week-nav{background:var(--white);border-radius:16px;margin-bottom:12px;padding:12px 8px 10px;box-shadow:0 1px 5px rgba(0,0,0,.08);}
   .train-month-row{display:flex;align-items:center;justify-content:space-between;padding:0 6px 10px;}
   .train-month-label{font-size:14px;font-weight:700;color:var(--ink);}
@@ -1045,13 +1048,18 @@ async function loadJSON(path){
   if(!r.ok) throw new Error(path+' nicht ladbar ('+r.status+')');
   return r.json();
 }
+// SHA-Cache: nach jedem Write wird die neue SHA gecacht → 2. Speichern halb so langsam
+const _shaCache={};
 async function ghSha(path){
+  if(_shaCache[path])return _shaCache[path];
   const r=await fetch('https://api.github.com/repos/'+CFG.repo+'/contents/'+path+'?ref='+CFG.branch,{
     headers:{Authorization:'Bearer '+session.token,Accept:'application/vnd.github+json'},cache:'no-store'});
-  if(r.status===404) return null;
-  if(r.status===401) throw new Error('Token ungültig oder abgelaufen.');
-  if(!r.ok) throw new Error('GitHub-Lesefehler '+r.status);
-  return (await r.json()).sha;
+  if(r.status===404)return null;
+  if(r.status===401)throw new Error('Token ungültig oder abgelaufen.');
+  if(!r.ok)throw new Error('GitHub-Lesefehler '+r.status);
+  const sha=(await r.json()).sha;
+  _shaCache[path]=sha;
+  return sha;
 }
 async function ghPutRaw(path,text,msg){
   if(!session||!session.token) throw new Error('Kein Schreib-Token vorhanden.');
@@ -1062,6 +1070,12 @@ async function ghPutRaw(path,text,msg){
     method:'PUT',
     headers:{Authorization:'Bearer '+session.token,Accept:'application/vnd.github+json','Content-Type':'application/json'},
     body:JSON.stringify(body)});
+  if(r.ok){
+    // Neue SHA cachen → nächster Save braucht keinen extra GET
+    const rd=await r.json().catch(()=>({}));
+    if(rd?.content?.sha)_shaCache[path]=rd.content.sha;
+    return;
+  }
   if(!r.ok){
     const e=await r.json().catch(()=>({}));
     if(r.status===404) throw new Error('Repo „'+CFG.repo+'" nicht gefunden. Prüfe „repo" in data/config.json und die Token-Rechte.');
@@ -2122,16 +2136,23 @@ function renderTraining(){
         h+='<div class="mncht-team-card'+(isMine?' mncht-mine':'')+'">';
         h+='<div class="mncht-team-name">'+(isMine?'<span class="mncht-mine-dot"></span>':'')+esc(label)+'</div>';
         slots.sort((a,b)=>a.day-b.day||(a.from.localeCompare(b.from))).forEach(s=>{
-          const tIds=getTrainerIds(s);
-        const trainers=getTrainerNames(s).filter((_,i)=>!activeSeasTrs||activeSeasTrs.includes(tIds[i]));
+          const allTIds=getTrainerIds(s);
+        const allNames=getTrainerNames(s);
+        const tIds=allTIds.filter((_,i)=>!activeSeasTrs||activeSeasTrs.includes(allTIds[i]));
+        const trainers=allNames.filter((_,i)=>!activeSeasTrs||activeSeasTrs.includes(allTIds[i]));
           h+='<div class="mncht-slot">'+
             '<div class="mncht-day">'+esc((WDAYS[s.day]||'').slice(0,2))+'</div>'+
             '<div class="mncht-time">'+s.from+'–'+s.to+'</div>'+
             '<div class="mncht-res">'+trainLocHTML(s)+'</div>'+
-            '<div class="mncht-trainer">'+(trainers.length?
-              '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:11px;height:11px;stroke:var(--ink-soft)"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>'+esc(trainers.join(' · ')):
-              '<span style="color:var(--ink-soft);font-style:italic;">noch kein Trainer</span>')+
-            '</div></div>';
+            (()=>{
+              if(!trainers.length)return '<div class="mncht-contacts"><span style="color:var(--ink-soft);font-style:italic;font-size:11px;">noch kein Trainer</span></div></div>';
+              const ico='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:11px;height:11px;stroke:var(--ink-soft);flex:none;"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>';
+              return '<div class="mncht-contacts">'+trainers.map((name,i)=>{
+                const uid=tIds[i]||null;
+                const ch=uid?getContactHTML(uid):'';
+                return '<div class="mncht-contact-row">'+ico+' <span style="font-weight:600;font-size:12px;">'+esc(name)+'</span>'+(ch?'<div class="ev-contact" style="margin-top:3px;padding-left:15px;">'+ch+'</div>':'')+' </div>';
+              }).join('')+'</div></div>';
+            })()
         });
         h+='</div>';
       });
@@ -2778,8 +2799,22 @@ function isInActiveSeason(userId){
   if(session&&session.isSuper)return true;
   return SEASONS.some(s=>s.from<=todayStr&&s.to>=todayStr&&(s.trainerIds||[]).includes(userId));
 }
+let _seasonSaveTimer=null;
+let _seasonSaveMsg='';
 async function saveSeasons(msg){
-  await ghPutRaw('data/seasons.json',JSON.stringify({seasons:SEASONS},null,2),msg||'Saison aktualisiert');
+  _seasonSaveMsg=msg||'Saison aktualisiert';
+  // Sofortiger Write – kein Debounce nötig da optimistic updates schon re-rendern
+  await ghPutRaw('data/seasons.json',JSON.stringify({seasons:SEASONS},null,2),_seasonSaveMsg);
+}
+async function saveSeasonDebounced(msg){
+  // Batching: sammelt schnelle Änderungen und schreibt einmal
+  _seasonSaveMsg=msg||_seasonSaveMsg||'Saison aktualisiert';
+  clearTimeout(_seasonSaveTimer);
+  return new Promise((resolve,reject)=>{
+    _seasonSaveTimer=setTimeout(()=>{
+      saveSeasons(_seasonSaveMsg).then(()=>{_seasonSaveMsg='';resolve();}).catch(reject);
+    },400);
+  });
 }
 function createSeasonFromSelect(){
   const el=document.getElementById('new-season-year');
@@ -2806,19 +2841,25 @@ async function addUserToSeason(seasonId,userId){
   const s=SEASONS.find(x=>x.id===seasonId);if(!s)return;
   if((s.trainerIds||[]).includes(userId)){showToast('Bereits zugeordnet.');return;}
   s.trainerIds=s.trainerIds||[];s.trainerIds.push(userId);
-  renderKonto(); showToast('Trainer hinzugefügt.');  // sofort
-  saveSeasons('Trainer zur Saison hinzugefügt').catch(e=>{
-    s.trainerIds.pop(); renderKonto(); showToast('Fehler: '+e.message,6000);
-  });
+  renderKonto(); // sofort
+  // Status-Pill anzeigen bis GitHub geantwortet hat
+  const pill=document.querySelector('.saving-pill');
+  if(pill){pill.textContent='Speichert …';pill.style.opacity='1';}
+  saveSeasonDebounced('Trainer zur Saison '+s.label+' hinzugefügt: '+USERS.find(u=>u.id===userId)?.first)
+    .then(()=>{ showToast('✓ Gespeichert.'); })
+    .catch(e=>{ s.trainerIds.pop(); renderKonto(); showToast('Fehler: '+e.message,6000); })
+    .finally(()=>{ const p=document.querySelector('.saving-pill');if(p)p.style.opacity='0'; });
 }
 async function removeUserFromSeason(seasonId,userId){
   const s=SEASONS.find(x=>x.id===seasonId);if(!s)return;
   const idx=(s.trainerIds||[]).indexOf(userId);if(idx===-1)return;
   const backup=[...s.trainerIds];s.trainerIds.splice(idx,1);
-  renderKonto(); showToast('Trainer entfernt.');  // sofort
-  saveSeasons('Trainer aus Saison entfernt').catch(e=>{
-    s.trainerIds=backup; renderKonto(); showToast('Fehler: '+e.message,6000);
-  });
+  renderKonto(); showToast('Trainer entfernt.');
+  const pill2=document.querySelector('.saving-pill');
+  if(pill2){pill2.textContent='Speichert …';pill2.style.opacity='1';}
+  saveSeasonDebounced('Trainer aus Saison '+s.label+' entfernt')
+    .catch(e=>{ s.trainerIds=backup; renderKonto(); showToast('Fehler: '+e.message,6000); })
+    .finally(()=>{ const p=document.querySelector('.saving-pill');if(p)p.style.opacity='0'; });
 }
 async function deleteSeason(seasonId){
   const s=SEASONS.find(x=>x.id===seasonId);if(!s)return;
