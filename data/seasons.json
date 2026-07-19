@@ -1,3 +1,12 @@
 {
-  "seasons": []
+  "seasons": [
+    {
+      "id": "2026-2027",
+      "label": "Saison 2026/27",
+      "startYear": 2026,
+      "from": "2026-07-01",
+      "to": "2027-06-30",
+      "trainerIds": []
+    }
+  ]
 }
