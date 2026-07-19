@@ -284,6 +284,23 @@
   .okpill{background:var(--green-dim);color:#1E5730;font-weight:700;padding:3px 9px;border-radius:12px;font-size:10px;}
 
   /* ── CONFLICT ── */
+  /* Wochenstreifen */
+  .train-week-nav{background:var(--white);border-radius:16px;margin-bottom:12px;padding:12px 8px 10px;box-shadow:0 1px 5px rgba(0,0,0,.08);}
+  .train-month-row{display:flex;align-items:center;justify-content:space-between;padding:0 6px 10px;}
+  .train-month-label{font-size:14px;font-weight:700;color:var(--ink);}
+  .twn-btn{background:none;border:none;font-size:22px;color:var(--ink-soft);cursor:pointer;padding:0 6px;line-height:1;}
+  .train-week-row{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .train-day-cell{display:flex;flex-direction:column;align-items:center;padding:7px 2px 5px;border-radius:12px;cursor:pointer;min-width:0;transition:background .15s;}
+  .train-day-cell.active{background:var(--green);}
+  .train-day-cell.today-ring:not(.active){position:relative;outline:2px solid var(--green);outline-offset:-2px;}
+  .tday-wd{font-size:10px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;}
+  .train-day-cell.active .tday-wd{color:rgba(255,255,255,.85);}
+  .tday-num{font-size:17px;font-weight:700;color:var(--ink);line-height:1.25;}
+  .train-day-cell.active .tday-num{color:#fff;}
+  .tday-dot{width:5px;height:5px;border-radius:50%;background:var(--green);margin-top:4px;transition:background .15s;}
+  .train-day-cell.active .tday-dot{background:rgba(255,255,255,.8);}
+  .tday-dot.empty{background:transparent;}
+  .training-day-header{font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;padding:6px 0 10px;}
   .free-slots-box{background:var(--green-dim,#EEF7F1);border:1.5px solid var(--green);border-radius:10px;padding:10px 14px;margin-top:10px;}
   .fs-header{font-size:10.5px;font-weight:700;color:#1E5730;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
   .fs-item{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(0,100,50,.1);}
@@ -1260,7 +1277,55 @@ function shareEvent(id){
   window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
 }
 let listDaysLoaded = 30;
-let trainingView = 'uebersicht'; // wie viele Tage ab heute geladen sind
+let trainingView = 'uebersicht';
+let trainingSelectedDate = '';  // wird in boot gesetzt
+
+function getWeekDates(anchorDate){
+  const dt=new Date((anchorDate||todayStr)+'T00:00:00');
+  const dow=dt.getDay(); // 0=Sun
+  const toMon=dow===0?-6:1-dow;
+  const mon=new Date(dt); mon.setDate(dt.getDate()+toMon);
+  const dates=[];
+  for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(mon.getDate()+i);dates.push(ymd(d));}
+  return dates;
+}
+function selectTrainingDay(d){ trainingSelectedDate=d; renderTraining(); }
+function prevTrainingWeek(){
+  const dt=new Date(trainingSelectedDate+'T00:00:00');
+  dt.setDate(dt.getDate()-7); trainingSelectedDate=ymd(dt); renderTraining();
+}
+function nextTrainingWeek(){
+  const dt=new Date(trainingSelectedDate+'T00:00:00');
+  dt.setDate(dt.getDate()+7); trainingSelectedDate=ymd(dt); renderTraining();
+}
+function renderWeekNav(){
+  const dates=getWeekDates(trainingSelectedDate);
+  const fd=new Date(dates[0]+'T00:00:00'),ld=new Date(dates[6]+'T00:00:00');
+  const monthLabel=fd.getMonth()===ld.getMonth()?
+    MONTHS[fd.getMonth()]+' '+fd.getFullYear():
+    MONTHS[fd.getMonth()].slice(0,3)+'/'+(MONTHS[ld.getMonth()]||'').slice(0,3)+' '+fd.getFullYear();
+  const DAY_S=['So','Mo','Di','Mi','Do','Fr','Sa'];
+  let h='<div class="train-week-nav">'+
+    '<div class="train-month-row">'+
+    '<button class="twn-btn" onclick="prevTrainingWeek()" aria-label="Vorwoche">&#8249;</button>'+
+    '<span class="train-month-label">'+esc(monthLabel)+'</span>'+
+    '<button class="twn-btn" onclick="nextTrainingWeek()" aria-label="Nächste Woche">&#8250;</button>'+
+    '</div><div class="train-week-row">';
+  dates.forEach(d=>{
+    const dt=new Date(d+'T00:00:00');
+    const active=d===trainingSelectedDate;
+    const isToday=d===todayStr;
+    const hasT=trainingInstancesOn(d).length>0||
+      TRAINING.some(s=>slotInRange(s,d)&&dowOf(d)===s.day&&(s.cancelled||[]).includes(d));
+    let cls='train-day-cell'+(active?' active':'')+(isToday&&!active?' today-ring':'');
+    h+='<div class="'+cls+'" onclick="selectTrainingDay(\''+d+'\')">'+'<div class="tday-wd">'+DAY_S[dt.getDay()]+'</div>'
+      +'<div class="tday-num">'+dt.getDate()+'</div>'
+      +'<div class="tday-dot'+(hasT?'':' empty')+'"></div>'
+      +'</div>';
+  });
+  h+='</div></div>';
+  return h;
+} // wie viele Tage ab heute geladen sind
 
 function renderList(){
   const box=document.getElementById('view-liste');
@@ -1819,6 +1884,7 @@ function requireAdmin(){
 }
 function renderTraining(){
   const box=document.getElementById('train-body');
+  if(!trainingSelectedDate)trainingSelectedDate=todayStr;
   const admin=session&&session.isAdmin;
   let h='';
 
@@ -1862,29 +1928,40 @@ function renderTraining(){
     return;
   }
 
-  // ── Übersicht ──
-  h+=todaysTrainingHTML();
-  h+=admin?'<div class="banner info">Als Admin pflegst du hier die feste Belegung. Wechsel zu <strong>Verwaltung</strong> zum Bearbeiten.</div>':
-    '<div class="lock-note"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>Feste wöchentliche Belegung · nur vom Vorstand änderbar</div>';
+  // ── Übersicht: Wochenstreifen + Tagesansicht ──
+  h+=renderWeekNav();
 
-  // Nächste 14 Tage
-  const planDays=[];
-  for(let i=1;i<15;i++){
-    const dt=new Date();dt.setDate(dt.getDate()+i);
-    const d=ymd(dt);
-    const evs=trainingInstancesOn(d).filter(passesFilter);
-    if(evs.length)planDays.push({d,evs});
-  }
-  if(planDays.length){
-    h+='<div class="day-label" style="margin:14px 0 6px;">Nächste 14 Tage</div>';
-    planDays.forEach(({d,evs})=>{
-      h+='<div class="day-group"><span class="day-head">'+fmtHead(d)+'</span>';
-      evs.forEach(e=>{h+=rowHTML(e);});
-      h+='</div>';
-    });
+  // Info-Banner
+  if(admin){
+    h+='<div class="banner info" style="margin-bottom:10px;">Als Admin pflegst du hier die feste Belegung. Wechsel zu <strong>Verwaltung</strong> zum Bearbeiten.</div>';
   }else{
-    h+='<div class="empty-day" style="margin-top:12px;">Keine Trainings in den nächsten 14 Tagen.</div>';
+    h+='<div class="lock-note" style="margin-bottom:10px;"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>Feste wöchentliche Belegung · nur vom Vorstand änderbar</div>';
   }
+
+  // Ausgewählter Tag
+  const d=trainingSelectedDate;
+  const isToday=d===todayStr;
+  const dt=new Date(d+'T00:00:00');
+  const active=trainingInstancesOn(d).filter(passesFilter);
+  const cancelled=TRAINING.filter(s=>slotInRange(s,d)&&dowOf(d)===s.day&&(s.cancelled||[]).includes(d));
+
+  if(!active.length&&!cancelled.length){
+    const dayLabel=DAYS[dt.getDay()]+', '+fmtShort(d);
+    h+='<div class="empty-card" style="text-align:center;padding:28px 16px;">'+
+      '<div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px;">'+
+      (isToday?'Heute kein Training':'Kein Training')+'</div>'+
+      '<div style="font-size:13px;color:var(--ink-soft);">'+(isToday?'':dayLabel)+'</div>'+
+      '</div>';
+  }else{
+    const dayLabel=(isToday?'Heute · ':'')+DAYS[dt.getDay()]+', '+fmtShort(d);
+    h+='<div class="training-day-header">'+esc(dayLabel)+'</div>';
+    h+=active.map(e=>rowHTML(e)).join('');
+    if(cancelled.length){
+      h+=cancelled.map(s=>'<div class="today-cancelled">'+
+        '<span class="hoff-pill">Abgesagt</span>'+esc(trainName(s))+'</div>').join('');
+    }
+  }
+
   box.innerHTML=h;
 }
 function tfTeamChange(){
@@ -2550,6 +2627,7 @@ async function boot(){
   dateInput().addEventListener('change',()=>{updateWeekday();renderPitch();renderHalle();hideConflicts();setTimeout(updateFreeSlotsOnConflict,150);});
   ['tf-day','tf-from','tf-to'].forEach(id=>document.getElementById(id).addEventListener('change',tfRenderPitch));
   updateWeekday(); onTeamChange(); setPitchMode('ganz');
+  trainingSelectedDate=todayStr;
   tfTeamChange(); tfSetPitchMode('ganz');
   renderTrainerChips(document.getElementById('tf-team').value,1,[]);
   document.getElementById('ver-note').textContent='Daten: '+CFG.repo;
