@@ -2135,25 +2135,37 @@ function renderTraining(){
         const isMine=myTeams.includes(team);
         h+='<div class="mncht-team-card'+(isMine?' mncht-mine':'')+'">';
         h+='<div class="mncht-team-name">'+(isMine?'<span class="mncht-mine-dot"></span>':'')+esc(label)+'</div>';
+        // Trainer einmal pro Team sammeln (dedupliziert, nach Saison gefiltert)
+        const teamTIds=[], teamTNames=[];
+        slots.forEach(s=>{
+          getTrainerIds(s).forEach((id,i)=>{
+            if((!activeSeasTrs||activeSeasTrs.includes(id))&&!teamTIds.includes(id)){
+              teamTIds.push(id);
+              teamTNames.push(getTrainerNames(s)[i]||'');
+            }
+          });
+        });
+        // Slots kompakt (nur Zeit + Ort, kein Trainer pro Slot)
         slots.sort((a,b)=>a.day-b.day||(a.from.localeCompare(b.from))).forEach(s=>{
-          const allTIds=getTrainerIds(s);
-        const allNames=getTrainerNames(s);
-        const tIds=allTIds.filter((_,i)=>!activeSeasTrs||activeSeasTrs.includes(allTIds[i]));
-        const trainers=allNames.filter((_,i)=>!activeSeasTrs||activeSeasTrs.includes(allTIds[i]));
           h+='<div class="mncht-slot">'+
             '<div class="mncht-day">'+esc((WDAYS[s.day]||'').slice(0,2))+'</div>'+
             '<div class="mncht-time">'+s.from+'–'+s.to+'</div>'+
             '<div class="mncht-res">'+trainLocHTML(s)+'</div>'+
-            (()=>{
-              if(!trainers.length)return '<div class="mncht-contacts"><span style="color:var(--ink-soft);font-style:italic;font-size:11px;">noch kein Trainer</span></div></div>';
-              const ico='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:11px;height:11px;stroke:var(--ink-soft);flex:none;"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>';
-              return '<div class="mncht-contacts">'+trainers.map((name,i)=>{
-                const uid=tIds[i]||null;
-                const ch=uid?getContactHTML(uid):'';
-                return '<div class="mncht-contact-row">'+ico+' <span style="font-weight:600;font-size:12px;">'+esc(name)+'</span>'+(ch?'<div class="ev-contact" style="margin-top:3px;padding-left:15px;">'+ch+'</div>':'')+' </div>';
-              }).join('')+'</div></div>';
-            })()
+            '</div>';
         });
+        // Trainer-Kontakte einmal unter allen Slots
+        const pico='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:11px;height:11px;stroke:var(--ink-soft);flex:none;"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>';
+        if(!teamTIds.length){
+          h+='<div style="padding:8px 0 2px;font-size:11px;color:var(--ink-soft);font-style:italic;">noch kein Trainer zugeordnet</div>';
+        } else {
+          h+='<div class="mncht-contacts">'+teamTIds.map((uid,i)=>{
+            const ch=getContactHTML(uid);
+            return '<div class="mncht-contact-row">'+pico+
+              '<span style="font-weight:700;font-size:12px;">'+esc(teamTNames[i])+'</span>'+
+              (ch?'<div class="ev-contact" style="margin-top:3px;padding-left:15px;">'+ch+'</div>':'')+
+              '</div>';
+          }).join('')+'</div>';
+        }
         h+='</div>';
       });
     }
