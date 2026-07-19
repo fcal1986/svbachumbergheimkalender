@@ -66,7 +66,7 @@
       "ownerName": "Fabrizio Calcagno"
     },
     {
-      "id": "dd45d697-8107-4fe4-9363-9684e7a77a66",
+      "id": "4b15c4f7-1ce4-4b1d-a698-c112914367ca",
       "d": "2026-07-25",
       "t": "15:00",
       "bis": "20:00",
@@ -77,10 +77,7 @@
         "mode": "ganz"
       },
       "halle": null,
-      "res": [
-        "Vereinsheim",
-        "Theke"
-      ],
+      "res": [],
       "note": "",
       "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
       "ownerName": "David Skwara"
