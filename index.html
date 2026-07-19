@@ -318,6 +318,8 @@
   .mncht-day{font-weight:700;color:var(--green);font-size:11px;text-transform:uppercase;padding-top:1px;}
   .mncht-time{font-weight:700;color:var(--ink);}
   .mncht-res{color:var(--ink-soft);}
+  .konto-header{display:flex;align-items:center;justify-content:space-between;background:var(--white);border-radius:14px;padding:12px 14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);}
+  .konto-info{display:flex;align-items:center;gap:10px;}
   .season-card{background:var(--bg);border-radius:12px;padding:12px;margin-bottom:10px;border:1.5px solid var(--line);}
   .season-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
   .season-title{font-size:13px;font-weight:800;color:var(--ink);}
@@ -736,6 +738,8 @@
 
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], session=null;
 let selectedSeasonFilter='';
+let kontoTab='profil'; // 'profil'|'saisons'|'zugaenge'|'protokoll'
+function setKontoTab(tab){kontoTab=tab;renderKonto();}
 
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const MONTHS_S=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
@@ -2393,8 +2397,9 @@ function tokenCard(){
      '<button class="ghost-btn" style="margin-top:0;" onclick="saveAdminToken()">Token speichern</button></div>';
   return h;
 }
-function adminCards(){
-  let h='<p class="section-label">Admin-Bereich</p>'+tokenCard()+seasonManagementCard();
+function adminNewUserCard(){
+  let h=tokenCard();
+  h+=
   h+='<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Neuen Zugang anlegen</h4>'+
      '<p class="sub">Anmeldung danach mit E-Mail und diesem Passwort – auf jedem Gerät.</p>'+
      '<div class="field" style="margin:10px 0 8px;"><input type="text" id="nu-first" placeholder="Vorname"></div>'+
@@ -2406,7 +2411,10 @@ function adminCards(){
      '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg>Darf alles verwalten (Admin)</div>'+
      '<button class="submit-btn" id="nu-btn" onclick="createUser()"><span id="nu-label">Zugang anlegen</span></button>'+
      '<p class="helptext">Admin darf zusätzlich Trainingszeiten pflegen, Zugänge anlegen und alle Termine ändern.</p></div>';
-  h+='<div class="card"><h4>Zugänge ('+USERS.length+')</h4>';
+  return h;
+}
+function adminUserListCard(){
+  let h='<div class="card"><h4>Zugänge ('+USERS.length+')</h4>';
   if(!USERS.length) h+='<p class="sub">Noch keine Zugänge angelegt.</p>';
   USERS.forEach(u=>{
     h+='<div class="user-row"><div class="avatar'+(u.admin?' adm':'')+'">'+initials(u.first+' '+u.last)+'</div>'+
@@ -2588,20 +2596,45 @@ function logCard(){
 }
 function renderKonto(){
   const box=document.getElementById('konto-body');
-  let h='';
   if(!session){
-    h+='<div class="card"><h4>Nicht angemeldet</h4><p class="sub">Termine ansehen geht ohne Anmeldung. Zum Eintragen brauchst du einen Zugang vom Vorstand.</p>'+
-       '<button class="submit-btn" onclick="openLogin()"><span>Anmelden</span></button></div>';
-    box.innerHTML=h+icalCard()+pwaCard();
+    box.innerHTML='<div class="card"><h4>Nicht angemeldet</h4><p class="sub">Termine ansehen geht ohne Anmeldung. Zum Eintragen brauchst du einen Zugang vom Vorstand.</p>'+
+      '<button class="submit-btn" onclick="openLogin()"><span>Anmelden</span></button></div>'+icalCard()+pwaCard();
     return;
   }
-  h+='<div class="card"><h4>'+esc(session.name)+(session.isAdmin?'<span class="badge-admin">Admin</span>':'')+'</h4>'+
-     '<p class="sub">'+esc(session.email)+(session.isSuper?' · Notzugang':'')+'</p>'+
-     '<button class="cancel-btn" onclick="logout()">Abmelden</button></div>';
-  if(session.isAdmin) h+=adminCards();
-  if(!session.isSuper) h+=profileCard();
-  box.innerHTML=h+logCard()+pwCard()+bioCard()+icalCard()+pwaCard();
-  if(logExpanded) loadLogIfNeeded();
+  // ── Header (immer sichtbar) ──
+  let h='<div class="konto-header">'+
+    '<div class="konto-info">'+
+    '<div class="avatar'+(session.isAdmin?' adm':'')+'" style="width:44px;height:44px;font-size:16px;flex:none;">'+initials(session.name)+'</div>'+
+    '<div><div style="font-size:15px;font-weight:800;">'+esc(session.name)+(session.isAdmin?'<span class="badge-admin">Admin</span>':'')+'</div>'+
+    '<div style="font-size:12px;color:var(--ink-soft);">'+esc(session.email)+'</div></div></div>'+
+    '<button class="cancel-btn" style="padding:6px 14px;font-size:12px;" onclick="logout()">Abmelden</button></div>';
+
+  // ── Sub-Tabs ──
+  const isAdmin=session.isAdmin;
+  if(!kontoTab||kontoTab==='protokoll'&&!isAdmin)kontoTab='profil';
+  const tabs=[
+    {id:'profil',label:'Profil'},
+    ...(isAdmin?[{id:'saisons',label:'Saisons'},{id:'zugaenge',label:'Zugänge'},{id:'protokoll',label:'Protokoll'}]:[])
+  ];
+  let tabsH='<div class="seg" style="margin-bottom:12px;">';
+  tabs.forEach(t=>{ const active=kontoTab===t.id; tabsH+='<button type="button"'+(active?' class="on"':'')+' onclick="setKontoTab(this.dataset.tab)" data-tab="'+t.id+'">'+t.label+'</button>'; });
+  tabsH+='</div>'; h+=tabsH;
+
+  // ── Tab-Inhalt ──
+  if(kontoTab==='profil'){
+    h+=pwCard()+bioCard();
+    if(!session.isSuper)h+=profileCard();
+    h+=icalCard()+pwaCard();
+  }else if(kontoTab==='saisons'){
+    h+=seasonManagementCard();
+  }else if(kontoTab==='zugaenge'){
+    h+=adminNewUserCard()+adminUserListCard();
+  }else if(kontoTab==='protokoll'){
+    h+=logCard();
+  }
+
+  box.innerHTML=h;
+  if(kontoTab==='protokoll'&&logExpanded)loadLogIfNeeded();
 }
 function saveAdminToken(){
   const t=document.getElementById('ad-token').value.trim();
@@ -2734,10 +2767,11 @@ async function createSeason(year){
   const{from,to}=getSeasonDates(year);
   const newS={id,label:getSeasonLabel(year),startYear:year,from,to,trainerIds:[]};
   SEASONS.push(newS);SEASONS.sort((a,b)=>b.startYear-a.startYear);
-  showSaving('Saison wird angelegt …');
-  try{await saveSeasons('Saison angelegt: '+newS.label);showToast(newS.label+' angelegt.');renderKonto();}
-  catch(e){SEASONS=SEASONS.filter(s=>s.id!==id);showToast('Fehler: '+e.message,6000);}
-  finally{hideSaving();}
+  kontoTab='saisons'; renderKonto(); showToast(newS.label+' angelegt.');  // sofort
+  saveSeasons('Saison angelegt: '+newS.label).catch(e=>{
+    SEASONS=SEASONS.filter(s=>s.id!==id); renderKonto();
+    showToast('Fehler beim Speichern: '+e.message,6000);
+  });
 }
 function addUserToSeasonFromSelect(seasonId){
   const el=document.getElementById('sadd-'+seasonId);
@@ -2747,29 +2781,29 @@ async function addUserToSeason(seasonId,userId){
   const s=SEASONS.find(x=>x.id===seasonId);if(!s)return;
   if((s.trainerIds||[]).includes(userId)){showToast('Bereits zugeordnet.');return;}
   s.trainerIds=s.trainerIds||[];s.trainerIds.push(userId);
-  showSaving('Wird hinzugefügt …');
-  try{await saveSeasons('Trainer zur Saison hinzugefügt');showToast('Trainer hinzugefügt.');renderKonto();}
-  catch(e){s.trainerIds.pop();showToast('Fehler: '+e.message,6000);}
-  finally{hideSaving();}
+  renderKonto(); showToast('Trainer hinzugefügt.');  // sofort
+  saveSeasons('Trainer zur Saison hinzugefügt').catch(e=>{
+    s.trainerIds.pop(); renderKonto(); showToast('Fehler: '+e.message,6000);
+  });
 }
 async function removeUserFromSeason(seasonId,userId){
   const s=SEASONS.find(x=>x.id===seasonId);if(!s)return;
   const idx=(s.trainerIds||[]).indexOf(userId);if(idx===-1)return;
   const backup=[...s.trainerIds];s.trainerIds.splice(idx,1);
-  showSaving('Wird entfernt …');
-  try{await saveSeasons('Trainer aus Saison entfernt');showToast('Trainer entfernt.');renderKonto();}
-  catch(e){s.trainerIds=backup;showToast('Fehler: '+e.message,6000);}
-  finally{hideSaving();}
+  renderKonto(); showToast('Trainer entfernt.');  // sofort
+  saveSeasons('Trainer aus Saison entfernt').catch(e=>{
+    s.trainerIds=backup; renderKonto(); showToast('Fehler: '+e.message,6000);
+  });
 }
 async function deleteSeason(seasonId){
   const s=SEASONS.find(x=>x.id===seasonId);if(!s)return;
   if((s.trainerIds||[]).length){showToast('Saison hat noch Trainer – bitte zuerst entfernen.',5000);return;}
   askConfirm('Saison löschen?',s.label+' endgültig entfernen?','Löschen',async()=>{
     const backup=[...SEASONS];SEASONS=SEASONS.filter(x=>x.id!==seasonId);
-    showSaving('Saison wird gelöscht …');
-    try{await saveSeasons('Saison gelöscht: '+s.label);showToast('Saison gelöscht.');renderKonto();}
-    catch(e){SEASONS=backup;showToast('Fehler: '+e.message,6000);}
-    finally{hideSaving();}
+    renderKonto(); showToast('Saison gelöscht.');  // sofort
+    saveSeasons('Saison gelöscht: '+s.label).catch(e=>{
+      SEASONS=backup; renderKonto(); showToast('Fehler: '+e.message,6000);
+    });
   });
 }
 function seasonManagementCard(){
