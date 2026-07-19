@@ -309,6 +309,16 @@
   .mp-day.mp-selected-week.mp-today::after{background:#fff;}
   .mp-accept{display:block;width:100%;background:var(--green);color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px;font-family:inherit;}
   /* Wochenstreifen */
+  /* Mannschaften-Tab */
+  .mncht-team-card{background:var(--white);border-radius:14px;margin-bottom:10px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:3px solid var(--line);}
+  .mncht-team-card.mncht-mine{border-left-color:var(--green);}
+  .mncht-team-name{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+  .mncht-mine-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none;}
+  .mncht-slot{display:grid;grid-template-columns:28px 90px 1fr;gap:4px;align-items:start;padding:6px 0;border-top:1px solid var(--line);font-size:12px;}
+  .mncht-day{font-weight:700;color:var(--green);font-size:11px;text-transform:uppercase;padding-top:1px;}
+  .mncht-time{font-weight:700;color:var(--ink);}
+  .mncht-res{color:var(--ink-soft);}
+  .mncht-trainer{grid-column:2/-1;color:var(--ink-soft);display:flex;align-items:center;gap:4px;font-size:11px;margin-top:1px;}
   .train-week-nav{background:var(--white);border-radius:16px;margin-bottom:12px;padding:12px 8px 10px;box-shadow:0 1px 5px rgba(0,0,0,.08);}
   .train-month-row{display:flex;align-items:center;justify-content:space-between;padding:0 6px 10px;}
   .train-month-label{font-size:14px;font-weight:700;color:var(--ink);}
@@ -331,6 +341,11 @@
   .fs-item:last-child{border-bottom:none;padding-bottom:0;}
   .fs-time{font-size:13px;font-weight:700;color:var(--ink);}
   .fs-btn{font-size:11px;font-weight:700;color:var(--green);background:var(--white);border:1.5px solid var(--green);border-radius:7px;cursor:pointer;padding:3px 10px;}
+  .pw-wrap{position:relative;display:block;}
+  .pw-wrap input{width:100%;padding-right:44px;box-sizing:border-box;}
+  .pw-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--ink-soft);padding:4px;display:flex;align-items:center;line-height:1;}
+  .pw-eye:hover{color:var(--ink);}
+  .pw-eye svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;}
   .conflict-box{background:#FDECEA;border:1.5px solid #E8A9A0;border-radius:13px;padding:13px 15px;margin-bottom:16px;display:none;}
   .conflict-box h5{color:#8E2A1D;margin:0 0 12px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
   .conflict-box h5 svg{width:17px;height:17px;stroke:#C0392B;flex:none;}
@@ -667,7 +682,7 @@
     <div class="login-err" id="login-err"></div>
     <form id="li-form" onsubmit="event.preventDefault();doLogin();">
       <input type="text" id="li-user" name="username" placeholder="E-Mail oder Benutzername" autocomplete="username" autocapitalize="none" spellcheck="false">
-      <input type="password" id="li-pass" name="password" placeholder="Passwort" autocomplete="current-password">
+      <div class="pw-wrap"><input type="password" id="li-pass" name="password" placeholder="Passwort" autocomplete="current-password"><button type="button" class="pw-eye" onclick="togglePw(this)" tabindex="-1"><svg viewBox="0 0 24 24"><g class="eye-open"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></g><g class="eye-shut" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></g></svg></button></div>
       <button type="submit" class="btn-yellow" id="li-btn">Anmelden</button>
     </form>
     <button class="btn-ghost-light" id="bio-btn" style="display:none;" onclick="bioLogin()">
@@ -809,6 +824,13 @@ function findConflicts(d,von,bis,pitch,halle,res,skipId){
   return result;
 }
 /* ── Freie Zeitfenster-Vorschläge ───────────────────────────── */
+function togglePw(btn){
+  const inp=btn.previousElementSibling;
+  const show=inp.type==='password';
+  inp.type=show?'text':'password';
+  btn.querySelector('.eye-open').style.display=show?'none':'block';
+  btn.querySelector('.eye-shut').style.display=show?'block':'none';
+}
 function snapTo15(t){
   if(!t)return t;
   const[h,m]=t.split(':').map(Number);
@@ -2033,12 +2055,50 @@ function renderTraining(){
   const admin=session&&session.isAdmin;
   let h='';
 
-  // ── Tab-Switcher (nur Admin) ──
-  if(admin){
-    h+='<div class="seg" style="margin-bottom:12px;">'+
-      '<button type="button"'+(trainingView==='uebersicht'?' class="on"':'')+' onclick="trainingView=\'uebersicht\';renderTraining()">Übersicht</button>'+
-      '<button type="button"'+(trainingView==='verwaltung'?' class="on"':'')+' onclick="trainingView=\'verwaltung\';renderTraining()">Verwaltung</button>'+
-      '</div>';
+  // ── Tab-Switcher: Übersicht + Mannschaften für alle, Verwaltung nur Admin ──
+  h+='<div class="seg" style="margin-bottom:12px;">'+
+    '<button type="button"'+(trainingView==='uebersicht'?' class="on"':'')+' onclick="trainingView=\'uebersicht\';renderTraining()">Übersicht</button>'+
+    '<button type="button"'+(trainingView==='mannschaften'?' class="on"':'')+' onclick="trainingView=\'mannschaften\';renderTraining()">Mannschaften</button>'+
+    (admin?'<button type="button"'+(trainingView==='verwaltung'?' class="on"':'')+' onclick="trainingView=\'verwaltung\';renderTraining()">Verwaltung</button>':'')+
+    '</div>';
+
+  // ── Mannschaften-Tab ──
+  if(trainingView==='mannschaften'){
+    const byTeam={};
+    TRAINING.filter(s=>!s.validUntil||s.validUntil>=todayStr).forEach(s=>{
+      const key=trainName(s);
+      if(!byTeam[key])byTeam[key]={label:key,slots:[],team:s.team,squad:s.squad||1};
+      byTeam[key].slots.push(s);
+    });
+    const teams=Object.values(byTeam).sort((a,b)=>{
+      const aj=isJugend(a.team),bj=isJugend(b.team);
+      if(aj&&!bj)return-1;if(!aj&&bj)return 1;
+      return a.label.localeCompare(b.label);
+    });
+    if(!teams.length){
+      h+='<div class="empty-day">Keine Trainingszeiten hinterlegt.</div>';
+    }else{
+      const myTeams=session?Object.keys(normalizeClasses(session.classes||{})):[];
+      teams.forEach(({label,slots,team})=>{
+        const isMine=myTeams.includes(team);
+        h+='<div class="mncht-team-card'+(isMine?' mncht-mine':'')+'">';
+        h+='<div class="mncht-team-name">'+(isMine?'<span class="mncht-mine-dot"></span>':'')+esc(label)+'</div>';
+        slots.sort((a,b)=>a.day-b.day||(a.from.localeCompare(b.from))).forEach(s=>{
+          const trainers=getTrainerNames(s);
+          h+='<div class="mncht-slot">'+
+            '<div class="mncht-day">'+esc((WDAYS[s.day]||'').slice(0,2))+'</div>'+
+            '<div class="mncht-time">'+s.from+'–'+s.to+'</div>'+
+            '<div class="mncht-res">'+trainLocHTML(s)+'</div>'+
+            '<div class="mncht-trainer">'+(trainers.length?
+              '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:11px;height:11px;stroke:var(--ink-soft)"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>'+esc(trainers.join(' · ')):
+              '<span style="color:var(--ink-soft);font-style:italic;">noch kein Trainer</span>')+
+            '</div></div>';
+        });
+        h+='</div>';
+      });
+    }
+    box.innerHTML=h;
+    return;
   }
 
   // ── Verwaltung (nur Admin) ──
