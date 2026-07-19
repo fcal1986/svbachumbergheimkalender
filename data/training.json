@@ -47,7 +47,7 @@
     {
       "id": "0b93dc4f-9902-4f11-9379-e690ff361c09",
       "day": 1,
-      "from": "17:15",
+      "from": "16:30",
       "to": "18:00",
       "team": "F-Jugend",
       "squad": 1,
@@ -58,7 +58,9 @@
       "res": [],
       "note": "",
       "trainerIds": [],
-      "trainerNames": []
+      "trainerNames": [],
+      "validFrom": "2026-07-19",
+      "validUntil": null
     },
     {
       "id": "c7db27ed-3365-4fc2-a27e-a04753b9e48b",
