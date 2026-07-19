@@ -339,12 +339,10 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [
-        "935d13de-b21e-43c5-a35f-405bfaf4cc6c"
-      ],
-      "trainerNames": [
-        "Fabrizio Calcagno"
-      ]
+      "trainerIds": [],
+      "trainerNames": [],
+      "validFrom": "2026-07-19",
+      "validUntil": null
     },
     {
       "id": "e4ade27c-8118-4432-8004-4a83c2a4ac45",
