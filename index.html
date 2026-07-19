@@ -814,7 +814,7 @@ function minToTime(m){return String(Math.floor(m/60)).padStart(2,'0')+':'+String
 
 function suggestFreeSlots(d,neededMin,skipId){
   if(!d)return[];
-  neededMin=Math.max(neededMin||60,30);
+  const MIN_GAP=30; // immer alle Lücken ≥ 30min zeigen, egal wie lang der neue Termin ist
   const DS=timeToMin('07:00'),DE=timeToMin('22:00');
   const busy=[];
   EVENTS.filter(e=>e.d===d&&e.id!==skipId).concat(trainingInstancesOn(d)).forEach(e=>{
@@ -828,11 +828,13 @@ function suggestFreeSlots(d,neededMin,skipId){
   });
   const free=[];let cur=DS;
   merged.forEach(b=>{
-    if(b.s>cur&&b.s-cur>=neededMin)free.push({start:minToTime(cur),end:minToTime(b.s)});
+    const gap=b.s-cur;
+    if(b.s>cur&&gap>=MIN_GAP)free.push({start:minToTime(cur),end:minToTime(b.s),dur:gap});
     if(b.e>cur)cur=b.e;
   });
-  if(DE>cur&&DE-cur>=neededMin)free.push({start:minToTime(cur),end:minToTime(DE)});
-  return free.slice(0,3);
+  const lastGap=DE-cur;
+  if(lastGap>=MIN_GAP)free.push({start:minToTime(cur),end:minToTime(DE),dur:lastGap});
+  return free.slice(0,5); // max 5 statt 3
 }
 
 function renderFreeSlotsBox(boxId,d,von,bis,skipId){
@@ -841,14 +843,17 @@ function renderFreeSlotsBox(boxId,d,von,bis,skipId){
   if(neededMin<=0){el.innerHTML='';return;}
   const slots=suggestFreeSlots(d,neededMin,skipId);
   if(!slots.length){
-    el.innerHTML='<div class="free-slots-box" style="background:#FFF5F5;border-color:var(--warn);"><div class="fs-header" style="color:var(--warn);">⚠ Kein freies Fenster für '+neededMin+'min am '+fmtShort(d)+'</div></div>';
+    el.innerHTML='<div class="free-slots-box" style="background:#FFF5F5;border-color:var(--warn);"><div class="fs-header" style="color:var(--warn);">⚠ Kein freies Zeitfenster (≥30min) am '+fmtShort(d)+'</div></div>';
     return;
   }
   const ico='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:12px;height:12px;stroke:#1E5730"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
   el.innerHTML='<div class="free-slots-box"><div class="fs-header">'+ico+' Freie Zeitfenster am '+fmtShort(d)+'</div>'+
-    slots.map(s=>'<div class="fs-item"><span class="fs-time">'+s.start+' – '+s.end+'</span>'+
-      '<button class="fs-btn" onclick="applySlot(\''+s.start+'\',\''+s.end+'\')">↓ Übernehmen</button></div>'
-    ).join('')+'</div>';
+    slots.map(s=>{
+      const tooShort=neededMin>0&&s.dur<neededMin;
+      const durLabel=tooShort?'<span style="font-size:10px;color:var(--warn);margin-left:5px;">('+s.dur+'min)</span>':'';
+      return '<div class="fs-item"><span class="fs-time">'+s.start+' – '+s.end+durLabel+'</span>'+
+        '<button class="fs-btn" onclick="applySlot(\''+s.start+'\',\''+s.end+'\')">↓ Übernehmen</button></div>';
+    }).join('')+'</div>';
 }
 
 function applySlotTF(start,end){
