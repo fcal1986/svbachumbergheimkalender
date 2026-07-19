@@ -52,8 +52,8 @@
       "team": "F-Jugend",
       "squad": 1,
       "pitch": {
-        "mode": "haelfte",
-        "part": "B"
+        "mode": "viertel",
+        "part": 4
       },
       "res": [],
       "note": "",
