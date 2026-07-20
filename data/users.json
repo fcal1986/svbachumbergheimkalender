@@ -64,27 +64,6 @@
       }
     },
     {
-      "id": "fad91661-65cb-45d2-8da7-df79447471b6",
-      "first": "Fabrizio 2",
-      "last": "Test",
-      "email": "test@test.de",
-      "admin": false,
-      "classes": {
-        "E-Jugend": [
-          2
-        ]
-      },
-      "enc": {
-        "salt": "uig4lwrEznQI2UfJho5olw==",
-        "iv": "RJDWGUAjcobVITOa",
-        "cipher": "mLbXQIYZE0LLgYWZrT+FpykOaGnBL10rjsdgm7E2VMW6qQw9NrwfVRNi01L+uXgg9gRDTCrXYAGQTcbBmY5SKFjPzD8Lf1adzG3H5TgLAXurIZA8W1JtVpZR6A74fosZ9+FWvJW0z0DKW2a0KA=="
-      },
-      "created": "2026-07-18T04:50:52.703Z",
-      "phone": "01729913002",
-      "contactEmail": "test@test.de",
-      "contactPublic": "both"
-    },
-    {
       "id": "2091328f-05b9-4c7b-a912-b1cf0c006592",
       "first": "Michael",
       "last": "Raneck",
