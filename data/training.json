@@ -154,19 +154,21 @@
     },
     {
       "id": "ca2dc0b4-a484-4593-98eb-4b55d8a60d93",
-      "day": 2,
+      "day": 1,
       "from": "16:30",
       "to": "18:00",
       "team": "G-Jugend",
       "squad": 1,
       "pitch": {
-        "mode": "haelfte",
-        "part": "B"
+        "mode": "viertel",
+        "part": 1
       },
       "res": [],
       "note": "",
       "trainerIds": [],
-      "trainerNames": []
+      "trainerNames": [],
+      "validFrom": "2026-09-01",
+      "validUntil": null
     },
     {
       "id": "89485bc0-5f67-4a6d-b1a5-f83aa909f1f7",
