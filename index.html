@@ -101,7 +101,7 @@
   .ev-time-col:last-child{border-right:none;}
   .ev-t{font-size:16px;font-weight:800;color:var(--ink);line-height:1.1;}
   .ev-tl{font-size:9.5px;color:var(--ink-soft);margin-top:2px;font-weight:600;text-transform:uppercase;}
-  .ev-note{font-size:11px;color:var(--ink-soft);margin-top:8px;padding:7px 10px;background:var(--bg);border-radius:8px;}
+  .ev-note{font-size:11px;color:var(--ink-secondary);margin-top:8px;padding:7px 10px;background:var(--bg);border-radius:8px;}
   .ev-contact{font-size:11.5px;margin-top:8px;display:flex;align-items:center;flex-wrap:wrap;row-gap:5px;column-gap:0;}
   .ci-link{color:var(--blue);text-decoration:none;display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:600;padding:2px 0;}
   .ci-link svg{width:12px;height:12px;stroke:currentColor;flex:none;}
@@ -150,7 +150,9 @@
   .day-head{font-size:11.5px;font-weight:700;color:var(--ink-soft);background:transparent;padding:6px 2px 4px;margin:14px 0 6px;display:flex;align-items:center;gap:8px;}
   .day-head::after{content:"";flex:1;height:1px;background:var(--line);}
   .day-group:first-of-type .day-head{margin-top:2px;}
-  .chip-scroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;}
+  .chip-scroll-wrap{position:relative;margin-bottom:10px;}
+  .chip-scroll-wrap::after{content:'';position:absolute;top:0;right:0;bottom:4px;width:28px;pointer-events:none;background:linear-gradient(to right,rgba(248,250,247,0),var(--bg));}
+  .chip-scroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:0;}
   .chip-scroll::-webkit-scrollbar{display:none;}
   .filter-chip{flex:none;font-size:11.5px;font-weight:600;padding:6px 13px;border-radius:20px;border:1.5px solid var(--line);background:var(--white);color:var(--ink-soft);white-space:nowrap;cursor:pointer;box-shadow:var(--card-shadow);}
   .filter-chip.on{background:var(--black-btn);border-color:var(--black-btn);color:#fff;}
@@ -171,6 +173,7 @@
   .cal-day.other{opacity:.3;}
   .cal-day.today{border:2px solid var(--green);}
   .cal-day.sel{background:var(--black-btn);border-color:var(--black-btn);color:#fff;}
+  .cal-day.today.sel{box-shadow:0 0 0 2px var(--green);}
   .cal-day .load{position:absolute;top:3px;right:3px;width:8px;height:6px;border-radius:1.5px;border:1px solid var(--grass);display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:.5px;background:var(--grass);overflow:hidden;}
   .cal-day .load i{background:#fff;}
   .cal-day .load i.on{background:var(--grass);}
@@ -473,12 +476,12 @@
       <p class="section-label">Demnächst</p>
       <div id="up-list"></div>
       <p class="section-label">Schnellzugriff</p>
-      <div class="chip-scroll">
+      <div class="chip-scroll-wrap"><div class="chip-scroll">
         <span class="filter-chip on" onclick="newEvent()">+ Neuer Termin</span>
         <span class="filter-chip" onclick="goto('termine');setView('monat')">Monatsansicht</span>
         <span class="filter-chip" onclick="goto('termine');setView('jahr')">Jahresansicht</span>
         <span class="filter-chip" onclick="goto('konto')">Kalender abonnieren</span>
-      </div>
+      </div></div>
     </div>
   </div>
 
@@ -490,7 +493,7 @@
         <button type="button" data-view="monat" class="on" onclick="setView('monat')">Monat</button>
         <button type="button" data-view="jahr" onclick="setView('jahr')">Jahr</button>
       </div>
-      <div class="chip-scroll" id="filterbar"></div>
+      <div class="chip-scroll-wrap"><div class="chip-scroll" id="filterbar"></div></div>
       <div id="view-liste" style="display:none;"></div>
       <div id="view-monat" style="display:none;"></div>
       <div id="view-jahr" style="display:none;"></div>
@@ -1690,9 +1693,26 @@ function onTimeChange(){
   // Leichte Verzögerung, damit Pitch-Render zuerst fertig ist
   setTimeout(updateFreeSlotsOnConflict,150);
 }
+/* ---------- Platz-Auswahl (gemeinsame Logik für Termin- & Trainingsformular) ---------- */
+function resChipOn(containerId,res){const el=document.querySelector('#'+containerId+' .res-chip[data-res="'+res+'"]');return!!el&&el.classList.contains('on');}
+function pitchPartForMode(m){return m==='ganz'?null:(m==='haelfte'?'A':1);}
+function pitchPartForPick(mode,q){return mode==='haelfte'?halfOf(q):q;}
+function toggleModeButtons(containerId,mode){document.querySelectorAll('#'+containerId+' button').forEach(b=>b.classList.toggle('on',b.dataset.mode===mode));}
+function renderPitchGrid(ids,state,busy,capPrefixHtml){
+  const sel=new Set(pitchQuarters(state));
+  document.querySelectorAll('#'+ids.grid+' .pq').forEach(el=>{
+    const q=parseInt(el.dataset.q);
+    el.classList.toggle('sel',sel.has(q));
+    el.classList.toggle('busy',busy.has(q));
+  });
+  const clash=[...sel].filter(q=>busy.has(q));
+  document.getElementById(ids.cap).innerHTML=capPrefixHtml+'<b>'+(4-busy.size)+'/4 frei</b></span>'+
+    (clash.length?'<span class="warnpill">Überschneidung: Viertel '+clash.join(', ')+'</span>':'<span class="okpill">Passt</span>');
+  return clash;
+}
 function toggleRes(el){el.classList.toggle('on');hideConflicts();if(el.dataset.res==='Großspielfeld')renderPitch();
   if(el.dataset.res==='Halle'){halleThirds=[];renderHalle();}}
-function halleResOn(){return document.querySelector('#f-res .res-chip[data-res="Halle"]').classList.contains('on');}
+function halleResOn(){return resChipOn('f-res','Halle');}
 function toggleHalleThird(n){const i=halleThirds.indexOf(n);if(i>=0)halleThirds.splice(i,1);else halleThirds.push(n);hideConflicts();renderHalle();}
 function renderHalle(){
   document.getElementById('f-halle-field').style.display=halleResOn()?'block':'none';
@@ -1708,31 +1728,23 @@ function renderHalle(){
   else if(clash.length)cap.innerHTML='<span class="warnpill">Achtung: Drittel '+clash.sort((a,b)=>a-b).join('+')+' belegt</span>';
   else cap.innerHTML='<span class="okpill">'+esc(halleShort({thirds:halleThirds}))+'</span>';
 }
-function pitchOn(){return document.querySelector('#f-res .res-chip[data-res="Großspielfeld"]').classList.contains('on');}
+function pitchOn(){return resChipOn('f-res','Großspielfeld');}
 function setPitchMode(m){
-  pitchMode=m; pitchPart=m==='ganz'?null:(m==='haelfte'?'A':1);
-  document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  pitchMode=m; pitchPart=pitchPartForMode(m);
+  toggleModeButtons('pitch-modes',m);
   renderPitch();
 }
-function pickPitch(q){ if(pitchMode==='ganz')return; pitchPart=pitchMode==='haelfte'?halfOf(q):q; renderPitch(); }
+function pickPitch(q){ if(pitchMode==='ganz')return; pitchPart=pitchPartForPick(pitchMode,q); renderPitch(); }
 function curPitch(){return pitchMode==='ganz'?{mode:'ganz'}:{mode:pitchMode,part:pitchPart};}
 function renderPitch(){
   const f=document.getElementById('f-pitch-field');
   f.style.display=pitchOn()?'block':'none';
   if(!pitchOn())return;
-  const sel=new Set(pitchQuarters(curPitch()));
   const von=document.getElementById('f-von').value||'00:00';
   const bis=document.getElementById('f-bis').value||'23:59';
   const busy=usedQuartersWindow(dateInput().value,von,bis,editingId);
-  document.querySelectorAll('#pitch .pq').forEach(el=>{
-    const q=parseInt(el.dataset.q);
-    el.classList.toggle('sel',sel.has(q));
-    el.classList.toggle('busy',busy.has(q));
-  });
-  const clash=[...sel].filter(q=>busy.has(q));
-  document.getElementById('pitch-cap').innerHTML=
-    '<span>'+fmtShort(dateInput().value)+' '+von+'–'+bis+': <b>'+(4-busy.size)+'/4 frei</b></span>'+
-    (clash.length?'<span class="warnpill">Überschneidung: Viertel '+clash.join(', ')+'</span>':'<span class="okpill">Passt</span>');
+  renderPitchGrid({grid:'pitch',cap:'pitch-cap'},curPitch(),busy,
+    '<span>'+fmtShort(dateInput().value)+' '+von+'–'+bis+': ');
 }
 function resetForm(){
   document.getElementById('f-anlass').value='';document.getElementById('f-bem').value='';
@@ -2250,13 +2262,13 @@ function tfTeamChange(){
   setTimeout(refreshTrainerChips,0);
 }
 function tfToggleRes(el){ el.classList.toggle('on'); if(el.dataset.res==='Großspielfeld') tfRenderPitch(); }
-function tfPitchOn(){ return document.querySelector('#tf-res .res-chip[data-res="Großspielfeld"]').classList.contains('on'); }
+function tfPitchOn(){ return resChipOn('tf-res','Großspielfeld'); }
 function tfSetPitchMode(m){
-  tPitchMode=m; tPitchPart=m==='ganz'?null:(m==='haelfte'?'A':1);
-  document.querySelectorAll('#tf-pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  tPitchMode=m; tPitchPart=pitchPartForMode(m);
+  toggleModeButtons('tf-pitch-modes',m);
   tfRenderPitch();
 }
-function tfPickPitch(q){ if(tPitchMode==='ganz')return; tPitchPart=tPitchMode==='haelfte'?halfOf(q):q; tfRenderPitch(); }
+function tfPickPitch(q){ if(tPitchMode==='ganz')return; tPitchPart=pitchPartForPick(tPitchMode,q); tfRenderPitch(); }
 function tfCurPitch(){ return tPitchMode==='ganz'?{mode:'ganz'}:{mode:tPitchMode,part:tPitchPart}; }
 function tfRenderPitch(){
   const f=document.getElementById('tf-pitch-field');
@@ -2265,17 +2277,9 @@ function tfRenderPitch(){
   const day=parseInt(document.getElementById('tf-day').value);
   const from=document.getElementById('tf-from').value||'00:00';
   const to=document.getElementById('tf-to').value||'23:59';
-  const sel=new Set(pitchQuarters(tfCurPitch()));
   const busy=tUsedQuarters(day,from,to,tEditId);
-  document.querySelectorAll('#tf-pitch .pq').forEach(el=>{
-    const q=parseInt(el.dataset.q);
-    el.classList.toggle('sel',sel.has(q));
-    el.classList.toggle('busy',busy.has(q));
-  });
-  const clash=[...sel].filter(q=>busy.has(q));
-  document.getElementById('tf-pitch-cap').innerHTML=
-    '<span>'+WDAYS[day]+' '+from+'–'+to+': <b>'+(4-busy.size)+'/4 frei</b></span>'+
-    (clash.length?'<span class="warnpill">Überschneidung: Viertel '+clash.join(', ')+'</span>':'<span class="okpill">Passt</span>');
+  const clash=renderPitchGrid({grid:'tf-pitch',cap:'tf-pitch-cap'},tfCurPitch(),busy,
+    '<span>'+WDAYS[day]+' '+from+'–'+to+': ');
   // Freie Zeitfenster-Vorschläge für Training
   setTimeout(()=>updateTFormFreeSlots(clash.length>0),100);
 }
@@ -2721,10 +2725,14 @@ async function createUser(){
   const backup=JSON.stringify(USERS);
   try{
     const encRec=await encryptToken(session.token,pass);
-    USERS.push({id:crypto.randomUUID(),first,last,email:mail,admin:isAdm,classes,enc:encRec,created:new Date().toISOString()});
+    const newU={id:crypto.randomUUID(),first,last,email:mail,admin:isAdm,classes,enc:encRec,created:new Date().toISOString()};
+    USERS.push(newU);
     await saveUsers('Zugang angelegt: '+first+' '+last+(isAdm?' (Admin)':''));
     syncTrainerAssignments(newU).then(n=>{ if(n>0) saveTraining('Trainer-Zuordnung aktualisiert: '+newU.first+' '+newU.last).catch(()=>{}); }).catch(()=>{});
-    showToast(first+' kann sich jetzt anmelden'+(isAdm?' und darf alles verwalten.':'.'));
+    // Neuen Zugang direkt der aktiven Saison zuordnen, statt dass der Admin das separat unter "Saisons" nachholen muss
+    const curSeason=getCurrentSeason();
+    if(curSeason) addUserToSeason(curSeason.id,newU.id).catch(()=>{});
+    showToast(first+' kann sich jetzt anmelden'+(isAdm?' und darf alles verwalten.':'.')+(curSeason?' Bereits der aktuellen Saison zugeordnet.':''));
     renderKonto();
   }catch(e){
     USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000);
