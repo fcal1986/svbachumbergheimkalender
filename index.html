@@ -3,42 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#FFFFFF">
-<meta name="description" content="Termine des SV Bachum/Bergheim – Spiele, Feste und Trainingszeiten auf einen Blick.">
+<meta name="theme-color" content="#F8FAF7">
+<meta name="description" content="platzcoach – Termine, Training und Platzbelegung für den SV Bachum/Bergheim, einfach organisiert.">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon.webp" type="image/webp">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="SVBB Termine">
-<title>SV Bachum/Bergheim – Termine</title>
+<meta name="apple-mobile-web-app-title" content="platzcoach">
+<title>platzcoach – SV Bachum / Bergheim</title>
+<meta property="og:title" content="platzcoach – SV Bachum / Bergheim">
+<meta property="og:description" content="platzcoach – Termine, Training und Platzbelegung für den SV Bachum/Bergheim, einfach organisiert.">
+<meta property="og:image" content="og-image.png">
+<meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 
   :root{
-    --bg:#EBF0F4; --white:#FFFFFF; --ink:#111111; --ink-soft:#8B97A5;
-    --line:#DDE4EA; --card-shadow:0 2px 10px rgba(0,0,0,.07);
-    --green:#44C177; --green-dim:#EAF5EF;
-    --ev-head:#95B5A9;
-    --black-btn:#111111;
-    --blue:#1D4E9E; --blue-bright:#3D6FC4;
+    /* platzcoach brand tokens */
+    --pc-navy:#011B32; --pc-green:#6BB41C; --pc-lime:#8BCF2F;
+    --bg:#F8FAF7; --white:#FFFFFF; --ink:#011B32; --ink-soft:#718191;
+    --ink-secondary:#405366;
+    --line:#DCE3E2; --card-shadow:0 4px 16px rgba(1,27,50,.08);
+    --card-shadow-elevated:0 10px 30px rgba(1,27,50,.12);
+    --green:#6BB41C; --green-dim:#EEF7E5;
+    --ev-head:#DCEAC2;
+    --black-btn:#011B32;
+    --blue:#011B32; --blue-bright:#2C4A66;
     --yellow:#FFD24A; --yellow-soft:#FFF1C2; --yellow-deep:#E8B400;
     --grass:#2F7A46; --grass-dim:#E6F1E9;
     --halle:#6B3FA0; --halle-dim:#F0EAFA;
-    --warn:#C0392B; --ok:#25A55A;
+    --warn:#C0392B; --ok:#6BB41C;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;height:100%;}
-  body{font-family:'Poppins',sans-serif;color:var(--ink);background:var(--bg);overscroll-behavior:none;}
+  body{font-family:'Inter',Arial,Helvetica,sans-serif;color:var(--ink);background:var(--bg);overscroll-behavior:none;}
   #app{display:flex;flex-direction:column;height:100dvh;max-width:520px;margin:0 auto;background:var(--bg);position:relative;overflow:hidden;}
 
   /* ── HEADER ── */
-  .appheader{flex:none;background:var(--white);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top)) 16px 10px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+  .appheader{flex:none;background:var(--white);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top)) 16px 10px;box-shadow:0 2px 8px rgba(1,27,50,.06);}
   .head-row{display:flex;align-items:center;gap:12px;}
-  .crest{width:36px;height:40px;flex:none;}
+  .crest{width:40px;height:40px;flex:none;object-fit:contain;}
   .head-text{flex:1;min-width:0;}
-  .head-text .club{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);}
-  .head-text h2{font-weight:700;font-size:17px;color:var(--ink);margin:0;line-height:1.2;}
-  .user-chip{border:none;font-family:'Poppins';font-size:11.5px;font-weight:700;padding:8px 14px;border-radius:20px;cursor:pointer;background:var(--bg);color:var(--ink-soft);border:1.5px solid var(--line);}
+  .head-text .brand-name{font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--green);line-height:1.3;}
+  .head-text .club{font-size:10.5px;font-weight:600;color:var(--ink-soft);line-height:1.25;}
+  .head-text h2{font-weight:700;font-size:16px;color:var(--ink);margin:1px 0 0;line-height:1.2;}
+  .user-chip{border:none;font-family:'Inter';font-size:11.5px;font-weight:700;padding:8px 14px;border-radius:999px;cursor:pointer;background:var(--bg);color:var(--ink-soft);border:1.5px solid var(--line);}
   .user-chip.in{background:var(--green);color:#fff;border-color:var(--green);}
 
   /* ── CONTENT ── */
@@ -46,8 +57,8 @@
   .content::-webkit-scrollbar{width:0;}
 
   /* ── NAV ── */
-  .navbar{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-around;background:var(--white);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:10;box-shadow:0 -2px 10px rgba(0,0,0,.06);}
-  .navbtn{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;color:var(--ink-soft);font-family:'Poppins';font-size:9px;font-weight:600;cursor:pointer;padding:2px 6px;}
+  .navbar{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-around;background:var(--white);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:10;box-shadow:0 -2px 10px rgba(1,27,50,.08);}
+  .navbtn{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;color:var(--ink-soft);font-family:'Inter';font-size:9px;font-weight:600;cursor:pointer;padding:2px 6px;}
   .navbtn .nbico{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .18s;}
   .navbtn svg{width:20px;height:20px;stroke:var(--ink-soft);}
   .navbtn.active .nbico{background:var(--green);}
@@ -65,7 +76,7 @@
 
   /* ── STAT CARDS ── */
   .stat-row{display:flex;gap:10px;margin-bottom:6px;}
-  .stat-card{flex:1;background:var(--white);border-radius:14px;padding:14px 16px;box-shadow:var(--card-shadow);}
+  .stat-card{flex:1;background:var(--white);border-radius:16px;padding:14px 16px;box-shadow:var(--card-shadow);}
   .stat-card .num{font-weight:800;font-size:26px;line-height:1;color:var(--ink);}
   .stat-card .lbl{font-size:11px;color:var(--ink-soft);margin-top:4px;}
   .stat-card.green{background:var(--green);}
@@ -73,7 +84,7 @@
   .stat-card.green .lbl{color:rgba(255,255,255,.75);}
 
   /* ── EVENT CARD (SpielerPlus style) ── */
-  .event-card{background:var(--white);border-radius:14px;box-shadow:var(--card-shadow);margin-bottom:10px;overflow:hidden;}
+  .event-card{background:var(--white);border-radius:16px;box-shadow:var(--card-shadow);margin-bottom:10px;overflow:hidden;}
   .event-card.mine .ev-head{border-left:4px solid var(--ok);}
   .event-card.hl{box-shadow:0 0 0 2.5px var(--yellow-deep),var(--card-shadow);}
   .ev-head{background:var(--ev-head);padding:11px 12px;display:flex;align-items:center;gap:10px;position:relative;}
@@ -100,15 +111,15 @@
   .ibtn svg{width:13px;height:13px;stroke:var(--ink-soft);}
   .ibtn.share svg{stroke:var(--ok);}
   .ibtn.del svg{stroke:var(--warn);}
-  .empty-card{background:var(--white);border-radius:14px;padding:20px 16px;text-align:center;font-size:12px;color:var(--ink-soft);box-shadow:var(--card-shadow);margin-bottom:10px;}
+  .empty-card{background:var(--white);border-radius:16px;padding:20px 16px;text-align:center;font-size:12px;color:var(--ink-soft);box-shadow:var(--card-shadow);margin-bottom:10px;}
 
   /* ── BADGES ── */
   .badges{display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
-  .badge-team{font-size:10px;font-weight:700;padding:3px 9px;border-radius:16px;background:var(--blue);color:#fff;}
+  .badge-team{font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--blue);color:#fff;}
   .badge-team.senioren{background:var(--blue-bright);}
   .badge-team.verein{background:var(--ink-soft);}
-  .badge-squad{font-size:10px;font-weight:700;padding:3px 9px;border-radius:16px;background:var(--yellow-soft);color:#6E5A0C;}
-  .badge-training{font-size:10px;font-weight:700;padding:3px 9px;border-radius:16px;background:var(--green-dim);color:#1E5730;}
+  .badge-squad{font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--yellow-soft);color:#6E5A0C;}
+  .badge-training{font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--green-dim);color:#1E5730;}
   .log-row{display:flex;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line);align-items:flex-start;}
   .log-row:last-child{border-bottom:none;}
   .log-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:none;}
@@ -117,7 +128,7 @@
   .log-msg{font-size:12px;font-weight:600;color:var(--ink);line-height:1.4;}
   .log-time{font-size:10.5px;color:var(--ink-soft);margin-top:3px;display:flex;align-items:center;gap:6px;}
   .log-cat{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:1px 7px;font-size:9.5px;font-weight:700;color:var(--ink-soft);}
-  .squad-sq-chip{font-size:10px;font-weight:700;padding:4px 8px;border-radius:8px;background:var(--bg);border:1.5px solid var(--line);color:var(--ink-soft);cursor:pointer;user-select:none;}
+  .squad-sq-chip{font-size:10px;font-weight:700;padding:4px 8px;border-radius:6px;background:var(--bg);border:1.5px solid var(--line);color:var(--ink-soft);cursor:pointer;user-select:none;}
   .squad-sq-chip.on{background:var(--green);border-color:var(--green);color:#fff;}
   .log-more{font-size:11px;color:var(--ink-soft);padding:10px 2px;text-align:center;}
   .badge-res{font-size:10px;font-weight:600;padding:3px 9px;border-radius:16px;background:var(--bg);color:var(--ink-soft);}
@@ -128,12 +139,12 @@
   .mini-pitch i{background:#F5FAF6;}
   .mini-pitch i.on{background:var(--grass);}
   .mini-pitch.lg{width:32px;height:20px;border-radius:3px;}
-  .badge-pitch{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 9px 3px 5px;border-radius:14px;background:var(--grass-dim);color:#1E5730;}
+  .badge-pitch{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 9px 3px 5px;border-radius:16px;background:var(--grass-dim);color:#1E5730;}
   .mini-halle{display:inline-flex;flex-direction:column;width:13px;height:20px;gap:1.5px;border:1.5px solid var(--halle);border-radius:3px;background:var(--halle);overflow:hidden;flex:none;vertical-align:middle;}
   .mini-halle s{flex:1;background:#FAF7FD;display:block;}
   .mini-halle s.on{background:var(--halle);}
   .mini-halle.lg{width:17px;height:26px;border-radius:3px;}
-  .badge-halle{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 9px 3px 5px;border-radius:14px;background:var(--halle-dim);color:#3D1A70;}
+  .badge-halle{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 9px 3px 5px;border-radius:16px;background:var(--halle-dim);color:#3D1A70;}
 
   /* ── TERMINE VIEW ── */
   .day-head{font-size:11.5px;font-weight:700;color:var(--ink-soft);background:transparent;padding:6px 2px 4px;margin:14px 0 6px;display:flex;align-items:center;gap:8px;}
@@ -144,7 +155,7 @@
   .filter-chip{flex:none;font-size:11.5px;font-weight:600;padding:6px 13px;border-radius:20px;border:1.5px solid var(--line);background:var(--white);color:var(--ink-soft);white-space:nowrap;cursor:pointer;box-shadow:var(--card-shadow);}
   .filter-chip.on{background:var(--black-btn);border-color:var(--black-btn);color:#fff;}
   .viewseg{display:flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden;background:var(--white);margin-bottom:12px;box-shadow:var(--card-shadow);}
-  .viewseg button{flex:1;border:none;background:none;padding:10px 0;font-family:'Poppins';font-size:12.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;border-right:1.5px solid var(--line);}
+  .viewseg button{flex:1;border:none;background:none;padding:10px 0;font-family:'Inter';font-size:12.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;border-right:1.5px solid var(--line);}
   .viewseg button:last-child{border-right:none;}
   .viewseg button.on{background:var(--black-btn);color:#fff;}
 
@@ -179,7 +190,7 @@
   .cap-text{font-size:11.5px;color:var(--ink-soft);line-height:1.5;flex:1;}
   .cap-text b{color:var(--ink);display:block;font-size:13px;}
   .empty-day{font-size:12px;color:var(--ink-soft);padding:10px 2px;}
-  .ghost-btn{width:100%;margin-top:8px;background:var(--white);border:1.5px dashed var(--line);color:var(--ink-soft);border-radius:12px;padding:12px;font-family:'Poppins';font-size:12.5px;font-weight:600;cursor:pointer;box-shadow:var(--card-shadow);}
+  .ghost-btn{width:100%;margin-top:8px;background:var(--white);border:1.5px dashed var(--line);color:var(--ink-soft);border-radius:12px;padding:12px;font-family:'Inter';font-size:12.5px;font-weight:600;cursor:pointer;box-shadow:var(--card-shadow);}
 
   /* ── YEAR ── */
   .year-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
@@ -203,7 +214,7 @@
   .train-day{margin-bottom:16px;}
   .train-day .d{font-weight:800;font-size:15px;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
   .train-day .d .line{flex:1;height:1px;background:var(--line);}
-  .addlink{flex:none;font-size:11px;font-weight:700;color:var(--green);background:var(--green-dim);border:none;border-radius:8px;padding:5px 9px;cursor:pointer;font-family:'Poppins';}
+  .addlink{flex:none;font-size:11px;font-weight:700;color:var(--green);background:var(--green-dim);border:none;border-radius:8px;padding:5px 9px;cursor:pointer;font-family:'Inter';}
   .train-slot{background:var(--white);border-radius:12px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:10px;box-shadow:var(--card-shadow);}
   .train-slot .tinfo{flex:1;min-width:0;}
   .train-slot .team{font-size:13.5px;font-weight:700;}
@@ -211,7 +222,7 @@
   .train-slot .time{font-size:13px;font-weight:800;color:var(--ink);flex:none;}
   .train-slot .tacts{display:flex;gap:4px;}
   .train-empty{font-size:11.5px;color:var(--ink-soft);padding:0 2px 8px;}
-  .heute-card{background:var(--white);border-radius:14px;box-shadow:var(--card-shadow);padding:14px 15px;margin-bottom:18px;border-left:4px solid var(--green);}
+  .heute-card{background:var(--white);border-radius:16px;box-shadow:var(--card-shadow);padding:14px 15px;margin-bottom:18px;border-left:4px solid var(--green);}
   .heute-card .hc-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-bottom:10px;}
   .heute-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);}
   .heute-row:last-child{border-bottom:none;}
@@ -236,31 +247,31 @@
   .cancel-chip{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:600;padding:3px 6px 3px 9px;border-radius:10px;background:#FDECEA;color:#9B3227;}
   .cancel-chip button{border:none;background:none;color:#9B3227;font-size:12px;line-height:1;cursor:pointer;padding:2px;font-weight:800;}
   .train-cancels{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
-  .cancel-link{font-size:10.5px;font-weight:600;color:var(--ink-soft);background:none;border:1px dashed var(--line);border-radius:8px;padding:4px 8px;cursor:pointer;font-family:'Poppins';}
+  .cancel-link{font-size:10.5px;font-weight:600;color:var(--ink-soft);background:none;border:1px dashed var(--line);border-radius:8px;padding:4px 8px;cursor:pointer;font-family:'Inter';}
 
   /* ── FORM ── */
   .field{margin-bottom:16px;}
   .field label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
   .req-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex:none;}
-  .field input,.field textarea,.field select{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px 13px;font-family:'Poppins';font-size:14px;color:var(--ink);background:var(--white);outline:none;appearance:none;-webkit-appearance:none;box-shadow:var(--card-shadow);}
+  .field input,.field textarea,.field select{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px 13px;font-family:'Inter';font-size:14px;color:var(--ink);background:var(--white);outline:none;appearance:none;-webkit-appearance:none;box-shadow:var(--card-shadow);}
   .field select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238B97A5' stroke-width='2.4'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;}
   .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(68,193,119,.12);}
   .field textarea{resize:none;height:72px;}
   .readonly-pill{display:inline-flex;align-items:center;gap:6px;background:var(--white);border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;font-size:13px;font-weight:600;color:var(--ink-soft);}
   .chip-group{display:flex;gap:8px;flex-wrap:wrap;}
-  .res-chip{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:11px;padding:9px 13px;font-size:12.5px;font-weight:600;color:var(--ink-soft);background:var(--white);cursor:pointer;user-select:none;box-shadow:var(--card-shadow);}
+  .res-chip{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:10px;padding:9px 13px;font-size:12.5px;font-weight:600;color:var(--ink-soft);background:var(--white);cursor:pointer;user-select:none;box-shadow:var(--card-shadow);}
   .res-chip svg{width:14px;height:14px;stroke:var(--ink-soft);}
   .res-chip.on{background:var(--black-btn);border-color:var(--black-btn);color:#fff;}
   .res-chip.on svg{stroke:#fff;}
   .seg{display:flex;border:1.5px solid var(--line);border-radius:11px;overflow:hidden;background:var(--white);box-shadow:var(--card-shadow);}
-  .seg button{flex:1;border:none;background:none;padding:11px 0;font-family:'Poppins';font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer;border-right:1.5px solid var(--line);}
+  .seg button{flex:1;border:none;background:none;padding:11px 0;font-family:'Inter';font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer;border-right:1.5px solid var(--line);}
   .seg button:last-child{border-right:none;}
   .seg button.on{background:var(--black-btn);color:#fff;}
 
   /* ── PITCH ── */
   .pitch-box{background:var(--white);border:1.5px solid var(--line);border-radius:13px;padding:12px;box-shadow:var(--card-shadow);}
   .pitch-modes{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:12px;}
-  .pitch-modes button{flex:1;border:none;background:none;padding:9px 0;font-family:'Poppins';font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer;border-right:1.5px solid var(--line);}
+  .pitch-modes button{flex:1;border:none;background:none;padding:9px 0;font-family:'Inter';font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer;border-right:1.5px solid var(--line);}
   .pitch-modes button:last-child{border-right:none;}
   .pitch-modes button.on{background:var(--black-btn);color:#fff;}
   .pitch-box .pitch{position:relative;aspect-ratio:16/10;border-radius:8px;background:var(--grass-dim);border:2px solid var(--grass);display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;overflow:hidden;}
@@ -307,10 +318,10 @@
   .mp-day.mp-today{position:relative;}
   .mp-day.mp-today::after{content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--green);}
   .mp-day.mp-selected-week.mp-today::after{background:#fff;}
-  .mp-accept{display:block;width:100%;background:var(--green);color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px;font-family:inherit;}
+  .mp-accept{display:block;width:100%;background:var(--green);color:#fff;border:none;border-radius:16px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px;font-family:inherit;}
   /* Wochenstreifen */
   /* Mannschaften-Tab */
-  .mncht-team-card{background:var(--white);border-radius:14px;margin-bottom:10px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:3px solid var(--line);}
+  .mncht-team-card{background:var(--white);border-radius:16px;margin-bottom:10px;padding:14px;box-shadow:0 1px 4px rgba(1,27,50,.08);border-left:3px solid var(--line);}
   .mncht-team-card.mncht-mine{border-left-color:var(--green);}
   .mncht-team-name{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
   .mncht-mine-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none;}
@@ -318,7 +329,7 @@
   .mncht-day{font-weight:700;color:var(--green);font-size:11px;text-transform:uppercase;padding-top:1px;}
   .mncht-time{font-weight:700;color:var(--ink);}
   .mncht-res{color:var(--ink-soft);}
-  .konto-header{display:flex;align-items:center;justify-content:space-between;background:var(--white);border-radius:14px;padding:12px 14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);}
+  .konto-header{display:flex;align-items:center;justify-content:space-between;background:var(--white);border-radius:16px;padding:12px 14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(1,27,50,.08);}
   .konto-info{display:flex;align-items:center;gap:10px;}
   .season-card{background:var(--bg);border-radius:12px;padding:12px;margin-bottom:10px;border:1.5px solid var(--line);}
   .season-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
@@ -371,13 +382,13 @@
   .ci-contact svg{width:12px;height:12px;stroke:#8E2A1D;}
 
   .helptext{font-size:10.5px;color:var(--ink-soft);margin-top:5px;line-height:1.55;}
-  .submit-btn{width:100%;background:var(--black-btn);color:#fff;border:none;border-radius:12px;padding:15px;font-family:'Poppins';font-weight:700;font-size:14px;cursor:pointer;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .submit-btn{width:100%;background:var(--black-btn);color:#fff;border:none;border-radius:12px;padding:15px;font-family:'Inter';font-weight:700;font-size:14px;cursor:pointer;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px;}
   .submit-btn svg{width:16px;height:16px;stroke:#fff;}
   .submit-btn:disabled{opacity:.45;}
-  .cancel-btn{width:100%;background:none;border:1.5px solid var(--line);color:var(--ink-soft);border-radius:12px;padding:12px;font-family:'Poppins';font-weight:600;font-size:13px;cursor:pointer;margin-top:8px;}
+  .cancel-btn{width:100%;background:none;border:1.5px solid var(--line);color:var(--ink-soft);border-radius:12px;padding:12px;font-family:'Inter';font-weight:600;font-size:13px;cursor:pointer;margin-top:8px;}
 
   /* ── KONTO ── */
-  .card{background:var(--white);border-radius:14px;padding:15px 16px;margin-bottom:10px;box-shadow:var(--card-shadow);}
+  .card{background:var(--white);border-radius:16px;padding:15px 16px;margin-bottom:10px;box-shadow:var(--card-shadow);}
   .card h4{margin:0 0 4px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;}
   .card h4 svg{width:16px;height:16px;stroke:var(--green);flex:none;}
   .card .sub{font-size:11.5px;color:var(--ink-soft);line-height:1.55;}
@@ -401,15 +412,15 @@
   .login-close{position:absolute;top:calc(14px + env(safe-area-inset-top));right:16px;width:38px;height:38px;border-radius:50%;background:var(--bg);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;}
   .login-close svg{width:18px;height:18px;stroke:var(--ink-soft);}
   .login-box{width:100%;max-width:340px;}
-  .login-crest{width:66px;height:72px;margin:0 auto 16px;display:block;}
+  .login-crest{width:180px;height:auto;margin:0 auto 20px;display:block;}
   .login-box h1{color:var(--ink);font-size:22px;font-weight:800;text-align:center;margin:0 0 4px;}
   .login-box .sub{color:var(--ink-soft);font-size:12.5px;text-align:center;margin:0 0 22px;line-height:1.5;}
-  .login-box input{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;font-family:'Poppins';font-size:14px;background:var(--bg);color:var(--ink);outline:none;margin-bottom:10px;}
+  .login-box input{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;font-family:'Inter';font-size:14px;background:var(--bg);color:var(--ink);outline:none;margin-bottom:10px;}
   .login-box input:focus{border-color:var(--green);}
   .login-err{background:#FDECEA;border:1px solid #F5C6C0;color:#8E2A1D;font-size:12px;padding:10px 12px;border-radius:10px;margin-bottom:10px;display:none;line-height:1.45;}
   .login-err.show{display:block;}
-  .btn-yellow{width:100%;background:var(--black-btn);color:#fff;border:none;border-radius:12px;padding:14px;font-family:'Poppins';font-weight:700;font-size:14px;cursor:pointer;}
-  .btn-ghost-light{width:100%;background:transparent;border:1.5px solid var(--line);color:var(--ink-soft);border-radius:12px;padding:13px;font-family:'Poppins';font-weight:600;font-size:13px;cursor:pointer;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-yellow{width:100%;background:var(--black-btn);color:#fff;border:none;border-radius:12px;padding:14px;font-family:'Inter';font-weight:700;font-size:14px;cursor:pointer;}
+  .btn-ghost-light{width:100%;background:transparent;border:1.5px solid var(--line);color:var(--ink-soft);border-radius:12px;padding:13px;font-family:'Inter';font-weight:600;font-size:13px;cursor:pointer;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;}
   .btn-ghost-light svg{width:17px;height:17px;stroke:var(--green);}
   .login-foot{color:var(--ink-soft);font-size:11px;text-align:center;margin-top:20px;line-height:1.6;}
 
@@ -423,10 +434,10 @@
   .modal-box h3{margin:0 0 8px;font-size:16px;font-weight:800;}
   .modal-box p{margin:0 0 16px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;}
   .modal-acts{display:flex;gap:8px;}
-  .modal-acts button{flex:1;border-radius:10px;padding:11px;font-family:'Poppins';font-size:13px;font-weight:600;cursor:pointer;border:none;}
+  .modal-acts button{flex:1;border-radius:10px;padding:11px;font-family:'Inter';font-size:13px;font-weight:600;cursor:pointer;border:none;}
   .modal-acts .no{background:var(--bg);color:var(--ink-soft);}
   .modal-acts .yes{background:var(--warn);color:#fff;}
-  #saving-pill{position:fixed;bottom:calc(82px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:20px;font-family:'Poppins';font-size:12px;font-weight:600;display:none;align-items:center;gap:9px;z-index:75;box-shadow:0 4px 16px rgba(0,0,0,.25);white-space:nowrap;transition:opacity .2s;}
+  #saving-pill{position:fixed;bottom:calc(82px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:20px;font-family:'Inter';font-size:12px;font-weight:600;display:none;align-items:center;gap:9px;z-index:75;box-shadow:0 4px 16px rgba(0,0,0,.25);white-space:nowrap;transition:opacity .2s;}
   #saving-pill.show{display:flex;}
   .spinner{width:15px;height:15px;border:2px solid rgba(0,0,0,.15);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
   @keyframes spin{to{transform:rotate(360deg);}}
@@ -439,13 +450,9 @@
   <!-- HEADER -->
   <div class="appheader">
     <div class="head-row">
-      <svg class="crest" viewBox="0 0 44 48" fill="none">
-        <path d="M22 1 L42 8 V25 C42 38 22 47 22 47 C22 47 2 38 2 25 V8 Z" fill="#0E2A5C" stroke="#FFD24A" stroke-width="1.6"/>
-        <path d="M22 1 L42 8 V25 C42 38 22 47 22 47 V1 Z" fill="#1D4E9E"/>
-        <text x="22" y="24" font-family="Poppins" font-weight="700" font-size="9" fill="#FFD24A" text-anchor="middle">SVBB</text>
-        <text x="22" y="36" font-family="Poppins" font-weight="600" font-size="6" fill="#C7D3EA" text-anchor="middle">B/B</text>
-      </svg>
+      <img class="crest" src="assets/logo-icon.svg" alt="platzcoach" width="44" height="44">
       <div class="head-text">
+        <div class="brand-name">platzcoach</div>
         <div class="club" id="hd-club">SV Bachum / Bergheim e.V.</div>
         <h2 id="hd-title">Termine</h2>
       </div>
@@ -684,12 +691,7 @@
 <div id="login">
   <button class="login-close" onclick="closeLogin()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   <div class="login-box">
-    <svg class="login-crest" viewBox="0 0 44 48" fill="none">
-      <path d="M22 1 L42 8 V25 C42 38 22 47 22 47 C22 47 2 38 2 25 V8 Z" fill="#0E2A5C" stroke="#FFD24A" stroke-width="1.6"/>
-      <path d="M22 1 L42 8 V25 C42 38 22 47 22 47 V1 Z" fill="#1D4E9E"/>
-      <text x="22" y="24" font-family="Poppins" font-weight="700" font-size="9" fill="#FFD24A" text-anchor="middle">SVBB</text>
-      <text x="22" y="36" font-family="Poppins" font-weight="600" font-size="6" fill="#C7D3EA" text-anchor="middle">B/B</text>
-    </svg>
+    <img class="login-crest" src="assets/logo.svg" alt="platzcoach">
     <h1>Anmelden</h1>
     <p class="sub">Termine ansehen geht ohne Anmeldung.<br>Eintragen und Ändern erfordert einen Zugang.</p>
     <div class="login-err" id="login-err"></div>
@@ -2111,7 +2113,7 @@ function renderTraining(){
     const activeSeasTrs=SEASONS.length&&selectedSeasonFilter?
       (SEASONS.find(s=>s.id===selectedSeasonFilter)?.trainerIds||null):null;
     if(SEASONS.length){
-      h+='<select onchange="selectedSeasonFilter=this.value;renderTraining()" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px;font-family:Poppins;font-size:13px;background:var(--bg);margin-bottom:12px;">'+
+      h+='<select onchange="selectedSeasonFilter=this.value;renderTraining()" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px;font-family:Inter;font-size:13px;background:var(--bg);margin-bottom:12px;">'+
         '<option value="">Alle Saisons</option>'+
         [...SEASONS].sort((a,b)=>b.startYear-a.startYear).map(s=>'<option value="'+s.id+'"'+(selectedSeasonFilter===s.id?' selected':'')+'>'+esc(s.label)+'</option>').join('')+
         '</select>';
@@ -2185,7 +2187,7 @@ function renderTraining(){
       if(!slots.length)return;
       h+='<h4 style="font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;margin:14px 0 6px;">'+wd+'</h4>';
       slots.forEach(s=>{
-        h+='<div style="background:var(--white);border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.07);display:flex;align-items:flex-start;gap:10px;">'+
+        h+='<div style="background:var(--white);border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(1,27,50,.08);display:flex;align-items:flex-start;gap:10px;">'+
           '<div style="flex:1;min-width:0;">'+
           '<div style="font-size:13px;font-weight:700;color:var(--ink);">'+esc(trainName(s))+'</div>'+
           '<div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px;">'+s.from+'–'+s.to+' · '+trainLocHTML(s)+'</div>'+
@@ -2641,7 +2643,7 @@ function logCard(){
   ).join('');
   return '<div class="card">'+hdr+
     '<p class="sub" style="margin-top:8px;">Alle Änderungen – schreibgeschützt. Aus GitHub-Commits.</p>'+
-    '<input type="search" id="log-search" placeholder="Suche nach Name, Datum, Aktion …" value="'+esc(logSearch)+'" oninput="logSearch=this.value;renderLogList()" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-family:Poppins;font-size:13px;margin:10px 0 8px;background:var(--bg);outline:none;" >'+
+    '<input type="search" id="log-search" placeholder="Suche nach Name, Datum, Aktion …" value="'+esc(logSearch)+'" oninput="logSearch=this.value;renderLogList()" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-family:Inter;font-size:13px;margin:10px 0 8px;background:var(--bg);outline:none;" >'+
     '<div class="chip-scroll" style="margin-bottom:10px;">'+catBtns+'</div>'+
     '<div id="log-list"></div></div>';
 }
@@ -2905,7 +2907,7 @@ function seasonManagementCard(){
     else{h+='<div style="margin-bottom:10px;">'+trainers.map(u=>'<div class="season-trainer-row"><span style="font-weight:600;">'+esc(u.first+' '+u.last)+'</span><button class="ibtn del" onclick="removeUserFromSeason(\''+s.id+'\',' +'\''+u.id+'\')" title="Entfernen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>').join('')+'</div>';}
     const avail=USERS.filter(u=>!(s.trainerIds||[]).includes(u.id)); // alle User inkl. Admins
     if(avail.length){h+='<div style="display:flex;gap:6px;align-items:center;">'+
-      '<select id="sadd-'+s.id+'" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-family:Poppins;font-size:12px;background:var(--bg);">'+
+      '<select id="sadd-'+s.id+'" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-family:Inter;font-size:12px;background:var(--bg);">'+
       '<option value="">Trainer wählen …</option>'+
       avail.sort((a,b)=>(a.first+a.last).localeCompare(b.first+b.last)).map(u=>'<option value="'+u.id+'">'+esc(u.first+' '+u.last)+'</option>').join('')+
       '</select><button class="ghost-btn" style="padding:8px 14px;white-space:nowrap;" onclick="addUserToSeasonFromSelect(this.dataset.sid)" data-sid="'+s.id+'">+ Hinzu</button></div>';}
@@ -2915,7 +2917,7 @@ function seasonManagementCard(){
   h+='<div style="border-top:1px solid var(--line);margin-top:14px;padding-top:14px;">'+
     '<div style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Neue Saison anlegen</div>'+
     '<div style="display:flex;gap:8px;align-items:center;">'+
-    '<select id="new-season-year" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:9px;font-family:Poppins;font-size:12px;background:var(--bg);">'+
+    '<select id="new-season-year" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:9px;font-family:Inter;font-size:12px;background:var(--bg);">'+
     [0,1,2,3].map(i=>{const y=new Date().getFullYear()+i;return'<option value="'+y+'"'+(y===nextY?' selected':'')+'>'+getSeasonLabel(y)+'</option>';}).join('')+
     '</select><button class="submit-btn" style="padding:9px 16px;white-space:nowrap;" onclick="createSeasonFromSelect()">Anlegen</button>'+
     '</div></div></div>';

@@ -1,13 +1,13 @@
 {
-  "name": "SV Bachum/Bergheim – Termine",
-  "short_name": "SVBB Termine",
-  "description": "Termine des SV Bachum/Bergheim – Spiele, Feste und Veranstaltungen.",
+  "name": "platzcoach – SV Bachum/Bergheim",
+  "short_name": "platzcoach",
+  "description": "platzcoach – Termine, Training und Platzbelegung für den SV Bachum/Bergheim, einfach organisiert.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0E2A5C",
-  "theme_color": "#0E2A5C",
+  "background_color": "#011B32",
+  "theme_color": "#F8FAF7",
   "lang": "de",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

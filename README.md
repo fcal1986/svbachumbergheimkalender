@@ -1,6 +1,6 @@
-# SVBB Termine
+# platzcoach – SV Bachum/Bergheim
 
-Terminverwaltung für den SV Bachum/Bergheim. Eine HTML-Seite auf GitHub Pages, Daten als JSON im selben Repo.
+Terminverwaltung für den SV Bachum/Bergheim, powered by **platzcoach**. Eine HTML-Seite auf GitHub Pages, Daten als JSON im selben Repo.
 
 **Ansehen kann jeder — ohne Anmeldung.** Nur Eintragen, Ändern und Löschen erfordert einen Zugang.
 
@@ -13,6 +13,14 @@ index.html
 manifest.json
 icon-192.png
 icon-512.png
+apple-touch-icon.png
+favicon.ico
+favicon.webp
+og-image.png
+assets/logo.svg
+assets/logo-horizontal.svg
+assets/logo-icon.svg
+assets/logo-white.svg
 data/config.json
 data/events.json
 data/users.json
