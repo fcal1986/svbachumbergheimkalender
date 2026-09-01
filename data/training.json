@@ -496,21 +496,23 @@
       "team": "E-Jugend",
       "squad": 2,
       "pitch": {
-        "mode": "haelfte",
-        "part": "A"
+        "mode": "viertel",
+        "part": 2
       },
       "res": [],
       "note": "",
       "trainerIds": [
-        "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-        "a30f8c9b-96f9-4557-b28b-619e122080ea"
+        "a30f8c9b-96f9-4557-b28b-619e122080ea",
+        "935d13de-b21e-43c5-a35f-405bfaf4cc6c"
       ],
       "trainerNames": [
-        "Fabrizio Calcagno",
-        "David Skwara"
+        "David Skwara",
+        "Fabrizio Calcagno"
       ],
       "trainerId": null,
-      "trainerName": ""
+      "trainerName": "",
+      "validFrom": "2026-09-01",
+      "validUntil": null
     },
     {
       "id": "2aec6df0-a5f2-4dbb-8efb-48a85579ed37",
