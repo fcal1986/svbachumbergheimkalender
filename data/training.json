@@ -276,13 +276,15 @@
       "team": "F-Jugend",
       "squad": 1,
       "pitch": {
-        "mode": "haelfte",
-        "part": "B"
+        "mode": "viertel",
+        "part": 2
       },
       "res": [],
       "note": "",
       "trainerIds": [],
-      "trainerNames": []
+      "trainerNames": [],
+      "validFrom": "2026-09-01",
+      "validUntil": null
     },
     {
       "id": "6a32ba38-5406-4849-973b-b738f3b78ab7",
