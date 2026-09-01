@@ -258,13 +258,15 @@
       "team": "E-Jugend",
       "squad": 3,
       "pitch": {
-        "mode": "haelfte",
-        "part": "A"
+        "mode": "viertel",
+        "part": 2
       },
       "res": [],
       "note": "",
       "trainerIds": [],
-      "trainerNames": []
+      "trainerNames": [],
+      "validFrom": "2026-09-01",
+      "validUntil": null
     },
     {
       "id": "ae20704e-735d-4f97-b7a1-cc8393bfd520",
