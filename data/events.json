@@ -81,6 +81,26 @@
       "note": "",
       "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
       "ownerName": "David Skwara"
+    },
+    {
+      "id": "56e7e79a-f08f-40b8-9e92-dddba6452d20",
+      "d": "2026-09-19",
+      "t": "10:00",
+      "bis": "11:30",
+      "title": "Ligaspiel",
+      "team": "E-Jugend",
+      "squad": 2,
+      "pitch": {
+        "mode": "haelfte",
+        "part": "A"
+      },
+      "halle": null,
+      "res": [
+        "Theke"
+      ],
+      "note": "Cafeteria",
+      "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
+      "ownerName": "David Skwara"
     }
   ]
 }
