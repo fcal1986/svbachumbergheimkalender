@@ -124,7 +124,15 @@ function looksLikeBlockedOrEmptyPage(html) {
 }
 
 async function fetchClubMatches(clubId, debug) {
-  const url = `https://www.fussball.de/ajax.club.matchplan/-/id/${clubId}/mode/PAGE/show-filter/true`;
+  // "Mehr laden" auf der fussball.de-Seite deutet auf serverseitige Pagination hin.
+  // Statt das nachzubauen (unbekannter Seiten-Parameter), fordern wir direkt einen
+  // weiten Datumsbereich + hohes "max" an – das Muster (datum-von/datum-bis/max)
+  // stammt aus dem "Drucken"-Link, den fussball.de selbst für die Vollansicht nutzt.
+  const today = new Date();
+  const inOneYear = new Date(today.getTime());
+  inOneYear.setFullYear(inOneYear.getFullYear() + 1);
+  const fmt = (d) => `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
+  const url = `https://www.fussball.de/ajax.club.matchplan/-/datum-von/${fmt(today)}/datum-bis/${fmt(inOneYear)}/max/999/id/${clubId}/mode/PAGE/show-filter/true`;
   const res = await fetch(url, {
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36',
@@ -135,10 +143,29 @@ async function fetchClubMatches(clubId, debug) {
   });
   const html = await res.text();
   if (debug) {
+    console.log(`  [debug] Angefragter Zeitraum: ${fmt(today)} bis ${fmt(inOneYear)} (max 999)`);
+    console.log(`  [debug] URL: ${url}`);
     console.log(`  [debug] HTTP-Status: ${res.status} | Antwortlänge: ${html.length} Zeichen`);
     console.log(`  [debug] Erste 300 Zeichen der Antwort:\n${html.slice(0, 300).replace(/\n/g, ' ')}`);
   }
-  if (!res.ok) throw new Error(`fussball.de antwortete mit ${res.status} für Verein ${clubId}`);
+  if (!res.ok) {
+    // Falls die erweiterten Parameter vom Server abgelehnt werden (z.B. 400/404),
+    // auf die zuvor funktionierende einfache URL zurückfallen – lieber weniger
+    // Monate als gar keine Daten.
+    console.warn(`  [warnung] Erweiterte Anfrage fehlgeschlagen (${res.status}) – falle zurück auf einfache Anfrage ohne Datumsbereich.`);
+    const fallbackUrl = `https://www.fussball.de/ajax.club.matchplan/-/id/${clubId}/mode/PAGE/show-filter/true`;
+    const res2 = await fetch(fallbackUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml',
+        'X-Requested-With': 'XMLHttpRequest',
+        'Referer': 'https://www.fussball.de/',
+      },
+    });
+    const html2 = await res2.text();
+    if (!res2.ok) throw new Error(`fussball.de antwortete mit ${res2.status} für Verein ${clubId}`);
+    return parseMatches(html2, debug);
+  }
   if (looksLikeBlockedOrEmptyPage(html)) {
     console.warn('  [warnung] Antwort sieht nach Bot-Schutz-/Consent-/Fehlerseite aus, nicht nach der echten Spielplan-Tabelle.');
   }
@@ -291,11 +318,27 @@ async function main() {
     }))
     .sort((a, b) => (a.d + (a.t || '')).localeCompare(b.d + (b.t || '')));
 
-  console.log(`${allGames.length} zukünftige Heimspiele über alle Mannschaften gefunden.`);
+  // Auswärtsspiele: unser Team steht auf der "away"-Seite, nicht auf "home".
+  // Rein informativ – belegen den eigenen Platz nicht, fließen also NICHT in die
+  // Konfliktprüfung ein (siehe index.html: nur "games", nicht "awayGames").
+  const awayGames = matches
+    .filter(m => isHomeMatch({ ...m, home: m.away }, clubMatch) && !isHomeMatch(m, clubMatch))
+    .filter(m => m.date >= todayIso)
+    .map(m => ({
+      d: m.date,
+      t: m.time,
+      team: m.ownTeam,
+      opponent: m.home, // bei einem Auswärtsspiel ist "home" der Gegner
+      competition: m.competition,
+      link: m.link,
+    }))
+    .sort((a, b) => (a.d + (a.t || '')).localeCompare(b.d + (b.t || '')));
 
-  const output = { updated: new Date().toISOString(), games: allGames, strategy: usedStrategy };
+  console.log(`${allGames.length} zukünftige Heimspiele und ${awayGames.length} zukünftige Auswärtsspiele gefunden.`);
+
+  const output = { updated: new Date().toISOString(), games: allGames, awayGames, strategy: usedStrategy };
   await fs.writeFile(OUTPUT_PATH, JSON.stringify(output, null, 2) + '\n');
-  console.log(`Fertig: ${allGames.length} Heimspiele nach ${OUTPUT_PATH} geschrieben.`);
+  console.log(`Fertig: ${allGames.length} Heimspiele + ${awayGames.length} Auswärtsspiele nach ${OUTPUT_PATH} geschrieben.`);
 }
 
 main().catch(err => {
