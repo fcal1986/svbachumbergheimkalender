@@ -42,56 +42,57 @@ function cleanText(s) {
 // Diese Route liefert die Spielplan-Tabelle für ALLE Mannschaften des Vereins
 // und ist ohne Login öffentlich erreichbar:
 //   https://www.fussball.de/ajax.club.matchplan/-/id/<CLUB_ID>/mode/PAGE/show-filter/true
-// Jede Zeile enthält Datum/Zeit, eine Spalte "Mannschaft | Wettbewerb"
-// (z.B. "Herren | Kreisliga A") und zwei Team-Links (Heim zuerst, dann Gast).
+//
+// WICHTIGE STRUKTUR (per Debug-Log am 07.09.2026 verifiziert): Pro Spiel gibt es
+// mehrere aufeinanderfolgende <tr>-Zeilen, keine einzelne:
+//   1. tr.row-headline.visible-small   – Mobil-Überschrift (Datum+Wettbewerb als Fließtext), IGNORIEREN
+//   2. tr.row-competition.hidden-small – Desktop: Datum/Zeit + "Mannschaft | Wettbewerb" + Spiel-ID
+//   3. tr (ohne row-*-Klasse)          – die eigentliche Team-Zeile mit zwei td.column-club (Heim, Gast)
+// Die Team-Namen stehen NICHT in derselben Zeile wie das Datum, sondern in der
+// darauffolgenden Zeile – deshalb iterieren wir gezielt über tr.row-competition
+// und suchen die Team-Zeile in den nächsten Geschwister-Zeilen.
 function parseMatches(html, debug) {
   const $ = cheerio.load(html);
   const matches = [];
-  const rows = $('tr');
-  let rowsWithDate = 0, rowsWithTwoTeamLinks = 0;
+  const compRows = $('tr.row-competition');
+  let noTeamRowCount = 0;
 
-  rows.each((_, row) => {
+  compRows.each((_, row) => {
     const $row = $(row);
     const rowText = $row.text().replace(/\s+/g, ' ').trim();
-    if (!rowText) return;
 
-    // Datum, z.B. "12.09.26" oder "12.09.2026" (Zeilen ohne Datum sind Überschriften/Trenner)
     const dateMatch = rowText.match(/(\d{2})\.(\d{2})\.(\d{2,4})/);
     if (!dateMatch) return;
-    rowsWithDate++;
-    const timeMatch = rowText.match(/(\d{1,2}):(\d{2})(?:\s*Uhr)?/);
+    const timeMatch = rowText.match(/(\d{1,2}):(\d{2})/);
 
-    // Team-Links: erster = Heim, zweiter = Gast (fussball.de-Konvention)
-    const teamLinks = $row.find('a[href*="/mannschaft/"]');
-    if (teamLinks.length < 2) {
-      // Freundschaftsspiele ohne festen Gegner ("FS | <id>") sind erwartbar und uninteressant fürs Debuggen –
-      // die wollen wir hier NICHT geloggt haben. Interessant sind Zeilen mit einer echten Liga/Pokal-Bezeichnung,
-      // die trotzdem keine 2 Team-Links haben – die zeigen uns die tatsächliche Struktur echter Spiele.
-      const looksLikeRealCompetition = !/freundschaftsspiel/i.test(rowText);
-      if (debug && looksLikeRealCompetition && rowsWithDate <= 10) {
-        console.log(`  [debug] Echtes Spiel(?) mit Datum, aber nur ${teamLinks.length} Team-Link(s): "${rowText.slice(0, 160)}"`);
-        console.log(`  [debug] Rohes HTML dieser Zeile:\n${$.html($row).slice(0, 2000)}`);
+    // "Mannschaft | Wettbewerb", z.B. "Herren | Kreisliga A"
+    const compText = cleanText($row.find('td.column-team').first().text());
+    const parts = compText.split('|').map(s => s.trim());
+    const ownTeam = parts[0] || '';
+    const competition = parts[1] || parts[0] || '';
+
+    // Die Team-Zeile ist eine der NÄCHSTEN Geschwister-Zeilen (nicht diese selbst!),
+    // erkennbar an zwei td.column-club-Zellen mit je einem Vereins-Link.
+    let $teamRow = $row.next('tr');
+    let hops = 0;
+    while ($teamRow.length && $teamRow.find('td.column-club').length < 2 && hops < 4) {
+      $teamRow = $teamRow.next('tr');
+      hops++;
+    }
+    if (!$teamRow.length || $teamRow.find('td.column-club').length < 2) {
+      noTeamRowCount++;
+      if (debug && noTeamRowCount <= 3) {
+        console.log(`  [debug] Keine Team-Zeile gefunden für: "${rowText.slice(0, 120)}"`);
       }
       return;
     }
-    rowsWithTwoTeamLinks++;
-    const home = cleanText($(teamLinks[0]).text());
-    const away = cleanText($(teamLinks[1]).text());
+    const clubCells = $teamRow.find('td.column-club');
+    const home = cleanText($(clubCells[0]).find('.club-name').text() || $(clubCells[0]).text());
+    const away = cleanText($(clubCells[1]).find('.club-name').text() || $(clubCells[1]).text());
     if (!home || !away) return;
 
-    // "Mannschaft | Wettbewerb"-Zelle finden, z.B. "Herren | Kreisliga A"
-    let ownTeam = '', competition = '';
-    $row.find('td').each((_, td) => {
-      const t = cleanText($(td).text());
-      if (!t || t.match(/\d{2}\.\d{2}\.\d{2,4}/) || t.match(/^\d{1,2}:\d{2}/) || t.length > 60) return;
-      if (!ownTeam && !competition) {
-        const parts = t.split('|').map(s => s.trim());
-        ownTeam = parts[0] || '';
-        competition = parts[1] || parts[0] || '';
-      }
-    });
-
-    const matchLink = $row.find('a[href*="/spiel/"]').first().attr('href') || '';
+    const matchLink = $teamRow.find('a[href*="/spiel/"]').first().attr('href')
+      || $row.find('a[href*="/spiel/"]').first().attr('href') || '';
     const yy = dateMatch[3].length === 2 ? '20' + dateMatch[3] : dateMatch[3];
     const iso = `${yy}-${dateMatch[2]}-${dateMatch[1]}`;
 
@@ -104,40 +105,10 @@ function parseMatches(html, debug) {
   });
 
   if (debug) {
-    console.log(`  [debug] <tr>-Zeilen gesamt: ${rows.length} | mit erkanntem Datum: ${rowsWithDate} | mit 2 Team-Links: ${rowsWithTwoTeamLinks} | daraus geparste Spiele: ${matches.length}`);
-    // Alle Link-Ziel-Muster im Dokument sammeln (zeigt, wie Team-/Spiel-Links wirklich aussehen)
-    const hrefPatterns = new Set();
-    $('a[href]').each((_, a) => {
-      const href = $(a).attr('href') || '';
-      const pattern = href.replace(/[a-z0-9-]{10,}/gi, '…').split('?')[0];
-      hrefPatterns.add(pattern);
-    });
-    console.log(`  [debug] ${$('a[href]').length} <a>-Links insgesamt gefunden. Muster: ${[...hrefPatterns].slice(0, 15).join(' | ')}`);
-    // Wo genau stecken die team-id-Links? (Filter-Dropdown vs. echte Spielzeile)
-    const teamIdLinks = $('a[href*="team-id"]');
-    if (teamIdLinks.length) {
-      const first = teamIdLinks.first();
-      const parentTr = first.closest('tr');
-      console.log(`  [debug] Erster team-id-Link: Text="${cleanText(first.text())}" href="${first.attr('href')}"`);
-      console.log(`  [debug] Steckt er in einer <tr>? ${parentTr.length ? 'JA' : 'NEIN'}. Nächstgelegenes Elternelement:\n${$.html(first.closest('tr,ul,div').first()).slice(0, 800)}`);
-    } else {
-      console.log('  [debug] Keine team-id-Links im gesamten Dokument gefunden.');
+    console.log(`  [debug] tr.row-competition gefunden: ${compRows.length} | ohne zuordenbare Team-Zeile: ${noTeamRowCount} | daraus geparste Spiele: ${matches.length}`);
+    if (!compRows.length) {
+      console.log('  [debug] Keine tr.row-competition-Zeilen gefunden – evtl. hat sich die CSS-Klasse geändert. Suche nach beliebigen <tr> mit Datum als Rückfallebene folgt separat.');
     }
-    // Alle Zeilen mit einer echten Wettbewerbs-Bezeichnung (nicht Freundschaftsspiel) auflisten
-    const compRows = rows.filter((_, r) => {
-      const t = $(r).text();
-      return /kreisliga|kreispokal|bezirksliga|verbandsliga|landesliga/i.test(t);
-    });
-    console.log(`  [debug] Zeilen mit echter Liga-/Pokal-Bezeichnung: ${compRows.length}`);
-    compRows.slice(0, 2).each((_, r) => console.log(`  [debug] Beispielzeile:\n${$.html($(r)).slice(0, 2000)}`));
-    // Hinweise auf clientseitig nachgeladene Daten (AngularJS/JSON) suchen
-    const jsonScripts = $('script').filter((_, s) => {
-      const type = ($(s).attr('type') || '').toLowerCase();
-      const content = $(s).html() || '';
-      return type.includes('json') || /matchplan|fixtures|matches\s*[:=]\s*\[/i.test(content);
-    });
-    console.log(`  [debug] Mögliche eingebettete Daten-<script>-Tags: ${jsonScripts.length}`);
-    jsonScripts.each((i, s) => { if (i < 2) console.log(`  [debug] Script-Ausschnitt: ${($(s).html() || '').slice(0, 400)}`); });
   }
 
   return matches;
