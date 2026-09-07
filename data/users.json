@@ -98,6 +98,22 @@
         "cipher": "WEcmoQW+aipboabPZ2cTmK1bQ+xXOslZqh4AZSia359AFBaGy8MAhXzFHkaz2OishxmGk+y2lj7/Rocsx+HqC+2RRZe2lEf/A7n+5y/MLRmB+/Fy2yw4dWLncoVpiEPyEXc+aNrxYb3i0NBqZw=="
       },
       "created": "2026-09-07T12:33:38.528Z"
+    },
+    {
+      "id": "df06454c-4585-47e4-b516-aa95a218f4da",
+      "first": "Sascha",
+      "last": "Rabura",
+      "email": "sascharabura@icloud.com",
+      "admin": false,
+      "classes": {
+        "D-Jugend": []
+      },
+      "enc": {
+        "salt": "YHeRXq5g+/zw6nYIB4/93Q==",
+        "iv": "YGRnTjjo5E1WIgsT",
+        "cipher": "v8yXEIeWFPl4hPpOiNJkGr8f2EDSbzReFCimFGR7dHZxVq+l6OUYAfW4OHsApROHx2lRjnigU1o2RMkCSW/lu3/vlAVefJbXHGH8MS2DT9bz5awtm5g1jmrEtMxTR9e5X2GufmJuO/IpbQczBA=="
+      },
+      "created": "2026-09-07T12:42:14.071Z"
     }
   ]
 }
