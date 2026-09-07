@@ -1,1 +1,38 @@
+name: fussball.de Heimspiele synchronisieren
 
+on:
+  schedule:
+    # Alle 6 Stunden. Bewusst nicht häufiger, um fussball.de nicht unnötig zu belasten.
+    - cron: '17 */6 * * *'
+  workflow_dispatch: {} # erlaubt manuellen Start über den "Actions"-Tab
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Abhängigkeiten installieren
+        run: npm install --no-audit --no-fund
+
+      - name: fussball.de Heimspiele abrufen
+        run: node scripts/fussballde-sync.mjs
+
+      - name: Änderungen committen (falls vorhanden)
+        run: |
+          git config user.name "platzcoach-bot"
+          git config user.email "actions@users.noreply.github.com"
+          if git diff --quiet -- data/fussballde.json; then
+            echo "Keine Änderungen an den Heimspielen – kein Commit nötig."
+          else
+            git add data/fussballde.json
+            git commit -m "Heimspiele von fussball.de aktualisiert"
+            git push
+          fi
