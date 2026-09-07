@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T06:17:07.991Z",
+  "updated": "2026-09-07T06:27:35.148Z",
   "games": [
     {
       "d": "2026-09-07",
@@ -24,6 +24,632 @@
       "opponent": "TuS Vosswinkel",
       "competition": "Kinderfußball",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-vosswinkel/-/spiel/031IKDRR28000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-09-14",
+      "t": "19:30",
+      "team": "Herren Ü32",
+      "opponent": "SG Herdringen/Müschede",
+      "competition": "Kreisturnier",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sg-herdringen-mueschede/-/spiel/031SAEVJ1G000000VS5489BTVTPHHFPR"
+    },
+    {
+      "d": "2026-09-18",
+      "t": "19:30",
+      "team": "A-Junioren",
+      "opponent": "JSG Oeventrop/Freien./Wen. I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-oeventrop-freienohl-wennemen/-/spiel/031JKQC7CS000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-09-19",
+      "t": "10:00",
+      "team": "E-Junioren",
+      "opponent": "SV Hüsten 09 I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-sv-huesten-09-1/-/spiel/031J8I24FK000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-09-20",
+      "t": "11:00",
+      "team": "B-Junioren",
+      "opponent": "Delbrücker SC II",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-delbruecker-sc-ii/-/spiel/031GM5IABK000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2026-09-23",
+      "t": "18:30",
+      "team": "B-Junioren",
+      "opponent": "JSG Herdringen/Mü. I",
+      "competition": "Kreispokal",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-herdringen-mueschede/-/spiel/031JUNCVJO000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-09-25",
+      "t": null,
+      "team": "A-Junioren",
+      "opponent": "spielfrei",
+      "competition": "Kreisliga A",
+      "link": null
+    },
+    {
+      "d": "2026-09-26",
+      "t": "10:00",
+      "team": "G-Junioren",
+      "opponent": "JSG Müschede/ Herdringen",
+      "competition": "Kinderfußball",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-mueschede-herdringen/-/spiel/031IKDRR6K000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-10-02",
+      "t": "19:30",
+      "team": "Herren",
+      "opponent": "FC Neheim-Erlenbruch",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fc-neheim-erlenbruch/-/spiel/031I0BNGSK000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-10-04",
+      "t": "11:00",
+      "team": "B-Junioren",
+      "opponent": "SV Heide Paderborn",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-heide-paderborn/-/spiel/031GM5I9OC000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2026-10-10",
+      "t": "10:00",
+      "team": "G-Junioren",
+      "opponent": "FC Neheim-Erlenbruch",
+      "competition": "Kinderfußball",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fc-neheim-erlenbruch/-/spiel/031IKDRR8O000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-10-11",
+      "t": "11:00",
+      "team": "B-Junioren",
+      "opponent": "SV Brackel 06",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-brackel-06/-/spiel/031GM5I9FO000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2026-10-17",
+      "t": "14:45",
+      "team": "C-Junioren",
+      "opponent": "JSG Grevenstein/Helf.-Alth./Be./Cal-Wa. I (9er)",
+      "competition": "Kreisliga B",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-grevenstein-hellefeld-altenh-berge-calle-wallen-9er/-/spiel/031I192R5O000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-10-18",
+      "t": "11:00",
+      "team": "Herren",
+      "opponent": "SG Allendorf/Amecke III",
+      "competition": "Kreisliga D",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-sg-allendorf-amecke-iii/-/spiel/031KK1IQI8000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-10-21",
+      "t": "19:30",
+      "team": "Herren",
+      "opponent": "SG Herdringen/Müschede II",
+      "competition": "Kreisliga B",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-sg-herdringen-mueschede-ii/-/spiel/031IK2S4HK000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-11-06",
+      "t": "19:30",
+      "team": "A-Junioren",
+      "opponent": "TuS Vosswinkel",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-vosswinkel/-/spiel/031JKQC6MC000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-11-07",
+      "t": "10:00",
+      "team": "F-Junioren",
+      "opponent": "JSG Rumbeck/GW Arnsb/Giersk./Arnsb. 09 I",
+      "competition": "Kinderfußball",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-1-jsg-tus-rumbeck-djk-gw-arnsberg-fc-bw-gierskaempen-sv-arnsberg-09/-/spiel/031J6SGO2O000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-11-08",
+      "t": "11:00",
+      "team": "Herren",
+      "opponent": "TuS Bruchhausen 02 II",
+      "competition": "Kreisliga D",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-tus-bruchhausen-02-ii/-/spiel/031KK1IQE4000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-11-13",
+      "t": "19:30",
+      "team": "A-Junioren",
+      "opponent": "JSG Allendorf/Amecke U20 (9er)",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-allendorf-amecke-u20/-/spiel/031JKQC6HC000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-11-21",
+      "t": "10:00",
+      "team": "E-Junioren",
+      "opponent": "JSG Müschede/Herdr./Ho. I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-jsg-mueschede-herdringen-holzen-1/-/spiel/031J8I23QG000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-11-28",
+      "t": "13:30",
+      "team": "C-Junioren",
+      "opponent": "JSG Herdringen/Mü./Ho. I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-herdringen-mueschede-holzen/-/spiel/031I1BDO18000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-11-29",
+      "t": "11:00",
+      "team": "B-Junioren",
+      "opponent": "FC Iserlohn 46/49 II",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fc-iserlohn-ii/-/spiel/031GM5IAV4000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2026-12-11",
+      "t": "19:30",
+      "team": "A-Junioren",
+      "opponent": "FC Neheim-Erlenbruch U20",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fc-neheim-erlenbruch-u20/-/spiel/031JKQC660000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-12-13",
+      "t": "11:00",
+      "team": "B-Junioren",
+      "opponent": "SV Westfalia Soest II",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-spielverein-westfalia-soest-ii/-/spiel/031GM5I7T0000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2027-02-19",
+      "t": "19:30",
+      "team": "A-Junioren",
+      "opponent": "JSG Herdringen/Müsch. U20 I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-herdringen-mueschede-u20/-/spiel/031JKQC9O4000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-02-28",
+      "t": "11:00",
+      "team": "B-Junioren",
+      "opponent": "ASC 09 Dortmund",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-asc-09-dortmund/-/spiel/031GM5IGA8000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2027-03-05",
+      "t": null,
+      "team": "A-Junioren",
+      "opponent": "spielfrei",
+      "competition": "Kreisliga A",
+      "link": null
+    },
+    {
+      "d": "2027-03-06",
+      "t": "11:30",
+      "team": "D-Junioren",
+      "opponent": "JSG Herdringen/Mü./Ho. I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-herdringen-mueschede-holzen-1/-/spiel/031OEC8OT4000000VS5489BUVT2M8LCU"
+    },
+    {
+      "d": "2027-04-04",
+      "t": "11:00",
+      "team": "Herren",
+      "opponent": "TuS Hachen II",
+      "competition": "Kreisliga D",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-tus-hachen-ii/-/spiel/031KK1IQRC000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-04-09",
+      "t": "19:30",
+      "team": "A-Junioren",
+      "opponent": "JSG Balve/Garbeck/La/Kü/Aff I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sg-balve-garbeck-la-kue-aff-1/-/spiel/031JKQC8O4000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-04-10",
+      "t": "10:00",
+      "team": "E-Junioren",
+      "opponent": "SV Affeln I",
+      "competition": "Kreisliga B",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-sv-affeln/-/spiel/031J8LLL60000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-04-11",
+      "t": "11:00",
+      "team": "B-Junioren",
+      "opponent": "SF DJK Mastbruch",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sf-djk-mastbruch/-/spiel/031GM5IEKG000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2027-04-18",
+      "t": "11:00",
+      "team": "Herren",
+      "opponent": "SG Allendorf/Amecke III",
+      "competition": "Kreisliga D",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-sg-allendorf-amecke-iii/-/spiel/031KK1IRO4000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-04-24",
+      "t": "10:00",
+      "team": "E-Junioren",
+      "opponent": "FC Neheim-Erlenbruch I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-fc-neheim-erlenbruch/-/spiel/031J8I25H8000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-04-28",
+      "t": "18:00",
+      "team": "D-Junioren",
+      "opponent": "JSG Herdringen/Mü./Ho. I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-herdringen-mueschede-holzen-1/-/spiel/031OEC8Q20000000VS5489BUVT2M8LCU"
+    },
+    {
+      "d": "2027-05-02",
+      "t": "11:00",
+      "team": "B-Junioren",
+      "opponent": "BSV Menden",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-bsv-menden/-/spiel/031GM5ID7K000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2027-05-07",
+      "t": "19:30",
+      "team": "A-Junioren",
+      "opponent": "JSG Hachen/Langs.-Enkh./Westf./Sto. I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-hachen-langscheid-enkhausen-westenfeld-stockum/-/spiel/031JKQC84G000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-05-22",
+      "t": "10:00",
+      "team": "E-Junioren",
+      "opponent": "JSG Niedereimer/Bruchhausen I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-jsg-niedereimer-bruchhausen/-/spiel/031J8I254K000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-05-23",
+      "t": "11:00",
+      "team": "B-Junioren",
+      "opponent": "FC Brünninghausen II",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fc-bruenninghausen-ii/-/spiel/031GM5ICPG000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2027-05-30",
+      "t": "11:00",
+      "team": "Herren",
+      "opponent": "TuS Niedereimer II",
+      "competition": "Kreisliga D",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-tus-niedereimer-ii/-/spiel/031KK1IR7O000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-06-05",
+      "t": "10:00",
+      "team": "E-Junioren",
+      "opponent": "SC Neheim II",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-sc-neheim-ii/-/spiel/031J8I24U0000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-06-06",
+      "t": "11:00",
+      "team": "B-Junioren",
+      "opponent": "SV Brilon",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-brilon/-/spiel/031GM5IBVC000000VS5489BTVVG7L386"
+    }
+  ],
+  "awayGames": [
+    {
+      "d": "2026-09-10",
+      "t": "19:30",
+      "team": "Herren",
+      "opponent": "TuS Vosswinkel",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/tus-vosswinkel-sv-bachum-bergheim/-/spiel/031I0BNCDG000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-09-11",
+      "t": "19:00",
+      "team": "A-Junioren",
+      "opponent": "JSG Herdringen/Müsch. U20 I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/jsg-herdringen-mueschede-u20-sv-bachum-bergheim/-/spiel/031JKQC7K8000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-09-13",
+      "t": "11:00",
+      "team": "B-Junioren",
+      "opponent": "TuS Lipperode",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/tus-lipperode-i-sv-bachum-bergheim/-/spiel/031GM5IAPG000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2026-09-16",
+      "t": "18:00",
+      "team": "D-Junioren",
+      "opponent": "spielfrei4 (PH)",
+      "competition": "Kreispokal",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim/-/spiel/031MHCEJAG000000VS5489BTVSRD0UH9"
+    },
+    {
+      "d": "2026-09-17",
+      "t": "18:30",
+      "team": "C-Junioren",
+      "opponent": "1 (PH)",
+      "competition": "Kreispokal",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim/-/spiel/031JV1IKQO000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-09-21",
+      "t": "19:30",
+      "team": "Herren Ü32",
+      "opponent": "SG Beckum/Hövel/Mellen",
+      "competition": "Kreispokal",
+      "link": "https://www.fussball.de/spiel/sg-beckum-hoevel-mellen-sv-bachum-bergheim/-/spiel/031GJD03OC000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2026-09-27",
+      "t": "11:00",
+      "team": "C-Junioren",
+      "opponent": "JSG Balve/Gar./La/Be/Aff I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/jsg-balve-garbeck-la-be-aff-i-sv-bachum-bergheim/-/spiel/031I1BDONO000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-10-09",
+      "t": "19:00",
+      "team": "A-Junioren",
+      "opponent": "JSG Balve/Garbeck/La/Kü/Aff I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sg-balve-garbeck-la-kue-aff-1-sv-bachum-bergheim/-/spiel/031JKQC6SK000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-10-19",
+      "t": "19:30",
+      "team": "Herren Ü32",
+      "opponent": "SC Neheim",
+      "competition": "Kreisturnier",
+      "link": "https://www.fussball.de/spiel/sc-neheim-sv-bachum-bergheim/-/spiel/031SAEVJ4G000000VS5489BTVTPHHFPR"
+    },
+    {
+      "d": "2026-10-25",
+      "t": "12:30",
+      "team": "Herren",
+      "opponent": "DJK GW Arnsberg II",
+      "competition": "Kreisliga D",
+      "link": "https://www.fussball.de/spiel/djk-gw-arnsberg-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IQH8000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-10-30",
+      "t": "19:30",
+      "team": "Herren",
+      "opponent": "SV Arnsberg",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-arnsberg-sv-bachum-bergheim/-/spiel/031I0BNFT8000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-11-14",
+      "t": "10:00",
+      "team": "D-Junioren",
+      "opponent": "JSG Balve/Garb./La/Kü/Me III",
+      "competition": "Kreisliga B",
+      "link": "https://www.fussball.de/spiel/jsg-balve-garbeck-la-kue-me-3-sv-bachum-bergheim-2/-/spiel/031OEI7PT8000000VS5489BUVT2M8LCU"
+    },
+    {
+      "d": "2026-11-15",
+      "t": "12:45",
+      "team": "Herren",
+      "opponent": "TuS Hachen II",
+      "competition": "Kreisliga D",
+      "link": "https://www.fussball.de/spiel/tus-hachen-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IQB4000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-11-16",
+      "t": "19:30",
+      "team": "Herren Ü32",
+      "opponent": "SV Hüsten 1",
+      "competition": "Kreisturnier",
+      "link": "https://www.fussball.de/spiel/sv-huesten-1-sv-bachum-bergheim/-/spiel/031SAEVJ6S000000VS5489BTVTPHHFPR"
+    },
+    {
+      "d": "2026-12-04",
+      "t": "19:30",
+      "team": "A-Junioren",
+      "opponent": "JSG Hachen/Langs.-Enkh./Westf./Sto. I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/jsg-hachen-langscheid-enkhausen-westenfeld-stockum-sv-bachum-bergheim/-/spiel/031JKQC6DO000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-12-05",
+      "t": "13:00",
+      "team": "C-Junioren",
+      "opponent": "TuS Sundern II",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/tus-sundern-2-sv-bachum-bergheim/-/spiel/031I1BDNR4000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-12-06",
+      "t": "11:00",
+      "team": "B-Junioren",
+      "opponent": "SV Brilon",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/sv-brilon-sv-bachum-bergheim/-/spiel/031GM5I85S000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2026-12-12",
+      "t": "13:00",
+      "team": "C-Junioren",
+      "opponent": "JSG Hachen/La-Enk./St./En. I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/jsg-hachen-lang-enkh-sto-end-1-sv-bachum-bergheim/-/spiel/031I1BDR8K000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-02-14",
+      "t": "09:00",
+      "team": "B-Junioren",
+      "opponent": "ASC 09 Dortmund",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/asc-09-dortmund-sv-bachum-bergheim/-/spiel/031GM5IB70000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2027-02-21",
+      "t": "11:00",
+      "team": "B-Junioren",
+      "opponent": "FC Brünninghausen II",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/fc-bruenninghausen-ii-sv-bachum-bergheim/-/spiel/031GM5I8P0000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2027-02-26",
+      "t": "19:30",
+      "team": "A-Junioren",
+      "opponent": "JSG Oeventrop/Freien./Wen. I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/jsg-oeventrop-freienohl-wennemen-sv-bachum-bergheim/-/spiel/031JKQC9E0000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-03-07",
+      "t": "11:00",
+      "team": "Herren",
+      "opponent": "SG Allendorf/Amecke III",
+      "competition": "Kreisliga D",
+      "link": "https://www.fussball.de/spiel/sg-allendorf-amecke-iii-sv-bachum-bergheim-iii/-/spiel/031KK1IR3S000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-03-12",
+      "t": "19:45",
+      "team": "A-Junioren",
+      "opponent": "TuS Sundern II",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/tus-sundern-2-sv-bachum-bergheim/-/spiel/031JKQC8UC000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-03-13",
+      "t": "11:00",
+      "team": "D-Junioren",
+      "opponent": "SC Neheim I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sc-neheim-i-sv-bachum-bergheim/-/spiel/031OEC8QIS000000VS5489BUVT2M8LCU"
+    },
+    {
+      "d": "2027-03-14",
+      "t": "09:00",
+      "team": "B-Junioren",
+      "opponent": "Delbrücker SC II",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/delbruecker-sc-ii-sv-bachum-bergheim/-/spiel/031GM5IF0G000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2027-03-20",
+      "t": "15:00",
+      "team": "C-Junioren",
+      "opponent": "SV Hüsten 09 I",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sv-huesten-09-1-sv-bachum-bergheim/-/spiel/031I1BDQFG000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-03-21",
+      "t": "09:00",
+      "team": "B-Junioren",
+      "opponent": "FC Iserlohn 46/49 II",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/fc-iserlohn-ii-sv-bachum-bergheim/-/spiel/031GM5IFSG000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2027-04-16",
+      "t": "19:00",
+      "team": "A-Junioren",
+      "opponent": "TuS Vosswinkel",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/tus-vosswinkel-sv-bachum-bergheim/-/spiel/031JKQC8ES000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-04-17",
+      "t": "11:00",
+      "team": "E-Junioren",
+      "opponent": "SV Hüsten 09 II",
+      "competition": "Kreisliga B",
+      "link": "https://www.fussball.de/spiel/sv-huesten-09-2-sv-bachum-bergheim-2/-/spiel/031J8LLKV0000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-04-25",
+      "t": "10:00",
+      "team": "B-Junioren",
+      "opponent": "SV Brackel 06",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/sv-brackel-06-sv-bachum-bergheim/-/spiel/031GM5IDN0000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2027-04-30",
+      "t": "19:30",
+      "team": "A-Junioren",
+      "opponent": "JSG Allendorf/Amecke U20 (9er)",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/jsg-allendorf-amecke-u20-sv-bachum-bergheim/-/spiel/031JKQC87C000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-05-09",
+      "t": "11:00",
+      "team": "B-Junioren",
+      "opponent": "Hombrucher SV III",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/hombrucher-sv-iii-sv-bachum-bergheim/-/spiel/031GM5ICVS000000VS5489BTVVG7L386"
+    },
+    {
+      "d": "2027-05-15",
+      "t": "10:00",
+      "team": "E-Junioren",
+      "opponent": "TuS Sundern II",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/tus-sundern-ii-sv-bachum-bergheim-1/-/spiel/031J8I258C000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-05-17",
+      "t": "15:00",
+      "team": "Herren",
+      "opponent": "SG Grevenstein/Hellefeld-Altenhellefeld",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/sg-grevenstein-hellefeld-altenhellefeld-sv-bachum-bergheim/-/spiel/031I0BNJEO000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-05-21",
+      "t": "19:00",
+      "team": "A-Junioren",
+      "opponent": "FC Neheim-Erlenbruch U20",
+      "competition": "Kreisliga A",
+      "link": "https://www.fussball.de/spiel/fc-neheim-erlenbruch-u20-sv-bachum-bergheim/-/spiel/031JKQC7Q0000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-06-12",
+      "t": "10:00",
+      "team": "E-Junioren",
+      "opponent": "JSG Müschede/Herdr./Ho. II",
+      "competition": "Kreisliga B",
+      "link": "https://www.fussball.de/spiel/jsg-mueschede-herdringen-holzen-2-sv-bachum-bergheim-2/-/spiel/031J8LLK6S000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2027-06-13",
+      "t": "09:00",
+      "team": "B-Junioren",
+      "opponent": "SV Westfalia Soest II",
+      "competition": "Bezirksliga",
+      "link": "https://www.fussball.de/spiel/spielverein-westfalia-soest-ii-sv-bachum-bergheim/-/spiel/031GM5IBJ8000000VS5489BTVVG7L386"
     }
   ],
   "strategy": "C (fussball.de HTML-Spielplan)"
