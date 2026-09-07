@@ -99,6 +99,7 @@
   .pitch-today-row .pt-team{flex:1;min-width:0;}
   .pitch-today-row .pt-pitch{flex:0 0 auto;font-size:10.5px;color:var(--ink-soft);}
   .status-row{display:flex;align-items:flex-start;gap:9px;background:var(--white);border-radius:12px;padding:10px 12px;margin-bottom:6px;box-shadow:var(--card-shadow);font-size:12.5px;color:var(--ink);}
+  .status-filter{display:flex;gap:7px;margin-bottom:8px;flex-wrap:wrap;}
   .result-row{display:flex;align-items:center;gap:10px;background:var(--white);border-radius:12px;padding:9px 12px;margin-bottom:6px;box-shadow:var(--card-shadow);border-left:4px solid var(--line);}
   .result-row.win{border-left-color:#16A34A;}
   .result-row.draw{border-left-color:#CA8A04;}
@@ -2135,20 +2136,20 @@ function seasonConflictScan(){
       const label=(tA===tB)
         ?tA+': '+typeA+' und '+typeB+' überschneiden sich'
         :tA+' ('+typeA+') ↔ '+tB+' ('+typeB+')';
-      const key=label+'|'+A.t;
-      if(!groups[key])groups[key]={label,t:A.t,dates:[]};
+      const key='pc|'+label+'|'+A.t;
+      if(!groups[key])groups[key]={label,t:A.t,dates:[],source:'platzcoach'};
       groups[key].dates.push(ds);
     });
     fussballCapacityWarningsOn(ds).forEach(w=>{
       const label='fussball.de: '+w.games.length+' Spiele gleichzeitig angesetzt ('+w.games.map(g=>esc(g.team||'?')).join(', ')+')';
-      const key=label+'|'+w.t;
-      if(!groups[key])groups[key]={label,t:w.t,dates:[]};
+      const key='fb|'+label+'|'+w.t;
+      if(!groups[key])groups[key]={label,t:w.t,dates:[],source:'fussballde'};
       groups[key].dates.push(ds);
     });
   }
   return Object.values(groups).map(g=>{
     g.dates.sort();
-    return {label:g.label,t:g.t,dates:g.dates,count:g.dates.length,first:g.dates[0],last:g.dates[g.dates.length-1]};
+    return {label:g.label,t:g.t,dates:g.dates,count:g.dates.length,first:g.dates[0],last:g.dates[g.dates.length-1],source:g.source};
   }).sort((a,b)=>a.first.localeCompare(b.first));
 }
 function toggleConflictDetail(id){
@@ -2174,22 +2175,34 @@ function conflictRowHTML(g,i){
     +'</div>'
     +'</div>';
 }
+let statusFilter='alle'; // 'alle' | 'fussballde' – bei 'fussballde' werden ALLE Ansetzungsfehler der Saison gezeigt, ohne 3er-Begrenzung
+function setStatusFilter(f){ statusFilter=f; statusExpanded=false; renderStartStatus(); }
 function renderStartStatus(){
   const box=document.getElementById('st-status');
   if(!box)return;
-  let html='';
+  let html='<div class="status-filter">'
+    +'<span class="filter-chip'+(statusFilter==='alle'?' on':'')+'" onclick="setStatusFilter(\'alle\')">Alle</span>'
+    +'<span class="filter-chip'+(statusFilter==='fussballde'?' on':'')+'" onclick="setStatusFilter(\'fussballde\')">Nur fussball.de-Ansetzungsfehler</span>'
+    +'</div>';
 
-  // Tagesaktuelle Hinweise zuerst – am direktesten umsetzbar.
-  const todays=todaysCombinedAgenda();
-  const noTrainer=todays.filter(e=>e.isTraining&&(!e.trainerIds||!e.trainerIds.length)).length;
-  if(noTrainer)html+=warnRowHTML(noTrainer+' Termin'+(noTrainer===1?'':'e')+' heute ohne Trainer.');
-  const noPitch=todays.filter(e=>!e.isExternal&&!e.pitch&&!(e.halle&&e.halle.thirds&&e.halle.thirds.length)&&!(e.res&&e.res.length)).length;
-  if(noPitch)html+=warnRowHTML(noPitch+' Termin'+(noPitch===1?'':'e')+' heute ohne Platzzuordnung.');
+  // Tagesaktuelle Hinweise nur bei "Alle" zeigen – bei "Nur fussball.de" soll die Liste
+  // ausschließlich Staffelleiter-Ansetzungsfehler enthalten, wie gewünscht.
+  if(statusFilter==='alle'){
+    const todays=todaysCombinedAgenda();
+    const noTrainer=todays.filter(e=>e.isTraining&&(!e.trainerIds||!e.trainerIds.length)).length;
+    if(noTrainer)html+=warnRowHTML(noTrainer+' Termin'+(noTrainer===1?'':'e')+' heute ohne Trainer.');
+    const noPitch=todays.filter(e=>!e.isExternal&&!e.pitch&&!(e.halle&&e.halle.thirds&&e.halle.thirds.length)&&!(e.res&&e.res.length)).length;
+    if(noPitch)html+=warnRowHTML(noPitch+' Termin'+(noPitch===1?'':'e')+' heute ohne Platzzuordnung.');
+  }
 
-  // Saison-Konflikte: nur die 3 dringendsten (soonest) direkt zeigen, Rest hinter Toggle.
-  const groups=seasonConflictScan();
+  // Saison-Konflikte: bei "Alle" nur die 3 dringendsten direkt zeigen (Rest hinter Toggle).
+  // Bei "Nur fussball.de" werden IMMER alle Treffer der laufenden Saison gezeigt, ohne Limit.
+  const allGroups=seasonConflictScan();
+  const groups=statusFilter==='alle'?allGroups:allGroups.filter(g=>g.source==='fussballde');
   if(!groups.length){
-    html+='<div class="status-row ok">'+svgOk+'<div>Keine Platzkonflikte in der gesamten Saison.</div></div>';
+    html+='<div class="status-row ok">'+svgOk+'<div>'+(statusFilter==='fussballde'?'Keine fussball.de-Ansetzungsfehler in der gesamten Saison.':'Keine Platzkonflikte in der gesamten Saison.')+'</div></div>';
+  }else if(statusFilter==='fussballde'){
+    html+=groups.map((g,i)=>conflictRowHTML(g,i)).join('');
   }else{
     const shown=statusExpanded?groups:groups.slice(0,3);
     html+=shown.map((g,i)=>conflictRowHTML(g,i)).join('');
