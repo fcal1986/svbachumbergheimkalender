@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T19:20:22.982Z",
+  "updated": "2026-09-07T19:45:06.762Z",
   "games": [
     {
       "d": "2026-08-20",
@@ -108,7 +108,10 @@
       "squad": 1,
       "opponent": "TuRa Freienohl",
       "competition": "Kreispokal",
-      "score": null,
+      "score": {
+        "home": 19,
+        "away": 30
+      },
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tura-freienohl/-/spiel/031GJ8BKB4000000VS5489BTVVG7L386"
     },
     {
@@ -388,7 +391,10 @@
       "squad": 1,
       "opponent": "SV Hüsten 09 I",
       "competition": "Kreisliga A",
-      "score": null,
+      "score": {
+        "home": 17,
+        "away": 0
+      },
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-sv-huesten-09-1/-/spiel/031J8I24FK000000VS5489BUVVKNMR0J"
     },
     {
@@ -1850,7 +1856,10 @@
       "squad": 3,
       "opponent": "JSG Hachen/Langsch-Enkh. II",
       "competition": "Kreisliga C",
-      "score": null,
+      "score": {
+        "home": 17,
+        "away": 30
+      },
       "link": "https://www.fussball.de/spiel/jsg-hachen-langscheid-enkhausen-2-sv-bachum-bergheim-3/-/spiel/031J8T2KNC000000VS5489BUVVKNMR0J"
     },
     {
@@ -1910,7 +1919,10 @@
       "squad": 3,
       "opponent": "TuS Bruchhausen 02 II",
       "competition": "Kreisliga D",
-      "score": null,
+      "score": {
+        "home": 19,
+        "away": 30
+      },
       "link": "https://www.fussball.de/spiel/tus-bruchhausen-02-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IQ00000000VS5489BUVVKNMR0J"
     },
     {
@@ -2080,7 +2092,10 @@
       "squad": 1,
       "opponent": "JSG Balve/Gar./La/Be/Aff I",
       "competition": "Kreisliga A",
-      "score": null,
+      "score": {
+        "home": 13,
+        "away": 30
+      },
       "link": "https://www.fussball.de/spiel/jsg-balve-garbeck-la-be-aff-i-sv-bachum-bergheim/-/spiel/031I1BDONO000000VS5489BUVVKNMR0J"
     },
     {
