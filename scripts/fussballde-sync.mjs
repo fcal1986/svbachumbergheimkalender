@@ -58,8 +58,9 @@ function parseMatches(html, debug) {
     // Team-Links: erster = Heim, zweiter = Gast (fussball.de-Konvention)
     const teamLinks = $row.find('a[href*="/mannschaft/"]');
     if (teamLinks.length < 2) {
-      if (debug && rowsWithDate <= 5) {
+      if (debug && rowsWithDate <= 3) {
         console.log(`  [debug] Zeile mit Datum, aber nur ${teamLinks.length} Team-Link(s): "${rowText.slice(0, 120)}"`);
+        console.log(`  [debug] Rohes HTML dieser Zeile:\n${$.html($row).slice(0, 1500)}`);
       }
       return;
     }
@@ -94,6 +95,22 @@ function parseMatches(html, debug) {
 
   if (debug) {
     console.log(`  [debug] <tr>-Zeilen gesamt: ${rows.length} | mit erkanntem Datum: ${rowsWithDate} | mit 2 Team-Links: ${rowsWithTwoTeamLinks} | daraus geparste Spiele: ${matches.length}`);
+    // Alle Link-Ziel-Muster im Dokument sammeln (zeigt, wie Team-/Spiel-Links wirklich aussehen)
+    const hrefPatterns = new Set();
+    $('a[href]').each((_, a) => {
+      const href = $(a).attr('href') || '';
+      const pattern = href.replace(/[a-z0-9-]{10,}/gi, '…').split('?')[0];
+      hrefPatterns.add(pattern);
+    });
+    console.log(`  [debug] ${$('a[href]').length} <a>-Links insgesamt gefunden. Muster: ${[...hrefPatterns].slice(0, 15).join(' | ')}`);
+    // Hinweise auf clientseitig nachgeladene Daten (AngularJS/JSON) suchen
+    const jsonScripts = $('script').filter((_, s) => {
+      const type = ($(s).attr('type') || '').toLowerCase();
+      const content = $(s).html() || '';
+      return type.includes('json') || /matchplan|fixtures|matches\s*[:=]\s*\[/i.test(content);
+    });
+    console.log(`  [debug] Mögliche eingebettete Daten-<script>-Tags: ${jsonScripts.length}`);
+    jsonScripts.each((i, s) => { if (i < 2) console.log(`  [debug] Script-Ausschnitt: ${($(s).html() || '').slice(0, 400)}`); });
   }
 
   return matches;
