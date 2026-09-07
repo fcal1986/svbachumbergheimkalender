@@ -114,6 +114,8 @@
   .empty-card{background:var(--white);border-radius:16px;padding:20px 16px;text-align:center;font-size:12px;color:var(--ink-soft);box-shadow:var(--card-shadow);margin-bottom:10px;}
   .fb-card{background:var(--white);border-radius:14px;padding:12px 14px;box-shadow:var(--card-shadow);margin-bottom:8px;display:flex;align-items:center;gap:10px;}
   .fb-card-away{opacity:.85;border:1px dashed var(--line);box-shadow:none;}
+  .event-card.external-card{border:1px dashed var(--line);box-shadow:none;}
+  .badge-fb{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--ink-soft);background:var(--bg);border-radius:8px;padding:3px 8px;}
   .fb-date{flex:0 0 auto;text-align:center;min-width:38px;}
   .fb-date .fb-dow{display:block;font-size:9.5px;color:var(--ink-soft);text-transform:uppercase;font-weight:700;}
   .fb-date .fb-day{display:block;font-size:14px;font-weight:800;color:var(--ink);}
@@ -867,6 +869,28 @@ function shiftTimeClamped(t,m){
   return String(Math.floor(tot/60)).padStart(2,'0')+':'+String(tot%60).padStart(2,'0');
 }
 function fussballGameLinkId(g){ return 'fb-'+(g.link||(g.d+'|'+g.t+'|'+g.opponent)); }
+
+/* ---------- fussball.de-Heimspiele in der Terminübersicht anzeigen (Liste/Monat/Jahr) ----------
+   Getrennt von fussballInstancesOn() (das für die Konfliktprüfung den Vor-/Nachlauf-Puffer
+   einrechnet): hier zeigen wir die reale Anstoßzeit, wie sie auch auf der Start-Seite steht. */
+function fussballFilterTeam(team){
+  // fussball.de nennt Jugendmannschaften "…-Junioren", intern heißt die Kategorie "…-Jugend" –
+  // ohne diese Übersetzung würde cat() Jugendspiele fälschlich als "Verein" einordnen.
+  return /junioren/i.test(team||'') ? team.replace(/junioren/i,'Jugend') : (team||'Verein');
+}
+function fussballDisplayAll(){
+  return (FUSSBALLDE.games||[]).map((g,idx)=>{
+    const bis=g.t?shiftTimeClamped(g.t,fussballDurationMin(g.team)):'23:59';
+    return {
+      id:fussballGameLinkId(g), d:g.d, t:g.t||'00:00', bis,
+      title:'Heimspiel: '+(g.team?g.team+' – ':'')+g.opponent,
+      team:fussballFilterTeam(g.team), squad:1, competition:g.competition||'',
+      isExternal:true, fbIndex:idx, ownerName:'fussball.de'
+    };
+  });
+}
+function fussballDisplayInstancesOn(d){ return fussballDisplayAll().filter(e=>e.d===d); }
+
 function fussballGameWindow(g){
   return { s:shiftTimeClamped(g.t,-fussballBufferBeforeMin()), e:shiftTimeClamped(g.t,fussballDurationMin(g.team)) };
 }
@@ -1395,6 +1419,7 @@ function filtered(){ return EVENTS.filter(passesFilter); }
 function eventsOn(d){
   return filtered().filter(e=>e.d===d)
     .concat(trainingInstancesOn(d).filter(passesFilter))
+    .concat(fussballDisplayInstancesOn(d).filter(passesFilter))
     .sort((a,b)=>a.t.localeCompare(b.t));
 }
 function usedQuarters(d,skipId){
@@ -1419,6 +1444,7 @@ function canEdit(e){
   return canBookTeam(e.team,e.squad||1);
 }
 function rowHTML(e){
+  if(e.isExternal) return externalRowHTML(e);
   const dt=new Date(e.d+'T00:00:00');
   const dow=DAYS_S[dt.getDay()];
   const dd=String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0');
@@ -1461,6 +1487,28 @@ function rowHTML(e){
     +(b?'<div class="badges" style="margin-top:10px;">'+b+'</div>':'')
     +(e.note&&!e.isTraining?'<div class="ev-note" style="margin-top:8px;">'+esc(e.note)+'</div>':'')
     +(contactHtml?'<div class="ev-contact">'+contactHtml+'</div>':'')
+    +'</div>'
+    +'</div>';
+}
+function externalRowHTML(e){
+  const dt=new Date(e.d+'T00:00:00');
+  const dow=DAYS_S[dt.getDay()];
+  const dd=String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0');
+  const bis=eventBis(e);
+  const acts=session?'<button class="ibtn" title="In Termin übernehmen" onclick="newEventFromFussball('+e.fbIndex+')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>':'';
+  return '<div class="event-card external-card" id="ev-'+e.id+'">'
+    +'<div class="ev-head">'
+    +'<div class="ev-date-box"><span class="ev-dow">'+dow+'</span><span class="ev-day">'+dd+'</span></div>'
+    +'<div class="ev-sep"></div>'
+    +'<div class="ev-title-box"><h4>'+esc(e.title)+'</h4><div class="ev-sub">'+e.t+'–'+bis+' · fussball.de</div></div>'
+    +'<div class="row-acts">'+acts+'</div>'
+    +'</div>'
+    +'<div class="ev-body">'
+    +'<div class="ev-times">'
+    +'<div class="ev-time-col"><div class="ev-t">'+e.t+'</div><div class="ev-tl">Von</div></div>'
+    +'<div class="ev-time-col"><div class="ev-t">'+bis+'</div><div class="ev-tl">Bis</div></div>'
+    +'</div>'
+    +'<div class="badges" style="margin-top:10px;"><span class="badge-fb">⚽ '+esc(e.competition||'fussball.de')+'</span></div>'
     +'</div>'
     +'</div>';
 }
@@ -1633,6 +1681,7 @@ function renderList(){
   for(let i=0;i<listDaysLoaded;i++){
     const dt=new Date(); dt.setDate(dt.getDate()+i);
     evs=evs.concat(trainingInstancesOn(ymd(dt)).filter(passesFilter));
+    evs=evs.concat(fussballDisplayInstancesOn(ymd(dt)).filter(passesFilter));
   }
   // cutoff-Datum berechnen
   const cutoff=new Date(); cutoff.setDate(cutoff.getDate()+listDaysLoaded);
@@ -1706,7 +1755,8 @@ function newForDay(){ newEvent(selDate); }
 function moveYear(s){yearShown+=s;render();}
 function renderYear(){
   const box=document.getElementById('view-jahr');
-  const evs=filtered().filter(e=>e.d.slice(0,4)==yearShown);
+  const evs=filtered().filter(e=>e.d.slice(0,4)==yearShown)
+    .concat(fussballDisplayAll().filter(e=>e.d.slice(0,4)==yearShown&&passesFilter(e)));
   let h='<div class="cal-head"><div class="cal-title">Jahresübersicht '+yearShown+'</div><div class="cal-btns">'+
     '<button class="cal-btn" onclick="moveYear(-1)">‹</button><button class="cal-btn" onclick="moveYear(1)">›</button></div></div><div class="year-grid">';
   for(let m=0;m<12;m++){
