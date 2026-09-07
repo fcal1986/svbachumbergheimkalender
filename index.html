@@ -101,7 +101,7 @@
   .ev-time-col:last-child{border-right:none;}
   .ev-t{font-size:16px;font-weight:800;color:var(--ink);line-height:1.1;}
   .ev-tl{font-size:9.5px;color:var(--ink-soft);margin-top:2px;font-weight:600;text-transform:uppercase;}
-  .ev-note{font-size:11px;color:var(--ink-secondary);margin-top:8px;padding:7px 10px;background:var(--bg);border-radius:8px;}
+  .ev-note{font-size:11px;color:var(--ink-soft);margin-top:8px;padding:7px 10px;background:var(--bg);border-radius:8px;}
   .ev-contact{font-size:11.5px;margin-top:8px;display:flex;align-items:center;flex-wrap:wrap;row-gap:5px;column-gap:0;}
   .ci-link{color:var(--blue);text-decoration:none;display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:600;padding:2px 0;}
   .ci-link svg{width:12px;height:12px;stroke:currentColor;flex:none;}
@@ -112,6 +112,20 @@
   .ibtn.share svg{stroke:var(--ok);}
   .ibtn.del svg{stroke:var(--warn);}
   .empty-card{background:var(--white);border-radius:16px;padding:20px 16px;text-align:center;font-size:12px;color:var(--ink-soft);box-shadow:var(--card-shadow);margin-bottom:10px;}
+  .fb-card{background:var(--white);border-radius:14px;padding:12px 14px;box-shadow:var(--card-shadow);margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+  .fb-date{flex:0 0 auto;text-align:center;min-width:38px;}
+  .fb-date .fb-dow{display:block;font-size:9.5px;color:var(--ink-soft);text-transform:uppercase;font-weight:700;}
+  .fb-date .fb-day{display:block;font-size:14px;font-weight:800;color:var(--ink);}
+  .fb-body{flex:1;min-width:0;}
+  .fb-body b{font-size:13px;color:var(--ink);}
+  .fb-sub{font-size:11px;color:var(--ink-soft);margin-top:1px;}
+  .fb-take-btn{flex:0 0 auto;background:var(--bg);border:1.5px solid var(--line);border-radius:9px;padding:7px 10px;font-size:11px;font-weight:700;color:var(--ink);cursor:pointer;white-space:nowrap;}
+  .fb-source{font-size:10px;color:var(--ink-soft);margin:6px 2px 2px;display:flex;align-items:center;gap:5px;}
+  .fb-source svg{width:11px;height:11px;stroke:var(--ink-soft);}
+  .fb-note{font-size:11px;color:var(--ink-secondary);background:var(--bg);border-radius:8px;padding:8px 10px;margin-top:8px;line-height:1.4;}
+  .fb-warn-card{background:#FFF7ED;border:1.5px solid #FDBA74;border-radius:14px;padding:12px 14px;margin-bottom:8px;}
+  .fb-warn-card b{font-size:12.5px;color:#9A3412;}
+  .fb-warn-card .fb-warn-sub{font-size:11px;color:#9A3412;margin-top:4px;line-height:1.4;}
 
   /* ── BADGES ── */
   .badges{display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
@@ -150,9 +164,7 @@
   .day-head{font-size:11.5px;font-weight:700;color:var(--ink-soft);background:transparent;padding:6px 2px 4px;margin:14px 0 6px;display:flex;align-items:center;gap:8px;}
   .day-head::after{content:"";flex:1;height:1px;background:var(--line);}
   .day-group:first-of-type .day-head{margin-top:2px;}
-  .chip-scroll-wrap{position:relative;margin-bottom:10px;}
-  .chip-scroll-wrap::after{content:'';position:absolute;top:0;right:0;bottom:4px;width:28px;pointer-events:none;background:linear-gradient(to right,rgba(248,250,247,0),var(--bg));}
-  .chip-scroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:0;}
+  .chip-scroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;}
   .chip-scroll::-webkit-scrollbar{display:none;}
   .filter-chip{flex:none;font-size:11.5px;font-weight:600;padding:6px 13px;border-radius:20px;border:1.5px solid var(--line);background:var(--white);color:var(--ink-soft);white-space:nowrap;cursor:pointer;box-shadow:var(--card-shadow);}
   .filter-chip.on{background:var(--black-btn);border-color:var(--black-btn);color:#fff;}
@@ -173,7 +185,6 @@
   .cal-day.other{opacity:.3;}
   .cal-day.today{border:2px solid var(--green);}
   .cal-day.sel{background:var(--black-btn);border-color:var(--black-btn);color:#fff;}
-  .cal-day.today.sel{box-shadow:0 0 0 2px var(--green);}
   .cal-day .load{position:absolute;top:3px;right:3px;width:8px;height:6px;border-radius:1.5px;border:1px solid var(--grass);display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:.5px;background:var(--grass);overflow:hidden;}
   .cal-day .load i{background:#fff;}
   .cal-day .load i.on{background:var(--grass);}
@@ -471,17 +482,18 @@
         <div class="stat-card green"><div class="num" id="st-b">–</div><div class="lbl" id="st-b-lbl">Kommende</div></div>
       </div>
       <div id="st-heute"></div>
+      <div id="fb-heimspiele-wrap"></div>
       <p class="section-label">Nächster Termin</p>
       <div id="nx-box"></div>
       <p class="section-label">Demnächst</p>
       <div id="up-list"></div>
       <p class="section-label">Schnellzugriff</p>
-      <div class="chip-scroll-wrap"><div class="chip-scroll">
+      <div class="chip-scroll">
         <span class="filter-chip on" onclick="newEvent()">+ Neuer Termin</span>
         <span class="filter-chip" onclick="goto('termine');setView('monat')">Monatsansicht</span>
         <span class="filter-chip" onclick="goto('termine');setView('jahr')">Jahresansicht</span>
         <span class="filter-chip" onclick="goto('konto')">Kalender abonnieren</span>
-      </div></div>
+      </div>
     </div>
   </div>
 
@@ -493,7 +505,7 @@
         <button type="button" data-view="monat" class="on" onclick="setView('monat')">Monat</button>
         <button type="button" data-view="jahr" onclick="setView('jahr')">Jahr</button>
       </div>
-      <div class="chip-scroll-wrap"><div class="chip-scroll" id="filterbar"></div></div>
+      <div class="chip-scroll" id="filterbar"></div>
       <div id="view-liste" style="display:none;"></div>
       <div id="view-monat" style="display:none;"></div>
       <div id="view-jahr" style="display:none;"></div>
@@ -630,6 +642,7 @@
             <div class="pq" data-q="4" onclick="pickPitch(4)">4</div>
           </div>
           <div class="pitch-cap" id="pitch-cap"></div>
+          <div id="fb-share-note"></div>
         </div>
         <p class="helptext">Hälfte A = Viertel 1+2 (links) · Hälfte B = Viertel 3+4 (rechts)</p>
       </div>
@@ -745,6 +758,7 @@
    ========================================================= */
 
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], session=null;
+let FUSSBALLDE={updated:null,games:[]}; // Heimspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
 let selectedSeasonFilter='';
 let kontoTab='profil'; // 'profil'|'saisons'|'zugaenge'|'protokoll'
 function setKontoTab(tab){kontoTab=tab;renderKonto();}
@@ -762,6 +776,7 @@ const today=new Date(), todayStr=ymd(today);
 let view='monat', filter='alle';
 let curY=today.getFullYear(), curM=today.getMonth(), yearShown=today.getFullYear();
 let selDate=todayStr, pitchMode='ganz', pitchPart=null, editingId=null, highlightId=null;
+let formSkipFussballLink=null; // wenn ein fussball.de-Heimspiel gerade in einen Termin übernommen wird: dessen eigenes "Belegt"-Fenster nicht als Konflikt mit sich selbst werten
 let tPitchMode='ganz', tPitchPart=null, tEditId=null;
 let halleThirds=[];
 let formDirty=false;
@@ -820,10 +835,91 @@ function trainingInstancesOn(d){
   })).sort((a,b)=>a.t.localeCompare(b.t));
 }
 
+/* fussball.de-Heimspiele als virtuelle Termine expandieren, damit sie in der
+   Konfliktprüfung berücksichtigt werden.
+   Wichtige Vereinsregel: Bis einschließlich E-Jugend teilen sich zwei Teams
+   gleichzeitig den Platz (Kleinfeld nebeneinander) – ab D-Jugend aufwärts
+   braucht ein Spiel den KOMPLETTEN Platz. fussball.de sagt uns nicht, welche
+   Hälfte ein teilbares Spiel nutzt – deshalb erzwingen wir dafür keinen
+   Viertel-genauen Konflikt, sondern nur einen Hinweis. Nur "ganzer Platz"-
+   Spiele (D-Jugend aufwärts) blockieren eine manuelle Buchung hart. */
+function fussballShareCategories(){
+  return (CFG&&CFG.fussballde&&CFG.fussballde.shareCategories)||['E-Junioren','F-Junioren','G-Junioren','Bambini'];
+}
+function fussballTeamCategory(team){
+  const t=(team||'').trim();
+  return fussballShareCategories().some(c=>t.toLowerCase().startsWith(c.toLowerCase()))?'share':'full';
+}
+// Bewusst kein pauschaler Vor-Puffer mehr: eng getaktete Ansetzungen (z.B. 10:00 + 11:00
+// direkt danach) sind beim Verein normal, weil die nächste Mannschaft sich am Rand
+// aufwärmt, während das vorige Spiel ausklingt – kein echter Platzkonflikt.
+function fussballBufferBeforeMin(){ return (CFG&&CFG.fussballde&&CFG.fussballde.bufferBeforeMin)??15; }
+function fussballDurationMin(team){
+  const cfg=CFG&&CFG.fussballde;
+  if(fussballTeamCategory(team)==='share') return (cfg&&cfg.durationMinYouth)||75;
+  return (cfg&&cfg.durationMinFull)||110;
+}
+function shiftTimeClamped(t,m){
+  const[h,min]=t.split(':').map(Number);
+  let tot=((h*60+min+m)%1440+1440)%1440; // sicher gegen Mitternachts-Über-/Unterlauf
+  return String(Math.floor(tot/60)).padStart(2,'0')+':'+String(tot%60).padStart(2,'0');
+}
+function fussballGameLinkId(g){ return 'fb-'+(g.link||(g.d+'|'+g.t+'|'+g.opponent)); }
+function fussballGameWindow(g){
+  return { s:shiftTimeClamped(g.t,-fussballBufferBeforeMin()), e:shiftTimeClamped(g.t,fussballDurationMin(g.team)) };
+}
+/* Nur "ganzer Platz"-Kategorien (D-Jugend aufwärts) gehen in die harte Konfliktprüfung ein. */
+function fussballInstancesOn(d){
+  return (FUSSBALLDE.games||[]).filter(g=>g.d===d&&g.t&&fussballTeamCategory(g.team)==='full').map(g=>{
+    const id=fussballGameLinkId(g);
+    if(id===formSkipFussballLink)return null; // gerade selbst per "Übernehmen" in einen Termin verwandelt
+    const win=fussballGameWindow(g);
+    return {
+      id, d:g.d, t:win.s, bis:win.e,
+      title:'Heimspiel: '+(g.team?g.team+' – ':'')+g.opponent, pitch:{mode:'ganz'}, halle:null, res:[],
+      isExternal:true, ownerName:'fussball.de (automatisch)', note:g.competition||''
+    };
+  }).filter(Boolean);
+}
+/* Weiche Info (kein Blocker): teilbare Jugendspiele (E-Jugend abwärts), die sich
+   zeitlich mit der geplanten Buchung überschneiden – zur Rücksprache, welche
+   Platzhälfte frei bleibt. */
+function fussballShareNotesFor(d,von,bis){
+  return (FUSSBALLDE.games||[]).filter(g=>g.d===d&&g.t&&fussballTeamCategory(g.team)==='share').map(g=>{
+    const win=fussballGameWindow(g);
+    return {g,win};
+  }).filter(({win})=>von<win.e&&bis>win.s);
+}
+/* fussball.de-eigene Ansetzungsfehler erkennen: der Staffelleiter plant manchmal
+   zu viele Spiele auf dieselbe Uhrzeit (mehr als der Platz gleichzeitig tragen
+   kann). Das ist unabhängig von Platzcoach-Buchungen und wird separat als
+   Warnung angezeigt, damit der Jugendleiter das beim Staffelleiter klären kann. */
+function fussballCapacityWarningsOn(d){
+  const games=(FUSSBALLDE.games||[]).filter(g=>g.d===d&&g.t);
+  const byTime={};
+  games.forEach(g=>{ (byTime[g.t]=byTime[g.t]||[]).push(g); });
+  const warnings=[];
+  Object.entries(byTime).forEach(([t,list])=>{
+    if(list.length<2)return;
+    const hasFull=list.some(g=>fussballTeamCategory(g.team)==='full');
+    const shareCount=list.filter(g=>fussballTeamCategory(g.team)==='share').length;
+    if(hasFull||shareCount>2) warnings.push({t,games:list});
+  });
+  return warnings;
+}
+function fussballCapacityWarningsUpcoming(days){
+  const out=[];
+  const dates=[...new Set((FUSSBALLDE.games||[]).map(g=>g.d))].filter(d=>d>=todayStr).sort();
+  dates.slice(0,days||60).forEach(d=>{
+    fussballCapacityWarningsOn(d).forEach(w=>out.push({d,...w}));
+  });
+  return out;
+}
+
 /* KONFLIKTPRÜFUNG – gibt [{event,reasons}] zurück */
 function findConflicts(d,von,bis,pitch,halle,res,skipId){
   const result=[];
-  const occupations=EVENTS.filter(e=>e.d===d&&e.id!==skipId).concat(trainingInstancesOn(d));
+  const occupations=EVENTS.filter(e=>e.d===d&&e.id!==skipId).concat(trainingInstancesOn(d)).concat(fussballInstancesOn(d));
   occupations.forEach(e=>{
     const eBis=eventBis(e);
     if(von>=eBis||bis<=e.t)return; // kein Zeitüberschnitt
@@ -877,7 +973,7 @@ function suggestFreeSlots(d,neededMin,skipId){
   const MIN_GAP=30; // immer alle Lücken ≥ 30min zeigen, egal wie lang der neue Termin ist
   const DS=timeToMin('07:00'),DE=timeToMin('22:00');
   const busy=[];
-  EVENTS.filter(e=>e.d===d&&e.id!==skipId).concat(trainingInstancesOn(d)).forEach(e=>{
+  EVENTS.filter(e=>e.d===d&&e.id!==skipId).concat(trainingInstancesOn(d)).concat(fussballInstancesOn(d)).forEach(e=>{
     busy.push({s:timeToMin(e.t),e:timeToMin(eventBis(e))});
   });
   busy.sort((a,b)=>a.s-b.s);
@@ -1242,6 +1338,7 @@ function refreshBioBtn(){
 
 /* ---------- Navigation ---------- */
 function goto(n){
+  if(n!=='neu')formSkipFussballLink=null; // Verlassen des Formulars ohne Speichern: Ausnahme nicht stehen lassen
   document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.dataset.pane===n));
   const navKey=(n==='tform')?'training':n;
   document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.nav===navKey));
@@ -1306,7 +1403,7 @@ function usedQuarters(d,skipId){
 }
 function usedQuartersWindow(d,von,bis,skipId){
   const s=new Set();
-  EVENTS.filter(e=>e.d===d&&e.id!==skipId).concat(trainingInstancesOn(d)).forEach(e=>{
+  EVENTS.filter(e=>e.d===d&&e.id!==skipId).concat(trainingInstancesOn(d)).concat(fussballInstancesOn(d)).forEach(e=>{
     const eBis=eventBis(e);
     if(von<eBis&&bis>e.t) pitchQuarters(e.pitch).forEach(q=>s.add(q));
   });
@@ -1670,6 +1767,54 @@ function renderStart(){
       +'</div>';
   }else box.innerHTML='<div class="empty-card">Keine kommenden Termine.</div>';
   document.getElementById('up-list').innerHTML=future.slice(1,4).map(rowHTML).join('')||'<div class="empty-card">Keine weiteren Termine.</div>';
+  renderFussballHeimspiele();
+}
+
+/* ---------- fussball.de Heimspiele (read-only, per GitHub Action synchronisiert) ---------- */
+function renderFussballHeimspiele(){
+  const wrap=document.getElementById('fb-heimspiele-wrap');
+  if(!wrap)return;
+  const games=(FUSSBALLDE.games||[]).filter(g=>g.d>=todayStr).sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t)).slice(0,3);
+  const capWarnings=fussballCapacityWarningsUpcoming(14);
+  if(!games.length&&!capWarnings.length){ wrap.innerHTML=''; return; }
+  let h='<p class="section-label">Heimspiele · fussball.de</p>';
+  if(capWarnings.length){
+    h+=capWarnings.map(w=>{
+      const dt=new Date(w.d+'T00:00:00'),dd=String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0');
+      const names=w.games.map(g=>esc(g.team||'?')).join(', ');
+      return '<div class="fb-warn-card">⚠️ <b>Möglicher Ansetzungsfehler bei fussball.de</b>'
+        +'<div class="fb-warn-sub">'+dd+' um '+w.t+' Uhr sind '+w.games.length+' Spiele gleichzeitig angesetzt ('+names+') – mehr, als der Platz gleichzeitig fasst. Bitte beim Jugend-/Staffelleiter melden.</div>'
+        +'</div>';
+    }).join('');
+  }
+  h+=games.map((g,i)=>{
+    const idx=FUSSBALLDE.games.indexOf(g);
+    const dt=new Date(g.d+'T00:00:00'),dow=DAYS_S[dt.getDay()],dd=String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0');
+    return '<div class="fb-card">'
+      +'<div class="fb-date"><span class="fb-dow">'+dow+'</span><span class="fb-day">'+dd+'</span></div>'
+      +'<div class="fb-body"><b>'+esc(g.team||'')+' – '+esc(g.opponent||'Gegner unbekannt')+'</b>'
+      +'<div class="fb-sub">'+(g.t||'Zeit offen')+' · '+esc(g.competition||'')+'</div></div>'
+      +(session?'<button class="fb-take-btn" onclick="newEventFromFussball('+idx+')">Übernehmen</button>':'')
+      +'</div>';
+  }).join('');
+  h+='<div class="fb-source"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>'
+    +'Automatisch von fussball.de übernommen'+(FUSSBALLDE.updated?(' · Stand '+fmtUpdated(FUSSBALLDE.updated)):'')+'</div>';
+  wrap.innerHTML=h;
+}
+function fmtUpdated(iso){
+  try{ const d=new Date(iso); return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'. '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+  catch(e){ return ''; }
+}
+function newEventFromFussball(idx){
+  const g=FUSSBALLDE.games[idx];
+  if(!g)return;
+  newEvent(g.d); // setzt formSkipFussballLink bereits über resetForm() zurück
+  if(!session)return; // requireLogin() in newEvent() already handled the redirect
+  formSkipFussballLink=fussballGameLinkId(g); // eigenes Belegungsfenster nicht als Konflikt mit sich selbst werten
+  document.getElementById('f-anlass').value='Heimspiel: '+g.team+' – '+g.opponent+(g.competition?' ('+g.competition+')':'');
+  if(g.t){ document.getElementById('f-von').value=g.t; document.getElementById('f-bis').value=addMinutes(g.t,120); }
+  onTimeChange();
+  showToast('Aus fussball.de übernommen – bitte Team, Platz & Details prüfen.',3500);
 }
 
 /* ---------- Terminformular ---------- */
@@ -1745,6 +1890,16 @@ function renderPitch(){
   const busy=usedQuartersWindow(dateInput().value,von,bis,editingId);
   renderPitchGrid({grid:'pitch',cap:'pitch-cap'},curPitch(),busy,
     '<span>'+fmtShort(dateInput().value)+' '+von+'–'+bis+': ');
+  renderFussballShareNote(dateInput().value,von,bis);
+}
+function renderFussballShareNote(d,von,bis){
+  const el=document.getElementById('fb-share-note');
+  if(!el)return;
+  const notes=fussballShareNotesFor(d,von,bis).filter(({g})=>fussballGameLinkId(g)!==formSkipFussballLink);
+  if(!notes.length){ el.innerHTML=''; return; }
+  el.innerHTML=notes.map(({g})=>
+    '<div class="fb-note">ℹ️ Zeitgleich Heimspiel <b>'+esc(g.team||'')+' – '+esc(g.opponent)+'</b> ('+g.t+' Uhr) – bis E-Jugend teilen sich zwei Teams den Platz. Bitte kurz abstimmen, welche Hälfte frei bleibt.</div>'
+  ).join('');
 }
 function resetForm(){
   document.getElementById('f-anlass').value='';document.getElementById('f-bem').value='';
@@ -1754,6 +1909,7 @@ function resetForm(){
   document.querySelectorAll('#f-res .res-chip').forEach(c=>c.classList.toggle('on',c.dataset.res==='Großspielfeld'));
   pitchMode='ganz';pitchPart=null;document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode==='ganz'));
   halleThirds=[];onTeamChange();renderPitch();renderHalle();hideConflicts();formDirty=false;
+  formSkipFussballLink=null;
 }
 function requireLogin(){
   if(session) return true;
@@ -1884,7 +2040,7 @@ function duplicateEvent(id){
   goto('neu');
   showToast('Kopie erstellt – Datum steht auf nächstes Jahr, bitte prüfen.',4000);
 }
-function cancelEdit(){ editingId=null; formDirty=false; goto('termine'); }
+function cancelEdit(){ editingId=null; formSkipFussballLink=null; formDirty=false; goto('termine'); }
 async function submitEvent(){
   if(!requireLogin())return;
   // Saisonprüfung als Sicherheitsnetz beim Speichern
@@ -3068,6 +3224,8 @@ async function boot(){
   catch(e){ TRAINING=[]; }
   try{ const sea=await loadJSON('data/seasons.json'); SEASONS=sea.seasons||[]; }
   catch(e){ SEASONS=[]; }
+  try{ FUSSBALLDE=await loadJSON('data/fussballde.json'); if(!Array.isArray(FUSSBALLDE.games))FUSSBALLDE.games=[]; }
+  catch(e){ FUSSBALLDE={updated:null,games:[]}; }
 
   document.getElementById('login-foot').textContent=
     USERS.length?'Zugang bekommst du vom Vorstand.':'Noch keine Zugänge angelegt – bitte als Admin anmelden.';

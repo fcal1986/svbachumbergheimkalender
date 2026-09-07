@@ -1,0 +1,7 @@
+{
+  "name": "platzcoach-fussballde-sync",
+  "private": true,
+  "type": "module",
+  "scripts": { "sync:fussballde": "node scripts/fussballde-sync.mjs" },
+  "dependencies": { "cheerio": "^1.0.0" }
+}
