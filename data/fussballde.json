@@ -1,5 +1,30 @@
 {
-  "updated": "2026-09-07T06:05:12.751Z",
-  "games": [],
+  "updated": "2026-09-07T06:17:07.991Z",
+  "games": [
+    {
+      "d": "2026-09-07",
+      "t": "18:00",
+      "team": "C-Junioren",
+      "opponent": "TuS Wickede/Ruhr",
+      "competition": "Kreisfreundschaftsspiele",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-wickede-ruhr/-/spiel/031V6957EC000000VS5489BTVT7QHFUC"
+    },
+    {
+      "d": "2026-09-08",
+      "t": "18:00",
+      "team": "B-Junioren",
+      "opponent": "BSV Menden II",
+      "competition": "Kreisfreundschaftsspiele",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-bsv-menden-ii/-/spiel/031D1H4ML4000000VS5489BUVUR5FS5A"
+    },
+    {
+      "d": "2026-09-12",
+      "t": "10:00",
+      "team": "G-Junioren",
+      "opponent": "TuS Vosswinkel",
+      "competition": "Kinderfußball",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-vosswinkel/-/spiel/031IKDRR28000000VS5489BUVVKNMR0J"
+    }
+  ],
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
