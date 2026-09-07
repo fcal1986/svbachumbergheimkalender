@@ -134,6 +134,24 @@
         "cipher": "k7kEHjFBVTHdDfxqy3jqpyG3tEkbJTuXp+S/D7xd/uT8okSjAYIwUsRT9iLu8t6WtoZCb38FT4OsTLYS3EYCUkHHUj/qmAjmZ1m2hWDn6yulWDtPtdaQK4FtM3BzR2pePwrbrQfXkZGVc4wS9w=="
       },
       "created": "2026-09-07T12:45:32.792Z"
+    },
+    {
+      "id": "89eec0ec-81c3-4127-a8d4-d6433273221a",
+      "first": "Marc",
+      "last": "Krause",
+      "email": "marc.krause88@googlemail.com",
+      "admin": false,
+      "classes": {
+        "E-Jugend": [
+          3
+        ]
+      },
+      "enc": {
+        "salt": "goizxzw/t4mq+6L45PU7Nw==",
+        "iv": "Eez+sgWUPm2GB5B6",
+        "cipher": "YocnCG2d9qrd8musrBc+K3Q+ZLDzg7zjhMBAUpvWzODO69WrP18h88HvzZmSAFf+M/xqVB9Cla8toagOnliJWifdXorOUBgo8E3n7VNwuZacP7XbH+Jy/vNCEFliQwQlPqqSm0LCiuNxXgNLZQ=="
+      },
+      "created": "2026-09-07T13:13:41.885Z"
     }
   ]
 }
