@@ -99,6 +99,18 @@
   .pitch-today-row .pt-team{flex:1;min-width:0;}
   .pitch-today-row .pt-pitch{flex:0 0 auto;font-size:10.5px;color:var(--ink-soft);}
   .status-row{display:flex;align-items:flex-start;gap:9px;background:var(--white);border-radius:12px;padding:10px 12px;margin-bottom:6px;box-shadow:var(--card-shadow);font-size:12.5px;color:var(--ink);}
+  .result-row{display:flex;align-items:center;gap:10px;background:var(--white);border-radius:12px;padding:9px 12px;margin-bottom:6px;box-shadow:var(--card-shadow);border-left:4px solid var(--line);}
+  .result-row.win{border-left-color:#16A34A;}
+  .result-row.draw{border-left-color:#CA8A04;}
+  .result-row.loss{border-left-color:#DC2626;}
+  .result-date{flex:0 0 auto;font-size:11px;color:var(--ink-soft);min-width:44px;}
+  .result-body{flex:1;min-width:0;}
+  .result-team{font-size:12.5px;font-weight:700;color:var(--ink);}
+  .result-opp{font-size:10.5px;color:var(--ink-soft);}
+  .result-score{flex:0 0 auto;font-size:15px;font-weight:800;color:var(--ink);}
+  .status-row.conflict-row{cursor:pointer;}
+  .conflict-meta{font-size:10.5px;color:#9A3412;margin-top:3px;}
+  .conflict-dates{font-size:10.5px;color:#9A3412;margin-top:6px;line-height:1.5;padding-top:6px;border-top:1px solid rgba(154,52,18,.15);}
   .status-row.ok{color:#166534;}
   .status-row.warn{color:#9A3412;background:#FFF7ED;}
   .status-row svg{width:15px;height:15px;flex:none;margin-top:1px;}
@@ -533,6 +545,8 @@
       <p class="section-label">Platzbelegung heute</p>
       <div id="st-pitch-today"></div>
 
+      <div id="st-results-wrap"></div>
+
       <p class="section-label">Status · gesamte Saison</p>
       <div id="st-status"></div>
     </div>
@@ -940,7 +954,7 @@ function fussballDisplayAll(){
     return {
       id:fussballGameLinkId(g), d:g.d, t:g.t||'00:00', bis,
       title:'Heimspiel: '+label+' – '+g.opponent, opponent:g.opponent,
-      team:mapped.team, squad:mapped.squad, competition:g.competition||'',
+      team:mapped.team, squad:mapped.squad, competition:g.competition||'', score:g.score||null,
       isExternal:true, pitchIsFull:isFull, pitchLabelText:isFull?'Ganzer Platz':'Platz geteilt',
       fbIndex:idx, ownerName:'fussball.de'
     };
@@ -955,7 +969,7 @@ function fussballDisplayAwayAll(){
     return {
       id:'fbaway-'+(g.link||(g.d+'|'+g.t+'|'+g.opponent)), d:g.d, t:g.t||'00:00', bis,
       title:label+' bei '+g.opponent, opponent:g.opponent,
-      team:mapped.team, squad:mapped.squad, competition:g.competition||'',
+      team:mapped.team, squad:mapped.squad, competition:g.competition||'', score:g.score||null,
       isExternal:true, isAway:true, ownerName:'fussball.de'
     };
   });
@@ -1629,11 +1643,11 @@ function rowHTML(e){
     if(e.halle&&e.halle.thirds&&e.halle.thirds.length)b+=halleBadge(e.halle);
     (e.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
   }
-  const sub=e.t+'–'+bis+' · '+(e.isTraining?('Trainer: '+trainerLabel(e)):esc(e.ownerName||'–'));
-  // Trainer-Kontakte (Telefon/E-Mail) stehen bei Training nur noch kompakt in der Sub-Zeile
-  // ("Trainer: Name, Name") – der ausführliche Kontaktblock darunter entfällt, um die Kachel
-  // kompakter zu halten.
-  const contactHtml=e.isTraining?'':(e.ownerId?getContactHTML(e.ownerId):'');
+  const sub=e.isTraining?'':(e.t+'–'+bis+' · '+esc(e.ownerName||'–'));
+  // Bei Training: keine Uhrzeit/Trainer-Zeile mehr unter der Headline (steht schon in den
+  // Von/Bis-Boxen bzw. im vollen Kontaktblock unten) – dafür der ausführliche Kontaktblock
+  // mit Telefon/E-Mail wieder komplett sichtbar.
+  const contactHtml=e.isTraining?getTrainersContactHTML(e):(e.ownerId?getContactHTML(e.ownerId):'');
   let acts='';
   if(e.isTraining){
     if(session&&(session.isAdmin||canBookAnyOfTeam(e.team))){
@@ -1654,7 +1668,7 @@ function rowHTML(e){
     +'<div class="ev-head">'
     +'<div class="ev-date-box"><span class="ev-dow">'+dow+'</span><span class="ev-day">'+dd+'</span></div>'
     +'<div class="ev-sep"></div>'
-    +'<div class="ev-title-box"><h4>'+esc(title)+'</h4><div class="ev-sub">'+sub+'</div></div>'
+    +'<div class="ev-title-box"><h4>'+esc(title)+'</h4>'+(sub?'<div class="ev-sub">'+sub+'</div>':'')+'</div>'
     +'<div class="row-acts">'+acts+'</div>'
     +'</div>'
     +'<div class="ev-body">'
@@ -1995,7 +2009,37 @@ function renderStart(){
   document.getElementById('st-summary').textContent=parts.length?parts.join(' · '):'Heute nichts geplant';
 
   renderPitchToday();
+  renderRecentResults();
   renderStartStatus();
+}
+
+/* ---------- Letzte Ergebnisse (fussball.de) ---------- */
+function recentFussballResults(days){
+  const cutoff=ymd(new Date(Date.now()-days*86400000));
+  const home=fussballDisplayAll().filter(e=>e.d<todayStr&&e.d>=cutoff&&e.score).map(e=>({...e,isAway:false}));
+  const away=fussballDisplayAwayAll().filter(e=>e.d<todayStr&&e.d>=cutoff&&e.score).map(e=>({...e,isAway:true}));
+  return home.concat(away).sort((a,b)=>b.d.localeCompare(a.d)||b.t.localeCompare(a.t));
+}
+function renderRecentResults(){
+  const box=document.getElementById('st-results-wrap');
+  if(!box)return;
+  const results=recentFussballResults(14);
+  if(!results.length){ box.innerHTML=''; return; }
+  let h='<p class="section-label">Letzte Ergebnisse · fussball.de</p>';
+  h+=results.slice(0,8).map(e=>{
+    const us=e.isAway?e.score.away:e.score.home;
+    const them=e.isAway?e.score.home:e.score.away;
+    const outcome=us>them?'win':(us<them?'loss':'draw');
+    const teamTxt=teamLabel(e.team,e.squad||1);
+    const scoreTxt=us+':'+them; // immer "wir:Gegner", unabhängig von Heim/Auswärts – sonst leicht misszuverstehen
+    return '<div class="result-row '+outcome+'">'
+      +'<div class="result-date">'+fmtShort(e.d)+'</div>'
+      +'<div class="result-body"><div class="result-team">'+esc(teamTxt)+'</div>'
+      +'<div class="result-opp">'+(e.isAway?'bei ':'vs ')+esc(e.opponent||'')+'</div></div>'
+      +'<div class="result-score">'+scoreTxt+'</div>'
+      +'</div>';
+  }).join('');
+  box.innerHTML=h;
 }
 
 /* ---------- Neue Start-Seite: kompaktes Tages-Dashboard ---------- */
@@ -2078,62 +2122,87 @@ function conflictsOnDay(ds){
   }
   return found;
 }
+function typeLabelOf(e){
+  const t=classifyAgendaItem(e);
+  if(t==='training')return 'Training';
+  if(t==='spiel')return isFriendly(e)?'Freundschaftsspiel':'Spiel';
+  return 'Termin';
+}
 /* Durchsucht die gesamte (aktive) Saison nach Platzkonflikten – eigene Termine/Training
    UNTEREINANDER sowie fussball.de-Ansetzungsfehler (z.B. Staffelleiter legt 2 Spiele auf
-   dieselbe Uhrzeit, obwohl der ganze Platz gebraucht wird).
-   Wiederkehrende Trainings-Kollisionen (gleiches Team-Paar, gleiche Uhrzeit, jede Woche)
-   werden zu EINER Zeile zusammengefasst, statt jede einzelne Woche separat aufzulisten. */
+   dieselbe Uhrzeit, obwohl der ganze Platz gebraucht wird). Alle Vorkommen mit demselben
+   Konflikt-Muster (gleiche Beteiligte, gleiche Uhrzeit) werden zu EINER Zeile mit Anzahl +
+   Datumsspanne zusammengefasst, statt jede einzelne Woche separat aufzulisten.
+   Ist auf beiden Seiten dieselbe Mannschaft betroffen (z.B. eigenes Training kollidiert mit
+   eigenem Freundschaftsspiel), wird das explizit als Selbst-Überschneidung benannt statt
+   verwirrend "X ↔ X" zu schreiben. */
 function seasonConflictScan(){
   const curSea=getCurrentSeason();
   const endStr=curSea?curSea.to:ymd(new Date(Date.now()+90*86400000));
   const maxDays=Math.min(370,Math.max(1,Math.round((new Date(endStr)-new Date(todayStr))/86400000)));
-  const recurring={}; // key: "TeamA|TeamB|HH:MM" -> {teamA,teamB,t,dates:[...]}
-  const oneOff=[]; // fussball.de-Ansetzungsfehler, je Datum individuell
+  const groups={};
   for(let i=0;i<=maxDays;i++){
     const d=new Date(todayStr+'T00:00:00'); d.setDate(d.getDate()+i);
     const ds=ymd(d);
     conflictsOnDay(ds).forEach(([A,B])=>{
-      const isRecurringPair=A.isTraining&&B.isTraining; // beide wiederkehrend -> wahrscheinlich jede Woche gleich
       const tA=teamLabel(A.team,A.squad||1),tB=teamLabel(B.team,B.squad||1);
-      const key=[tA,tB].sort().join('|')+'|'+A.t;
-      if(isRecurringPair){
-        if(!recurring[key])recurring[key]={teamA:tA,teamB:tB,t:A.t,dates:[]};
-        recurring[key].dates.push(ds);
-      }else{
-        oneOff.push({d:ds,text:tA+' ↔ '+tB+' um '+A.t+' Uhr'});
-      }
+      const typeA=typeLabelOf(A),typeB=typeLabelOf(B);
+      const label=(tA===tB)
+        ?tA+': '+typeA+' und '+typeB+' überschneiden sich'
+        :tA+' ('+typeA+') ↔ '+tB+' ('+typeB+')';
+      const key=label+'|'+A.t;
+      if(!groups[key])groups[key]={label,t:A.t,dates:[]};
+      groups[key].dates.push(ds);
     });
-    fussballCapacityWarningsOn(ds).forEach(w=>oneOff.push({d:ds,text:w.games.length+' Spiele um '+w.t+' Uhr gleichzeitig angesetzt ('+w.games.map(g=>esc(g.team||'?')).join(', ')+')'}));
+    fussballCapacityWarningsOn(ds).forEach(w=>{
+      const label='fussball.de: '+w.games.length+' Spiele gleichzeitig angesetzt ('+w.games.map(g=>esc(g.team||'?')).join(', ')+')';
+      const key=label+'|'+w.t;
+      if(!groups[key])groups[key]={label,t:w.t,dates:[]};
+      groups[key].dates.push(ds);
+    });
   }
-  const grouped=Object.values(recurring).map(r=>{
-    const first=r.dates[0];
-    const wd=DAYS[new Date(first+'T00:00:00').getDay()];
-    const text=r.dates.length>1
-      ?r.teamA+' ↔ '+r.teamB+' – jeden '+wd+' um '+r.t+' Uhr (erstmals '+fmtShort(first)+', '+r.dates.length+'× in dieser Saison)'
-      :r.teamA+' ↔ '+r.teamB+' um '+r.t+' Uhr';
-    return {d:first,text,noDatePrefix:r.dates.length>1};
-  });
-  return grouped.concat(oneOff).sort((a,b)=>a.d.localeCompare(b.d));
+  return Object.values(groups).map(g=>{
+    g.dates.sort();
+    return {label:g.label,t:g.t,dates:g.dates,count:g.dates.length,first:g.dates[0],last:g.dates[g.dates.length-1]};
+  }).sort((a,b)=>a.first.localeCompare(b.first));
+}
+function toggleConflictDetail(id){
+  const el=document.getElementById(id);
+  if(el)el.style.display=el.style.display==='none'?'block':'none';
 }
 function renderStartStatus(){
   const box=document.getElementById('st-status');
   if(!box)return;
-  const conflicts=seasonConflictScan();
-  const rows=[];
-  if(!conflicts.length){
-    rows.push({warn:false,text:'Keine Platzkonflikte in der gesamten Saison.'});
+  const groups=seasonConflictScan();
+  let html='';
+  if(!groups.length){
+    html+='<div class="status-row ok">'+svgOk+'<div>Keine Platzkonflikte in der gesamten Saison.</div></div>';
   }else{
-    conflicts.slice(0,25).forEach(c=>rows.push({warn:true,text:(c.noDatePrefix?'':fmtShort(c.d)+': ')+c.text}));
-    if(conflicts.length>25)rows.push({warn:true,text:'+ '+(conflicts.length-25)+' weitere Konflikte – siehe Termine.'});
+    html+=groups.map((g,i)=>{
+      const wd=DAYS[new Date(g.first+'T00:00:00').getDay()];
+      const dateInfo=g.count>1
+        ?(g.count+'× · '+(g.count>3?'jeden '+wd+', ':'')+'erstmals '+fmtShort(g.first)+(g.last!==g.first?' bis '+fmtShort(g.last):''))
+        :fmtShort(g.first);
+      const detailId='conf-detail-'+i;
+      const dateList=g.dates.map(fmtShort).join(', ');
+      return '<div class="status-row warn conflict-row" onclick="toggleConflictDetail(\''+detailId+'\')">'
+        +svgWarn
+        +'<div style="flex:1;min-width:0;">'
+        +'<div>'+esc(g.label)+' um '+g.t+' Uhr</div>'
+        +'<div class="conflict-meta">'+esc(dateInfo)+(g.count>1?' · Termine anzeigen ▾':'')+'</div>'
+        +(g.count>1?'<div id="'+detailId+'" class="conflict-dates" style="display:none;">'+esc(dateList)+'</div>':'')
+        +'</div>'
+        +'</div>';
+    }).join('');
   }
 
   const todays=todaysCombinedAgenda();
   const noTrainer=todays.filter(e=>e.isTraining&&(!e.trainerIds||!e.trainerIds.length)).length;
-  if(noTrainer)rows.push({warn:true,text:noTrainer+' Termin'+(noTrainer===1?'':'e')+' heute ohne Trainer.'});
+  if(noTrainer)html+='<div class="status-row warn">'+svgWarn+'<div>'+noTrainer+' Termin'+(noTrainer===1?'':'e')+' heute ohne Trainer.</div></div>';
   const noPitch=todays.filter(e=>!e.isExternal&&!e.pitch&&!(e.halle&&e.halle.thirds&&e.halle.thirds.length)&&!(e.res&&e.res.length)).length;
-  if(noPitch)rows.push({warn:true,text:noPitch+' Termin'+(noPitch===1?'':'e')+' heute ohne Platzzuordnung.'});
+  if(noPitch)html+='<div class="status-row warn">'+svgWarn+'<div>'+noPitch+' Termin'+(noPitch===1?'':'e')+' heute ohne Platzzuordnung.</div></div>';
 
-  box.innerHTML=rows.map(r=>'<div class="status-row '+(r.warn?'warn':'ok')+'">'+(r.warn?svgWarn:svgOk)+'<div>'+esc(r.text)+'</div></div>').join('');
+  box.innerHTML=html;
 }
 
 /* ---------- fussball.de Heimspiele (read-only, per GitHub Action synchronisiert) ----------
