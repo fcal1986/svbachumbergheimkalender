@@ -77,11 +77,13 @@
       "note": "",
       "trainerIds": [
         "89d70bbf-9008-4563-b6ee-9724ed48fe7f",
-        "2091328f-05b9-4c7b-a912-b1cf0c006592"
+        "2091328f-05b9-4c7b-a912-b1cf0c006592",
+        "07163ce5-85a7-4aff-bef9-87ce9ac4bb20"
       ],
       "trainerNames": [
         "Damian Cvetkov",
-        "Michael Raneck"
+        "Michael Raneck",
+        "Markus Vielhaber"
       ]
     },
     {
@@ -97,8 +99,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "07163ce5-85a7-4aff-bef9-87ce9ac4bb20"
+      ],
+      "trainerNames": [
+        "Markus Vielhaber"
+      ],
       "validFrom": "2026-07-18",
       "validUntil": null
     },
@@ -309,11 +315,13 @@
       "note": "",
       "trainerIds": [
         "89d70bbf-9008-4563-b6ee-9724ed48fe7f",
-        "2091328f-05b9-4c7b-a912-b1cf0c006592"
+        "2091328f-05b9-4c7b-a912-b1cf0c006592",
+        "07163ce5-85a7-4aff-bef9-87ce9ac4bb20"
       ],
       "trainerNames": [
         "Damian Cvetkov",
-        "Michael Raneck"
+        "Michael Raneck",
+        "Markus Vielhaber"
       ]
     },
     {
@@ -329,8 +337,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": []
+      "trainerIds": [
+        "07163ce5-85a7-4aff-bef9-87ce9ac4bb20"
+      ],
+      "trainerNames": [
+        "Markus Vielhaber"
+      ]
     },
     {
       "id": "4607193e-c5e6-40a3-b78e-ab9d668bc2f2",
