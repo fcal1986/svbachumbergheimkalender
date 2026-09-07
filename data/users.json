@@ -116,6 +116,22 @@
         "cipher": "v8yXEIeWFPl4hPpOiNJkGr8f2EDSbzReFCimFGR7dHZxVq+l6OUYAfW4OHsApROHx2lRjnigU1o2RMkCSW/lu3/vlAVefJbXHGH8MS2DT9bz5awtm5g1jmrEtMxTR9e5X2GufmJuO/IpbQczBA=="
       },
       "created": "2026-09-07T12:42:14.071Z"
+    },
+    {
+      "id": "07163ce5-85a7-4aff-bef9-87ce9ac4bb20",
+      "first": "Markus",
+      "last": "Vielhaber",
+      "email": "markus.vielhaber@sv-bachum-bergheim.de",
+      "admin": false,
+      "classes": {
+        "C-Jugend": []
+      },
+      "enc": {
+        "salt": "oMuaOuqYPRxjxUi01//7eg==",
+        "iv": "vrwMpCAsvP3sECYp",
+        "cipher": "k7kEHjFBVTHdDfxqy3jqpyG3tEkbJTuXp+S/D7xd/uT8okSjAYIwUsRT9iLu8t6WtoZCb38FT4OsTLYS3EYCUkHHUj/qmAjmZ1m2hWDn6yulWDtPtdaQK4FtM3BzR2pePwrbrQfXkZGVc4wS9w=="
+      },
+      "created": "2026-09-07T12:45:32.792Z"
     }
   ]
 }
