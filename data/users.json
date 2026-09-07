@@ -106,7 +106,9 @@
       "email": "sascharabura@icloud.com",
       "admin": false,
       "classes": {
-        "D-Jugend": []
+        "D-Jugend": [
+          1
+        ]
       },
       "enc": {
         "salt": "YHeRXq5g+/zw6nYIB4/93Q==",
