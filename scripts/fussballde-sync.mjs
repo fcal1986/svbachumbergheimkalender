@@ -119,9 +119,14 @@ function parseMatches(html, debug) {
       const sm = t.match(/(\d{1,2})\s*:\s*(\d{1,2})/);
       if (sm && !score) score = { home: parseInt(sm[1], 10), away: parseInt(sm[2], 10) };
     });
-    if (debug && matchLink && !score && noScoreDebugCount < 5) {
+    const todayIsoLocal = new Date().toISOString().slice(0, 10);
+    const isPastCompetitive = matchLink && !score && iso < todayIsoLocal && !/freundschaft/i.test(competition);
+    if (debug && isPastCompetitive && noScoreDebugCount < 15) {
+      // Vergangene ECHTE Liga-/Pokal-Spiele ohne erkanntes Ergebnis sind die eigentlich
+      // verdächtigen Fälle (Freundschaftsspiele haben auf fussball.de oft schlicht nie ein
+      // Ergebnis – das ist erwartbar und wird hier bewusst NICHT geloggt).
       noScoreDebugCount++;
-      console.log(`  [debug] Kein Ergebnis erkannt für "${home}" vs "${away}" (${iso}) – Zellinhalte der Team-Zeile: ${JSON.stringify(scoreDebugCells)}`);
+      console.log(`  [debug] Vergangenes Liga-/Pokal-Spiel OHNE erkanntes Ergebnis: "${home}" vs "${away}" (${iso}, ${competition}) – Zellinhalte: ${JSON.stringify(scoreDebugCells)}`);
     }
 
     matches.push({
@@ -349,6 +354,22 @@ async function main() {
   if (debug && matches.length) {
     console.log(`  [debug] Beispiel erstes Spiel: ${JSON.stringify(matches[0])}`);
     console.log(`  [debug] Erkannte Heim-Teamnamen (einmalig): ${[...new Set(matches.map(m => m.home))].join(' | ')}`);
+    // Gesamtstatistik statt nur der ersten paar Beispiele: wie viele bereits vergangenen
+    // Spiele haben ein Ergebnis, wie viele nicht? Das beantwortet direkt, ob es sich um
+    // Einzelfälle (z.B. nicht eingetragene Freundschaftsspiele) oder ein systematisches
+    // Problem handelt.
+    const todayIsoForStats = new Date().toISOString().slice(0, 10);
+    const past = matches.filter(m => m.date < todayIsoForStats);
+    const pastWithScore = past.filter(m => m.score);
+    console.log(`  [debug] Vergangene Spiele insgesamt: ${past.length} | davon mit erkanntem Ergebnis: ${pastWithScore.length} | ohne: ${past.length - pastWithScore.length}`);
+    // Gezielt das/die heutigen bzw. letzten 2 Tage betreffenden Spiele ausgeben (unabhängig
+    // vom 5er-Limit oben), da das meist der konkrete Anlass für eine Nachfrage ist.
+    const recentIso = new Date(Date.now() - 2 * 86400000).toISOString().slice(0, 10);
+    const recentOrToday = matches.filter(m => m.date >= recentIso && m.date <= todayIsoForStats);
+    if (recentOrToday.length) {
+      console.log(`  [debug] Spiele der letzten 2 Tage bis heute (${recentOrToday.length}):`);
+      recentOrToday.forEach(m => console.log(`    ${m.date} ${m.time || '?'} ${m.home} vs ${m.away} -> score=${JSON.stringify(m.score)} link=${m.link}`));
+    }
   }
   console.log(`clubMatch-Filter: "${clubMatch}" (case-insensitive "startsWith"-Vergleich mit dem Heim-Teamnamen)`);
 
