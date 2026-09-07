@@ -55,14 +55,26 @@ function parseMatches(html, debug) {
   const $ = cheerio.load(html);
   const matches = [];
   const compRows = $('tr.row-competition');
-  let noTeamRowCount = 0;
+  let noTeamRowCount = 0, noDateCount = 0;
+  let currentDate = null; // fussball.de wiederholt das Datum nicht bei mehreren Spielen am selben Tag –
+                          // wir übernehmen es dann von der zuletzt gesehenen Zeile mit Datum.
 
   compRows.each((_, row) => {
     const $row = $(row);
     const rowText = $row.text().replace(/\s+/g, ' ').trim();
 
     const dateMatch = rowText.match(/(\d{2})\.(\d{2})\.(\d{2,4})/);
-    if (!dateMatch) return;
+    let iso;
+    if (dateMatch) {
+      const yy = dateMatch[3].length === 2 ? '20' + dateMatch[3] : dateMatch[3];
+      iso = `${yy}-${dateMatch[2]}-${dateMatch[1]}`;
+      currentDate = iso;
+    } else if (currentDate) {
+      iso = currentDate; // Datum von voriger Zeile übernehmen
+    } else {
+      noDateCount++;
+      return; // noch nie ein Datum gesehen – Zeile kann nicht zugeordnet werden
+    }
     const timeMatch = rowText.match(/(\d{1,2}):(\d{2})/);
 
     // "Mannschaft | Wettbewerb", z.B. "Herren | Kreisliga A"
@@ -93,8 +105,6 @@ function parseMatches(html, debug) {
 
     const matchLink = $teamRow.find('a[href*="/spiel/"]').first().attr('href')
       || $row.find('a[href*="/spiel/"]').first().attr('href') || '';
-    const yy = dateMatch[3].length === 2 ? '20' + dateMatch[3] : dateMatch[3];
-    const iso = `${yy}-${dateMatch[2]}-${dateMatch[1]}`;
 
     matches.push({
       date: iso,
@@ -105,10 +115,15 @@ function parseMatches(html, debug) {
   });
 
   if (debug) {
-    console.log(`  [debug] tr.row-competition gefunden: ${compRows.length} | ohne zuordenbare Team-Zeile: ${noTeamRowCount} | daraus geparste Spiele: ${matches.length}`);
+    console.log(`  [debug] tr.row-competition gefunden: ${compRows.length} | ohne Datum (auch keins von vorher): ${noDateCount} | ohne zuordenbare Team-Zeile: ${noTeamRowCount} | daraus geparste Spiele: ${matches.length}`);
     if (!compRows.length) {
-      console.log('  [debug] Keine tr.row-competition-Zeilen gefunden – evtl. hat sich die CSS-Klasse geändert. Suche nach beliebigen <tr> mit Datum als Rückfallebene folgt separat.');
+      console.log('  [debug] Keine tr.row-competition-Zeilen gefunden – evtl. hat sich die CSS-Klasse geändert.');
     }
+    // Spiele pro Datum zählen, damit sichtbar wird, ob z.B. an einem Tag mit
+    // mehreren Spielen wirklich alle ankommen oder ob welche fehlen.
+    const perDate = {};
+    matches.forEach(m => { perDate[m.date] = (perDate[m.date] || 0) + 1; });
+    console.log(`  [debug] Spiele pro Datum: ${JSON.stringify(perDate)}`);
   }
 
   return matches;
