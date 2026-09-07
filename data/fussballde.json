@@ -1,10 +1,11 @@
 {
-  "updated": "2026-09-07T06:57:37.354Z",
+  "updated": "2026-09-07T07:25:49.060Z",
   "games": [
     {
       "d": "2026-09-07",
       "t": "18:00",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "TuS Wickede/Ruhr",
       "competition": "Kreisfreundschaftsspiele",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-wickede-ruhr/-/spiel/031V6957EC000000VS5489BTVT7QHFUC"
@@ -13,6 +14,7 @@
       "d": "2026-09-08",
       "t": "18:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "BSV Menden II",
       "competition": "Kreisfreundschaftsspiele",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-bsv-menden-ii/-/spiel/031D1H4ML4000000VS5489BUVUR5FS5A"
@@ -21,6 +23,7 @@
       "d": "2026-09-12",
       "t": "10:00",
       "team": "G-Junioren",
+      "squad": 1,
       "opponent": "TuS Vosswinkel",
       "competition": "Kinderfußball",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-vosswinkel/-/spiel/031IKDRR28000000VS5489BUVVKNMR0J"
@@ -29,6 +32,7 @@
       "d": "2026-09-12",
       "t": "10:00",
       "team": "F-Junioren",
+      "squad": 1,
       "opponent": "SC Neheim I",
       "competition": "Kinderfußball",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-sc-neheim-i/-/spiel/031J6SGOK4000000VS5489BUVVKNMR0J"
@@ -37,6 +41,7 @@
       "d": "2026-09-12",
       "t": "11:30",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "JSG Niedereimer/Bruchh. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-niedereimer-bruchhausen-i/-/spiel/031OEC8PNK000000VS5489BUVT2M8LCU"
@@ -45,6 +50,7 @@
       "d": "2026-09-12",
       "t": "13:30",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "JSG Hachen/La-Enk./St./En. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-hachen-lang-enkh-sto-end-1/-/spiel/031I1BDP68000000VS5489BUVVKNMR0J"
@@ -53,6 +59,7 @@
       "d": "2026-09-13",
       "t": null,
       "team": "Herren",
+      "squad": 2,
       "opponent": "spielfrei",
       "competition": "Kreisliga B",
       "link": null
@@ -61,6 +68,7 @@
       "d": "2026-09-14",
       "t": "19:30",
       "team": "Herren Ü32",
+      "squad": 1,
       "opponent": "SG Herdringen/Müschede",
       "competition": "Kreisturnier",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sg-herdringen-mueschede/-/spiel/031SAEVJ1G000000VS5489BTVTPHHFPR"
@@ -69,6 +77,7 @@
       "d": "2026-09-18",
       "t": "19:30",
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "JSG Oeventrop/Freien./Wen. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-oeventrop-freienohl-wennemen/-/spiel/031JKQC7CS000000VS5489BUVVKNMR0J"
@@ -77,6 +86,7 @@
       "d": "2026-09-19",
       "t": null,
       "team": "C-Junioren",
+      "squad": 2,
       "opponent": "spielfrei",
       "competition": "Kreisliga B",
       "link": null
@@ -85,6 +95,7 @@
       "d": "2026-09-19",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 1,
       "opponent": "SV Hüsten 09 I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-sv-huesten-09-1/-/spiel/031J8I24FK000000VS5489BUVVKNMR0J"
@@ -93,6 +104,7 @@
       "d": "2026-09-19",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 2,
       "opponent": "SV Hüsten 09 II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-sv-huesten-09-2/-/spiel/031J8LLJVC000000VS5489BUVVKNMR0J"
@@ -101,6 +113,7 @@
       "d": "2026-09-19",
       "t": "11:30",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "JSG Balve/Garb./La/Kü/Me I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-balve-garb-la-kue-me-1/-/spiel/031OEC8PJ8000000VS5489BUVT2M8LCU"
@@ -109,6 +122,7 @@
       "d": "2026-09-19",
       "t": "13:00",
       "team": "D-Junioren",
+      "squad": 2,
       "opponent": "JSG Hachen/Langsch.-Enkh. I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-hachen-langscheid-enkhausen/-/spiel/031OEI7QG8000000VS5489BUVT2M8LCU"
@@ -117,6 +131,7 @@
       "d": "2026-09-19",
       "t": "13:45",
       "team": "E-Junioren",
+      "squad": 3,
       "opponent": "JSG Vosswinkel/Echthausen II",
       "competition": "Kreisliga C",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-3-jsg-vosswinkel-echthausen-ii/-/spiel/031J8T2KJ0000000VS5489BUVVKNMR0J"
@@ -125,6 +140,7 @@
       "d": "2026-09-20",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "Delbrücker SC II",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-delbruecker-sc-ii/-/spiel/031GM5IABK000000VS5489BTVVG7L386"
@@ -133,6 +149,7 @@
       "d": "2026-09-20",
       "t": "11:00",
       "team": "Herren",
+      "squad": 3,
       "opponent": "TuS Hachen II",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-tus-hachen-ii/-/spiel/031KK1IPTG000000VS5489BUVVKNMR0J"
@@ -141,6 +158,7 @@
       "d": "2026-09-20",
       "t": "13:15",
       "team": "Herren",
+      "squad": 2,
       "opponent": "SKV Balkan",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-skv-balkan/-/spiel/031IK2S11G000000VS5489BUVVKNMR0J"
@@ -149,6 +167,7 @@
       "d": "2026-09-20",
       "t": "15:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "FSG Ruhrtal I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fsg-ruhrtal-i/-/spiel/031I0BNC80000000VS5489BUVVKNMR0J"
@@ -157,6 +176,7 @@
       "d": "2026-09-23",
       "t": "18:30",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "JSG Herdringen/Mü. I",
       "competition": "Kreispokal",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-herdringen-mueschede/-/spiel/031JUNCVJO000000VS5489BUVVKNMR0J"
@@ -165,6 +185,7 @@
       "d": "2026-09-25",
       "t": null,
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "spielfrei",
       "competition": "Kreisliga A",
       "link": null
@@ -173,6 +194,7 @@
       "d": "2026-09-26",
       "t": null,
       "team": "D-Junioren",
+      "squad": 2,
       "opponent": "spielfrei",
       "competition": "Kreisliga B",
       "link": null
@@ -181,6 +203,7 @@
       "d": "2026-09-26",
       "t": "10:00",
       "team": "G-Junioren",
+      "squad": 1,
       "opponent": "JSG Müschede/ Herdringen",
       "competition": "Kinderfußball",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-mueschede-herdringen/-/spiel/031IKDRR6K000000VS5489BUVVKNMR0J"
@@ -189,6 +212,7 @@
       "d": "2026-09-26",
       "t": "10:00",
       "team": "F-Junioren",
+      "squad": 1,
       "opponent": "JSG Freienohl/Oeventr./Wen. I",
       "competition": "Kinderfußball",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-jsg-1-freienohl-oeventrop-wennemen/-/spiel/031J6SGOAO000000VS5489BUVVKNMR0J"
@@ -197,6 +221,7 @@
       "d": "2026-10-02",
       "t": "19:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "FC Neheim-Erlenbruch",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fc-neheim-erlenbruch/-/spiel/031I0BNGSK000000VS5489BUVVKNMR0J"
@@ -205,6 +230,7 @@
       "d": "2026-10-02",
       "t": "19:30",
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "TuS Sundern II",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-sundern-2/-/spiel/031JKQC710000000VS5489BUVVKNMR0J"
@@ -213,6 +239,7 @@
       "d": "2026-10-04",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "SV Heide Paderborn",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-heide-paderborn/-/spiel/031GM5I9OC000000VS5489BTVVG7L386"
@@ -221,6 +248,7 @@
       "d": "2026-10-04",
       "t": "13:15",
       "team": "Herren",
+      "squad": 2,
       "opponent": "KF 2. Korriku Sundern",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-kf-2-korriku-sundern/-/spiel/031IK2RVNC000000VS5489BUVVKNMR0J"
@@ -229,6 +257,7 @@
       "d": "2026-10-04",
       "t": "15:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "SV Affeln 28",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-affeln-28/-/spiel/031I0BNAS8000000VS5489BUVVKNMR0J"
@@ -237,6 +266,7 @@
       "d": "2026-10-10",
       "t": "10:00",
       "team": "G-Junioren",
+      "squad": 1,
       "opponent": "FC Neheim-Erlenbruch",
       "competition": "Kinderfußball",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fc-neheim-erlenbruch/-/spiel/031IKDRR8O000000VS5489BUVVKNMR0J"
@@ -245,6 +275,7 @@
       "d": "2026-10-10",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 1,
       "opponent": "TuS Sundern II",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-tus-sundern-ii/-/spiel/031J8I246S000000VS5489BUVVKNMR0J"
@@ -253,6 +284,7 @@
       "d": "2026-10-10",
       "t": "13:00",
       "team": "D-Junioren",
+      "squad": 2,
       "opponent": "SV Affeln 28",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-sv-affeln-28/-/spiel/031OEI7Q68000000VS5489BUVT2M8LCU"
@@ -261,6 +293,7 @@
       "d": "2026-10-10",
       "t": "13:30",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "SV Hüsten 09 I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-huesten-09-1/-/spiel/031I1BDOLO000000VS5489BUVVKNMR0J"
@@ -269,6 +302,7 @@
       "d": "2026-10-10",
       "t": "13:45",
       "team": "E-Junioren",
+      "squad": 2,
       "opponent": "JSG Oeventrop/Freie./Wen. I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-1-oeventrop-freienohl-wennemen/-/spiel/031J8LLJOS000000VS5489BUVVKNMR0J"
@@ -277,6 +311,7 @@
       "d": "2026-10-10",
       "t": "13:45",
       "team": "E-Junioren",
+      "squad": 3,
       "opponent": "JSG Rumbeck/GW Arnsb/Arnsb 09/Giersk. III",
       "competition": "Kreisliga C",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-3-3-jsg-tus-rumbeck-djk-gw-arnsberg-sv-arnsberg-09-fc-bw-gierskaempen-3/-/spiel/031J8T2KC0000000VS5489BUVVKNMR0J"
@@ -285,6 +320,7 @@
       "d": "2026-10-10",
       "t": "14:45",
       "team": "C-Junioren",
+      "squad": 2,
       "opponent": "JSG Balve/Gar./La/Be/Aff II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-balve-garbeck-la-be-aff-ii/-/spiel/031I192R9C000000VS5489BUVVKNMR0J"
@@ -293,6 +329,7 @@
       "d": "2026-10-11",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "SV Brackel 06",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-brackel-06/-/spiel/031GM5I9FO000000VS5489BTVVG7L386"
@@ -301,6 +338,7 @@
       "d": "2026-10-11",
       "t": "13:30",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "SpVg. Hagen 1911",
       "competition": "Kreisfreundschaftsspiele",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-spvg-hagen-1911/-/spiel/031VF5RPHK000000VS5489BTVT7QHFUC"
@@ -309,6 +347,7 @@
       "d": "2026-10-17",
       "t": "14:45",
       "team": "C-Junioren",
+      "squad": 2,
       "opponent": "JSG Grevenstein/Helf.-Alth./Be./Cal-Wa. I (9er)",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-grevenstein-hellefeld-altenh-berge-calle-wallen-9er/-/spiel/031I192R5O000000VS5489BUVVKNMR0J"
@@ -317,6 +356,7 @@
       "d": "2026-10-18",
       "t": "11:00",
       "team": "Herren",
+      "squad": 3,
       "opponent": "SG Allendorf/Amecke III",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-sg-allendorf-amecke-iii/-/spiel/031KK1IQI8000000VS5489BUVVKNMR0J"
@@ -325,6 +365,7 @@
       "d": "2026-10-18",
       "t": "13:15",
       "team": "Herren",
+      "squad": 2,
       "opponent": "SV Affeln 28 II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-sv-affeln-28-ii/-/spiel/031IK2RUGS000000VS5489BUVVKNMR0J"
@@ -333,6 +374,7 @@
       "d": "2026-10-18",
       "t": "15:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "SG Beckum/Hövel/Mellen",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sg-beckum-hoevel-mellen/-/spiel/031I0BN9JC000000VS5489BUVVKNMR0J"
@@ -341,6 +383,7 @@
       "d": "2026-10-21",
       "t": "19:30",
       "team": "Herren",
+      "squad": 2,
       "opponent": "SG Herdringen/Müschede II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-sg-herdringen-mueschede-ii/-/spiel/031IK2S4HK000000VS5489BUVVKNMR0J"
@@ -349,6 +392,7 @@
       "d": "2026-11-06",
       "t": "19:30",
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "TuS Vosswinkel",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-vosswinkel/-/spiel/031JKQC6MC000000VS5489BUVVKNMR0J"
@@ -357,6 +401,7 @@
       "d": "2026-11-07",
       "t": null,
       "team": "G-Junioren",
+      "squad": 1,
       "opponent": "spielfrei",
       "competition": "Kinderfußball",
       "link": null
@@ -365,6 +410,7 @@
       "d": "2026-11-07",
       "t": null,
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "spielfrei",
       "competition": "Kreisliga A",
       "link": null
@@ -373,6 +419,7 @@
       "d": "2026-11-07",
       "t": "10:00",
       "team": "F-Junioren",
+      "squad": 1,
       "opponent": "JSG Rumbeck/GW Arnsb/Giersk./Arnsb. 09 I",
       "competition": "Kinderfußball",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-1-jsg-tus-rumbeck-djk-gw-arnsberg-fc-bw-gierskaempen-sv-arnsberg-09/-/spiel/031J6SGO2O000000VS5489BUVVKNMR0J"
@@ -381,6 +428,7 @@
       "d": "2026-11-07",
       "t": "11:30",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "SV Hüsten 09 I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-huesten-09-1/-/spiel/031OEC8P7O000000VS5489BUVT2M8LCU"
@@ -389,6 +437,7 @@
       "d": "2026-11-07",
       "t": "13:45",
       "team": "E-Junioren",
+      "squad": 3,
       "opponent": "JSG Rumbeck/GW Arnsb/Arnsb 09/Giersk. IV",
       "competition": "Kreisliga C",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-3-4-jsg-tus-rumbeck-djk-gw-arnsberg-sv-arnsberg-09-fc-bw-gierskaempen-4/-/spiel/031J8T2K8K000000VS5489BUVVKNMR0J"
@@ -397,6 +446,7 @@
       "d": "2026-11-08",
       "t": null,
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "spielfrei",
       "competition": "Bezirksliga",
       "link": null
@@ -405,6 +455,7 @@
       "d": "2026-11-08",
       "t": "11:00",
       "team": "Herren",
+      "squad": 3,
       "opponent": "TuS Bruchhausen 02 II",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-tus-bruchhausen-02-ii/-/spiel/031KK1IQE4000000VS5489BUVVKNMR0J"
@@ -413,6 +464,7 @@
       "d": "2026-11-08",
       "t": "13:15",
       "team": "Herren",
+      "squad": 2,
       "opponent": "SuS Langscheid/Enkhausen II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-sus-langscheid-enkhausen-ii/-/spiel/031IK2RT90000000VS5489BUVVKNMR0J"
@@ -421,6 +473,7 @@
       "d": "2026-11-08",
       "t": "15:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "SG Grevenstein/Hellefeld-Altenhellefeld",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sg-grevenstein-hellefeld-altenhellefeld/-/spiel/031I0BN8BS000000VS5489BUVVKNMR0J"
@@ -429,6 +482,7 @@
       "d": "2026-11-13",
       "t": "19:30",
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "JSG Allendorf/Amecke U20 (9er)",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-allendorf-amecke-u20/-/spiel/031JKQC6HC000000VS5489BUVVKNMR0J"
@@ -437,6 +491,7 @@
       "d": "2026-11-14",
       "t": "14:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "Hombrucher SV III",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-hombrucher-sv-iii/-/spiel/031GM5I8TS000000VS5489BTVVG7L386"
@@ -445,6 +500,7 @@
       "d": "2026-11-21",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 1,
       "opponent": "JSG Müschede/Herdr./Ho. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-jsg-mueschede-herdringen-holzen-1/-/spiel/031J8I23QG000000VS5489BUVVKNMR0J"
@@ -453,6 +509,7 @@
       "d": "2026-11-21",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 2,
       "opponent": "JSG Müschede/Herdr./Ho. II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-mueschede-herdringen-holzen-2/-/spiel/031J8LLJEO000000VS5489BUVVKNMR0J"
@@ -461,6 +518,7 @@
       "d": "2026-11-21",
       "t": "10:00",
       "team": "F-Junioren",
+      "squad": 1,
       "opponent": "JSG Niedereimer/Bruchh. I",
       "competition": "Kinderfußball",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-jsg-niedereimer-bruchhausen/-/spiel/031J6SGNS8000000VS5489BUVVKNMR0J"
@@ -469,6 +527,7 @@
       "d": "2026-11-21",
       "t": "13:00",
       "team": "D-Junioren",
+      "squad": 2,
       "opponent": "JSG Vosswinkel/Echth. II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-vosswinkel-echth-ii/-/spiel/031OEI7POG000000VS5489BUVT2M8LCU"
@@ -477,6 +536,7 @@
       "d": "2026-11-21",
       "t": "13:45",
       "team": "E-Junioren",
+      "squad": 3,
       "opponent": "SV Affeln II",
       "competition": "Kreisliga C",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-3-sv-affeln-2/-/spiel/031J8T2K20000000VS5489BUVVKNMR0J"
@@ -485,6 +545,7 @@
       "d": "2026-11-21",
       "t": "14:00",
       "team": "Herren",
+      "squad": 2,
       "opponent": "SSV Küntrop",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-ssv-kuentrop/-/spiel/031IK2S3Q8000000VS5489BUVVKNMR0J"
@@ -493,6 +554,7 @@
       "d": "2026-11-21",
       "t": "15:30",
       "team": "Herren",
+      "squad": 3,
       "opponent": "TuS Niedereimer II",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-tus-niedereimer-ii/-/spiel/031KK1IQ6C000000VS5489BUVVKNMR0J"
@@ -501,6 +563,7 @@
       "d": "2026-11-21",
       "t": "16:00",
       "team": "Herren",
+      "squad": 1,
       "opponent": "SV Hüsten 09 II",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-huesten-09-ii/-/spiel/031I0BNF9C000000VS5489BUVVKNMR0J"
@@ -509,6 +572,7 @@
       "d": "2026-11-28",
       "t": "13:30",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "JSG Herdringen/Mü./Ho. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-herdringen-mueschede-holzen/-/spiel/031I1BDO18000000VS5489BUVVKNMR0J"
@@ -517,6 +581,7 @@
       "d": "2026-11-28",
       "t": "14:45",
       "team": "C-Junioren",
+      "squad": 2,
       "opponent": "JSG Hachen/Lan-Enk./St./End. II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-hachen-lang-enkh-sto-end-2/-/spiel/031I192QU4000000VS5489BUVVKNMR0J"
@@ -525,6 +590,7 @@
       "d": "2026-11-29",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "FC Iserlohn 46/49 II",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fc-iserlohn-ii/-/spiel/031GM5IAV4000000VS5489BTVVG7L386"
@@ -533,6 +599,7 @@
       "d": "2026-11-29",
       "t": "13:15",
       "team": "Herren",
+      "squad": 2,
       "opponent": "TuS Langenholthausen II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-tus-langenholthausen-ii/-/spiel/031IK2RRV4000000VS5489BUVVKNMR0J"
@@ -541,6 +608,7 @@
       "d": "2026-11-29",
       "t": "15:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "SG Holzen/Eisborn",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sg-holzen-eisborn/-/spiel/031I0BN79G000000VS5489BUVVKNMR0J"
@@ -549,6 +617,7 @@
       "d": "2026-12-06",
       "t": "13:15",
       "team": "Herren",
+      "squad": 2,
       "opponent": "SG Eintracht 25",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-sg-eintracht-25/-/spiel/031IK2SJKK000000VS5489BUVVKNMR0J"
@@ -557,6 +626,7 @@
       "d": "2026-12-11",
       "t": "19:30",
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "FC Neheim-Erlenbruch U20",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fc-neheim-erlenbruch-u20/-/spiel/031JKQC660000000VS5489BUVVKNMR0J"
@@ -565,6 +635,7 @@
       "d": "2026-12-13",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "SV Westfalia Soest II",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-spielverein-westfalia-soest-ii/-/spiel/031GM5I7T0000000VS5489BTVVG7L386"
@@ -573,6 +644,7 @@
       "d": "2027-02-19",
       "t": "19:30",
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "JSG Herdringen/Müsch. U20 I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-herdringen-mueschede-u20/-/spiel/031JKQC9O4000000VS5489BUVVKNMR0J"
@@ -581,6 +653,7 @@
       "d": "2027-02-21",
       "t": "15:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "SV Arnsberg",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-arnsberg/-/spiel/031I0BNT7K000000VS5489BUVVKNMR0J"
@@ -589,6 +662,7 @@
       "d": "2027-02-28",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "ASC 09 Dortmund",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-asc-09-dortmund/-/spiel/031GM5IGA8000000VS5489BTVVG7L386"
@@ -597,6 +671,7 @@
       "d": "2027-03-05",
       "t": null,
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "spielfrei",
       "competition": "Kreisliga A",
       "link": null
@@ -605,6 +680,7 @@
       "d": "2027-03-06",
       "t": "11:30",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "JSG Herdringen/Mü./Ho. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-herdringen-mueschede-holzen-1/-/spiel/031OEC8OT4000000VS5489BUVT2M8LCU"
@@ -613,6 +689,7 @@
       "d": "2027-03-06",
       "t": "13:00",
       "team": "D-Junioren",
+      "squad": 2,
       "opponent": "SG Allendorf/Amecke I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-sg-allendorf-amecke/-/spiel/031OEI7S74000000VS5489BUVT2M8LCU"
@@ -621,6 +698,7 @@
       "d": "2027-03-06",
       "t": "13:30",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "JSG Freienohl/Oev./Wen. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-freienohl-oeventrop-wennemen/-/spiel/031I1BDR24000000VS5489BUVVKNMR0J"
@@ -629,6 +707,7 @@
       "d": "2027-03-06",
       "t": "14:45",
       "team": "C-Junioren",
+      "squad": 2,
       "opponent": "FC Neh.-Erlenbruch I (9er)",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-fc-neheim-erlenbruch-9er/-/spiel/031I192SKO000000VS5489BUVVKNMR0J"
@@ -637,6 +716,7 @@
       "d": "2027-03-07",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "TuS Lipperode",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-lipperode-i/-/spiel/031GM5IFK4000000VS5489BTVVG7L386"
@@ -645,6 +725,7 @@
       "d": "2027-03-07",
       "t": "13:15",
       "team": "Herren",
+      "squad": 2,
       "opponent": "TuS Sundern II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-tus-sundern-ii/-/spiel/031IK2SFTK000000VS5489BUVVKNMR0J"
@@ -653,6 +734,7 @@
       "d": "2027-03-07",
       "t": "15:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "TuS Bruchhausen",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-bruchhausen/-/spiel/031I0BNR2G000000VS5489BUVVKNMR0J"
@@ -661,6 +743,7 @@
       "d": "2027-03-13",
       "t": null,
       "team": "C-Junioren",
+      "squad": 2,
       "opponent": "spielfrei",
       "competition": "Kreisliga B",
       "link": null
@@ -669,6 +752,7 @@
       "d": "2027-03-13",
       "t": "13:30",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "JSG Balve/Gar./La/Be/Aff I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-balve-garbeck-la-be-aff-i/-/spiel/031I1BDQIS000000VS5489BUVVKNMR0J"
@@ -677,6 +761,7 @@
       "d": "2027-03-14",
       "t": "11:00",
       "team": "Herren",
+      "squad": 3,
       "opponent": "DJK GW Arnsberg II",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-djk-gw-arnsberg-ii/-/spiel/031KK1IR2G000000VS5489BUVVKNMR0J"
@@ -685,6 +770,7 @@
       "d": "2027-03-21",
       "t": null,
       "team": "Herren",
+      "squad": 2,
       "opponent": "spielfrei",
       "competition": "Kreisliga B",
       "link": null
@@ -693,6 +779,7 @@
       "d": "2027-03-21",
       "t": "15:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "TuS Vosswinkel",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-vosswinkel/-/spiel/031I0BNOVK000000VS5489BUVVKNMR0J"
@@ -701,6 +788,7 @@
       "d": "2027-04-04",
       "t": "11:00",
       "team": "Herren",
+      "squad": 3,
       "opponent": "TuS Hachen II",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-tus-hachen-ii/-/spiel/031KK1IQRC000000VS5489BUVVKNMR0J"
@@ -709,6 +797,7 @@
       "d": "2027-04-09",
       "t": "19:30",
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "JSG Balve/Garbeck/La/Kü/Aff I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sg-balve-garbeck-la-kue-aff-1/-/spiel/031JKQC8O4000000VS5489BUVVKNMR0J"
@@ -717,6 +806,7 @@
       "d": "2027-04-10",
       "t": null,
       "team": "D-Junioren",
+      "squad": 2,
       "opponent": "spielfrei",
       "competition": "Kreisliga B",
       "link": null
@@ -725,6 +815,7 @@
       "d": "2027-04-10",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 2,
       "opponent": "SV Affeln I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-sv-affeln/-/spiel/031J8LLL60000000VS5489BUVVKNMR0J"
@@ -733,6 +824,7 @@
       "d": "2027-04-10",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 1,
       "opponent": "TuS Sundern I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-tus-sundern/-/spiel/031J8I25RC000000VS5489BUVVKNMR0J"
@@ -741,6 +833,7 @@
       "d": "2027-04-10",
       "t": "11:30",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "SV Hüsten 09 I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-huesten-09-1/-/spiel/031OEC8QDK000000VS5489BUVT2M8LCU"
@@ -749,6 +842,7 @@
       "d": "2027-04-10",
       "t": "13:30",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "JSG Niedereimer/Bruchh. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-niedereimer-bruchhausen/-/spiel/031I1BDQ54000000VS5489BUVVKNMR0J"
@@ -757,6 +851,7 @@
       "d": "2027-04-10",
       "t": "13:45",
       "team": "E-Junioren",
+      "squad": 3,
       "opponent": "JSG Hachen/Langsch-Enkh. II",
       "competition": "Kreisliga C",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-3-jsg-hachen-langscheid-enkhausen-2/-/spiel/031J8T2LRK000000VS5489BUVVKNMR0J"
@@ -765,6 +860,7 @@
       "d": "2027-04-10",
       "t": "14:45",
       "team": "C-Junioren",
+      "squad": 2,
       "opponent": "JSG Gierskämpen/Arnsb.09/Rum./ArnsbGW I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-gierskaempen-arnsb09-rumb-gwarnsb-1/-/spiel/031I192SCS000000VS5489BUVVKNMR0J"
@@ -773,6 +869,7 @@
       "d": "2027-04-11",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "SF DJK Mastbruch",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sf-djk-mastbruch/-/spiel/031GM5IEKG000000VS5489BTVVG7L386"
@@ -781,6 +878,7 @@
       "d": "2027-04-11",
       "t": "13:15",
       "team": "Herren",
+      "squad": 2,
       "opponent": "FC BW Gierskämpen",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-fc-bw-gierskaempen/-/spiel/031IK2SBEK000000VS5489BUVVKNMR0J"
@@ -789,6 +887,7 @@
       "d": "2027-04-11",
       "t": "15:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "SG Balve/Garbeck",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sg-balve-garbeck/-/spiel/031I0BNNRS000000VS5489BUVVKNMR0J"
@@ -797,6 +896,7 @@
       "d": "2027-04-17",
       "t": null,
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "spielfrei",
       "competition": "Kreisliga A",
       "link": null
@@ -805,6 +905,7 @@
       "d": "2027-04-18",
       "t": "11:00",
       "team": "Herren",
+      "squad": 3,
       "opponent": "SG Allendorf/Amecke III",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-sg-allendorf-amecke-iii/-/spiel/031KK1IRO4000000VS5489BUVVKNMR0J"
@@ -813,6 +914,7 @@
       "d": "2027-04-24",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 1,
       "opponent": "FC Neheim-Erlenbruch I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-fc-neheim-erlenbruch/-/spiel/031J8I25H8000000VS5489BUVVKNMR0J"
@@ -821,6 +923,7 @@
       "d": "2027-04-24",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 2,
       "opponent": "JSG Langenholthausen/Kü./Me./Be. I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-langenholthausen-kuentrop-mellen-beckum/-/spiel/031J8LLKTS000000VS5489BUVVKNMR0J"
@@ -829,6 +932,7 @@
       "d": "2027-04-24",
       "t": "13:00",
       "team": "D-Junioren",
+      "squad": 2,
       "opponent": "JSG Gierskämpen/Arnsb.09/Rumb./Arnsb.GW I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-1-jsg-fc-bw-gierskaempen-sv-arnsberg-tus-rumbeck-gw-arnsberg/-/spiel/031OEI7R7O000000VS5489BUVT2M8LCU"
@@ -837,6 +941,7 @@
       "d": "2027-04-24",
       "t": "13:30",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "SC Neheim I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sc-neheim/-/spiel/031I1BDPPS000000VS5489BUVVKNMR0J"
@@ -845,6 +950,7 @@
       "d": "2027-04-24",
       "t": "13:45",
       "team": "E-Junioren",
+      "squad": 3,
       "opponent": "SV Hüsten 09 III",
       "competition": "Kreisliga C",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-3-sv-huesten-09-3/-/spiel/031J8T2LIC000000VS5489BUVVKNMR0J"
@@ -853,6 +959,7 @@
       "d": "2027-04-25",
       "t": "13:15",
       "team": "Herren",
+      "squad": 2,
       "opponent": "DJK GW Arnsberg",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-djk-gw-arnsberg/-/spiel/031IK2SA8O000000VS5489BUVVKNMR0J"
@@ -861,6 +968,7 @@
       "d": "2027-04-25",
       "t": "15:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "SG Allendorf/Amecke",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sg-allendorf-amecke/-/spiel/031I0BNLSO000000VS5489BUVVKNMR0J"
@@ -869,6 +977,7 @@
       "d": "2027-04-28",
       "t": "18:00",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "JSG Herdringen/Mü./Ho. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-herdringen-mueschede-holzen-1/-/spiel/031OEC8Q20000000VS5489BUVT2M8LCU"
@@ -877,6 +986,7 @@
       "d": "2027-05-02",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "BSV Menden",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-bsv-menden/-/spiel/031GM5ID7K000000VS5489BTVVG7L386"
@@ -885,6 +995,7 @@
       "d": "2027-05-02",
       "t": "15:00",
       "team": "Herren",
+      "squad": 3,
       "opponent": "TuS Bruchhausen 02 II",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-tus-bruchhausen-02-ii/-/spiel/031KK1IRJ0000000VS5489BUVVKNMR0J"
@@ -893,6 +1004,7 @@
       "d": "2027-05-07",
       "t": "19:30",
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "JSG Hachen/Langs.-Enkh./Westf./Sto. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-hachen-langscheid-enkhausen-westenfeld-stockum/-/spiel/031JKQC84G000000VS5489BUVVKNMR0J"
@@ -901,6 +1013,7 @@
       "d": "2027-05-09",
       "t": "13:15",
       "team": "Herren",
+      "squad": 2,
       "opponent": "Türkiyemspor Neh.-Hüsten",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-tuerkiyemspor-neh-huesten/-/spiel/031IK2S8BO000000VS5489BUVVKNMR0J"
@@ -909,6 +1022,7 @@
       "d": "2027-05-09",
       "t": "15:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "TuS Hachen",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-hachen/-/spiel/031I0BNJSK000000VS5489BUVVKNMR0J"
@@ -917,6 +1031,7 @@
       "d": "2027-05-22",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 1,
       "opponent": "JSG Niedereimer/Bruchhausen I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-jsg-niedereimer-bruchhausen/-/spiel/031J8I254K000000VS5489BUVVKNMR0J"
@@ -925,6 +1040,7 @@
       "d": "2027-05-22",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 2,
       "opponent": "JSG Vosswinkel/Echthausen I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-vosswinkel-echthausen/-/spiel/031J8LLKGG000000VS5489BUVVKNMR0J"
@@ -933,6 +1049,7 @@
       "d": "2027-05-22",
       "t": "11:30",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "SC Neheim I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sc-neheim-i/-/spiel/031OEC8PVG000000VS5489BUVT2M8LCU"
@@ -941,6 +1058,7 @@
       "d": "2027-05-22",
       "t": "13:00",
       "team": "D-Junioren",
+      "squad": 2,
       "opponent": "JSG Balve/Garb./La/Kü/Me III",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-balve-garbeck-la-kue-me-3/-/spiel/031OEI7R0K000000VS5489BUVT2M8LCU"
@@ -949,6 +1067,7 @@
       "d": "2027-05-22",
       "t": "14:45",
       "team": "C-Junioren",
+      "squad": 2,
       "opponent": "JSG Allendorf/Am. I (9er)",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-sg-allendorf-amecke/-/spiel/031I192S00000000VS5489BUVVKNMR0J"
@@ -957,6 +1076,7 @@
       "d": "2027-05-23",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "FC Brünninghausen II",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fc-bruenninghausen-ii/-/spiel/031GM5ICPG000000VS5489BTVVG7L386"
@@ -965,6 +1085,7 @@
       "d": "2027-05-23",
       "t": "13:15",
       "team": "Herren",
+      "squad": 2,
       "opponent": "TuS Rumbeck",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-tus-rumbeck/-/spiel/031IK2S6HK000000VS5489BUVVKNMR0J"
@@ -973,6 +1094,7 @@
       "d": "2027-05-23",
       "t": "15:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "TuS Langenholthausen",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-langenholthausen/-/spiel/031I0BNHTC000000VS5489BUVVKNMR0J"
@@ -981,6 +1103,7 @@
       "d": "2027-05-30",
       "t": null,
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "spielfrei",
       "competition": "Bezirksliga",
       "link": null
@@ -989,6 +1112,7 @@
       "d": "2027-05-30",
       "t": "11:00",
       "team": "Herren",
+      "squad": 3,
       "opponent": "TuS Niedereimer II",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-tus-niedereimer-ii/-/spiel/031KK1IR7O000000VS5489BUVVKNMR0J"
@@ -997,6 +1121,7 @@
       "d": "2027-06-05",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 1,
       "opponent": "SC Neheim II",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-sc-neheim-ii/-/spiel/031J8I24U0000000VS5489BUVVKNMR0J"
@@ -1005,6 +1130,7 @@
       "d": "2027-06-05",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 2,
       "opponent": "SC Neheim I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-sc-neheim-i/-/spiel/031J8LLKB0000000VS5489BUVVKNMR0J"
@@ -1013,6 +1139,7 @@
       "d": "2027-06-05",
       "t": "13:30",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "TuS Sundern II",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-sundern-2/-/spiel/031I1BDPA4000000VS5489BUVVKNMR0J"
@@ -1021,6 +1148,7 @@
       "d": "2027-06-05",
       "t": "13:45",
       "team": "E-Junioren",
+      "squad": 3,
       "opponent": "JSG Vosswinkel/Echthausen III",
       "competition": "Kreisliga C",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-3-jsg-vosswinkel-echthausen-iii/-/spiel/031J8T2L40000000VS5489BUVVKNMR0J"
@@ -1029,6 +1157,7 @@
       "d": "2027-06-06",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "SV Brilon",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-brilon/-/spiel/031GM5IBVC000000VS5489BTVVG7L386"
@@ -1039,6 +1168,7 @@
       "d": "2026-09-10",
       "t": "19:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "TuS Vosswinkel",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/tus-vosswinkel-sv-bachum-bergheim/-/spiel/031I0BNCDG000000VS5489BUVVKNMR0J"
@@ -1047,6 +1177,7 @@
       "d": "2026-09-11",
       "t": "19:00",
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "JSG Herdringen/Müsch. U20 I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/jsg-herdringen-mueschede-u20-sv-bachum-bergheim/-/spiel/031JKQC7K8000000VS5489BUVVKNMR0J"
@@ -1055,6 +1186,7 @@
       "d": "2026-09-12",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 3,
       "opponent": "JSG Hachen/Langsch-Enkh. II",
       "competition": "Kreisliga C",
       "link": "https://www.fussball.de/spiel/jsg-hachen-langscheid-enkhausen-2-sv-bachum-bergheim-3/-/spiel/031J8T2KNC000000VS5489BUVVKNMR0J"
@@ -1063,6 +1195,7 @@
       "d": "2026-09-12",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 2,
       "opponent": "SV Affeln I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-affeln-sv-bachum-bergheim-2/-/spiel/031J8LLK50000000VS5489BUVVKNMR0J"
@@ -1071,6 +1204,7 @@
       "d": "2026-09-12",
       "t": "11:00",
       "team": "E-Junioren",
+      "squad": 1,
       "opponent": "TuS Sundern I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/tus-sundern-sv-bachum-bergheim-1/-/spiel/031J8I24MC000000VS5489BUVVKNMR0J"
@@ -1079,6 +1213,7 @@
       "d": "2026-09-12",
       "t": "13:00",
       "team": "D-Junioren",
+      "squad": 2,
       "opponent": "SG Allendorf/Amecke I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sg-allendorf-amecke-sv-bachum-bergheim-2/-/spiel/031OEI7QOS000000VS5489BUVT2M8LCU"
@@ -1087,6 +1222,7 @@
       "d": "2026-09-12",
       "t": "13:30",
       "team": "C-Junioren",
+      "squad": 2,
       "opponent": "FC Neh.-Erlenbruch I (9er)",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/fc-neheim-erlenbruch-9er-sv-bachum-bergheim-2/-/spiel/031I192RLC000000VS5489BUVVKNMR0J"
@@ -1095,6 +1231,7 @@
       "d": "2026-09-13",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "TuS Lipperode",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/tus-lipperode-i-sv-bachum-bergheim/-/spiel/031GM5IAPG000000VS5489BTVVG7L386"
@@ -1103,6 +1240,7 @@
       "d": "2026-09-13",
       "t": "12:45",
       "team": "Herren",
+      "squad": 3,
       "opponent": "TuS Bruchhausen 02 II",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/tus-bruchhausen-02-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IQ00000000VS5489BUVVKNMR0J"
@@ -1111,6 +1249,7 @@
       "d": "2026-09-16",
       "t": "18:00",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "spielfrei4 (PH)",
       "competition": "Kreispokal",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim/-/spiel/031MHCEJAG000000VS5489BTVSRD0UH9"
@@ -1119,6 +1258,7 @@
       "d": "2026-09-17",
       "t": "18:30",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "1 (PH)",
       "competition": "Kreispokal",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim/-/spiel/031JV1IKQO000000VS5489BUVVKNMR0J"
@@ -1127,6 +1267,7 @@
       "d": "2026-09-17",
       "t": "19:30",
       "team": "Herren",
+      "squad": 3,
       "opponent": "TuS Bruchhausen 02 II",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/tus-bruchhausen-02-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IQ00000000VS5489BUVVKNMR0J"
@@ -1135,6 +1276,7 @@
       "d": "2026-09-19",
       "t": "10:00",
       "team": "G-Junioren",
+      "squad": 1,
       "opponent": "SC Neheim",
       "competition": "Kinderfußball",
       "link": "https://www.fussball.de/spiel/sc-neheim-sv-bachum-bergheim/-/spiel/031IKDRR58000000VS5489BUVVKNMR0J"
@@ -1143,6 +1285,7 @@
       "d": "2026-09-19",
       "t": "10:00",
       "team": "F-Junioren",
+      "squad": 1,
       "opponent": "SV Hüsten 09 I",
       "competition": "Kinderfußball",
       "link": "https://www.fussball.de/spiel/sv-huesten-09-1-sv-bachum-bergheim-1/-/spiel/031J6SGOCS000000VS5489BUVVKNMR0J"
@@ -1151,6 +1294,7 @@
       "d": "2026-09-19",
       "t": "12:30",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "JSG Freienohl/Oev./Wen. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/jsg-freienohl-oeventrop-wennemen-sv-bachum-bergheim/-/spiel/031I1BDP1K000000VS5489BUVVKNMR0J"
@@ -1159,6 +1303,7 @@
       "d": "2026-09-21",
       "t": "19:30",
       "team": "Herren Ü32",
+      "squad": 1,
       "opponent": "SG Beckum/Hövel/Mellen",
       "competition": "Kreispokal",
       "link": "https://www.fussball.de/spiel/sg-beckum-hoevel-mellen-sv-bachum-bergheim/-/spiel/031GJD03OC000000VS5489BTVVG7L386"
@@ -1167,6 +1312,7 @@
       "d": "2026-09-23",
       "t": "19:00",
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "SG Balve/Garbeck/La/Kü/Aff 1",
       "competition": "Kreispokal",
       "link": "https://www.fussball.de/spiel/sg-balve-garbeck-la-kue-aff-1-sv-bachum-bergheim/-/spiel/031JV746I8000000VS5489BUVVKNMR0J"
@@ -1175,6 +1321,7 @@
       "d": "2026-09-23",
       "t": "19:30",
       "team": "Herren",
+      "squad": 2,
       "opponent": "SG Eintracht 25",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sg-eintracht-25-sv-bachum-bergheim-ii/-/spiel/031IK2S5D4000000VS5489BUVVKNMR0J"
@@ -1183,6 +1330,7 @@
       "d": "2026-09-26",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 3,
       "opponent": "SV Hüsten 09 III",
       "competition": "Kreisliga C",
       "link": "https://www.fussball.de/spiel/sv-huesten-09-3-sv-bachum-bergheim-3/-/spiel/031J8T2KG4000000VS5489BUVVKNMR0J"
@@ -1191,6 +1339,7 @@
       "d": "2026-09-26",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 2,
       "opponent": "JSG Langenholthausen/Kü./Me./Be. I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/jsg-langenholthausen-kuentrop-mellen-beckum-sv-bachum-bergheim-2/-/spiel/031J8LLJUK000000VS5489BUVVKNMR0J"
@@ -1199,6 +1348,7 @@
       "d": "2026-09-26",
       "t": "11:00",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "JSG Herdringen/Mü./Ho. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/jsg-herdringen-mueschede-holzen-1-sv-bachum-bergheim/-/spiel/031OEC8PEO000000VS5489BUVT2M8LCU"
@@ -1207,6 +1357,7 @@
       "d": "2026-09-26",
       "t": "11:00",
       "team": "C-Junioren",
+      "squad": 2,
       "opponent": "JSG Gierskämpen/Arnsb.09/Rum./ArnsbGW I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/jsg-gierskaempen-arnsb09-rumb-gwarnsb-1-sv-bachum-bergheim-2/-/spiel/031I192RE4000000VS5489BUVVKNMR0J"
@@ -1215,6 +1366,7 @@
       "d": "2026-09-26",
       "t": "11:00",
       "team": "E-Junioren",
+      "squad": 1,
       "opponent": "FC Neheim-Erlenbruch I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/fc-neheim-erlenbruch-sv-bachum-bergheim-1/-/spiel/031J8I24EK000000VS5489BUVVKNMR0J"
@@ -1223,6 +1375,7 @@
       "d": "2026-09-26",
       "t": "13:30",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "JSG Balve/Gar./La/Be/Aff I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/jsg-balve-garbeck-la-be-aff-i-sv-bachum-bergheim/-/spiel/031I1BDONO000000VS5489BUVVKNMR0J"
@@ -1231,6 +1384,7 @@
       "d": "2026-09-27",
       "t": "11:00",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "JSG Balve/Gar./La/Be/Aff I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/jsg-balve-garbeck-la-be-aff-i-sv-bachum-bergheim/-/spiel/031I1BDONO000000VS5489BUVVKNMR0J"
@@ -1239,6 +1393,7 @@
       "d": "2026-09-27",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "SF DJK Mastbruch",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/sf-djk-mastbruch-sv-bachum-bergheim/-/spiel/031GM5IA2O000000VS5489BTVVG7L386"
@@ -1247,6 +1402,7 @@
       "d": "2026-09-27",
       "t": "12:45",
       "team": "Herren",
+      "squad": 3,
       "opponent": "TuS Niedereimer II",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/tus-niedereimer-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IPOS000000VS5489BUVVKNMR0J"
@@ -1255,6 +1411,7 @@
       "d": "2026-09-27",
       "t": "15:00",
       "team": "Herren",
+      "squad": 2,
       "opponent": "FC BW Gierskämpen",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/fc-bw-gierskaempen-sv-bachum-bergheim-ii/-/spiel/031IK2RVS8000000VS5489BUVVKNMR0J"
@@ -1263,6 +1420,7 @@
       "d": "2026-09-27",
       "t": "15:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "SG Balve/Garbeck",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sg-balve-garbeck-sv-bachum-bergheim/-/spiel/031I0BNBIS000000VS5489BUVVKNMR0J"
@@ -1271,6 +1429,7 @@
       "d": "2026-10-09",
       "t": "19:00",
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "JSG Balve/Garbeck/La/Kü/Aff I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sg-balve-garbeck-la-kue-aff-1-sv-bachum-bergheim/-/spiel/031JKQC6SK000000VS5489BUVVKNMR0J"
@@ -1279,6 +1438,7 @@
       "d": "2026-10-10",
       "t": "10:00",
       "team": "F-Junioren",
+      "squad": 1,
       "opponent": "TuS Vosswinkel I",
       "competition": "Kinderfußball",
       "link": "https://www.fussball.de/spiel/tus-vosswinkel-sv-bachum-bergheim-1/-/spiel/031J6SGO64000000VS5489BUVVKNMR0J"
@@ -1287,6 +1447,7 @@
       "d": "2026-10-10",
       "t": "11:00",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "SC Neheim I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sc-neheim-i-sv-bachum-bergheim/-/spiel/031OEC8PC8000000VS5489BUVT2M8LCU"
@@ -1295,6 +1456,7 @@
       "d": "2026-10-11",
       "t": "15:00",
       "team": "Herren",
+      "squad": 1,
       "opponent": "SG Allendorf/Amecke",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sg-allendorf-amecke-sv-bachum-bergheim/-/spiel/031I0BNA28000000VS5489BUVVKNMR0J"
@@ -1303,6 +1465,7 @@
       "d": "2026-10-11",
       "t": "15:00",
       "team": "Herren",
+      "squad": 2,
       "opponent": "DJK GW Arnsberg",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/djk-gw-arnsberg-sv-bachum-bergheim-ii/-/spiel/031IK2RV40000000VS5489BUVVKNMR0J"
@@ -1311,6 +1474,7 @@
       "d": "2026-10-17",
       "t": "14:45",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "JSG Niedereimer/Bruchh. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/jsg-niedereimer-bruchhausen-sv-bachum-bergheim/-/spiel/031I1BDOEC000000VS5489BUVVKNMR0J"
@@ -1319,6 +1483,7 @@
       "d": "2026-10-18",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "BSV Menden",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/bsv-menden-sv-bachum-bergheim/-/spiel/031GM5I93S000000VS5489BTVVG7L386"
@@ -1327,6 +1492,7 @@
       "d": "2026-10-19",
       "t": "19:30",
       "team": "Herren Ü32",
+      "squad": 1,
       "opponent": "SC Neheim",
       "competition": "Kreisturnier",
       "link": "https://www.fussball.de/spiel/sc-neheim-sv-bachum-bergheim/-/spiel/031SAEVJ4G000000VS5489BTVTPHHFPR"
@@ -1335,6 +1501,7 @@
       "d": "2026-10-25",
       "t": "12:30",
       "team": "Herren",
+      "squad": 3,
       "opponent": "DJK GW Arnsberg II",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/djk-gw-arnsberg-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IQH8000000VS5489BUVVKNMR0J"
@@ -1343,6 +1510,7 @@
       "d": "2026-10-25",
       "t": "15:00",
       "team": "Herren",
+      "squad": 1,
       "opponent": "TuS Hachen",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/tus-hachen-sv-bachum-bergheim/-/spiel/031I0BN8L8000000VS5489BUVVKNMR0J"
@@ -1351,6 +1519,7 @@
       "d": "2026-10-25",
       "t": "15:00",
       "team": "Herren",
+      "squad": 2,
       "opponent": "Türkiyemspor Neh.-Hüsten",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/tuerkiyemspor-neh-huesten-sv-bachum-bergheim-ii/-/spiel/031IK2RTPG000000VS5489BUVVKNMR0J"
@@ -1359,6 +1528,7 @@
       "d": "2026-10-30",
       "t": "19:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "SV Arnsberg",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-arnsberg-sv-bachum-bergheim/-/spiel/031I0BNFT8000000VS5489BUVVKNMR0J"
@@ -1367,6 +1537,7 @@
       "d": "2026-11-07",
       "t": "11:00",
       "team": "E-Junioren",
+      "squad": 2,
       "opponent": "JSG Vosswinkel/Echthausen I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/jsg-vosswinkel-echthausen-sv-bachum-bergheim-2/-/spiel/031J8LLJMG000000VS5489BUVVKNMR0J"
@@ -1375,6 +1546,7 @@
       "d": "2026-11-07",
       "t": "12:00",
       "team": "D-Junioren",
+      "squad": 2,
       "opponent": "JSG Gierskämpen/Arnsb.09/Rumb./Arnsb.GW I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/1-jsg-fc-bw-gierskaempen-sv-arnsberg-tus-rumbeck-gw-arnsberg-sv-bachum-bergheim-2/-/spiel/031OEI7Q2S000000VS5489BUVT2M8LCU"
@@ -1383,6 +1555,7 @@
       "d": "2026-11-07",
       "t": "13:45",
       "team": "E-Junioren",
+      "squad": 1,
       "opponent": "JSG Niedereimer/Bruchhausen I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/jsg-niedereimer-bruchhausen-sv-bachum-bergheim-1/-/spiel/031J8I243S000000VS5489BUVVKNMR0J"
@@ -1391,6 +1564,7 @@
       "d": "2026-11-07",
       "t": "14:30",
       "team": "C-Junioren",
+      "squad": 2,
       "opponent": "JSG Allendorf/Am. I (9er)",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sg-allendorf-amecke-sv-bachum-bergheim-2/-/spiel/031I192R3K000000VS5489BUVVKNMR0J"
@@ -1399,6 +1573,7 @@
       "d": "2026-11-14",
       "t": "10:00",
       "team": "D-Junioren",
+      "squad": 2,
       "opponent": "JSG Balve/Garb./La/Kü/Me III",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/jsg-balve-garbeck-la-kue-me-3-sv-bachum-bergheim-2/-/spiel/031OEI7PT8000000VS5489BUVT2M8LCU"
@@ -1407,6 +1582,7 @@
       "d": "2026-11-14",
       "t": "10:00",
       "team": "F-Junioren",
+      "squad": 1,
       "opponent": "FC Neheim-Erlenbruch I",
       "competition": "Kinderfußball",
       "link": "https://www.fussball.de/spiel/fc-neheim-erlenbruch-sv-bachum-bergheim-1/-/spiel/031J6SGNTO000000VS5489BUVVKNMR0J"
@@ -1415,6 +1591,7 @@
       "d": "2026-11-14",
       "t": "10:30",
       "team": "E-Junioren",
+      "squad": 1,
       "opponent": "SC Neheim II",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sc-neheim-ii-sv-bachum-bergheim-1/-/spiel/031J8I23V8000000VS5489BUVVKNMR0J"
@@ -1423,6 +1600,7 @@
       "d": "2026-11-14",
       "t": "11:00",
       "team": "E-Junioren",
+      "squad": 2,
       "opponent": "SC Neheim I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sc-neheim-i-sv-bachum-bergheim-2/-/spiel/031J8LLJIC000000VS5489BUVVKNMR0J"
@@ -1431,6 +1609,7 @@
       "d": "2026-11-14",
       "t": "13:00",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "SC Neheim I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sc-neheim-sv-bachum-bergheim/-/spiel/031I1BDO60000000VS5489BUVVKNMR0J"
@@ -1439,6 +1618,7 @@
       "d": "2026-11-14",
       "t": "13:45",
       "team": "E-Junioren",
+      "squad": 3,
       "opponent": "JSG Vosswinkel/Echthausen III",
       "competition": "Kreisliga C",
       "link": "https://www.fussball.de/spiel/jsg-vosswinkel-echthausen-iii-sv-bachum-bergheim-3/-/spiel/031J8T2K6S000000VS5489BUVVKNMR0J"
@@ -1447,6 +1627,7 @@
       "d": "2026-11-14",
       "t": "14:45",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "JSG Niedereimer/Bruchh. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/jsg-niedereimer-bruchhausen-i-sv-bachum-bergheim/-/spiel/031OEC8P5G000000VS5489BUVT2M8LCU"
@@ -1455,6 +1636,7 @@
       "d": "2026-11-15",
       "t": "12:45",
       "team": "Herren",
+      "squad": 3,
       "opponent": "TuS Hachen II",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/tus-hachen-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IQB4000000VS5489BUVVKNMR0J"
@@ -1463,6 +1645,7 @@
       "d": "2026-11-15",
       "t": "15:00",
       "team": "Herren",
+      "squad": 1,
       "opponent": "TuS Langenholthausen",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/tus-langenholthausen-sv-bachum-bergheim/-/spiel/031I0BN7DC000000VS5489BUVVKNMR0J"
@@ -1471,6 +1654,7 @@
       "d": "2026-11-15",
       "t": "15:00",
       "team": "Herren",
+      "squad": 2,
       "opponent": "TuS Rumbeck",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/tus-rumbeck-sv-bachum-bergheim-ii/-/spiel/031IK2RS9O000000VS5489BUVVKNMR0J"
@@ -1479,6 +1663,7 @@
       "d": "2026-11-16",
       "t": "19:30",
       "team": "Herren Ü32",
+      "squad": 1,
       "opponent": "SV Hüsten 1",
       "competition": "Kreisturnier",
       "link": "https://www.fussball.de/spiel/sv-huesten-1-sv-bachum-bergheim/-/spiel/031SAEVJ6S000000VS5489BTVTPHHFPR"
@@ -1487,6 +1672,7 @@
       "d": "2026-11-21",
       "t": "14:00",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "JSG Balve/Garb./La/Kü/Me I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/jsg-balve-garb-la-kue-me-1-sv-bachum-bergheim/-/spiel/031OEC8P10000000VS5489BUVT2M8LCU"
@@ -1495,6 +1681,7 @@
       "d": "2026-12-04",
       "t": "19:30",
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "JSG Hachen/Langs.-Enkh./Westf./Sto. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/jsg-hachen-langscheid-enkhausen-westenfeld-stockum-sv-bachum-bergheim/-/spiel/031JKQC6DO000000VS5489BUVVKNMR0J"
@@ -1503,6 +1690,7 @@
       "d": "2026-12-05",
       "t": "13:00",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "TuS Sundern II",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/tus-sundern-2-sv-bachum-bergheim/-/spiel/031I1BDNR4000000VS5489BUVVKNMR0J"
@@ -1511,6 +1699,7 @@
       "d": "2026-12-06",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "SV Brilon",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/sv-brilon-sv-bachum-bergheim/-/spiel/031GM5I85S000000VS5489BTVVG7L386"
@@ -1519,6 +1708,7 @@
       "d": "2026-12-06",
       "t": "13:00",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "SV Brackel 06",
       "competition": "Kreisfreundschaftsspiele",
       "link": "https://www.fussball.de/spiel/sv-brackel-06-sv-bachum-bergheim/-/spiel/0320GPVQKS000000VS5489BTVT7QHFUC"
@@ -1527,6 +1717,7 @@
       "d": "2026-12-06",
       "t": "15:00",
       "team": "Herren",
+      "squad": 1,
       "opponent": "FC Neheim-Erlenbruch",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/fc-neheim-erlenbruch-sv-bachum-bergheim/-/spiel/031I0BNUDG000000VS5489BUVVKNMR0J"
@@ -1535,6 +1726,7 @@
       "d": "2026-12-12",
       "t": "13:00",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "JSG Hachen/La-Enk./St./En. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/jsg-hachen-lang-enkh-sto-end-1-sv-bachum-bergheim/-/spiel/031I1BDR8K000000VS5489BUVVKNMR0J"
@@ -1543,6 +1735,7 @@
       "d": "2027-02-14",
       "t": "09:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "ASC 09 Dortmund",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/asc-09-dortmund-sv-bachum-bergheim/-/spiel/031GM5IB70000000VS5489BTVVG7L386"
@@ -1551,6 +1744,7 @@
       "d": "2027-02-21",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "FC Brünninghausen II",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/fc-bruenninghausen-ii-sv-bachum-bergheim/-/spiel/031GM5I8P0000000VS5489BTVVG7L386"
@@ -1559,6 +1753,7 @@
       "d": "2027-02-21",
       "t": "13:00",
       "team": "Herren",
+      "squad": 2,
       "opponent": "SG Herdringen/Müschede II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sg-herdringen-mueschede-ii-sv-bachum-bergheim-ii/-/spiel/031IK2SIAG000000VS5489BUVVKNMR0J"
@@ -1567,6 +1762,7 @@
       "d": "2027-02-26",
       "t": "19:30",
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "JSG Oeventrop/Freien./Wen. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/jsg-oeventrop-freienohl-wennemen-sv-bachum-bergheim/-/spiel/031JKQC9E0000000VS5489BUVVKNMR0J"
@@ -1575,6 +1771,7 @@
       "d": "2027-02-28",
       "t": "12:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "SV Hüsten 09 II",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-huesten-09-ii-sv-bachum-bergheim/-/spiel/031I0BNSG0000000VS5489BUVVKNMR0J"
@@ -1583,6 +1780,7 @@
       "d": "2027-02-28",
       "t": "15:00",
       "team": "Herren",
+      "squad": 2,
       "opponent": "SSV Küntrop",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/ssv-kuentrop-sv-bachum-bergheim-ii/-/spiel/031IK2SH98000000VS5489BUVVKNMR0J"
@@ -1591,6 +1789,7 @@
       "d": "2027-03-07",
       "t": "11:00",
       "team": "Herren",
+      "squad": 3,
       "opponent": "SG Allendorf/Amecke III",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/sg-allendorf-amecke-iii-sv-bachum-bergheim-iii/-/spiel/031KK1IR3S000000VS5489BUVVKNMR0J"
@@ -1599,6 +1798,7 @@
       "d": "2027-03-12",
       "t": "19:45",
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "TuS Sundern II",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/tus-sundern-2-sv-bachum-bergheim/-/spiel/031JKQC8UC000000VS5489BUVVKNMR0J"
@@ -1607,6 +1807,7 @@
       "d": "2027-03-13",
       "t": "11:00",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "SC Neheim I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sc-neheim-i-sv-bachum-bergheim/-/spiel/031OEC8QIS000000VS5489BUVT2M8LCU"
@@ -1615,6 +1816,7 @@
       "d": "2027-03-13",
       "t": "12:00",
       "team": "D-Junioren",
+      "squad": 2,
       "opponent": "JSG Hachen/Langsch.-Enkh. I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/jsg-hachen-langscheid-enkhausen-sv-bachum-bergheim-2/-/spiel/031OEI7RRK000000VS5489BUVT2M8LCU"
@@ -1623,6 +1825,7 @@
       "d": "2027-03-14",
       "t": "09:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "Delbrücker SC II",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/delbruecker-sc-ii-sv-bachum-bergheim/-/spiel/031GM5IF0G000000VS5489BTVVG7L386"
@@ -1631,6 +1834,7 @@
       "d": "2027-03-14",
       "t": "13:15",
       "team": "Herren",
+      "squad": 1,
       "opponent": "FSG Ruhrtal II",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/fsg-ruhrtal-ii-sv-bachum-bergheim/-/spiel/031I0BNQJ4000000VS5489BUVVKNMR0J"
@@ -1639,6 +1843,7 @@
       "d": "2027-03-14",
       "t": "15:00",
       "team": "Herren",
+      "squad": 2,
       "opponent": "TuS Niedereimer",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/tus-niedereimer-sv-bachum-bergheim-ii/-/spiel/031IK2SF3S000000VS5489BUVVKNMR0J"
@@ -1647,6 +1852,7 @@
       "d": "2027-03-20",
       "t": "15:00",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "SV Hüsten 09 I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-huesten-09-1-sv-bachum-bergheim/-/spiel/031I1BDQFG000000VS5489BUVVKNMR0J"
@@ -1655,6 +1861,7 @@
       "d": "2027-03-21",
       "t": "09:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "FC Iserlohn 46/49 II",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/fc-iserlohn-ii-sv-bachum-bergheim/-/spiel/031GM5IFSG000000VS5489BTVVG7L386"
@@ -1663,6 +1870,7 @@
       "d": "2027-03-21",
       "t": "12:45",
       "team": "Herren",
+      "squad": 3,
       "opponent": "TuS Bruchhausen 02 II",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/tus-bruchhausen-02-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IQV0000000VS5489BUVVKNMR0J"
@@ -1671,6 +1879,7 @@
       "d": "2027-04-04",
       "t": "15:00",
       "team": "Herren",
+      "squad": 2,
       "opponent": "SKV Balkan",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/skv-balkan-sv-bachum-bergheim-ii/-/spiel/031IK2SD2G000000VS5489BUVVKNMR0J"
@@ -1679,6 +1888,7 @@
       "d": "2027-04-04",
       "t": "15:30",
       "team": "Herren",
+      "squad": 1,
       "opponent": "FSG Ruhrtal I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/fsg-ruhrtal-i-sv-bachum-bergheim/-/spiel/031I0BNOO4000000VS5489BUVVKNMR0J"
@@ -1687,6 +1897,7 @@
       "d": "2027-04-11",
       "t": "12:45",
       "team": "Herren",
+      "squad": 3,
       "opponent": "TuS Niedereimer II",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/tus-niedereimer-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IQLK000000VS5489BUVVKNMR0J"
@@ -1695,6 +1906,7 @@
       "d": "2027-04-16",
       "t": "19:00",
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "TuS Vosswinkel",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/tus-vosswinkel-sv-bachum-bergheim/-/spiel/031JKQC8ES000000VS5489BUVVKNMR0J"
@@ -1703,6 +1915,7 @@
       "d": "2027-04-17",
       "t": "11:00",
       "team": "E-Junioren",
+      "squad": 2,
       "opponent": "SV Hüsten 09 II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-huesten-09-2-sv-bachum-bergheim-2/-/spiel/031J8LLKV0000000VS5489BUVVKNMR0J"
@@ -1711,6 +1924,7 @@
       "d": "2027-04-17",
       "t": "11:00",
       "team": "E-Junioren",
+      "squad": 1,
       "opponent": "SV Hüsten 09 I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-huesten-09-1-sv-bachum-bergheim-1/-/spiel/031J8I25IK000000VS5489BUVVKNMR0J"
@@ -1719,6 +1933,7 @@
       "d": "2027-04-17",
       "t": "11:30",
       "team": "D-Junioren",
+      "squad": 2,
       "opponent": "SV Affeln 28",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-affeln-28-sv-bachum-bergheim-2/-/spiel/031OEI7REK000000VS5489BUVT2M8LCU"
@@ -1727,6 +1942,7 @@
       "d": "2027-04-17",
       "t": "11:30",
       "team": "C-Junioren",
+      "squad": 2,
       "opponent": "JSG Balve/Gar./La/Be/Aff II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/jsg-balve-garbeck-la-be-aff-ii-sv-bachum-bergheim-2/-/spiel/031I192S78000000VS5489BUVVKNMR0J"
@@ -1735,6 +1951,7 @@
       "d": "2027-04-17",
       "t": "13:45",
       "team": "E-Junioren",
+      "squad": 3,
       "opponent": "JSG Vosswinkel/Echthausen II",
       "competition": "Kreisliga C",
       "link": "https://www.fussball.de/spiel/jsg-vosswinkel-echthausen-ii-sv-bachum-bergheim-3/-/spiel/031J8T2LM8000000VS5489BUVVKNMR0J"
@@ -1743,6 +1960,7 @@
       "d": "2027-04-17",
       "t": "14:45",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "JSG Niedereimer/Bruchh. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/jsg-niedereimer-bruchhausen-i-sv-bachum-bergheim/-/spiel/031OEC8QB8000000VS5489BUVT2M8LCU"
@@ -1751,6 +1969,7 @@
       "d": "2027-04-18",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "SV Heide Paderborn",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/sv-heide-paderborn-sv-bachum-bergheim/-/spiel/031GM5IE54000000VS5489BTVVG7L386"
@@ -1759,6 +1978,7 @@
       "d": "2027-04-18",
       "t": "15:00",
       "team": "Herren",
+      "squad": 2,
       "opponent": "KF 2. Korriku Sundern",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/kf-2-korriku-sundern-sv-bachum-bergheim-ii/-/spiel/031IK2SB6C000000VS5489BUVVKNMR0J"
@@ -1767,6 +1987,7 @@
       "d": "2027-04-18",
       "t": "15:00",
       "team": "Herren",
+      "squad": 1,
       "opponent": "SV Affeln 28",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-affeln-28-sv-bachum-bergheim/-/spiel/031I0BNMVS000000VS5489BUVVKNMR0J"
@@ -1775,6 +1996,7 @@
       "d": "2027-04-24",
       "t": "13:30",
       "team": "C-Junioren",
+      "squad": 2,
       "opponent": "JSG Grevenstein/Helf.-Alth./Be./Cal-Wa. I (9er)",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/jsg-grevenstein-hellefeld-altenh-berge-calle-wallen-9er-sv-bachum-bergheim-2/-/spiel/031I192S24000000VS5489BUVVKNMR0J"
@@ -1783,6 +2005,7 @@
       "d": "2027-04-24",
       "t": "14:00",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "JSG Balve/Garb./La/Kü/Me I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/jsg-balve-garb-la-kue-me-1-sv-bachum-bergheim/-/spiel/031OEC8Q60000000VS5489BUVT2M8LCU"
@@ -1791,6 +2014,7 @@
       "d": "2027-04-25",
       "t": "10:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "SV Brackel 06",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/sv-brackel-06-sv-bachum-bergheim/-/spiel/031GM5IDN0000000VS5489BTVVG7L386"
@@ -1799,6 +2023,7 @@
       "d": "2027-04-25",
       "t": "12:30",
       "team": "Herren",
+      "squad": 3,
       "opponent": "DJK GW Arnsberg II",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/djk-gw-arnsberg-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IRMS000000VS5489BUVVKNMR0J"
@@ -1807,6 +2032,7 @@
       "d": "2027-04-30",
       "t": "19:30",
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "JSG Allendorf/Amecke U20 (9er)",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/jsg-allendorf-amecke-u20-sv-bachum-bergheim/-/spiel/031JKQC87C000000VS5489BUVVKNMR0J"
@@ -1815,6 +2041,7 @@
       "d": "2027-05-02",
       "t": "13:00",
       "team": "Herren",
+      "squad": 2,
       "opponent": "SV Affeln 28 II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sv-affeln-28-ii-sv-bachum-bergheim-ii/-/spiel/031IK2S9D4000000VS5489BUVVKNMR0J"
@@ -1823,6 +2050,7 @@
       "d": "2027-05-02",
       "t": "15:00",
       "team": "Herren",
+      "squad": 1,
       "opponent": "SG Beckum/Hövel/Mellen",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sg-beckum-hoevel-mellen-sv-bachum-bergheim/-/spiel/031I0BNL7G000000VS5489BUVVKNMR0J"
@@ -1831,6 +2059,7 @@
       "d": "2027-05-09",
       "t": "11:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "Hombrucher SV III",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/hombrucher-sv-iii-sv-bachum-bergheim/-/spiel/031GM5ICVS000000VS5489BTVVG7L386"
@@ -1839,6 +2068,7 @@
       "d": "2027-05-15",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 1,
       "opponent": "TuS Sundern II",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/tus-sundern-ii-sv-bachum-bergheim-1/-/spiel/031J8I258C000000VS5489BUVVKNMR0J"
@@ -1847,6 +2077,7 @@
       "d": "2027-05-15",
       "t": "11:00",
       "team": "E-Junioren",
+      "squad": 2,
       "opponent": "JSG Oeventrop/Freie./Wen. I",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/jsg-1-oeventrop-freienohl-wennemen-sv-bachum-bergheim-2/-/spiel/031J8LLKJS000000VS5489BUVVKNMR0J"
@@ -1855,6 +2086,7 @@
       "d": "2027-05-15",
       "t": "13:45",
       "team": "E-Junioren",
+      "squad": 3,
       "opponent": "JSG Rumbeck/GW Arnsb/Arnsb 09/Giersk. III",
       "competition": "Kreisliga C",
       "link": "https://www.fussball.de/spiel/3-jsg-tus-rumbeck-djk-gw-arnsberg-sv-arnsberg-09-fc-bw-gierskaempen-3-sv-bachum-bergheim-3/-/spiel/031J8T2LBO000000VS5489BUVVKNMR0J"
@@ -1863,6 +2095,7 @@
       "d": "2027-05-17",
       "t": "15:00",
       "team": "Herren",
+      "squad": 1,
       "opponent": "SG Grevenstein/Hellefeld-Altenhellefeld",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sg-grevenstein-hellefeld-altenhellefeld-sv-bachum-bergheim/-/spiel/031I0BNJEO000000VS5489BUVVKNMR0J"
@@ -1871,6 +2104,7 @@
       "d": "2027-05-17",
       "t": "18:30",
       "team": "Herren",
+      "squad": 2,
       "opponent": "SuS Langscheid/Enkhausen II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/sus-langscheid-enkhausen-ii-sv-bachum-bergheim-ii/-/spiel/031IK2S7N0000000VS5489BUVVKNMR0J"
@@ -1879,6 +2113,7 @@
       "d": "2027-05-21",
       "t": "19:00",
       "team": "A-Junioren",
+      "squad": 1,
       "opponent": "FC Neheim-Erlenbruch U20",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/fc-neheim-erlenbruch-u20-sv-bachum-bergheim/-/spiel/031JKQC7Q0000000VS5489BUVVKNMR0J"
@@ -1887,6 +2122,7 @@
       "d": "2027-05-22",
       "t": "13:00",
       "team": "C-Junioren",
+      "squad": 1,
       "opponent": "JSG Herdringen/Mü./Ho. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/jsg-herdringen-mueschede-holzen-sv-bachum-bergheim/-/spiel/031I1BDPIS000000VS5489BUVVKNMR0J"
@@ -1895,6 +2131,7 @@
       "d": "2027-05-22",
       "t": "13:45",
       "team": "E-Junioren",
+      "squad": 3,
       "opponent": "JSG Rumbeck/GW Arnsb/Arnsb 09/Giersk. IV",
       "competition": "Kreisliga C",
       "link": "https://www.fussball.de/spiel/4-jsg-tus-rumbeck-djk-gw-arnsberg-sv-arnsberg-09-fc-bw-gierskaempen-4-sv-bachum-bergheim-3/-/spiel/031J8T2L6O000000VS5489BUVVKNMR0J"
@@ -1903,6 +2140,7 @@
       "d": "2027-05-23",
       "t": "12:45",
       "team": "Herren",
+      "squad": 3,
       "opponent": "TuS Hachen II",
       "competition": "Kreisliga D",
       "link": "https://www.fussball.de/spiel/tus-hachen-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IRES000000VS5489BUVVKNMR0J"
@@ -1911,6 +2149,7 @@
       "d": "2027-05-30",
       "t": "12:30",
       "team": "Herren",
+      "squad": 2,
       "opponent": "TuS Langenholthausen II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/tus-langenholthausen-ii-sv-bachum-bergheim-ii/-/spiel/031IK2S65G000000VS5489BUVVKNMR0J"
@@ -1919,6 +2158,7 @@
       "d": "2027-05-30",
       "t": "15:00",
       "team": "Herren",
+      "squad": 1,
       "opponent": "SG Holzen/Eisborn",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sg-holzen-eisborn-sv-bachum-bergheim/-/spiel/031I0BNHMC000000VS5489BUVVKNMR0J"
@@ -1927,6 +2167,7 @@
       "d": "2027-06-05",
       "t": "13:00",
       "team": "D-Junioren",
+      "squad": 1,
       "opponent": "SV Hüsten 09 I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/sv-huesten-09-1-sv-bachum-bergheim/-/spiel/031OEC8PQC000000VS5489BUVT2M8LCU"
@@ -1935,6 +2176,7 @@
       "d": "2027-06-05",
       "t": "14:00",
       "team": "C-Junioren",
+      "squad": 2,
       "opponent": "JSG Hachen/Lan-Enk./St./End. II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/jsg-hachen-lang-enkh-sto-end-2-sv-bachum-bergheim-2/-/spiel/031I192RPK000000VS5489BUVVKNMR0J"
@@ -1943,6 +2185,7 @@
       "d": "2027-06-05",
       "t": "14:45",
       "team": "D-Junioren",
+      "squad": 2,
       "opponent": "JSG Vosswinkel/Echth. II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/jsg-vosswinkel-echth-ii-sv-bachum-bergheim-2/-/spiel/031OEI7QRG000000VS5489BUVT2M8LCU"
@@ -1951,6 +2194,7 @@
       "d": "2027-06-12",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 2,
       "opponent": "JSG Müschede/Herdr./Ho. II",
       "competition": "Kreisliga B",
       "link": "https://www.fussball.de/spiel/jsg-mueschede-herdringen-holzen-2-sv-bachum-bergheim-2/-/spiel/031J8LLK6S000000VS5489BUVVKNMR0J"
@@ -1959,6 +2203,7 @@
       "d": "2027-06-12",
       "t": "10:00",
       "team": "E-Junioren",
+      "squad": 1,
       "opponent": "JSG Müschede/Herdr./Ho. I",
       "competition": "Kreisliga A",
       "link": "https://www.fussball.de/spiel/jsg-mueschede-herdringen-holzen-1-sv-bachum-bergheim-1/-/spiel/031J8I24P0000000VS5489BUVVKNMR0J"
@@ -1967,6 +2212,7 @@
       "d": "2027-06-12",
       "t": "11:30",
       "team": "E-Junioren",
+      "squad": 3,
       "opponent": "SV Affeln II",
       "competition": "Kreisliga C",
       "link": "https://www.fussball.de/spiel/sv-affeln-2-sv-bachum-bergheim-3/-/spiel/031J8T2KRK000000VS5489BUVVKNMR0J"
@@ -1975,6 +2221,7 @@
       "d": "2027-06-13",
       "t": "09:00",
       "team": "B-Junioren",
+      "squad": 1,
       "opponent": "SV Westfalia Soest II",
       "competition": "Bezirksliga",
       "link": "https://www.fussball.de/spiel/spielverein-westfalia-soest-ii-sv-bachum-bergheim/-/spiel/031GM5IBJ8000000VS5489BTVVG7L386"
