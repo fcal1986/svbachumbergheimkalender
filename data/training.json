@@ -15,11 +15,13 @@
       "note": "",
       "trainerIds": [
         "a30f8c9b-96f9-4557-b28b-619e122080ea",
-        "935d13de-b21e-43c5-a35f-405bfaf4cc6c"
+        "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
+        "bb26c9cb-1831-4209-a57b-2d97596593ff"
       ],
       "trainerNames": [
         "David Skwara",
-        "Fabrizio Calcagno"
+        "Fabrizio Calcagno",
+        "Marc Geauf"
       ],
       "validFrom": "2026-07-01",
       "validUntil": "2027-06-30",
@@ -39,8 +41,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "bb26c9cb-1831-4209-a57b-2d97596593ff"
+      ],
+      "trainerNames": [
+        "Marc Geauf"
+      ],
       "validFrom": "2026-07-19",
       "validUntil": null
     },
@@ -147,8 +153,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "bb26c9cb-1831-4209-a57b-2d97596593ff"
+      ],
+      "trainerNames": [
+        "Marc Geauf"
+      ],
       "validFrom": "2026-07-19",
       "validUntil": null
     },
@@ -263,8 +273,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "bb26c9cb-1831-4209-a57b-2d97596593ff"
+      ],
+      "trainerNames": [
+        "Marc Geauf"
+      ],
       "validFrom": "2026-09-01",
       "validUntil": null
     },
@@ -369,8 +383,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "bb26c9cb-1831-4209-a57b-2d97596593ff"
+      ],
+      "trainerNames": [
+        "Marc Geauf"
+      ],
       "validFrom": "2026-07-19",
       "validUntil": null
     },
@@ -503,11 +521,13 @@
       "note": "",
       "trainerIds": [
         "a30f8c9b-96f9-4557-b28b-619e122080ea",
-        "935d13de-b21e-43c5-a35f-405bfaf4cc6c"
+        "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
+        "bb26c9cb-1831-4209-a57b-2d97596593ff"
       ],
       "trainerNames": [
         "David Skwara",
-        "Fabrizio Calcagno"
+        "Fabrizio Calcagno",
+        "Marc Geauf"
       ],
       "trainerId": null,
       "trainerName": "",
