@@ -77,6 +77,25 @@
   /* ── STAT CARDS ── */
   .stat-row{display:flex;gap:10px;margin-bottom:6px;}
   .stat-card{flex:1;background:var(--white);border-radius:16px;padding:14px 16px;box-shadow:var(--card-shadow);}
+  .start-daycard{background:var(--white);border-radius:16px;padding:16px 18px;box-shadow:var(--card-shadow);margin-bottom:6px;}
+  .start-date{font-size:13px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;}
+  .start-summary{font-size:20px;font-weight:800;color:var(--ink);margin-top:4px;}
+  .start-next-card{background:var(--white);border-radius:16px;padding:14px 16px;box-shadow:var(--card-shadow);margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+  .start-next-time{flex:0 0 auto;text-align:center;min-width:52px;}
+  .start-next-time .t{font-size:18px;font-weight:800;color:var(--ink);display:block;}
+  .start-next-time .k{font-size:9.5px;color:var(--ink-soft);text-transform:uppercase;font-weight:700;}
+  .start-next-body{flex:1;min-width:0;}
+  .start-next-body .team{font-size:14px;font-weight:800;color:var(--ink);}
+  .start-next-body .meta{font-size:11.5px;color:var(--ink-soft);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+  .start-open-btn{flex:0 0 auto;background:var(--black-btn);color:#fff;border:none;border-radius:9px;padding:8px 12px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .pitch-today-row{display:flex;align-items:center;gap:10px;background:var(--white);border-radius:12px;padding:9px 12px;margin-bottom:6px;box-shadow:var(--card-shadow);}
+  .pitch-today-row .pt-time{flex:0 0 auto;font-size:12px;font-weight:800;color:var(--ink);min-width:40px;}
+  .pitch-today-row .pt-team{flex:1;min-width:0;font-size:12.5px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pitch-today-row .pt-pitch{flex:0 0 auto;font-size:10.5px;color:var(--ink-soft);}
+  .status-row{display:flex;align-items:flex-start;gap:9px;background:var(--white);border-radius:12px;padding:10px 12px;margin-bottom:6px;box-shadow:var(--card-shadow);font-size:12.5px;color:var(--ink);}
+  .status-row.ok{color:#166534;}
+  .status-row.warn{color:#9A3412;background:#FFF7ED;}
+  .status-row svg{width:15px;height:15px;flex:none;margin-top:1px;}
   .stat-card .num{font-weight:800;font-size:26px;line-height:1;color:var(--ink);}
   .stat-card .lbl{font-size:11px;color:var(--ink-soft);margin-top:4px;}
   .stat-card.green{background:var(--green);}
@@ -498,24 +517,26 @@
   <!-- START -->
   <div class="pane active" data-pane="start">
     <div class="content">
-      <div class="stat-row">
-        <div class="stat-card" onclick="goToMonthFiltered('training')" style="cursor:pointer;"><div class="num" id="st-count">–</div><div class="lbl">Training diesen Monat</div></div>
-        <div class="stat-card green" onclick="goToMonthFiltered('spiele')" style="cursor:pointer;"><div class="num" id="st-b">–</div><div class="lbl">Spiele diesen Monat</div></div>
+      <div class="start-daycard">
+        <div class="start-date" id="st-date">–</div>
+        <div class="start-summary" id="st-summary">–</div>
       </div>
-      <div id="st-heute"></div>
-      <div id="fb-heimspiele-wrap"></div>
-      <div id="fb-auswaerts-wrap"></div>
+
       <p class="section-label">Nächster Termin</p>
-      <div id="nx-box"></div>
-      <p class="section-label">Demnächst</p>
-      <div id="up-list"></div>
+      <div id="st-next"></div>
+
+      <p class="section-label">Platzbelegung heute</p>
+      <div id="st-pitch-today"></div>
+
+      <p class="section-label">Status</p>
+      <div id="st-status"></div>
+
       <p class="section-label">Schnellzugriff</p>
-      <div class="chip-scroll">
-        <span class="filter-chip on" onclick="newEvent()">+ Neuer Termin</span>
-        <span class="filter-chip" onclick="goto('termine');setView('monat')">Monatsansicht</span>
-        <span class="filter-chip" onclick="goto('termine');setView('jahr')">Jahresansicht</span>
-        <span class="filter-chip" onclick="goto('konto')">Kalender abonnieren</span>
-      </div>
+      <div class="chip-scroll-wrap"><div class="chip-scroll">
+        <span class="filter-chip on" onclick="newTrainingSlot()">+ Training</span>
+        <span class="filter-chip" onclick="newEvent()">+ Spiel</span>
+        <span class="filter-chip" onclick="goto('termine');setView('monat')">Platzbelegung</span>
+      </div></div>
     </div>
   </div>
 
@@ -917,11 +938,13 @@ function fussballDisplayAll(){
     const mapped=fussballFilterTeam(g.team,g.squad);
     const label=teamLabel(mapped.team,mapped.squad); // z.B. "E2-Jugend" statt nur "E-Junioren"
     const bis=g.t?shiftTimeClamped(g.t,fussballDurationMin(g.team)):'23:59';
+    const isFull=fussballTeamCategory(g.team)==='full';
     return {
       id:fussballGameLinkId(g), d:g.d, t:g.t||'00:00', bis,
-      title:'Heimspiel: '+label+' – '+g.opponent,
+      title:'Heimspiel: '+label+' – '+g.opponent, opponent:g.opponent,
       team:mapped.team, squad:mapped.squad, competition:g.competition||'',
-      isExternal:true, fbIndex:idx, ownerName:'fussball.de'
+      isExternal:true, pitchIsFull:isFull, pitchLabelText:isFull?'Ganzer Platz':'Platz geteilt',
+      fbIndex:idx, ownerName:'fussball.de'
     };
   });
 }
@@ -933,7 +956,7 @@ function fussballDisplayAwayAll(){
     const bis=g.t?shiftTimeClamped(g.t,fussballDurationMin(g.team)):'23:59';
     return {
       id:'fbaway-'+(g.link||(g.d+'|'+g.t+'|'+g.opponent)), d:g.d, t:g.t||'00:00', bis,
-      title:label+' bei '+g.opponent,
+      title:label+' bei '+g.opponent, opponent:g.opponent,
       team:mapped.team, squad:mapped.squad, competition:g.competition||'',
       isExternal:true, isAway:true, ownerName:'fussball.de'
     };
@@ -1947,45 +1970,138 @@ function renderYear(){
   box.innerHTML=h;
 }
 function renderStart(){
-  const all=EVENTS.slice().sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t)),future=all.filter(e=>e.d>=todayStr);
-  const monthKey=todayStr.slice(0,7);
-  document.getElementById('st-count').textContent=countTrainingInMonth(monthKey);
-  document.getElementById('st-b').textContent=countSpieleInMonth(monthKey);
-  const stHeute=document.getElementById('st-heute');
-  if(stHeute) stHeute.innerHTML='<div onclick="goto(\'training\')" style="cursor:pointer;">'+todaysTrainingHTML()+'</div>';
-  const nx=future[0],box=document.getElementById('nx-box');
-  if(nx){
-    const dt=new Date(nx.d+'T00:00:00'),dow=DAYS_S[dt.getDay()],dd=String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0');
-    let b='';
-    if(nx.pitch)b+=pitchBadge(nx.pitch);
-    if(nx.halle&&nx.halle.thirds&&nx.halle.thirds.length)b+=halleBadge(nx.halle);
-    (nx.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
-    const bis=eventBis(nx);
-    box.innerHTML='<div class="event-card" id="ev-start-nx">'
-      +'<div class="ev-head">'
-      +'<div class="ev-date-box"><span class="ev-dow">'+dow+'</span><span class="ev-day">'+dd+'</span></div>'
-      +'<div class="ev-sep"></div>'
-      +'<div class="ev-title-box"><h4>'+esc(nx.title)+'</h4>'
-      +'<div class="ev-sub">'+nx.t+'–'+eventBis(nx)+' · '+esc(nx.ownerName||'–')+'</div></div>'
-      +(()=>{ let a='<button class="ibtn share" onclick="shareEvent(\''+nx.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"/></svg></button>';
-        if(session)a+='<button class="ibtn" onclick="duplicateEvent(\''+nx.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>';
-        if(canEdit(nx)){a+='<button class="ibtn" onclick="editEvent(\''+nx.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>';
-        a+='<button class="ibtn del" onclick="deleteEvent(\''+nx.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>';}
-        return '<div class="row-acts">'+a+'</div>';})()
-      +'</div>'
-      +'<div class="ev-body">'
-      +'<div class="ev-times">'
-      +'<div class="ev-time-col"><div class="ev-t">'+nx.t+'</div><div class="ev-tl">Von</div></div>'
-      +'<div class="ev-time-col"><div class="ev-t">'+bis+'</div><div class="ev-tl">Bis</div></div>'
-      +'</div>'
-      +(b?'<div class="badges" style="margin-top:10px;">'+b+'</div>':'')
-      +(nx.note?'<div class="ev-note">'+esc(nx.note)+'</div>':'')
-      +(nx.ownerId?'<div class="ev-contact">'+getContactHTML(nx.ownerId)+'</div>':'')
-      +'</div>'
+  const dt=new Date(todayStr+'T00:00:00');
+  document.getElementById('st-date').textContent=DAYS[dt.getDay()]+', '+fmtShort(todayStr);
+
+  const todays=todaysCombinedAgenda();
+  const counts={training:0,spiel:0,sonstige:0};
+  todays.forEach(e=>counts[classifyAgendaItem(e)]++);
+  const parts=[];
+  if(counts.training)parts.push(counts.training+' Training'+(counts.training===1?'':'s'));
+  if(counts.spiel)parts.push(counts.spiel+' Spiel'+(counts.spiel===1?'':'e'));
+  if(counts.sonstige)parts.push(counts.sonstige+' sonstige'+(counts.sonstige===1?'r Termin':' Termine'));
+  document.getElementById('st-summary').textContent=parts.length?parts.join(' · '):'Heute nichts geplant';
+
+  renderStartNext();
+  renderPitchToday();
+  renderStartStatus();
+}
+
+/* ---------- Neue Start-Seite: kompaktes Tages-Dashboard ---------- */
+function todaysCombinedAgenda(){
+  return EVENTS.filter(e=>e.d===todayStr)
+    .concat(trainingInstancesOn(todayStr))
+    .concat(fussballDisplayInstancesOn(todayStr))
+    .concat(fussballDisplayAwayInstancesOn(todayStr))
+    .sort((a,b)=>a.t.localeCompare(b.t));
+}
+function classifyAgendaItem(e){
+  if(e.isTraining)return 'training';
+  if(e.isExternal)return 'spiel';
+  if(/spiel/i.test(e.title||''))return 'spiel';
+  return 'sonstige';
+}
+function agendaOn(ds){
+  return EVENTS.filter(e=>e.d===ds)
+    .concat(trainingInstancesOn(ds))
+    .concat(fussballDisplayInstancesOn(ds))
+    .concat(fussballDisplayAwayInstancesOn(ds))
+    .sort((a,b)=>a.t.localeCompare(b.t));
+}
+function nextRelevantTermin(){
+  const now=new Date();
+  const nowHM=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  const upcoming=todaysCombinedAgenda().filter(e=>eventBis(e)>nowHM);
+  if(upcoming.length)return upcoming[0];
+  for(let i=1;i<=60;i++){
+    const d=new Date();d.setDate(d.getDate()+i);
+    const list=agendaOn(ymd(d));
+    if(list.length)return list[0];
+  }
+  return null;
+}
+function pitchLabelOf(e){
+  if(e.pitch)return pitchShort(e.pitch);
+  if(e.halle&&e.halle.thirds&&e.halle.thirds.length)return halleShort(e.halle);
+  if(e.isExternal)return e.pitchLabelText||'fussball.de';
+  return '';
+}
+function renderStartNext(){
+  const box=document.getElementById('st-next');
+  if(!box)return;
+  const nx=nextRelevantTermin();
+  if(!nx){ box.innerHTML='<div class="empty-card">Keine kommenden Termine.</div>'; return; }
+  const type=classifyAgendaItem(nx);
+  const typeLabel=type==='training'?'Training':(type==='spiel'?'Spiel':'Termin');
+  const tomorrowStr=ymd(new Date(Date.now()+86400000));
+  const dayLabel=nx.d===todayStr?'Heute':(nx.d===tomorrowStr?'Morgen':fmtShort(nx.d));
+  const teamTxt=teamLabel(nx.team,nx.squad||1);
+  const pitchTxt=pitchLabelOf(nx);
+  const oppTxt=nx.isExternal?(nx.isAway?'bei '+esc(nx.opponent||''):'vs '+esc(nx.opponent||'')):'';
+  box.innerHTML='<div class="start-next-card" onclick="openTerminFromStart(\''+nx.id+'\',\''+nx.d+'\')" style="cursor:pointer;">'
+    +'<div class="start-next-time"><span class="t">'+nx.t+'</span><span class="k">'+esc(dayLabel)+'</span></div>'
+    +'<div class="start-next-body"><div class="team">'+esc(teamTxt)+(oppTxt?' <span style="font-weight:600;color:var(--ink-soft);">'+oppTxt+'</span>':'')+'</div>'
+    +'<div class="meta"><span>'+typeLabel+'</span>'+(pitchTxt?'<span>· '+esc(pitchTxt)+'</span>':'')+'</div></div>'
+    +'<button class="start-open-btn" onclick="event.stopPropagation();openTerminFromStart(\''+nx.id+'\',\''+nx.d+'\')">Termin öffnen</button>'
+    +'</div>';
+}
+function openTerminFromStart(id,d){
+  const dt=new Date(d+'T00:00:00');
+  curY=dt.getFullYear(); curM=dt.getMonth(); yearShown=curY; selDate=d;
+  highlightId=id.startsWith('fb')?null:id; // externe Karten haben kein eigenes .hl-Styling, echte Termine/Training schon
+  goto('termine'); setView('monat');
+  setTimeout(()=>{ const el=document.getElementById('ev-'+id); if(el)el.scrollIntoView({behavior:'smooth',block:'center'}); },250);
+  setTimeout(()=>{ highlightId=null; render(); },5000);
+}
+function renderPitchToday(){
+  const box=document.getElementById('st-pitch-today');
+  if(!box)return;
+  const items=todaysCombinedAgenda().filter(e=>e.pitch||(e.halle&&e.halle.thirds&&e.halle.thirds.length)||e.isExternal);
+  if(!items.length){ box.innerHTML='<div class="empty-card">Heute keine Platzbelegung.</div>'; return; }
+  box.innerHTML=items.map(e=>{
+    const teamTxt=teamLabel(e.team,e.squad||1);
+    return '<div class="pitch-today-row">'
+      +'<div class="pt-time">'+e.t+'</div>'
+      +'<div class="pt-team">'+esc(teamTxt)+'</div>'
+      +'<div class="pt-pitch">'+esc(pitchLabelOf(e))+'</div>'
       +'</div>';
-  }else box.innerHTML='<div class="empty-card">Keine kommenden Termine.</div>';
-  document.getElementById('up-list').innerHTML=future.slice(1,4).map(rowHTML).join('')||'<div class="empty-card">Keine weiteren Termine.</div>';
-  renderFussballHeimspiele();
+  }).join('');
+}
+const svgOk='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="#16A34A"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>';
+const svgWarn='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="#C2410C"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>';
+function renderStartStatus(){
+  const box=document.getElementById('st-status');
+  if(!box)return;
+  const items=todaysCombinedAgenda();
+  const rows=[];
+
+  // Platzkonflikte: paarweise Überschneidung bei überlappenden Vierteln
+  let conflict=false;
+  for(let i=0;i<items.length&&!conflict;i++){
+    for(let j=i+1;j<items.length;j++){
+      const A=items[i],B=items[j];
+      if(A.t<eventBis(B)&&B.t<eventBis(A)){
+        const qa=A.pitch?pitchQuarters(A.pitch):(A.isExternal&&A.pitchIsFull?[1,2,3,4]:[]);
+        const qb=B.pitch?pitchQuarters(B.pitch):(B.isExternal&&B.pitchIsFull?[1,2,3,4]:[]);
+        if(qa.some(q=>qb.includes(q))){conflict=true;break;}
+      }
+    }
+  }
+  rows.push(conflict
+    ?{warn:true,text:'Platzkonflikt heute erkannt – bitte betroffene Termine prüfen.'}
+    :{warn:false,text:'Keine Platzkonflikte heute.'});
+
+  const noTrainer=items.filter(e=>e.isTraining&&(!e.trainerIds||!e.trainerIds.length)).length;
+  if(noTrainer)rows.push({warn:true,text:noTrainer+' Termin'+(noTrainer===1?'':'e')+' ohne Trainer.'});
+
+  const noPitch=items.filter(e=>!e.isExternal&&!e.pitch&&!(e.halle&&e.halle.thirds&&e.halle.thirds.length)&&!(e.res&&e.res.length)).length;
+  if(noPitch)rows.push({warn:true,text:noPitch+' Termin'+(noPitch===1?'':'e')+' ohne Platzzuordnung.'});
+
+  fussballCapacityWarningsOn(todayStr).forEach(w=>{
+    rows.push({warn:true,text:'fussball.de: '+w.games.length+' Spiele um '+w.t+' Uhr gleichzeitig angesetzt – mögl. Ansetzungsfehler.'});
+  });
+
+  box.innerHTML=rows.map(r=>'<div class="status-row '+(r.warn?'warn':'ok')+'">'+(r.warn?svgWarn:svgOk)+'<div>'+esc(r.text)+'</div></div>').join('');
 }
 
 /* ---------- fussball.de Heimspiele (read-only, per GitHub Action synchronisiert) ----------
