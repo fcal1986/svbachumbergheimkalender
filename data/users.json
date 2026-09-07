@@ -124,7 +124,9 @@
       "email": "markus.vielhaber@sv-bachum-bergheim.de",
       "admin": false,
       "classes": {
-        "C-Jugend": []
+        "C-Jugend": [
+          2
+        ]
       },
       "enc": {
         "salt": "oMuaOuqYPRxjxUi01//7eg==",
