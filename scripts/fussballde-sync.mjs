@@ -106,10 +106,19 @@ function parseMatches(html, debug) {
     const matchLink = $teamRow.find('a[href*="/spiel/"]').first().attr('href')
       || $row.find('a[href*="/spiel/"]').first().attr('href') || '';
 
+    // Ergebnis (falls das Spiel schon stattgefunden hat): steht in der Team-Zeile als "4:2"
+    // (noch nicht gespielt: "-:-", das matcht unser \d-Muster nicht und bleibt score=null).
+    let score = null;
+    $teamRow.find('td').each((_, td) => {
+      const t = cleanText($(td).text());
+      const sm = t.match(/^(\d{1,2})\s*:\s*(\d{1,2})$/);
+      if (sm && !score) score = { home: parseInt(sm[1], 10), away: parseInt(sm[2], 10) };
+    });
+
     matches.push({
       date: iso,
       time: timeMatch ? `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}` : null,
-      home, away, ownTeam, competition,
+      home, away, ownTeam, competition, score,
       link: matchLink ? new URL(matchLink, 'https://www.fussball.de').toString() : null,
     });
   });
@@ -156,10 +165,12 @@ async function fetchClubMatches(clubId, debug) {
   // weiten Datumsbereich + hohes "max" an – das Muster (datum-von/datum-bis/max)
   // stammt aus dem "Drucken"-Link, den fussball.de selbst für die Vollansicht nutzt.
   const today = new Date();
+  const daysBack = new Date(today.getTime());
+  daysBack.setDate(daysBack.getDate() - 21); // letzte 3 Wochen mit einschließen, damit Ergebnisse verfügbar sind
   const inOneYear = new Date(today.getTime());
   inOneYear.setFullYear(inOneYear.getFullYear() + 1);
   const fmt = (d) => `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
-  const url = `https://www.fussball.de/ajax.club.matchplan/-/datum-von/${fmt(today)}/datum-bis/${fmt(inOneYear)}/max/999/id/${clubId}/mode/PAGE/show-filter/true`;
+  const url = `https://www.fussball.de/ajax.club.matchplan/-/datum-von/${fmt(daysBack)}/datum-bis/${fmt(inOneYear)}/max/999/id/${clubId}/mode/PAGE/show-filter/true`;
   const res = await fetch(url, {
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36',
@@ -170,7 +181,7 @@ async function fetchClubMatches(clubId, debug) {
   });
   const html = await res.text();
   if (debug) {
-    console.log(`  [debug] Angefragter Zeitraum: ${fmt(today)} bis ${fmt(inOneYear)} (max 999)`);
+    console.log(`  [debug] Angefragter Zeitraum: ${fmt(daysBack)} bis ${fmt(inOneYear)} (max 999)`);
     console.log(`  [debug] URL: ${url}`);
     console.log(`  [debug] HTTP-Status: ${res.status} | Antwortlänge: ${html.length} Zeichen`);
     console.log(`  [debug] Erste 300 Zeichen der Antwort:\n${html.slice(0, 300).replace(/\n/g, ' ')}`);
@@ -332,9 +343,11 @@ async function main() {
   }
   console.log(`clubMatch-Filter: "${clubMatch}" (case-insensitive "startsWith"-Vergleich mit dem Heim-Teamnamen)`);
 
+  const cutoffIso = new Date(Date.now() - 21 * 86400000).toISOString().slice(0, 10);
+
   const allGames = matches
     .filter(m => isHomeMatch(m, clubMatch))
-    .filter(m => m.date >= todayIso) // nur zukünftige Spiele
+    .filter(m => m.date >= cutoffIso) // zukünftige Spiele + letzte 3 Wochen (für Ergebnisse)
     .map(m => ({
       d: m.date,
       t: m.time,
@@ -342,6 +355,7 @@ async function main() {
       squad: extractSquadNumber(m.home), // "wir" sind bei einem Heimspiel die Heim-Mannschaft
       opponent: m.away,
       competition: m.competition,
+      score: m.score || null, // {home,away} sobald das Spiel gespielt wurde, sonst null
       link: m.link,
     }))
     .sort((a, b) => (a.d + (a.t || '')).localeCompare(b.d + (b.t || '')));
@@ -351,7 +365,7 @@ async function main() {
   // Konfliktprüfung ein (siehe index.html: nur "games", nicht "awayGames").
   const awayGames = matches
     .filter(m => isHomeMatch({ ...m, home: m.away }, clubMatch) && !isHomeMatch(m, clubMatch))
-    .filter(m => m.date >= todayIso)
+    .filter(m => m.date >= cutoffIso)
     .map(m => ({
       d: m.date,
       t: m.time,
@@ -359,11 +373,12 @@ async function main() {
       squad: extractSquadNumber(m.away), // "wir" sind bei einem Auswärtsspiel die Gast-Mannschaft
       opponent: m.home, // bei einem Auswärtsspiel ist "home" der Gegner
       competition: m.competition,
+      score: m.score || null,
       link: m.link,
     }))
     .sort((a, b) => (a.d + (a.t || '')).localeCompare(b.d + (b.t || '')));
 
-  console.log(`${allGames.length} zukünftige Heimspiele und ${awayGames.length} zukünftige Auswärtsspiele gefunden.`);
+  console.log(`${allGames.length} Heimspiele (inkl. letzte 3 Wochen) und ${awayGames.length} Auswärtsspiele gefunden.`);
 
   const output = { updated: new Date().toISOString(), games: allGames, awayGames, strategy: usedStrategy };
   await fs.writeFile(OUTPUT_PATH, JSON.stringify(output, null, 2) + '\n');
