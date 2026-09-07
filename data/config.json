@@ -7,5 +7,13 @@
     "password": "svbachumbergheim",
     "first": "Vorstand",
     "last": "Admin"
+  },
+  "fussballde": {
+  "clubId": "00ES8GN8LS00007LVV0AG08LVUPGND5I",
+  "clubMatch": "SV Bachum",
+  "bufferBeforeMin": 15,
+  "durationMinFull": 110,
+  "durationMinYouth": 75,
+  "shareCategories": ["E-Junioren", "F-Junioren", "G-Junioren", "Bambini"]
   }
 }
