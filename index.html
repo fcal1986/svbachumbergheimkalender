@@ -108,6 +108,11 @@
   .result-team{font-size:12.5px;font-weight:700;color:var(--ink);}
   .result-opp{font-size:10.5px;color:var(--ink-soft);}
   .result-score{flex:0 0 auto;font-size:15px;font-weight:800;color:var(--ink);}
+  .score-pill{flex:0 0 auto;font-size:14px;font-weight:800;border-radius:8px;padding:5px 10px;color:#fff;}
+  .score-pill.win{background:#16A34A;}
+  .score-pill.draw{background:#CA8A04;}
+  .score-pill.loss{background:#DC2626;}
+  .event-card.has-score{opacity:1;}
   .status-row.conflict-row{cursor:pointer;}
   .conflict-meta{font-size:10.5px;color:#9A3412;margin-top:3px;}
   .conflict-dates{font-size:10.5px;color:#9A3412;margin-top:6px;line-height:1.5;padding-top:6px;border-top:1px solid rgba(154,52,18,.15);}
@@ -544,8 +549,6 @@
 
       <p class="section-label">Platzbelegung heute</p>
       <div id="st-pitch-today"></div>
-
-      <div id="st-results-wrap"></div>
 
       <p class="section-label">Status · gesamte Saison</p>
       <div id="st-status"></div>
@@ -1700,6 +1703,16 @@ function fussballTrainersFor(team,squad){
   });
   return names.length?{trainerIds:ids,trainerNames:names}:null;
 }
+/* Ergebnis-Helfer: liefert {us,them,outcome,text} aus e.score, immer aus "unserer" Sicht
+   (also bei Auswärtsspielen nicht einfach Heim:Auswärts von fussball.de übernehmen –
+   sonst liest sich ein 3:1-Sieg auswärts fälschlich wie eine Niederlage). */
+function scoreInfo(e){
+  if(!e.score)return null;
+  const us=e.isAway?e.score.away:e.score.home;
+  const them=e.isAway?e.score.home:e.score.away;
+  const outcome=us>them?'win':(us<them?'loss':'draw');
+  return {us,them,outcome,text:us+':'+them};
+}
 function externalRowHTML(e){
   const dt=new Date(e.d+'T00:00:00');
   const dow=DAYS_S[dt.getDay()];
@@ -1708,12 +1721,13 @@ function externalRowHTML(e){
   const acts=(session&&!e.isAway)?'<button class="ibtn" title="In Termin übernehmen" onclick="newEventFromFussball('+e.fbIndex+')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>':'';
   const trainerObj=fussballTrainersFor(e.team,e.squad);
   const trainerHtml=trainerObj?getTrainersContactHTML(trainerObj):'';
-  return '<div class="event-card external-card'+(e.isAway?' external-away':'')+'" id="ev-'+e.id+'">'
+  const sc=scoreInfo(e);
+  return '<div class="event-card external-card'+(e.isAway?' external-away':'')+(sc?' has-score '+sc.outcome:'')+'" id="ev-'+e.id+'">'
     +'<div class="ev-head">'
     +'<div class="ev-date-box"><span class="ev-dow">'+dow+'</span><span class="ev-day">'+dd+'</span></div>'
     +'<div class="ev-sep"></div>'
     +'<div class="ev-title-box"><h4>'+esc(e.title)+'</h4><div class="ev-sub">'+e.t+'–'+bis+' · fussball.de'+(e.isAway?' · belegt keinen eigenen Platz':'')+'</div></div>'
-    +'<div class="row-acts">'+acts+'</div>'
+    +(sc?'<div class="score-pill '+sc.outcome+'">'+sc.text+'</div>':'<div class="row-acts">'+acts+'</div>')
     +'</div>'
     +'<div class="ev-body">'
     +'<div class="ev-times">'
@@ -2009,37 +2023,7 @@ function renderStart(){
   document.getElementById('st-summary').textContent=parts.length?parts.join(' · '):'Heute nichts geplant';
 
   renderPitchToday();
-  renderRecentResults();
   renderStartStatus();
-}
-
-/* ---------- Letzte Ergebnisse (fussball.de) ---------- */
-function recentFussballResults(days){
-  const cutoff=ymd(new Date(Date.now()-days*86400000));
-  const home=fussballDisplayAll().filter(e=>e.d<todayStr&&e.d>=cutoff&&e.score).map(e=>({...e,isAway:false}));
-  const away=fussballDisplayAwayAll().filter(e=>e.d<todayStr&&e.d>=cutoff&&e.score).map(e=>({...e,isAway:true}));
-  return home.concat(away).sort((a,b)=>b.d.localeCompare(a.d)||b.t.localeCompare(a.t));
-}
-function renderRecentResults(){
-  const box=document.getElementById('st-results-wrap');
-  if(!box)return;
-  const results=recentFussballResults(14);
-  if(!results.length){ box.innerHTML=''; return; }
-  let h='<p class="section-label">Letzte Ergebnisse · fussball.de</p>';
-  h+=results.slice(0,8).map(e=>{
-    const us=e.isAway?e.score.away:e.score.home;
-    const them=e.isAway?e.score.home:e.score.away;
-    const outcome=us>them?'win':(us<them?'loss':'draw');
-    const teamTxt=teamLabel(e.team,e.squad||1);
-    const scoreTxt=us+':'+them; // immer "wir:Gegner", unabhängig von Heim/Auswärts – sonst leicht misszuverstehen
-    return '<div class="result-row '+outcome+'">'
-      +'<div class="result-date">'+fmtShort(e.d)+'</div>'
-      +'<div class="result-body"><div class="result-team">'+esc(teamTxt)+'</div>'
-      +'<div class="result-opp">'+(e.isAway?'bei ':'vs ')+esc(e.opponent||'')+'</div></div>'
-      +'<div class="result-score">'+scoreTxt+'</div>'
-      +'</div>';
-  }).join('');
-  box.innerHTML=h;
 }
 
 /* ---------- Neue Start-Seite: kompaktes Tages-Dashboard ---------- */
@@ -2097,10 +2081,11 @@ function renderPitchToday(){
     let typeTxt=type==='training'?'Training':(type==='spiel'?(isFriendly(e)?'Freundschaftsspiel':'Spiel'):'Termin');
     if(e.isExternal)typeTxt+=e.isAway?' · auswärts':' · heim';
     const visual=pitchVisualOf(e)||'<span class="badge-pitch" style="opacity:.5;">–</span>';
+    const sc=scoreInfo(e);
     return '<div class="pitch-today-row'+(running?' pt-running':'')+'" onclick="openTerminFromStart(\''+e.id+'\',\''+e.d+'\')">'
       +'<div class="pt-time">'+(running?'<span class="pt-live">●</span>':'')+e.t+'</div>'
       +'<div class="pt-team"><div class="pt-team-name">'+esc(teamTxt)+'</div><div class="pt-type">'+esc(typeTxt)+'</div></div>'
-      +'<div class="pt-visual">'+visual+'</div>'
+      +(sc?'<div class="score-pill '+sc.outcome+'" style="font-size:12px;padding:3px 8px;">'+sc.text+'</div>':'<div class="pt-visual">'+visual+'</div>')
       +'</div>';
   }).join('');
 }
@@ -2170,37 +2155,50 @@ function toggleConflictDetail(id){
   const el=document.getElementById(id);
   if(el)el.style.display=el.style.display==='none'?'block':'none';
 }
+let statusExpanded=false;
+function toggleStatusExpanded(){ statusExpanded=!statusExpanded; renderStartStatus(); }
+function warnRowHTML(text){ return '<div class="status-row warn">'+svgWarn+'<div>'+esc(text)+'</div></div>'; }
+function conflictRowHTML(g,i){
+  const wd=DAYS[new Date(g.first+'T00:00:00').getDay()];
+  const dateInfo=g.count>1
+    ?(g.count+'× · '+(g.count>3?'jeden '+wd+', ':'')+'erstmals '+fmtShort(g.first)+(g.last!==g.first?' bis '+fmtShort(g.last):''))
+    :fmtShort(g.first);
+  const detailId='conf-detail-'+i;
+  const dateList=g.dates.map(fmtShort).join(', ');
+  return '<div class="status-row warn conflict-row" onclick="toggleConflictDetail(\''+detailId+'\')">'
+    +svgWarn
+    +'<div style="flex:1;min-width:0;">'
+    +'<div>'+esc(g.label)+' um '+g.t+' Uhr</div>'
+    +'<div class="conflict-meta">'+esc(dateInfo)+(g.count>1?' · Termine anzeigen ▾':'')+'</div>'
+    +(g.count>1?'<div id="'+detailId+'" class="conflict-dates" style="display:none;">'+esc(dateList)+'</div>':'')
+    +'</div>'
+    +'</div>';
+}
 function renderStartStatus(){
   const box=document.getElementById('st-status');
   if(!box)return;
-  const groups=seasonConflictScan();
   let html='';
+
+  // Tagesaktuelle Hinweise zuerst – am direktesten umsetzbar.
+  const todays=todaysCombinedAgenda();
+  const noTrainer=todays.filter(e=>e.isTraining&&(!e.trainerIds||!e.trainerIds.length)).length;
+  if(noTrainer)html+=warnRowHTML(noTrainer+' Termin'+(noTrainer===1?'':'e')+' heute ohne Trainer.');
+  const noPitch=todays.filter(e=>!e.isExternal&&!e.pitch&&!(e.halle&&e.halle.thirds&&e.halle.thirds.length)&&!(e.res&&e.res.length)).length;
+  if(noPitch)html+=warnRowHTML(noPitch+' Termin'+(noPitch===1?'':'e')+' heute ohne Platzzuordnung.');
+
+  // Saison-Konflikte: nur die 3 dringendsten (soonest) direkt zeigen, Rest hinter Toggle.
+  const groups=seasonConflictScan();
   if(!groups.length){
     html+='<div class="status-row ok">'+svgOk+'<div>Keine Platzkonflikte in der gesamten Saison.</div></div>';
   }else{
-    html+=groups.map((g,i)=>{
-      const wd=DAYS[new Date(g.first+'T00:00:00').getDay()];
-      const dateInfo=g.count>1
-        ?(g.count+'× · '+(g.count>3?'jeden '+wd+', ':'')+'erstmals '+fmtShort(g.first)+(g.last!==g.first?' bis '+fmtShort(g.last):''))
-        :fmtShort(g.first);
-      const detailId='conf-detail-'+i;
-      const dateList=g.dates.map(fmtShort).join(', ');
-      return '<div class="status-row warn conflict-row" onclick="toggleConflictDetail(\''+detailId+'\')">'
-        +svgWarn
-        +'<div style="flex:1;min-width:0;">'
-        +'<div>'+esc(g.label)+' um '+g.t+' Uhr</div>'
-        +'<div class="conflict-meta">'+esc(dateInfo)+(g.count>1?' · Termine anzeigen ▾':'')+'</div>'
-        +(g.count>1?'<div id="'+detailId+'" class="conflict-dates" style="display:none;">'+esc(dateList)+'</div>':'')
-        +'</div>'
-        +'</div>';
-    }).join('');
+    const shown=statusExpanded?groups:groups.slice(0,3);
+    html+=shown.map((g,i)=>conflictRowHTML(g,i)).join('');
+    if(groups.length>3){
+      html+='<button class="ghost-btn" style="margin-top:2px;width:100%;" onclick="toggleStatusExpanded()">'
+        +(statusExpanded?'Weniger anzeigen':'+ '+(groups.length-3)+' weitere Konflikte in der Saison anzeigen')
+        +'</button>';
+    }
   }
-
-  const todays=todaysCombinedAgenda();
-  const noTrainer=todays.filter(e=>e.isTraining&&(!e.trainerIds||!e.trainerIds.length)).length;
-  if(noTrainer)html+='<div class="status-row warn">'+svgWarn+'<div>'+noTrainer+' Termin'+(noTrainer===1?'':'e')+' heute ohne Trainer.</div></div>';
-  const noPitch=todays.filter(e=>!e.isExternal&&!e.pitch&&!(e.halle&&e.halle.thirds&&e.halle.thirds.length)&&!(e.res&&e.res.length)).length;
-  if(noPitch)html+='<div class="status-row warn">'+svgWarn+'<div>'+noPitch+' Termin'+(noPitch===1?'':'e')+' heute ohne Platzzuordnung.</div></div>';
 
   box.innerHTML=html;
 }
