@@ -129,6 +129,18 @@ function parseMatches(html, debug) {
   return matches;
 }
 
+// Erkennt die Mannschafts-Nummer aus dem Vereinsnamen, z.B. "SV Bachum-Bergh. I" -> 1,
+// "SV Bachum/Bergheim III" -> 3, "SV Bachum/Bergheim" (ohne Suffix) -> 1.
+// Nötig, um z.B. "E1" von "E2" zu unterscheiden (fussball.de trennt das nur über den
+// Vereinsnamen der jeweiligen Mannschaft, nicht über ein eigenes Feld).
+function extractSquadNumber(clubName) {
+  const name = (clubName || '').trim();
+  const m = name.match(/\b(III|II|IV|V|I)\s*$/) || name.match(/\b([1-9])\s*$/);
+  if (!m) return 1;
+  const roman = { I: 1, II: 2, III: 3, IV: 4, V: 5 };
+  return roman[m[1]] || parseInt(m[1], 10) || 1;
+}
+
 // Erkennt typische Anzeichen, dass wir statt der echten Seite eine Bot-Schutz-
 // / Cookie-Consent- / Fehlerseite bekommen haben (häufigste Ursache für "0 Spiele
 // gefunden" ohne HTTP-Fehler).
@@ -327,6 +339,7 @@ async function main() {
       d: m.date,
       t: m.time,
       team: m.ownTeam,
+      squad: extractSquadNumber(m.home), // "wir" sind bei einem Heimspiel die Heim-Mannschaft
       opponent: m.away,
       competition: m.competition,
       link: m.link,
@@ -343,6 +356,7 @@ async function main() {
       d: m.date,
       t: m.time,
       team: m.ownTeam,
+      squad: extractSquadNumber(m.away), // "wir" sind bei einem Auswärtsspiel die Gast-Mannschaft
       opponent: m.home, // bei einem Auswärtsspiel ist "home" der Gegner
       competition: m.competition,
       link: m.link,
