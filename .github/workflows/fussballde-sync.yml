@@ -4,7 +4,12 @@ on:
   schedule:
     # Alle 6 Stunden. Bewusst nicht häufiger, um fussball.de nicht unnötig zu belasten.
     - cron: '17 */6 * * *'
-  workflow_dispatch: {} # erlaubt manuellen Start über den "Actions"-Tab
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: 'Ausführliches Debug-Log ausgeben (bei Problemen aktivieren)'
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -23,6 +28,8 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: fussball.de Heimspiele abrufen
+        env:
+          FUSSBALLDE_DEBUG: ${{ (github.event.inputs.debug || 'false') == 'true' && '1' || '0' }}
         run: node scripts/fussballde-sync.mjs
 
       - name: Änderungen committen (falls vorhanden)
