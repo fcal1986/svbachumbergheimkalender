@@ -15,13 +15,11 @@
       "note": "",
       "trainerIds": [
         "a30f8c9b-96f9-4557-b28b-619e122080ea",
-        "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-        "bb26c9cb-1831-4209-a57b-2d97596593ff"
+        "935d13de-b21e-43c5-a35f-405bfaf4cc6c"
       ],
       "trainerNames": [
         "David Skwara",
-        "Fabrizio Calcagno",
-        "Marc Geauf"
+        "Fabrizio Calcagno"
       ],
       "validFrom": "2026-07-01",
       "validUntil": "2027-06-30",
@@ -41,12 +39,8 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [
-        "bb26c9cb-1831-4209-a57b-2d97596593ff"
-      ],
-      "trainerNames": [
-        "Marc Geauf"
-      ],
+      "trainerIds": [],
+      "trainerNames": [],
       "validFrom": "2026-07-19",
       "validUntil": null
     },
@@ -273,12 +267,8 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [
-        "bb26c9cb-1831-4209-a57b-2d97596593ff"
-      ],
-      "trainerNames": [
-        "Marc Geauf"
-      ],
+      "trainerIds": [],
+      "trainerNames": [],
       "validFrom": "2026-09-01",
       "validUntil": null
     },
@@ -521,13 +511,11 @@
       "note": "",
       "trainerIds": [
         "a30f8c9b-96f9-4557-b28b-619e122080ea",
-        "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-        "bb26c9cb-1831-4209-a57b-2d97596593ff"
+        "935d13de-b21e-43c5-a35f-405bfaf4cc6c"
       ],
       "trainerNames": [
         "David Skwara",
-        "Fabrizio Calcagno",
-        "Marc Geauf"
+        "Fabrizio Calcagno"
       ],
       "trainerId": null,
       "trainerName": "",
