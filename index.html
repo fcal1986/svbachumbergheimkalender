@@ -895,18 +895,27 @@ function fussballGameLinkId(g){ return 'fb-'+(g.link||(g.d+'|'+g.t+'|'+g.opponen
 /* ---------- fussball.de-Heimspiele in der Terminübersicht anzeigen (Liste/Monat/Jahr) ----------
    Getrennt von fussballInstancesOn() (das für die Konfliktprüfung den Vor-/Nachlauf-Puffer
    einrechnet): hier zeigen wir die reale Anstoßzeit, wie sie auch auf der Start-Seite steht. */
-function fussballFilterTeam(team){
-  // fussball.de nennt Jugendmannschaften "…-Junioren", intern heißt die Kategorie "…-Jugend" –
-  // ohne diese Übersetzung würde cat() Jugendspiele fälschlich als "Verein" einordnen.
-  return /junioren/i.test(team||'') ? team.replace(/junioren/i,'Jugend') : (team||'Verein');
+function fussballFilterTeam(team,squad){
+  const t=(team||'').trim();
+  // fussball.de nennt Jugendmannschaften "…-Junioren" + Squad-Nummer getrennt; intern heißt
+  // die Kategorie "…-Jugend" mit Squad-Nummer (z.B. "E-Jugend" + 2 -> "E2-Jugend"). Das passt
+  // bereits zum bestehenden Schema, nur der Name muss übersetzt werden.
+  if(/junioren/i.test(t)) return {team:t.replace(/junioren/i,'Jugend'), squad:squad||1};
+  // Erwachsenen-Teams heißen in der App NICHT "Herren"+Squad, sondern die Nummer steckt direkt
+  // im Namen ("1. Herren", "2. Herren", "3. Herren") – ohne diese Übersetzung matcht der Filter
+  // nie mit den eigenen Terminen/Trainings, obwohl es dieselbe Mannschaft ist.
+  if(/^herren$/i.test(t)) return {team:(squad&&squad>1?squad+'. Herren':'1. Herren'), squad:1};
+  return {team:t||'Verein', squad:squad||1};
 }
 function fussballDisplayAll(){
   return (FUSSBALLDE.games||[]).map((g,idx)=>{
+    const mapped=fussballFilterTeam(g.team,g.squad);
+    const label=teamLabel(mapped.team,mapped.squad); // z.B. "E2-Jugend" statt nur "E-Junioren"
     const bis=g.t?shiftTimeClamped(g.t,fussballDurationMin(g.team)):'23:59';
     return {
       id:fussballGameLinkId(g), d:g.d, t:g.t||'00:00', bis,
-      title:'Heimspiel: '+(g.team?g.team+' – ':'')+g.opponent,
-      team:fussballFilterTeam(g.team), squad:g.squad||1, competition:g.competition||'',
+      title:'Heimspiel: '+label+' – '+g.opponent,
+      team:mapped.team, squad:mapped.squad, competition:g.competition||'',
       isExternal:true, fbIndex:idx, ownerName:'fussball.de'
     };
   });
@@ -914,11 +923,13 @@ function fussballDisplayAll(){
 function fussballDisplayInstancesOn(d){ return fussballDisplayAll().filter(e=>e.d===d); }
 function fussballDisplayAwayAll(){
   return (FUSSBALLDE.awayGames||[]).map((g)=>{
+    const mapped=fussballFilterTeam(g.team,g.squad);
+    const label=teamLabel(mapped.team,mapped.squad);
     const bis=g.t?shiftTimeClamped(g.t,fussballDurationMin(g.team)):'23:59';
     return {
       id:'fbaway-'+(g.link||(g.d+'|'+g.t+'|'+g.opponent)), d:g.d, t:g.t||'00:00', bis,
-      title:(g.team?g.team+' ':'')+'bei '+g.opponent,
-      team:fussballFilterTeam(g.team), squad:g.squad||1, competition:g.competition||'',
+      title:label+' bei '+g.opponent,
+      team:mapped.team, squad:mapped.squad, competition:g.competition||'',
       isExternal:true, isAway:true, ownerName:'fussball.de'
     };
   });
