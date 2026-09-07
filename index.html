@@ -128,6 +128,8 @@
   .team-filter-actions button{flex:1;border-radius:9px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;}
   .team-filter-actions .apply-btn{background:var(--black-btn);color:#fff;border:none;}
   .team-filter-actions .reset-btn{background:var(--bg);color:var(--ink);border:1.5px solid var(--line);}
+  .type-filter-chip{display:inline-flex;align-items:center;gap:8px;background:var(--black-btn);color:#fff;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;margin-bottom:10px;}
+  .type-filter-chip span{cursor:pointer;opacity:.8;font-weight:900;}
   .fb-date{flex:0 0 auto;text-align:center;min-width:38px;}
   .fb-date .fb-dow{display:block;font-size:9.5px;color:var(--ink-soft);text-transform:uppercase;font-weight:700;}
   .fb-date .fb-day{display:block;font-size:14px;font-weight:800;color:var(--ink);}
@@ -496,8 +498,8 @@
   <div class="pane active" data-pane="start">
     <div class="content">
       <div class="stat-row">
-        <div class="stat-card"><div class="num" id="st-count">–</div><div class="lbl">Termine diesen Monat</div></div>
-        <div class="stat-card green"><div class="num" id="st-b">–</div><div class="lbl" id="st-b-lbl">Kommende</div></div>
+        <div class="stat-card" onclick="goToMonthFiltered('training')" style="cursor:pointer;"><div class="num" id="st-count">–</div><div class="lbl">Training diesen Monat</div></div>
+        <div class="stat-card green" onclick="goToMonthFiltered('spiele')" style="cursor:pointer;"><div class="num" id="st-b">–</div><div class="lbl">Spiele diesen Monat</div></div>
       </div>
       <div id="st-heute"></div>
       <div id="fb-heimspiele-wrap"></div>
@@ -531,6 +533,7 @@
         <button type="button" class="team-filter-btn" id="team-filter-btn" onclick="toggleTeamFilterPanel()">Mannschaften <span id="team-filter-count"></span> ▾</button>
       </div>
       <div id="team-filter-panel" class="team-filter-panel" style="display:none;"></div>
+      <div id="type-filter-banner"></div>
       <div id="view-liste" style="display:none;"></div>
       <div id="view-monat" style="display:none;"></div>
       <div id="view-jahr" style="display:none;"></div>
@@ -800,6 +803,7 @@ const ALL_CLASSES=['G-Jugend','F-Jugend','E-Jugend','D-Jugend','C-Jugend','B-Jug
 const today=new Date(), todayStr=ymd(today);
 let view='monat', filter='alle';
 let teamMultiFilter=new Set(), teamFilterPending=new Set(); // Mehrfachauswahl bestimmter Mannschaften (z.B. E1+E2), ersetzt bei Nutzung den Einzel-Filter
+let typeFilter=null; // 'training' | 'spiele' | null – von den Start-Kacheln "Training/Spiele diesen Monat" gesetzt
 let curY=today.getFullYear(), curM=today.getMonth(), yearShown=today.getFullYear();
 let selDate=todayStr, pitchMode='ganz', pitchPart=null, editingId=null, highlightId=null;
 let formSkipFussballLink=null; // wenn ein fussball.de-Heimspiel gerade in einen Termin übernommen wird: dessen eigenes "Belegt"-Fenster nicht als Konflikt mit sich selbst werten
@@ -1428,9 +1432,9 @@ function setView(v){
   render();
 }
 function setFilter(f){
-  filter=f; teamMultiFilter=new Set(); listDaysLoaded=30;
+  filter=f; teamMultiFilter=new Set(); typeFilter=null; listDaysLoaded=30;
   document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f===f));
-  updateTeamFilterBtn();
+  updateTeamFilterBtn(); updateTypeFilterBanner();
   render(); renderStart();
 }
 function buildFilters(){
@@ -1455,7 +1459,33 @@ function buildFilters(){
   updateTeamFilterBtn();
 }
 
-/* ---------- Mehrfachauswahl bestimmter Mannschaften (z.B. "E1 und E2") ---------- */
+/* ---------- Start-Kacheln "Training/Spiele diesen Monat" ---------- */
+function countTrainingInMonth(monthKey){
+  const[y,m]=monthKey.split('-').map(Number);
+  const last=new Date(y,m,0).getDate();
+  let c=0;
+  for(let d=1;d<=last;d++) c+=trainingInstancesOn(monthKey+'-'+String(d).padStart(2,'0')).length;
+  return c;
+}
+function countSpieleInMonth(monthKey){
+  const inMonth=g=>g.d&&g.d.slice(0,7)===monthKey;
+  return (FUSSBALLDE.games||[]).filter(inMonth).length+(FUSSBALLDE.awayGames||[]).filter(inMonth).length;
+}
+function goToMonthFiltered(type){
+  typeFilter=type; teamMultiFilter=new Set(); filter='alle';
+  curY=today.getFullYear(); curM=today.getMonth(); selDate=todayStr;
+  goto('termine'); setView('monat');
+  updateTeamFilterBtn(); updateTypeFilterBanner();
+}
+function clearTypeFilter(){ typeFilter=null; updateTypeFilterBanner(); render(); }
+function updateTypeFilterBanner(){
+  const el=document.getElementById('type-filter-banner');
+  if(!el)return;
+  if(!typeFilter){ el.innerHTML=''; return; }
+  const label=typeFilter==='training'?'Nur Training':'Nur Spiele (fussball.de)';
+  el.innerHTML='<div class="type-filter-chip">'+label+' <span onclick="clearTypeFilter()">✕</span></div>';
+}
+
 function filterOptionLabel(team,squad){
   if(isJugend(team)) return jugendLetter(team)+squad+'-Jugend';
   const roman=['','I','II','III','IV','V'];
@@ -1519,6 +1549,8 @@ function updateTeamFilterBtn(){
 
 /* ---------- Termine ---------- */
 function passesFilter(e){
+  if(typeFilter==='training'&&!e.isTraining)return false;
+  if(typeFilter==='spiele'&&!e.isExternal)return false;
   if(teamMultiFilter.size) return teamMultiFilter.has((e.team)+':'+(e.squad||1));
   if(filter==='alle') return true;
   if(filter==='meine') return session&&(e.ownerId===session.id||(e.isTraining&&e.trainerId===session.id));
@@ -1601,12 +1633,31 @@ function rowHTML(e){
     +'</div>'
     +'</div>';
 }
+/* Trainer-Zuordnung für fussball.de-Spiele: sucht passende Trainingszeit(en) mit
+   gleicher Mannschaft+Squad und übernimmt deren Trainer-Kontakte – so weiß man bei
+   einem Heim-/Auswärtsspiel z.B. der E2-Jugend sofort, wer der Ansprechpartner ist. */
+function fussballTrainersFor(team,squad){
+  const slots=TRAINING.filter(s=>s.team===team&&(s.squad||1)===(squad||1));
+  if(!slots.length)return null;
+  const ids=[],names=[],seen=new Set();
+  slots.forEach(s=>{
+    const sIds=getTrainerIds(s),sNames=getTrainerNames(s);
+    sIds.forEach((id,i)=>{
+      const key=id||sNames[i];
+      if(!key||seen.has(key))return;
+      seen.add(key); ids.push(id); names.push(sNames[i]||'');
+    });
+  });
+  return names.length?{trainerIds:ids,trainerNames:names}:null;
+}
 function externalRowHTML(e){
   const dt=new Date(e.d+'T00:00:00');
   const dow=DAYS_S[dt.getDay()];
   const dd=String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0');
   const bis=eventBis(e);
   const acts=(session&&!e.isAway)?'<button class="ibtn" title="In Termin übernehmen" onclick="newEventFromFussball('+e.fbIndex+')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>':'';
+  const trainerObj=fussballTrainersFor(e.team,e.squad);
+  const trainerHtml=trainerObj?getTrainersContactHTML(trainerObj):'';
   return '<div class="event-card external-card'+(e.isAway?' external-away':'')+'" id="ev-'+e.id+'">'
     +'<div class="ev-head">'
     +'<div class="ev-date-box"><span class="ev-dow">'+dow+'</span><span class="ev-day">'+dd+'</span></div>'
@@ -1620,6 +1671,7 @@ function externalRowHTML(e){
     +'<div class="ev-time-col"><div class="ev-t">'+bis+'</div><div class="ev-tl">Bis</div></div>'
     +'</div>'
     +'<div class="badges" style="margin-top:10px;"><span class="badge-fb">⚽ '+esc(e.competition||'fussball.de')+'</span></div>'
+    +(trainerHtml?'<div class="ev-contact">'+trainerHtml+'</div>':'')
     +'</div>'
     +'</div>';
 }
@@ -1895,9 +1947,9 @@ function renderYear(){
 }
 function renderStart(){
   const all=EVENTS.slice().sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t)),future=all.filter(e=>e.d>=todayStr);
-  document.getElementById('st-count').textContent=all.filter(e=>e.d.slice(0,7)===todayStr.slice(0,7)).length;
-  if(session){document.getElementById('st-b').textContent=future.filter(e=>e.ownerId===session.id).length;document.getElementById('st-b-lbl').textContent='Meine';}
-  else{document.getElementById('st-b').textContent=future.length;document.getElementById('st-b-lbl').textContent='Kommend';}
+  const monthKey=todayStr.slice(0,7);
+  document.getElementById('st-count').textContent=countTrainingInMonth(monthKey);
+  document.getElementById('st-b').textContent=countSpieleInMonth(monthKey);
   const stHeute=document.getElementById('st-heute');
   if(stHeute) stHeute.innerHTML='<div onclick="goto(\'training\')" style="cursor:pointer;">'+todaysTrainingHTML()+'</div>';
   const nx=future[0],box=document.getElementById('nx-box');
@@ -1961,10 +2013,13 @@ function renderFussballHeimspiele(){
   }
   h+=games.map(g=>{
     const dt=new Date(g.d+'T00:00:00'),dow=DAYS_S[dt.getDay()],dd=String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0');
+    const tr=fussballTrainersFor(g.team,g.squad);
     return '<div class="fb-card">'
       +'<div class="fb-date"><span class="fb-dow">'+dow+'</span><span class="fb-day">'+dd+'</span></div>'
       +'<div class="fb-body"><b>'+esc(g.title.replace(/^Heimspiel:\s*/,''))+'</b>'
-      +'<div class="fb-sub">'+(g.t||'Zeit offen')+' · '+esc(g.competition||'')+'</div></div>'
+      +'<div class="fb-sub">'+(g.t||'Zeit offen')+' · '+esc(g.competition||'')+'</div>'
+      +(tr?'<div class="fb-sub">👤 '+tr.trainerNames.map(esc).join(', ')+'</div>':'')
+      +'</div>'
       +(session?'<button class="fb-take-btn" onclick="newEventFromFussball('+g.fbIndex+')">Übernehmen</button>':'')
       +'</div>';
   }).join('');
@@ -1987,10 +2042,13 @@ function renderFussballAuswaertsspiele(){
   let h='<p class="section-label">Auswärtsspiele · fussball.de</p>';
   h+=games.map(g=>{
     const dt=new Date(g.d+'T00:00:00'),dow=DAYS_S[dt.getDay()],dd=String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0');
+    const tr=fussballTrainersFor(g.team,g.squad);
     return '<div class="fb-card fb-card-away">'
       +'<div class="fb-date"><span class="fb-dow">'+dow+'</span><span class="fb-day">'+dd+'</span></div>'
       +'<div class="fb-body"><b>'+esc(g.title)+'</b>'
-      +'<div class="fb-sub">'+(g.t||'Zeit offen')+' · '+esc(g.competition||'')+' · belegt keinen eigenen Platz</div></div>'
+      +'<div class="fb-sub">'+(g.t||'Zeit offen')+' · '+esc(g.competition||'')+' · belegt keinen eigenen Platz</div>'
+      +(tr?'<div class="fb-sub">👤 '+tr.trainerNames.map(esc).join(', ')+'</div>':'')
+      +'</div>'
       +'</div>';
   }).join('');
   if(moreCount>0) h+='<button class="ghost-btn" style="margin:2px 0 8px;" onclick="goto(\'termine\')">+ '+moreCount+' weitere'+(moreCount===1?'s':'')+' Auswärtsspiel'+(moreCount===1?'':'e')+' in der Terminübersicht</button>';
@@ -3394,6 +3452,7 @@ function openHashEvent(){
 
 /* ---------- Boot ---------- */
 function render(){
+  updateTypeFilterBanner();
   if(view==='liste')renderList();
   if(view==='monat')renderMonth();
   if(view==='jahr')renderYear();
