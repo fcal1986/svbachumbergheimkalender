@@ -55,7 +55,7 @@ function parseMatches(html, debug) {
   const $ = cheerio.load(html);
   const matches = [];
   const compRows = $('tr.row-competition');
-  let noTeamRowCount = 0, noDateCount = 0;
+  let noTeamRowCount = 0, noDateCount = 0, noScoreDebugCount = 0;
   let currentDate = null; // fussball.de wiederholt das Datum nicht bei mehreren Spielen am selben Tag –
                           // wir übernehmen es dann von der zuletzt gesehenen Zeile mit Datum.
 
@@ -108,12 +108,21 @@ function parseMatches(html, debug) {
 
     // Ergebnis (falls das Spiel schon stattgefunden hat): steht in der Team-Zeile als "4:2"
     // (noch nicht gespielt: "-:-", das matcht unser \d-Muster nicht und bleibt score=null).
+    // Bewusst NICHT auf exakten Zellinhalt verankert (^...$) – fussball.de zeigt neben dem
+    // Ergebnis oft noch ein Häkchen-Symbol o.ä. in derselben Zelle, das den exakten Match
+    // sonst verhindern würde.
     let score = null;
+    const scoreDebugCells = [];
     $teamRow.find('td').each((_, td) => {
       const t = cleanText($(td).text());
-      const sm = t.match(/^(\d{1,2})\s*:\s*(\d{1,2})$/);
+      if (debug) scoreDebugCells.push(t);
+      const sm = t.match(/(\d{1,2})\s*:\s*(\d{1,2})/);
       if (sm && !score) score = { home: parseInt(sm[1], 10), away: parseInt(sm[2], 10) };
     });
+    if (debug && matchLink && !score && noScoreDebugCount < 5) {
+      noScoreDebugCount++;
+      console.log(`  [debug] Kein Ergebnis erkannt für "${home}" vs "${away}" (${iso}) – Zellinhalte der Team-Zeile: ${JSON.stringify(scoreDebugCells)}`);
+    }
 
     matches.push({
       date: iso,
