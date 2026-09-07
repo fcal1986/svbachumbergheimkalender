@@ -298,6 +298,7 @@
   .res-chip.on{background:var(--black-btn);border-color:var(--black-btn);color:#fff;}
   .res-chip.on svg{stroke:#fff;}
   .seg{display:flex;border:1.5px solid var(--line);border-radius:11px;overflow:hidden;background:var(--white);box-shadow:var(--card-shadow);}
+  .training-sticky-head{position:sticky;top:-14px;z-index:5;background:var(--bg);padding-top:14px;margin:-14px -14px 0;padding-left:14px;padding-right:14px;}
   .seg button{flex:1;border:none;background:none;padding:11px 0;font-family:'Inter';font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer;border-right:1.5px solid var(--line);}
   .seg button:last-child{border-right:none;}
   .seg button.on{background:var(--black-btn);color:#fff;}
@@ -2520,12 +2521,12 @@ function renderTraining(){
   const admin=session&&session.isAdmin;
   let h='';
 
-  // ── Tab-Switcher: Übersicht + Mannschaften für alle, Verwaltung nur Admin ──
-  h+='<div class="seg" style="margin-bottom:12px;">'+
+  // ── Tab-Switcher: Übersicht + Mannschaften für alle, Verwaltung nur Admin ── (bleibt beim Scrollen oben fix)
+  h+='<div class="training-sticky-head"><div class="seg" style="margin-bottom:0;">'+
     '<button type="button"'+(trainingView==='uebersicht'?' class="on"':'')+' onclick="trainingView=\'uebersicht\';renderTraining()">Übersicht</button>'+
     '<button type="button"'+(trainingView==='mannschaften'?' class="on"':'')+' onclick="trainingView=\'mannschaften\';renderTraining()">Mannschaften</button>'+
     (admin?'<button type="button"'+(trainingView==='verwaltung'?' class="on"':'')+' onclick="trainingView=\'verwaltung\';renderTraining()">Verwaltung</button>':'')+
-    '</div>';
+    '</div></div><div style="height:12px;"></div>';
 
   // ── Mannschaften-Tab ──
   if(trainingView==='mannschaften'){
@@ -2863,6 +2864,42 @@ function tokenCard(){
      '<button class="ghost-btn" style="margin-top:0;" onclick="saveAdminToken()">Token speichern</button></div>';
   return h;
 }
+let nuClasses={}; // Mannschafts-Zuordnung beim Anlegen eines neuen Zugangs (Team -> [Squad-Nummern])
+function nuToggleTeam(team){
+  if(nuClasses.hasOwnProperty(team))delete nuClasses[team]; else nuClasses[team]=[];
+  renderNuClassPicker();
+}
+function nuToggleSquad(team,squad){
+  if(!nuClasses.hasOwnProperty(team))nuClasses[team]=[];
+  const sq=[...(nuClasses[team]||[])];
+  const expanded=sq.length?sq:[1,2,3];
+  const i=expanded.indexOf(squad);
+  if(i>=0)expanded.splice(i,1); else expanded.push(squad);
+  expanded.sort((a,b)=>a-b);
+  nuClasses[team]=expanded.length===3?[]:expanded;
+  renderNuClassPicker();
+}
+function renderNuClassPicker(){
+  const el=document.getElementById('nu-classes-picker');
+  if(!el)return;
+  el.innerHTML=ALL_CLASSES.map(team=>{
+    const on=nuClasses.hasOwnProperty(team);
+    const sq=on?(nuClasses[team]||[]):[];
+    const isJ=isJugend(team);
+    const L=jugendLetter(team);
+    let row='<div style="margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">';
+    row+='<div class="res-chip'+(on?' on':'')+'" onclick="nuToggleTeam(\''+team+'\')" style="padding:6px 10px;font-size:11px;">'+esc(team)+'</div>';
+    if(on&&isJ){
+      [1,2,3].forEach(n=>{
+        const sqOn=!sq.length||sq.includes(n);
+        row+='<span class="squad-sq-chip'+(sqOn?' on':'')+'" onclick="nuToggleSquad(\''+team+'\','+n+')">'+L+n+'</span>';
+      });
+      row+='<span style="font-size:9.5px;color:var(--ink-soft);">'+(sq.length?sq.map(s=>L+s+'-Jugend').join(', '):'alle Mannschaften')+'</span>';
+    }
+    row+='</div>';
+    return row;
+  }).join('');
+}
 function adminNewUserCard(){
   let h=tokenCard();
   h+=
@@ -2872,11 +2909,12 @@ function adminNewUserCard(){
      '<div class="field" style="margin-bottom:8px;"><input type="text" id="nu-last" placeholder="Nachname"></div>'+
      '<div class="field" style="margin-bottom:8px;"><input type="email" id="nu-mail" placeholder="E-Mail" autocapitalize="none" spellcheck="false"></div>'+
      '<div class="field" style="margin-bottom:10px;"><input type="text" id="nu-pass" placeholder="Start-Passwort (min. 8 Zeichen)"></div>'+
-     '<div class="field" style="margin-bottom:10px;"><label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block;">Altersklassen (für Trainer)</label><div class="chip-group" id="nu-classes">'+ALL_CLASSES.map(cl=>'<div class="res-chip" data-cl="'+cl+'" onclick="this.classList.toggle(\'on\')" style="padding:6px 10px;font-size:11px;">'+cl+'</div>').join('')+'</div></div>'+
+     '<div class="field" style="margin-bottom:10px;"><label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block;">Mannschaft(en) (für Trainer) – bei Jugend optional bis auf einzelne Teams (z.B. nur D1) eingrenzbar</label><div id="nu-classes-picker"></div></div>'+
     '<div class="res-chip" id="nu-admin" onclick="this.classList.toggle(\'on\')" style="margin-bottom:12px;">'+
      '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg>Darf alles verwalten (Admin)</div>'+
      '<button class="submit-btn" id="nu-btn" onclick="createUser()"><span id="nu-label">Zugang anlegen</span></button>'+
      '<p class="helptext">Admin darf zusätzlich Trainingszeiten pflegen, Zugänge anlegen und alle Termine ändern.</p></div>';
+  setTimeout(renderNuClassPicker,0);
   return h;
 }
 function adminUserListCard(){
@@ -3122,8 +3160,7 @@ async function createUser(){
   const mail=document.getElementById('nu-mail').value.trim().toLowerCase();
   const pass=document.getElementById('nu-pass').value;
   const isAdm=document.getElementById('nu-admin').classList.contains('on');
-  const classArr=[...document.querySelectorAll('#nu-classes .res-chip.on')].map(x=>x.dataset.cl);
-  const classes={}; classArr.forEach(t=>{classes[t]=[];});
+  const classes=JSON.parse(JSON.stringify(nuClasses));
   if(!first||!last||!mail){showToast('Bitte Vorname, Nachname und E-Mail ausfüllen.');return;}
   if(!/^\S+@\S+\.\S+$/.test(mail)){showToast('E-Mail sieht nicht gültig aus.');return;}
   if(pass.length<8){showToast('Passwort braucht mindestens 8 Zeichen.');return;}
@@ -3142,6 +3179,7 @@ async function createUser(){
     const curSeason=getCurrentSeason();
     if(curSeason) addUserToSeason(curSeason.id,newU.id).catch(()=>{});
     showToast(first+' kann sich jetzt anmelden'+(isAdm?' und darf alles verwalten.':'.')+(curSeason?' Bereits der aktuellen Saison zugeordnet.':''));
+    nuClasses={};
     renderKonto();
   }catch(e){
     USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000);
@@ -3181,6 +3219,10 @@ async function saveUserClasses(id){
     const clsLabel=Object.keys(cls).length?Object.keys(cls).map(t=>{const sq=cls[t]||[];return t+(isJugend(t)&&sq.length?'('+sq.map(s=>jugendLetter(t)+s).join(',')+')':(isJugend(t)?'(alle)':''));}).join(', '):'keine';
     await saveUsers('Mannschaften zugewiesen: '+u.first+' '+u.last+' → '+clsLabel);
     syncTrainerAssignments(u).then(n=>{ if(n>0) saveTraining('Trainer-Zuordnung aktualisiert: '+u.first+' '+u.last).then(()=>{ renderTraining(); renderStart(); }).catch(()=>{}); }).catch(()=>{});
+    // Sonst greift der Saison-Filter in "Mannschaften" und blendet frisch zugeordnete Trainer
+    // wieder aus, obwohl die Team-Zuordnung selbst funktioniert hat.
+    const curSeason=getCurrentSeason();
+    if(curSeason&&Object.keys(cls).length) addUserToSeason(curSeason.id,u.id,true).catch(()=>{});
     classEditorOpen=null;
     showToast('Altersklassen gespeichert.');
     renderKonto();
@@ -3268,16 +3310,16 @@ function addUserToSeasonFromSelect(seasonId){
   const el=document.getElementById('sadd-'+seasonId);
   if(el&&el.value)addUserToSeason(seasonId,el.value);
 }
-async function addUserToSeason(seasonId,userId){
+async function addUserToSeason(seasonId,userId,silent){
   const s=SEASONS.find(x=>x.id===seasonId);if(!s)return;
-  if((s.trainerIds||[]).includes(userId)){showToast('Bereits zugeordnet.');return;}
+  if((s.trainerIds||[]).includes(userId)){if(!silent)showToast('Bereits zugeordnet.');return;}
   s.trainerIds=s.trainerIds||[];s.trainerIds.push(userId);
   renderKonto(); // sofort
   // Status-Pill anzeigen bis GitHub geantwortet hat
   const pill=document.querySelector('.saving-pill');
   if(pill){pill.textContent='Speichert …';pill.style.opacity='1';}
   saveSeasonDebounced('Trainer zur Saison '+s.label+' hinzugefügt: '+USERS.find(u=>u.id===userId)?.first)
-    .then(()=>{ showToast('✓ Gespeichert.'); })
+    .then(()=>{ if(!silent)showToast('✓ Gespeichert.'); })
     .catch(e=>{ s.trainerIds.pop(); renderKonto(); showToast('Fehler: '+e.message,6000); })
     .finally(()=>{ const p=document.querySelector('.saving-pill');if(p)p.style.opacity='0'; });
 }
