@@ -38,11 +38,13 @@ function cleanText(s) {
 //   https://www.fussball.de/ajax.club.matchplan/-/id/<CLUB_ID>/mode/PAGE/show-filter/true
 // Jede Zeile enthält Datum/Zeit, eine Spalte "Mannschaft | Wettbewerb"
 // (z.B. "Herren | Kreisliga A") und zwei Team-Links (Heim zuerst, dann Gast).
-function parseMatches(html) {
+function parseMatches(html, debug) {
   const $ = cheerio.load(html);
   const matches = [];
+  const rows = $('tr');
+  let rowsWithDate = 0, rowsWithTwoTeamLinks = 0;
 
-  $('tr').each((_, row) => {
+  rows.each((_, row) => {
     const $row = $(row);
     const rowText = $row.text().replace(/\s+/g, ' ').trim();
     if (!rowText) return;
@@ -50,11 +52,18 @@ function parseMatches(html) {
     // Datum, z.B. "12.09.26" oder "12.09.2026" (Zeilen ohne Datum sind Überschriften/Trenner)
     const dateMatch = rowText.match(/(\d{2})\.(\d{2})\.(\d{2,4})/);
     if (!dateMatch) return;
+    rowsWithDate++;
     const timeMatch = rowText.match(/(\d{1,2}):(\d{2})(?:\s*Uhr)?/);
 
     // Team-Links: erster = Heim, zweiter = Gast (fussball.de-Konvention)
     const teamLinks = $row.find('a[href*="/mannschaft/"]');
-    if (teamLinks.length < 2) return;
+    if (teamLinks.length < 2) {
+      if (debug && rowsWithDate <= 5) {
+        console.log(`  [debug] Zeile mit Datum, aber nur ${teamLinks.length} Team-Link(s): "${rowText.slice(0, 120)}"`);
+      }
+      return;
+    }
+    rowsWithTwoTeamLinks++;
     const home = cleanText($(teamLinks[0]).text());
     const away = cleanText($(teamLinks[1]).text());
     if (!home || !away) return;
@@ -83,21 +92,42 @@ function parseMatches(html) {
     });
   });
 
+  if (debug) {
+    console.log(`  [debug] <tr>-Zeilen gesamt: ${rows.length} | mit erkanntem Datum: ${rowsWithDate} | mit 2 Team-Links: ${rowsWithTwoTeamLinks} | daraus geparste Spiele: ${matches.length}`);
+  }
+
   return matches;
 }
 
-async function fetchClubMatches(clubId) {
+// Erkennt typische Anzeichen, dass wir statt der echten Seite eine Bot-Schutz-
+// / Cookie-Consent- / Fehlerseite bekommen haben (häufigste Ursache für "0 Spiele
+// gefunden" ohne HTTP-Fehler).
+function looksLikeBlockedOrEmptyPage(html) {
+  const lower = html.toLowerCase();
+  const signals = ['captcha', 'cloudflare', 'access denied', 'just a moment', 'consent', 'cookie-einstellungen', 'bot detection', 'request unsuccessful'];
+  return signals.some(s => lower.includes(s));
+}
+
+async function fetchClubMatches(clubId, debug) {
   const url = `https://www.fussball.de/ajax.club.matchplan/-/id/${clubId}/mode/PAGE/show-filter/true`;
   const res = await fetch(url, {
     headers: {
-      'User-Agent': 'Mozilla/5.0 (compatible; PlatzcoachSync/1.0; +https://github.com/)',
-      'Accept': 'text/html',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml',
       'X-Requested-With': 'XMLHttpRequest',
+      'Referer': 'https://www.fussball.de/',
     },
   });
-  if (!res.ok) throw new Error(`fussball.de antwortete mit ${res.status} für Verein ${clubId}`);
   const html = await res.text();
-  return parseMatches(html);
+  if (debug) {
+    console.log(`  [debug] HTTP-Status: ${res.status} | Antwortlänge: ${html.length} Zeichen`);
+    console.log(`  [debug] Erste 300 Zeichen der Antwort:\n${html.slice(0, 300).replace(/\n/g, ' ')}`);
+  }
+  if (!res.ok) throw new Error(`fussball.de antwortete mit ${res.status} für Verein ${clubId}`);
+  if (looksLikeBlockedOrEmptyPage(html)) {
+    console.warn('  [warnung] Antwort sieht nach Bot-Schutz-/Consent-/Fehlerseite aus, nicht nach der echten Spielplan-Tabelle.');
+  }
+  return parseMatches(html, debug);
 }
 
 function isHomeMatch(match, clubMatch) {
@@ -105,6 +135,7 @@ function isHomeMatch(match, clubMatch) {
 }
 
 async function main() {
+  const debug = process.env.FUSSBALLDE_DEBUG === '1' || process.argv.includes('--debug');
   const cfg = await loadConfig();
   const fb = cfg.fussballde;
   if (!fb || !fb.clubId) {
@@ -117,7 +148,15 @@ async function main() {
 
   let allGames = [];
   try {
-    const matches = await fetchClubMatches(fb.clubId);
+    const matches = await fetchClubMatches(fb.clubId, debug);
+    if (debug) {
+      console.log(`  [debug] ${matches.length} Spiele insgesamt geparst (alle Mannschaften, Heim+Auswärts).`);
+      if (matches.length) {
+        console.log(`  [debug] Beispiel erstes Spiel: ${JSON.stringify(matches[0])}`);
+        console.log(`  [debug] Erkannte Heim-Teamnamen (einmalig): ${[...new Set(matches.map(m => m.home))].join(' | ')}`);
+      }
+      console.log(`  [debug] clubMatch-Filter: "${clubMatch}" (case-insensitive "startsWith"-Vergleich mit dem Heim-Teamnamen)`);
+    }
     allGames = matches
       .filter(m => isHomeMatch(m, clubMatch))
       .filter(m => m.date >= todayIso) // nur zukünftige Spiele
