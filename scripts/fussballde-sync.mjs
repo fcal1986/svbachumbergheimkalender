@@ -102,32 +102,23 @@ function parseMatches(html, debug) {
     const home = cleanText($(clubCells[0]).find('.club-name').text() || $(clubCells[0]).text());
     const away = cleanText($(clubCells[1]).find('.club-name').text() || $(clubCells[1]).text());
     if (!home || !away) return;
+    // "spielfrei" ist fussball.de's Markierung für eine Freilos-Woche (kein echter Gegner) –
+    // erscheint oft mit "00:00–23:59" als Ganztags-Platzhalter. Keine echte Terminbelegung,
+    // muss daher rausgefiltert werden, statt als "Heimspiel gegen spielfrei" zu erscheinen.
+    if (/^spielfrei/i.test(home) || /^spielfrei/i.test(away)) return;
 
     const matchLink = $teamRow.find('a[href*="/spiel/"]').first().attr('href')
       || $row.find('a[href*="/spiel/"]').first().attr('href') || '';
 
-    // Ergebnis (falls das Spiel schon stattgefunden hat): steht in der Team-Zeile als "4:2"
-    // (noch nicht gespielt: "-:-", das matcht unser \d-Muster nicht und bleibt score=null).
-    // Bewusst NICHT auf exakten Zellinhalt verankert (^...$) – fussball.de zeigt neben dem
-    // Ergebnis oft noch ein Häkchen-Symbol o.ä. in derselben Zelle, das den exakten Match
-    // sonst verhindern würde.
-    let score = null;
-    const scoreDebugCells = [];
-    $teamRow.find('td').each((_, td) => {
-      const t = cleanText($(td).text());
-      if (debug) scoreDebugCells.push(t);
-      const sm = t.match(/(\d{1,2})\s*:\s*(\d{1,2})/);
-      if (sm && !score) score = { home: parseInt(sm[1], 10), away: parseInt(sm[2], 10) };
-    });
-    const todayIsoLocal = new Date().toISOString().slice(0, 10);
-    const isPastCompetitive = matchLink && !score && iso < todayIsoLocal && !/freundschaft/i.test(competition);
-    if (debug && isPastCompetitive && noScoreDebugCount < 15) {
-      // Vergangene ECHTE Liga-/Pokal-Spiele ohne erkanntes Ergebnis sind die eigentlich
-      // verdächtigen Fälle (Freundschaftsspiele haben auf fussball.de oft schlicht nie ein
-      // Ergebnis – das ist erwartbar und wird hier bewusst NICHT geloggt).
-      noScoreDebugCount++;
-      console.log(`  [debug] Vergangenes Liga-/Pokal-Spiel OHNE erkanntes Ergebnis: "${home}" vs "${away}" (${iso}, ${competition}) – Zellinhalte: ${JSON.stringify(scoreDebugCells)}`);
-    }
+    // ACHTUNG: fussball.de verschlüsselt die Ergebnis-Ziffern absichtlich mit einer eigenen
+    // Schriftart (Unicode Private-Use-Area-Zeichen wie "\uE655" statt echten Ziffern "0"-"9",
+    // mit einem wechselnden "data-obfuscation"-Schlüssel pro Seitenaufruf). Das ist eine
+    // gezielte Anti-Scraping-Maßnahme speziell für Ergebnisse – Team-Namen, Daten und
+    // Wettbewerbe sind davon NICHT betroffen, nur die Zahlen im Ergebnis. Diese absichtliche
+    // Verschlüsselung wird hier bewusst NICHT zurückentwickelt/umgangen. "score" bleibt daher
+    // immer null; Ergebnisse werden in Platzcoach stattdessen manuell erfasst (siehe index.html
+    // "Ergebnis eintragen").
+    const score = null;
 
     matches.push({
       date: iso,
