@@ -56,6 +56,12 @@
   .occupied-badge .dot{width:7px;height:7px;border-radius:50%;flex:none;}
   .occupied-badge .dot.on{background:#16A34A;animation:pulse 1.6s infinite;}
   .occupied-badge .dot.off{background:var(--line);}
+  .ios-step{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:12.5px;color:var(--ink);}
+  .ios-step-num{flex:none;width:20px;height:20px;border-radius:50%;background:var(--black-btn);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+  .install-banner-card{display:flex;align-items:center;gap:10px;background:var(--white);border-radius:14px;padding:12px 12px;margin-bottom:10px;box-shadow:var(--card-shadow);border:1.5px solid var(--line);}
+  .install-banner-text{flex:1;min-width:0;font-size:12px;color:var(--ink);}
+  .install-banner-text b{font-size:13px;}
+  .install-banner-text div{color:var(--ink-soft);margin-top:2px;font-size:11px;}
   .user-chip.in{background:var(--green);color:#fff;border-color:var(--green);}
 
   /* ── CONTENT ── */
@@ -555,6 +561,7 @@
   <!-- START -->
   <div class="pane active" data-pane="start">
     <div class="content">
+      <div id="install-banner"></div>
       <div class="start-daycard">
         <div class="start-date" id="st-date">–</div>
         <div class="start-summary" id="st-summary">–</div>
@@ -835,6 +842,7 @@
    ========================================================= */
 
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], session=null;
+let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
 let selectedSeasonFilter='';
 let kontoTab='profil'; // 'profil'|'saisons'|'zugaenge'|'protokoll'
@@ -2018,6 +2026,7 @@ function renderStart(){
   if(counts.sonstige)parts.push(counts.sonstige+' sonstige'+(counts.sonstige===1?'r Termin':' Termine'));
   document.getElementById('st-summary').textContent=parts.length?parts.join(' · '):'Heute nichts geplant';
 
+  renderInstallBanner();
   renderPitchToday();
   renderStartStatus();
 }
@@ -3062,8 +3071,24 @@ function profileCard(){
     '<button class="submit-btn" style="margin-top:0;" onclick="saveProfile()"><span>Speichern</span></button></div>';
 }
 function pwaCard(){
+  if(isStandaloneApp()){
+    return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="stroke:var(--green)"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>App installiert</h4>'+
+      '<p class="sub">platzcoach läuft bereits als App auf diesem Gerät.</p></div>';
+  }
+  if(deferredInstallPrompt){
+    return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>Als App installieren</h4>'+
+      '<p class="sub">Ein Tipp genügt – danach startet platzcoach direkt vom Startbildschirm, ganz ohne Adressleiste.</p>'+
+      '<button class="submit-btn" onclick="triggerInstall()"><span>Jetzt installieren</span></button></div>';
+  }
+  if(isIOSDevice()){
+    return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>Als App speichern (iPhone/iPad)</h4>'+
+      '<p class="sub">Apple erlaubt automatische Installation leider nicht – nur 2 kurze Schritte manuell:</p>'+
+      '<div class="ios-step"><span class="ios-step-num">1</span><span>Unten in Safari auf <b>„Teilen" ⬆️</b> tippen</span></div>'+
+      '<div class="ios-step"><span class="ios-step-num">2</span><span>„Zum Home-Bildschirm" auswählen</span></div>'+
+      '</div>';
+  }
   return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>Als App speichern</h4>'+
-    '<p class="sub">iPhone: Teilen-Symbol → „Zum Home-Bildschirm". Android: Menü ⋮ → „App installieren".</p></div>';
+    '<p class="sub">Android: Menü ⋮ im Browser → „App installieren". Am PC: Installations-Symbol in der Adressleiste.</p></div>';
 }
 function bioCard(){
   if(!bioAvailable())
@@ -3730,6 +3755,57 @@ function render(){
   if(view==='jahr')renderYear();
 }
 function renderAll(){ render(); renderStart(); renderTraining(); }
+
+/* ---------- PWA-Installation ---------- */
+function isStandaloneApp(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+}
+function isIOSDevice(){
+  return /iP(hone|ad|od)/.test(navigator.userAgent) && !window.MSStream;
+}
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+  refreshInstallUI();
+});
+window.addEventListener('appinstalled',()=>{
+  deferredInstallPrompt=null;
+  showToast('App installiert – ab jetzt direkt vom Startbildschirm öffnen.');
+  refreshInstallUI();
+});
+function refreshInstallUI(){
+  const activePane=document.querySelector('.pane.active');
+  if(activePane&&activePane.dataset.pane==='konto'&&session) renderKonto();
+  renderInstallBanner();
+}
+async function triggerInstall(){
+  if(!deferredInstallPrompt)return;
+  deferredInstallPrompt.prompt();
+  try{
+    const choice=await deferredInstallPrompt.userChoice;
+    if(choice.outcome==='accepted') showToast('Wird installiert …');
+  }catch(e){}
+  deferredInstallPrompt=null;
+  refreshInstallUI();
+}
+function dismissInstallBanner(){
+  sessionStorage.setItem('pc_install_banner_dismissed','1');
+  renderInstallBanner();
+}
+function renderInstallBanner(){
+  const box=document.getElementById('install-banner');
+  if(!box)return;
+  const dismissed=sessionStorage.getItem('pc_install_banner_dismissed')==='1';
+  if(!deferredInstallPrompt||isStandaloneApp()||dismissed){ box.innerHTML=''; return; }
+  box.innerHTML='<div class="install-banner-card">'
+    +'<div class="install-banner-text"><b>App installieren?</b><div>Ein Tipp – dann startet platzcoach direkt vom Startbildschirm.</div></div>'
+    +'<button class="submit-btn" style="flex:none;width:auto;margin-top:0;padding:9px 14px;font-size:12px;" onclick="triggerInstall()">Installieren</button>'
+    +'<button class="ibtn" onclick="dismissInstallBanner()" title="Schließen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'
+    +'</div>';
+}
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
 
 async function boot(){
   try{
