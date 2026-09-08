@@ -101,23 +101,6 @@
       "note": "Cafeteria",
       "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
       "ownerName": "David Skwara"
-    },
-    {
-      "id": "bbb91a42-316a-43ec-9427-d8b987c0009d",
-      "d": "2026-09-08",
-      "t": "15:00",
-      "bis": "17:00",
-      "title": "Nur Theke",
-      "team": "F-Jugend",
-      "squad": 1,
-      "pitch": null,
-      "halle": null,
-      "res": [
-        "Theke"
-      ],
-      "note": "Test",
-      "ownerId": "admin",
-      "ownerName": "Vorstand Admin"
     }
   ]
 }
