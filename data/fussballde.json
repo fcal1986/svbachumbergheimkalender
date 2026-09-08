@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T04:37:23.776Z",
+  "updated": "2026-09-08T16:32:33.499Z",
   "games": [
     {
       "d": "2026-08-20",
@@ -108,10 +108,7 @@
       "squad": 1,
       "opponent": "TuRa Freienohl",
       "competition": "Kreispokal",
-      "score": {
-        "home": 19,
-        "away": 30
-      },
+      "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tura-freienohl/-/spiel/031GJ8BKB4000000VS5489BTVVG7L386"
     },
     {
@@ -123,16 +120,6 @@
       "competition": "Kreispokal",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sc-neheim/-/spiel/031GINLNS4000000VS5489BTVVG7L386"
-    },
-    {
-      "d": "2026-09-04",
-      "t": null,
-      "team": "Herren",
-      "squad": 2,
-      "opponent": "spielfrei",
-      "competition": "Kreispokal",
-      "score": null,
-      "link": null
     },
     {
       "d": "2026-09-04",
@@ -345,16 +332,6 @@
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-hachen-lang-enkh-sto-end-1/-/spiel/031I1BDP68000000VS5489BUVVKNMR0J"
     },
     {
-      "d": "2026-09-13",
-      "t": null,
-      "team": "Herren",
-      "squad": 2,
-      "opponent": "spielfrei",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": null
-    },
-    {
       "d": "2026-09-14",
       "t": "19:30",
       "team": "Herren Ü32",
@@ -376,25 +353,12 @@
     },
     {
       "d": "2026-09-19",
-      "t": null,
-      "team": "C-Junioren",
-      "squad": 2,
-      "opponent": "spielfrei",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": null
-    },
-    {
-      "d": "2026-09-19",
       "t": "10:00",
       "team": "E-Junioren",
       "squad": 1,
       "opponent": "SV Hüsten 09 I",
       "competition": "Kreisliga A",
-      "score": {
-        "home": 17,
-        "away": 0
-      },
+      "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-sv-huesten-09-1/-/spiel/031J8I24FK000000VS5489BUVVKNMR0J"
     },
     {
@@ -496,26 +460,6 @@
       "competition": "Kreispokal",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-herdringen-mueschede/-/spiel/031JUNCVJO000000VS5489BUVVKNMR0J"
-    },
-    {
-      "d": "2026-09-25",
-      "t": null,
-      "team": "A-Junioren",
-      "squad": 1,
-      "opponent": "spielfrei",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": null
-    },
-    {
-      "d": "2026-09-26",
-      "t": null,
-      "team": "D-Junioren",
-      "squad": 2,
-      "opponent": "spielfrei",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": null
     },
     {
       "d": "2026-09-26",
@@ -739,26 +683,6 @@
     },
     {
       "d": "2026-11-07",
-      "t": null,
-      "team": "G-Junioren",
-      "squad": 1,
-      "opponent": "spielfrei",
-      "competition": "Kinderfußball",
-      "score": null,
-      "link": null
-    },
-    {
-      "d": "2026-11-07",
-      "t": null,
-      "team": "C-Junioren",
-      "squad": 1,
-      "opponent": "spielfrei",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": null
-    },
-    {
-      "d": "2026-11-07",
       "t": "10:00",
       "team": "F-Junioren",
       "squad": 1,
@@ -786,16 +710,6 @@
       "competition": "Kreisliga C",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-3-4-jsg-tus-rumbeck-djk-gw-arnsberg-sv-arnsberg-09-fc-bw-gierskaempen-4/-/spiel/031J8T2K8K000000VS5489BUVVKNMR0J"
-    },
-    {
-      "d": "2026-11-08",
-      "t": null,
-      "team": "B-Junioren",
-      "squad": 1,
-      "opponent": "spielfrei",
-      "competition": "Bezirksliga",
-      "score": null,
-      "link": null
     },
     {
       "d": "2026-11-08",
@@ -1038,16 +952,6 @@
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-asc-09-dortmund/-/spiel/031GM5IGA8000000VS5489BTVVG7L386"
     },
     {
-      "d": "2027-03-05",
-      "t": null,
-      "team": "A-Junioren",
-      "squad": 1,
-      "opponent": "spielfrei",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": null
-    },
-    {
       "d": "2027-03-06",
       "t": "11:30",
       "team": "D-Junioren",
@@ -1119,16 +1023,6 @@
     },
     {
       "d": "2027-03-13",
-      "t": null,
-      "team": "C-Junioren",
-      "squad": 2,
-      "opponent": "spielfrei",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": null
-    },
-    {
-      "d": "2027-03-13",
       "t": "13:30",
       "team": "C-Junioren",
       "squad": 1,
@@ -1146,16 +1040,6 @@
       "competition": "Kreisliga D",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-djk-gw-arnsberg-ii/-/spiel/031KK1IR2G000000VS5489BUVVKNMR0J"
-    },
-    {
-      "d": "2027-03-21",
-      "t": null,
-      "team": "Herren",
-      "squad": 2,
-      "opponent": "spielfrei",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": null
     },
     {
       "d": "2027-03-21",
@@ -1186,16 +1070,6 @@
       "competition": "Kreisliga A",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sg-balve-garbeck-la-kue-aff-1/-/spiel/031JKQC8O4000000VS5489BUVVKNMR0J"
-    },
-    {
-      "d": "2027-04-10",
-      "t": null,
-      "team": "D-Junioren",
-      "squad": 2,
-      "opponent": "spielfrei",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": null
     },
     {
       "d": "2027-04-10",
@@ -1286,16 +1160,6 @@
       "competition": "Kreisliga A",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sg-balve-garbeck/-/spiel/031I0BNNRS000000VS5489BUVVKNMR0J"
-    },
-    {
-      "d": "2027-04-17",
-      "t": null,
-      "team": "C-Junioren",
-      "squad": 1,
-      "opponent": "spielfrei",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": null
     },
     {
       "d": "2027-04-18",
@@ -1516,16 +1380,6 @@
       "competition": "Kreisliga A",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-langenholthausen/-/spiel/031I0BNHTC000000VS5489BUVVKNMR0J"
-    },
-    {
-      "d": "2027-05-30",
-      "t": null,
-      "team": "B-Junioren",
-      "squad": 1,
-      "opponent": "spielfrei",
-      "competition": "Bezirksliga",
-      "score": null,
-      "link": null
     },
     {
       "d": "2027-05-30",
@@ -1856,10 +1710,7 @@
       "squad": 3,
       "opponent": "JSG Hachen/Langsch-Enkh. II",
       "competition": "Kreisliga C",
-      "score": {
-        "home": 17,
-        "away": 30
-      },
+      "score": null,
       "link": "https://www.fussball.de/spiel/jsg-hachen-langscheid-enkhausen-2-sv-bachum-bergheim-3/-/spiel/031J8T2KNC000000VS5489BUVVKNMR0J"
     },
     {
@@ -1919,21 +1770,8 @@
       "squad": 3,
       "opponent": "TuS Bruchhausen 02 II",
       "competition": "Kreisliga D",
-      "score": {
-        "home": 19,
-        "away": 30
-      },
-      "link": "https://www.fussball.de/spiel/tus-bruchhausen-02-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IQ00000000VS5489BUVVKNMR0J"
-    },
-    {
-      "d": "2026-09-16",
-      "t": "18:00",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "spielfrei4 (PH)",
-      "competition": "Kreispokal",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim/-/spiel/031MHCEJAG000000VS5489BTVSRD0UH9"
+      "link": "https://www.fussball.de/spiel/tus-bruchhausen-02-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IQ00000000VS5489BUVVKNMR0J"
     },
     {
       "d": "2026-09-17",
@@ -2092,10 +1930,7 @@
       "squad": 1,
       "opponent": "JSG Balve/Gar./La/Be/Aff I",
       "competition": "Kreisliga A",
-      "score": {
-        "home": 13,
-        "away": 30
-      },
+      "score": null,
       "link": "https://www.fussball.de/spiel/jsg-balve-garbeck-la-be-aff-i-sv-bachum-bergheim/-/spiel/031I1BDONO000000VS5489BUVVKNMR0J"
     },
     {
