@@ -1302,66 +1302,9 @@ async function ghPutRaw(path,text,msg){
 }
 async function saveEvents(msg){
   await ghPutRaw('data/events.json',JSON.stringify({events:EVENTS},null,2),msg);
-  try{ await ghPutRaw('termine.ics',buildICS(),'Kalender aktualisiert'); }
-  catch(e){ showToast('Termin gespeichert, Kalender-Datei aber nicht: '+e.message,4500); }
 }
 async function saveUsers(msg){ await ghPutRaw('data/users.json',JSON.stringify({users:USERS},null,2),msg); }
 async function saveTraining(msg){ await ghPutRaw('data/training.json',JSON.stringify({slots:TRAINING},null,2),msg); }
-
-/* ---------- iCal ---------- */
-function icsEsc(s){return String(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n');}
-function icsFold(line){
-  if(line.length<=73) return line;
-  let out='',cur='';
-  for(const ch of line){ if((cur+ch).length>73){ out+=cur+'\r\n '; cur=''; } cur+=ch; }
-  return out+cur;
-}
-function icsStamp(){
-  const d=new Date(), p=n=>String(n).padStart(2,'0');
-  return d.getUTCFullYear()+p(d.getUTCMonth()+1)+p(d.getUTCDate())+'T'+p(d.getUTCHours())+p(d.getUTCMinutes())+p(d.getUTCSeconds())+'Z';
-}
-function icsLocalTime(d,t){
-  const dt=new Date(d+'T'+t+':00');
-  const p=n=>String(n).padStart(2,'0');
-  return dt.getFullYear()+p(dt.getMonth()+1)+p(dt.getDate())+'T'+p(dt.getHours())+p(dt.getMinutes())+'00';
-}
-function buildICS(){
-  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//SVBB//Termine//DE','CALSCALE:GREGORIAN','METHOD:PUBLISH',
-    'X-WR-CALNAME:'+icsEsc(CFG.clubName+' – Termine'),'X-WR-TIMEZONE:Europe/Berlin',
-    'REFRESH-INTERVAL;VALUE=DURATION:PT6H','X-PUBLISHED-TTL:PT6H',
-    'BEGIN:VTIMEZONE','TZID:Europe/Berlin',
-    'BEGIN:DAYLIGHT','TZOFFSETFROM:+0100','TZOFFSETTO:+0200','TZNAME:CEST',
-    'DTSTART:19700329T020000','RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU','END:DAYLIGHT',
-    'BEGIN:STANDARD','TZOFFSETFROM:+0200','TZOFFSETTO:+0100','TZNAME:CET',
-    'DTSTART:19701025T030000','RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU','END:STANDARD','END:VTIMEZONE'];
-  const stamp=icsStamp();
-  EVENTS.forEach(e=>{
-    let ort=[];
-    if(e.pitch) ort.push('Großspielfeld: '+pitchShort(e.pitch));
-    if(e.halle&&e.halle.thirds&&e.halle.thirds.length) ort.push(halleShort(e.halle));
-    ort=ort.concat(e.res||[]);
-    const desc=['Team: '+teamLabel(e.team,e.squad),
-      'Ansprechpartner: '+(e.ownerName||'–'), e.note?'Info: '+e.note:''].filter(Boolean).join('\n');
-    L.push('BEGIN:VEVENT','UID:'+e.id+'@svbb-termine','DTSTAMP:'+stamp,
-      'DTSTART;TZID=Europe/Berlin:'+icsLocalTime(e.d,e.t),
-      'DTEND;TZID=Europe/Berlin:'+icsLocalTime(e.d,eventBis(e)),
-      'SUMMARY:'+icsEsc(e.title),'DESCRIPTION:'+icsEsc(desc));
-    if(ort.length) L.push('LOCATION:'+icsEsc(ort.join(', ')));
-    L.push('URL:'+baseUrl()+'#t='+e.id,'END:VEVENT');
-  });
-  L.push('END:VCALENDAR');
-  return L.map(icsFold).join('\r\n')+'\r\n';
-}
-function downloadICS(){
-  const blob=new Blob([buildICS()],{type:'text/calendar;charset=utf-8'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob); a.download='svbb-termine.ics'; a.click();
-  URL.revokeObjectURL(a.href);
-}
-function copyIcsUrl(){
-  const url=baseUrl()+'termine.ics';
-  navigator.clipboard.writeText(url).then(()=>showToast('Abo-Link kopiert.')).catch(()=>showToast('Link: '+url,6000));
-}
 
 /* ---------- Login ---------- */
 function openLogin(hint){ document.getElementById('login').classList.add('show'); loginErr(hint||''); refreshBioBtn(); }
@@ -2052,12 +1995,16 @@ function pitchLabelOf(e){
   if(e.pitch)return pitchShort(e.pitch);
   if(e.halle&&e.halle.thirds&&e.halle.thirds.length)return halleShort(e.halle);
   if(e.isExternal)return e.pitchLabelText||'fussball.de';
+  if(e.res&&e.res.length)return e.res.join(', ');
   return '';
 }
 function pitchVisualOf(e){
   if(e.pitch)return pitchBadge(e.pitch);
   if(e.halle&&e.halle.thirds&&e.halle.thirds.length)return halleBadge(e.halle);
   if(e.isExternal)return '<span class="badge-pitch">'+(e.pitchIsFull?miniPitch([1,2,3,4]):'⚽')+esc(e.pitchLabelText||'fussball.de')+'</span>';
+  // Auch reine Ressourcen-Buchungen (z.B. nur Theke/Vereinsheim, ohne Platz/Halle) sollen in
+  // "Platzbelegung heute" erkennbar sein, statt nur als leerer "–"-Platzhalter zu erscheinen.
+  if(e.res&&e.res.length)return e.res.map(r=>'<span class="badge-res">'+esc(r)+'</span>').join(' ');
   return '';
 }
 function isFriendly(e){ return /freundschaft/i.test(e.competition||''); }
@@ -3023,14 +2970,6 @@ function deleteTrainingSlot(id){
 }
 
 /* ---------- Konto ---------- */
-function icalCard(){
-  return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>Kalender abonnieren</h4>'+
-    '<p class="sub">Einmal einrichten – danach erscheinen alle Vereinstermine automatisch im Handy-Kalender.</p>'+
-    '<div class="urlbox">'+esc(baseUrl()+'termine.ics')+'</div>'+
-    '<button class="ghost-btn" style="margin-top:0;" onclick="copyIcsUrl()">Abo-Link kopieren</button>'+
-    '<button class="ghost-btn" onclick="downloadICS()">Als Datei herunterladen (einmalig)</button>'+
-    '<p class="helptext">iPhone: Einstellungen → Kalender → Accounts → Account hinzufügen → Andere → Kalenderabo. Android: Google Kalender am PC → Weitere Kalender → Per URL.</p></div>';
-}
 function profileCard(){
   const u=USERS.find(x=>x.id===session.id)||{};
   const phone=u.phone||'';
@@ -3329,7 +3268,7 @@ function renderKonto(){
   const box=document.getElementById('konto-body');
   if(!session){
     box.innerHTML='<div class="card"><h4>Nicht angemeldet</h4><p class="sub">Termine ansehen geht ohne Anmeldung. Zum Eintragen brauchst du einen Zugang vom Vorstand.</p>'+
-      '<button class="submit-btn" onclick="openLogin()"><span>Anmelden</span></button></div>'+icalCard()+pwaCard();
+      '<button class="submit-btn" onclick="openLogin()"><span>Anmelden</span></button></div>'+pwaCard();
     return;
   }
   // ── Header (immer sichtbar) ──
@@ -3360,7 +3299,7 @@ function renderKonto(){
   if(kontoTab==='profil'){
     h+=pwCard()+bioCard();
     if(!session.isSuper)h+=profileCard();
-    h+=icalCard()+pwaCard();
+    h+=pwaCard();
   }else if(kontoTab==='saisons'){
     h+=seasonManagementCard();
   }else if(kontoTab==='zugaenge'){
