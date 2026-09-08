@@ -136,7 +136,7 @@
   .ev-day{display:block;font-size:14px;font-weight:800;color:var(--ink);}
   .ev-sep{width:1px;height:32px;background:rgba(0,0,0,.15);flex:none;}
   .ev-title-box{flex:1;min-width:0;padding-right:4px;}
-  .ev-title-box h4{margin:0;font-size:14.5px;font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ev-title-box h4{margin:0;font-size:14.5px;font-weight:800;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25;}
   .ev-title-box .ev-sub{font-size:10.5px;color:rgba(0,0,0,.5);margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.35;}
   .ev-body{padding:11px 12px 12px;}
   .ev-times{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:0;}
@@ -160,6 +160,8 @@
   .fb-card{background:var(--white);border-radius:14px;padding:12px 14px;box-shadow:var(--card-shadow);margin-bottom:8px;display:flex;align-items:center;gap:10px;}
   .fb-card-away{opacity:.85;border:1px dashed var(--line);box-shadow:none;}
   .event-card.external-card{border:1px dashed var(--line);box-shadow:none;}
+  .event-card.cancelled-card{opacity:.75;box-shadow:none;border:1px solid var(--line);background:var(--bg);}
+  .event-card.cancelled-card .ev-head{background:transparent;}
   .event-card.external-away{opacity:.8;}
   .badge-fb{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--ink-soft);background:var(--bg);border-radius:8px;padding:3px 8px;}
   .team-filter-btn{flex:0 0 auto;white-space:nowrap;background:var(--white);border:1.5px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;}
@@ -309,6 +311,9 @@
   .heute-row .hteam{flex:1;min-width:0;font-size:13px;font-weight:600;}
   .heute-row.off .hteam{color:var(--ink-soft);text-decoration:line-through;}
   .heute-row .hoff-pill{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:10px;background:#FDECEA;color:#9B3227;flex:none;}
+  .hoff-pill{font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:10px;background:#FDECEA;color:#9B3227;flex:none;white-space:nowrap;}
+  .pitch-today-row.pt-cancelled{opacity:.72;}
+  .pitch-today-row.pt-cancelled .pt-team-name{text-decoration:line-through;text-decoration-color:var(--ink-soft);}
   .today-cancelled{font-size:12px;font-weight:600;color:var(--ink-soft);padding:6px 12px;display:flex;align-items:center;gap:6px;border-top:1px solid var(--line);}
   .heute-empty{font-size:12.5px;color:var(--ink-soft);padding:4px 0;}
   .heute-row .hsub{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:4px;}
@@ -902,6 +907,18 @@ function trainingInstancesOn(d){
     isTraining:true, trainingSlotId:s.id
   })).sort((a,b)=>a.t.localeCompare(b.t));
 }
+/* Abgesagte Regeltermine: sollen NICHT einfach aus Start/Termine verschwinden, sondern
+   sichtbar bleiben mit "Abgesagt"-Kennzeichnung – daher eine EIGENE, von der normalen
+   trainingInstancesOn() getrennte Liste. Bewusst NICHT in agendaOn()/Konfliktprüfung
+   verwendet, da ein abgesagtes Training den Platz ja gerade NICHT belegt. */
+function cancelledTrainingInstancesOn(d){
+  return TRAINING.filter(s=>slotInRange(s,d)&&dowOf(d)===s.day&&(s.cancelled||[]).includes(d)).map(s=>({
+    id:'trc-'+s.id+'-'+d, d:d, t:s.from, bis:s.to,
+    title:'Training', team:s.team, squad:s.squad||1,
+    pitch:null, halle:null, res:[], note:s.note||'',
+    isTraining:true, isCancelled:true, trainingSlotId:s.id
+  })).sort((a,b)=>a.t.localeCompare(b.t));
+}
 
 /* fussball.de-Heimspiele als virtuelle Termine expandieren, damit sie in der
    Konfliktprüfung berücksichtigt werden.
@@ -1422,21 +1439,18 @@ function setFilter(f){
 }
 function buildFilters(){
   const fs=[['alle','Alle']];
-  if(session){
-    fs.push(['meine','Meine']);
-    if(!session.isAdmin){
-      const cls=normalizeClasses(session.classes||{});
-      Object.entries(cls).forEach(([team,squads])=>{
-        if(isJugend(team)){
-          const sq=squads.length?[...squads].sort((a,b)=>a-b):[1,2,3];
-          sq.forEach(s=>fs.push([team+':'+s, jugendLetter(team)+s+'-Jugend']));
-        }else{
-          fs.push([team+':1', team.replace(' Herren','').replace('U32 / ','U')]);
-        }
-      });
-    }
+  if(session&&!session.isAdmin){
+    const cls=normalizeClasses(session.classes||{});
+    Object.entries(cls).forEach(([team,squads])=>{
+      if(isJugend(team)){
+        const sq=squads.length?[...squads].sort((a,b)=>a-b):[1,2,3];
+        sq.forEach(s=>fs.push([team+':'+s, jugendLetter(team)+s+'-Jugend']));
+      }else{
+        fs.push([team+':1', team.replace(' Herren','').replace('U32 / ','U')]);
+      }
+    });
   }
-  fs.push(['jugend','Jugend'],['senioren','Senioren'],['verein','Verein']);
+  fs.push(['jugend','Jugend'],['senioren','Senioren'],['verein','Verein'],['fussballde','fussball.de']);
   document.getElementById('filterbar').innerHTML=fs.map(([k,l])=>
     '<span class="filter-chip'+(k===filter?' on':'')+'" data-f="'+k+'" onclick="setFilter(\''+k+'\')">'+l+'</span>').join('');
   updateTeamFilterBtn();
@@ -1536,7 +1550,7 @@ function passesFilter(e){
   if(typeFilter==='spiele'&&!e.isExternal)return false;
   if(teamMultiFilter.size) return teamMultiFilter.has((e.team)+':'+(e.squad||1));
   if(filter==='alle') return true;
-  if(filter==='meine') return session&&(e.ownerId===session.id||(e.isTraining&&e.trainerId===session.id));
+  if(filter==='fussballde') return !!e.isExternal;
   if(filter.includes(':')){ const[ft,fq]=filter.split(':'); return e.team===ft&&(e.squad||1)===parseInt(fq); }
   return cat(e.team)===filter;
 }
@@ -1544,6 +1558,7 @@ function filtered(){ return EVENTS.filter(passesFilter); }
 function eventsOn(d){
   return filtered().filter(e=>e.d===d)
     .concat(trainingInstancesOn(d).filter(passesFilter))
+    .concat(cancelledTrainingInstancesOn(d).filter(passesFilter))
     .concat(fussballDisplayInstancesOn(d).filter(passesFilter))
     .concat(fussballDisplayAwayInstancesOn(d).filter(passesFilter))
     .sort((a,b)=>a.t.localeCompare(b.t));
@@ -1569,8 +1584,30 @@ function canEdit(e){
   if(e.ownerId===session.id)return true;
   return canBookTeam(e.team,e.squad||1);
 }
+function cancelledRowHTML(e){
+  const dt=new Date(e.d+'T00:00:00');
+  const dow=DAYS_S[dt.getDay()];
+  const dd=String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0');
+  const bis=eventBis(e);
+  const canManage=session&&(session.isAdmin||canBookAnyOfTeam(e.team));
+  const acts=canManage?'<button class="ibtn" title="Absage zurücknehmen" onclick="reactivateCancelled(\''+e.trainingSlotId+'\',\''+e.d+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></button>':'';
+  return '<div class="event-card cancelled-card" id="ev-'+e.id+'">'
+    +'<div class="ev-head">'
+    +'<div class="ev-date-box"><span class="ev-dow">'+dow+'</span><span class="ev-day">'+dd+'</span></div>'
+    +'<div class="ev-sep"></div>'
+    +'<div class="ev-title-box"><h4 style="text-decoration:line-through;color:var(--ink-soft);">Training · '+esc(teamLabel(e.team,e.squad))+'</h4>'
+    +'<div class="ev-sub">'+e.t+'–'+bis+' · fällt aus</div></div>'
+    +'<div class="row-acts">'+acts+'</div>'
+    +'</div>'
+    +'<div class="ev-body">'
+    +'<span class="hoff-pill">Abgesagt</span>'
+    +(e.note?'<div class="ev-note" style="margin-top:8px;">'+esc(e.note)+'</div>':'')
+    +'</div>'
+    +'</div>';
+}
 function rowHTML(e){
   if(e.isExternal) return externalRowHTML(e);
+  if(e.isCancelled) return cancelledRowHTML(e);
   const dt=new Date(e.d+'T00:00:00');
   const dow=DAYS_S[dt.getDay()];
   const dd=String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0');
@@ -1852,6 +1889,7 @@ function renderList(){
   for(let i=0;i<listDaysLoaded;i++){
     const dt=new Date(); dt.setDate(dt.getDate()+i);
     evs=evs.concat(trainingInstancesOn(ymd(dt)).filter(passesFilter));
+    evs=evs.concat(cancelledTrainingInstancesOn(ymd(dt)).filter(passesFilter));
     evs=evs.concat(fussballDisplayInstancesOn(ymd(dt)).filter(passesFilter));
     evs=evs.concat(fussballDisplayAwayInstancesOn(ymd(dt)).filter(passesFilter));
   }
@@ -1959,7 +1997,7 @@ function renderStart(){
 
   const todays=todaysCombinedAgenda();
   const counts={training:0,spiel:0,sonstige:0};
-  todays.forEach(e=>counts[classifyAgendaItem(e)]++);
+  todays.forEach(e=>{ if(!e.isCancelled) counts[classifyAgendaItem(e)]++; }); // abgesagte zählen nicht als stattfindend
   const parts=[];
   if(counts.training)parts.push(counts.training+' Training'+(counts.training===1?'':'s'));
   if(counts.spiel)parts.push(counts.spiel+' Spiel'+(counts.spiel===1?'':'e'));
@@ -1974,6 +2012,7 @@ function renderStart(){
 function todaysCombinedAgenda(){
   return EVENTS.filter(e=>e.d===todayStr)
     .concat(trainingInstancesOn(todayStr))
+    .concat(cancelledTrainingInstancesOn(todayStr))
     .concat(fussballDisplayInstancesOn(todayStr))
     .concat(fussballDisplayAwayInstancesOn(todayStr))
     .sort((a,b)=>a.t.localeCompare(b.t));
@@ -2019,10 +2058,18 @@ function openTerminFromStart(id,d){
 function renderPitchToday(){
   const box=document.getElementById('st-pitch-today');
   if(!box)return;
-  const items=todaysCombinedAgenda().filter(e=>e.pitch||(e.halle&&e.halle.thirds&&e.halle.thirds.length)||e.isExternal||e.res&&e.res.length||classifyAgendaItem(e)==='sonstige');
+  const items=todaysCombinedAgenda().filter(e=>e.isCancelled||e.pitch||(e.halle&&e.halle.thirds&&e.halle.thirds.length)||e.isExternal||e.res&&e.res.length||classifyAgendaItem(e)==='sonstige');
   if(!items.length){ box.innerHTML='<div class="empty-card">Heute keine Termine.</div>'; return; }
   const now=new Date(),nowHM=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
   box.innerHTML=items.map(e=>{
+    if(e.isCancelled){
+      const teamTxt=teamLabel(e.team,e.squad||1);
+      return '<div class="pitch-today-row pt-cancelled" onclick="openTerminFromStart(\''+e.id+'\',\''+e.d+'\')">'
+        +'<div class="pt-time">'+e.t+'</div>'
+        +'<div class="pt-team"><div class="pt-team-name">'+esc(teamTxt)+'</div><div class="pt-type">Training</div></div>'
+        +'<span class="hoff-pill">Abgesagt</span>'
+        +'</div>';
+    }
     const running=e.t<=nowHM&&eventBis(e)>nowHM;
     const teamTxt=teamLabel(e.team,e.squad||1);
     const type=classifyAgendaItem(e);
@@ -2136,9 +2183,9 @@ function renderStartStatus(){
   // ausschließlich Staffelleiter-Ansetzungsfehler enthalten, wie gewünscht.
   if(statusFilter==='alle'){
     const todays=todaysCombinedAgenda();
-    const noTrainer=todays.filter(e=>e.isTraining&&(!e.trainerIds||!e.trainerIds.length)).length;
+    const noTrainer=todays.filter(e=>e.isTraining&&!e.isCancelled&&(!e.trainerIds||!e.trainerIds.length)).length;
     if(noTrainer)html+=warnRowHTML(noTrainer+' Termin'+(noTrainer===1?'':'e')+' heute ohne Trainer.');
-    const noPitch=todays.filter(e=>!e.isExternal&&!e.pitch&&!(e.halle&&e.halle.thirds&&e.halle.thirds.length)&&!(e.res&&e.res.length)).length;
+    const noPitch=todays.filter(e=>!e.isCancelled&&!e.isExternal&&!e.pitch&&!(e.halle&&e.halle.thirds&&e.halle.thirds.length)&&!(e.res&&e.res.length)).length;
     if(noPitch)html+=warnRowHTML(noPitch+' Termin'+(noPitch===1?'':'e')+' heute ohne Platzzuordnung.');
   }
 
@@ -2597,9 +2644,9 @@ async function doCancelSlot(){
   const backup=JSON.stringify(TRAINING);
   s.cancelled=[...(s.cancelled||[]),date].sort();
   try{
-    closeCancelModal(); renderTraining(); renderStart();
+    closeCancelModal(); renderTraining(); renderStart(); render();
     showToast('Training am '+fmtShort(date)+' abgesagt.');
-    saveTraining('Training abgesagt: '+trainName(s)+' am '+fmtShort(date))
+    saveTraining('Training abgesagt: '+trainName(s)+' am '+fmtShort(date)+' – '+session.name)
       .catch(e=>{ TRAINING=JSON.parse(backup);renderTraining();renderStart();showToast('Fehler: '+e.message,6000); });
   }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   finally{ if(cmBtn){ cmBtn.disabled=false; cmBtn.textContent='Absagen'; } }
@@ -2610,8 +2657,8 @@ async function reactivateCancelled(id,date){
   const backup=JSON.stringify(TRAINING);
   s.cancelled=(s.cancelled||[]).filter(d=>d!==date);
   try{
-    renderTraining(); renderStart(); showToast('Training am '+fmtShort(date)+' findet wieder statt.');
-    saveTraining('Absage zurückgenommen: '+trainName(s)+' am '+fmtShort(date))
+    renderTraining(); renderStart(); render(); showToast('Training am '+fmtShort(date)+' findet wieder statt.');
+    saveTraining('Absage zurückgenommen: '+trainName(s)+' am '+fmtShort(date)+' – '+session.name)
       .catch(e=>{ TRAINING=JSON.parse(backup);renderTraining();renderStart();showToast('Fehler: '+e.message,6000); });
   }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   finally{ hideSaving(); }
@@ -2949,7 +2996,7 @@ async function saveTrainingSlot(){
     }else{
       TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[]});
     }
-    const tMsg=(tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+team+' (ab '+fmtShort(validFrom)+')';
+    const tMsg=(tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+team+' (ab '+fmtShort(validFrom)+') – '+session.name;
     tEditId=null; renderTraining(); renderStart(); goto('training');
     if(warn.length) showToast('⚠ Gespeichert – Achtung: '+warn[0],5000);
     else showToast('Trainingszeit gespeichert.');
@@ -2963,7 +3010,7 @@ function deleteTrainingSlot(id){
   askConfirm('Trainingszeit löschen?',trainName(s)+' am '+WDAYS[s.day]+' '+s.from+'–'+s.to+' wird entfernt.','Löschen',async()=>{
     const backup=JSON.stringify(TRAINING);
     TRAINING=TRAINING.filter(x=>x.id!==id);
-    try{ await saveTraining('Trainingszeit gelöscht: '+WDAYS[s.day]+' '+s.from+' '+s.team);
+    try{ await saveTraining('Trainingszeit gelöscht: '+WDAYS[s.day]+' '+s.from+' '+s.team+' – '+session.name);
       renderTraining(); showToast('Gelöscht.');
     }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   });
@@ -3254,14 +3301,9 @@ function logCard(){
     return '<div class="card">'+hdr+
       '<p class="sub" style="margin-top:8px;margin-bottom:0;">Alle Änderungen an Terminen, Training und Zugängen – schreibgeschützt.</p></div>';
   }
-  const catBtns=['alle','Termin','Training','Zugang'].map(cat=>
-    '<button class="filter-chip'+(logCat===cat?' on':'')+'" onclick="logCat=\''+cat+'\';renderLogList()">'+
-    (cat==='alle'?'Alle':cat)+'</button>'
-  ).join('');
   return '<div class="card">'+hdr+
     '<p class="sub" style="margin-top:8px;">Alle Änderungen – schreibgeschützt. Aus GitHub-Commits.</p>'+
     '<input type="search" id="log-search" placeholder="Suche nach Name, Datum, Aktion …" value="'+esc(logSearch)+'" oninput="logSearch=this.value;renderLogList()" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-family:Inter;font-size:13px;margin:10px 0 8px;background:var(--bg);outline:none;" >'+
-    '<div class="chip-scroll" style="margin-bottom:10px;">'+catBtns+'</div>'+
     '<div id="log-list"></div></div>';
 }
 function renderKonto(){
@@ -3339,8 +3381,8 @@ async function createUser(){
     const encRec=await encryptToken(session.token,pass);
     const newU={id:crypto.randomUUID(),first,last,email:mail,admin:isAdm,classes,enc:encRec,created:new Date().toISOString()};
     USERS.push(newU);
-    await saveUsers('Zugang angelegt: '+first+' '+last+(isAdm?' (Admin)':''));
-    syncTrainerAssignments(newU).then(n=>{ if(n>0) saveTraining('Trainer-Zuordnung aktualisiert: '+newU.first+' '+newU.last).catch(()=>{}); }).catch(()=>{});
+    await saveUsers('Zugang angelegt: '+first+' '+last+(isAdm?' (Admin)':'')+' – '+session.name);
+    syncTrainerAssignments(newU).then(n=>{ if(n>0) saveTraining('Trainer-Zuordnung aktualisiert: '+newU.first+' '+newU.last+' – '+session.name).catch(()=>{}); }).catch(()=>{});
     // Neuen Zugang direkt der aktiven Saison zuordnen, statt dass der Admin das separat unter "Saisons" nachholen muss
     const curSeason=getCurrentSeason();
     if(curSeason) addUserToSeason(curSeason.id,newU.id).catch(()=>{});
@@ -3383,8 +3425,8 @@ async function saveUserClasses(id){
   try{
     const cls=normalizeClasses(u.classes||{});
     const clsLabel=Object.keys(cls).length?Object.keys(cls).map(t=>{const sq=cls[t]||[];return t+(isJugend(t)&&sq.length?'('+sq.map(s=>jugendLetter(t)+s).join(',')+')':(isJugend(t)?'(alle)':''));}).join(', '):'keine';
-    await saveUsers('Mannschaften zugewiesen: '+u.first+' '+u.last+' → '+clsLabel);
-    syncTrainerAssignments(u).then(n=>{ if(n>0) saveTraining('Trainer-Zuordnung aktualisiert: '+u.first+' '+u.last).then(()=>{ renderTraining(); renderStart(); }).catch(()=>{}); }).catch(()=>{});
+    await saveUsers('Mannschaften zugewiesen: '+u.first+' '+u.last+' → '+clsLabel+' – '+session.name);
+    syncTrainerAssignments(u).then(n=>{ if(n>0) saveTraining('Trainer-Zuordnung aktualisiert: '+u.first+' '+u.last+' – '+session.name).then(()=>{ renderTraining(); renderStart(); }).catch(()=>{}); }).catch(()=>{});
     // Sonst greift der Saison-Filter in "Mannschaften" und blendet frisch zugeordnete Trainer
     // wieder aus, obwohl die Team-Zuordnung selbst funktioniert hat.
     const curSeason=getCurrentSeason();
@@ -3484,7 +3526,7 @@ async function addUserToSeason(seasonId,userId,silent){
   // Status-Pill anzeigen bis GitHub geantwortet hat
   const pill=document.querySelector('.saving-pill');
   if(pill){pill.textContent='Speichert …';pill.style.opacity='1';}
-  saveSeasonDebounced('Trainer zur Saison '+s.label+' hinzugefügt: '+USERS.find(u=>u.id===userId)?.first)
+  saveSeasonDebounced('Trainer zur Saison '+s.label+' hinzugefügt: '+USERS.find(u=>u.id===userId)?.first+' – '+session.name)
     .then(()=>{ if(!silent)showToast('✓ Gespeichert.'); })
     .catch(e=>{ s.trainerIds.pop(); renderKonto(); showToast('Fehler: '+e.message,6000); })
     .finally(()=>{ const p=document.querySelector('.saving-pill');if(p)p.style.opacity='0'; });
@@ -3496,7 +3538,7 @@ async function removeUserFromSeason(seasonId,userId){
   renderKonto(); showToast('Trainer entfernt.');
   const pill2=document.querySelector('.saving-pill');
   if(pill2){pill2.textContent='Speichert …';pill2.style.opacity='1';}
-  saveSeasonDebounced('Trainer aus Saison '+s.label+' entfernt')
+  saveSeasonDebounced('Trainer aus Saison '+s.label+' entfernt – '+session.name)
     .catch(e=>{ s.trainerIds=backup; renderKonto(); showToast('Fehler: '+e.message,6000); })
     .finally(()=>{ const p=document.querySelector('.saving-pill');if(p)p.style.opacity='0'; });
 }
@@ -3571,7 +3613,7 @@ async function autoAssignAllTrainers(){
   for(const u of USERS){ total+=await syncTrainerAssignments(u); }
   try{
     if(total>0){
-      await saveTraining('Trainer auto-zugewiesen ('+total+' Zuordnungen)');
+      await saveTraining('Trainer auto-zugewiesen ('+total+' Zuordnungen) – '+session.name);
       showToast(total+' Trainer-Zuordnung'+(total>1?'en':'')+' gespeichert.');
       renderTraining(); renderStart();
     }else{
@@ -3588,7 +3630,7 @@ function toggleUserAdmin(id){
     now?'Zum Admin machen':'Recht entziehen', async()=>{
       const backup=JSON.stringify(USERS);
       u.admin=now;
-      try{ await saveUsers((now?'Admin-Recht vergeben: ':'Admin-Recht entzogen: ')+u.first+' '+u.last);
+      try{ await saveUsers((now?'Admin-Recht vergeben: ':'Admin-Recht entzogen: ')+u.first+' '+u.last+' – '+session.name);
         showToast('Gespeichert.'); renderKonto();
       }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
     });
@@ -3605,8 +3647,8 @@ function deleteUser(id){
       if(s.trainerIds){const i=s.trainerIds.indexOf(id);if(i>=0){s.trainerIds.splice(i,1);if(s.trainerNames)s.trainerNames.splice(i,1);}}
     });
     try{
-      await saveUsers('Zugang gelöscht: '+u.first+' '+u.last);
-      if(affected.length) await saveTraining('Trainer-Zuordnung entfernt: '+u.first+' '+u.last);
+      await saveUsers('Zugang gelöscht: '+u.first+' '+u.last+' – '+session.name);
+      if(affected.length) await saveTraining('Trainer-Zuordnung entfernt: '+u.first+' '+u.last+' – '+session.name);
       showToast('Gelöscht.'+(affected.length?' '+affected.length+' Trainingszeit(en) stehen jetzt auf „wird bald ergänzt".':''));
       renderKonto(); renderTraining();
     }
