@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T21:10:25.289Z",
+  "updated": "2026-09-09T04:43:16.573Z",
   "games": [
     {
       "d": "2026-08-20",
@@ -1443,16 +1443,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-08-18",
-      "t": "19:30",
-      "team": "Herren",
-      "squad": 2,
-      "opponent": "SG Holzen/Eisborn",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sg-holzen-eisborn-sv-bachum-bergheim-ii/-/spiel/031H0BHU48000000VS5489BUVSJ4CRAP"
-    },
     {
       "d": "2026-08-19",
       "t": "19:00",
