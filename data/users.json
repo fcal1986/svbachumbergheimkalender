@@ -156,6 +156,25 @@
       },
       "created": "2026-09-07T13:13:41.885Z",
       "locked": true
+    },
+    {
+      "id": "99caa6e8-415d-4204-ba0b-c5d4a53c9f0b",
+      "first": "Fabrizio",
+      "last": "Test",
+      "email": "fabrizio.calcagno@santander.de",
+      "admin": false,
+      "classes": {
+        "C-Jugend": [
+          2
+        ]
+      },
+      "enc": {
+        "salt": "sVPCKRNNoOTA2l9i8Xmgeg==",
+        "iv": "eDQq2L3+hITm4UXH",
+        "cipher": "GgZbruQ0xiLwM27WP7z7O4JGGar3Ogji9/+EjoHkk+7pNjCBd35sAXwAKKYfLoJ26j2IT/GtTUS8vMWj93URsI69cL7LbRE4T46Fc4aYdK4Th9TazFoZT6wcWgQ7M2fluOXVfUBTC0Xce1mVAQ=="
+      },
+      "created": "2026-09-09T12:23:58.468Z",
+      "emailNotificationsEnabled": true
     }
   ]
 }
