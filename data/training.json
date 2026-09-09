@@ -203,12 +203,12 @@
       "id": "c9f4e22e-daeb-43b8-914b-eae6f1db049e",
       "day": 2,
       "from": "18:00",
-      "to": "18:45",
+      "to": "19:30",
       "team": "D-Jugend",
       "squad": 1,
       "pitch": {
-        "mode": "haelfte",
-        "part": "B"
+        "mode": "viertel",
+        "part": 3
       },
       "res": [],
       "note": "",
@@ -218,7 +218,9 @@
       "trainerNames": [
         "Sascha Rabura"
       ],
-      "cancelled": []
+      "cancelled": [],
+      "validFrom": "2026-09-09",
+      "validUntil": null
     },
     {
       "id": "6b8092f0-ad1d-47fa-b201-35ce36912eeb",
