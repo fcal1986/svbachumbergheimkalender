@@ -280,8 +280,8 @@
       "team": "E-Jugend",
       "squad": 3,
       "pitch": {
-        "mode": "viertel",
-        "part": 2
+        "mode": "haelfte",
+        "part": "A"
       },
       "res": [],
       "note": "",
