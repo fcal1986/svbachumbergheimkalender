@@ -102,15 +102,15 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "07163ce5-85a7-4aff-bef9-87ce9ac4bb20",
-        "99caa6e8-415d-4204-ba0b-c5d4a53c9f0b"
+        "07163ce5-85a7-4aff-bef9-87ce9ac4bb20"
       ],
       "trainerNames": [
-        "Markus Vielhaber",
-        "Fabrizio Test"
+        "Markus Vielhaber"
       ],
       "validFrom": "2026-07-18",
-      "validUntil": null
+      "validUntil": null,
+      "trainerId": null,
+      "trainerName": ""
     },
     {
       "id": "56d7534c-ebee-4fe3-80e9-3aa0663e8d67",
@@ -353,13 +353,13 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "07163ce5-85a7-4aff-bef9-87ce9ac4bb20",
-        "99caa6e8-415d-4204-ba0b-c5d4a53c9f0b"
+        "07163ce5-85a7-4aff-bef9-87ce9ac4bb20"
       ],
       "trainerNames": [
-        "Markus Vielhaber",
-        "Fabrizio Test"
-      ]
+        "Markus Vielhaber"
+      ],
+      "trainerId": null,
+      "trainerName": ""
     },
     {
       "id": "4607193e-c5e6-40a3-b78e-ab9d668bc2f2",
