@@ -1,0 +1,40 @@
+name: E-Mail-Benachrichtigung bei Änderungen
+
+# Läuft bei jedem Push, der Termine, Trainingszeiten, Saisons oder Zugänge betrifft
+# (also bei jeder Speicherung in der App), und verschickt eine E-Mail mit den
+# Commit-Nachrichten – die App erzeugt bereits sprechende Nachrichten wie
+# "Termin angelegt: ...". Bewusst NICHT ausgelöst durch automatische
+# fussball.de-Sync-Commits (sonst alle 6h eine Mail).
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'data/fussballde.json'
+      - '.github/**'
+      - 'README-DEPLOY.md'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    if: github.event.head_commit.author.name != 'platzcoach-bot'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # volle Historie, um ALLE Commits dieses Pushs zu sehen (nicht nur den letzten)
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Abhängigkeiten installieren
+        run: npm install --no-audit --no-fund
+
+      - name: E-Mail senden
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+        run: node scripts/notify-email.mjs
