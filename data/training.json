@@ -448,7 +448,7 @@
       "id": "a4dbb675-3e10-40c6-afa2-40c2ca82a21c",
       "day": 4,
       "from": "18:00",
-      "to": "18:45",
+      "to": "19:30",
       "team": "D-Jugend",
       "squad": 1,
       "pitch": {
@@ -462,7 +462,9 @@
       ],
       "trainerNames": [
         "Sascha Rabura"
-      ]
+      ],
+      "validFrom": "2026-09-09",
+      "validUntil": null
     },
     {
       "id": "97a34d14-a08f-46f6-a7de-addf6595ed3e",
