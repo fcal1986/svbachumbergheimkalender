@@ -116,7 +116,8 @@
         "iv": "YGRnTjjo5E1WIgsT",
         "cipher": "v8yXEIeWFPl4hPpOiNJkGr8f2EDSbzReFCimFGR7dHZxVq+l6OUYAfW4OHsApROHx2lRjnigU1o2RMkCSW/lu3/vlAVefJbXHGH8MS2DT9bz5awtm5g1jmrEtMxTR9e5X2GufmJuO/IpbQczBA=="
       },
-      "created": "2026-09-07T12:42:14.071Z"
+      "created": "2026-09-07T12:42:14.071Z",
+      "locked": true
     },
     {
       "id": "07163ce5-85a7-4aff-bef9-87ce9ac4bb20",
