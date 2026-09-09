@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T11:24:45.290Z",
+  "updated": "2026-09-09T16:39:33.504Z",
   "games": [
     {
       "d": "2026-08-20",
@@ -1962,6 +1962,16 @@
       "competition": "Kreisliga A",
       "score": null,
       "link": "https://www.fussball.de/spiel/sg-balve-garbeck-sv-bachum-bergheim/-/spiel/031I0BNBIS000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-10-04",
+      "t": "13:00",
+      "team": "D-Junioren",
+      "squad": 1,
+      "opponent": "ASC 09 Dortmund III",
+      "competition": "Kreisfreundschaftsspiele",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/asc-09-dortmund-iii-sv-bachum-bergheim/-/spiel/0321O2JISG000000VS5489BUVSORQI22"
     },
     {
       "d": "2026-10-09",
