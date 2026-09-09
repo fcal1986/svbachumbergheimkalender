@@ -17,7 +17,7 @@
   "shareCategories": ["E-Junioren", "F-Junioren", "G-Junioren", "Bambini"]
   },
   "notify": {
-  "emails": ["info@test.de"],
+  "emails": ["fab.calcagno@gmail.com"],
   "fromEmail": "noreply@platzcoach.de"
   }
 }
