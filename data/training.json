@@ -293,7 +293,9 @@
       ],
       "validFrom": "2026-09-01",
       "validUntil": null,
-      "cancelled": []
+      "cancelled": [
+        "2026-09-09"
+      ]
     },
     {
       "id": "ae20704e-735d-4f97-b7a1-cc8393bfd520",
