@@ -466,9 +466,9 @@
     },
     {
       "id": "97a34d14-a08f-46f6-a7de-addf6595ed3e",
-      "day": 4,
-      "from": "18:45",
-      "to": "19:30",
+      "day": 5,
+      "from": "16:30",
+      "to": "18:00",
       "team": "D-Jugend",
       "squad": 2,
       "pitch": {
@@ -478,7 +478,9 @@
       "res": [],
       "note": "",
       "trainerIds": [],
-      "trainerNames": []
+      "trainerNames": [],
+      "validFrom": "2026-09-09",
+      "validUntil": null
     },
     {
       "id": "7f185be8-1d5e-4371-9fca-35974369c05d",
