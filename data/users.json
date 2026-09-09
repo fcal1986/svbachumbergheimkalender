@@ -156,21 +156,6 @@
       },
       "created": "2026-09-07T13:13:41.885Z",
       "locked": true
-    },
-    {
-      "id": "789fcf8f-b297-4d21-89b6-47392e15bbfd",
-      "first": "Fabrizio",
-      "last": "Calcagno",
-      "email": "fabrizio.calcagno@santander.de",
-      "admin": true,
-      "classes": {},
-      "enc": {
-        "salt": "atDDDkY0VR/pCikBHylsnw==",
-        "iv": "dekK/nFn7g3hJAe5",
-        "cipher": "9rmR3pAgtL66v6hKQY25rsmAmS1hGIwLiCbyNDE+cqug80o0DiUiVLSOmo0W1a1W7sr9CCVbiCS5LvX9K+Z4RTKdgvnlF3LHdM90WKwxbnInFwlcZbgQuRbA7f9uNRRPI4l2QyRIZGjIvR6gFA=="
-      },
-      "created": "2026-09-09T12:46:26.107Z",
-      "emailNotificationsEnabled": true
     }
   ]
 }
