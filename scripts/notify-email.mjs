@@ -61,6 +61,52 @@ function isNoisyCommit(msg) {
   return /^Heimspiele von fussball\.de aktualisiert/i.test(msg);
 }
 
+// Erkennt "Zugang angelegt: Marc Krause (Admin) – David Skwara" bzw. ohne "(Admin)" und
+// liefert den vollen Namen ("Marc Krause") des NEU angelegten Nutzers zurück, oder null.
+function newAccountNameFromCommit(msg) {
+  const m = msg.match(/^Zugang angelegt: (.+?)(?: \(Admin\))? – /);
+  return m ? m[1].trim() : null;
+}
+
+async function sendWelcomeEmails(messages, users, transporter, clubName, fromAddress, siteUrl) {
+  const newAccountNames = messages.map(newAccountNameFromCommit).filter(Boolean);
+  for (const fullName of newAccountNames) {
+    // Bewusst per Namensabgleich statt ID – die Commit-Nachricht selbst enthält keine ID.
+    // Bei zwei gleichnamigen Personen träfe das im seltenen Fall beide oder die falsche;
+    // das ist eine akzeptierte Grenze dieses Text-basierten Ansatzes (wie beim Rest des
+    // Benachrichtigungssystems auch).
+    const user = users.find(u => `${u.first} ${u.last}`.trim() === fullName && !u.locked);
+    if (!user || !user.email) {
+      console.log(`  [Willkommens-Mail] Konnte "${fullName}" keinem Zugang mit E-Mail zuordnen – übersprungen.`);
+      continue;
+    }
+    const linkHtml = siteUrl ? `<p><a href="${escapeHtml(siteUrl)}" style="color:#16A34A;">${escapeHtml(siteUrl)}</a></p>` : '';
+    const linkText = siteUrl ? `\n${siteUrl}\n` : '';
+    const html = `
+      <div style="font-family:Arial,sans-serif;font-size:14px;color:#0B1B32;">
+        <p>Hallo ${escapeHtml(user.first)},</p>
+        <p>dein Zugang für <strong>${escapeHtml(clubName)}</strong> in Platzcoach wurde eingerichtet – schön, dass du dabei bist! 👋</p>
+        <p>Deine Anmeldung erfolgt mit dieser E-Mail-Adresse: <strong>${escapeHtml(user.email)}</strong><br>
+        Das Start-Passwort dazu hast du (oder bekommst du) direkt vom Vorstand.</p>
+        ${linkHtml}
+        <p style="color:#718191;font-size:12px;">Automatische Benachrichtigung von Platzcoach.</p>
+      </div>`;
+    const text = `Hallo ${user.first},\n\ndein Zugang für ${clubName} in Platzcoach wurde eingerichtet – schön, dass du dabei bist!\n\nDeine Anmeldung erfolgt mit dieser E-Mail-Adresse: ${user.email}\nDas Start-Passwort dazu hast du (oder bekommst du) direkt vom Vorstand.\n${linkText}`;
+    try {
+      await transporter.sendMail({
+        from: `${clubName} <${fromAddress}>`,
+        to: user.email,
+        subject: `Willkommen bei ${clubName} in Platzcoach!`,
+        text,
+        html,
+      });
+      console.log(`  [Willkommens-Mail] An ${user.email} (${fullName}) gesendet.`);
+    } catch (err) {
+      console.error(`  [Willkommens-Mail] Senden an ${user.email} fehlgeschlagen:`, err.message);
+    }
+  }
+}
+
 async function main() {
   const cfg = await loadConfig();
   const notify = cfg.notify || {};
@@ -73,13 +119,13 @@ async function main() {
   //    allgemeines Vorstands-Postfach, das kein eigener Platzcoach-Zugang ist.
   const users = await loadUsers();
   const optedInUserEmails = users
-    .filter(u => u.emailNotificationsEnabled !== false)
+    .filter(u => u.emailNotificationsEnabled !== false && !u.locked)
     .map(u => (u.email || '').trim().toLowerCase())
     .filter(Boolean);
   const configEmails = (Array.isArray(notify.emails) ? notify.emails : [])
     .filter(Boolean).map(e => e.trim().toLowerCase());
   const recipients = [...new Set([...optedInUserEmails, ...configEmails])];
-  console.log(`Empfänger: ${optedInUserEmails.length} User mit aktivierten Benachrichtigungen (von ${users.length} Zugängen insgesamt) + ${configEmails.length} feste Adresse(n) aus config.json = ${recipients.length} eindeutige Empfänger.`);
+  console.log(`Empfänger: ${optedInUserEmails.length} User mit aktivierten Benachrichtigungen und nicht gesperrtem Zugang (von ${users.length} Zugängen insgesamt) + ${configEmails.length} feste Adresse(n) aus config.json = ${recipients.length} eindeutige Empfänger.`);
 
   if (!recipients.length) {
     console.log('Keine Empfänger (weder User mit aktivierten Benachrichtigungen noch "notify.emails" in config.json) – überspringe Benachrichtigung.');
@@ -106,6 +152,13 @@ async function main() {
   });
 
   const clubName = cfg.club || 'Platzcoach';
+  const fromAddress = notify.fromEmail || process.env.SMTP_USER;
+
+  // Willkommens-Mail(s) an neu angelegte Zugänge – ZUSÄTZLICH zur normalen Sammel-Mail
+  // unten, nicht statt ihr. Bewusst OHNE Passwort (siehe Absprache) – nur Begrüßung und
+  // Hinweis auf die Login-E-Mail, das Passwort teilt der Vorstand weiterhin persönlich mit.
+  await sendWelcomeEmails(messages, users, transporter, clubName, fromAddress, cfg.siteUrl);
+
   const listHtml = messages.map(m => `<li style="margin-bottom:6px;">${escapeHtml(m)}</li>`).join('');
   const html = `
     <div style="font-family:Arial,sans-serif;font-size:14px;color:#0B1B32;">
@@ -116,7 +169,7 @@ async function main() {
   const text = `${clubName} – Änderungen in Platzcoach:\n\n` + messages.map(m => `- ${m}`).join('\n');
 
   await transporter.sendMail({
-    from: `${clubName} <${notify.fromEmail || process.env.SMTP_USER}>`,
+    from: `${clubName} <${fromAddress}>`,
     to: recipients.join(', '),
     subject: `Platzcoach: ${messages.length} Änderung${messages.length === 1 ? '' : 'en'}`,
     text,
