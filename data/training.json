@@ -225,18 +225,20 @@
     {
       "id": "6b8092f0-ad1d-47fa-b201-35ce36912eeb",
       "day": 2,
-      "from": "18:45",
+      "from": "18:00",
       "to": "19:30",
       "team": "D-Jugend",
       "squad": 2,
       "pitch": {
-        "mode": "haelfte",
-        "part": "B"
+        "mode": "viertel",
+        "part": 4
       },
       "res": [],
       "note": "",
       "trainerIds": [],
-      "trainerNames": []
+      "trainerNames": [],
+      "validFrom": "2026-09-09",
+      "validUntil": null
     },
     {
       "id": "a0fba6c3-540b-44c1-aa2f-ee7d4d6f5907",
