@@ -55,11 +55,31 @@ function escapeHtml(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// Commits, die selbst KEINE Benachrichtigung in der allgemeinen Sammel-Mail auslösen sollen:
-// - automatische Bot-Läufe (fussball.de-Sync), sonst gäbe es alle 6h eine E-Mail.
-// - "Zugang angelegt" – die neue Person bekommt dafür bereits ihre eigene Willkommens- und
-//   Passwort-Mail; alle ANDEREN müssen nicht separat informiert werden, dass irgendwo ein
-//   neuer Zugang entstanden ist.
+// WHITELIST statt Blacklist: Nur Commit-Nachrichten, die Platzcoach selbst beim Speichern
+// erzeugt, gelten als benachrichtigungsrelevant. Grund: GitHub selbst erzeugt bei direkten
+// Änderungen über die Weboberfläche eigene Nachrichten ("Add files via upload", "Update
+// index.html", "Create ...", "Merge ..." usw.) – die lassen sich nicht vollständig vorher
+// aufzählen, eine Blacklist hätte also immer Lücken. Diese Liste hier ist die vollständige
+// Sammlung aller Präfixe aus index.html (jeder saveEvents/saveTraining/saveUsers/
+// saveSeasonDebounced-Aufruf) – wird dort eine neue Aktion ergänzt, muss ihr Präfix auch
+// hier ergänzt werden, sonst verschwindet sie stillschweigend aus der Sammel-Mail.
+const PLATZCOACH_PREFIXES = [
+  'Neuer Termin:', 'Termin geändert:', 'Termin gelöscht:',
+  'Trainingszeit angelegt:', 'Trainingszeit geändert:', 'Trainingszeit gelöscht:',
+  'Training abgesagt:', 'Absage zurückgenommen:',
+  'Zugang angelegt:', 'Zugang gelöscht:', 'Zugang gesperrt:', 'Zugang entsperrt:',
+  'Mannschaften zugewiesen:', 'Trainer-Zuordnung aktualisiert:', 'Trainer-Zuordnung entfernt:',
+  'Trainer zur Saison', 'Trainer aus Saison', 'Trainer auto-zugewiesen (',
+  'Admin-Recht vergeben:', 'Admin-Recht entzogen:',
+  'Profil geändert:', 'Passwort geändert:',
+];
+function isFromPlatzcoach(msg) {
+  return PLATZCOACH_PREFIXES.some(p => msg.startsWith(p));
+}
+
+// Von den (echten) Platzcoach-Nachrichten sollen diese TROTZDEM nicht in der allgemeinen
+// Sammel-Mail auftauchen: automatische Bot-Läufe (fussball.de-Sync, sonst alle 6h eine Mail)
+// und "Zugang angelegt" (die neue Person bekommt stattdessen ihre eigene Willkommens-Mail).
 function isNoisyCommit(msg) {
   return /^Heimspiele von fussball\.de aktualisiert/i.test(msg)
     || /^Zugang angelegt: /i.test(msg);
@@ -141,8 +161,9 @@ async function main() {
   }
 
   const allMessages = getCommitMessages();
-  const messages = allMessages.filter(m => !isNoisyCommit(m));
-  console.log(`${allMessages.length} Commit(s) im Push, davon ${messages.length} für die Sammel-Mail relevant.`);
+  const platzcoachMessages = allMessages.filter(isFromPlatzcoach);
+  const messages = platzcoachMessages.filter(m => !isNoisyCommit(m));
+  console.log(`${allMessages.length} Commit(s) im Push, davon ${platzcoachMessages.length} von Platzcoach selbst (Rest = z.B. direkte GitHub-Änderungen, wird ignoriert), davon ${messages.length} für die Sammel-Mail relevant.`);
 
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -159,7 +180,7 @@ async function main() {
   // NICHT in der allgemeinen Sammel-Mail unten auftauchen soll, aber die neue Person
   // trotzdem ihre eigene Willkommens-Mail bekommen muss. Bewusst OHNE Passwort (siehe
   // Absprache) – das kommt separat über den Dispatch-Weg (send-welcome-password.mjs).
-  await sendWelcomeEmails(allMessages, users, transporter, clubName, fromAddress, cfg.siteUrl);
+  await sendWelcomeEmails(platzcoachMessages, users, transporter, clubName, fromAddress, cfg.siteUrl);
 
   if (!messages.length) {
     console.log('Keine für die Sammel-Mail relevanten Änderungen – keine weitere E-Mail nötig.');
