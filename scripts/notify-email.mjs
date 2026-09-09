@@ -55,10 +55,14 @@ function escapeHtml(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// Commits, die selbst KEINE Benachrichtigung auslösen sollen (automatische Bot-Läufe,
-// sonst gäbe es bei jedem fussball.de-Sync eine E-Mail).
+// Commits, die selbst KEINE Benachrichtigung in der allgemeinen Sammel-Mail auslösen sollen:
+// - automatische Bot-Läufe (fussball.de-Sync), sonst gäbe es alle 6h eine E-Mail.
+// - "Zugang angelegt" – die neue Person bekommt dafür bereits ihre eigene Willkommens- und
+//   Passwort-Mail; alle ANDEREN müssen nicht separat informiert werden, dass irgendwo ein
+//   neuer Zugang entstanden ist.
 function isNoisyCommit(msg) {
-  return /^Heimspiele von fussball\.de aktualisiert/i.test(msg);
+  return /^Heimspiele von fussball\.de aktualisiert/i.test(msg)
+    || /^Zugang angelegt: /i.test(msg);
 }
 
 // Erkennt "Zugang angelegt: Marc Krause (Admin) – David Skwara" bzw. ohne "(Admin)" und
@@ -138,11 +142,7 @@ async function main() {
 
   const allMessages = getCommitMessages();
   const messages = allMessages.filter(m => !isNoisyCommit(m));
-  console.log(`${allMessages.length} Commit(s) im Push, davon ${messages.length} relevant.`);
-  if (!messages.length) {
-    console.log('Keine benachrichtigungsrelevanten Änderungen – keine E-Mail nötig.');
-    return;
-  }
+  console.log(`${allMessages.length} Commit(s) im Push, davon ${messages.length} für die Sammel-Mail relevant.`);
 
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -154,10 +154,17 @@ async function main() {
   const clubName = cfg.club || 'Platzcoach';
   const fromAddress = notify.fromEmail || process.env.SMTP_USER;
 
-  // Willkommens-Mail(s) an neu angelegte Zugänge – ZUSÄTZLICH zur normalen Sammel-Mail
-  // unten, nicht statt ihr. Bewusst OHNE Passwort (siehe Absprache) – nur Begrüßung und
-  // Hinweis auf die Login-E-Mail, das Passwort teilt der Vorstand weiterhin persönlich mit.
-  await sendWelcomeEmails(messages, users, transporter, clubName, fromAddress, cfg.siteUrl);
+  // Willkommens-Mail(s) an neu angelegte Zugänge – bewusst aus ALLEN Commits erkannt
+  // (nicht aus der oben gefilterten "messages"-Liste!), da "Zugang angelegt" ja gerade
+  // NICHT in der allgemeinen Sammel-Mail unten auftauchen soll, aber die neue Person
+  // trotzdem ihre eigene Willkommens-Mail bekommen muss. Bewusst OHNE Passwort (siehe
+  // Absprache) – das kommt separat über den Dispatch-Weg (send-welcome-password.mjs).
+  await sendWelcomeEmails(allMessages, users, transporter, clubName, fromAddress, cfg.siteUrl);
+
+  if (!messages.length) {
+    console.log('Keine für die Sammel-Mail relevanten Änderungen – keine weitere E-Mail nötig.');
+    return;
+  }
 
   const listHtml = messages.map(m => `<li style="margin-bottom:6px;">${escapeHtml(m)}</li>`).join('');
   const html = `
