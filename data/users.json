@@ -19,7 +19,8 @@
       },
       "phone": "015224897699",
       "contactPublic": "phone",
-      "contactEmail": "fab.calcagno@gmail.com"
+      "contactEmail": "fab.calcagno@gmail.com",
+      "emailNotificationsEnabled": false
     },
     {
       "id": "a30f8c9b-96f9-4557-b28b-619e122080ea",
