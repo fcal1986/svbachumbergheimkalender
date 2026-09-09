@@ -154,7 +154,8 @@
         "iv": "Eez+sgWUPm2GB5B6",
         "cipher": "YocnCG2d9qrd8musrBc+K3Q+ZLDzg7zjhMBAUpvWzODO69WrP18h88HvzZmSAFf+M/xqVB9Cla8toagOnliJWifdXorOUBgo8E3n7VNwuZacP7XbH+Jy/vNCEFliQwQlPqqSm0LCiuNxXgNLZQ=="
       },
-      "created": "2026-09-07T13:13:41.885Z"
+      "created": "2026-09-07T13:13:41.885Z",
+      "locked": true
     }
   ]
 }
