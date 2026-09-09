@@ -1340,6 +1340,17 @@ async function ghPutRaw(path,text,msg){
     throw new Error(e.message||'Speichern fehlgeschlagen ('+r.status+')');
   }
 }
+async function ghDispatch(eventType,payload){
+  if(!session||!session.token) throw new Error('Kein Schreib-Token vorhanden.');
+  const r=await fetch('https://api.github.com/repos/'+CFG.repo+'/dispatches',{
+    method:'POST',
+    headers:{Authorization:'Bearer '+session.token,Accept:'application/vnd.github+json','Content-Type':'application/json'},
+    body:JSON.stringify({event_type:eventType,client_payload:payload})});
+  if(!r.ok){
+    const e=await r.json().catch(()=>({}));
+    throw new Error(e.message||'Dispatch fehlgeschlagen ('+r.status+')');
+  }
+}
 async function saveEvents(msg){
   await ghPutRaw('data/events.json',JSON.stringify({events:EVENTS},null,2),msg);
 }
@@ -3457,6 +3468,13 @@ async function createUser(){
     const curSeason=getCurrentSeason();
     if(curSeason) addUserToSeason(curSeason.id,newU.id).catch(()=>{});
     showToast(first+' kann sich jetzt anmelden'+(isAdm?' und darf alles verwalten.':'.')+(curSeason?' Bereits der aktuellen Saison zugeordnet.':''));
+    // Passwort-Mail läuft NICHT über einen Commit (würde bei öffentlichem Repo für immer
+    // sichtbar in der Git-Historie landen!), sondern über ein GitHub-"Dispatch"-Event: das
+    // Passwort geht nur kurz durchs Action-Log, nie in eine dauerhaft gespeicherte Datei.
+    ghDispatch('welcome-password',{name:first+' '+last,email:mail,password:pass}).catch(err=>{
+      console.error('Passwort-Mail-Dispatch fehlgeschlagen:',err);
+      showToast('Zugang angelegt – Passwort-Mail konnte aber nicht ausgelöst werden: '+err.message,6000);
+    });
     nuClasses={};
     renderKonto();
   }catch(e){
