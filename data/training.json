@@ -539,13 +539,13 @@
     {
       "id": "c48dfe28-58b5-4e17-8cfe-41926fb33bbc",
       "day": 5,
-      "from": "16:30",
-      "to": "18:00",
+      "from": "16:00",
+      "to": "17:30",
       "team": "E-Jugend",
       "squad": 2,
       "pitch": {
-        "mode": "viertel",
-        "part": 2
+        "mode": "haelfte",
+        "part": "A"
       },
       "res": [],
       "note": "",
