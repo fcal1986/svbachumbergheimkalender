@@ -504,17 +504,19 @@
       "id": "15b3cbb6-e38f-4b97-9865-9daa5d46b587",
       "day": 4,
       "from": "19:30",
-      "to": "20:15",
+      "to": "21:15",
       "team": "3. Herren",
       "squad": 1,
       "pitch": {
-        "mode": "haelfte",
-        "part": "B"
+        "mode": "viertel",
+        "part": 3
       },
       "res": [],
       "note": "",
       "trainerIds": [],
-      "trainerNames": []
+      "trainerNames": [],
+      "validFrom": "2026-09-09",
+      "validUntil": null
     },
     {
       "id": "547a1e4b-4a57-4206-9d53-8d749803ac0b",
