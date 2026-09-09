@@ -56,6 +56,15 @@
   .occupied-badge .dot{width:7px;height:7px;border-radius:50%;flex:none;}
   .occupied-badge .dot.on{background:#16A34A;animation:pulse 1.6s infinite;}
   .occupied-badge .dot.off{background:var(--line);}
+  .notif-row{display:flex;align-items:center;justify-content:space-between;gap:14px;}
+  .notif-row-text b{font-size:13.5px;color:var(--ink);}
+  .notif-row-text p{font-size:11.5px;color:var(--ink-soft);margin-top:4px;line-height:1.4;}
+  .toggle-switch{position:relative;display:inline-block;width:46px;height:27px;flex:none;}
+  .toggle-switch input{opacity:0;width:0;height:0;position:absolute;}
+  .toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--line);transition:.2s;border-radius:999px;}
+  .toggle-slider:before{position:absolute;content:'';height:21px;width:21px;left:3px;bottom:3px;background:#fff;transition:.2s;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.25);}
+  .toggle-switch input:checked+.toggle-slider{background:var(--green);}
+  .toggle-switch input:checked+.toggle-slider:before{transform:translateX(19px);}
   .ios-step{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:12.5px;color:var(--ink);}
   .ios-step-num{flex:none;width:20px;height:20px;border-radius:50%;background:var(--black-btn);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;}
   .install-banner-card{display:flex;align-items:center;gap:10px;background:var(--white);border-radius:14px;padding:12px 12px;margin-bottom:10px;box-shadow:var(--card-shadow);border:1.5px solid var(--line);}
@@ -3048,6 +3057,20 @@ function deleteTrainingSlot(id){
 }
 
 /* ---------- Konto ---------- */
+function notificationsCard(){
+  const u=USERS.find(x=>x.id===session.id)||{};
+  // Fehlender Wert (bei allen vor dieser Funktion angelegten Zugängen) zählt als aktiviert –
+  // das ersetzt hier die "Datenbankmigration": es gibt keine echte Datenbank, nur diese
+  // JSON-Datei, und ein Feld, das schlicht noch nie geschrieben wurde, verhält sich dank
+  // dieser Prüfung automatisch wie "true", ganz ohne Migrations-Skript.
+  const enabled=u.emailNotificationsEnabled!==false;
+  return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:16px;height:16px;stroke:var(--green)"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>Benachrichtigungen</h4>'+
+    '<div class="notif-row">'+
+    '<div class="notif-row-text"><b>E-Mail-Benachrichtigungen</b>'+
+    '<p>Erhalte wichtige Benachrichtigungen zu Änderungen und Aktivitäten in Platzcoach per E-Mail.</p></div>'+
+    '<label class="toggle-switch"><input type="checkbox" id="notif-toggle"'+(enabled?' checked':'')+' onchange="toggleEmailNotifications(this.checked)"><span class="toggle-slider"></span></label>'+
+    '</div></div>';
+}
 function profileCard(){
   const u=USERS.find(x=>x.id===session.id)||{};
   const phone=u.phone||'';
@@ -3387,7 +3410,7 @@ function renderKonto(){
   // ── Tab-Inhalt ──
   if(kontoTab==='profil'){
     h+=pwCard()+bioCard();
-    if(!session.isSuper)h+=profileCard();
+    if(!session.isSuper)h+=profileCard()+notificationsCard();
     h+=pwaCard();
   }else if(kontoTab==='saisons'){
     h+=seasonManagementCard();
@@ -3426,7 +3449,7 @@ async function createUser(){
   const backup=JSON.stringify(USERS);
   try{
     const encRec=await encryptToken(session.token,pass);
-    const newU={id:crypto.randomUUID(),first,last,email:mail,admin:isAdm,classes,enc:encRec,created:new Date().toISOString()};
+    const newU={id:crypto.randomUUID(),first,last,email:mail,admin:isAdm,classes,enc:encRec,created:new Date().toISOString(),emailNotificationsEnabled:true};
     USERS.push(newU);
     await saveUsers('Zugang angelegt: '+first+' '+last+(isAdm?' (Admin)':'')+' – '+session.name);
     syncTrainerAssignments(newU).then(n=>{ if(n>0) saveTraining('Trainer-Zuordnung aktualisiert: '+newU.first+' '+newU.last+' – '+session.name).catch(()=>{}); }).catch(()=>{});
@@ -3485,6 +3508,22 @@ async function saveUserClasses(id){
   finally{ hideSaving(); }
 }
 function setContactVis(b){b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');}
+async function toggleEmailNotifications(newVal){
+  const u=USERS.find(x=>x.id===session.id); if(!u)return;
+  const prevVal=u.emailNotificationsEnabled!==false;
+  const backup=JSON.stringify(USERS);
+  u.emailNotificationsEnabled=newVal;
+  session.emailNotificationsEnabled=newVal;
+  sessionStorage.setItem('svbb_session',JSON.stringify(session));
+  try{
+    await saveUsers((newVal?'E-Mail-Benachrichtigungen aktiviert: ':'E-Mail-Benachrichtigungen deaktiviert: ')+u.first+' '+u.last);
+    showToast(newVal?'E-Mail-Benachrichtigungen aktiviert.':'E-Mail-Benachrichtigungen deaktiviert.');
+  }catch(e){
+    USERS=JSON.parse(backup);
+    const el=document.getElementById('notif-toggle'); if(el)el.checked=prevVal;
+    showToast('Fehler beim Speichern: '+e.message,6000);
+  }
+}
 async function saveProfile(){
   const u=USERS.find(x=>x.id===session.id); if(!u)return;
   const phone=document.getElementById('prof-phone').value.trim();
