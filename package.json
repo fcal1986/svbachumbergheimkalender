@@ -3,5 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": { "sync:fussballde": "node scripts/fussballde-sync.mjs" },
-  "dependencies": { "cheerio": "^1.0.0" }
+  "dependencies": { "cheerio": "^1.0.0" },
+  "nodemailer": "^6.9.0"
 }
