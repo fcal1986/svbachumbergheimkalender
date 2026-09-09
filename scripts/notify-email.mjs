@@ -17,9 +17,18 @@ import { execSync } from 'node:child_process';
 import nodemailer from 'nodemailer';
 
 const CONFIG_PATH = 'data/config.json';
+const USERS_PATH = 'data/users.json';
 
 async function loadConfig() {
   return JSON.parse(await fs.readFile(CONFIG_PATH, 'utf8'));
+}
+async function loadUsers() {
+  try {
+    const raw = JSON.parse(await fs.readFile(USERS_PATH, 'utf8'));
+    return Array.isArray(raw.users) ? raw.users : [];
+  } catch (e) {
+    return [];
+  }
 }
 
 // Holt die Commit-Nachrichten aller Commits im aktuellen Push. Ist "before" nicht bekannt
@@ -55,10 +64,25 @@ function isNoisyCommit(msg) {
 async function main() {
   const cfg = await loadConfig();
   const notify = cfg.notify || {};
-  const recipients = Array.isArray(notify.emails) ? notify.emails.filter(Boolean) : [];
+
+  // Empfänger kommen aus ZWEI Quellen, zusammengeführt und dedupliziert:
+  // 1. Jeder Platzcoach-Zugang mit aktivierten E-Mail-Benachrichtigungen (Login-E-Mail wird
+  //    verwendet – es gibt bewusst kein separates Notification-E-Mail-Feld). Ein fehlender
+  //    Wert (bei Zugängen von vor dieser Funktion) zählt als aktiviert, siehe index.html.
+  // 2. Die weiterhin unterstützte feste Liste "notify.emails" in config.json, z.B. für ein
+  //    allgemeines Vorstands-Postfach, das kein eigener Platzcoach-Zugang ist.
+  const users = await loadUsers();
+  const optedInUserEmails = users
+    .filter(u => u.emailNotificationsEnabled !== false)
+    .map(u => (u.email || '').trim().toLowerCase())
+    .filter(Boolean);
+  const configEmails = (Array.isArray(notify.emails) ? notify.emails : [])
+    .filter(Boolean).map(e => e.trim().toLowerCase());
+  const recipients = [...new Set([...optedInUserEmails, ...configEmails])];
+  console.log(`Empfänger: ${optedInUserEmails.length} User mit aktivierten Benachrichtigungen (von ${users.length} Zugängen insgesamt) + ${configEmails.length} feste Adresse(n) aus config.json = ${recipients.length} eindeutige Empfänger.`);
 
   if (!recipients.length) {
-    console.log('Kein "notify.emails" in data/config.json konfiguriert – überspringe Benachrichtigung.');
+    console.log('Keine Empfänger (weder User mit aktivierten Benachrichtigungen noch "notify.emails" in config.json) – überspringe Benachrichtigung.');
     return;
   }
   if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
