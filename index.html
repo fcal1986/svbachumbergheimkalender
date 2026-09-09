@@ -232,6 +232,7 @@
   .log-more{font-size:11px;color:var(--ink-soft);padding:10px 2px;text-align:center;}
   .badge-res{font-size:10px;font-weight:600;padding:3px 9px;border-radius:16px;background:var(--bg);color:var(--ink-soft);}
   .badge-admin{font-size:9px;font-weight:700;padding:2px 7px;border-radius:12px;background:var(--green);color:#fff;}
+  .badge-locked{font-size:9px;font-weight:700;padding:2px 7px;border-radius:12px;background:#DC2626;color:#fff;}
 
   /* ── MINI PITCH + HALLE ── */
   .mini-pitch{display:inline-grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1.5px;width:22px;height:14px;border:1.5px solid var(--grass);border-radius:3px;background:var(--grass);overflow:hidden;flex:none;vertical-align:middle;}
@@ -1381,6 +1382,7 @@ async function doLogin(){
     }else{
       const rec=USERS.find(x=>x.email.toLowerCase()===u);
       if(!rec) throw new Error('Kein Benutzer mit dieser E-Mail.');
+      if(rec.locked) throw new Error('Dieser Zugang wurde gesperrt. Bitte an den Vorstand wenden.');
       let token;
       try{ token=await decryptToken(rec.enc,p); }catch(e){ throw new Error('Passwort stimmt nicht.'); }
       session={id:rec.id,name:rec.first+' '+rec.last,email:rec.email,
@@ -1434,6 +1436,13 @@ async function bioLogin(){
       challenge:crypto.getRandomValues(new Uint8Array(32)),
       allowCredentials:[{type:'public-key',id:unb64(st.credId)}],
       userVerification:'required',timeout:60000,rpId:location.hostname}});
+    // Sperr-Status erneut gegen den AKTUELLEN Stand von USERS prüfen – die zwischengespeicherte
+    // Sitzung könnte von vor einer Sperrung stammen und darf diese nicht umgehen.
+    if(st.session.id!=='admin'){
+      const rec=USERS.find(x=>x.id===st.session.id);
+      if(!rec){ loginErr('Dieser Zugang existiert nicht mehr. Bitte Passwort nutzen.'); return; }
+      if(rec.locked){ loginErr('Dieser Zugang wurde gesperrt. Bitte an den Vorstand wenden.'); return; }
+    }
     session={...st.session}; afterLogin();
   }catch(e){ loginErr('Fingerabdruck nicht erkannt. Bitte Passwort nutzen.'); }
 }
@@ -3216,11 +3225,14 @@ function adminUserListCard(){
   if(!USERS.length) h+='<p class="sub">Noch keine Zugänge angelegt.</p>';
   USERS.forEach(u=>{
     h+='<div class="user-row"><div class="avatar'+(u.admin?' adm':'')+'">'+initials(u.first+' '+u.last)+'</div>'+
-       '<div class="user-info"><div class="n">'+esc(u.first+' '+u.last)+(u.admin?'<span class="badge-admin">Admin</span>':'')+'</div>'+
+       '<div class="user-info"><div class="n">'+esc(u.first+' '+u.last)+(u.admin?'<span class="badge-admin">Admin</span>':'')+(u.locked?'<span class="badge-locked">Gesperrt</span>':'')+'</div>'+
        '<div class="e">'+esc(u.email)+'</div>'+
        (()=>{ const cls=normalizeClasses(u.classes||{});const keys=Object.keys(cls);if(!keys.length)return '</div>';return '<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;">'+keys.map(t=>{const sq=cls[t]||[];const sqLabel=isJugend(t)&&sq.length?(' · '+sq.map(s=>jugendLetter(t)+s).join(',')):'';return '<span class="badge-res" style="font-size:8px;padding:2px 6px;">'+esc(t)+esc(sqLabel)+'</span>';}).join('')+'</div></div>';})()+
        '<button class="ibtn" onclick="toggleClassEditor(\''+u.id+'\')" aria-label="Altersklassen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg></button>'+
        '<button class="ibtn" onclick="toggleUserAdmin(\''+u.id+'\')" aria-label="Admin-Recht"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg></button>'+
+       '<button class="ibtn'+(u.locked?' del':'')+'" onclick="toggleUserLocked(\''+u.id+'\')" aria-label="'+(u.locked?'Entsperren':'Sperren')+'">'+(u.locked?
+         '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0"/></svg>':
+         '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>')+'</button>'+
        '<button class="ibtn del" onclick="deleteUser(\''+u.id+'\')" aria-label="Löschen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>'+
        (classEditorOpen===u.id?(()=>{
   const cls=normalizeClasses(u.classes||{});
@@ -3739,6 +3751,19 @@ function toggleUserAdmin(id){
       }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
     });
 }
+function toggleUserLocked(id){
+  const u=USERS.find(x=>x.id===id); if(!u)return;
+  const now=!u.locked;
+  askConfirm(now?'Zugang sperren?':'Zugang entsperren?',
+    u.first+' '+u.last+(now?' kann sich danach nicht mehr anmelden und bekommt keine Benachrichtigungen mehr per E-Mail. Bereits laufende Sitzungen auf anderen Geräten bleiben bis zur Abmeldung aktiv.':' kann sich wieder anmelden und bekommt wieder Benachrichtigungen.'),
+    now?'Sperren':'Entsperren', async()=>{
+      const backup=JSON.stringify(USERS);
+      u.locked=now;
+      try{ await saveUsers((now?'Zugang gesperrt: ':'Zugang entsperrt: ')+u.first+' '+u.last+' – '+session.name);
+        showToast('Gespeichert.'); renderKonto();
+      }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
+    });
+}
 function deleteUser(id){
   const u=USERS.find(x=>x.id===id); if(!u)return;
   askConfirm('Zugang löschen?',u.first+' '+u.last+' kann sich dann nicht mehr anmelden. Seine Termine bleiben.','Löschen',async()=>{
@@ -3888,7 +3913,21 @@ async function boot(){
 
   document.getElementById('login-foot').textContent=
     USERS.length?'Zugang bekommst du vom Vorstand.':'Noch keine Zugänge angelegt – bitte als Admin anmelden.';
-  try{ const s=JSON.parse(sessionStorage.getItem('svbb_session')); if(s&&s.id) session=s; }catch(e){}
+  try{
+    const s=JSON.parse(sessionStorage.getItem('svbb_session'));
+    if(s&&s.id){
+      // Bei jedem Neuladen der App gegen den aktuellen Stand prüfen: wurde der Zugang seit
+      // der letzten Sitzung gesperrt? Das ist der einzige Moment, an dem eine bereits aktive
+      // Sitzung ohne eigenen Server nachträglich beendet werden kann (kein Echtzeit-Rauswurf
+      // möglich, aber immerhin bei jedem Öffnen/Neuladen der App).
+      const rec=(s.id==='admin')?null:USERS.find(x=>x.id===s.id);
+      if(s.id!=='admin'&&(!rec||rec.locked)){
+        sessionStorage.removeItem('svbb_session');
+      }else{
+        session=s;
+      }
+    }
+  }catch(e){}
 
   dateInput().value=todayStr;
   dateInput().addEventListener('change',()=>{updateWeekday();renderPitch();renderHalle();hideConflicts();setTimeout(updateFreeSlotsOnConflict,150);});
