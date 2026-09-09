@@ -521,7 +521,7 @@
     {
       "id": "547a1e4b-4a57-4206-9d53-8d749803ac0b",
       "day": 4,
-      "from": "20:15",
+      "from": "19:30",
       "to": "21:15",
       "team": "Ü32 / Ü50",
       "squad": 1,
@@ -532,7 +532,9 @@
       "res": [],
       "note": "",
       "trainerIds": [],
-      "trainerNames": []
+      "trainerNames": [],
+      "validFrom": "2026-09-09",
+      "validUntil": null
     },
     {
       "id": "c48dfe28-58b5-4e17-8cfe-41926fb33bbc",
