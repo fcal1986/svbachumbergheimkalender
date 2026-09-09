@@ -15,5 +15,9 @@
   "durationMinFull": 110,
   "durationMinYouth": 75,
   "shareCategories": ["E-Junioren", "F-Junioren", "G-Junioren", "Bambini"]
+  },
+  "notify": {
+  "emails": ["info@test.de"],
+  "fromEmail": "noreply@platzcoach.de"
   }
 }
