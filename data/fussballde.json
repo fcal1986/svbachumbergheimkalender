@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T20:56:35.223Z",
+  "updated": "2026-09-10T04:43:49.318Z",
   "games": [
     {
       "d": "2026-08-20",
@@ -1443,16 +1443,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-08-19",
-      "t": "19:00",
-      "team": "Herren",
-      "squad": 3,
-      "opponent": "TuS Vosswinkel II",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/tus-vosswinkel-ii-sv-bachum-bergheim-iii/-/spiel/031EGG5V9C000000VS5489BTVUS470OH"
-    },
     {
       "d": "2026-08-20",
       "t": "18:00",
