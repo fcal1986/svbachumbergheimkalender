@@ -1,16 +1,6 @@
 {
-  "updated": "2026-09-10T20:53:08.195Z",
+  "updated": "2026-09-11T04:41:47.045Z",
   "games": [
-    {
-      "d": "2026-08-20",
-      "t": "20:00",
-      "team": "Herren",
-      "squad": 1,
-      "opponent": "TuS Bruchhausen",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-bruchhausen/-/spiel/031JFAOBG0000000VS5489BUVVKNMR0J"
-    },
     {
       "d": "2026-08-22",
       "t": "13:00",
@@ -1443,16 +1433,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-08-20",
-      "t": "18:00",
-      "team": "Herren",
-      "squad": 1,
-      "opponent": "TuS Vosswinkel",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/tus-vosswinkel-sv-bachum-bergheim/-/spiel/031JFAOBFC000000VS5489BUVVKNMR0J"
-    },
     {
       "d": "2026-08-22",
       "t": "12:00",
