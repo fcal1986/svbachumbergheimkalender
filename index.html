@@ -185,6 +185,8 @@
   .event-card.cancelled-card .ev-head{background:transparent;}
   .event-card.external-away{opacity:.8;}
   .badge-fb{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--ink-soft);background:var(--bg);border-radius:8px;padding:3px 8px;}
+  .fb-link-btn{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--green);text-decoration:none;margin-left:auto;}
+  .fb-link-btn svg{width:13px;height:13px;stroke:var(--green);}
   .team-filter-btn{flex:0 0 auto;white-space:nowrap;background:var(--white);border:1.5px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;}
   .team-filter-btn.active{background:var(--black-btn);color:#fff;border-color:var(--black-btn);}
   .team-filter-panel{background:var(--white);border-radius:14px;box-shadow:var(--card-shadow);padding:12px 14px;margin:8px 0;}
@@ -1001,7 +1003,7 @@ function fussballDisplayAll(){
       title:'Heimspiel: '+label+' – '+g.opponent, opponent:g.opponent,
       team:mapped.team, squad:mapped.squad, competition:g.competition||'', score:g.score||null,
       isExternal:true, pitchIsFull:isFull, pitchLabelText:isFull?'Ganzer Platz':'Platz geteilt',
-      fbIndex:idx, ownerName:'fussball.de'
+      fbIndex:idx, ownerName:'fussball.de', link:g.link||null
     };
   });
 }
@@ -1015,7 +1017,7 @@ function fussballDisplayAwayAll(){
       id:'fbaway-'+(g.link||(g.d+'|'+g.t+'|'+g.opponent)), d:g.d, t:g.t||'00:00', bis,
       title:label+' bei '+g.opponent, opponent:g.opponent,
       team:mapped.team, squad:mapped.squad, competition:g.competition||'', score:g.score||null,
-      isExternal:true, isAway:true, ownerName:'fussball.de'
+      isExternal:true, isAway:true, ownerName:'fussball.de', link:g.link||null
     };
   });
 }
@@ -1766,7 +1768,9 @@ function externalRowHTML(e){
     +'<div class="ev-time-col"><div class="ev-t">'+e.t+'</div><div class="ev-tl">Von</div></div>'
     +'<div class="ev-time-col"><div class="ev-t">'+bis+'</div><div class="ev-tl">Bis</div></div>'
     +'</div>'
-    +'<div class="badges" style="margin-top:10px;"><span class="badge-fb">⚽ '+esc(e.competition||'fussball.de')+'</span></div>'
+    +'<div class="badges" style="margin-top:10px;align-items:center;"><span class="badge-fb">⚽ '+esc(e.competition||'fussball.de')+'</span>'
+    +(e.link?'<a href="'+esc(e.link)+'" target="_blank" rel="noopener" class="fb-link-btn" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg>Zum Spiel</a>':'')
+    +'</div>'
     +(trainerHtml?'<div class="ev-contact">'+trainerHtml+'</div>':'')
     +'</div>'
     +'</div>';
