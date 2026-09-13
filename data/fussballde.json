@@ -1,16 +1,6 @@
 {
-  "updated": "2026-09-12T20:34:05.627Z",
+  "updated": "2026-09-13T04:49:00.078Z",
   "games": [
-    {
-      "d": "2026-08-22",
-      "t": "13:00",
-      "team": "Herren",
-      "squad": 1,
-      "opponent": "TuS Hachen",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-hachen/-/spiel/031JFDHPUK000000VS5489BUVVKNMR0J"
-    },
     {
       "d": "2026-08-23",
       "t": "11:00",
@@ -1433,16 +1423,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-08-22",
-      "t": "12:00",
-      "team": "A-Junioren",
-      "squad": 1,
-      "opponent": "SG Hemer",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sg-hemer-sv-bachum-bergheim/-/spiel/031G8C2VJS000000VS5489BTVVG7L386"
-    },
     {
       "d": "2026-08-23",
       "t": "13:00",
