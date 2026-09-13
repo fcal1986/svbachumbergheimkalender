@@ -53,7 +53,7 @@ function cleanText(s) {
 // und suchen die Team-Zeile in den nächsten Geschwister-Zeilen.
 function parseMatches(html, debug) {
   const $ = cheerio.load(html);
-  const matches = [];
+  let matches = [];
   const compRows = $('tr.row-competition');
   let noTeamRowCount = 0, noDateCount = 0, noScoreDebugCount = 0;
   let currentDate = null; // fussball.de wiederholt das Datum nicht bei mehreren Spielen am selben Tag –
@@ -127,6 +127,32 @@ function parseMatches(html, debug) {
       link: matchLink ? new URL(matchLink, 'https://www.fussball.de').toString() : null,
     });
   });
+
+  // Deduplizierung nach Spiel-Link: fussball.de listet ein und dasselbe Spiel bei einer
+  // Verlegung (Spielverlegung) manchmal doppelt – einmal unter dem alten, einmal unter dem
+  // neuen Termin. Ohne diese Bereinigung erscheint das Spiel in Platzcoach zweimal, teils mit
+  // dem veralteten Datum. Bei zwei Einträgen mit demselben Link wird das SPÄTERE Datum behalten
+  // (eine Verlegung verschiebt so gut wie nie auf einen früheren Termin).
+  const byLink = new Map();
+  const noLinkMatches = [];
+  for (const m of matches) {
+    if (!m.link) { noLinkMatches.push(m); continue; }
+    const existing = byLink.get(m.link);
+    if (!existing) { byLink.set(m.link, m); continue; }
+    const existingKey = existing.date + ' ' + (existing.time || '');
+    const currentKey = m.date + ' ' + (m.time || '');
+    if (currentKey > existingKey) {
+      if (debug) console.log(`  [debug] Duplikat erkannt (Spielverlegung?): "${m.home}" vs "${m.away}" – behalte ${m.date} ${m.time}, verwerfe ${existing.date} ${existing.time} (${m.link})`);
+      byLink.set(m.link, m);
+    } else if (debug && currentKey !== existingKey) {
+      console.log(`  [debug] Duplikat erkannt (Spielverlegung?): "${m.home}" vs "${m.away}" – behalte ${existing.date} ${existing.time}, verwerfe ${m.date} ${m.time} (${m.link})`);
+    }
+  }
+  const dedupedMatches = [...byLink.values(), ...noLinkMatches];
+  if (debug && dedupedMatches.length !== matches.length) {
+    console.log(`  [debug] Deduplizierung: ${matches.length} Spiele vor, ${dedupedMatches.length} nach Bereinigung (${matches.length - dedupedMatches.length} Duplikat(e) entfernt).`);
+  }
+  matches = dedupedMatches;
 
   if (debug) {
     console.log(`  [debug] tr.row-competition gefunden: ${compRows.length} | ohne Datum (auch keins von vorher): ${noDateCount} | ohne zuordenbare Team-Zeile: ${noTeamRowCount} | daraus geparste Spiele: ${matches.length}`);
