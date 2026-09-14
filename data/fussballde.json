@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T04:57:58.928Z",
+  "updated": "2026-09-14T12:48:47.346Z",
   "games": [
     {
       "d": "2026-08-25",
@@ -1722,6 +1722,16 @@
       "competition": "Kreisliga A",
       "score": null,
       "link": "https://www.fussball.de/spiel/jsg-freienohl-oeventrop-wennemen-sv-bachum-bergheim/-/spiel/031I1BDP1K000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-09-21",
+      "t": "18:30",
+      "team": "C-Junioren",
+      "squad": 2,
+      "opponent": "JSG Möhnesee/Günne",
+      "competition": "Kreisfreundschaftsspiele",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/jsg-moehnesee-guenne-sv-bachum-bergheim-2/-/spiel/0323983KPG000000VS5489BTVT7QHFUC"
     },
     {
       "d": "2026-09-21",
