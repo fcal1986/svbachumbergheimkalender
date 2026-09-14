@@ -1,16 +1,6 @@
 {
-  "updated": "2026-09-13T20:50:28.312Z",
+  "updated": "2026-09-14T04:57:58.928Z",
   "games": [
-    {
-      "d": "2026-08-23",
-      "t": "11:00",
-      "team": "B-Junioren",
-      "squad": 1,
-      "opponent": "Spielverein Westfalia Soest",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-spielverein-westfalia-soest/-/spiel/031DFCLEK4000000VS5489BTVUS470OH"
-    },
     {
       "d": "2026-08-25",
       "t": "19:30",
@@ -1413,16 +1403,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-08-23",
-      "t": "13:00",
-      "team": "Herren",
-      "squad": 2,
-      "opponent": "SV Affeln 28 II",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-affeln-28-ii-sv-bachum-bergheim-ii/-/spiel/031F1GHFPG000000VS5489BUVUR5FS5A"
-    },
     {
       "d": "2026-08-28",
       "t": "18:30",
