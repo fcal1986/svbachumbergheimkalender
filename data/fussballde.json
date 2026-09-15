@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T16:59:46.366Z",
+  "updated": "2026-09-15T21:21:40.892Z",
   "games": [
     {
       "d": "2026-08-25",
@@ -460,6 +460,16 @@
       "competition": "Kreisliga A",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-sundern-2/-/spiel/031JKQC710000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-10-03",
+      "t": "11:30",
+      "team": "D-Junioren",
+      "squad": 1,
+      "opponent": "Hammer SportClub 2008",
+      "competition": "Kreisfreundschaftsspiele",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-hammer-sportclub-2008/-/spiel/0323NL89K0000000VS5489BUVSORQI22"
     },
     {
       "d": "2026-10-04",
