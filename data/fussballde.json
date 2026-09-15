@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T04:55:46.757Z",
+  "updated": "2026-09-15T11:45:11.297Z",
   "games": [
     {
       "d": "2026-08-25",
@@ -1692,6 +1692,16 @@
       "competition": "Kreisliga D",
       "score": null,
       "link": "https://www.fussball.de/spiel/tus-bruchhausen-02-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IQ00000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-09-18",
+      "t": "17:30",
+      "team": "D-Junioren",
+      "squad": 1,
+      "opponent": "TuS Germania Lohauserholz",
+      "competition": "Kreisfreundschaftsspiele",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/tus-germania-lohauserholz-sv-bachum-bergheim/-/spiel/0323KH2N1K000000VS5489BUVSORQI22"
     },
     {
       "d": "2026-09-19",
