@@ -411,7 +411,10 @@
         "Marc Geauf"
       ],
       "validFrom": "2026-07-19",
-      "validUntil": null
+      "validUntil": null,
+      "cancelled": [
+        "2026-09-18"
+      ]
     },
     {
       "id": "e4ade27c-8118-4432-8004-4a83c2a4ac45",
