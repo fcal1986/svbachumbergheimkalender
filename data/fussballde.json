@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-16T16:56:56.765Z",
+  "updated": "2026-09-16T21:19:01.053Z",
   "games": [
     {
       "d": "2026-08-29",
@@ -1635,16 +1635,6 @@
     },
     {
       "d": "2026-09-12",
-      "t": "13:00",
-      "team": "D-Junioren",
-      "squad": 2,
-      "opponent": "SG Allendorf/Amecke I",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sg-allendorf-amecke-sv-bachum-bergheim-2/-/spiel/031OEI7QOS000000VS5489BUVT2M8LCU"
-    },
-    {
-      "d": "2026-09-12",
       "t": "13:30",
       "team": "C-Junioren",
       "squad": 2,
@@ -1692,6 +1682,16 @@
       "competition": "Kreisliga D",
       "score": null,
       "link": "https://www.fussball.de/spiel/tus-bruchhausen-02-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IQ00000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-09-18",
+      "t": "16:30",
+      "team": "D-Junioren",
+      "squad": 2,
+      "opponent": "SG Allendorf/Amecke I",
+      "competition": "Kreisliga B",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sg-allendorf-amecke-sv-bachum-bergheim-2/-/spiel/031OEI7QOS000000VS5489BUVT2M8LCU"
     },
     {
       "d": "2026-09-18",
