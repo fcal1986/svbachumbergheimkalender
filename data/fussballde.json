@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T11:42:22.530Z",
+  "updated": "2026-09-17T17:00:08.743Z",
   "games": [
     {
       "d": "2026-08-29",
@@ -342,16 +342,6 @@
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-hachen-langscheid-enkhausen/-/spiel/031OEI7QG8000000VS5489BUVT2M8LCU"
     },
     {
-      "d": "2026-09-19",
-      "t": "13:45",
-      "team": "E-Junioren",
-      "squad": 3,
-      "opponent": "JSG Vosswinkel/Echthausen II",
-      "competition": "Kreisliga C",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-3-jsg-vosswinkel-echthausen-ii/-/spiel/031J8T2KJ0000000VS5489BUVVKNMR0J"
-    },
-    {
       "d": "2026-09-20",
       "t": "11:00",
       "team": "B-Junioren",
@@ -403,6 +393,16 @@
     },
     {
       "d": "2026-09-23",
+      "t": "16:50",
+      "team": "E-Junioren",
+      "squad": 3,
+      "opponent": "JSG Vosswinkel/Echthausen II",
+      "competition": "Kreisliga C",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-3-jsg-vosswinkel-echthausen-ii/-/spiel/031J8T2KJ0000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-09-23",
       "t": "18:30",
       "team": "B-Junioren",
       "squad": 1,
@@ -430,6 +430,16 @@
       "competition": "Kinderfußball",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-jsg-1-freienohl-oeventrop-wennemen/-/spiel/031J6SGOAO000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-09-27",
+      "t": "11:30",
+      "team": "D-Junioren",
+      "squad": 1,
+      "opponent": "BSV Menden",
+      "competition": "Kreisfreundschaftsspiele",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-bsv-menden/-/spiel/03249PQL6S000000VS5489BUVV5UN1SE"
     },
     {
       "d": "2026-10-02",
@@ -526,7 +536,7 @@
       "t": "13:30",
       "team": "C-Junioren",
       "squad": 1,
-      "opponent": "SV Hüsten 09 I",
+      "opponent": "SV Hüsten 09 I zg.",
       "competition": "Kreisliga A",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-huesten-09-1/-/spiel/031I1BDOLO000000VS5489BUVVKNMR0J"
@@ -2358,7 +2368,7 @@
       "t": "15:00",
       "team": "C-Junioren",
       "squad": 1,
-      "opponent": "SV Hüsten 09 I",
+      "opponent": "SV Hüsten 09 I zg.",
       "competition": "Kreisliga A",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-huesten-09-1-sv-bachum-bergheim/-/spiel/031I1BDQFG000000VS5489BUVVKNMR0J"
