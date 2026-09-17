@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T17:00:08.743Z",
+  "updated": "2026-09-17T21:23:07.498Z",
   "games": [
     {
       "d": "2026-08-29",
@@ -710,6 +710,16 @@
       "competition": "Kreisliga A",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sg-grevenstein-hellefeld-altenhellefeld/-/spiel/031I0BN8BS000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-11-11",
+      "t": "17:30",
+      "team": "D-Junioren",
+      "squad": 1,
+      "opponent": "TuS Sundern",
+      "competition": "Kreispokal",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-sundern/-/spiel/031MHDTIGG000000VS5489BTVSRD0UH9"
     },
     {
       "d": "2026-11-13",
@@ -1892,6 +1902,16 @@
       "competition": "Kreisfreundschaftsspiele",
       "score": null,
       "link": "https://www.fussball.de/spiel/asc-09-dortmund-iii-sv-bachum-bergheim/-/spiel/0321O2JISG000000VS5489BUVSORQI22"
+    },
+    {
+      "d": "2026-10-08",
+      "t": "18:00",
+      "team": "C-Junioren",
+      "squad": 1,
+      "opponent": "JSG Niedereimer/Bruchh. I",
+      "competition": "Kreispokal",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/jsg-niedereimer-bruchhausen-sv-bachum-bergheim/-/spiel/031JUUND7G000000VS5489BUVVKNMR0J"
     },
     {
       "d": "2026-10-09",
