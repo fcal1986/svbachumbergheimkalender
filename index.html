@@ -1435,14 +1435,14 @@ async function doLogin(){
   finally{ btn.disabled=false; btn.textContent='Anmelden'; }
 }
 function afterLogin(){
-  sessionStorage.setItem('svbb_session',JSON.stringify(session));
+  localStorage.setItem('svbb_session',JSON.stringify(session));
   document.getElementById('li-pass').value='';
   closeLogin();
   showToast('Angemeldet als '+session.name.split(' ')[0]+'. Seite wird neu geladen …',1800);
   setTimeout(()=>location.reload(),1200);
 }
 function logout(){
-  session=null; sessionStorage.removeItem('svbb_session');
+  session=null; localStorage.removeItem('svbb_session');
   if(filter==='meine') filter='alle';
   refreshHeader(); buildFilters(); renderAll(); renderKonto();
   showToast('Abgemeldet. Termine kannst du weiter ansehen.');
@@ -3625,7 +3625,7 @@ function saveAdminToken(){
   if(!t){showToast('Bitte Token eingeben.');return;}
   localStorage.setItem('svbb_admin_token',t);
   session.token=t;
-  sessionStorage.setItem('svbb_session',JSON.stringify(session));
+  localStorage.setItem('svbb_session',JSON.stringify(session));
   showToast('Token gespeichert.'); renderKonto();
 }
 async function createUser(){
@@ -3718,7 +3718,7 @@ async function toggleEmailNotifications(newVal){
   const backup=JSON.stringify(USERS);
   u.emailNotificationsEnabled=newVal;
   session.emailNotificationsEnabled=newVal;
-  sessionStorage.setItem('svbb_session',JSON.stringify(session));
+  localStorage.setItem('svbb_session',JSON.stringify(session));
   try{
     await saveUsers((newVal?'E-Mail-Benachrichtigungen aktiviert: ':'E-Mail-Benachrichtigungen deaktiviert: ')+u.first+' '+u.last);
     showToast(newVal?'E-Mail-Benachrichtigungen aktiviert.':'E-Mail-Benachrichtigungen deaktiviert.');
@@ -3753,7 +3753,7 @@ async function saveProfile(){
   const backup=JSON.stringify(USERS);
   u.phone=phone; u.contactEmail=contactEmail; u.contactPublic=contactPublic;
   session.phone=phone; session.contactEmail=contactEmail; session.contactPublic=contactPublic;
-  sessionStorage.setItem('svbb_session',JSON.stringify(session));
+  localStorage.setItem('svbb_session',JSON.stringify(session));
   try{
     await saveUsers('Profil geändert: '+u.first+' '+u.last);
     showToast('Kontaktdaten gespeichert.');
@@ -3980,7 +3980,7 @@ async function changePassword(){
     u.enc=await encryptToken(token,newPw);
     await saveUsers('Passwort geändert: '+u.first+' '+u.last);
     session.token=token;
-    sessionStorage.setItem('svbb_session',JSON.stringify(session));
+    localStorage.setItem('svbb_session',JSON.stringify(session));
     document.getElementById('pw-old').value='';
     document.getElementById('pw-new').value='';
     document.getElementById('pw-new2').value='';
@@ -4045,13 +4045,13 @@ async function triggerInstall(){
   refreshInstallUI();
 }
 function dismissInstallBanner(){
-  sessionStorage.setItem('pc_install_banner_dismissed','1');
+  localStorage.setItem('pc_install_banner_dismissed','1');
   renderInstallBanner();
 }
 function renderInstallBanner(){
   const box=document.getElementById('install-banner');
   if(!box)return;
-  const dismissed=sessionStorage.getItem('pc_install_banner_dismissed')==='1';
+  const dismissed=localStorage.getItem('pc_install_banner_dismissed')==='1';
   if(!deferredInstallPrompt||isStandaloneApp()||dismissed){ box.innerHTML=''; return; }
   box.innerHTML='<div class="install-banner-card">'
     +'<div class="install-banner-text"><b>App installieren?</b><div>Ein Tipp – dann startet platzcoach direkt vom Startbildschirm.</div></div>'
@@ -4088,7 +4088,7 @@ async function boot(){
   document.getElementById('login-foot').textContent=
     USERS.length?'Zugang bekommst du vom Vorstand.':'Noch keine Zugänge angelegt – bitte als Admin anmelden.';
   try{
-    const s=JSON.parse(sessionStorage.getItem('svbb_session'));
+    const s=JSON.parse(localStorage.getItem('svbb_session'));
     if(s&&s.id){
       // Bei jedem Neuladen der App gegen den aktuellen Stand prüfen: wurde der Zugang seit
       // der letzten Sitzung gesperrt? Das ist der einzige Moment, an dem eine bereits aktive
@@ -4096,7 +4096,7 @@ async function boot(){
       // möglich, aber immerhin bei jedem Öffnen/Neuladen der App).
       const rec=(s.id==='admin')?null:USERS.find(x=>x.id===s.id);
       if(s.id!=='admin'&&(!rec||rec.locked)){
-        sessionStorage.removeItem('svbb_session');
+        localStorage.removeItem('svbb_session');
       }else{
         session=s;
       }
