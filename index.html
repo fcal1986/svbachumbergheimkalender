@@ -360,6 +360,7 @@
   /* ── FORM ── */
   .field{margin-bottom:16px;}
   .field label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .field-label{font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin:0;}
   .req-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex:none;}
   .field input,.field textarea,.field select{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px 13px;font-family:'Inter';font-size:14px;color:var(--ink);background:var(--white);outline:none;appearance:none;-webkit-appearance:none;box-shadow:var(--card-shadow);}
   .field select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238B97A5' stroke-width='2.4'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;}
@@ -543,6 +544,14 @@
   .modal-box h3{margin:0 0 8px;font-size:16px;font-weight:800;}
   .modal-box p{margin:0 0 16px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;}
   .modal-acts{display:flex;gap:8px;}
+  .rs-result-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;}
+  .rs-result-row.rs-selectable{cursor:pointer;border:1.5px solid transparent;transition:.12s;}
+  .rs-result-row.rs-selectable.on{background:var(--green-dim);border-color:var(--green);}
+  .rs-result-row.rs-selectable input[type=checkbox]{width:18px;height:18px;flex:none;accent-color:var(--green);margin:0;}
+  .rs-result-row.rs-selectable b{flex:1;}
+  .rs-result-row b{color:var(--ink);}
+  .rs-result-row span{color:var(--green);font-weight:700;font-size:11.5px;}
+  .rs-empty{font-size:12.5px;color:var(--ink-soft);text-align:center;padding:12px 0;}
   .modal-acts button{flex:1;border-radius:10px;padding:11px;font-family:'Inter';font-size:13px;font-weight:600;cursor:pointer;border:none;}
   .modal-acts .no{background:var(--bg);color:var(--ink-soft);}
   .modal-acts .yes{background:var(--warn);color:#fff;}
@@ -842,6 +851,33 @@
       <button class="no" onclick="closeCancelModal()">Abbrechen</button>
       <button class="yes" id="cm-yes" onclick="doCancelSlot()">Absagen</button>
     </div>
+  </div>
+</div>
+
+<div class="modal" id="reschedule-modal">
+  <div class="modal-box" style="max-width:360px;max-height:85vh;overflow-y:auto;">
+    <h3>Neue Ansetzung suchen</h3>
+    <p id="rs-text" class="sub" style="margin-top:2px;">Für welches Spiel?</p>
+    <p class="field-label" style="margin-top:14px;">An welchen Wochentagen käme das Spiel infrage?</p>
+    <div class="chip-row" id="rs-days">
+      <span class="filter-chip" data-day="1" onclick="toggleRescheduleDay(1)">Mo</span>
+      <span class="filter-chip" data-day="2" onclick="toggleRescheduleDay(2)">Di</span>
+      <span class="filter-chip" data-day="3" onclick="toggleRescheduleDay(3)">Mi</span>
+      <span class="filter-chip" data-day="4" onclick="toggleRescheduleDay(4)">Do</span>
+      <span class="filter-chip" data-day="5" onclick="toggleRescheduleDay(5)">Fr</span>
+      <span class="filter-chip" data-day="6" onclick="toggleRescheduleDay(6)">Sa</span>
+      <span class="filter-chip" data-day="7" onclick="toggleRescheduleDay(7)">So</span>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <div class="field" style="flex:1;margin-bottom:0;"><label>Von</label><input type="time" id="rs-von" value="14:00"></div>
+      <div class="field" style="flex:1;margin-bottom:0;"><label>Bis</label><input type="time" id="rs-bis" value="18:00"></div>
+    </div>
+    <p class="hint" style="margin-top:8px;">Sucht freie Termine ±6 Wochen um den ursprünglichen Spieltermin, im gewählten Zeitfenster an den gewählten Tagen.</p>
+    <div class="modal-acts" style="margin-top:16px;">
+      <button class="no" onclick="closeRescheduleModal()">Schließen</button>
+      <button class="yes" onclick="runRescheduleSearch()">Suchen</button>
+    </div>
+    <div id="rs-results" style="margin-top:16px;"></div>
   </div>
 </div>
 
@@ -1485,7 +1521,9 @@ function setView(v){
   render();
 }
 function setFilter(f){
-  filter=f; teamMultiFilter=new Set(); typeFilter=null; listDaysLoaded=30;
+  filter=f;
+  if(f!=='fussballde') teamMultiFilter=new Set(); // fussball.de bleibt bewusst mit Mannschaftsauswahl kombinierbar
+  typeFilter=null; listDaysLoaded=30;
   document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f===f));
   updateTeamFilterBtn(); updateTypeFilterBanner();
   render(); renderStart();
@@ -1576,7 +1614,7 @@ function toggleTeamFilterOpt(ev,key){
 }
 function applyTeamFilter(){
   teamMultiFilter=new Set(teamFilterPending);
-  filter=teamMultiFilter.size?'multi':'alle';
+  if(filter!=='fussballde'){ filter=teamMultiFilter.size?'multi':'alle'; } // fussball.de-Auswahl bleibt erhalten
   listDaysLoaded=30;
   document.getElementById('team-filter-panel').style.display='none';
   document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f===filter));
@@ -1601,9 +1639,12 @@ function updateTeamFilterBtn(){
 function passesFilter(e){
   if(typeFilter==='training'&&!e.isTraining)return false;
   if(typeFilter==='spiele'&&!e.isExternal)return false;
+  // fussball.de-Filter ist bewusst MIT der Mannschafts-Mehrfachauswahl kombinierbar (beide
+  // müssen zutreffen) – anders als die übrigen Chips (Jugend/Senioren/Verein), die weiterhin
+  // exklusiv zur Mannschaftsauswahl sind, da "Jugend" + einzelne Teams auswählen redundant wäre.
+  if(filter==='fussballde'&&!e.isExternal) return false;
   if(teamMultiFilter.size) return teamMultiFilter.has((e.team)+':'+(e.squad||1));
-  if(filter==='alle') return true;
-  if(filter==='fussballde') return !!e.isExternal;
+  if(filter==='alle'||filter==='fussballde') return true;
   if(filter.includes(':')){ const[ft,fq]=filter.split(':'); return e.team===ft&&(e.squad||1)===parseInt(fq); }
   return cat(e.team)===filter;
 }
@@ -1752,7 +1793,10 @@ function externalRowHTML(e){
   const dow=DAYS_S[dt.getDay()];
   const dd=String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0');
   const bis=eventBis(e);
-  const acts=(session&&!e.isAway)?'<button class="ibtn" title="In Termin übernehmen" onclick="newEventFromFussball('+e.fbIndex+')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>':'';
+  const acts=(session&&!e.isAway)?(
+    '<button class="ibtn" title="In Termin übernehmen" onclick="newEventFromFussball('+e.fbIndex+')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>'
+    +'<button class="ibtn" title="Neue Ansetzung suchen" onclick="openRescheduleFinder('+e.fbIndex+')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>'
+  ):'';
   const trainerObj=fussballTrainersFor(e.team,e.squad);
   const trainerHtml=trainerObj?getTrainersContactHTML(trainerObj):'';
   const sc=scoreInfo(e);
@@ -2696,6 +2740,111 @@ function openCancelModal(id,prefilledDate){
   document.getElementById('cancel-modal').classList.add('show');
 }
 function closeCancelModal(){ document.getElementById('cancel-modal').classList.remove('show'); cancelSlotId=null; }
+
+/* ---------- Neue Ansetzung suchen (nur Heimspiele) ---------- */
+let rescheduleGame=null, rescheduleDays=new Set(), rescheduleResults=[], rescheduleSelected=new Set();
+function openRescheduleFinder(fbIndex){
+  rescheduleGame=FUSSBALLDE.games[fbIndex]; if(!rescheduleGame)return;
+  rescheduleDays=new Set([dowOf(rescheduleGame.d)]); // Wochentag des Original-Termins als sinnvoller Startpunkt vorausgewählt
+  rescheduleResults=[]; rescheduleSelected=new Set();
+  document.querySelectorAll('#rs-days .filter-chip').forEach(c=>c.classList.toggle('on',rescheduleDays.has(parseInt(c.dataset.day))));
+  const mapped=fussballFilterTeam(rescheduleGame.team,rescheduleGame.squad);
+  document.getElementById('rs-text').textContent=teamLabel(mapped.team,mapped.squad)+' – '+rescheduleGame.opponent+' (bisher '+fmtShort(rescheduleGame.d)+', '+rescheduleGame.t+' Uhr)';
+  document.getElementById('rs-results').innerHTML='';
+  document.getElementById('reschedule-modal').classList.add('show');
+}
+function closeRescheduleModal(){ document.getElementById('reschedule-modal').classList.remove('show'); rescheduleGame=null; }
+function toggleRescheduleDay(d){
+  if(rescheduleDays.has(d))rescheduleDays.delete(d); else rescheduleDays.add(d);
+  document.querySelectorAll('#rs-days .filter-chip').forEach(c=>c.classList.toggle('on',rescheduleDays.has(parseInt(c.dataset.day))));
+}
+function runRescheduleSearch(){
+  const box=document.getElementById('rs-results');
+  rescheduleResults=[]; rescheduleSelected=new Set();
+  if(!rescheduleGame){ box.innerHTML=''; return; }
+  if(!rescheduleDays.size){ box.innerHTML='<div class="rs-empty">Bitte mindestens einen Wochentag auswählen.</div>'; return; }
+  const von=document.getElementById('rs-von').value, bis=document.getElementById('rs-bis').value;
+  if(!von||!bis||timeToMin(von)>=timeToMin(bis)){ box.innerHTML='<div class="rs-empty">"Von" muss vor "Bis" liegen.</div>'; return; }
+
+  const g=rescheduleGame;
+  const durationMin=fussballDurationMin(g.team);
+  // Vereinfachung: es wird immer der GANZE Platz geprüft, unabhängig davon, ob das Original-Spiel
+  // laut fussball.de nur einen Teil des Platzes braucht ("Platz geteilt") – bei geteilten Plätzen
+  // kennen wir das exakt benötigte Viertel nicht, daher lieber sicher (ganzer Platz frei) als ein
+  // Ergebnis vorschlagen, das sich später doch als belegt herausstellt.
+  const neededQuarters=[1,2,3,4];
+  const origDate=new Date(g.d+'T00:00:00');
+  const results=[];
+  for(let offset=-42;offset<=42;offset++){
+    const d=new Date(origDate); d.setDate(d.getDate()+offset);
+    const ds=ymd(d);
+    if(ds===g.d)continue;
+    if(!rescheduleDays.has(dowOf(ds)))continue;
+    let windows=[]; let curStart=null, curLastValidStart=null;
+    const vonMin=timeToMin(von), bisMin=timeToMin(bis);
+    for(let t=vonMin;t+durationMin<=bisMin;t+=15){
+      const startStr=minToTime(t), endStr=minToTime(t+durationMin);
+      const used=usedQuartersWindow(ds,startStr,endStr,null);
+      const free=neededQuarters.every(q=>!used.has(q));
+      if(free){ if(curStart===null)curStart=t; curLastValidStart=t; }
+      else if(curStart!==null){ windows.push([curStart,curLastValidStart+durationMin]); curStart=null; }
+    }
+    if(curStart!==null)windows.push([curStart,curLastValidStart+durationMin]);
+    if(windows.length){
+      const [ws,we]=windows.reduce((a,b)=>(b[1]-b[0])>(a[1]-a[0])?b:a);
+      results.push({date:ds,freeFrom:minToTime(ws),freeTo:minToTime(we)});
+    }
+  }
+  rescheduleResults=results;
+  if(!results.length){
+    box.innerHTML='<div class="rs-empty">Keine freien Termine im gewählten Zeitfenster gefunden (±6 Wochen).</div>';
+    return;
+  }
+  renderRescheduleResults();
+}
+function renderRescheduleResults(){
+  const box=document.getElementById('rs-results');
+  const results=rescheduleResults;
+  const shown=results.slice(0,15);
+  box.innerHTML='<div class="field-label" style="margin-bottom:8px;">'+results.length+' freie'+(results.length===1?'r Termin':' Termine')+' gefunden – zum Vorschlagen auswählen</div>'
+    +shown.map((r,i)=>{
+      const dt=new Date(r.date+'T00:00:00');
+      const checked=rescheduleSelected.has(i);
+      return '<label class="rs-result-row rs-selectable'+(checked?' on':'')+'">'
+        +'<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleRescheduleSelect('+i+')">'
+        +'<b>'+DAYS_S[dt.getDay()]+' '+fmtShort(r.date)+'</b><span>'+r.freeFrom+'–'+r.freeTo+' frei</span></label>';
+    }).join('')
+    +(results.length>shown.length?'<div class="rs-empty">+ '+(results.length-shown.length)+' weitere (chronologisch nächste zuerst gezeigt)</div>':'')
+    +'<div id="rs-share-bar"></div>';
+  renderRescheduleShareBar();
+}
+function toggleRescheduleSelect(i){
+  if(rescheduleSelected.has(i))rescheduleSelected.delete(i); else rescheduleSelected.add(i);
+  renderRescheduleResults();
+}
+function renderRescheduleShareBar(){
+  const bar=document.getElementById('rs-share-bar'); if(!bar)return;
+  if(!rescheduleSelected.size){ bar.innerHTML=''; return; }
+  bar.innerHTML='<button class="submit-btn" style="margin-top:12px;background:#25D366;" onclick="shareRescheduleProposal()">'
+    +'<svg viewBox="0 0 24 24" fill="currentColor" style="width:17px;height:17px;"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.26 4.81L2.05 22l5.4-1.42a9.87 9.87 0 004.59 1.17h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2zm0 18.06a8.2 8.2 0 01-4.17-1.14l-.3-.18-3.1.82.83-3.02-.2-.31a8.15 8.15 0 01-1.26-4.32c0-4.51 3.68-8.19 8.2-8.19a8.15 8.15 0 015.8 2.4 8.15 8.15 0 012.4 5.8c0 4.52-3.68 8.14-8.2 8.14z"/></svg>'
+    +(rescheduleSelected.size===1?'1 Vorschlag':rescheduleSelected.size+' Vorschläge')+' per WhatsApp teilen</button>';
+}
+function shareRescheduleProposal(){
+  const g=rescheduleGame; if(!g||!rescheduleSelected.size)return;
+  const mapped=fussballFilterTeam(g.team,g.squad);
+  const teamTxt=teamLabel(mapped.team,mapped.squad);
+  const picked=[...rescheduleSelected].sort((a,b)=>a-b).map(i=>rescheduleResults[i]);
+  const lines=picked.map(r=>{
+    const dt=new Date(r.date+'T00:00:00');
+    return '• '+DAYS_S[dt.getDay()]+' '+fmtShort(r.date)+', '+r.freeFrom+'–'+r.freeTo+' Uhr';
+  }).join('\n');
+  const txt='📅 *Neue Ansetzung gesucht: '+teamTxt+' vs. '+g.opponent+'*\n'
+    +'(bisher: '+fmtShare(g.d)+', '+g.t+' Uhr)\n\n'
+    +'Folgende Termine wären bei uns frei – passt einer davon?\n\n'
+    +lines+'\n\n'
+    +'Bitte kurz Rückmeldung, welcher Termin passt 🙏';
+  window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
+}
 async function doCancelSlot(){
   const s=TRAINING.find(x=>x.id===cancelSlotId); if(!s)return;
   const date=document.getElementById('cm-date').value;
