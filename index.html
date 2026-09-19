@@ -875,7 +875,7 @@
       <div class="field" style="flex:1;margin-bottom:0;"><label>Von</label><input type="time" id="rs-von" value="14:00"></div>
       <div class="field" style="flex:1;margin-bottom:0;"><label>Bis</label><input type="time" id="rs-bis" value="18:00"></div>
     </div>
-    <p class="hint" style="margin-top:8px;">Sucht freie Termine nach dem ursprünglichen Spieltermin, bis zu 6 Wochen danach, im gewählten Zeitfenster an den gewählten Tagen.</p>
+    <p class="hint" style="margin-top:8px;">Sucht freie Termine ab morgen bis 6 Wochen nach dem ursprünglichen Spieltermin, im gewählten Zeitfenster an den gewählten Tagen.</p>
     <div class="modal-acts" style="margin-top:16px;">
       <button class="no" onclick="closeRescheduleModal()">Schließen</button>
       <button class="yes" onclick="runRescheduleSearch()">Suchen</button>
@@ -1054,7 +1054,7 @@ function fussballDisplayAwayAll(){
     const bis=g.t?shiftTimeClamped(g.t,fussballDurationMin(g.team)):'23:59';
     return {
       id:'fbaway-'+(g.link||(g.d+'|'+g.t+'|'+g.opponent)), d:g.d, t:g.t||'00:00', bis,
-      title:label+' bei '+g.opponent, opponent:g.opponent,
+      title:'Auswärtsspiel: '+label+' bei '+g.opponent, opponent:g.opponent,
       team:mapped.team, squad:mapped.squad, competition:g.competition||'', score:g.score||null,
       isExternal:true, isAway:true, ownerName:'fussball.de', link:g.link||null
     };
@@ -2776,14 +2776,12 @@ function runRescheduleSearch(){
   // kennen wir das exakt benötigte Viertel nicht, daher lieber sicher (ganzer Platz frei) als ein
   // Ergebnis vorschlagen, das sich später doch als belegt herausstellt.
   const neededQuarters=[1,2,3,4];
-  // Suchfenster: NACH dem Original-Spieltermin bis 6 Wochen danach – nicht ab heute, denn der
-  // Original-Termin kann selbst schon Wochen in der Zukunft liegen (z.B. erst in 6 Wochen bei
-  // fussball.de angesetzt). Eine neue Ansetzung ergibt nur NACH diesem Termin Sinn. Zusätzlich
-  // nie vor "morgen", falls der Original-Termin (unerwartet) in der Vergangenheit läge.
+  // Maximal mögliche Spanne: Start immer ab morgen (heute+1, nie in der Vergangenheit suchen),
+  // Ende immer Original-Spieltermin + 6 Wochen (auch wenn der Original-Termin selbst schon
+  // Wochen in der Zukunft liegt) – so werden auch Termine VOR dem Original-Termin als mögliche
+  // Alternative geprüft, nicht nur danach.
   const origDate=new Date(g.d+'T00:00:00');
-  const dayAfterOrig=new Date(origDate); dayAfterOrig.setDate(dayAfterOrig.getDate()+1);
-  const tomorrow=new Date(todayStr+'T00:00:00'); tomorrow.setDate(tomorrow.getDate()+1);
-  const searchStart=dayAfterOrig>tomorrow?dayAfterOrig:tomorrow;
+  const searchStart=new Date(todayStr+'T00:00:00'); searchStart.setDate(searchStart.getDate()+1);
   const searchEnd=new Date(origDate); searchEnd.setDate(searchEnd.getDate()+42); // Original-Termin + 6 Wochen
   const totalDays=Math.round((searchEnd-searchStart)/86400000);
   const results=[];
