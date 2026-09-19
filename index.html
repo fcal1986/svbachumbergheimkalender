@@ -552,6 +552,9 @@
   .rs-result-row b{color:var(--ink);}
   .rs-result-row span{color:var(--green);font-weight:700;font-size:11.5px;}
   .rs-empty{font-size:12.5px;color:var(--ink-soft);text-align:center;padding:12px 0;}
+  .weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+  .weekday-chip{display:flex;align-items:center;justify-content:center;background:var(--white);border:1.5px solid var(--line);border-radius:10px;padding:9px 2px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;text-align:center;}
+  .weekday-chip.on{background:var(--black-btn);color:#fff;border-color:var(--black-btn);}
   .modal-acts button{flex:1;border-radius:10px;padding:11px;font-family:'Inter';font-size:13px;font-weight:600;cursor:pointer;border:none;}
   .modal-acts .no{background:var(--bg);color:var(--ink-soft);}
   .modal-acts .yes{background:var(--warn);color:#fff;}
@@ -859,20 +862,20 @@
     <h3>Neue Ansetzung suchen</h3>
     <p id="rs-text" class="sub" style="margin-top:2px;">Für welches Spiel?</p>
     <p class="field-label" style="margin-top:14px;">An welchen Wochentagen käme das Spiel infrage?</p>
-    <div class="chip-row" id="rs-days">
-      <span class="filter-chip" data-day="1" onclick="toggleRescheduleDay(1)">Mo</span>
-      <span class="filter-chip" data-day="2" onclick="toggleRescheduleDay(2)">Di</span>
-      <span class="filter-chip" data-day="3" onclick="toggleRescheduleDay(3)">Mi</span>
-      <span class="filter-chip" data-day="4" onclick="toggleRescheduleDay(4)">Do</span>
-      <span class="filter-chip" data-day="5" onclick="toggleRescheduleDay(5)">Fr</span>
-      <span class="filter-chip" data-day="6" onclick="toggleRescheduleDay(6)">Sa</span>
-      <span class="filter-chip" data-day="7" onclick="toggleRescheduleDay(7)">So</span>
+    <div class="weekday-grid" id="rs-days">
+      <span class="weekday-chip" data-day="1" onclick="toggleRescheduleDay(1)">Mo</span>
+      <span class="weekday-chip" data-day="2" onclick="toggleRescheduleDay(2)">Di</span>
+      <span class="weekday-chip" data-day="3" onclick="toggleRescheduleDay(3)">Mi</span>
+      <span class="weekday-chip" data-day="4" onclick="toggleRescheduleDay(4)">Do</span>
+      <span class="weekday-chip" data-day="5" onclick="toggleRescheduleDay(5)">Fr</span>
+      <span class="weekday-chip" data-day="6" onclick="toggleRescheduleDay(6)">Sa</span>
+      <span class="weekday-chip" data-day="7" onclick="toggleRescheduleDay(7)">So</span>
     </div>
     <div style="display:flex;gap:10px;margin-top:14px;">
       <div class="field" style="flex:1;margin-bottom:0;"><label>Von</label><input type="time" id="rs-von" value="14:00"></div>
       <div class="field" style="flex:1;margin-bottom:0;"><label>Bis</label><input type="time" id="rs-bis" value="18:00"></div>
     </div>
-    <p class="hint" style="margin-top:8px;">Sucht freie Termine ±6 Wochen um den ursprünglichen Spieltermin, im gewählten Zeitfenster an den gewählten Tagen.</p>
+    <p class="hint" style="margin-top:8px;">Sucht freie Termine nach dem ursprünglichen Spieltermin, bis zu 6 Wochen danach, im gewählten Zeitfenster an den gewählten Tagen.</p>
     <div class="modal-acts" style="margin-top:16px;">
       <button class="no" onclick="closeRescheduleModal()">Schließen</button>
       <button class="yes" onclick="runRescheduleSearch()">Suchen</button>
@@ -2747,7 +2750,7 @@ function openRescheduleFinder(fbIndex){
   rescheduleGame=FUSSBALLDE.games[fbIndex]; if(!rescheduleGame)return;
   rescheduleDays=new Set([dowOf(rescheduleGame.d)]); // Wochentag des Original-Termins als sinnvoller Startpunkt vorausgewählt
   rescheduleResults=[]; rescheduleSelected=new Set();
-  document.querySelectorAll('#rs-days .filter-chip').forEach(c=>c.classList.toggle('on',rescheduleDays.has(parseInt(c.dataset.day))));
+  document.querySelectorAll('#rs-days .weekday-chip').forEach(c=>c.classList.toggle('on',rescheduleDays.has(parseInt(c.dataset.day))));
   const mapped=fussballFilterTeam(rescheduleGame.team,rescheduleGame.squad);
   document.getElementById('rs-text').textContent=teamLabel(mapped.team,mapped.squad)+' – '+rescheduleGame.opponent+' (bisher '+fmtShort(rescheduleGame.d)+', '+rescheduleGame.t+' Uhr)';
   document.getElementById('rs-results').innerHTML='';
@@ -2756,7 +2759,7 @@ function openRescheduleFinder(fbIndex){
 function closeRescheduleModal(){ document.getElementById('reschedule-modal').classList.remove('show'); rescheduleGame=null; }
 function toggleRescheduleDay(d){
   if(rescheduleDays.has(d))rescheduleDays.delete(d); else rescheduleDays.add(d);
-  document.querySelectorAll('#rs-days .filter-chip').forEach(c=>c.classList.toggle('on',rescheduleDays.has(parseInt(c.dataset.day))));
+  document.querySelectorAll('#rs-days .weekday-chip').forEach(c=>c.classList.toggle('on',rescheduleDays.has(parseInt(c.dataset.day))));
 }
 function runRescheduleSearch(){
   const box=document.getElementById('rs-results');
@@ -2773,10 +2776,19 @@ function runRescheduleSearch(){
   // kennen wir das exakt benötigte Viertel nicht, daher lieber sicher (ganzer Platz frei) als ein
   // Ergebnis vorschlagen, das sich später doch als belegt herausstellt.
   const neededQuarters=[1,2,3,4];
+  // Suchfenster: NACH dem Original-Spieltermin bis 6 Wochen danach – nicht ab heute, denn der
+  // Original-Termin kann selbst schon Wochen in der Zukunft liegen (z.B. erst in 6 Wochen bei
+  // fussball.de angesetzt). Eine neue Ansetzung ergibt nur NACH diesem Termin Sinn. Zusätzlich
+  // nie vor "morgen", falls der Original-Termin (unerwartet) in der Vergangenheit läge.
   const origDate=new Date(g.d+'T00:00:00');
+  const dayAfterOrig=new Date(origDate); dayAfterOrig.setDate(dayAfterOrig.getDate()+1);
+  const tomorrow=new Date(todayStr+'T00:00:00'); tomorrow.setDate(tomorrow.getDate()+1);
+  const searchStart=dayAfterOrig>tomorrow?dayAfterOrig:tomorrow;
+  const searchEnd=new Date(origDate); searchEnd.setDate(searchEnd.getDate()+42); // Original-Termin + 6 Wochen
+  const totalDays=Math.round((searchEnd-searchStart)/86400000);
   const results=[];
-  for(let offset=-42;offset<=42;offset++){
-    const d=new Date(origDate); d.setDate(d.getDate()+offset);
+  for(let offset=0;offset<=totalDays;offset++){
+    const d=new Date(searchStart); d.setDate(d.getDate()+offset);
     const ds=ymd(d);
     if(ds===g.d)continue;
     if(!rescheduleDays.has(dowOf(ds)))continue;
