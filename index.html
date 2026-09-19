@@ -552,6 +552,7 @@
   .rs-result-row b{color:var(--ink);}
   .rs-result-row span{color:var(--green);font-weight:700;font-size:11.5px;}
   .rs-empty{font-size:12.5px;color:var(--ink-soft);text-align:center;padding:12px 0;}
+  .rs-showmore{cursor:pointer;font-weight:700;color:var(--green);background:var(--bg);border-radius:10px;margin-top:4px;}
   .weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
   .weekday-chip{display:flex;align-items:center;justify-content:center;background:var(--white);border:1.5px solid var(--line);border-radius:10px;padding:9px 2px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;text-align:center;}
   .weekday-chip.on{background:var(--black-btn);color:#fff;border-color:var(--black-btn);}
@@ -2745,11 +2746,11 @@ function openCancelModal(id,prefilledDate){
 function closeCancelModal(){ document.getElementById('cancel-modal').classList.remove('show'); cancelSlotId=null; }
 
 /* ---------- Neue Ansetzung suchen (nur Heimspiele) ---------- */
-let rescheduleGame=null, rescheduleDays=new Set(), rescheduleResults=[], rescheduleSelected=new Set();
+let rescheduleGame=null, rescheduleDays=new Set(), rescheduleResults=[], rescheduleSelected=new Set(), rescheduleShowAll=false;
 function openRescheduleFinder(fbIndex){
   rescheduleGame=FUSSBALLDE.games[fbIndex]; if(!rescheduleGame)return;
   rescheduleDays=new Set([dowOf(rescheduleGame.d)]); // Wochentag des Original-Termins als sinnvoller Startpunkt vorausgewählt
-  rescheduleResults=[]; rescheduleSelected=new Set();
+  rescheduleResults=[]; rescheduleSelected=new Set(); rescheduleShowAll=false;
   document.querySelectorAll('#rs-days .weekday-chip').forEach(c=>c.classList.toggle('on',rescheduleDays.has(parseInt(c.dataset.day))));
   const mapped=fussballFilterTeam(rescheduleGame.team,rescheduleGame.squad);
   document.getElementById('rs-text').textContent=teamLabel(mapped.team,mapped.squad)+' – '+rescheduleGame.opponent+' (bisher '+fmtShort(rescheduleGame.d)+', '+rescheduleGame.t+' Uhr)';
@@ -2763,7 +2764,7 @@ function toggleRescheduleDay(d){
 }
 function runRescheduleSearch(){
   const box=document.getElementById('rs-results');
-  rescheduleResults=[]; rescheduleSelected=new Set();
+  rescheduleResults=[]; rescheduleSelected=new Set(); rescheduleShowAll=false;
   if(!rescheduleGame){ box.innerHTML=''; return; }
   if(!rescheduleDays.size){ box.innerHTML='<div class="rs-empty">Bitte mindestens einen Wochentag auswählen.</div>'; return; }
   const von=document.getElementById('rs-von').value, bis=document.getElementById('rs-bis').value;
@@ -2815,7 +2816,7 @@ function runRescheduleSearch(){
 function renderRescheduleResults(){
   const box=document.getElementById('rs-results');
   const results=rescheduleResults;
-  const shown=results.slice(0,15);
+  const shown=rescheduleShowAll?results:results.slice(0,15);
   box.innerHTML='<div class="field-label" style="margin-bottom:8px;">'+results.length+' freie'+(results.length===1?'r Termin':' Termine')+' gefunden – zum Vorschlagen auswählen</div>'
     +shown.map((r,i)=>{
       const dt=new Date(r.date+'T00:00:00');
@@ -2824,10 +2825,11 @@ function renderRescheduleResults(){
         +'<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleRescheduleSelect('+i+')">'
         +'<b>'+DAYS_S[dt.getDay()]+' '+fmtShort(r.date)+'</b><span>'+r.freeFrom+'–'+r.freeTo+' frei</span></label>';
     }).join('')
-    +(results.length>shown.length?'<div class="rs-empty">+ '+(results.length-shown.length)+' weitere (chronologisch nächste zuerst gezeigt)</div>':'')
+    +(results.length>shown.length?'<div class="rs-empty rs-showmore" onclick="expandRescheduleResults()">+ '+(results.length-shown.length)+' weitere anzeigen ▾</div>':'')
     +'<div id="rs-share-bar"></div>';
   renderRescheduleShareBar();
 }
+function expandRescheduleResults(){ rescheduleShowAll=true; renderRescheduleResults(); }
 function toggleRescheduleSelect(i){
   if(rescheduleSelected.has(i))rescheduleSelected.delete(i); else rescheduleSelected.add(i);
   renderRescheduleResults();
