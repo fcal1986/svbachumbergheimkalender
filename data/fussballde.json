@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T20:54:58.161Z",
+  "updated": "2026-09-19T04:38:26.180Z",
   "games": [
     {
       "d": "2026-08-29",
@@ -1423,16 +1423,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-08-28",
-      "t": "18:30",
-      "team": "A-Junioren",
-      "squad": 1,
-      "opponent": "TuS Ampen (U20)",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/tus-ampen-u20-sv-bachum-bergheim/-/spiel/031FDB8TV0000000VS5489BUVSJ4CRAP"
-    },
     {
       "d": "2026-08-29",
       "t": "13:30",
