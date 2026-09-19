@@ -876,7 +876,7 @@
       <div class="field" style="flex:1;margin-bottom:0;"><label>Von</label><input type="time" id="rs-von" value="14:00"></div>
       <div class="field" style="flex:1;margin-bottom:0;"><label>Bis</label><input type="time" id="rs-bis" value="18:00"></div>
     </div>
-    <p class="hint" style="margin-top:8px;">Sucht freie Termine ab morgen bis 6 Wochen nach dem ursprünglichen Spieltermin, im gewählten Zeitfenster an den gewählten Tagen.</p>
+    <p class="hint" style="margin-top:8px;">Sucht freie Termine ab morgen bis 6 Wochen nach dem ursprünglichen Spieltermin, im gewählten Zeitfenster an den gewählten Tagen. Tage, an denen die Mannschaft bereits ein anderes Spiel hat (auch auswärts), werden ausgeschlossen.</p>
     <div class="modal-acts" style="margin-top:16px;">
       <button class="no" onclick="closeRescheduleModal()">Schließen</button>
       <button class="yes" onclick="runRescheduleSearch()">Suchen</button>
@@ -2791,6 +2791,15 @@ function runRescheduleSearch(){
     const ds=ymd(d);
     if(ds===g.d)continue;
     if(!rescheduleDays.has(dowOf(ds)))continue;
+    // Team-Ganztags-Sperre: hat DIESE Mannschaft an dem Tag bereits irgendein anderes Spiel
+    // (Heim ODER Auswärts)? Auswärtsspiele belegen unseren Platz nicht und wären in der reinen
+    // Platzprüfung unten unsichtbar – ein Team kann aber nicht an einem Tag zwei Pflichtspiele
+    // bestreiten, unabhängig von der genauen Uhrzeit. Daher kompletter Tages-Ausschluss, nicht
+    // nur ein Zeitfenster-Abgleich.
+    const teamBusyThatDay=
+      (FUSSBALLDE.games||[]).some(x=>x.team===g.team&&(x.squad||1)===(g.squad||1)&&x.d===ds)
+      || (FUSSBALLDE.awayGames||[]).some(x=>x.team===g.team&&(x.squad||1)===(g.squad||1)&&x.d===ds);
+    if(teamBusyThatDay)continue;
     let windows=[]; let curStart=null, curLastValidStart=null;
     const vonMin=timeToMin(von), bisMin=timeToMin(bis);
     for(let t=vonMin;t+durationMin<=bisMin;t+=15){
