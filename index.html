@@ -336,6 +336,11 @@
   .heute-row.off .hteam{color:var(--ink-soft);text-decoration:line-through;}
   .heute-row .hoff-pill{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:10px;background:#FDECEA;color:#9B3227;flex:none;}
   .hoff-pill{font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:10px;background:#FDECEA;color:#9B3227;flex:none;white-space:nowrap;}
+  .lock-banner{display:flex;align-items:center;gap:9px;background:#FEE2E2;border:1.5px solid #FCA5A5;border-radius:10px;padding:9px 11px;margin:8px 0;font-size:12px;color:#9B3227;}
+  .lock-banner svg{flex:none;width:17px;height:17px;stroke:#DC2626;}
+  .lock-banner b{font-size:12.5px;}
+  .lock-banner-sub{font-size:10.5px;color:#B94A3A;margin-top:1px;}
+  .lock-cancel-link{margin-left:auto;flex:none;font-size:11px;font-weight:800;color:#9B3227;text-decoration:underline;cursor:pointer;white-space:nowrap;}
   .pitch-today-row.pt-cancelled{opacity:.72;}
   .pitch-today-row.pt-cancelled .pt-team-name{text-decoration:line-through;text-decoration-color:var(--ink-soft);}
   .today-cancelled{font-size:12px;font-weight:600;color:var(--ink-soft);padding:6px 12px;display:flex;align-items:center;gap:6px;border-top:1px solid var(--line);}
@@ -587,6 +592,7 @@
   <div class="pane active" data-pane="start">
     <div class="content">
       <div id="install-banner"></div>
+      <div id="lock-start-banner"></div>
       <div class="start-daycard">
         <div class="start-date" id="st-date">–</div>
         <div class="start-summary" id="st-summary">–</div>
@@ -893,7 +899,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], session=null;
+let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
 let selectedSeasonFilter='';
@@ -1399,6 +1405,40 @@ async function saveEvents(msg){
 }
 async function saveUsers(msg){ await ghPutRaw('data/users.json',JSON.stringify({users:USERS},null,2),msg); }
 async function saveTraining(msg){ await ghPutRaw('data/training.json',JSON.stringify({slots:TRAINING},null,2),msg); }
+async function saveLocks(msg){ await ghPutRaw('data/resource-locks.json',JSON.stringify({locks:LOCKS},null,2),msg); }
+
+/* ---------- Ressourcen-Sperren (z.B. Platz wegen Schnee gesperrt) ----------
+   Bewusst NUR als Warnung gedacht, keine automatische Terminabsage: eine Wetter-Sperre kann
+   jederzeit wieder aufgehoben werden, automatisches Absagen+späteres Zurücksetzen wäre
+   fehleranfällig. Trainer sehen die Warnung und entscheiden selbst (mit Schnellzugriff zum
+   bestehenden Absagen-Mechanismus, falls gewünscht). */
+function activeLocksOn(ds){
+  return LOCKS.filter(l=>l.von<=ds&&(!l.bis||l.bis>=ds));
+}
+function lockAffectsItem(lock,item){
+  if(lock.resource==='platz'){
+    if(item.pitch)return true; // Training/eigener Termin mit Platz-Zuordnung
+    if(item.isExternal&&!item.isAway)return true; // fussball.de-Heimspiel (nutzt immer den Platz)
+    return false;
+  }
+  if(lock.resource==='halle'){
+    return !!(item.halle&&item.halle.thirds&&item.halle.thirds.length);
+  }
+  // custom: Abgleich über den freien Ressourcen-Namen (z.B. "Theke")
+  return !!(item.res&&item.res.includes(lock.customName));
+}
+function locksForItem(item){
+  return activeLocksOn(item.d).filter(l=>lockAffectsItem(l,item));
+}
+function lockBannerHTML(lock,item){
+  const bisTxt=lock.bis?('bis '+fmtShort(lock.bis)):'unbegrenzt';
+  const resTxt=lock.resource==='platz'?'Platz':lock.resource==='halle'?'Halle':esc(lock.customName);
+  const canCancel=session&&item.isTraining&&!item.isCancelled&&canBookAnyOfTeam(item.team);
+  return '<div class="lock-banner">'+svgWarn
+    +'<div><b>'+resTxt+' gesperrt'+(lock.note?' ('+esc(lock.note)+')':'')+'</b><div class="lock-banner-sub">'+bisTxt+'</div></div>'
+    +(canCancel?'<span class="lock-cancel-link" onclick="event.stopPropagation();openCancelModal(\''+item.trainingSlotId+'\',\''+item.d+'\')">Jetzt absagen</span>':'')
+    +'</div>';
+}
 
 /* ---------- Login ---------- */
 function openLogin(hint){ document.getElementById('login').classList.add('show'); loginErr(hint||''); refreshBioBtn(); }
@@ -1759,6 +1799,7 @@ function rowHTML(e){
     +'<div class="ev-time-col"><div class="ev-t">'+bis+'</div><div class="ev-tl">Bis</div></div>'
     +(pitchVisual?'<div class="ev-time-pitch">'+pitchVisual+'</div>':'')
     +'</div>'
+    +locksForItem(e).map(l=>lockBannerHTML(l,e)).join('')
     +(b?'<div class="badges" style="margin-top:10px;">'+b+'</div>':'')
     +(e.note&&!e.isTraining?'<div class="ev-note" style="margin-top:8px;">'+esc(e.note)+'</div>':'')
     +(contactHtml?'<div class="ev-contact">'+contactHtml+'</div>':'')
@@ -1816,6 +1857,7 @@ function externalRowHTML(e){
     +'<div class="ev-time-col"><div class="ev-t">'+e.t+'</div><div class="ev-tl">Von</div></div>'
     +'<div class="ev-time-col"><div class="ev-t">'+bis+'</div><div class="ev-tl">Bis</div></div>'
     +'</div>'
+    +locksForItem(e).map(l=>lockBannerHTML(l,e)).join('')
     +'<div class="badges" style="margin-top:10px;align-items:center;"><span class="badge-fb">⚽ '+esc(e.competition||'fussball.de')+'</span>'
     +(e.link?'<a href="'+esc(e.link)+'" target="_blank" rel="noopener" class="fb-link-btn" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg>Zum Spiel</a>':'')
     +'</div>'
@@ -2108,8 +2150,22 @@ function renderStart(){
   document.getElementById('st-summary').textContent=parts.length?parts.join(' · '):'Heute nichts geplant';
 
   renderInstallBanner();
+  renderLockStartBanner();
   renderPitchToday();
   renderStartStatus();
+}
+function renderLockStartBanner(){
+  const box=document.getElementById('lock-start-banner');
+  if(!box)return;
+  const active=activeLocksOn(todayStr);
+  if(!active.length){ box.innerHTML=''; return; }
+  const resLabel=r=>r.resource==='platz'?'Platz':r.resource==='halle'?'Halle':r.customName;
+  box.innerHTML=active.map(l=>
+    '<div class="lock-banner" onclick="goto(\'konto\')" style="cursor:pointer;">'+svgWarn
+    +'<div><b>'+esc(resLabel(l))+' gesperrt'+(l.note?' ('+esc(l.note)+')':'')+'</b>'
+    +'<div class="lock-banner-sub">'+(l.bis?'bis '+fmtShort(l.bis):'unbegrenzt')+'</div></div>'
+    +'</div>'
+  ).join('');
 }
 
 /* ---------- Neue Start-Seite: kompaktes Tages-Dashboard ---------- */
@@ -3610,7 +3666,7 @@ function renderKonto(){
     if(!session.isSuper)h+=profileCard()+notificationsCard();
     h+=pwaCard();
   }else if(kontoTab==='saisons'){
-    h+=seasonManagementCard();
+    h+=seasonManagementCard()+resourceLockCard();
   }else if(kontoTab==='zugaenge'){
     h+=adminNewUserCard()+adminUserListCard();
   }else if(kontoTab==='protokoll'){
@@ -3841,6 +3897,70 @@ async function deleteSeason(seasonId){
     saveSeasons('Saison gelöscht: '+s.label).catch(e=>{
       SEASONS=backup; renderKonto(); showToast('Fehler: '+e.message,6000);
     });
+  });
+}
+let lockFormResource='platz';
+function resourceLockCard(){
+  const active=LOCKS.filter(l=>!l.bis||l.bis>=todayStr).sort((a,b)=>a.von.localeCompare(b.von));
+  const resLabel=r=>r==='platz'?'Platz':r==='halle'?'Halle':r;
+  return '<div class="card"><h4>'+svgWarn+'Ressourcen-Sperren</h4>'
+    +'<p class="sub">Für Wetter (z.B. Schnee) oder andere Gründe – betroffene Termine zeigen eine Warnung, werden aber NICHT automatisch abgesagt.</p>'
+    +'<div class="seg" id="lock-res-seg" style="margin-top:12px;">'
+    +'<button type="button" class="'+(lockFormResource==='platz'?'on':'')+'" onclick="setLockResource(\'platz\')">Platz</button>'
+    +'<button type="button" class="'+(lockFormResource==='halle'?'on':'')+'" onclick="setLockResource(\'halle\')">Halle</button>'
+    +'<button type="button" class="'+(lockFormResource==='custom'?'on':'')+'" onclick="setLockResource(\'custom\')">Eigene</button>'
+    +'</div>'
+    +'<div id="lock-custom-field" style="display:'+(lockFormResource==='custom'?'block':'none')+';margin-top:10px;">'
+    +'<div class="field" style="margin:10px 0;"><label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">Ressourcen-Name</label><input type="text" id="lock-custom-name" autocomplete="off" placeholder="z. B. Theke"></div>'
+    +'</div>'
+    +'<div style="display:flex;gap:10px;margin-top:10px;">'
+    +'<div class="field" style="flex:1;margin-bottom:0;"><label>Von</label><input type="date" id="lock-von" value="'+todayStr+'"></div>'
+    +'<div class="field" style="flex:1;margin-bottom:0;"><label>Bis (optional)</label><input type="date" id="lock-bis"></div>'
+    +'</div>'
+    +'<p class="hint" style="margin-top:6px;">Ohne "Bis" gilt die Sperre unbegrenzt, bis sie manuell aufgehoben wird.</p>'
+    +'<div class="field" style="margin:10px 0;"><label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">Notiz (kurz)</label><input type="text" id="lock-note" autocomplete="off" placeholder="z. B. Schnee"></div>'
+    +'<button class="submit-btn" onclick="createLock()"><span>Sperre anlegen</span></button>'
+    +(active.length?'<div class="selected-list-label" style="margin-top:18px;">Aktive Sperren</div>'+active.map(l=>
+      '<div class="rs-result-row" style="align-items:flex-start;">'
+      +'<div><b>'+resLabel(l.resource==='custom'?l.customName:l.resource)+'</b>'
+      +'<div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">ab '+fmtShort(l.von)+(l.bis?' bis '+fmtShort(l.bis):' · unbegrenzt')+(l.note?' · '+esc(l.note):'')+'</div></div>'
+      +'<span class="review-edit" onclick="liftLock(\''+l.id+'\')">Aufheben</span>'
+      +'</div>'
+    ).join(''):'<p class="sub" style="margin-top:14px;">Aktuell keine aktiven Sperren.</p>')
+    +'</div>';
+}
+function setLockResource(r){
+  lockFormResource=r;
+  document.querySelectorAll('#lock-res-seg button').forEach((b,i)=>b.classList.toggle('on',['platz','halle','custom'][i]===r));
+  document.getElementById('lock-custom-field').style.display=r==='custom'?'block':'none';
+}
+async function createLock(){
+  const von=document.getElementById('lock-von').value;
+  const bis=document.getElementById('lock-bis').value||null;
+  const note=document.getElementById('lock-note').value.trim();
+  const customName=lockFormResource==='custom'?document.getElementById('lock-custom-name').value.trim():null;
+  if(!von){ showToast('Bitte ein Von-Datum wählen.',4000); return; }
+  if(bis&&bis<von){ showToast('"Bis" muss nach "Von" liegen.',4000); return; }
+  if(lockFormResource==='custom'&&!customName){ showToast('Bitte einen Ressourcen-Namen eingeben.',4000); return; }
+  const lock={id:crypto.randomUUID(),resource:lockFormResource,customName,von,bis,note,createdBy:session.name,createdAt:new Date().toISOString()};
+  const backup=JSON.stringify(LOCKS);
+  LOCKS.push(lock);
+  const resLabel=lockFormResource==='platz'?'Platz':lockFormResource==='halle'?'Halle':customName;
+  try{
+    await saveLocks('Sperre angelegt: '+resLabel+' ab '+fmtShort(von)+(bis?' bis '+fmtShort(bis):' (unbegrenzt)')+(note?' – '+note:'')+' – '+session.name);
+    showToast('Sperre angelegt.'); renderKonto(); render(); renderStart();
+  }catch(e){ LOCKS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
+}
+function liftLock(id){
+  const l=LOCKS.find(x=>x.id===id); if(!l)return;
+  askConfirm('Sperre aufheben?','Die Sperre wird sofort entfernt.','Aufheben',async()=>{
+    const backup=JSON.stringify(LOCKS);
+    const resLabel=l.resource==='platz'?'Platz':l.resource==='halle'?'Halle':l.customName;
+    LOCKS=LOCKS.filter(x=>x.id!==id);
+    try{
+      await saveLocks('Sperre aufgehoben: '+resLabel+' – '+session.name);
+      showToast('Sperre aufgehoben.'); renderKonto(); render(); renderStart();
+    }catch(e){ LOCKS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   });
 }
 function seasonManagementCard(){
@@ -4084,6 +4204,8 @@ async function boot(){
   catch(e){ SEASONS=[]; }
   try{ FUSSBALLDE=await loadJSON('data/fussballde.json'); if(!Array.isArray(FUSSBALLDE.games))FUSSBALLDE.games=[]; if(!Array.isArray(FUSSBALLDE.awayGames))FUSSBALLDE.awayGames=[]; }
   catch(e){ FUSSBALLDE={updated:null,games:[],awayGames:[]}; }
+  try{ const lk=await loadJSON('data/resource-locks.json'); LOCKS=Array.isArray(lk.locks)?lk.locks:[]; }
+  catch(e){ LOCKS=[]; }
 
   document.getElementById('login-foot').textContent=
     USERS.length?'Zugang bekommst du vom Vorstand.':'Noch keine Zugänge angelegt – bitte als Admin anmelden.';
