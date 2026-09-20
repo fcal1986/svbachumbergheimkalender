@@ -1,3 +1,14 @@
 {
-  "locks": []
+  "locks": [
+    {
+      "id": "9169800d-a46f-4b96-86fe-8972487a0a08",
+      "resource": "platz",
+      "customName": null,
+      "von": "2026-09-20",
+      "bis": null,
+      "note": "",
+      "createdBy": "Vorstand Admin",
+      "createdAt": "2026-09-20T07:37:18.314Z"
+    }
+  ]
 }
