@@ -11,14 +11,14 @@
       "createdAt": "2026-09-20T07:11:21.558Z"
     },
     {
-      "id": "881c487e-9da1-41fb-aa8e-c07c8234a8cc",
-      "resource": "custom",
-      "customName": "Theke",
+      "id": "a4214979-da43-4a92-8b7c-98ff476a5462",
+      "resource": "platz",
+      "customName": null,
       "von": "2026-09-20",
       "bis": null,
-      "note": "Bedarf",
+      "note": "",
       "createdBy": "Vorstand Admin",
-      "createdAt": "2026-09-20T07:13:05.121Z"
+      "createdAt": "2026-09-20T07:13:37.986Z"
     }
   ]
 }
