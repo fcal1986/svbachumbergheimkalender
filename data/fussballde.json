@@ -1,36 +1,6 @@
 {
-  "updated": "2026-09-19T20:41:31.472Z",
+  "updated": "2026-09-20T11:25:19.923Z",
   "games": [
-    {
-      "d": "2026-08-29",
-      "t": "12:00",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "Iserlohner Turnerschaft",
-      "competition": "Kreisturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iserlohner-turnerschaft/-/spiel/0313PT58CG000000VS5489BUVSBBVPEU"
-    },
-    {
-      "d": "2026-08-29",
-      "t": "12:30",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "DJK Grün-Weiß Menden 1",
-      "competition": "Kreisturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-djk-gruen-weiss-menden-1/-/spiel/0313PT58D8000000VS5489BUVSBBVPEU"
-    },
-    {
-      "d": "2026-08-29",
-      "t": "14:30",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "Sportfreunde Hüingsen",
-      "competition": "Kreisturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sportfreunde-hueingsen/-/spiel/0313PT58GC000000VS5489BUVSBBVPEU"
-    },
     {
       "d": "2026-08-30",
       "t": "11:00",
@@ -1423,26 +1393,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-08-29",
-      "t": "13:30",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "DJK Grün-Weiß Menden 2",
-      "competition": "Kreisturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/djk-gruen-weiss-menden-2-sv-bachum-bergheim/-/spiel/0313PT58EO000000VS5489BUVSBBVPEU"
-    },
-    {
-      "d": "2026-08-29",
-      "t": "15:30",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "SuS Kaiserau",
-      "competition": "Kreisturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sus-kaiserau-sv-bachum-bergheim/-/spiel/0313PT58HO000000VS5489BUVSBBVPEU"
-    },
     {
       "d": "2026-08-30",
       "t": "10:45",
