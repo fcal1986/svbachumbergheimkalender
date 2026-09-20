@@ -4297,6 +4297,39 @@ async function boot(){
 }
 boot();
 
+/* ---------- Analytics: Microsoft Clarity + Google Analytics ----------
+   Bewusst am Ende der Datei, nach boot() – blockiert nichts, falls einer der Dienste
+   langsam lädt oder mal nicht erreichbar ist. */
+
+// Sensible Eingabefelder (Telefon, E-Mail, Name, Passwort) sollen NIE im Klartext in einer
+// Clarity-Session-Aufzeichnung landen. Läuft automatisch für alle aktuellen UND zukünftigen
+// Felder, da diese App viele Formulare per innerHTML nachträglich einblendet.
+function maskSensitiveInputs(){
+  document.querySelectorAll('input:not([data-clarity-mask])').forEach(el=>{
+    if(['text','email','tel','password','search'].includes(el.type)) el.setAttribute('data-clarity-mask','true');
+  });
+}
+new MutationObserver(maskSensitiveInputs).observe(document.body,{childList:true,subtree:true});
+maskSensitiveInputs();
+
+// Microsoft Clarity – Projekt-ID nach Einrichtung hier eintragen:
+(function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", "ylet8n4zzu");
+
+// Google Analytics (GA4) – Mess-ID nach Einrichtung hier eintragen (beide Stellen "G-NHNDPTRXF7"):
+(function(){
+  const s=document.createElement('script');
+  s.async=true; s.src='https://www.googletagmanager.com/gtag/js?id=G-NHNDPTRXF7';
+  document.head.appendChild(s);
+  window.dataLayer=window.dataLayer||[];
+  window.gtag=function(){dataLayer.push(arguments);};
+  gtag('js', new Date());
+  gtag('config', 'G-NHNDPTRXF7', { anonymize_ip: true });
+})();
+
 </script>
 </body>
 </html>
