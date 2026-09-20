@@ -37,8 +37,8 @@
     --warn:#C0392B; --ok:#6BB41C;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;height:100%;}
-  body{font-family:'Inter',Arial,Helvetica,sans-serif;color:var(--ink);background:var(--bg);overscroll-behavior:none;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{font-family:'Inter',Arial,Helvetica,sans-serif;color:var(--ink);background:var(--bg);overscroll-behavior:none;position:fixed;inset:0;}
   #app{display:flex;flex-direction:column;height:100dvh;max-width:520px;margin:0 auto;background:var(--bg);position:relative;overflow:hidden;}
 
   /* ── HEADER ── */
@@ -1366,27 +1366,48 @@ async function ghSha(path){
   _shaCache[path]=sha;
   return sha;
 }
+// Globale Speicher-Warteschlange: ALLE Speichervorgänge in der ganzen App laufen hier durch
+// und werden nacheinander abgearbeitet, nie gleichzeitig – unabhängig davon, welcher Button
+// sie ausgelöst hat. Das verhindert GitHub-SHA-Konflikte durch Doppelklicks/schnelle
+// Mehrfachaktionen (zwei Saves gleichzeitig auf denselben Dateistand aufbauend) und liefert
+// nebenbei für die GESAMTE App eine einheitliche Lade-Anzeige, ohne dass jede einzelne
+// Speicherfunktion das selbst umsetzen muss.
+let ghSaveQueue=Promise.resolve();
 async function ghPutRaw(path,text,msg){
   if(!session||!session.token) throw new Error('Kein Schreib-Token vorhanden.');
-  const sha=await ghSha(path);
-  const body={message:msg,content:b64(enc.encode(text)),branch:CFG.branch};
-  if(sha) body.sha=sha;
-  const r=await fetch('https://api.github.com/repos/'+CFG.repo+'/contents/'+path,{
-    method:'PUT',
-    headers:{Authorization:'Bearer '+session.token,Accept:'application/vnd.github+json','Content-Type':'application/json'},
-    body:JSON.stringify(body)});
-  if(r.ok){
-    // Neue SHA cachen → nächster Save braucht keinen extra GET
-    const rd=await r.json().catch(()=>({}));
-    if(rd?.content?.sha)_shaCache[path]=rd.content.sha;
-    return;
-  }
-  if(!r.ok){
+  const myTurn=ghSaveQueue.catch(()=>{}); // auf vorherigen Save warten, auch wenn der fehlgeschlagen ist
+  let release;
+  ghSaveQueue=new Promise(res=>{ release=res; });
+  await myTurn;
+  showSaving('Wird gespeichert …');
+  try{
+    const sha=await ghSha(path);
+    const body={message:msg,content:b64(enc.encode(text)),branch:CFG.branch};
+    if(sha) body.sha=sha;
+    const r=await fetch('https://api.github.com/repos/'+CFG.repo+'/contents/'+path,{
+      method:'PUT',
+      headers:{Authorization:'Bearer '+session.token,Accept:'application/vnd.github+json','Content-Type':'application/json'},
+      body:JSON.stringify(body)});
+    if(r.ok){
+      // Neue SHA cachen → nächster Save braucht keinen extra GET
+      const rd=await r.json().catch(()=>({}));
+      if(rd?.content?.sha)_shaCache[path]=rd.content.sha;
+      return;
+    }
     const e=await r.json().catch(()=>({}));
     if(r.status===404) throw new Error('Repo „'+CFG.repo+'" nicht gefunden. Prüfe „repo" in data/config.json und die Token-Rechte.');
     if(r.status===401) throw new Error('Token ungültig oder abgelaufen.');
     if(r.status===403) throw new Error('Token hat keine Schreibrechte (Contents: Read and write).');
+    if(r.status===409){
+      // Sollte durch die Warteschlange oben eigentlich nicht mehr vorkommen – zur Sicherheit
+      // trotzdem eine verständliche Meldung statt des rohen SHA-Diffs von GitHub.
+      _shaCache[path]=null; // Cache verwerfen, damit der nächste Versuch den echten aktuellen Stand holt
+      throw new Error('Der Datei-Stand hat sich zwischenzeitlich geändert. Bitte nochmal versuchen.');
+    }
     throw new Error(e.message||'Speichern fehlgeschlagen ('+r.status+')');
+  }finally{
+    hideSaving();
+    release();
   }
 }
 async function ghDispatch(eventType,payload){
@@ -3919,7 +3940,7 @@ function resourceLockCard(){
     +'</div>'
     +'<p class="hint" style="margin-top:6px;">Ohne "Bis" gilt die Sperre unbegrenzt, bis sie manuell aufgehoben wird.</p>'
     +'<div class="field" style="margin:10px 0;"><label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">Notiz (kurz)</label><input type="text" id="lock-note" autocomplete="off" placeholder="z. B. Schnee"></div>'
-    +'<button class="submit-btn" onclick="createLock()"><span>Sperre anlegen</span></button>'
+    +'<button class="submit-btn" id="lock-save-btn" onclick="createLock()"><span>Sperre anlegen</span></button>'
     +(active.length?'<div class="selected-list-label" style="margin-top:18px;">Aktive Sperren</div>'+active.map(l=>
       '<div class="rs-result-row" style="align-items:flex-start;">'
       +'<div><b>'+resLabel(l.resource==='custom'?l.customName:l.resource)+'</b>'
@@ -3934,33 +3955,52 @@ function setLockResource(r){
   document.querySelectorAll('#lock-res-seg button').forEach((b,i)=>b.classList.toggle('on',['platz','halle','custom'][i]===r));
   document.getElementById('lock-custom-field').style.display=r==='custom'?'block':'none';
 }
+let lockSaving=false;
+function markFieldErr(id,bad){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.style.borderColor=bad?'var(--warn)':'';
+  el.style.borderWidth=bad?'2px':'';
+}
 async function createLock(){
+  if(lockSaving)return; // Doppelklick-Schutz: verhindert doppelte Sperren bei schnellem Mehrfachklick
   const von=document.getElementById('lock-von').value;
   const bis=document.getElementById('lock-bis').value||null;
   const note=document.getElementById('lock-note').value.trim();
   const customName=lockFormResource==='custom'?document.getElementById('lock-custom-name').value.trim():null;
-  if(!von){ showToast('Bitte ein Von-Datum wählen.',4000); return; }
-  if(bis&&bis<von){ showToast('"Bis" muss nach "Von" liegen.',4000); return; }
-  if(lockFormResource==='custom'&&!customName){ showToast('Bitte einen Ressourcen-Namen eingeben.',4000); return; }
+  markFieldErr('lock-von',false); markFieldErr('lock-custom-name',false);
+  let valid=true;
+  if(!von){ markFieldErr('lock-von',true); valid=false; }
+  if(bis&&von&&bis<von){ showToast('"Bis" muss nach "Von" liegen.',4000); valid=false; }
+  if(lockFormResource==='custom'&&!customName){ markFieldErr('lock-custom-name',true); valid=false; }
+  if(!valid){ showToast('Bitte die rot markierten Felder ausfüllen.',4000); return; }
   const lock={id:crypto.randomUUID(),resource:lockFormResource,customName,von,bis,note,createdBy:session.name,createdAt:new Date().toISOString()};
   const backup=JSON.stringify(LOCKS);
   LOCKS.push(lock);
   const resLabel=lockFormResource==='platz'?'Platz':lockFormResource==='halle'?'Halle':customName;
+  lockSaving=true;
+  const btn=document.getElementById('lock-save-btn'); if(btn)btn.disabled=true;
+  showSaving('Sperre wird gespeichert …');
   try{
     await saveLocks('Sperre angelegt: '+resLabel+' ab '+fmtShort(von)+(bis?' bis '+fmtShort(bis):' (unbegrenzt)')+(note?' – '+note:'')+' – '+session.name);
     showToast('Sperre angelegt.'); renderKonto(); render(); renderStart();
-  }catch(e){ LOCKS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
+  }catch(e){ LOCKS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); renderKonto(); }
+  finally{ lockSaving=false; hideSaving(); }
 }
 function liftLock(id){
   const l=LOCKS.find(x=>x.id===id); if(!l)return;
   askConfirm('Sperre aufheben?','Die Sperre wird sofort entfernt.','Aufheben',async()=>{
+    if(lockSaving)return;
     const backup=JSON.stringify(LOCKS);
     const resLabel=l.resource==='platz'?'Platz':l.resource==='halle'?'Halle':l.customName;
     LOCKS=LOCKS.filter(x=>x.id!==id);
+    lockSaving=true;
+    showSaving('Wird aufgehoben …');
     try{
       await saveLocks('Sperre aufgehoben: '+resLabel+' – '+session.name);
       showToast('Sperre aufgehoben.'); renderKonto(); render(); renderStart();
-    }catch(e){ LOCKS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
+    }catch(e){ LOCKS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); renderKonto(); }
+    finally{ lockSaving=false; hideSaving(); }
   });
 }
 function seasonManagementCard(){
