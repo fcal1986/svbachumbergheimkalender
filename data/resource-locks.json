@@ -1,16 +1,6 @@
 {
   "locks": [
     {
-      "id": "90e256cf-9b0c-474a-96fe-0386a29f70fe",
-      "resource": "platz",
-      "customName": null,
-      "von": "2026-09-20",
-      "bis": "2026-09-27",
-      "note": "Schnee",
-      "createdBy": "Vorstand Admin",
-      "createdAt": "2026-09-20T07:11:21.558Z"
-    },
-    {
       "id": "6e701b8d-82ea-4984-b961-fc9a4343d76c",
       "resource": "custom",
       "customName": "Theke",
