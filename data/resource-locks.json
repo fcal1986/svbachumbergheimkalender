@@ -9,6 +9,16 @@
       "note": "",
       "createdBy": "Vorstand Admin",
       "createdAt": "2026-09-20T07:37:18.314Z"
+    },
+    {
+      "id": "d3d8016d-f0d9-4984-93aa-fb5f2cf32e8b",
+      "resource": "custom",
+      "customName": "Theke",
+      "von": "2026-09-20",
+      "bis": null,
+      "note": "",
+      "createdBy": "Vorstand Admin",
+      "createdAt": "2026-09-20T07:37:37.484Z"
     }
   ]
 }
