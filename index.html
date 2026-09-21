@@ -3879,6 +3879,20 @@ function syncClassesFromActiveSeason(){
 /* Einmalige Migration von Alt-Daten: falls die aktive Saison noch KEINE trainerClasses hat,
    aber Nutzer bereits (alte) u.classes gesetzt haben, als Startpunkt in die aktive Saison
    übernehmen, damit nichts verloren geht. Läuft nur, solange trainerClasses fehlt. */
+function cleanupOrphanedSeasonTrainers(){
+  let anyChanged=false;
+  SEASONS.forEach(s=>{
+    if(!Array.isArray(s.trainerIds)||!s.trainerIds.length)return;
+    let seasonChanged=false;
+    const keep=[], keepNames=[];
+    s.trainerIds.forEach((id,i)=>{
+      if(USERS.find(u=>u.id===id)){ keep.push(id); keepNames.push((s.trainerNames||[])[i]||''); }
+      else{ seasonChanged=true; if(s.trainerClasses)delete s.trainerClasses[id]; }
+    });
+    if(seasonChanged){ s.trainerIds=keep; s.trainerNames=keepNames; anyChanged=true; }
+  });
+  return anyChanged;
+}
 function migrateClassesIntoActiveSeasonIfNeeded(){
   const active=getCurrentSeason();
   if(!active)return false;
@@ -4344,19 +4358,35 @@ function deleteUser(id){
   askConfirm('Zugang löschen?',u.first+' '+u.last+' kann sich dann nicht mehr anmelden. Seine Termine bleiben.','Löschen',async()=>{
     const backup=JSON.stringify(USERS);
     const tBackup=JSON.stringify(TRAINING);
+    const sBackup=JSON.stringify(SEASONS);
     USERS=USERS.filter(x=>x.id!==id);
     const affected=TRAINING.filter(s=>s.trainerId===id||(s.trainerIds||[]).includes(id));
     affected.forEach(s=>{
       s.trainerId=null; s.trainerName='';
       if(s.trainerIds){const i=s.trainerIds.indexOf(id);if(i>=0){s.trainerIds.splice(i,1);if(s.trainerNames)s.trainerNames.splice(i,1);}}
     });
+    // Gelöschten Zugang auch aus allen Saisons entfernen – sonst bleibt er als "Geister-Trainer"
+    // in trainerIds stehen: die Saison zählt ihn weiter mit (z.B. "3 Trainer"), obwohl er beim
+    // Aufklappen gar nicht mehr auftaucht (da USERS.find() ihn nicht mehr findet), UND die Saison
+    // lässt sich dadurch nie mehr löschen, weil trainerIds nie leer wird.
+    let seasonsAffected=0;
+    SEASONS.forEach(s=>{
+      const i=(s.trainerIds||[]).indexOf(id);
+      if(i>=0){
+        s.trainerIds.splice(i,1);
+        if(s.trainerNames)s.trainerNames.splice(i,1);
+        if(s.trainerClasses)delete s.trainerClasses[id];
+        seasonsAffected++;
+      }
+    });
     try{
       await saveUsers('Zugang gelöscht: '+u.first+' '+u.last+' – '+session.name);
       if(affected.length) await saveTraining('Trainer-Zuordnung entfernt: '+u.first+' '+u.last+' – '+session.name);
+      if(seasonsAffected) await saveSeasons('Aus Saison(s) entfernt (Zugang gelöscht): '+u.first+' '+u.last+' – '+session.name);
       showToast('Gelöscht.'+(affected.length?' '+affected.length+' Trainingszeit(en) stehen jetzt auf „wird bald ergänzt".':''));
       renderKonto(); renderTraining();
     }
-    catch(e){ USERS=JSON.parse(backup); TRAINING=JSON.parse(tBackup); showToast('Fehler: '+e.message,6000); }
+    catch(e){ USERS=JSON.parse(backup); TRAINING=JSON.parse(tBackup); SEASONS=JSON.parse(sBackup); showToast('Fehler: '+e.message,6000); }
   });
 }
 async function changePassword(){
@@ -4483,6 +4513,12 @@ async function boot(){
   catch(e){ TRAINING=[]; }
   try{ const sea=await loadJSON('data/seasons.json'); SEASONS=sea.seasons||[]; }
   catch(e){ SEASONS=[]; }
+  // Einmalige Reparatur: verwaiste Trainer-IDs aus Saisons entfernen, die durch gelöschte
+  // Zugänge vor diesem Fix übrig geblieben sind (zeigten z.B. "3 Trainer" an, obwohl beim
+  // Aufklappen niemand mehr auftauchte, und verhinderten dadurch auch das Löschen der Saison).
+  if(cleanupOrphanedSeasonTrainers()&&session&&session.token){
+    saveSeasons('Verwaiste Trainer-Zuordnungen bereinigt (automatisch) – '+session.name).catch(()=>{});
+  }
   // Einmalige Migration: alte user.classes in die aktive Saison übernehmen, falls diese noch
   // keine eigene Team-Zuordnung hat. Speichert nur, wenn tatsächlich migriert wurde.
   if(migrateClassesIntoActiveSeasonIfNeeded()&&session&&session.token){
