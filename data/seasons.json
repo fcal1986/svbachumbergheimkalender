@@ -6,9 +6,7 @@
       "startYear": 2027,
       "from": "2027-07-01",
       "to": "2028-06-30",
-      "trainerIds": [
-        "b9940d25-5870-424c-adff-06a307a83047"
-      ],
+      "trainerIds": [],
       "trainerNames": [
         "Demo Demo",
         "",
