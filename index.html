@@ -296,6 +296,7 @@
   .cap-text b{color:var(--ink);display:block;font-size:13px;}
   .empty-day{font-size:12px;color:var(--ink-soft);padding:10px 2px;}
   .ghost-btn{width:100%;margin-top:8px;background:var(--white);border:1.5px dashed var(--line);color:var(--ink-soft);border-radius:12px;padding:12px;font-family:'Inter';font-size:12.5px;font-weight:600;cursor:pointer;box-shadow:var(--card-shadow);}
+  .ghost-btn.on{background:var(--green-dim);border-style:solid;border-color:var(--green);color:var(--green);}
 
   /* ── YEAR ── */
   .year-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
@@ -4131,6 +4132,7 @@ function seasonManagementCard(){
     const trainers=(s.trainerIds||[]).map(id=>USERS.find(u=>u.id===id)).filter(Boolean);
     if(!trainers.length){h+='<div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px;">Noch keine Trainer zugeordnet.</div>';}
     else{
+      if(!active)h+='<div style="font-size:10.5px;color:var(--ink-soft);margin-bottom:8px;">Zum Löschen dieser Saison zuerst alle Trainer unten entfernen (✕).</div>';
       h+='<div style="margin-bottom:10px;">'+trainers.map(u=>{
         const cls=normalizeClasses((s.trainerClasses||{})[u.id]||{});
         const badges=Object.keys(cls).map(t=>{const sq=cls[t]||[];const sqLabel=isJugend(t)&&sq.length?(' · '+sq.map(x=>jugendLetter(t)+x).join(',')):'';return '<span class="badge-res" style="font-size:8px;padding:2px 6px;">'+esc(t)+esc(sqLabel)+'</span>';}).join('');
@@ -4151,10 +4153,10 @@ function seasonManagementCard(){
     }
     const avail=USERS.filter(u=>!(s.trainerIds||[]).includes(u.id)); // alle User inkl. Admins
     if(avail.length){h+='<div style="display:flex;gap:6px;align-items:center;">'+
-      '<select id="sadd-'+s.id+'" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-family:Inter;font-size:12px;background:var(--bg);">'+
+      '<select id="sadd-'+s.id+'" onchange="document.getElementById(\'sadd-btn-'+s.id+'\').classList.toggle(\'on\',!!this.value)" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-family:Inter;font-size:12px;background:var(--bg);">'+
       '<option value="">Trainer wählen …</option>'+
       avail.sort((a,b)=>(a.first+a.last).localeCompare(b.first+b.last)).map(u=>'<option value="'+u.id+'">'+esc(u.first+' '+u.last)+'</option>').join('')+
-      '</select><button class="ghost-btn" style="padding:8px 14px;white-space:nowrap;" onclick="addUserToSeasonFromSelect(this.dataset.sid)" data-sid="'+s.id+'">+ Hinzu</button></div>';}
+      '</select><button class="ghost-btn" id="sadd-btn-'+s.id+'" style="padding:8px 14px;white-space:nowrap;margin-top:0;width:auto;" onclick="addUserToSeasonFromSelect(this.dataset.sid)" data-sid="'+s.id+'">+ Hinzu</button></div>';}
     h+='</div>';
   });
   const nextY=getCurrentSeason()?getCurrentSeason().startYear+1:new Date().getFullYear();
