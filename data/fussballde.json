@@ -1,26 +1,6 @@
 {
-  "updated": "2026-09-20T20:50:01.519Z",
+  "updated": "2026-09-21T04:57:08.959Z",
   "games": [
-    {
-      "d": "2026-08-30",
-      "t": "11:00",
-      "team": "B-Junioren",
-      "squad": 1,
-      "opponent": "VfR Sölde",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-vfr-soelde/-/spiel/031U2TF02O000000VS5489BUVSORQI22"
-    },
-    {
-      "d": "2026-08-30",
-      "t": "14:00",
-      "team": "B-Junioren",
-      "squad": 1,
-      "opponent": "SpVg Beckum I",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-spvg-beckum-i/-/spiel/031QCK1HBK000000VS5489BTVT8K11BC"
-    },
     {
       "d": "2026-08-31",
       "t": "18:15",
@@ -1403,46 +1383,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-08-30",
-      "t": "10:45",
-      "team": "Herren",
-      "squad": 3,
-      "opponent": "SG Allendorf/Amecke III",
-      "competition": "Kreisliga D",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sg-allendorf-amecke-iii-sv-bachum-bergheim-iii/-/spiel/031KK1IQ3K000000VS5489BUVVKNMR0J"
-    },
-    {
-      "d": "2026-08-30",
-      "t": "13:00",
-      "team": "Herren",
-      "squad": 2,
-      "opponent": "TuS Sundern II",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/tus-sundern-ii-sv-bachum-bergheim-ii/-/spiel/031IK2S2UG000000VS5489BUVVKNMR0J"
-    },
-    {
-      "d": "2026-08-30",
-      "t": "15:00",
-      "team": "A-Junioren",
-      "squad": 1,
-      "opponent": "BW Büderich",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/bw-buederich-sv-bachum-bergheim/-/spiel/031C2G07H0000000VS5489BTVUS470OH"
-    },
-    {
-      "d": "2026-08-30",
-      "t": "15:00",
-      "team": "Herren",
-      "squad": 1,
-      "opponent": "TuS Bruchhausen",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/tus-bruchhausen-sv-bachum-bergheim/-/spiel/031I0BNE1K000000VS5489BUVVKNMR0J"
-    },
     {
       "d": "2026-09-04",
       "t": "19:01",
