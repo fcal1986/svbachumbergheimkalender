@@ -863,6 +863,23 @@
   </div>
 </div>
 
+<div class="modal" id="season-create-modal">
+  <div class="modal-box" style="max-width:360px;max-height:85vh;overflow-y:auto;">
+    <h3>Zuordnungen übernehmen?</h3>
+    <p id="scm-text" class="sub" style="margin-top:4px;"></p>
+    <div id="scm-picker" style="display:none;margin-top:10px;"></div>
+    <div id="scm-acts" style="display:flex;flex-direction:column;gap:8px;margin-top:16px;">
+      <button class="submit-btn" onclick="seasonCreateAll()">Alle übernehmen</button>
+      <button class="ghost-btn" style="margin-top:0;" onclick="seasonCreateSelect()">Einzeln auswählen</button>
+      <button class="no" style="width:100%;padding:12px;" onclick="seasonCreateEmpty()">Leer anlegen</button>
+    </div>
+    <div id="scm-confirm-row" style="display:none;margin-top:14px;gap:8px;flex-direction:column;">
+      <button class="submit-btn" onclick="confirmSeasonSelectiveCreate()">Ausgewählte übernehmen</button>
+      <button class="no" style="width:100%;padding:12px;" onclick="closeSeasonCreateModal()">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="cancel-modal">
   <div class="modal-box">
     <h3>Training absagen</h3>
@@ -1318,7 +1335,13 @@ function showToast(m,ms){
   t.classList.add('show'); clearTimeout(t._h);
   t._h=setTimeout(()=>t.classList.remove('show'),ms||2800);
 }
-function closeModal(){document.getElementById('modal').classList.remove('show');}
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
+  // Sicherheitsnetz: falls der "Abbrechen"-Button für einen Spezialfall (z.B. Saison ohne
+  // Übernahme anlegen) umfunktioniert wurde, hier immer wieder auf Standard zurücksetzen.
+  const noBtn=document.querySelector('#modal .no');
+  if(noBtn){ noBtn.textContent='Abbrechen'; noBtn.onclick=closeModal; }
+}
 function askConfirm(title,text,yesLabel,cb){
   document.getElementById('mo-title').textContent=title;
   document.getElementById('mo-text').textContent=text;
@@ -3467,13 +3490,23 @@ function renderNuClassPicker(){
 }
 function adminNewUserCard(){
   let h=tokenCard();
+  const seasonsSorted=[...SEASONS].sort((a,b)=>b.startYear-a.startYear);
+  const curS=getCurrentSeason();
   h+='<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Neuen Zugang anlegen</h4>'+
      '<p class="sub">Anmeldung danach mit E-Mail und diesem Passwort – auf jedem Gerät.</p>'+
      '<div class="field" style="margin:10px 0 8px;"><input type="text" id="nu-first" placeholder="Vorname"></div>'+
      '<div class="field" style="margin-bottom:8px;"><input type="text" id="nu-last" placeholder="Nachname"></div>'+
      '<div class="field" style="margin-bottom:8px;"><input type="email" id="nu-mail" placeholder="E-Mail" autocapitalize="none" spellcheck="false"></div>'+
      '<div class="field" style="margin-bottom:10px;"><input type="text" id="nu-pass" placeholder="Start-Passwort (min. 12 Zeichen)"></div>'+
-     '<div class="field" style="margin-bottom:10px;"><label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block;">Mannschaft(en) (für Trainer) – bei Jugend optional bis auf einzelne Teams (z.B. nur D1) eingrenzbar</label><div id="nu-classes-picker"></div></div>'+
+     (seasonsSorted.length>1?(
+       '<div class="field" style="margin-bottom:10px;"><label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block;">Saison</label>'+
+       '<select id="nu-season" style="width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-family:Inter;font-size:14px;background:var(--white);">'+
+       seasonsSorted.map(s=>'<option value="'+s.id+'"'+(curS&&s.id===curS.id?' selected':'')+'>'+esc(s.label)+(curS&&s.id===curS.id?' (aktuell)':'')+'</option>').join('')+
+       '</select></div>'
+     ):'')+
+     '<div class="field" style="margin-bottom:10px;"><label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block;">Mannschaft(en) (für Trainer) – bei Jugend optional bis auf einzelne Teams (z.B. nur D1) eingrenzbar</label>'+
+     '<p class="hint" style="margin:0 0 8px;">'+(seasonsSorted.length>1?'Gilt für die oben gewählte Saison':'Gilt für die aktuelle Saison ('+esc(curS?.label||'—')+')')+' – später unter "Saisons" anpassbar.</p>'+
+     '<div id="nu-classes-picker"></div></div>'+
     '<div class="res-chip" id="nu-admin" onclick="this.classList.toggle(\'on\')" style="margin-bottom:12px;">'+
      '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg>Darf alles verwalten (Admin)</div>'+
      '<button class="submit-btn" id="nu-btn" onclick="createUser()"><span id="nu-label">Zugang anlegen</span></button>'+
@@ -3510,7 +3543,6 @@ function userListRowsHTML(){
       +(()=>{ const cls=normalizeClasses(u.classes||{});const keys=Object.keys(cls);if(!keys.length)return '';return '<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;">'+keys.map(t=>{const sq=cls[t]||[];const sqLabel=isJugend(t)&&sq.length?(' · '+sq.map(s=>jugendLetter(t)+s).join(',')):'';return '<span class="badge-res" style="font-size:8px;padding:2px 6px;">'+esc(t)+esc(sqLabel)+'</span>';}).join('')+'</div>';})()
       +'</div></div>'
       +'<div class="user-actions">'
-      +'<button class="uact'+(classEditorOpen===u.id?' on':'')+'" onclick="toggleClassEditor(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg><span>Teams</span></button>'
       +'<button class="uact'+(u.admin?' on':'')+'" onclick="toggleUserAdmin(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg><span>Admin</span></button>'
       +'<button class="uact'+(u.locked?' danger':'')+'"'+(userLockBusy.has(u.id)?' disabled style="opacity:.5;"':'')+' onclick="toggleUserLocked(\''+u.id+'\')">'+(userLockBusy.has(u.id)?
         '<span class="spinner" style="width:14px;height:14px;border-color:rgba(0,0,0,.15);border-top-color:var(--ink-soft);"></span><span>Bitte warten</span>':
@@ -3519,28 +3551,6 @@ function userListRowsHTML(){
         '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg><span>Sperren</span>')+'</button>'
       +'<button class="uact danger" onclick="deleteUser(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg><span>Löschen</span></button>'
       +'</div>';
-    if(classEditorOpen===u.id){
-      const cls=normalizeClasses(u.classes||{});
-      let eh='<div style="padding:8px 2px 14px;border-bottom:1px solid var(--line);">';
-      ALL_CLASSES.forEach(team=>{
-        const on=cls.hasOwnProperty(team);
-        const sq=on?(cls[team]||[]):[];
-        const isJ=isJugend(team);
-        const L=jugendLetter(team);
-        eh+='<div style="margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">';
-        eh+='<div class="res-chip'+(on?' on':'')+'" onclick="toggleUserTeam(\''+u.id+'\',\''+team+'\')" style="padding:6px 11px;font-size:11.5px;">'+esc(team)+'</div>';
-        if(on&&isJ){
-          [1,2,3].forEach(n=>{
-            const sqOn=!sq.length||sq.includes(n);
-            eh+='<span class="squad-sq-chip'+(sqOn?' on':'')+'" onclick="toggleUserSquad(\''+u.id+'\',\''+team+'\','+n+')">'+L+n+'</span>';
-          });
-          eh+='<span style="font-size:9.5px;color:var(--ink-soft);">'+(sq.length?sq.map(s=>L+s+'-Jugend').join(', '):'alle Mannschaften')+'</span>';
-        }
-        eh+='</div>';
-      });
-      eh+='<button class="ghost-btn" style="margin-top:4px;" onclick="saveUserClasses(\''+u.id+'\')">Zuweisungen speichern</button></div>';
-      h+=eh;
-    }
     return h+'</div>';
   }).join('');
 }
@@ -3762,15 +3772,24 @@ async function createUser(){
   document.getElementById('nu-label').innerHTML='<span class="spinner" style="width:13px;height:13px;border-color:rgba(0,0,0,.15);border-top-color:var(--ink);display:inline-block;vertical-align:middle;margin-right:5px;"></span>Lege an …';
   const backup=JSON.stringify(USERS);
   try{
+    const seasonSel=document.getElementById('nu-season');
+    const targetSeasonId=seasonSel?seasonSel.value:getCurrentSeason()?.id;
+    const targetSeason=targetSeasonId?SEASONS.find(s=>s.id===targetSeasonId):null;
+    const curSeasonForCreate=getCurrentSeason();
+    // u.classes ist nur ein Cache der AKTUELLEN Saison (siehe syncClassesFromActiveSeason) – wird
+    // hier eine andere (z.B. zukünftige) Saison gewählt, muss der Cache trotzdem leer starten,
+    // sonst zeigt die Zugänge-Liste kurzzeitig Teams einer noch gar nicht aktiven Saison an.
+    const initialClasses=(targetSeason&&curSeasonForCreate&&targetSeason.id===curSeasonForCreate.id)?classes:{};
     const encRec=await encryptToken(session.token,pass);
-    const newU={id:crypto.randomUUID(),first,last,email:mail,admin:isAdm,classes,enc:encRec,created:new Date().toISOString(),emailNotificationsEnabled:true};
+    const newU={id:crypto.randomUUID(),first,last,email:mail,admin:isAdm,classes:initialClasses,enc:encRec,created:new Date().toISOString(),emailNotificationsEnabled:true};
     USERS.push(newU);
     await saveUsers('Zugang angelegt: '+first+' '+last+(isAdm?' (Admin)':'')+' – '+session.name);
     syncTrainerAssignments(newU).then(n=>{ if(n>0) saveTraining('Trainer-Zuordnung aktualisiert: '+newU.first+' '+newU.last+' – '+session.name).catch(()=>{}); }).catch(()=>{});
-    // Neuen Zugang direkt der aktiven Saison zuordnen, statt dass der Admin das separat unter "Saisons" nachholen muss
-    const curSeason=getCurrentSeason();
-    if(curSeason) addUserToSeason(curSeason.id,newU.id).catch(()=>{});
-    showToast(first+' kann sich jetzt anmelden'+(isAdm?' und darf alles verwalten.':'.')+(curSeason?' Bereits der aktuellen Saison zugeordnet.':''));
+    // Neuen Zugang der gewählten Saison zuordnen (Standard: aktuelle Saison), inkl. der hier
+    // ausgewählten Teams – die Team-Zuordnung gehört der Saison, nicht dem Nutzer (siehe
+    // syncClassesFromActiveSeason).
+    if(targetSeason) addUserToSeason(targetSeason.id,newU.id,false,classes).catch(()=>{});
+    showToast(first+' kann sich jetzt anmelden'+(isAdm?' und darf alles verwalten.':'.')+(targetSeason?' Bereits "'+targetSeason.label+'" zugeordnet.':''));
     // Passwort-Mail läuft NICHT über einen Commit (würde bei öffentlichem Repo für immer
     // sichtbar in der Git-Historie landen!), sondern über ein GitHub-"Dispatch"-Event: das
     // Passwort geht nur kurz durchs Action-Log, nie in eine dauerhaft gespeicherte Datei.
@@ -3785,48 +3804,6 @@ async function createUser(){
     const l=document.getElementById('nu-label'); if(l)l.textContent='Zugang anlegen';
     const b=document.getElementById('nu-btn'); if(b)b.disabled=false;
   }
-}
-let classEditorOpen=null;
-function toggleClassEditor(id){
-  classEditorOpen=(classEditorOpen===id)?null:id;
-  renderKonto();
-}
-function toggleUserTeam(id,team){
-  const u=USERS.find(x=>x.id===id); if(!u)return;
-  u.classes=normalizeClasses(u.classes||{});
-  if(u.classes.hasOwnProperty(team))delete u.classes[team]; else u.classes[team]=[];
-  renderKonto();
-}
-function toggleUserSquad(id,team,squad){
-  const u=USERS.find(x=>x.id===id); if(!u)return;
-  u.classes=normalizeClasses(u.classes||{});
-  if(!u.classes.hasOwnProperty(team))u.classes[team]=[];
-  const sq=[...(u.classes[team]||[])];
-  const expanded=sq.length?sq:[1,2,3];
-  const i=expanded.indexOf(squad);
-  if(i>=0)expanded.splice(i,1); else expanded.push(squad);
-  expanded.sort((a,b)=>a-b);
-  u.classes[team]=expanded.length===3?[]:expanded;
-  renderKonto();
-}
-async function saveUserClasses(id){
-  const u=USERS.find(x=>x.id===id); if(!u)return;
-  showSaving('Mannschaften werden gespeichert …');
-  const backup=JSON.stringify(USERS);
-  try{
-    const cls=normalizeClasses(u.classes||{});
-    const clsLabel=Object.keys(cls).length?Object.keys(cls).map(t=>{const sq=cls[t]||[];return t+(isJugend(t)&&sq.length?'('+sq.map(s=>jugendLetter(t)+s).join(',')+')':(isJugend(t)?'(alle)':''));}).join(', '):'keine';
-    await saveUsers('Mannschaften zugewiesen: '+u.first+' '+u.last+' → '+clsLabel+' – '+session.name);
-    syncTrainerAssignments(u).then(n=>{ if(n>0) saveTraining('Trainer-Zuordnung aktualisiert: '+u.first+' '+u.last+' – '+session.name).then(()=>{ renderTraining(); renderStart(); }).catch(()=>{}); }).catch(()=>{});
-    // Sonst greift der Saison-Filter in "Mannschaften" und blendet frisch zugeordnete Trainer
-    // wieder aus, obwohl die Team-Zuordnung selbst funktioniert hat.
-    const curSeason=getCurrentSeason();
-    if(curSeason&&Object.keys(cls).length) addUserToSeason(curSeason.id,u.id,true).catch(()=>{});
-    classEditorOpen=null;
-    showToast('Altersklassen gespeichert.');
-    renderKonto();
-  }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); renderKonto(); }
-  finally{ hideSaving(); }
 }
 function setContactVis(b){b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');}
 async function toggleEmailNotifications(newVal){
@@ -3881,6 +3858,36 @@ async function saveProfile(){
 function getSeasonDates(year){return{from:year+'-07-01',to:(year+1)+'-06-30'};}
 function getSeasonLabel(year){const y2=(year+1).toString().slice(-2);return 'Saison '+year+'/'+y2;}
 function getCurrentSeason(){return SEASONS.find(s=>s.from<=todayStr&&s.to>=todayStr)||null;}
+/* ---------- Team-Zuordnung ist jetzt Saison-Eigentum, nicht Nutzer-Eigentum ----------
+   Grund: welche Teams jemand trainiert, ändert sich von Saison zu Saison (z.B. Fabrizio
+   E2 diese Saison, E1 nächste Saison). Quelle der Wahrheit: season.trainerClasses[userId].
+   u.classes bleibt als abgeleiteter Cache bestehen, damit der ganze übrige Code (Filter,
+   Berechtigungen, Kontaktanzeige – über ein Dutzend Stellen) unverändert weiterfunktioniert:
+   er liest einfach weiterhin u.classes, das hier automatisch aktuell gehalten wird. */
+function syncClassesFromActiveSeason(){
+  const active=getCurrentSeason();
+  USERS.forEach(u=>{
+    u.classes=(active&&active.trainerClasses&&active.trainerClasses[u.id])?normalizeClasses(active.trainerClasses[u.id]):{};
+  });
+  if(session&&!session.isSuper){
+    const me=USERS.find(u=>u.id===session.id);
+    if(me)session.classes=me.classes;
+  }
+}
+/* Einmalige Migration von Alt-Daten: falls die aktive Saison noch KEINE trainerClasses hat,
+   aber Nutzer bereits (alte) u.classes gesetzt haben, als Startpunkt in die aktive Saison
+   übernehmen, damit nichts verloren geht. Läuft nur, solange trainerClasses fehlt. */
+function migrateClassesIntoActiveSeasonIfNeeded(){
+  const active=getCurrentSeason();
+  if(!active)return false;
+  if(active.trainerClasses)return false; // schon migriert/vorhanden
+  active.trainerClasses={};
+  USERS.forEach(u=>{
+    const cls=normalizeClasses(u.classes||{});
+    if(Object.keys(cls).length)active.trainerClasses[u.id]=cls;
+  });
+  return true;
+}
 function isInActiveSeason(userId){
   if(!SEASONS.length)return true; // backward-compat: kein Saisonsystem → immer aktiv
   // Notzugang (isSuper) darf immer alles
@@ -3906,17 +3913,71 @@ async function saveSeasonDebounced(msg){
 }
 function createSeasonFromSelect(){
   const el=document.getElementById('new-season-year');
-  if(el)createSeason(el.value);
+  if(el)promptCreateSeason(el.value);
 }
-async function createSeason(year){
+let pendingSeasonYear=null, pendingSeasonPrev=null, seasonSelectPicks=new Set();
+function promptCreateSeason(year){
+  year=parseInt(year);if(!year||year<2020||year>2050){showToast('Ungültiges Jahr.');return;}
+  const id=year+'-'+(year+1);
+  if(SEASONS.find(s=>s.id===id)){showToast('Saison '+id+' existiert bereits.');return;}
+  const prev=[...SEASONS].sort((a,b)=>b.startYear-a.startYear)[0];
+  if(!prev||!(prev.trainerIds||[]).length){ createSeason(year,null); return; }
+  pendingSeasonYear=year; pendingSeasonPrev=prev; seasonSelectPicks=new Set();
+  document.getElementById('scm-text').textContent='Sollen die Trainer- und Team-Zuordnungen aus "'+prev.label+'" als Ausgangspunkt für "'+getSeasonLabel(year)+'" übernommen werden? Einzelne Änderungen (z. B. Wechsel der Mannschaft) kannst du danach jederzeit unter "Saisons" anpassen.';
+  document.getElementById('scm-picker').style.display='none';
+  document.getElementById('scm-picker').innerHTML='';
+  document.getElementById('scm-acts').style.display='flex';
+  document.getElementById('scm-confirm-row').style.display='none';
+  document.getElementById('season-create-modal').classList.add('show');
+}
+function closeSeasonCreateModal(){ document.getElementById('season-create-modal').classList.remove('show'); }
+function seasonCreateAll(){ closeSeasonCreateModal(); createSeason(pendingSeasonYear,pendingSeasonPrev); }
+function seasonCreateEmpty(){ closeSeasonCreateModal(); createSeason(pendingSeasonYear,null); }
+function seasonCreateSelect(){
+  const prev=pendingSeasonPrev;
+  const trainers=(prev.trainerIds||[]).map(id=>USERS.find(u=>u.id===id)).filter(Boolean)
+    .sort((a,b)=>(a.first+a.last).localeCompare(b.first+b.last,'de'));
+  seasonSelectPicks=new Set(trainers.map(u=>u.id)); // standardmäßig alle vorausgewählt, einzeln abwählbar
+  document.getElementById('scm-picker').innerHTML=trainers.map(u=>{
+    const cls=normalizeClasses((prev.trainerClasses||{})[u.id]||{});
+    const teamsTxt=Object.keys(cls).length?Object.keys(cls).join(', '):'keine Mannschaft zugewiesen';
+    return '<label style="display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--bg);">'
+      +'<input type="checkbox" checked onchange="toggleSeasonSelectPick(\''+u.id+'\',this.checked)" style="width:18px;height:18px;flex:none;accent-color:var(--green);">'
+      +'<span><b style="font-size:12.5px;">'+esc(u.first+' '+u.last)+'</b><br><span style="font-size:10.5px;color:var(--ink-soft);">'+esc(teamsTxt)+'</span></span></label>';
+  }).join('');
+  document.getElementById('scm-picker').style.display='block';
+  document.getElementById('scm-acts').style.display='none';
+  document.getElementById('scm-confirm-row').style.display='flex';
+}
+function toggleSeasonSelectPick(id,checked){
+  if(checked)seasonSelectPicks.add(id); else seasonSelectPicks.delete(id);
+}
+function confirmSeasonSelectiveCreate(){
+  const prev=pendingSeasonPrev;
+  const keepIds=(prev.trainerIds||[]).filter(id=>seasonSelectPicks.has(id));
+  const filtered={
+    label:prev.label,
+    trainerIds:keepIds,
+    trainerNames:keepIds.map(id=>{const u=USERS.find(x=>x.id===id);return u?(u.first+' '+u.last):'';}),
+    trainerClasses:Object.fromEntries(Object.entries(prev.trainerClasses||{}).filter(([id])=>seasonSelectPicks.has(id)))
+  };
+  closeSeasonCreateModal();
+  createSeason(pendingSeasonYear,filtered);
+}
+async function createSeason(year,copyFrom){
   year=parseInt(year);if(!year||year<2020||year>2050){showToast('Ungültiges Jahr.');return;}
   const id=year+'-'+(year+1);
   if(SEASONS.find(s=>s.id===id)){showToast('Saison '+id+' existiert bereits.');return;}
   const{from,to}=getSeasonDates(year);
-  const newS={id,label:getSeasonLabel(year),startYear:year,from,to,trainerIds:[]};
+  const newS={id,label:getSeasonLabel(year),startYear:year,from,to,trainerIds:[],trainerNames:[],trainerClasses:{}};
+  if(copyFrom){
+    newS.trainerIds=[...(copyFrom.trainerIds||[])];
+    newS.trainerNames=[...(copyFrom.trainerNames||[])];
+    newS.trainerClasses=JSON.parse(JSON.stringify(copyFrom.trainerClasses||{}));
+  }
   SEASONS.push(newS);SEASONS.sort((a,b)=>b.startYear-a.startYear);
-  kontoTab='saisons'; renderKonto(); showToast(newS.label+' angelegt.');  // sofort
-  saveSeasons('Saison angelegt: '+newS.label).catch(e=>{
+  kontoTab='saisons'; renderKonto(); showToast(newS.label+' angelegt'+(copyFrom?' (Zuordnungen übernommen).':'.'));  // sofort
+  saveSeasons('Saison angelegt: '+newS.label+(copyFrom?' (Zuordnungen aus '+copyFrom.label+' übernommen)':'')).catch(e=>{
     SEASONS=SEASONS.filter(s=>s.id!==id); renderKonto();
     showToast('Fehler beim Speichern: '+e.message,6000);
   });
@@ -3925,16 +3986,23 @@ function addUserToSeasonFromSelect(seasonId){
   const el=document.getElementById('sadd-'+seasonId);
   if(el&&el.value)addUserToSeason(seasonId,el.value);
 }
-async function addUserToSeason(seasonId,userId,silent){
+async function addUserToSeason(seasonId,userId,silent,classes){
   const s=SEASONS.find(x=>x.id===seasonId);if(!s)return;
-  if((s.trainerIds||[]).includes(userId)){if(!silent)showToast('Bereits zugeordnet.');return;}
+  if((s.trainerIds||[]).includes(userId)){
+    if(classes&&Object.keys(classes).length){ s.trainerClasses=s.trainerClasses||{}; s.trainerClasses[userId]=classes; }
+    if(!silent)showToast('Bereits zugeordnet.');
+    return;
+  }
   s.trainerIds=s.trainerIds||[];s.trainerIds.push(userId);
+  const u=USERS.find(x=>x.id===userId);
+  s.trainerNames=s.trainerNames||[]; if(u)s.trainerNames.push(u.first+' '+u.last);
+  if(classes&&Object.keys(classes).length){ s.trainerClasses=s.trainerClasses||{}; s.trainerClasses[userId]=classes; }
   renderKonto(); // sofort
   // Status-Pill anzeigen bis GitHub geantwortet hat
   const pill=document.querySelector('.saving-pill');
   if(pill){pill.textContent='Speichert …';pill.style.opacity='1';}
   saveSeasonDebounced('Trainer zur Saison '+s.label+' hinzugefügt: '+USERS.find(u=>u.id===userId)?.first+' – '+session.name)
-    .then(()=>{ if(!silent)showToast('✓ Gespeichert.'); })
+    .then(()=>{ if(!silent)showToast('✓ Gespeichert.'); syncClassesFromActiveSeason(); })
     .catch(e=>{ s.trainerIds.pop(); renderKonto(); showToast('Fehler: '+e.message,6000); })
     .finally(()=>{ const p=document.querySelector('.saving-pill');if(p)p.style.opacity='0'; });
 }
@@ -4043,9 +4111,10 @@ function liftLock(id){
     finally{ lockSaving=false; hideSaving(); }
   });
 }
+let seasonClassEditorOpen=null; // Format: seasonId+'|'+userId
 function seasonManagementCard(){
   const ico='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:16px;height:16px;stroke:var(--green)"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>';
-  let h='<div class="card"><h4>'+ico+'Saisons</h4><p class="sub">Definiert, welche Trainer in welcher Spielzeit aktiv sind.</p>';
+  let h='<div class="card"><h4>'+ico+'Saisons</h4><p class="sub">Definiert, welche Trainer in welcher Spielzeit welche Mannschaften betreuen – ändert sich das (z.B. Wechsel von E2 auf E1), einfach hier für die jeweilige Saison anpassen.</p>';
   const sorted=[...SEASONS].sort((a,b)=>b.startYear-a.startYear);
   if(!sorted.length){h+='<div style="font-size:12px;color:var(--ink-soft);margin:8px 0 12px;">Noch keine Saisons.</div>';}
   sorted.forEach(s=>{
@@ -4061,7 +4130,25 @@ function seasonManagementCard(){
       '</div></div>';
     const trainers=(s.trainerIds||[]).map(id=>USERS.find(u=>u.id===id)).filter(Boolean);
     if(!trainers.length){h+='<div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px;">Noch keine Trainer zugeordnet.</div>';}
-    else{h+='<div style="margin-bottom:10px;">'+trainers.map(u=>'<div class="season-trainer-row"><span style="font-weight:600;">'+esc(u.first+' '+u.last)+'</span><button class="ibtn del" onclick="removeUserFromSeason(\''+s.id+'\',' +'\''+u.id+'\')" title="Entfernen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>').join('')+'</div>';}
+    else{
+      h+='<div style="margin-bottom:10px;">'+trainers.map(u=>{
+        const cls=normalizeClasses((s.trainerClasses||{})[u.id]||{});
+        const badges=Object.keys(cls).map(t=>{const sq=cls[t]||[];const sqLabel=isJugend(t)&&sq.length?(' · '+sq.map(x=>jugendLetter(t)+x).join(',')):'';return '<span class="badge-res" style="font-size:8px;padding:2px 6px;">'+esc(t)+esc(sqLabel)+'</span>';}).join('');
+        const editKey=s.id+'|'+u.id;
+        const isOpen=seasonClassEditorOpen===editKey;
+        let row='<div class="season-trainer-row" style="flex-direction:column;align-items:stretch;">'
+          +'<div style="display:flex;align-items:center;justify-content:space-between;">'
+          +'<span style="font-weight:600;">'+esc(u.first+' '+u.last)+'</span>'
+          +'<div style="display:flex;gap:4px;">'
+          +'<button class="ibtn'+(isOpen?' on':'')+'" onclick="toggleSeasonClassEditor(\''+s.id+'\',\''+u.id+'\')" title="Mannschaften"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg></button>'
+          +'<button class="ibtn del" onclick="removeUserFromSeason(\''+s.id+'\',\''+u.id+'\')" title="Entfernen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'
+          +'</div></div>'
+          +(badges?'<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:4px;">'+badges+'</div>':'<div style="font-size:10.5px;color:var(--ink-soft);margin-top:2px;">Noch keine Mannschaft zugewiesen</div>');
+        if(isOpen) row+=seasonClassPickerHTML(s,u);
+        row+='</div>';
+        return row;
+      }).join('')+'</div>';
+    }
     const avail=USERS.filter(u=>!(s.trainerIds||[]).includes(u.id)); // alle User inkl. Admins
     if(avail.length){h+='<div style="display:flex;gap:6px;align-items:center;">'+
       '<select id="sadd-'+s.id+'" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-family:Inter;font-size:12px;background:var(--bg);">'+
@@ -4079,6 +4166,75 @@ function seasonManagementCard(){
     '</select><button class="submit-btn" style="padding:9px 16px;white-space:nowrap;" onclick="createSeasonFromSelect()">Anlegen</button>'+
     '</div></div></div>';
   return h;
+}
+function seasonClassPickerHTML(s,u){
+  const cls=normalizeClasses((s.trainerClasses||{})[u.id]||{});
+  let eh='<div style="padding:10px 2px 4px;margin-top:6px;border-top:1px dashed var(--line);">';
+  ALL_CLASSES.forEach(team=>{
+    const on=cls.hasOwnProperty(team);
+    const sq=on?(cls[team]||[]):[];
+    const isJ=isJugend(team);
+    const L=jugendLetter(team);
+    eh+='<div style="margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">';
+    eh+='<div class="res-chip'+(on?' on':'')+'" onclick="toggleSeasonTrainerTeam(\''+s.id+'\',\''+u.id+'\',\''+team+'\')" style="padding:6px 11px;font-size:11.5px;">'+esc(team)+'</div>';
+    if(on&&isJ){
+      [1,2,3].forEach(n=>{
+        const sqOn=!sq.length||sq.includes(n);
+        eh+='<span class="squad-sq-chip'+(sqOn?' on':'')+'" onclick="toggleSeasonTrainerSquad(\''+s.id+'\',\''+u.id+'\',\''+team+'\','+n+')">'+L+n+'</span>';
+      });
+      eh+='<span style="font-size:9.5px;color:var(--ink-soft);">'+(sq.length?sq.map(x=>L+x+'-Jugend').join(', '):'alle Mannschaften')+'</span>';
+    }
+    eh+='</div>';
+  });
+  eh+='<button class="ghost-btn" style="margin-top:4px;" onclick="saveSeasonTrainerClasses(\''+s.id+'\',\''+u.id+'\')">Speichern</button></div>';
+  return eh;
+}
+function toggleSeasonClassEditor(seasonId,userId){
+  const key=seasonId+'|'+userId;
+  seasonClassEditorOpen=(seasonClassEditorOpen===key)?null:key;
+  renderKonto();
+}
+function toggleSeasonTrainerTeam(seasonId,userId,team){
+  const s=SEASONS.find(x=>x.id===seasonId); if(!s)return;
+  s.trainerClasses=s.trainerClasses||{};
+  const cls=normalizeClasses(s.trainerClasses[userId]||{});
+  if(cls.hasOwnProperty(team))delete cls[team]; else cls[team]=[];
+  s.trainerClasses[userId]=cls;
+  renderKonto();
+}
+function toggleSeasonTrainerSquad(seasonId,userId,team,squad){
+  const s=SEASONS.find(x=>x.id===seasonId); if(!s)return;
+  s.trainerClasses=s.trainerClasses||{};
+  const cls=normalizeClasses(s.trainerClasses[userId]||{});
+  if(!cls.hasOwnProperty(team))cls[team]=[];
+  const sq=[...(cls[team]||[])];
+  const expanded=sq.length?sq:[1,2,3];
+  const i=expanded.indexOf(squad);
+  if(i>=0)expanded.splice(i,1); else expanded.push(squad);
+  expanded.sort((a,b)=>a-b);
+  cls[team]=expanded.length===3?[]:expanded;
+  s.trainerClasses[userId]=cls;
+  renderKonto();
+}
+async function saveSeasonTrainerClasses(seasonId,userId){
+  const s=SEASONS.find(x=>x.id===seasonId); if(!s)return;
+  const u=USERS.find(x=>x.id===userId); if(!u)return;
+  showSaving('Team-Zuordnung wird gespeichert …');
+  const backup=JSON.stringify(SEASONS);
+  try{
+    const cls=normalizeClasses((s.trainerClasses||{})[userId]||{});
+    const clsLabel=Object.keys(cls).length?Object.keys(cls).map(t=>{const sq=cls[t]||[];return t+(isJugend(t)&&sq.length?'('+sq.map(x=>jugendLetter(t)+x).join(',')+')':(isJugend(t)?'(alle)':''));}).join(', '):'keine';
+    await saveSeasons('Team-Zuordnung ('+s.label+'): '+u.first+' '+u.last+' → '+clsLabel+' – '+session.name);
+    syncClassesFromActiveSeason();
+    const cur=getCurrentSeason();
+    if(cur&&s.id===cur.id){
+      syncTrainerAssignments(u).then(n=>{ if(n>0) saveTraining('Trainer-Zuordnung aktualisiert: '+u.first+' '+u.last+' – '+session.name).then(()=>{ renderTraining(); renderStart(); }).catch(()=>{}); }).catch(()=>{});
+    }
+    seasonClassEditorOpen=null;
+    showToast('Gespeichert.');
+    renderKonto();
+  }catch(e){ SEASONS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); renderKonto(); }
+  finally{ hideSaving(); }
 }
 async function syncTrainerAssignments(u){
   // Fügt hinzu UND entfernt – immer vollständig synchron mit Klassenzuweisung
@@ -4295,6 +4451,12 @@ async function boot(){
   catch(e){ TRAINING=[]; }
   try{ const sea=await loadJSON('data/seasons.json'); SEASONS=sea.seasons||[]; }
   catch(e){ SEASONS=[]; }
+  // Einmalige Migration: alte user.classes in die aktive Saison übernehmen, falls diese noch
+  // keine eigene Team-Zuordnung hat. Speichert nur, wenn tatsächlich migriert wurde.
+  if(migrateClassesIntoActiveSeasonIfNeeded()&&session&&session.token){
+    saveSeasons('Team-Zuordnungen in aktive Saison migriert (automatisch)').catch(()=>{});
+  }
+  syncClassesFromActiveSeason();
   try{ FUSSBALLDE=await loadJSON('data/fussballde.json'); if(!Array.isArray(FUSSBALLDE.games))FUSSBALLDE.games=[]; if(!Array.isArray(FUSSBALLDE.awayGames))FUSSBALLDE.awayGames=[]; }
   catch(e){ FUSSBALLDE={updated:null,games:[],awayGames:[]}; }
   try{ const lk=await loadJSON('data/resource-locks.json'); LOCKS=Array.isArray(lk.locks)?lk.locks:[]; }
