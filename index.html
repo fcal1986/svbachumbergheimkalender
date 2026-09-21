@@ -3511,7 +3511,9 @@ function userListRowsHTML(){
       +'<div class="user-actions">'
       +'<button class="uact" onclick="toggleClassEditor(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg><span>Teams</span></button>'
       +'<button class="uact'+(u.admin?' on':'')+'" onclick="toggleUserAdmin(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg><span>Admin</span></button>'
-      +'<button class="uact'+(u.locked?' danger':'')+'" onclick="toggleUserLocked(\''+u.id+'\')">'+(u.locked?
+      +'<button class="uact'+(u.locked?' danger':'')+'"'+(userLockBusy.has(u.id)?' disabled style="opacity:.5;"':'')+' onclick="toggleUserLocked(\''+u.id+'\')">'+(userLockBusy.has(u.id)?
+        '<span class="spinner" style="width:14px;height:14px;border-color:rgba(0,0,0,.15);border-top-color:var(--ink-soft);"></span><span>Bitte warten</span>':
+        u.locked?
         '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0"/></svg><span>Entsperren</span>':
         '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg><span>Sperren</span>')+'</button>'
       +'<button class="uact danger" onclick="deleteUser(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg><span>Löschen</span></button>'
@@ -4122,18 +4124,31 @@ function toggleUserAdmin(id){
       }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
     });
 }
+let userLockBusy=new Set(); // verhindert Doppel-Klicks auf denselben Zugang während des Speicherns
 function toggleUserLocked(id){
   const u=USERS.find(x=>x.id===id); if(!u)return;
   const now=!u.locked;
-  askConfirm(now?'Zugang sperren?':'Zugang entsperren?',
-    u.first+' '+u.last+(now?' kann sich danach nicht mehr anmelden und bekommt keine Benachrichtigungen mehr per E-Mail. Bereits laufende Sitzungen auf anderen Geräten bleiben bis zur Abmeldung aktiv.':' kann sich wieder anmelden und bekommt wieder Benachrichtigungen.'),
-    now?'Sperren':'Entsperren', async()=>{
-      const backup=JSON.stringify(USERS);
-      u.locked=now;
-      try{ await saveUsers((now?'Zugang gesperrt: ':'Zugang entsperrt: ')+u.first+' '+u.last+' – '+session.name);
-        showToast('Gespeichert.'); renderKonto();
-      }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
-    });
+  // Entsperren ist die risikoärmere Richtung (gibt nur Zugang zurück) und passiert in der Praxis
+  // oft mehrfach hintereinander (mehrere Leute nacheinander entsperren) – deshalb DIREKT, ohne
+  // Zwischendialog, für ein zuverlässiges Ein-Tap-Gefühl. Sperren (jemanden aussperren) bleibt
+  // bewusst mit Bestätigung, das ist die folgenreichere Richtung.
+  if(!now){ doToggleUserLocked(id,now); return; }
+  askConfirm('Zugang sperren?',
+    u.first+' '+u.last+' kann sich danach nicht mehr anmelden und bekommt keine Benachrichtigungen mehr per E-Mail. Bereits laufende Sitzungen auf anderen Geräten bleiben bis zur Abmeldung aktiv.',
+    'Sperren', async()=>{ await doToggleUserLocked(id,now); });
+}
+async function doToggleUserLocked(id,now){
+  if(userLockBusy.has(id))return; // schon eine Aktion für diesen Zugang unterwegs
+  const u=USERS.find(x=>x.id===id); if(!u)return;
+  userLockBusy.add(id);
+  renderUserListOnly(); // Buttons für diesen Zugang während des Speicherns sichtbar deaktivieren
+  const backup=JSON.stringify(USERS);
+  u.locked=now;
+  try{
+    await saveUsers((now?'Zugang gesperrt: ':'Zugang entsperrt: ')+u.first+' '+u.last+' – '+session.name);
+    showToast(now?'Zugang gesperrt.':'Zugang entsperrt.');
+  }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
+  finally{ userLockBusy.delete(id); renderUserListOnly(); }
 }
 function deleteUser(id){
   const u=USERS.find(x=>x.id===id); if(!u)return;
