@@ -9,11 +9,13 @@
       "trainerIds": [
         "fad91661-65cb-45d2-8da7-df79447471b6",
         "789fcf8f-b297-4d21-89b6-47392e15bbfd",
-        "340197e7-36c6-4253-9afb-e17178a641cf"
+        "340197e7-36c6-4253-9afb-e17178a641cf",
+        "bb26c9cb-1831-4209-a57b-2d97596593ff"
       ],
       "trainerNames": [
         "Demo Demo",
-        "Demo Demo"
+        "Demo Demo",
+        "Marc Geauf"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
