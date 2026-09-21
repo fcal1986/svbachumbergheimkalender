@@ -507,13 +507,23 @@
   .card h4{margin:0 0 4px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;}
   .card h4 svg{width:16px;height:16px;stroke:var(--green);flex:none;}
   .card .sub{font-size:11.5px;color:var(--ink-soft);line-height:1.55;}
-  .user-row{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--line);}
+  .user-row{display:flex;flex-direction:column;gap:10px;padding:12px 2px;border-bottom:1px solid var(--line);}
   .user-row:last-child{border-bottom:none;}
+  .user-identity{display:flex;align-items:center;gap:10px;}
+  .user-row.is-locked .user-identity{opacity:.5;}
   .avatar{width:36px;height:36px;border-radius:50%;background:var(--black-btn);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none;}
   .avatar.adm{background:var(--green);color:#fff;}
   .user-info{flex:1;min-width:0;}
-  .user-info .n{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:6px;}
+  .user-info .n{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:6px;flex-wrap:wrap;row-gap:4px;}
   .user-info .e{font-size:11px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .user-actions{display:flex;gap:5px;}
+  .uact{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 2px;cursor:pointer;}
+  .uact svg{width:16px;height:16px;stroke:var(--ink-soft);flex:none;}
+  .uact span{font-size:9px;font-weight:700;color:var(--ink-soft);text-align:center;line-height:1.1;}
+  .uact.on{background:var(--green-dim);border-color:var(--green);}
+  .uact.on svg,.uact.on span{stroke:var(--green);color:var(--green);}
+  .uact.danger svg,.uact.danger span{stroke:#C0392B;color:#C0392B;}
+  .uact.danger.on{background:#FDECEA;border-color:#F5C6C0;}
   .banner{border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.55;margin-bottom:12px;}
   .banner.warn{background:#FDECEA;border:1px solid #F5C6C0;color:#8E2A1D;}
   .banner.info{background:#EAF5EF;border:1px solid #B9DFC8;color:#1E5730;}
@@ -904,7 +914,7 @@ let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Eve
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
 let selectedSeasonFilter='';
 let kontoTab='profil'; // 'profil'|'saisons'|'zugaenge'|'protokoll'
-function setKontoTab(tab){kontoTab=tab;renderKonto();}
+function setKontoTab(tab){kontoTab=tab;if(tab==='zugaenge')userListSearch='';renderKonto();}
 
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const MONTHS_S=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
@@ -3456,7 +3466,6 @@ function renderNuClassPicker(){
 }
 function adminNewUserCard(){
   let h=tokenCard();
-  h+=
   h+='<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Neuen Zugang anlegen</h4>'+
      '<p class="sub">Anmeldung danach mit E-Mail und diesem Passwort – auf jedem Gerät.</p>'+
      '<div class="field" style="margin:10px 0 8px;"><input type="text" id="nu-first" placeholder="Vorname"></div>'+
@@ -3471,44 +3480,72 @@ function adminNewUserCard(){
   setTimeout(renderNuClassPicker,0);
   return h;
 }
-function adminUserListCard(){
-  let h='<div class="card"><h4>Zugänge ('+USERS.length+')</h4>';
-  if(!USERS.length) h+='<p class="sub">Noch keine Zugänge angelegt.</p>';
-  USERS.forEach(u=>{
-    h+='<div class="user-row"><div class="avatar'+(u.admin?' adm':'')+'">'+initials(u.first+' '+u.last)+'</div>'+
-       '<div class="user-info"><div class="n">'+esc(u.first+' '+u.last)+(u.admin?'<span class="badge-admin">Admin</span>':'')+(u.locked?'<span class="badge-locked">Gesperrt</span>':'')+'</div>'+
-       '<div class="e">'+esc(u.email)+'</div>'+
-       (()=>{ const cls=normalizeClasses(u.classes||{});const keys=Object.keys(cls);if(!keys.length)return '</div>';return '<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;">'+keys.map(t=>{const sq=cls[t]||[];const sqLabel=isJugend(t)&&sq.length?(' · '+sq.map(s=>jugendLetter(t)+s).join(',')):'';return '<span class="badge-res" style="font-size:8px;padding:2px 6px;">'+esc(t)+esc(sqLabel)+'</span>';}).join('')+'</div></div>';})()+
-       '<button class="ibtn" onclick="toggleClassEditor(\''+u.id+'\')" aria-label="Altersklassen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg></button>'+
-       '<button class="ibtn" onclick="toggleUserAdmin(\''+u.id+'\')" aria-label="Admin-Recht"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg></button>'+
-       '<button class="ibtn'+(u.locked?' del':'')+'" onclick="toggleUserLocked(\''+u.id+'\')" aria-label="'+(u.locked?'Entsperren':'Sperren')+'">'+(u.locked?
-         '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0"/></svg>':
-         '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>')+'</button>'+
-       '<button class="ibtn del" onclick="deleteUser(\''+u.id+'\')" aria-label="Löschen"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>'+
-       (classEditorOpen===u.id?(()=>{
-  const cls=normalizeClasses(u.classes||{});
-  let eh='<div style="padding:8px 2px 14px;border-bottom:1px solid var(--line);">';
-  ALL_CLASSES.forEach(team=>{
-    const on=cls.hasOwnProperty(team);
-    const sq=on?(cls[team]||[]):[];
-    const isJ=isJugend(team);
-    const L=jugendLetter(team);
-    eh+='<div style="margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">';
-    eh+='<div class="res-chip'+(on?' on':'')+'" onclick="toggleUserTeam(\''+u.id+'\',\''+team+'\')" style="padding:6px 11px;font-size:11.5px;">'+esc(team)+'</div>';
-    if(on&&isJ){
-      [1,2,3].forEach(n=>{
-        const sqOn=!sq.length||sq.includes(n);
-        eh+='<span class="squad-sq-chip'+(sqOn?' on':'')+'" onclick="toggleUserSquad(\''+u.id+'\',\''+team+'\','+n+')">'+L+n+'</span>';
+let userListSearch='';
+function filterUserList(v){ userListSearch=v.toLowerCase(); renderUserListOnly(); }
+function renderUserListOnly(){
+  const el=document.getElementById('user-list-body');
+  if(el) el.innerHTML=userListRowsHTML();
+}
+function sortedFilteredUsers(){
+  const q=userListSearch.trim();
+  let list=USERS.filter(u=>!q||(u.first+' '+u.last+' '+u.email).toLowerCase().includes(q));
+  // Admins zuerst, dann alphabetisch nach Vor-/Nachname
+  list.sort((a,b)=>{
+    if(!!a.admin!==!!b.admin) return a.admin?-1:1;
+    return (a.first+' '+a.last).localeCompare(b.first+' '+b.last,'de');
+  });
+  return list;
+}
+function userListRowsHTML(){
+  const list=sortedFilteredUsers();
+  if(!USERS.length) return '<p class="sub">Noch keine Zugänge angelegt.</p>';
+  if(!list.length) return '<p class="sub">Keine Zugänge gefunden für "'+esc(userListSearch)+'".</p>';
+  return list.map(u=>{
+    let h='<div class="user-row'+(u.locked?' is-locked':'')+'">'
+      +'<div class="user-identity">'
+      +'<div class="avatar'+(u.admin?' adm':'')+'">'+initials(u.first+' '+u.last)+'</div>'
+      +'<div class="user-info"><div class="n">'+esc(u.first+' '+u.last)+(u.admin?'<span class="badge-admin">Admin</span>':'')+(u.locked?'<span class="badge-locked">Gesperrt</span>':'')+'</div>'
+      +'<div class="e">'+esc(u.email)+'</div>'
+      +(()=>{ const cls=normalizeClasses(u.classes||{});const keys=Object.keys(cls);if(!keys.length)return '';return '<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;">'+keys.map(t=>{const sq=cls[t]||[];const sqLabel=isJugend(t)&&sq.length?(' · '+sq.map(s=>jugendLetter(t)+s).join(',')):'';return '<span class="badge-res" style="font-size:8px;padding:2px 6px;">'+esc(t)+esc(sqLabel)+'</span>';}).join('')+'</div>';})()
+      +'</div></div>'
+      +'<div class="user-actions">'
+      +'<button class="uact" onclick="toggleClassEditor(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg><span>Teams</span></button>'
+      +'<button class="uact'+(u.admin?' on':'')+'" onclick="toggleUserAdmin(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg><span>Admin</span></button>'
+      +'<button class="uact'+(u.locked?' danger':'')+'" onclick="toggleUserLocked(\''+u.id+'\')">'+(u.locked?
+        '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0"/></svg><span>Entsperren</span>':
+        '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg><span>Sperren</span>')+'</button>'
+      +'<button class="uact danger" onclick="deleteUser(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg><span>Löschen</span></button>'
+      +'</div>';
+    if(classEditorOpen===u.id){
+      const cls=normalizeClasses(u.classes||{});
+      let eh='<div style="padding:8px 2px 14px;border-bottom:1px solid var(--line);">';
+      ALL_CLASSES.forEach(team=>{
+        const on=cls.hasOwnProperty(team);
+        const sq=on?(cls[team]||[]):[];
+        const isJ=isJugend(team);
+        const L=jugendLetter(team);
+        eh+='<div style="margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">';
+        eh+='<div class="res-chip'+(on?' on':'')+'" onclick="toggleUserTeam(\''+u.id+'\',\''+team+'\')" style="padding:6px 11px;font-size:11.5px;">'+esc(team)+'</div>';
+        if(on&&isJ){
+          [1,2,3].forEach(n=>{
+            const sqOn=!sq.length||sq.includes(n);
+            eh+='<span class="squad-sq-chip'+(sqOn?' on':'')+'" onclick="toggleUserSquad(\''+u.id+'\',\''+team+'\','+n+')">'+L+n+'</span>';
+          });
+          eh+='<span style="font-size:9.5px;color:var(--ink-soft);">'+(sq.length?sq.map(s=>L+s+'-Jugend').join(', '):'alle Mannschaften')+'</span>';
+        }
+        eh+='</div>';
       });
-      eh+='<span style="font-size:9.5px;color:var(--ink-soft);">'+(sq.length?sq.map(s=>L+s+'-Jugend').join(', '):'alle Mannschaften')+'</span>';
+      eh+='<button class="ghost-btn" style="margin-top:4px;" onclick="saveUserClasses(\''+u.id+'\')">Zuweisungen speichern</button></div>';
+      h+=eh;
     }
-    eh+='</div>';
-  });
-  eh+='<button class="ghost-btn" style="margin-top:4px;" onclick="saveUserClasses(\''+u.id+'\')">Zuweisungen speichern</button></div>';
-  return eh;
-})():'');
-  });
-  return h+'</div>';
+    return h+'</div>';
+  }).join('');
+}
+function adminUserListCard(){
+  return '<div class="card"><h4>Zugänge ('+USERS.length+')</h4>'
+    +(USERS.length>1?'<div class="field" style="margin-bottom:10px;"><input type="text" placeholder="Name oder E-Mail suchen …" value="'+esc(userListSearch)+'" oninput="filterUserList(this.value)"></div>':'')
+    +'<div id="user-list-body">'+userListRowsHTML()+'</div>'
+    +'</div>';
 }
 
 /* ── Protokoll / Audit-Log ──────────────────────────────────────────── */
@@ -3943,7 +3980,7 @@ function resourceLockCard(){
     +'<button class="submit-btn" id="lock-save-btn" onclick="createLock()"><span>Sperre anlegen</span></button>'
     +(active.length?'<div class="selected-list-label" style="margin-top:18px;">Aktive Sperren</div>'+active.map(l=>
       '<div class="rs-result-row" style="align-items:flex-start;">'
-      +'<div><b>'+resLabel(l.resource==='custom'?l.customName:l.resource)+'</b>'
+      +'<div><b>'+esc(resLabel(l.resource==='custom'?l.customName:l.resource))+'</b>'
       +'<div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">ab '+fmtShort(l.von)+(l.bis?' bis '+fmtShort(l.bis):' · unbegrenzt')+(l.note?' · '+esc(l.note):'')+'</div></div>'
       +'<span class="review-edit" onclick="liftLock(\''+l.id+'\')">Aufheben</span>'
       +'</div>'
