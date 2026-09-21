@@ -602,6 +602,7 @@
   <div class="pane active" data-pane="start">
     <div class="content">
       <div id="install-banner"></div>
+      <div id="session-debug" style="display:none;font-size:10px;color:var(--ink-soft);background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:6px 10px;margin-bottom:8px;"></div>
       <div id="lock-start-banner"></div>
       <div class="start-daycard">
         <div class="start-date" id="st-date">–</div>
@@ -3411,13 +3412,13 @@ function pwCard(){
   return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Passwort ändern</h4>'+
     '<p class="sub">Dein Schreib-Token hängt am Passwort. Beim Ändern wird er neu verschlüsselt.</p>'+
     '<div class="field" style="margin:10px 0 8px;"><input type="password" id="pw-old" placeholder="Aktuelles Passwort" autocomplete="current-password"></div>'+
-    '<div class="field" style="margin-bottom:8px;"><input type="password" id="pw-new" placeholder="Neues Passwort (min. 8 Zeichen)" autocomplete="new-password"></div>'+
+    '<div class="field" style="margin-bottom:8px;"><input type="password" id="pw-new" placeholder="Neues Passwort (min. 12 Zeichen)" autocomplete="new-password"></div>'+
     '<div class="field" style="margin-bottom:10px;"><input type="password" id="pw-new2" placeholder="Neues Passwort wiederholen" autocomplete="new-password"></div>'+
     '<button class="submit-btn" id="pw-btn" onclick="changePassword()"><span id="pw-label">Passwort ändern</span></button></div>';
 }
 function tokenCard(){
   if(!session.isSuper){
-    return '<div class="banner ok">Dein Zugang enthält den Schreib-Token bereits – er hängt an deinem Passwort. Du kannst dich auf jedem Gerät anmelden, ohne etwas einzurichten.</div>';
+    return ''; // Kein Hinweistext mehr für normale Zugänge – der Token ist ein internes Detail.
   }
   let h = session.token
     ? '<div class="banner ok"><b>Token ist auf diesem Gerät hinterlegt.</b> Auf einem anderen Gerät musst du ihn als „admin" erneut eintragen – oder besser: leg dir unten ein eigenes Konto mit Admin-Recht an.</div>'
@@ -3471,7 +3472,7 @@ function adminNewUserCard(){
      '<div class="field" style="margin:10px 0 8px;"><input type="text" id="nu-first" placeholder="Vorname"></div>'+
      '<div class="field" style="margin-bottom:8px;"><input type="text" id="nu-last" placeholder="Nachname"></div>'+
      '<div class="field" style="margin-bottom:8px;"><input type="email" id="nu-mail" placeholder="E-Mail" autocapitalize="none" spellcheck="false"></div>'+
-     '<div class="field" style="margin-bottom:10px;"><input type="text" id="nu-pass" placeholder="Start-Passwort (min. 8 Zeichen)"></div>'+
+     '<div class="field" style="margin-bottom:10px;"><input type="text" id="nu-pass" placeholder="Start-Passwort (min. 12 Zeichen)"></div>'+
      '<div class="field" style="margin-bottom:10px;"><label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block;">Mannschaft(en) (für Trainer) – bei Jugend optional bis auf einzelne Teams (z.B. nur D1) eingrenzbar</label><div id="nu-classes-picker"></div></div>'+
     '<div class="res-chip" id="nu-admin" onclick="this.classList.toggle(\'on\')" style="margin-bottom:12px;">'+
      '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg>Darf alles verwalten (Admin)</div>'+
@@ -3509,7 +3510,7 @@ function userListRowsHTML(){
       +(()=>{ const cls=normalizeClasses(u.classes||{});const keys=Object.keys(cls);if(!keys.length)return '';return '<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;">'+keys.map(t=>{const sq=cls[t]||[];const sqLabel=isJugend(t)&&sq.length?(' · '+sq.map(s=>jugendLetter(t)+s).join(',')):'';return '<span class="badge-res" style="font-size:8px;padding:2px 6px;">'+esc(t)+esc(sqLabel)+'</span>';}).join('')+'</div>';})()
       +'</div></div>'
       +'<div class="user-actions">'
-      +'<button class="uact" onclick="toggleClassEditor(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg><span>Teams</span></button>'
+      +'<button class="uact'+(classEditorOpen===u.id?' on':'')+'" onclick="toggleClassEditor(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg><span>Teams</span></button>'
       +'<button class="uact'+(u.admin?' on':'')+'" onclick="toggleUserAdmin(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg><span>Admin</span></button>'
       +'<button class="uact'+(u.locked?' danger':'')+'"'+(userLockBusy.has(u.id)?' disabled style="opacity:.5;"':'')+' onclick="toggleUserLocked(\''+u.id+'\')">'+(userLockBusy.has(u.id)?
         '<span class="spinner" style="width:14px;height:14px;border-color:rgba(0,0,0,.15);border-top-color:var(--ink-soft);"></span><span>Bitte warten</span>':
@@ -3722,7 +3723,7 @@ function renderKonto(){
 
   // ── Tab-Inhalt ──
   if(kontoTab==='profil'){
-    h+=pwCard()+bioCard();
+    h+=pwCard();
     if(!session.isSuper)h+=profileCard()+notificationsCard();
     h+=pwaCard();
   }else if(kontoTab==='saisons'){
@@ -3754,7 +3755,7 @@ async function createUser(){
   const classes=JSON.parse(JSON.stringify(nuClasses));
   if(!first||!last||!mail){showToast('Bitte Vorname, Nachname und E-Mail ausfüllen.');return;}
   if(!/^\S+@\S+\.\S+$/.test(mail)){showToast('E-Mail sieht nicht gültig aus.');return;}
-  if(pass.length<8){showToast('Passwort braucht mindestens 8 Zeichen.');return;}
+  if(pass.length<12){showToast('Passwort braucht mindestens 12 Zeichen.');return;}
   if(USERS.some(u=>u.email.toLowerCase()===mail)){showToast('Diese E-Mail gibt es schon.');return;}
   const btn=document.getElementById('nu-btn');
   btn.disabled=true;
@@ -4176,7 +4177,7 @@ async function changePassword(){
   const newPw=document.getElementById('pw-new').value;
   const newPw2=document.getElementById('pw-new2').value;
   if(!oldPw||!newPw||!newPw2){ showToast('Bitte alle drei Felder ausfüllen.'); return; }
-  if(newPw.length<8){ showToast('Neues Passwort braucht mindestens 8 Zeichen.'); return; }
+  if(newPw.length<12){ showToast('Neues Passwort braucht mindestens 12 Zeichen.'); return; }
   if(newPw!==newPw2){ showToast('Die beiden neuen Passwörter stimmen nicht überein.'); return; }
   if(newPw===oldPw){ showToast('Das neue Passwort entspricht dem alten.'); return; }
   const u=USERS.find(x=>x.id===session.id);
@@ -4302,20 +4303,25 @@ async function boot(){
   document.getElementById('login-foot').textContent=
     USERS.length?'Zugang bekommst du vom Vorstand.':'Noch keine Zugänge angelegt – bitte als Admin anmelden.';
   try{
-    const s=JSON.parse(localStorage.getItem('svbb_session'));
+    const raw=localStorage.getItem('svbb_session');
+    const dbg=document.getElementById('session-debug');
+    const s=JSON.parse(raw);
     if(s&&s.id){
-      // Bei jedem Neuladen der App gegen den aktuellen Stand prüfen: wurde der Zugang seit
-      // der letzten Sitzung gesperrt? Das ist der einzige Moment, an dem eine bereits aktive
-      // Sitzung ohne eigenen Server nachträglich beendet werden kann (kein Echtzeit-Rauswurf
-      // möglich, aber immerhin bei jedem Öffnen/Neuladen der App).
       const rec=(s.id==='admin')?null:USERS.find(x=>x.id===s.id);
       if(s.id!=='admin'&&(!rec||rec.locked)){
+        if(dbg){dbg.style.display='block';dbg.textContent='Diagnose: Sitzung für "'+s.name+'" gefunden, aber Zugang existiert nicht mehr oder ist gesperrt – wurde deshalb abgemeldet.';}
         localStorage.removeItem('svbb_session');
       }else{
         session=s;
       }
+    }else if(dbg){
+      dbg.style.display='block';
+      dbg.textContent=raw?('Diagnose: Sitzung defekt/unlesbar beim Start. Roh-Wert: '+raw.slice(0,80)):'Diagnose: Kein gespeicherter Zugang beim Start gefunden (localStorage war leer).';
     }
-  }catch(e){}
+  }catch(e){
+    const dbg=document.getElementById('session-debug');
+    if(dbg){dbg.style.display='block';dbg.textContent='Diagnose: Fehler beim Wiederherstellen – '+e.message;}
+  }
 
   dateInput().value=todayStr;
   dateInput().addEventListener('change',()=>{updateWeekday();renderPitch();renderHalle();hideConflicts();setTimeout(updateFreeSlotsOnConflict,150);});
@@ -4324,7 +4330,7 @@ async function boot(){
   trainingSelectedDate=todayStr;
   tfTeamChange(); tfSetPitchMode('ganz');
   renderTrainerChips(document.getElementById('tf-team').value,1,[]);
-  document.getElementById('ver-note').textContent='Daten: '+CFG.repo;
+  // Kein Hinweis auf Repo-Pfad in der App – interne Infrastruktur muss Nutzer nicht sehen.
 
   refreshHeader(); refreshBioBtn(); buildFilters();
   setView('monat'); renderStart(); renderTraining();
