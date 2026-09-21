@@ -1,3 +1,14 @@
 {
-  "locks": []
+  "locks": [
+    {
+      "id": "69e65a10-d59c-423c-92f0-2332db0d9afd",
+      "resource": "platz",
+      "customName": null,
+      "von": "2026-09-21",
+      "bis": "2026-09-27",
+      "note": "Test",
+      "createdBy": "Fabrizio Calcagno",
+      "createdAt": "2026-09-21T13:05:30.361Z"
+    }
+  ]
 }
