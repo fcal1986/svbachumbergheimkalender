@@ -1642,7 +1642,7 @@ function buildFilters(){
       }
     });
   }
-  fs.push(['jugend','Jugend'],['senioren','Senioren'],['verein','Verein'],['fussballde','fussball.de']);
+  fs.push(['fussballde','fussball.de']);
   document.getElementById('filterbar').innerHTML=fs.map(([k,l])=>
     '<span class="filter-chip'+(k===filter?' on':'')+'" data-f="'+k+'" onclick="setFilter(\''+k+'\')">'+l+'</span>').join('');
   updateTeamFilterBtn();
@@ -1896,8 +1896,7 @@ function externalRowHTML(e){
   const dd=String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0');
   const bis=eventBis(e);
   const acts=(session&&!e.isAway)?(
-    '<button class="ibtn" title="In Termin übernehmen" onclick="newEventFromFussball('+e.fbIndex+')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>'
-    +'<button class="ibtn" title="Neue Ansetzung suchen" onclick="openRescheduleFinder('+e.fbIndex+')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>'
+    '<button class="ibtn" title="Neue Ansetzung suchen" onclick="openRescheduleFinder('+e.fbIndex+')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>'
   ):'';
   const trainerObj=fussballTrainersFor(e.team,e.squad);
   const trainerHtml=trainerObj?getTrainersContactHTML(trainerObj):'';
@@ -2468,7 +2467,6 @@ function renderFussballHeimspiele(){
       +'<div class="fb-sub">'+(g.t||'Zeit offen')+' · '+esc(g.competition||'')+'</div>'
       +(tr?'<div class="fb-sub">👤 '+tr.trainerNames.map(esc).join(', ')+'</div>':'')
       +'</div>'
-      +(session?'<button class="fb-take-btn" onclick="newEventFromFussball('+g.fbIndex+')">Übernehmen</button>':'')
       +'</div>';
   }).join('');
   if(moreCount>0) h+='<button class="ghost-btn" style="margin:2px 0 8px;" onclick="goto(\'termine\')">+ '+moreCount+' weitere'+(moreCount===1?'s':'')+' Heimspiel'+(moreCount===1?'':'e')+' in der Terminübersicht</button>';
