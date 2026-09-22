@@ -136,6 +136,12 @@
   .score-pill.loss{background:#DC2626;}
   .event-card.has-score{opacity:1;}
   .status-row.conflict-row{cursor:pointer;}
+  .conflict-banner{display:flex;align-items:center;gap:8px;background:#FFF4ED;border:1.5px solid #FDBA8C;border-radius:10px;padding:7px 11px;margin:8px 0;font-size:12px;color:#9A3412;}
+  .conflict-banner svg{width:16px;height:16px;flex:none;}
+  .conf-mark{position:absolute;top:4px;left:5px;width:14px;height:14px;border-radius:50%;background:#EA580C;color:#fff;font-size:9.5px;font-weight:800;line-height:14px;text-align:center;}
+  .cal-day.sel .conf-mark{box-shadow:0 0 0 1.5px #fff;}
+  .conf-mark.legend{position:static;display:inline-block;margin-right:4px;}
+  .mini-day.conflict{outline:2px solid #EA580C;outline-offset:0;border-radius:3px;position:relative;z-index:1;}
   .conflict-date-chip{display:inline-block;margin:4px 6px 0 0;padding:4px 9px;border-radius:8px;background:var(--white);border:1px solid #F5C6C0;font-weight:700;font-size:11px;color:#9B3227;cursor:pointer;}
   .conflict-meta{font-size:10.5px;color:#9A3412;margin-top:3px;}
   .conflict-dates{font-size:10.5px;color:#9A3412;margin-top:6px;line-height:1.5;padding-top:6px;border-top:1px solid rgba(154,52,18,.15);}
@@ -930,7 +936,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='22.09.2026 · 3';
+const APP_VERSION='22.09.2026 · 4';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -1858,7 +1864,7 @@ function rowHTML(e){
     +'<div class="ev-time-col"><div class="ev-t">'+bis+'</div><div class="ev-tl">Bis</div></div>'
     +(pitchVisual?'<div class="ev-time-pitch">'+pitchVisual+'</div>':'')
     +'</div>'
-    +locksForItem(e).map(l=>lockBannerHTML(l,e)).join('')
+    +conflictBannerHTML(e)+locksForItem(e).map(l=>lockBannerHTML(l,e)).join('')
     +(b?'<div class="badges" style="margin-top:10px;">'+b+'</div>':'')
     +(e.note&&!e.isTraining?'<div class="ev-note" style="margin-top:8px;">'+esc(e.note)+'</div>':'')
     +(contactHtml?'<div class="ev-contact">'+contactHtml+'</div>':'')
@@ -1915,7 +1921,7 @@ function externalRowHTML(e){
     +'<div class="ev-time-col"><div class="ev-t">'+e.t+'</div><div class="ev-tl">Von</div></div>'
     +'<div class="ev-time-col"><div class="ev-t">'+bis+'</div><div class="ev-tl">Bis</div></div>'
     +'</div>'
-    +locksForItem(e).map(l=>lockBannerHTML(l,e)).join('')
+    +conflictBannerHTML(e)+locksForItem(e).map(l=>lockBannerHTML(l,e)).join('')
     +'<div class="badges" style="margin-top:10px;align-items:center;"><span class="badge-fb">⚽ '+esc(e.competition||'fussball.de')+'</span>'
     +(e.link?'<a href="'+esc(e.link)+'" target="_blank" rel="noopener" class="fb-link-btn" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg>Zum Spiel</a>':'')
     +'</div>'
@@ -2151,13 +2157,14 @@ function renderMonth(){
     const dt=new Date(y,m,d), ds=ymd(dt), evs=eventsOn(ds);
     const cats=[...new Set(evs.map(e=>cat(e.team)))];
     const used=usedQuarters(ds);
-    const cls='cal-day'+(other?' other':'')+(ds===todayStr?' today':'')+(ds===selDate?' sel':'');
+    const conf=hasConflictOn(ds);
+    const cls='cal-day'+(other?' other':'')+(ds===todayStr?' today':'')+(ds===selDate?' sel':'')+(conf?' has-conflict':'');
     let load='';
     if(used.size) load='<span class="load">'+[1,3,2,4].map(q=>'<i'+(used.has(q)?' class="on"':'')+'></i>').join('')+'</span>';
-    h+='<div class="'+cls+'" onclick="selectDay(\''+ds+'\')">'+load+dt.getDate()+'<div class="cal-dots">'+
+    h+='<div class="'+cls+'" onclick="selectDay(\''+ds+'\')">'+load+(conf?'<span class="conf-mark" title="Platzkonflikt">!</span>':'')+dt.getDate()+'<div class="cal-dots">'+
       cats.slice(0,3).map(c=>'<span class="cdot '+c+'"></span>').join('')+'</div></div>';
   }
-  h+='</div><div class="cal-legend"><span><span class="cdot jugend"></span>Jugend</span><span><span class="cdot senioren"></span>Senioren</span><span><span class="cdot verein"></span>Verein</span><span>'+miniPitch([1,2])+'Platzbelegung</span></div>';
+  h+='</div><div class="cal-legend"><span><span class="cdot jugend"></span>Jugend</span><span><span class="cdot senioren"></span>Senioren</span><span><span class="cdot verein"></span>Verein</span><span>'+miniPitch([1,2])+'Platzbelegung</span><span><span class="conf-mark legend">!</span>Platzkonflikt</span></div>';
   const evs=eventsOn(selDate);
   h+='<div style="margin-top:14px;"><p class="section-label" id="month-day-head" style="scroll-margin-top:8px;">'+fmtHead(selDate)+'</p>';
   h+=evs.length?evs.map(rowHTML).join(''):'<div class="empty-day">Kein Termin an diesem Tag.</div>';
@@ -2184,6 +2191,7 @@ function renderYear(){
       let cls='mini-day';
       if(cats.length>1)cls+=' multi'; else if(cats.length===1)cls+=' '+cats[0];
       if(ds===todayStr)cls+=' today';
+      if(hasConflictOn(ds))cls+=' conflict';
       h+='<div class="'+cls+'"></div>';
     }
     h+='</div></div>';
@@ -2191,7 +2199,9 @@ function renderYear(){
   h+='</div>';
   let best=-1,bi=-1;
   for(let m=0;m<12;m++){const c=evs.filter(e=>parseInt(e.d.slice(5,7))===m+1).length;if(c>best){best=c;bi=m;}}
-  h+='<div class="year-sum"><b>'+evs.length+' Termine</b> in '+yearShown+' · Voller Monat: <b>'+(best>0?MONTHS[bi]+' ('+best+')':'–')+'</b><br>Monat antippen für die Monatsansicht.</div>';
+  let confDaysYear=0;
+  for(let dd=new Date(yearShown,0,1);dd.getFullYear()===yearShown;dd.setDate(dd.getDate()+1)) if(hasConflictOn(ymd(dd)))confDaysYear++;
+  h+='<div class="year-sum"><b>'+evs.length+' Termine</b> in '+yearShown+' · Voller Monat: <b>'+(best>0?MONTHS[bi]+' ('+best+')':'–')+'</b><br>Monat antippen für die Monatsansicht.'+(confDaysYear?'<br><span style="color:#9A3412;"><span class="conf-mark legend">!</span>'+confDaysYear+' Tag'+(confDaysYear===1?'':'e')+' mit Platzkonflikt (orange umrandet)</span>':'')+'</div>';
   box.innerHTML=h;
 }
 function renderStart(){
@@ -2327,6 +2337,22 @@ function conflictsOnDay(ds){
     }
   }
   return found;
+}
+/* IDs aller Termine eines Tages, die an einem Platzkonflikt beteiligt sind – dieselben Quellen
+   wie die Statusliste auf der Start-Seite, bewusst unabhängig von aktiven Filtern. Cache pro
+   Tag, wird bei jedem render() geleert, damit Änderungen sofort sichtbar werden. */
+let _conflictCache={};
+function conflictIdsOn(ds){
+  if(_conflictCache[ds])return _conflictCache[ds];
+  const ids=new Set();
+  conflictsOnDay(ds).forEach(([A,B])=>{ ids.add(A.id); ids.add(B.id); });
+  fussballCapacityWarningsOn(ds).forEach(w=>w.games.forEach(g=>ids.add(fussballGameLinkId(g))));
+  return (_conflictCache[ds]=ids);
+}
+function hasConflictOn(ds){ return conflictIdsOn(ds).size>0; }
+function conflictBannerHTML(e){
+  if(!e||e.isCancelled||!e.d||!conflictIdsOn(e.d).has(e.id))return '';
+  return '<div class="conflict-banner">'+svgWarn+'<b>Platzkonflikt</b></div>';
 }
 function typeLabelOf(e){
   const t=classifyAgendaItem(e);
@@ -4452,6 +4478,7 @@ function openHashEvent(){
 
 /* ---------- Boot ---------- */
 function render(){
+  _conflictCache={};
   updateTypeFilterBanner();
   if(view==='liste')renderList();
   if(view==='monat')renderMonth();
