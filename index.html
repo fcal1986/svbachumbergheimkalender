@@ -936,7 +936,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='22.09.2026 · 4';
+const APP_VERSION='22.09.2026 · 5';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -1136,16 +1136,21 @@ function fussballShareNotesFor(d,von,bis){
    zu viele Spiele auf dieselbe Uhrzeit (mehr als der Platz gleichzeitig tragen
    kann). Das ist unabhängig von Platzcoach-Buchungen und wird separat als
    Warnung angezeigt, damit der Jugendleiter das beim Staffelleiter klären kann. */
+/* Mehr als zwei geteilte Jugendspiele GLEICHZEITIG (zeitliche Überschneidung, nicht nur
+   identische Anstoßzeit) passen nicht auf einen Platz mit zwei Hälften. Konflikte mit
+   Ganzplatz-Spielen oder eigenen Terminen erkennt conflictsOnDay() paarweise. */
 function fussballCapacityWarningsOn(d){
-  const games=(FUSSBALLDE.games||[]).filter(g=>g.d===d&&g.t);
-  const byTime={};
-  games.forEach(g=>{ (byTime[g.t]=byTime[g.t]||[]).push(g); });
-  const warnings=[];
-  Object.entries(byTime).forEach(([t,list])=>{
-    if(list.length<2)return;
-    const hasFull=list.some(g=>fussballTeamCategory(g.team)==='full');
-    const shareCount=list.filter(g=>fussballTeamCategory(g.team)==='share').length;
-    if(hasFull||shareCount>2) warnings.push({t,games:list});
+  const shared=(FUSSBALLDE.games||[]).filter(g=>g.d===d&&g.t&&fussballTeamCategory(g.team)==='share')
+    .map(g=>({g,s:g.t,e:shiftTimeClamped(g.t,fussballDurationMin(g.team))}));
+  const warnings=[], seen=new Set();
+  // Belegung zu jedem Anstoßzeitpunkt prüfen: welche geteilten Spiele laufen dann gerade?
+  shared.forEach(x=>{
+    const active=shared.filter(y=>y.s<=x.s&&y.e>x.s);
+    if(active.length>2){
+      const key=active.map(y=>fussballGameLinkId(y.g)).sort().join('|');
+      if(seen.has(key))return; seen.add(key);
+      warnings.push({t:active.map(y=>y.s).sort()[0],games:active.map(y=>y.g)});
+    }
   });
   return warnings;
 }
@@ -2322,6 +2327,8 @@ function renderPitchToday(){
 }
 const svgOk='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="#16A34A"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>';
 const svgWarn='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="#C2410C"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>';
+// Heimspiel von fussball.de, das nur eine Platzhälfte braucht (z.B. E-Jugend und jünger).
+function isSharedHomeGame(e){ return !!(e&&e.isExternal&&!e.isAway&&!e.pitchIsFull&&e.team); }
 /* Prüft einen einzelnen Tag auf überlappende Platznutzung (paarweise Viertel-Überschneidung). */
 function conflictsOnDay(ds){
   const items=agendaOn(ds);
@@ -2332,6 +2339,17 @@ function conflictsOnDay(ds){
       if(A.t<eventBis(B)&&B.t<eventBis(A)){
         const qa=A.pitch?pitchQuarters(A.pitch):(A.isExternal&&A.pitchIsFull?[1,2,3,4]:[]);
         const qb=B.pitch?pitchQuarters(B.pitch):(B.isExternal&&B.pitchIsFull?[1,2,3,4]:[]);
+        const shA=isSharedHomeGame(A), shB=isSharedHomeGame(B);
+        if(shA&&shB) continue; // zwei geteilte Spiele passen nebeneinander – mehr als zwei prüft fussballCapacityWarningsOn
+        if(shA||shB){
+          // Geteiltes Jugendspiel (z.B. E-Jugend) braucht irgendeine komplett freie Platzhälfte.
+          // Welche genau, legt fussball.de nicht fest – daher Konflikt nur, wenn der andere Termin
+          // KEINE Hälfte frei lässt (ganzer Platz, oder in beiden Hälften je ein Viertel belegt).
+          const other=shA?qb:qa;
+          const halfFree=Object.values(HALF).some(h=>h.every(q=>!other.includes(q)));
+          if(other.length&&!halfFree)found.push([A,B]);
+          continue;
+        }
         if(qa.some(q=>qb.includes(q)))found.push([A,B]);
       }
     }
@@ -2383,11 +2401,11 @@ function seasonConflictScan(){
         ?tA+': '+typeA+' und '+typeB+' überschneiden sich'
         :tA+' ('+typeA+') ↔ '+tB+' ('+typeB+')';
       const key='pc|'+label+'|'+A.t;
-      if(!groups[key])groups[key]={label,t:A.t,dates:[],source:'platzcoach'};
+      if(!groups[key])groups[key]={label,t:A.t,dates:[],source:(A.isExternal&&B.isExternal)?'fussballde':'platzcoach'};
       groups[key].dates.push(ds);
     });
     fussballCapacityWarningsOn(ds).forEach(w=>{
-      const label='fussball.de: '+w.games.length+' Spiele gleichzeitig angesetzt ('+w.games.map(g=>esc(g.team||'?')).join(', ')+')';
+      const label='fussball.de: '+w.games.length+' Spiele gleichzeitig angesetzt ('+w.games.map(g=>{const m=fussballFilterTeam(g.team,g.squad);return teamLabel(m.team,m.squad);}).join(', ')+')';
       const key='fb|'+label+'|'+w.t;
       if(!groups[key])groups[key]={label,t:w.t,dates:[],source:'fussballde'};
       groups[key].dates.push(ds);
@@ -2496,7 +2514,7 @@ function renderFussballHeimspiele(){
   if(capWarnings.length){
     h+=capWarnings.map(w=>{
       const dt=new Date(w.d+'T00:00:00'),dd=String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0');
-      const names=w.games.map(g=>esc(g.team||'?')).join(', ');
+      const names=w.games.map(g=>{const m=fussballFilterTeam(g.team,g.squad);return teamLabel(m.team,m.squad);}).join(', ');
       return '<div class="fb-warn-card">⚠️ <b>Möglicher Ansetzungsfehler bei fussball.de</b>'
         +'<div class="fb-warn-sub">'+dd+' um '+w.t+' Uhr sind '+w.games.length+' Spiele gleichzeitig angesetzt ('+names+') – mehr, als der Platz gleichzeitig fasst. Bitte beim Jugend-/Staffelleiter melden.</div>'
         +'</div>';
