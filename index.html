@@ -930,6 +930,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
+const APP_VERSION='22.09.2026 · 3';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -4577,7 +4578,9 @@ async function boot(){
   trainingSelectedDate=todayStr;
   tfTeamChange(); tfSetPitchMode('ganz');
   renderTrainerChips(document.getElementById('tf-team').value,1,[]);
-  // Kein Hinweis auf Repo-Pfad in der App – interne Infrastruktur muss Nutzer nicht sehen.
+  // Versionsanzeige im Konto-Bereich: zeigt auf einen Blick, ob die neueste Datei geladen ist.
+  // Bei jeder Änderung APP_VERSION hochzählen.
+  document.getElementById('ver-note').textContent='Platzcoach · Version '+APP_VERSION;
 
   refreshHeader(); refreshBioBtn(); buildFilters();
   setView('monat'); renderStart(); renderTraining();
