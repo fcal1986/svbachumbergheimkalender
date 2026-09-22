@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T11:39:42.650Z",
+  "updated": "2026-09-22T16:58:02.589Z",
   "games": [
     {
       "d": "2026-09-02",
@@ -1952,6 +1952,16 @@
       "competition": "Kreisliga B",
       "score": null,
       "link": "https://www.fussball.de/spiel/sg-allendorf-amecke-sv-bachum-bergheim-2/-/spiel/031I192R3K000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-11-08",
+      "t": "13:30",
+      "team": "D-Junioren",
+      "squad": 1,
+      "opponent": "SV Brilon",
+      "competition": "Kreisfreundschaftsspiele",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-brilon-sv-bachum-bergheim/-/spiel/0325UEH6B0000000VS5489BUVV5UN1SE"
     },
     {
       "d": "2026-11-14",
