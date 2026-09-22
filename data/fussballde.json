@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T16:58:02.589Z",
+  "updated": "2026-09-22T21:20:00.235Z",
   "games": [
     {
       "d": "2026-09-02",
@@ -570,6 +570,16 @@
       "competition": "Kreisliga B",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-sg-herdringen-mueschede-ii/-/spiel/031IK2S4HK000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-10-31",
+      "t": "13:14",
+      "team": "D-Junioren",
+      "squad": 1,
+      "opponent": "DJK Teutonia Ehrenfeld",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-djk-teutonia-ehrenfeld/-/spiel/031S94RMHG000000VS5489BTVTPHHFPR"
     },
     {
       "d": "2026-11-06",
@@ -1912,6 +1922,36 @@
       "competition": "Kreisliga A",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-arnsberg-sv-bachum-bergheim/-/spiel/031I0BNFT8000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-10-31",
+      "t": "12:00",
+      "team": "D-Junioren",
+      "squad": 1,
+      "opponent": "DJK Grün-Weiß Menden 1",
+      "competition": "Kreisfreundschaftsspiele",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/djk-gruen-weiss-menden-1-sv-bachum-bergheim/-/spiel/0325UV3HG4000000VS5489BUVV5UN1SE"
+    },
+    {
+      "d": "2026-10-31",
+      "t": "14:10",
+      "team": "D-Junioren",
+      "squad": 1,
+      "opponent": "SV Westfalia Rhynern II",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-westfalia-rhynern-ii-sv-bachum-bergheim/-/spiel/031S94RMI0000000VS5489BTVTPHHFPR"
+    },
+    {
+      "d": "2026-10-31",
+      "t": "15:06",
+      "team": "D-Junioren",
+      "squad": 1,
+      "opponent": "Team 8",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/team-8-sv-bachum-bergheim/-/spiel/031S94RMMC000000VS5489BTVTPHHFPR"
     },
     {
       "d": "2026-11-07",
