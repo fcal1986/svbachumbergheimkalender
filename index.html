@@ -136,6 +136,7 @@
   .score-pill.loss{background:#DC2626;}
   .event-card.has-score{opacity:1;}
   .status-row.conflict-row{cursor:pointer;}
+  .conflict-date-chip{display:inline-block;margin:4px 6px 0 0;padding:4px 9px;border-radius:8px;background:var(--white);border:1px solid #F5C6C0;font-weight:700;font-size:11px;color:#9B3227;cursor:pointer;}
   .conflict-meta{font-size:10.5px;color:#9A3412;margin-top:3px;}
   .conflict-dates{font-size:10.5px;color:#9A3412;margin-top:6px;line-height:1.5;padding-top:6px;border-top:1px solid rgba(154,52,18,.15);}
   .status-row.ok{color:#166534;}
@@ -1532,14 +1533,14 @@ async function doLogin(){
   finally{ btn.disabled=false; btn.textContent='Anmelden'; }
 }
 function afterLogin(){
-  localStorage.setItem('svbb_session',JSON.stringify(session));
+  localStorage.setItem('svbb_session',JSON.stringify(session)); localStorage.setItem('pc_was_logged_in','1');
   document.getElementById('li-pass').value='';
   closeLogin();
   showToast('Angemeldet als '+session.name.split(' ')[0]+'. Seite wird neu geladen …',1800);
   setTimeout(()=>location.reload(),1200);
 }
 function logout(){
-  session=null; localStorage.removeItem('svbb_session');
+  session=null; localStorage.removeItem('svbb_session'); localStorage.removeItem('pc_was_logged_in');
   if(filter==='meine') filter='alle';
   refreshHeader(); buildFilters(); renderAll(); renderKonto();
   showToast('Abgemeldet. Termine kannst du weiter ansehen.');
@@ -2157,7 +2158,7 @@ function renderMonth(){
   }
   h+='</div><div class="cal-legend"><span><span class="cdot jugend"></span>Jugend</span><span><span class="cdot senioren"></span>Senioren</span><span><span class="cdot verein"></span>Verein</span><span>'+miniPitch([1,2])+'Platzbelegung</span></div>';
   const evs=eventsOn(selDate);
-  h+='<div style="margin-top:14px;"><p class="section-label">'+fmtHead(selDate)+'</p>';
+  h+='<div style="margin-top:14px;"><p class="section-label" id="month-day-head" style="scroll-margin-top:8px;">'+fmtHead(selDate)+'</p>';
   h+=evs.length?evs.map(rowHTML).join(''):'<div class="empty-day">Kein Termin an diesem Tag.</div>';
   h+='<button class="ghost-btn" onclick="newForDay()">＋ Termin für diesen Tag eintragen</button></div>';
   box.innerHTML=h;
@@ -2370,6 +2371,19 @@ function seasonConflictScan(){
     return {label:g.label,t:g.t,dates:g.dates,count:g.dates.length,first:g.dates[0],last:g.dates[g.dates.length-1],source:g.source};
   }).sort((a,b)=>a.first.localeCompare(b.first));
 }
+// Springt aus der Start-Seite direkt zu einem Tag in der Monatsansicht der Terminübersicht.
+// Aktive Filter werden zurückgesetzt, sonst könnte eine der beiden Seiten des Konflikts
+// ausgeblendet sein und der Konflikt wäre am Zieltag gar nicht zu sehen.
+function jumpToDay(ds){
+  const d=new Date(ds+'T00:00:00');
+  curY=d.getFullYear(); curM=d.getMonth(); selDate=ds;
+  const hadFilter=(filter!=='alle')||teamMultiFilter.size>0||typeFilter;
+  if(hadFilter) setFilter('alle');
+  goto('termine');
+  setView('monat');
+  if(hadFilter) showToast('Filter zurückgesetzt, damit alle beteiligten Termine sichtbar sind.');
+  setTimeout(()=>{ const h=document.getElementById('month-day-head'); if(h) h.scrollIntoView({block:'start',behavior:'smooth'}); },50);
+}
 function toggleConflictDetail(id){
   const el=document.getElementById(id);
   if(el)el.style.display=el.style.display==='none'?'block':'none';
@@ -2383,13 +2397,16 @@ function conflictRowHTML(g,i){
     ?(g.count+'× · '+(g.count>3?'jeden '+wd+', ':'')+'erstmals '+fmtShort(g.first)+(g.last!==g.first?' bis '+fmtShort(g.last):''))
     :fmtShort(g.first);
   const detailId='conf-detail-'+i;
-  const dateList=g.dates.map(fmtShort).join(', ');
-  return '<div class="status-row warn conflict-row" onclick="toggleConflictDetail(\''+detailId+'\')">'
+  // Einzeltermin: Tippen springt direkt zu diesem Tag. Wiederkehrender Konflikt: Tippen klappt
+  // die Datumsliste auf, jedes Datum darin springt dann zu seinem Tag.
+  const dateChips=g.dates.map(ds=>'<span class="conflict-date-chip" onclick="event.stopPropagation();jumpToDay(\''+ds+'\')">'+esc(fmtShort(ds))+' ›</span>').join('');
+  const rowClick=g.count>1?'toggleConflictDetail(\''+detailId+'\')':'jumpToDay(\''+g.first+'\')';
+  return '<div class="status-row warn conflict-row" onclick="'+rowClick+'">'
     +svgWarn
     +'<div style="flex:1;min-width:0;">'
     +'<div>'+esc(g.label)+' um '+g.t+' Uhr</div>'
-    +'<div class="conflict-meta">'+esc(dateInfo)+(g.count>1?' · Termine anzeigen ▾':'')+'</div>'
-    +(g.count>1?'<div id="'+detailId+'" class="conflict-dates" style="display:none;">'+esc(dateList)+'</div>':'')
+    +'<div class="conflict-meta">'+esc(dateInfo)+(g.count>1?' · Termine anzeigen ▾':' · Zum Tag ›')+'</div>'
+    +(g.count>1?'<div id="'+detailId+'" class="conflict-dates" style="display:none;">'+dateChips+'</div>':'')
     +'</div>'
     +'</div>';
 }
@@ -3752,7 +3769,7 @@ function saveAdminToken(){
   if(!t){showToast('Bitte Token eingeben.');return;}
   localStorage.setItem('svbb_admin_token',t);
   session.token=t;
-  localStorage.setItem('svbb_session',JSON.stringify(session));
+  localStorage.setItem('svbb_session',JSON.stringify(session)); localStorage.setItem('pc_was_logged_in','1');
   showToast('Token gespeichert.'); renderKonto();
 }
 async function createUser(){
@@ -3812,7 +3829,7 @@ async function toggleEmailNotifications(newVal){
   const backup=JSON.stringify(USERS);
   u.emailNotificationsEnabled=newVal;
   session.emailNotificationsEnabled=newVal;
-  localStorage.setItem('svbb_session',JSON.stringify(session));
+  localStorage.setItem('svbb_session',JSON.stringify(session)); localStorage.setItem('pc_was_logged_in','1');
   try{
     await saveUsers((newVal?'E-Mail-Benachrichtigungen aktiviert: ':'E-Mail-Benachrichtigungen deaktiviert: ')+u.first+' '+u.last);
     showToast(newVal?'E-Mail-Benachrichtigungen aktiviert.':'E-Mail-Benachrichtigungen deaktiviert.');
@@ -3847,7 +3864,7 @@ async function saveProfile(){
   const backup=JSON.stringify(USERS);
   u.phone=phone; u.contactEmail=contactEmail; u.contactPublic=contactPublic;
   session.phone=phone; session.contactEmail=contactEmail; session.contactPublic=contactPublic;
-  localStorage.setItem('svbb_session',JSON.stringify(session));
+  localStorage.setItem('svbb_session',JSON.stringify(session)); localStorage.setItem('pc_was_logged_in','1');
   try{
     await saveUsers('Profil geändert: '+u.first+' '+u.last);
     showToast('Kontaktdaten gespeichert.');
@@ -4409,7 +4426,7 @@ async function changePassword(){
     u.enc=await encryptToken(token,newPw);
     await saveUsers('Passwort geändert: '+u.first+' '+u.last);
     session.token=token;
-    localStorage.setItem('svbb_session',JSON.stringify(session));
+    localStorage.setItem('svbb_session',JSON.stringify(session)); localStorage.setItem('pc_was_logged_in','1');
     document.getElementById('pw-old').value='';
     document.getElementById('pw-new').value='';
     document.getElementById('pw-new2').value='';
@@ -4542,7 +4559,9 @@ async function boot(){
       }else{
         session=s;
       }
-    }else if(dbg){
+    }else if(dbg&&localStorage.getItem('pc_was_logged_in')==='1'){
+      // Nur wenn dieses Gerät vorher angemeldet war und sich NICHT bewusst abgemeldet hat –
+      // normale Besucher ohne Login sollen diese Diagnose nie sehen.
       dbg.style.display='block';
       dbg.textContent=raw?('Diagnose: Sitzung defekt/unlesbar beim Start. Roh-Wert: '+raw.slice(0,80)):'Diagnose: Kein gespeicherter Zugang beim Start gefunden (localStorage war leer).';
     }
