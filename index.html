@@ -936,7 +936,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='22.09.2026 · 5';
+const APP_VERSION='22.09.2026 · 6';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -1049,10 +1049,20 @@ function fussballTeamCategory(team){
 // direkt danach) sind beim Verein normal, weil die nächste Mannschaft sich am Rand
 // aufwärmt, während das vorige Spiel ausklingt – kein echter Platzkonflikt.
 function fussballBufferBeforeMin(){ return (CFG&&CFG.fussballde&&CFG.fussballde.bufferBeforeMin)??15; }
+/* Geschätzte Platzbelegung pro Spiel in Minuten, gestaffelt nach Altersklasse:
+   Spielzeit + Halbzeit + kleiner Puffer. fussball.de liefert nur die Anstoßzeit.
+   Einzelne Werte lassen sich in data/config.json unter fussballde.durationByAge überschreiben,
+   z.B. "durationByAge": {"D": 85}. */
+const DURATION_BY_AGE={Senioren:110, A:110, B:100, C:90, D:80, E:70, F:60, G:60};
+function fussballAgeKey(team){
+  const m=(team||'').trim().match(/^([A-G])-(Junioren|Juniorinnen|Jugend)/i);
+  return m?m[1].toUpperCase():'Senioren';
+}
 function fussballDurationMin(team){
   const cfg=CFG&&CFG.fussballde;
-  if(fussballTeamCategory(team)==='share') return (cfg&&cfg.durationMinYouth)||75;
-  return (cfg&&cfg.durationMinFull)||110;
+  const key=fussballAgeKey(team);
+  const override=cfg&&cfg.durationByAge&&cfg.durationByAge[key];
+  return override||DURATION_BY_AGE[key]||110;
 }
 function shiftTimeClamped(t,m){
   const[h,min]=t.split(':').map(Number);
