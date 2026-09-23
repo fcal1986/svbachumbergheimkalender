@@ -936,7 +936,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='22.09.2026 · 6';
+const APP_VERSION='22.09.2026 · 7';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -3633,6 +3633,45 @@ function adminUserListCard(){
     +'</div>';
 }
 
+/* ── Regeln für fussball.de-Heimspiele (Info-Karte im Protokoll-Reiter) ──
+   Werte werden live aus den tatsächlich verwendeten Einstellungen gelesen, damit die Anzeige
+   auch nach Anpassungen in data/config.json immer stimmt. */
+let rulesInfoOpen=false;
+function toggleRulesInfo(){ rulesInfoOpen=!rulesInfoOpen; renderKonto(); }
+function rulesInfoCard(){
+  const ico='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:16px;height:16px;stroke:var(--green)"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>';
+  let h='<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleRulesInfo()">'
+    +'<h4 style="margin:0;">'+ico+'Regeln für Spiele von fussball.de</h4>'
+    +'<span style="font-size:12px;font-weight:700;color:var(--ink-soft);">'+(rulesInfoOpen?'▴':'▾')+'</span></div>';
+  if(!rulesInfoOpen) return h+'<p class="sub" style="margin:6px 0 0;">Platzbedarf, geschätzte Spieldauer und wann ein Platzkonflikt entsteht.</p></div>';
+  const rows=[['Senioren','Senioren (Herren, Ü32)','2 × 45'],['A','A-Jugend','2 × 45'],['B','B-Jugend','2 × 40'],['C','C-Jugend','2 × 35'],
+              ['D','D-Jugend','2 × 30'],['E','E-Jugend','2 × 25'],['F','F-Jugend','2 × 20'],['G','G-Jugend / Bambini','2 × 20']];
+  const teamFor={Senioren:'Herren',A:'A-Junioren',B:'B-Junioren',C:'C-Junioren',D:'D-Junioren',E:'E-Junioren',F:'F-Junioren',G:'G-Junioren'};
+  const td='padding:6px 4px;border-bottom:1px solid var(--line);font-size:12px;';
+  h+='<p class="sub" style="margin-top:8px;">fussball.de liefert nur die Anstoßzeit. Das Ende schätzt Platzcoach: <b>Anstoß + Dauer</b> (Spielzeit, Halbzeit, kleiner Puffer).</p>'
+    +'<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;margin:6px 0 12px;">'
+    +'<tr><th style="'+td+'text-align:left;">Altersklasse</th><th style="'+td+'text-align:left;">Platz</th><th style="'+td+'text-align:left;">Spielzeit</th><th style="'+td+'text-align:right;">Dauer</th></tr>'
+    +rows.map(([k,label,play])=>{
+      const t=teamFor[k];
+      const share=fussballTeamCategory(t)==='share';
+      return '<tr><td style="'+td+'">'+esc(label)+'</td><td style="'+td+'">'+(share?'eine Hälfte':'ganzer Platz')+'</td><td style="'+td+'">'+play+'</td><td style="'+td+'text-align:right;font-weight:700;">'+fussballDurationMin(t)+' Min.</td></tr>';
+    }).join('')
+    +'</table></div>'
+    +'<p class="field-label" style="margin:4px 0 6px;">Wann ist es ein Platzkonflikt?</p>'
+    +'<ul style="margin:0 0 10px;padding-left:18px;font-size:12px;line-height:1.55;color:var(--ink);">'
+    +'<li><b>Ganzer Platz</b> trifft zeitgleich auf einen anderen Termin mit Platznutzung (Spiel, Training, eigener Termin): Konflikt.</li>'
+    +'<li><b>Geteiltes Spiel</b> (eine Hälfte) neben einem Termin mit Platzteil: kein Konflikt, solange eine komplette Hälfte frei bleibt. Belegt der andere Termin den ganzen Platz oder in beiden Hälften je ein Viertel: Konflikt.</li>'
+    +'<li><b>Zwei geteilte Spiele</b> gleichzeitig passen nebeneinander. Ab <b>drei</b> ist es ein Konflikt.</li>'
+    +'<li><b>Gleichzeitig</b> heißt: Die Zeiträume überschneiden sich, nicht nur die Anstoßzeit ist gleich.</li>'
+    +'<li><b>Auswärtsspiele</b> belegen keinen eigenen Platz und lösen keinen Platzkonflikt aus. Bei der Suche nach einer neuen Ansetzung zählen sie trotzdem, weil eine Mannschaft nicht zweimal am Tag spielen kann.</li>'
+    +'</ul>'
+    +'<p class="field-label" style="margin:4px 0 6px;">Beim Eintragen neuer Termine</p>'
+    +'<p class="sub" style="margin:0 0 10px;">Ein Spiel auf dem ganzen Platz blockiert Trainings und eigene Termine schon <b>'+fussballBufferBeforeMin()+' Minuten vor Anstoß</b> (Aufwärmen). In der Konfliktanzeige gilt dieser Vorlauf nicht, weil eng getaktete Spiele nacheinander normal sind.</p>'
+    +'<p class="field-label" style="margin:4px 0 6px;">Anpassen</p>'
+    +'<p class="sub" style="margin:0;">In <b>data/config.json</b> unter <b>fussballde</b>: <b>durationByAge</b> (z.&nbsp;B. {"D": 85}), <b>shareCategories</b> (welche Klassen nur eine Hälfte brauchen), <b>bufferBeforeMin</b> (Vorlauf beim Eintragen).</p>'
+    +'</div>';
+  return h;
+}
 /* ── Protokoll / Audit-Log ──────────────────────────────────────────── */
 let LOG_CACHE=null, LOG_LOADING=false;
 let logSearch='', logCat='alle', logExpanded=false;
@@ -3813,7 +3852,7 @@ function renderKonto(){
   }else if(kontoTab==='zugaenge'){
     h+=adminNewUserCard()+adminUserListCard();
   }else if(kontoTab==='protokoll'){
-    h+=logCard();
+    h+=rulesInfoCard()+logCard();
   }
 
   box.innerHTML=h;
