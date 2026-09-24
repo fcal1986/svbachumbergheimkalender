@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-24T11:47:03.639Z",
+  "updated": "2026-09-24T17:12:03.729Z",
   "games": [
     {
       "d": "2026-09-04",
@@ -570,6 +570,16 @@
       "competition": "Vereinsturnier",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-djk-teutonia-ehrenfeld/-/spiel/031S94RMHG000000VS5489BTVTPHHFPR"
+    },
+    {
+      "d": "2026-11-04",
+      "t": "18:30",
+      "team": "B-Junioren",
+      "squad": 1,
+      "opponent": "TuS Sundern",
+      "competition": "Kreispokal",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-sundern/-/spiel/031JUP018O000000VS5489BUVVKNMR0J"
     },
     {
       "d": "2026-11-06",
