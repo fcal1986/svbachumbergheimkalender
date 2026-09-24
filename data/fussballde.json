@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-24T04:52:06.969Z",
+  "updated": "2026-09-24T11:47:03.639Z",
   "games": [
     {
       "d": "2026-09-04",
@@ -886,7 +886,7 @@
       "t": "13:00",
       "team": "D-Junioren",
       "squad": 2,
-      "opponent": "SG Allendorf/Amecke I",
+      "opponent": "SG Allendorf/Amecke I (7er) o.W.",
       "competition": "Kreisliga B",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-sg-allendorf-amecke/-/spiel/031OEI7S74000000VS5489BUVT2M8LCU"
@@ -1578,7 +1578,7 @@
       "t": "16:30",
       "team": "D-Junioren",
       "squad": 2,
-      "opponent": "SG Allendorf/Amecke I",
+      "opponent": "SG Allendorf/Amecke I (7er) o.W.",
       "competition": "Kreisliga B",
       "score": null,
       "link": "https://www.fussball.de/spiel/sg-allendorf-amecke-sv-bachum-bergheim-2/-/spiel/031OEI7QOS000000VS5489BUVT2M8LCU"
@@ -1662,16 +1662,6 @@
       "competition": "Kreisliga B",
       "score": null,
       "link": "https://www.fussball.de/spiel/sg-eintracht-25-sv-bachum-bergheim-ii/-/spiel/031IK2S5D4000000VS5489BUVVKNMR0J"
-    },
-    {
-      "d": "2026-09-26",
-      "t": "10:00",
-      "team": "E-Junioren",
-      "squad": 3,
-      "opponent": "SV Hüsten 09 III",
-      "competition": "Kreisliga C",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-huesten-09-3-sv-bachum-bergheim-3/-/spiel/031J8T2KG4000000VS5489BUVVKNMR0J"
     },
     {
       "d": "2026-09-26",
@@ -1762,6 +1752,16 @@
       "competition": "Kreisliga A",
       "score": null,
       "link": "https://www.fussball.de/spiel/sg-balve-garbeck-sv-bachum-bergheim/-/spiel/031I0BNBIS000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-09-28",
+      "t": "17:00",
+      "team": "E-Junioren",
+      "squad": 3,
+      "opponent": "SV Hüsten 09 III",
+      "competition": "Kreisliga C",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-huesten-09-3-sv-bachum-bergheim-3/-/spiel/031J8T2KG4000000VS5489BUVVKNMR0J"
     },
     {
       "d": "2026-10-02",
