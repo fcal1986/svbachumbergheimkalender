@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-25T21:02:51.831Z",
+  "updated": "2026-09-25T21:09:13.115Z",
   "games": [
     {
       "d": "2026-09-04",
@@ -1555,6 +1555,16 @@
     },
     {
       "d": "2026-09-17",
+      "t": "17:00",
+      "team": "G-Junioren",
+      "squad": 1,
+      "opponent": "SC Neheim",
+      "competition": "Kinderfußball",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sc-neheim-sv-bachum-bergheim/-/spiel/031IKDRR58000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-09-17",
       "t": "17:30",
       "team": "E-Junioren",
       "squad": 3,
@@ -1602,16 +1612,6 @@
       "competition": "Kreisfreundschaftsspiele",
       "score": null,
       "link": "https://www.fussball.de/spiel/tus-germania-lohauserholz-sv-bachum-bergheim/-/spiel/0323KH2N1K000000VS5489BUVSORQI22"
-    },
-    {
-      "d": "2026-09-19",
-      "t": "10:00",
-      "team": "G-Junioren",
-      "squad": 1,
-      "opponent": "SC Neheim",
-      "competition": "Kinderfußball",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sc-neheim-sv-bachum-bergheim/-/spiel/031IKDRR58000000VS5489BUVVKNMR0J"
     },
     {
       "d": "2026-09-19",
@@ -1714,8 +1714,8 @@
       "link": "https://www.fussball.de/spiel/fc-neheim-erlenbruch-sv-bachum-bergheim-1/-/spiel/031J8I24EK000000VS5489BUVVKNMR0J"
     },
     {
-      "d": "2026-09-27",
-      "t": "11:00",
+      "d": "2026-09-26",
+      "t": "13:30",
       "team": "C-Junioren",
       "squad": 1,
       "opponent": "JSG Balve/Gar./La/Be/Aff I",
