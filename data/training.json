@@ -234,10 +234,12 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "cfe0a536-f595-475a-aef0-df62dfb09885"
+        "cfe0a536-f595-475a-aef0-df62dfb09885",
+        "bde8d374-560d-4037-9dea-322d7dd85ba9"
       ],
       "trainerNames": [
-        "Daniel Schauerte-Becker"
+        "Daniel Schauerte-Becker",
+        "Sven Svejn"
       ],
       "validFrom": "2026-09-09",
       "validUntil": null
@@ -481,10 +483,12 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "cfe0a536-f595-475a-aef0-df62dfb09885"
+        "cfe0a536-f595-475a-aef0-df62dfb09885",
+        "bde8d374-560d-4037-9dea-322d7dd85ba9"
       ],
       "trainerNames": [
-        "Daniel Schauerte-Becker"
+        "Daniel Schauerte-Becker",
+        "Sven Svejn"
       ],
       "validFrom": "2026-09-09",
       "validUntil": null
