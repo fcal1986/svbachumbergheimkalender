@@ -314,6 +314,25 @@
       "emailNotificationsEnabled": true,
       "phone": "015120432568",
       "contactPublic": "none"
+    },
+    {
+      "id": "a73f2e9e-f267-4fcb-8b64-ff55ba5e46f3",
+      "first": "Florian",
+      "last": "Landgraf",
+      "email": "f.landgraf@web.de",
+      "admin": false,
+      "classes": {
+        "F-Jugend": []
+      },
+      "enc": {
+        "salt": "qwyyPn1yvbskfgCkO3OJ3w==",
+        "iv": "5Bk4w1b5nQCN1O5i",
+        "cipher": "VrmHNlwWVFWo0sV5xAD2xrped2ZaOAE5aRR2UTbBvORaemunWET7q6X1zxx6qQjlIAtsXfC/UC5JeBVSr0ttOpo8A+vGRkYyL74R6Gs6X/pVO41WJi9a5xIBmrzlvK+awAu6zSQ/1Jj4LL2GEA=="
+      },
+      "created": "2026-09-25T18:54:46.559Z",
+      "emailNotificationsEnabled": true,
+      "phone": "+4916090347220",
+      "contactPublic": "none"
     }
   ]
 }
