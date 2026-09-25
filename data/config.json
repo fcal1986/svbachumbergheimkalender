@@ -16,8 +16,12 @@
   "durationMinYouth": 75,
   "shareCategories": ["E-Junioren", "F-Junioren", "G-Junioren", "Bambini"]
   },
+  "registration": {
+  "workerUrl": ""
+  },
   "notify": {
   "emails": ["fab.calcagno@gmail.com"],
-  "fromEmail": "noreply@platzcoach.de"
+  "fromEmail": "noreply@platzcoach.de",
+  "replyTo": "info@platzcoach.de"
   }
 }
