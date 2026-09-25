@@ -233,6 +233,25 @@
       "emailNotificationsEnabled": true,
       "phone": "015170164107",
       "contactPublic": "phone"
+    },
+    {
+      "id": "1d67889f-3194-43d7-9ead-2faa97e9b782",
+      "first": "Damian",
+      "last": "Cvetkov",
+      "email": "damian.cvetkov@gmail.com",
+      "admin": false,
+      "classes": {
+        "C-Jugend": []
+      },
+      "enc": {
+        "salt": "yHuEhywkFjHdS5kZFphZqA==",
+        "iv": "n/Deoq0ZOG8cCnRy",
+        "cipher": "iYM6nsengsTfJI7Qz6PgAgFzgoNG1iy1+LduP06uvIwjBU5lT41jmTCPxUyqDy5UPtJZS42Jy3HgokB1bzsJNE6socPVoiC1kvkUJu7ZBrCFFJCaBv1V0xxrM0KnN0O2akqw7rxas9Vnm3kChA=="
+      },
+      "created": "2026-09-25T18:36:52.413Z",
+      "emailNotificationsEnabled": true,
+      "phone": "17634944920",
+      "contactPublic": "phone"
     }
   ]
 }
