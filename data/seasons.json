@@ -10,7 +10,8 @@
         "a30f8c9b-96f9-4557-b28b-619e122080ea",
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
         "a21f28cb-3527-4337-ba43-9752dab0bcdb",
-        "cfe0a536-f595-475a-aef0-df62dfb09885"
+        "cfe0a536-f595-475a-aef0-df62dfb09885",
+        "f9f5d5e9-2907-46bb-b5a7-a04477c65b5a"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
@@ -33,13 +34,20 @@
             2,
             3
           ]
+        },
+        "f9f5d5e9-2907-46bb-b5a7-a04477c65b5a": {
+          "F-Jugend": [
+            2,
+            3
+          ]
         }
       },
       "trainerNames": [
         "",
         "",
         "Markus Vielhaber",
-        "Daniel Schauerte-Becker"
+        "Daniel Schauerte-Becker",
+        "Malak Khalil"
       ]
     }
   ]
