@@ -293,6 +293,27 @@
       "emailNotificationsEnabled": true,
       "phone": "+49 151 59429047",
       "contactPublic": "phone"
+    },
+    {
+      "id": "35b36d62-9cf2-40c1-8eee-9940273a6353",
+      "first": "Salvatore",
+      "last": "Macri",
+      "email": "macri.s.sm@googlemail.com",
+      "admin": false,
+      "classes": {
+        "D-Jugend": [
+          2
+        ]
+      },
+      "enc": {
+        "salt": "8LolUxkS1rS6m4V12hthXQ==",
+        "iv": "TNwo1Ja9ehDpw3de",
+        "cipher": "iSmgOqFK628hvcb3itHgCAze/FNGn+WSA/qX6rRSVnN4BKDkx847oDdkI6xgYvj5Jp0EwP9o47gcNbD8gsHzMvGpqEz9EilmjjvzYmlwPkOqasdsIiUxW0IplWDMEzrOisJwJJwehaD+Rq0RuA=="
+      },
+      "created": "2026-09-25T18:54:39.352Z",
+      "emailNotificationsEnabled": true,
+      "phone": "015120432568",
+      "contactPublic": "none"
     }
   ]
 }
