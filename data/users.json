@@ -137,6 +137,27 @@
       },
       "created": "2026-09-07T13:13:41.885Z",
       "locked": true
+    },
+    {
+      "id": "a21f28cb-3527-4337-ba43-9752dab0bcdb",
+      "first": "Markus",
+      "last": "Vielhaber",
+      "email": "info@bcw-software.de",
+      "admin": false,
+      "classes": {
+        "C-Jugend": [
+          2
+        ]
+      },
+      "enc": {
+        "salt": "BrK4XFI12EywV6k3TkPPGQ==",
+        "iv": "Yq6MctnslXel3Edm",
+        "cipher": "0blVkJxOJN8m4ACceXpS4ESr4QBeNnlUIOx7cd9qB7VOHXeixgmpzXrPoJLjWC9lKMa2jrlShZScfi7DEmm11MAvn9faEYZcjIZzBIf/K+zOE0JPI0j6BgPCBkjul3tAzRFuWiTjAZARluE0pA=="
+      },
+      "created": "2026-09-25T11:57:50.462Z",
+      "emailNotificationsEnabled": true,
+      "phone": "01722342821",
+      "contactPublic": "phone"
     }
   ]
 }
