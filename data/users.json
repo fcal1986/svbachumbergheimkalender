@@ -149,6 +149,27 @@
       "emailNotificationsEnabled": true,
       "phone": "01755210127",
       "contactPublic": "none"
+    },
+    {
+      "id": "bde8d374-560d-4037-9dea-322d7dd85ba9",
+      "first": "Sven",
+      "last": "Svejn",
+      "email": "svejn.sven@outlook.com",
+      "admin": false,
+      "classes": {
+        "D-Jugend": [
+          2
+        ]
+      },
+      "enc": {
+        "salt": "tL/RduLMUd7Hsrze1iaU1Q==",
+        "iv": "HSMhadeh0pbAg/Sm",
+        "cipher": "jyMqzLoTXSeVWjtJqur0jNospMkQ6O0legLEm+SjUuDdpBxiNBiJvbBv5YhDWgPqHyXjUr/ctbDcI+bvWWlhlbLy0rsBiuz3EX5yTpJz2XhOLRPAbFIxBQNgn0tpoeRb1eZUV7s3y7AH+SpAsQ=="
+      },
+      "created": "2026-09-25T18:36:35.119Z",
+      "emailNotificationsEnabled": true,
+      "phone": "017631039889",
+      "contactPublic": "phone"
     }
   ]
 }
