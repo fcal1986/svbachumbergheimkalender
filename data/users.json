@@ -360,16 +360,11 @@
       "last": "Schauerte-Becker",
       "email": "d.schauertebecker@aol.de",
       "admin": false,
-      "classes": {
-        "D-Jugend": [
-          2,
-          3
-        ]
-      },
+      "classes": {},
       "enc": {
-        "salt": "TxB4VRdZS66HjZut2yQ4+A==",
-        "iv": "Wrm2ryK9+NCzRGTa",
-        "cipher": "tMFM3kFWibCFJAXHOStcrbK0mXp+GDGBCOhSvZiF9KWmsCS7T02Xkr2CQtzNYnQngTS1rlElhdCCWZOw3rdBfKCs8ZsNrhTiME0RA5MyXBSibTkq7FwV6MtFZNGOcCnmB4anLcoKb8VrQ3qo9Q=="
+        "salt": "8JSSos1cd3tVqXe6wlDXsQ==",
+        "iv": "6M/oLdJl3+fyAFA9",
+        "cipher": "9cry6OyviTh0MAuOjdjG9miesMyMbPBEO5K9PO0JZGl2eIObZk+J3Bkkcf7PhswfqhkQnMyxGG8nIFI2pa0606wBcxPA56ckc1HIthFbf+P5/uWbm66jEuHSnybt1zobZIWyIkq/+169EAWZ4A=="
       },
       "created": "2026-09-25T19:31:21.338Z",
       "emailNotificationsEnabled": true,
