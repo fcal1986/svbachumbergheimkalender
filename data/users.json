@@ -73,8 +73,7 @@
       "admin": false,
       "classes": {
         "F-Jugend": [
-          2,
-          3
+          1
         ]
       },
       "enc": {
@@ -114,8 +113,7 @@
       "admin": false,
       "classes": {
         "C-Jugend": [
-          2,
-          3
+          1
         ]
       },
       "enc": {
@@ -239,8 +237,7 @@
       "admin": false,
       "classes": {
         "D-Jugend": [
-          1,
-          3
+          2
         ]
       },
       "enc": {
@@ -360,7 +357,11 @@
       "last": "Schauerte-Becker",
       "email": "d.schauertebecker@aol.de",
       "admin": false,
-      "classes": {},
+      "classes": {
+        "D-Jugend": [
+          1
+        ]
+      },
       "enc": {
         "salt": "8JSSos1cd3tVqXe6wlDXsQ==",
         "iv": "6M/oLdJl3+fyAFA9",
@@ -369,6 +370,25 @@
       "created": "2026-09-25T19:31:21.338Z",
       "emailNotificationsEnabled": true,
       "phone": "017620975763",
+      "contactPublic": "phone"
+    },
+    {
+      "id": "871986c9-429e-4576-affb-961cf5f374f6",
+      "first": "Cetin",
+      "last": "Kurt",
+      "email": "cetin49@icloud.com",
+      "admin": false,
+      "classes": {
+        "B-Jugend": []
+      },
+      "enc": {
+        "salt": "3wEOyzX51TI/2c35tUyawQ==",
+        "iv": "STQSEyDh+a/Aayl0",
+        "cipher": "GIz7QbRE/GfgRWoClaa3v1FRsPEaF+CdxvpNhp897C0xaWVI60vsWuC65Z/Zgl0txla9VVpE9+VqN/FXdhdWef4DPtZBOItYLoHOBnNarVYkXV0zSjCMXHcHz92NzPqxYXRXbPoXlcTH5vH81w=="
+      },
+      "created": "2026-09-25T20:03:15.061Z",
+      "emailNotificationsEnabled": true,
+      "phone": "0157 32117051",
       "contactPublic": "phone"
     }
   ]
