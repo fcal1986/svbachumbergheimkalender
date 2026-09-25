@@ -232,12 +232,10 @@
       "note": "",
       "trainerIds": [
         "2def1cdd-2baf-4442-b139-4bc3abe69405",
-        "82278cba-af88-4663-bd3c-937db4a7b122",
         "d1cc03c0-324c-40de-a4f8-49d75efeb828"
       ],
       "trainerNames": [
         "Sascha Rabura",
-        "Bülent Gencsen",
         "Marcel Mohr"
       ],
       "cancelled": [],
@@ -262,12 +260,14 @@
       "trainerIds": [
         "bde8d374-560d-4037-9dea-322d7dd85ba9",
         "35b36d62-9cf2-40c1-8eee-9940273a6353",
-        "0f7e4fdb-535c-4b5c-95d9-8bdbe98300c7"
+        "0f7e4fdb-535c-4b5c-95d9-8bdbe98300c7",
+        "82278cba-af88-4663-bd3c-937db4a7b122"
       ],
       "trainerNames": [
         "Sven Svejn",
         "Salvatore Macri",
-        "Daniel Schauerte-Becker"
+        "Daniel Schauerte-Becker",
+        "Bülent Gencsen"
       ],
       "validFrom": "2026-09-09",
       "validUntil": null,
@@ -516,12 +516,10 @@
       "note": "",
       "trainerIds": [
         "2def1cdd-2baf-4442-b139-4bc3abe69405",
-        "82278cba-af88-4663-bd3c-937db4a7b122",
         "d1cc03c0-324c-40de-a4f8-49d75efeb828"
       ],
       "trainerNames": [
         "Sascha Rabura",
-        "Bülent Gencsen",
         "Marcel Mohr"
       ],
       "validFrom": "2026-09-09",
@@ -545,12 +543,14 @@
       "trainerIds": [
         "bde8d374-560d-4037-9dea-322d7dd85ba9",
         "35b36d62-9cf2-40c1-8eee-9940273a6353",
-        "0f7e4fdb-535c-4b5c-95d9-8bdbe98300c7"
+        "0f7e4fdb-535c-4b5c-95d9-8bdbe98300c7",
+        "82278cba-af88-4663-bd3c-937db4a7b122"
       ],
       "trainerNames": [
         "Sven Svejn",
         "Salvatore Macri",
-        "Daniel Schauerte-Becker"
+        "Daniel Schauerte-Becker",
+        "Bülent Gencsen"
       ],
       "validFrom": "2026-09-09",
       "validUntil": null,
