@@ -557,6 +557,20 @@
   .btn-ghost-light{width:100%;background:transparent;border:1.5px solid var(--line);color:var(--ink-soft);border-radius:12px;padding:13px;font-family:'Inter';font-weight:600;font-size:13px;cursor:pointer;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;}
   .btn-ghost-light svg{width:17px;height:17px;stroke:var(--green);}
   .login-foot{color:var(--ink-soft);font-size:11px;text-align:center;margin-top:20px;line-height:1.6;}
+  #register{position:fixed;inset:0;z-index:61;background:var(--white);display:none;flex-direction:column;align-items:center;padding:calc(24px + env(safe-area-inset-top)) 16px 32px;overflow-y:auto;}
+  #register.show{display:flex;}
+  #register .login-box{max-width:420px;margin:auto 0;}
+  .reg-label{display:block;font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin:8px 0 6px;}
+  .reg-check{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;line-height:1.5;color:var(--ink);margin:12px 0 4px;cursor:pointer;}
+  #register .reg-check input{width:18px;height:18px;flex:none;margin:2px 0 0;padding:0;accent-color:var(--green);}
+  #register .reg-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;}
+  .reg-item{border:1.5px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;}
+  .reg-actions{display:flex;gap:8px;margin-top:8px;}
+  .reg-actions>button,.reg-actions>a{flex:1;min-width:0;}
+  .reg-linkbtn{margin:0;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:12px;}
+  .reg-item.reg-dup{border-color:#F5C6C0;}
+  .reg-banner{display:flex;align-items:center;gap:10px;background:#EAF5EF;border:1px solid #B9DFC8;color:#1E5730;border-radius:14px;padding:12px 14px;margin-bottom:10px;font-size:12.5px;cursor:pointer;}
+  .reg-banner svg{width:20px;height:20px;stroke:#1E5730;flex:none;}
 
   /* ── TOAST / MODAL ── */
   .toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(88px + env(safe-area-inset-bottom));width:calc(100% - 36px);max-width:484px;background:var(--ink);color:#F0F3F7;padding:12px 14px;border-radius:12px;font-size:12px;display:flex;align-items:flex-start;gap:8px;opacity:0;transition:all .25s;pointer-events:none;z-index:80;line-height:1.45;}
@@ -611,6 +625,7 @@
   <div class="pane active" data-pane="start">
     <div class="content">
       <div id="install-banner"></div>
+      <div id="reg-banner"></div>
       <div id="session-debug" style="display:none;font-size:10px;color:var(--ink-soft);background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:6px 10px;margin-bottom:8px;"></div>
       <div id="lock-start-banner"></div>
       <div class="start-daycard">
@@ -859,6 +874,12 @@
   </div>
 </div>
 
+<!-- REGISTRIERUNG (über Einladungslink #invite=…) -->
+<div id="register">
+  <button class="login-close" onclick="closeRegister()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <div class="login-box" id="reg-body"></div>
+</div>
+
 <div id="saving-pill"><span class="spinner" style="border-color:rgba(255,255,255,.3);border-top-color:#fff;width:13px;height:13px;"></span><span id="saving-msg">Wird gespeichert …</span></div>
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span id="toast-text"></span></div>
 <div class="modal" id="modal">
@@ -936,7 +957,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='22.09.2026 · 7';
+const APP_VERSION='25.09.2026 · 2';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -2233,6 +2254,7 @@ function renderStart(){
   document.getElementById('st-summary').textContent=parts.length?parts.join(' · '):'Heute nichts geplant';
 
   renderInstallBanner();
+  renderRegBanner();
   renderLockStartBanner();
   renderPitchToday();
   renderStartStatus();
@@ -3831,7 +3853,7 @@ function renderKonto(){
   if(!kontoTab||kontoTab==='protokoll'&&!isAdmin)kontoTab='profil';
   const tabs=[
     {id:'profil',label:'Profil'},
-    ...(isAdmin?[{id:'saisons',label:'Saisons'},{id:'zugaenge',label:'Zugänge'},{id:'protokoll',label:'Protokoll'}]:[])
+    ...(isAdmin?[{id:'saisons',label:'Saisons'},{id:'zugaenge',label:'Zugänge'+(regIsAdminSession()&&REGSTATE.list.length?' ('+REGSTATE.list.length+')':'')},{id:'protokoll',label:'Protokoll'}]:[])
   ];
   let tabsH='<div class="seg" style="margin-bottom:12px;">';
   tabs.forEach(t=>{ const active=kontoTab===t.id; tabsH+='<button type="button"'+(active?' class="on"':'')+' onclick="setKontoTab(this.dataset.tab)" data-tab="'+t.id+'">'+t.label+'</button>'; });
@@ -3850,13 +3872,14 @@ function renderKonto(){
   }else if(kontoTab==='saisons'){
     h+=seasonManagementCard()+resourceLockCard();
   }else if(kontoTab==='zugaenge'){
-    h+=adminNewUserCard()+adminUserListCard();
+    h+='<div id="reg-admin"></div>'+adminNewUserCard()+adminUserListCard();
   }else if(kontoTab==='protokoll'){
     h+=rulesInfoCard()+logCard();
   }
 
   box.innerHTML=h;
   if(kontoTab==='protokoll'&&logExpanded)loadLogIfNeeded();
+  if(kontoTab==='zugaenge'){ if(regIsAdminSession()&&(!REGSTATE.loaded||REGSTATE.forToken!==session.token)) loadRegData(); else renderRegAdmin(); }
 }
 function saveAdminToken(){
   const t=document.getElementById('ad-token').value.trim();
@@ -3865,6 +3888,63 @@ function saveAdminToken(){
   session.token=t;
   localStorage.setItem('svbb_session',JSON.stringify(session)); localStorage.setItem('pc_was_logged_in','1');
   showToast('Token gespeichert.'); renderKonto();
+}
+/* Gemeinsamer Kern für "Zugang anlegen": wird vom manuellen Formular (createUser) UND von der
+   Freigabe einer Selbstregistrierung (approveRegistration) genutzt, damit beide Wege exakt
+   denselben Ablauf haben – users.json, Saison-Zuordnung, Trainer-Sync, Willkommens-Mail
+   (über die Commit-Nachricht "Zugang angelegt: …") und Passwort-Mail (über Dispatch).
+   Wirft bei Fehlern; USERS wird dann auf den vorherigen Stand zurückgesetzt. */
+function normMail(m){ return String(m||'').trim().toLowerCase(); }
+function findUserByEmail(mail){ const m=normMail(mail); return USERS.find(u=>normMail(u.email)===m)||null; }
+/* Holt users.json direkt über die GitHub-API (nicht über die Webseite, die bis zu einigen Minuten
+   hinterherhinken kann) und übernimmt diesen Stand. So sieht die Dubletten-Prüfung auch Zugänge,
+   die ein anderer Admin gerade erst angelegt hat, und das anschließende Speichern baut auf dem
+   echten aktuellen Dateistand auf. */
+async function refreshUsersFromGitHub(){
+  const r=await fetch('https://api.github.com/repos/'+CFG.repo+'/contents/data/users.json?ref='+CFG.branch,{
+    headers:{Authorization:'Bearer '+session.token,Accept:'application/vnd.github+json'},cache:'no-store'});
+  if(!r.ok) throw new Error('Aktuelle Zugänge konnten nicht geprüft werden (GitHub '+r.status+'). Bitte nochmal versuchen.');
+  const d=await r.json();
+  const data=JSON.parse(dec.decode(unb64(String(d.content||'').replace(/\s/g,''))));
+  if(!Array.isArray(data.users)) throw new Error('users.json hat ein unerwartetes Format.');
+  USERS=data.users;
+  if(d.sha) _shaCache['data/users.json']=d.sha;
+  syncClassesFromActiveSeason();
+}
+async function createUserCore({first,last,mail,pass,isAdm,classes,targetSeason,phone,contactPublic}){
+  mail=normMail(mail);
+  // Letzte, harte Sperre für beide Wege (manuell + Freigabe): eine E-Mail = genau ein Zugang.
+  const dup=findUserByEmail(mail);
+  if(dup) throw new Error('Für '+mail+' gibt es schon einen Zugang ('+dup.first+' '+dup.last+').');
+  const backup=JSON.stringify(USERS);
+  try{
+    const curSeasonForCreate=getCurrentSeason();
+    // u.classes ist nur ein Cache der AKTUELLEN Saison (siehe syncClassesFromActiveSeason) – wird
+    // eine andere (z.B. zukünftige) Saison gewählt, muss der Cache trotzdem leer starten,
+    // sonst zeigt die Zugänge-Liste kurzzeitig Teams einer noch gar nicht aktiven Saison an.
+    const initialClasses=(targetSeason&&curSeasonForCreate&&targetSeason.id===curSeasonForCreate.id)?classes:{};
+    const encRec=await encryptToken(session.token,pass);
+    const newU={id:crypto.randomUUID(),first,last,email:mail,admin:!!isAdm,classes:initialClasses,enc:encRec,created:new Date().toISOString(),emailNotificationsEnabled:true};
+    if(phone){ newU.phone=phone; newU.contactPublic=contactPublic||'none'; }
+    USERS.push(newU);
+    await saveUsers('Zugang angelegt: '+first+' '+last+(isAdm?' (Admin)':'')+' – '+session.name);
+    syncTrainerAssignments(newU).then(n=>{ if(n>0) saveTraining('Trainer-Zuordnung aktualisiert: '+newU.first+' '+newU.last+' – '+session.name).catch(()=>{}); }).catch(()=>{});
+    // Neuen Zugang der gewählten Saison zuordnen (Standard: aktuelle Saison), inkl. der
+    // ausgewählten Teams – die Team-Zuordnung gehört der Saison, nicht dem Nutzer (siehe
+    // syncClassesFromActiveSeason).
+    if(targetSeason) addUserToSeason(targetSeason.id,newU.id,false,classes).catch(()=>{});
+    // Passwort-Mail läuft NICHT über einen Commit (würde bei öffentlichem Repo für immer
+    // sichtbar in der Git-Historie landen!), sondern über ein GitHub-"Dispatch"-Event: das
+    // Passwort geht nur kurz durchs Action-Log, nie in eine dauerhaft gespeicherte Datei.
+    ghDispatch('welcome-password',{name:first+' '+last,email:mail,password:pass}).catch(err=>{
+      console.error('Passwort-Mail-Dispatch fehlgeschlagen:',err);
+      showToast('Zugang angelegt – Passwort-Mail konnte aber nicht ausgelöst werden: '+err.message,6000);
+    });
+    return newU;
+  }catch(e){
+    USERS=JSON.parse(backup);
+    throw e;
+  }
 }
 async function createUser(){
   if(!session.token){showToast('Erst den GitHub-Token hinterlegen.');return;}
@@ -3881,37 +3961,17 @@ async function createUser(){
   const btn=document.getElementById('nu-btn');
   btn.disabled=true;
   document.getElementById('nu-label').innerHTML='<span class="spinner" style="width:13px;height:13px;border-color:rgba(0,0,0,.15);border-top-color:var(--ink);display:inline-block;vertical-align:middle;margin-right:5px;"></span>Lege an …';
-  const backup=JSON.stringify(USERS);
   try{
     const seasonSel=document.getElementById('nu-season');
     const targetSeasonId=seasonSel?seasonSel.value:getCurrentSeason()?.id;
     const targetSeason=targetSeasonId?SEASONS.find(s=>s.id===targetSeasonId):null;
-    const curSeasonForCreate=getCurrentSeason();
-    // u.classes ist nur ein Cache der AKTUELLEN Saison (siehe syncClassesFromActiveSeason) – wird
-    // hier eine andere (z.B. zukünftige) Saison gewählt, muss der Cache trotzdem leer starten,
-    // sonst zeigt die Zugänge-Liste kurzzeitig Teams einer noch gar nicht aktiven Saison an.
-    const initialClasses=(targetSeason&&curSeasonForCreate&&targetSeason.id===curSeasonForCreate.id)?classes:{};
-    const encRec=await encryptToken(session.token,pass);
-    const newU={id:crypto.randomUUID(),first,last,email:mail,admin:isAdm,classes:initialClasses,enc:encRec,created:new Date().toISOString(),emailNotificationsEnabled:true};
-    USERS.push(newU);
-    await saveUsers('Zugang angelegt: '+first+' '+last+(isAdm?' (Admin)':'')+' – '+session.name);
-    syncTrainerAssignments(newU).then(n=>{ if(n>0) saveTraining('Trainer-Zuordnung aktualisiert: '+newU.first+' '+newU.last+' – '+session.name).catch(()=>{}); }).catch(()=>{});
-    // Neuen Zugang der gewählten Saison zuordnen (Standard: aktuelle Saison), inkl. der hier
-    // ausgewählten Teams – die Team-Zuordnung gehört der Saison, nicht dem Nutzer (siehe
-    // syncClassesFromActiveSeason).
-    if(targetSeason) addUserToSeason(targetSeason.id,newU.id,false,classes).catch(()=>{});
+    await refreshUsersFromGitHub();
+    await createUserCore({first,last,mail,pass,isAdm,classes,targetSeason});
     showToast(first+' kann sich jetzt anmelden'+(isAdm?' und darf alles verwalten.':'.')+(targetSeason?' Bereits "'+targetSeason.label+'" zugeordnet.':''));
-    // Passwort-Mail läuft NICHT über einen Commit (würde bei öffentlichem Repo für immer
-    // sichtbar in der Git-Historie landen!), sondern über ein GitHub-"Dispatch"-Event: das
-    // Passwort geht nur kurz durchs Action-Log, nie in eine dauerhaft gespeicherte Datei.
-    ghDispatch('welcome-password',{name:first+' '+last,email:mail,password:pass}).catch(err=>{
-      console.error('Passwort-Mail-Dispatch fehlgeschlagen:',err);
-      showToast('Zugang angelegt – Passwort-Mail konnte aber nicht ausgelöst werden: '+err.message,6000);
-    });
     nuClasses={};
     renderKonto();
   }catch(e){
-    USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000);
+    showToast('Fehler: '+e.message,6000);
     const l=document.getElementById('nu-label'); if(l)l.textContent='Zugang anlegen';
     const b=document.getElementById('nu-btn'); if(b)b.disabled=false;
   }
@@ -4529,6 +4589,409 @@ async function changePassword(){
   finally{ btn.disabled=false; lbl.textContent=old; }
 }
 
+/* ---------- Selbstregistrierung mit Einladungslink ----------
+   Ablauf: Admin erzeugt einen Einladungslink (Konto → Zugänge) und verschickt ihn z. B. per
+   WhatsApp. Über den Link (…/#invite=CODE) öffnet sich die Registrierungsmaske. Die Angaben
+   gehen an den Registrierungs-Worker (Cloudflare) und werden dort PRIVAT gespeichert – nicht
+   im öffentlichen Repo. Admins sehen die offenen Anmeldungen, können die Mannschaften
+   anpassen und freigeben oder ablehnen. Freigeben nutzt createUserCore(), also exakt den
+   Ablauf wie beim manuellen Anlegen (inkl. Willkommens- und Passwort-Mail).
+   Einrichtung: data/config.json → "registration": {"workerUrl": "https://…workers.dev"} */
+function regEnabled(){ return !!(CFG&&CFG.registration&&CFG.registration.workerUrl); }
+async function regApi(path,opts){
+  opts=opts||{};
+  const base=String((CFG.registration&&CFG.registration.workerUrl)||'').replace(/\/+$/,'');
+  if(!base) throw new Error('Die Selbstregistrierung ist noch nicht eingerichtet.');
+  const headers={};
+  if(opts.body) headers['Content-Type']='application/json';
+  if(opts.auth){
+    if(!session||!session.token) throw new Error('Kein Schreib-Token vorhanden.');
+    headers.Authorization='Bearer '+session.token;
+  }
+  let r;
+  try{
+    r=await fetch(base+path,{method:opts.method||'GET',headers,body:opts.body?JSON.stringify(opts.body):undefined,cache:'no-store'});
+  }catch(e){ throw new Error('Keine Verbindung zum Anmeldeserver. Bitte Internetverbindung prüfen.'); }
+  let data={};
+  try{ data=await r.json(); }catch(e){}
+  if(!r.ok) throw new Error(data.error||('Anmeldeserver antwortet mit Fehler '+r.status+'.'));
+  return data;
+}
+const REG_PHONE_RE=/^[+\d][\d\s\-/()]{5,24}$/;
+const REG_MAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function regInviteLink(code){ return location.origin+location.pathname+'#invite='+code; }
+function fmtDateTime(iso){
+  const d=new Date(iso); if(isNaN(d))return '';
+  return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear()+', '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+' Uhr';
+}
+function fmtDateOnly(iso){ const d=new Date(iso); if(isNaN(d))return ''; return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear(); }
+function classesLabelHTML(cls){
+  const n=normalizeClasses(cls||{}); const keys=Object.keys(n);
+  if(!keys.length) return '<span class="sub" style="font-size:11px;">keine Mannschaft gewählt</span>';
+  return keys.map(t=>{const sq=n[t]||[];const lab=isJugend(t)&&sq.length?(' · '+sq.map(s=>jugendLetter(t)+s).join(', ')):(isJugend(t)?' · alle':'');
+    return '<span class="badge-res" style="font-size:9.5px;padding:3px 7px;">'+esc(t)+esc(lab)+'</span>';}).join(' ');
+}
+
+/* Mannschafts-Auswahl, wiederverwendbar (Registrierungsmaske + Anpassen bei der Freigabe).
+   Gleiches Format wie beim manuellen Anlegen: {Team: [Squad-Nummern]}, leeres Array = alle. */
+const CP={};
+function cpToggleTeam(pid,team){ const c=CP[pid]; if(c.hasOwnProperty(team))delete c[team]; else c[team]=[]; cpRender(pid); }
+function cpToggleSquad(pid,team,n){
+  const c=CP[pid]; if(!c.hasOwnProperty(team))c[team]=[];
+  const ex=(c[team]&&c[team].length)?[...c[team]]:[1,2,3];
+  const i=ex.indexOf(n); if(i>=0)ex.splice(i,1); else ex.push(n);
+  ex.sort((a,b)=>a-b);
+  if(!ex.length){ delete c[team]; } else c[team]=ex.length===3?[]:ex;
+  cpRender(pid);
+}
+function cpRender(pid){
+  if(pid!=='reg'){ renderRegAdmin(); return; } // Admin-Karte komplett neu, damit die Mannschafts-Anzeige oben mitzieht
+  const el=document.getElementById('cp-'+pid); if(el) el.innerHTML=cpHTML(pid);
+}
+function cpHTML(pid){
+  const c=CP[pid]||{};
+  return '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:6px;">'+ALL_CLASSES.map(team=>{
+    const on=c.hasOwnProperty(team), sq=on?(c[team]||[]):[], L=jugendLetter(team);
+    const wide=on&&isJugend(team);
+    let row='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;'+(wide?'flex-basis:100%;':'')+'">';
+    row+='<div class="res-chip'+(on?' on':'')+'" onclick="cpToggleTeam(\''+pid+'\',\''+team+'\')" style="padding:6px 10px;font-size:11.5px;">'+esc(team)+'</div>';
+    if(on&&isJugend(team)){
+      [1,2,3].forEach(n=>{ const sqOn=!sq.length||sq.includes(n);
+        row+='<span class="squad-sq-chip'+(sqOn?' on':'')+'" onclick="cpToggleSquad(\''+pid+'\',\''+team+'\','+n+')">'+L+n+'</span>'; });
+      row+='<span style="font-size:10px;color:var(--ink-soft);">'+(sq.length?sq.map(s=>L+s).join(', '):'alle '+esc(team.replace('-Jugend',''))+'-Teams')+'</span>';
+    }
+    return row+'</div>';
+  }).join('')+'</div>';
+}
+
+/* ── Registrierungsmaske (öffentlich, über den Einladungslink) ── */
+let REGFORM={code:'',state:'idle',error:''};
+function openInviteFromHash(){
+  const m=location.hash.match(/^#invite=([A-Za-z0-9_-]{10,64})$/);
+  if(m) openRegister(m[1]);
+}
+function clearInviteHash(){ if(/^#invite=/.test(location.hash)) history.replaceState(null,'',location.pathname+location.search); }
+async function openRegister(code){
+  REGFORM={code,state:'checking',error:''};
+  CP.reg={};
+  document.getElementById('register').classList.add('show');
+  renderRegister();
+  if(!regEnabled()){ REGFORM.state='invalid'; REGFORM.error='Die Selbstregistrierung ist bei diesem Verein noch nicht eingerichtet.'; renderRegister(); return; }
+  try{
+    const r=await regApi('/invite/'+encodeURIComponent(code));
+    REGFORM.state=r.valid?'form':'invalid';
+    if(!r.valid) REGFORM.error='Dieser Einladungslink ist abgelaufen oder wurde ersetzt. Bitte frag im Verein nach dem aktuellen Link.';
+  }catch(e){ REGFORM.state='invalid'; REGFORM.error=e.message; }
+  renderRegister();
+}
+function closeRegister(){ document.getElementById('register').classList.remove('show'); clearInviteHash(); }
+function renderRegister(){
+  const box=document.getElementById('reg-body'); if(!box)return;
+  const club=esc(String(CFG&&CFG.clubName||'deinem Verein').replace(/\.+$/,''));
+  let h='<img class="login-crest" src="assets/logo.svg" alt="platzcoach" style="width:150px;margin-bottom:14px;">';
+  if(REGFORM.state==='checking'){
+    h+='<div style="text-align:center;padding:30px 0;"><span class="spinner" style="width:22px;height:22px;border-color:rgba(0,0,0,.12);border-top-color:var(--green);display:inline-block;"></span><p class="sub" style="margin-top:12px;">Einladung wird geprüft …</p></div>';
+  }else if(REGFORM.state==='invalid'){
+    h+='<h1>Link ungültig</h1><p class="sub">'+esc(REGFORM.error)+'</p><button class="btn-yellow" onclick="closeRegister()">Zu Platzcoach</button>';
+  }else if(REGFORM.state==='done'){
+    h+='<div style="text-align:center;"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:54px;height:54px;stroke:var(--green);margin-bottom:8px;"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg></div>'
+      +'<h1>Danke, '+esc(REGFORM.first||'')+'!</h1>'
+      +'<p class="sub">Deine Anmeldung ist beim Vorstand angekommen. Sobald ein Admin sie freigibt, bekommst du <b>zwei E-Mails</b>: eine Willkommens-Mail und eine mit deinem Start-Passwort.</p>'
+      +'<p class="sub" style="margin-top:-8px;">Bis dahin kannst du alle Termine schon ohne Anmeldung ansehen.</p>'
+      +'<button class="btn-yellow" onclick="closeRegister()">Termine ansehen</button>';
+  }else{
+    const busy=REGFORM.state==='sending';
+    h+='<h1>Als Trainer registrieren</h1>'
+      +'<p class="sub">Für Platzcoach bei '+club+'. Nach der Freigabe durch den Vorstand bekommst du deine Zugangsdaten per E-Mail.</p>'
+      +'<div class="login-err'+(REGFORM.error?' show':'')+'" id="reg-err">'+esc(REGFORM.error)+'</div>'
+      +'<form onsubmit="event.preventDefault();submitRegister();" novalidate>'
+      +'<input type="text" id="rg-first" placeholder="Vorname" autocomplete="given-name" value="'+esc(REGFORM.first||'')+'">'
+      +'<input type="text" id="rg-last" placeholder="Nachname" autocomplete="family-name" value="'+esc(REGFORM.last||'')+'">'
+      +'<input type="email" id="rg-mail" placeholder="E-Mail (wird dein Login)" autocomplete="email" autocapitalize="none" spellcheck="false" value="'+esc(REGFORM.email||'')+'">'
+      +'<input type="tel" id="rg-phone" placeholder="Telefonnummer" autocomplete="tel" value="'+esc(REGFORM.phone||'')+'">'
+      +'<input type="text" id="rg-website" class="reg-hp" tabindex="-1" autocomplete="off" aria-hidden="true">'
+      +'<span class="reg-label">Welche Mannschaft(en) trainierst du?</span>'
+      +'<p class="helptext" style="margin:0 0 8px;">Bei Jugendmannschaften danach dein Team antippen, z. B. nur E2. Mehrere Mannschaften sind möglich.</p>'
+      +'<div id="cp-reg">'+cpHTML('reg')+'</div>'
+      +'<label class="reg-check"><input type="checkbox" id="rg-showphone"'+(REGFORM.showPhone?' checked':'')+'><span>Meine Telefonnummer in Platzcoach anzeigen, damit andere Trainer mich erreichen können. <span style="color:var(--ink-soft);">Ohne Haken sieht sie nur der Vorstand bei der Freigabe. Später im Profil änderbar.</span></span></label>'
+      +'<label class="reg-check"><input type="checkbox" id="rg-consent"'+(REGFORM.consent?' checked':'')+'><span>Ich bin einverstanden, dass meine Angaben an den Vorstand von '+club+' übermittelt und nach der Freigabe in Platzcoach gespeichert werden.</span></label>'
+      +'<p class="helptext" style="margin:0 0 12px;">Hinweis: Name, E-Mail und Mannschaften werden nach der Freigabe in den Vereinsdaten von Platzcoach gespeichert, die derzeit technisch öffentlich abrufbar sind.</p>'
+      +'<button type="submit" class="btn-yellow" id="rg-btn"'+(busy?' disabled':'')+'>'+(busy?'<span class="spinner" style="width:13px;height:13px;border-color:rgba(255,255,255,.3);border-top-color:#fff;display:inline-block;vertical-align:middle;margin-right:6px;"></span>Wird gesendet …':'Registrierung absenden')+'</button>'
+      +'</form>'
+      +'<p class="login-foot">Schon einen Zugang? <a href="#" onclick="event.preventDefault();closeRegister();openLogin();" style="color:var(--green);font-weight:700;">Hier anmelden</a></p>';
+  }
+  box.innerHTML=h;
+}
+function regReadForm(){
+  const v=id=>(document.getElementById(id)||{}).value||'';
+  REGFORM.first=v('rg-first').trim(); REGFORM.last=v('rg-last').trim();
+  REGFORM.email=v('rg-mail').trim().toLowerCase(); REGFORM.phone=v('rg-phone').trim();
+  REGFORM.website=v('rg-website');
+  REGFORM.showPhone=!!(document.getElementById('rg-showphone')||{}).checked;
+  REGFORM.consent=!!(document.getElementById('rg-consent')||{}).checked;
+}
+async function submitRegister(){
+  if(REGFORM.state==='sending')return;
+  regReadForm();
+  const f=REGFORM, errs=[];
+  if(!f.first||!f.last) errs.push('Bitte Vor- und Nachname eintragen.');
+  if(!REG_MAIL_RE.test(f.email)) errs.push('Bitte eine gültige E-Mail-Adresse eintragen.');
+  if(!REG_PHONE_RE.test(f.phone)) errs.push('Bitte eine gültige Telefonnummer eintragen (z. B. 0172 1234567).');
+  if(!Object.keys(CP.reg||{}).length) errs.push('Bitte mindestens eine Mannschaft auswählen.');
+  if(!f.consent) errs.push('Bitte den Haken beim Einverständnis setzen.');
+  if(!errs.length&&USERS.some(u=>(u.email||'').toLowerCase()===f.email)) errs.push('Für diese E-Mail gibt es schon einen Zugang. Du kannst dich direkt anmelden.');
+  if(errs.length){ f.error=errs.join(' '); renderRegister(); document.getElementById('register').scrollTop=0; return; }
+  f.error=''; f.state='sending'; renderRegister();
+  try{
+    await regApi('/register',{method:'POST',body:{code:f.code,first:f.first,last:f.last,email:f.email,phone:f.phone,showPhone:f.showPhone,classes:CP.reg,consent:true,website:f.website}});
+    f.state='done'; clearInviteHash();
+  }catch(e){ f.state='form'; f.error=e.message; }
+  renderRegister(); document.getElementById('register').scrollTop=0;
+}
+
+/* ── Admin: Einladungslink + offene Anmeldungen (Konto → Zugänge) ── */
+let REGSTATE={loaded:false,loading:false,error:'',invite:null,list:[],editing:null,busy:{},days:14,forToken:null};
+function regIsAdminSession(){ return !!(session&&session.isAdmin&&session.token&&regEnabled()); }
+async function loadRegData(){
+  if(!regIsAdminSession()||REGSTATE.loading)return;
+  REGSTATE.loading=true; REGSTATE.error=''; renderRegAdmin();
+  try{
+    const [inv,regs]=await Promise.all([regApi('/admin/invite',{auth:true}),regApi('/admin/registrations',{auth:true})]);
+    REGSTATE.invite=inv.invite||null; REGSTATE.list=regs.registrations||[];
+    REGSTATE.list.forEach(r=>{ if(!CP['r'+r.id]) CP['r'+r.id]=JSON.parse(JSON.stringify(r.classes||{})); });
+    REGSTATE.loaded=true; REGSTATE.forToken=session.token;
+  }catch(e){ REGSTATE.error=e.message; REGSTATE.loaded=true; }
+  REGSTATE.loading=false;
+  renderRegAdmin(); updateRegBadges();
+}
+function updateRegBadges(){
+  const n=regIsAdminSession()?REGSTATE.list.length:0;
+  const tab=document.querySelector('#konto-body .seg button[data-tab="zugaenge"]');
+  if(tab) tab.textContent='Zugänge'+(n?' ('+n+')':'');
+  renderRegBanner();
+}
+function renderRegBanner(){
+  const el=document.getElementById('reg-banner'); if(!el)return;
+  if(!regIsAdminSession()){
+    if(REGSTATE.loaded){ REGSTATE={...REGSTATE,loaded:false,invite:null,list:[],forToken:null}; }
+    el.innerHTML=''; return;
+  }
+  if((!REGSTATE.loaded||REGSTATE.forToken!==session.token)&&!REGSTATE.loading){ loadRegData(); return; }
+  const n=REGSTATE.list.length;
+  el.innerHTML=n?('<div class="reg-banner" onclick="goto(\'konto\');setKontoTab(\'zugaenge\');">'
+    +'<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-3.9 3.1-6 7-6s7 2.1 7 6"/><path d="M19 8v6M16 11h6"/></svg>'
+    +'<span><b>'+n+' neue Anmeldung'+(n===1?'':'en')+'</b> warte'+(n===1?'t':'n')+' auf Freigabe</span><span style="margin-left:auto;font-weight:700;white-space:nowrap;">Ansehen →</span></div>'):'';
+}
+function renderRegAdmin(){
+  const el=document.getElementById('reg-admin'); if(!el)return;
+  const ico='<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.7-1.7"/></svg>';
+  let h='<div class="card"><h4>'+ico+'Selbstregistrierung</h4>';
+  if(!regEnabled()){
+    el.innerHTML=h+'<p class="sub">Noch nicht eingerichtet. In <b>data/config.json</b> fehlt <b>"registration": {"workerUrl": "…"}</b> – siehe Anleitung README-REGISTRIERUNG.md.</p></div>'; return;
+  }
+  if(!session.token){ el.innerHTML=h+'<p class="sub">Erst den GitHub-Token hinterlegen.</p></div>'; return; }
+  if(REGSTATE.loading&&!REGSTATE.loaded){
+    el.innerHTML=h+'<p class="sub"><span class="spinner" style="width:12px;height:12px;border-color:rgba(0,0,0,.12);border-top-color:var(--green);display:inline-block;vertical-align:middle;margin-right:6px;"></span>Lade Anmeldungen …</p></div>'; return;
+  }
+  if(REGSTATE.error){
+    el.innerHTML=h+'<div class="banner warn" style="margin:8px 0 0;">'+esc(REGSTATE.error)+'</div><button class="ghost-btn" onclick="loadRegData()">Erneut versuchen</button></div>'; return;
+  }
+  // Einladungslink
+  const inv=REGSTATE.invite;
+  if(inv){
+    const link=regInviteLink(inv.code);
+    h+='<p class="sub">Diesen Link an die Trainer schicken. Wer ihn öffnet, kann sich registrieren. Gültig bis <b>'+fmtDateOnly(inv.expires)+'</b>.</p>'
+      +'<div class="field" style="margin:8px 0;"><input type="text" id="reg-link" readonly value="'+esc(link)+'" onclick="this.select()" style="font-size:12px;"></div>'
+      +'<div class="reg-actions">'
+      +'<button class="submit-btn" style="margin:0;" onclick="shareInviteWhatsApp()">Per WhatsApp teilen</button>'
+      +'<button class="cancel-btn" style="margin:0;" onclick="copyInviteLink()">Link kopieren</button></div>'
+      +'<div class="reg-actions">'
+      +'<button class="cancel-btn" style="margin:0;font-size:12px;" onclick="createInvite()">Neuen Link erzeugen</button>'
+      +'<button class="cancel-btn" style="margin:0;font-size:12px;color:#8E2A1D;" onclick="disableInvite()">Link deaktivieren</button></div>';
+  }else{
+    h+='<p class="sub">Erzeuge einen Einladungslink und schicke ihn z. B. in die Trainer-WhatsApp-Gruppe. Neue Trainer registrieren sich selbst, du gibst sie hier frei.</p>'
+      +'<span class="reg-label" style="margin-top:10px;">Gültig für</span><div class="seg" style="margin-bottom:8px;">'
+      +[7,14,30].map(d=>'<button type="button"'+(REGSTATE.days===d?' class="on"':'')+' onclick="REGSTATE.days='+d+';renderRegAdmin();">'+d+' Tage</button>').join('')+'</div>'
+      +'<button class="submit-btn" onclick="createInvite()">Einladungslink erzeugen</button>';
+  }
+  h+='</div>';
+  // Offene Anmeldungen
+  const list=REGSTATE.list;
+  h+='<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;"><h4 style="margin:0;">'
+    +'<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-3.9 3.1-6 7-6s7 2.1 7 6"/><path d="M19 8v6M16 11h6"/></svg>'
+    +'Offene Anmeldungen'+(list.length?' ('+list.length+')':'')+'</h4>'
+    +'<button class="ibtn" title="Aktualisieren" onclick="loadRegData()"'+(REGSTATE.loading?' disabled style="opacity:.5;"':'')+'><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 12a9 9 0 11-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></button></div>';
+  if(!list.length){
+    h+='<p class="sub" style="margin:8px 0 0;">Keine offenen Anmeldungen.</p>';
+  }else{
+    const cur=getCurrentSeason();
+    if(!cur) h+='<div class="banner warn" style="margin:10px 0 0;">Es gibt keine aktive Saison. Freigegebene Trainer werden erst zugeordnet, wenn du sie unter „Saisons" einträgst.</div>';
+    list.forEach(r=>{
+      const pid='r'+r.id, busy=REGSTATE.busy[r.id], editing=REGSTATE.editing===r.id, editInfo=REGSTATE.editInfo===r.id;
+      const dup=findUserByEmail(r.email);
+      const telHref='tel:'+esc(String(r.phone||'').replace(/[^\d+]/g,''));
+      h+='<div class="reg-item'+(dup?' reg-dup':'')+'">'
+        +'<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;"><div style="font-weight:800;font-size:14px;">'+esc(r.first+' '+r.last)+'</div>'
+        +'<div style="font-size:10.5px;color:var(--ink-soft);white-space:nowrap;">'+fmtDateTime(r.created)+'</div></div>'
+        +'<div style="font-size:12px;margin-top:3px;"><a href="mailto:'+esc(r.email)+'" style="color:var(--ink);">'+esc(r.email)+'</a>'+(r.edited?' <span style="color:var(--ink-soft);font-size:10.5px;">· vom Admin korrigiert</span>':'')+'</div>'
+        +'<div style="font-size:12px;margin-top:2px;"><a href="'+telHref+'" style="color:var(--ink);">'+esc(r.phone)+'</a>'
+        +' <span style="color:var(--ink-soft);font-size:10.5px;">'+(r.showPhone?'· für andere sichtbar':'· nur für den Vorstand')+'</span></div>'
+        +'<div style="margin-top:7px;display:flex;flex-wrap:wrap;gap:4px;">'+classesLabelHTML(CP[pid]||r.classes)+'</div>';
+      if(dup&&!editInfo){
+        h+='<div class="banner warn" style="margin:10px 0 0;"><b>E-Mail schon vergeben.</b> Für '+esc(r.email)+' gibt es bereits den Zugang von <b>'+esc(dup.first+' '+dup.last)+'</b>'
+          +(dup.created?' (angelegt am '+fmtDateOnly(dup.created)+')':'')+'. Freigeben ist erst möglich, wenn die E-Mail korrigiert ist.<br>'
+          +'Bitte kurz mit '+esc(r.first)+' Rücksprache halten: Ist die Adresse vertippt, unter „Angaben bearbeiten" korrigieren. Hat '+esc(r.first)+' schon einen Zugang, die Anmeldung entfernen.</div>'
+          +'<div class="reg-actions"><a class="cancel-btn reg-linkbtn" href="'+telHref+'">Anrufen</a><a class="cancel-btn reg-linkbtn" href="mailto:'+esc(r.email)+'">E-Mail</a></div>';
+      }
+      if(editInfo){
+        const f=REGSTATE.editDraft||{};
+        h+='<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line);"><span class="reg-label" style="margin-top:0;">Angaben bearbeiten</span>'
+          +'<div class="field" style="margin-bottom:8px;"><input type="text" id="re-first" value="'+esc(f.first)+'" placeholder="Vorname"></div>'
+          +'<div class="field" style="margin-bottom:8px;"><input type="text" id="re-last" value="'+esc(f.last)+'" placeholder="Nachname"></div>'
+          +'<div class="field" style="margin-bottom:8px;"><input type="email" id="re-mail" value="'+esc(f.email)+'" placeholder="E-Mail" autocapitalize="none" spellcheck="false" oninput="regCheckDraftMail()"></div>'
+          +'<div id="re-mail-hint" class="helptext" style="margin:-4px 0 8px;"></div>'
+          +'<div class="field" style="margin-bottom:8px;"><input type="tel" id="re-phone" value="'+esc(f.phone)+'" placeholder="Telefonnummer"></div>'
+          +'<div class="reg-actions"><button class="cancel-btn" style="margin:0;" onclick="cancelEditRegistration()"'+(busy?' disabled':'')+'>Abbrechen</button>'
+          +'<button class="submit-btn" style="margin:0;" onclick="saveEditRegistration(\''+r.id+'\')"'+(busy?' disabled':'')+'>'+(busy?'Speichert …':'Speichern')+'</button></div></div>';
+      }else if(editing){
+        h+='<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line);"><span class="reg-label" style="margin-top:0;">Mannschaften anpassen</span><div id="cp-'+pid+'">'+cpHTML(pid)+'</div>'
+          +'<button class="cancel-btn" style="margin-top:4px;font-size:12px;" onclick="REGSTATE.editing=null;renderRegAdmin();">Fertig</button></div>';
+      }
+      if(!editInfo){
+        h+='<div class="reg-actions">'
+          +'<button class="cancel-btn" style="margin:0;font-size:12px;" onclick="startEditRegistration(\''+r.id+'\')"'+(busy?' disabled':'')+'>Angaben bearbeiten</button>'
+          +(editing||dup?'':'<button class="cancel-btn" style="margin:0;font-size:12px;" onclick="REGSTATE.editing=\''+r.id+'\';renderRegAdmin();"'+(busy?' disabled':'')+'>Mannschaften anpassen</button>')
+          +'</div><div class="reg-actions">';
+        if(dup){
+          h+='<button class="cancel-btn" style="margin:0;color:#8E2A1D;" onclick="rejectRegistration(\''+r.id+'\',true)"'+(busy?' disabled':'')+'>Anmeldung entfernen</button>';
+        }else{
+          h+='<button class="cancel-btn" style="margin:0;color:#8E2A1D;" onclick="rejectRegistration(\''+r.id+'\')"'+(busy?' disabled':'')+'>Ablehnen</button>'
+            +'<button class="submit-btn" style="margin:0;" onclick="approveRegistration(\''+r.id+'\')"'+(busy?' disabled':'')+'>'
+            +(busy?'<span class="spinner" style="width:13px;height:13px;border-color:rgba(255,255,255,.3);border-top-color:#fff;display:inline-block;"></span> Bitte warten':'Freigeben')+'</button>';
+        }
+        h+='</div>';
+      }
+      h+='</div>';
+    });
+  }
+  h+='</div>';
+  el.innerHTML=h;
+}
+async function createInvite(){
+  const doIt=async()=>{
+    try{
+      const r=await regApi('/admin/invite',{method:'POST',auth:true,body:{days:REGSTATE.days||14,by:session.name}});
+      REGSTATE.invite=r.invite; renderRegAdmin(); showToast('Einladungslink erzeugt.');
+    }catch(e){ showToast('Fehler: '+e.message,6000); }
+  };
+  if(REGSTATE.invite) askConfirm('Neuen Link erzeugen?','Der bisherige Einladungslink funktioniert danach nicht mehr. Bereits eingegangene Anmeldungen bleiben erhalten.','Neuer Link',doIt);
+  else await doIt();
+}
+function disableInvite(){
+  askConfirm('Link deaktivieren?','Über den bisherigen Link kann sich danach niemand mehr registrieren. Bereits eingegangene Anmeldungen bleiben erhalten.','Deaktivieren',async()=>{
+    try{ await regApi('/admin/invite',{method:'DELETE',auth:true}); REGSTATE.invite=null; renderRegAdmin(); showToast('Einladungslink deaktiviert.'); }
+    catch(e){ showToast('Fehler: '+e.message,6000); }
+  });
+}
+function inviteShareText(){
+  return 'Hallo zusammen! Hier könnt ihr euch als Trainer bei Platzcoach ('+(CFG.clubName||'')+') registrieren: '+regInviteLink(REGSTATE.invite.code)+' – Nach der Freigabe bekommt ihr eure Zugangsdaten per E-Mail.';
+}
+async function copyInviteLink(){
+  const link=regInviteLink(REGSTATE.invite.code);
+  try{ await navigator.clipboard.writeText(link); showToast('Link kopiert.'); }
+  catch(e){ const i=document.getElementById('reg-link'); if(i){ i.select(); document.execCommand('copy'); showToast('Link kopiert.'); } }
+}
+function shareInviteWhatsApp(){ window.open('https://wa.me/?text='+encodeURIComponent(inviteShareText()),'_blank','noopener'); }
+function genStartPassword(){
+  // 12 Zeichen ohne verwechselbare Zeichen (0/O, 1/l/I), in 3er-Blöcken zum leichten Abtippen.
+  const A='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789', out=[];
+  while(out.length<12){ const b=crypto.getRandomValues(new Uint8Array(16)); for(const x of b){ if(x<A.length*4&&out.length<12) out.push(A[x%A.length]); } }
+  return out.slice(0,4).join('')+'-'+out.slice(4,8).join('')+'-'+out.slice(8,12).join('');
+}
+function startEditRegistration(id){
+  const r=REGSTATE.list.find(x=>x.id===id); if(!r)return;
+  REGSTATE.editInfo=id; REGSTATE.editing=null;
+  REGSTATE.editDraft={first:r.first,last:r.last,email:r.email,phone:r.phone};
+  renderRegAdmin(); regCheckDraftMail();
+}
+function cancelEditRegistration(){ REGSTATE.editInfo=null; REGSTATE.editDraft=null; renderRegAdmin(); }
+function regReadDraft(){
+  const v=id=>((document.getElementById(id)||{}).value||'').trim();
+  REGSTATE.editDraft={first:v('re-first'),last:v('re-last'),email:normMail(v('re-mail')),phone:v('re-phone')};
+  return REGSTATE.editDraft;
+}
+function regCheckDraftMail(){
+  const el=document.getElementById('re-mail-hint'); if(!el)return;
+  const m=normMail((document.getElementById('re-mail')||{}).value);
+  const dup=findUserByEmail(m);
+  const other=REGSTATE.list.find(x=>x.id!==REGSTATE.editInfo&&x.email===m);
+  el.style.color=(dup||other)?'#8E2A1D':'var(--ink-soft)';
+  el.textContent=dup?('Achtung: Diese E-Mail gehört schon zum Zugang von '+dup.first+' '+dup.last+'.')
+    :other?('Achtung: Diese E-Mail steht schon in der Anmeldung von '+other.first+' '+other.last+'.')
+    :(REG_MAIL_RE.test(m)?'E-Mail ist noch frei.':'');
+}
+async function saveEditRegistration(id){
+  const d=regReadDraft();
+  if(!d.first||!d.last){ showToast('Bitte Vor- und Nachname eintragen.'); return; }
+  if(!REG_MAIL_RE.test(d.email)){ showToast('Die E-Mail sieht nicht gültig aus.'); return; }
+  if(!REG_PHONE_RE.test(d.phone)){ showToast('Die Telefonnummer sieht nicht gültig aus.'); return; }
+  const dup=findUserByEmail(d.email);
+  if(dup){ showToast('Diese E-Mail gehört schon zum Zugang von '+dup.first+' '+dup.last+'.',5000); return; }
+  REGSTATE.busy[id]=true; renderRegAdmin();
+  try{
+    const res=await regApi('/admin/registrations/'+id,{method:'PATCH',auth:true,body:d});
+    const i=REGSTATE.list.findIndex(x=>x.id===id); if(i>=0) REGSTATE.list[i]=res.registration;
+    REGSTATE.editInfo=null; REGSTATE.editDraft=null;
+    showToast('Angaben gespeichert.');
+  }catch(e){ showToast('Fehler: '+e.message,6000); }
+  delete REGSTATE.busy[id]; renderRegAdmin();
+}
+function approveRegistration(id){
+  const r=REGSTATE.list.find(x=>x.id===id); if(!r)return;
+  const classes=JSON.parse(JSON.stringify(CP['r'+id]||r.classes||{}));
+  if(!Object.keys(classes).length){ showToast('Bitte mindestens eine Mannschaft auswählen.'); return; }
+  const cur=getCurrentSeason();
+  askConfirm('Zugang freigeben?',r.first+' '+r.last+' bekommt eine Willkommens-Mail und eine zweite Mail mit dem Start-Passwort'+(cur?' und wird der Saison „'+cur.label+'" zugeordnet.':'.'),'Freigeben',async()=>{
+    REGSTATE.busy[id]=true; renderRegAdmin();
+    try{
+      // Unmittelbar vor dem Anlegen: Zugänge frisch aus GitHub laden und erneut prüfen.
+      await refreshUsersFromGitHub();
+      const dup=findUserByEmail(r.email);
+      if(dup){
+        delete REGSTATE.busy[id]; renderRegAdmin(); renderUserListOnly();
+        showToast('Nicht freigegeben: '+r.email+' gehört schon zum Zugang von '+dup.first+' '+dup.last+'.',6000);
+        return;
+      }
+      await createUserCore({first:r.first,last:r.last,mail:r.email,pass:genStartPassword(),isAdm:false,classes,targetSeason:cur,
+        phone:r.showPhone?r.phone:'',contactPublic:'phone'});
+      try{ await regApi('/admin/registrations/'+id,{method:'DELETE',auth:true}); }
+      catch(e){ showToast('Zugang angelegt, aber die Anmeldung konnte nicht aus der Liste entfernt werden: '+e.message,6000); }
+      REGSTATE.list=REGSTATE.list.filter(x=>x.id!==id); delete CP['r'+id];
+      if(REGSTATE.editing===id) REGSTATE.editing=null;
+      showToast(r.first+' ist freigeschaltet. Willkommens- und Passwort-Mail sind unterwegs.',5000);
+      delete REGSTATE.busy[id];
+      renderKonto(); updateRegBadges();
+    }catch(e){
+      delete REGSTATE.busy[id]; renderRegAdmin();
+      showToast('Fehler: '+e.message,6000);
+    }
+  });
+}
+function rejectRegistration(id,silent){
+  const r=REGSTATE.list.find(x=>x.id===id); if(!r)return;
+  const doIt=async()=>{
+    REGSTATE.busy[id]=true; renderRegAdmin();
+    try{
+      await regApi('/admin/registrations/'+id,{method:'DELETE',auth:true});
+      REGSTATE.list=REGSTATE.list.filter(x=>x.id!==id); delete CP['r'+id];
+      showToast(silent?'Anmeldung entfernt.':'Anmeldung von '+r.first+' abgelehnt und gelöscht.');
+    }catch(e){ showToast('Fehler: '+e.message,6000); }
+    delete REGSTATE.busy[id]; renderRegAdmin(); updateRegBadges();
+  };
+  if(silent) return doIt();
+  askConfirm('Anmeldung ablehnen?','Die Angaben von '+r.first+' '+r.last+' werden gelöscht. Es wird keine E-Mail verschickt.','Ablehnen',doIt);
+}
+
 /* ---------- Deep Link ---------- */
 function openHashEvent(){
   const m=location.hash.match(/^#t=(.+)$/);
@@ -4680,7 +5143,8 @@ async function boot(){
   setView('monat'); renderStart(); renderTraining();
   document.getElementById('hd-clock').style.display='block'; updateHeaderClock(); // Start ist die aktive Pane beim Laden
   openHashEvent();
-  window.addEventListener('hashchange',openHashEvent);
+  openInviteFromHash();
+  window.addEventListener('hashchange',()=>{ openHashEvent(); openInviteFromHash(); });
 
   // Absicherung gegen "Kopf-/Fußzeile verschwunden nach Rückkehr aus dem Hintergrund" (z.B. nach
   // "Zum Spiel" auf fussball.de und zurück): manche mobilen Browser berechnen 100dvh nicht sofort
