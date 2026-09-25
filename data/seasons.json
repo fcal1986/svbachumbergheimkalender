@@ -9,7 +9,6 @@
       "trainerIds": [
         "a30f8c9b-96f9-4557-b28b-619e122080ea",
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-        "bb26c9cb-1831-4209-a57b-2d97596593ff",
         "a21f28cb-3527-4337-ba43-9752dab0bcdb"
       ],
       "trainerClasses": {
@@ -23,11 +22,6 @@
             2
           ]
         },
-        "bb26c9cb-1831-4209-a57b-2d97596593ff": {
-          "E-Jugend": [
-            1
-          ]
-        },
         "a21f28cb-3527-4337-ba43-9752dab0bcdb": {
           "C-Jugend": [
             2
@@ -35,7 +29,6 @@
         }
       },
       "trainerNames": [
-        "",
         "",
         "",
         "Markus Vielhaber"
