@@ -101,8 +101,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "a21f28cb-3527-4337-ba43-9752dab0bcdb"
+      ],
+      "trainerNames": [
+        "Markus Vielhaber"
+      ],
       "validFrom": "2026-07-18",
       "validUntil": null,
       "trainerId": null,
@@ -346,8 +350,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "a21f28cb-3527-4337-ba43-9752dab0bcdb"
+      ],
+      "trainerNames": [
+        "Markus Vielhaber"
+      ],
       "trainerId": null,
       "trainerName": ""
     },
