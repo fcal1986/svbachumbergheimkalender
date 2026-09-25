@@ -23,7 +23,8 @@
         "35b36d62-9cf2-40c1-8eee-9940273a6353",
         "a73f2e9e-f267-4fcb-8b64-ff55ba5e46f3",
         "d1cc03c0-324c-40de-a4f8-49d75efeb828",
-        "849b22db-1ace-4865-ac73-8b325b5ff5d2"
+        "849b22db-1ace-4865-ac73-8b325b5ff5d2",
+        "0f7e4fdb-535c-4b5c-95d9-8bdbe98300c7"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
@@ -105,6 +106,12 @@
           "A-Jugend": [
             1
           ]
+        },
+        "0f7e4fdb-535c-4b5c-95d9-8bdbe98300c7": {
+          "D-Jugend": [
+            2,
+            3
+          ]
         }
       },
       "trainerNames": [
@@ -124,7 +131,8 @@
         "Salvatore Macri",
         "Florian Landgraf",
         "Marcel Mohr",
-        "Marc Kemper"
+        "Marc Kemper",
+        "Daniel Schauerte-Becker"
       ]
     }
   ]
