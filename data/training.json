@@ -39,8 +39,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "df7c1228-0999-452e-9a08-33244bf13cc0"
+      ],
+      "trainerNames": [
+        "Valerij Bolinger"
+      ],
       "validFrom": "2026-07-19",
       "validUntil": null,
       "trainerId": null,
@@ -289,8 +293,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "df7c1228-0999-452e-9a08-33244bf13cc0"
+      ],
+      "trainerNames": [
+        "Valerij Bolinger"
+      ],
       "validFrom": "2026-09-01",
       "validUntil": null,
       "cancelled": [],
