@@ -15,11 +15,13 @@
       "note": "",
       "trainerIds": [
         "a30f8c9b-96f9-4557-b28b-619e122080ea",
-        "935d13de-b21e-43c5-a35f-405bfaf4cc6c"
+        "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
+        "5c23d154-6ca7-4006-b094-6e275d77740e"
       ],
       "trainerNames": [
         "David Skwara",
-        "Fabrizio Calcagno"
+        "Fabrizio Calcagno",
+        "Fabrizio Test"
       ],
       "validFrom": "2026-07-01",
       "validUntil": "2027-06-30",
@@ -556,11 +558,13 @@
       "note": "",
       "trainerIds": [
         "a30f8c9b-96f9-4557-b28b-619e122080ea",
-        "935d13de-b21e-43c5-a35f-405bfaf4cc6c"
+        "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
+        "5c23d154-6ca7-4006-b094-6e275d77740e"
       ],
       "trainerNames": [
         "David Skwara",
-        "Fabrizio Calcagno"
+        "Fabrizio Calcagno",
+        "Fabrizio Test"
       ],
       "trainerId": null,
       "trainerName": "",
