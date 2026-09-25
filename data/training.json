@@ -65,11 +65,13 @@
       "note": "",
       "trainerIds": [
         "c5f27a4d-fc49-438a-9221-b72392d040b4",
-        "a73f2e9e-f267-4fcb-8b64-ff55ba5e46f3"
+        "a73f2e9e-f267-4fcb-8b64-ff55ba5e46f3",
+        "f9f5d5e9-2907-46bb-b5a7-a04477c65b5a"
       ],
       "trainerNames": [
         "Patrick Voß",
-        "Florian Landgraf"
+        "Florian Landgraf",
+        "Malak Khalil"
       ],
       "validFrom": "2026-07-19",
       "validUntil": null
@@ -346,11 +348,13 @@
       "note": "",
       "trainerIds": [
         "c5f27a4d-fc49-438a-9221-b72392d040b4",
-        "a73f2e9e-f267-4fcb-8b64-ff55ba5e46f3"
+        "a73f2e9e-f267-4fcb-8b64-ff55ba5e46f3",
+        "f9f5d5e9-2907-46bb-b5a7-a04477c65b5a"
       ],
       "trainerNames": [
         "Patrick Voß",
-        "Florian Landgraf"
+        "Florian Landgraf",
+        "Malak Khalil"
       ],
       "validFrom": "2026-09-01",
       "validUntil": null
