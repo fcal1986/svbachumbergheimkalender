@@ -354,6 +354,27 @@
       "emailNotificationsEnabled": true,
       "phone": "01738656922",
       "contactPublic": "phone"
+    },
+    {
+      "id": "849b22db-1ace-4865-ac73-8b325b5ff5d2",
+      "first": "Marc",
+      "last": "Kemper",
+      "email": "m.kemper03@gmx.de",
+      "admin": false,
+      "classes": {
+        "A-Jugend": [
+          1
+        ]
+      },
+      "enc": {
+        "salt": "ZUVtFFGlvfMQKSEwyhQ9Ag==",
+        "iv": "c8BioSeQO6vy3rH0",
+        "cipher": "ugkgrrbjHtfX6PKq0CGVg9V9rP7HcuQhnYTRfs9CZcCp59G+RC2ppxAwg/IqoocWy+fGg7HIRZ4L+t34Q7Jw9wD9ZQ+R2PDa0vNBg0hkk4ldbkW9T+lEowOAVAvj3+xJk7BPpHu+m4g1WGl32Q=="
+      },
+      "created": "2026-09-25T18:55:04.895Z",
+      "emailNotificationsEnabled": true,
+      "phone": "01627402073",
+      "contactPublic": "none"
     }
   ]
 }
