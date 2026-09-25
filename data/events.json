@@ -81,6 +81,23 @@
       "note": "",
       "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
       "ownerName": "David Skwara"
+    },
+    {
+      "id": "dc763a48-ef71-4269-a647-02fd5fcb8e2f",
+      "d": "2026-09-25",
+      "t": "19:30",
+      "bis": "22:00",
+      "title": "Trainerstammtisch",
+      "team": "Alle Teams",
+      "squad": 1,
+      "pitch": null,
+      "halle": null,
+      "res": [
+        "Vereinsheim"
+      ],
+      "note": "",
+      "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
+      "ownerName": "David Skwara"
     }
   ]
 }
