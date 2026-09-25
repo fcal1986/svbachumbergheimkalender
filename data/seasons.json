@@ -9,7 +9,8 @@
       "trainerIds": [
         "a30f8c9b-96f9-4557-b28b-619e122080ea",
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-        "a21f28cb-3527-4337-ba43-9752dab0bcdb"
+        "a21f28cb-3527-4337-ba43-9752dab0bcdb",
+        "cfe0a536-f595-475a-aef0-df62dfb09885"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
@@ -26,12 +27,19 @@
           "C-Jugend": [
             2
           ]
+        },
+        "cfe0a536-f595-475a-aef0-df62dfb09885": {
+          "D-Jugend": [
+            2,
+            3
+          ]
         }
       },
       "trainerNames": [
         "",
         "",
-        "Markus Vielhaber"
+        "Markus Vielhaber",
+        "Daniel Schauerte-Becker"
       ]
     }
   ]
