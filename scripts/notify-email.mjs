@@ -92,7 +92,7 @@ function newAccountNameFromCommit(msg) {
   return m ? m[1].trim() : null;
 }
 
-async function sendWelcomeEmails(messages, users, transporter, clubName, fromAddress, siteUrl) {
+async function sendWelcomeEmails(messages, users, transporter, clubName, fromAddress, siteUrl, replyTo) {
   const newAccountNames = messages.map(newAccountNameFromCommit).filter(Boolean);
   for (const fullName of newAccountNames) {
     // Bewusst per Namensabgleich statt ID – die Commit-Nachricht selbst enthält keine ID.
@@ -118,7 +118,8 @@ async function sendWelcomeEmails(messages, users, transporter, clubName, fromAdd
     const text = `Hallo ${user.first},\n\ndein Zugang für ${clubName} in Platzcoach wurde eingerichtet – schön, dass du dabei bist!\n\nDeine Anmeldung erfolgt mit dieser E-Mail-Adresse: ${user.email}\nDas Start-Passwort dazu hast du (oder bekommst du) direkt vom Vorstand.\n${linkText}`;
     try {
       await transporter.sendMail({
-        from: `${clubName} <${fromAddress}>`,
+        from: `Platzcoach <${fromAddress}>`, // Absendername bewusst immer "Platzcoach" (SaaS); der Verein steht im Text
+        ...(replyTo ? { replyTo } : {}),
         to: user.email,
         subject: `Willkommen bei ${clubName} in Platzcoach!`,
         text,
@@ -172,15 +173,17 @@ async function main() {
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
   });
 
-  const clubName = cfg.club || 'Platzcoach';
+  const clubName = cfg.clubName || cfg.club || 'Platzcoach';
   const fromAddress = notify.fromEmail || process.env.SMTP_USER;
+  // Antworten auf Platzcoach-Mails landen hier statt bei der noreply-Absenderadresse.
+  const replyTo = notify.replyTo || '';
 
   // Willkommens-Mail(s) an neu angelegte Zugänge – bewusst aus ALLEN Commits erkannt
   // (nicht aus der oben gefilterten "messages"-Liste!), da "Zugang angelegt" ja gerade
   // NICHT in der allgemeinen Sammel-Mail unten auftauchen soll, aber die neue Person
   // trotzdem ihre eigene Willkommens-Mail bekommen muss. Bewusst OHNE Passwort (siehe
   // Absprache) – das kommt separat über den Dispatch-Weg (send-welcome-password.mjs).
-  await sendWelcomeEmails(platzcoachMessages, users, transporter, clubName, fromAddress, cfg.siteUrl);
+  await sendWelcomeEmails(platzcoachMessages, users, transporter, clubName, fromAddress, cfg.siteUrl, replyTo);
 
   if (!messages.length) {
     console.log('Keine für die Sammel-Mail relevanten Änderungen – keine weitere E-Mail nötig.');
@@ -197,7 +200,8 @@ async function main() {
   const text = `${clubName} – Änderungen in Platzcoach:\n\n` + messages.map(m => `- ${m}`).join('\n');
 
   await transporter.sendMail({
-    from: `${clubName} <${fromAddress}>`,
+    from: `Platzcoach <${fromAddress}>`, // Absendername bewusst immer "Platzcoach" (SaaS); der Verein steht im Text
+    ...(replyTo ? { replyTo } : {}),
     to: recipients.join(', '),
     subject: `Platzcoach: ${messages.length} Änderung${messages.length === 1 ? '' : 'en'}`,
     text,

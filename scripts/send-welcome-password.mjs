@@ -39,8 +39,9 @@ async function main() {
   }
 
   const cfg = await loadConfig();
-  const clubName = cfg.club || 'Platzcoach';
+  const clubName = cfg.clubName || cfg.club || 'Platzcoach';
   const fromAddress = (cfg.notify && cfg.notify.fromEmail) || process.env.SMTP_USER;
+  const replyTo = (cfg.notify && cfg.notify.replyTo) || ''; // Antworten gehen an diese Adresse
   const firstName = name.split(' ')[0] || name;
 
   const transporter = nodemailer.createTransport({
@@ -61,7 +62,8 @@ async function main() {
   const text = `Hallo ${firstName},\n\nhier ist dein Start-Passwort für Platzcoach (${clubName}):\n\n${password}\n\nDeine Login-E-Mail-Adresse findest du in der separaten Willkommens-Mail von Platzcoach. Bitte bewahre dieses Passwort sicher auf und leite diese E-Mail nicht weiter.`;
 
   await transporter.sendMail({
-    from: `${clubName} <${fromAddress}>`,
+    from: `Platzcoach <${fromAddress}>`, // Absendername bewusst immer "Platzcoach" (SaaS); der Verein steht im Text
+    ...(replyTo ? { replyTo } : {}),
     to: email,
     subject: 'Dein Start-Passwort für Platzcoach',
     text,
