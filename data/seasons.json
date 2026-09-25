@@ -23,7 +23,8 @@
         "dea0203f-f8a0-4230-8e3a-e51a728eb61a",
         "35b36d62-9cf2-40c1-8eee-9940273a6353",
         "a73f2e9e-f267-4fcb-8b64-ff55ba5e46f3",
-        "d1cc03c0-324c-40de-a4f8-49d75efeb828"
+        "d1cc03c0-324c-40de-a4f8-49d75efeb828",
+        "849b22db-1ace-4865-ac73-8b325b5ff5d2"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
@@ -106,6 +107,11 @@
           "D-Jugend": [
             1
           ]
+        },
+        "849b22db-1ace-4865-ac73-8b325b5ff5d2": {
+          "A-Jugend": [
+            1
+          ]
         }
       },
       "trainerNames": [
@@ -125,7 +131,8 @@
         "Alex Ramm",
         "Salvatore Macri",
         "Florian Landgraf",
-        "Marcel Mohr"
+        "Marcel Mohr",
+        "Marc Kemper"
       ]
     }
   ]
