@@ -279,6 +279,16 @@
   .chip-scroll::-webkit-scrollbar{display:none;}
   .filter-chip{flex:none;font-size:11.5px;font-weight:600;padding:6px 13px;border-radius:20px;border:1.5px solid var(--line);background:var(--white);color:var(--ink-soft);white-space:nowrap;cursor:pointer;box-shadow:var(--card-shadow);}
   .filter-chip.on{background:var(--black-btn);border-color:var(--black-btn);color:#fff;}
+  .termine-sticky{position:sticky;top:-14px;z-index:5;background:var(--bg);margin:-14px -14px 10px;padding:14px 14px 8px;box-shadow:0 6px 10px -8px rgba(11,27,50,.18);}
+  .termine-sticky .viewseg{margin-bottom:8px;}
+  .filter-row{display:flex;align-items:center;gap:7px;}
+  .filter-row .chip-scroll{flex:1 1 auto;min-width:0;flex-wrap:nowrap;overflow-x:auto;margin-bottom:0;padding-bottom:0;scrollbar-width:none;}
+  .filter-row .chip-scroll::-webkit-scrollbar{display:none;}
+  .filter-row .team-filter-btn{margin:0;}
+  .termine-sticky .team-filter-panel{max-height:45vh;overflow-y:auto;margin:8px 0 0;}
+  .termine-sticky #type-filter-banner:not(:empty){margin-top:8px;}
+  .list-start{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--white);border:1.5px solid var(--line);border-radius:12px;padding:9px 12px;margin-bottom:10px;font-size:12.5px;box-shadow:var(--card-shadow);}
+  .list-start button{flex:none;border:1.5px solid var(--green);color:var(--green);background:var(--white);border-radius:8px;padding:5px 10px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;}
   .viewseg{display:flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden;background:var(--white);margin-bottom:12px;box-shadow:var(--card-shadow);}
   .viewseg button{flex:1;border:none;background:none;padding:10px 0;font-family:'Inter';font-size:12.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;border-right:1.5px solid var(--line);}
   .viewseg button:last-child{border-right:none;}
@@ -665,15 +675,21 @@
   <!-- TERMINE -->
   <div class="pane" data-pane="termine">
     <div class="content">
-      <div class="viewseg" id="viewseg">
-        <button type="button" data-view="liste" onclick="setView('liste')">Liste</button>
-        <button type="button" data-view="monat" class="on" onclick="setView('monat')">Monat</button>
-        <button type="button" data-view="jahr" onclick="setView('jahr')">Jahr</button>
+      <!-- Feste Leiste: Ansicht + Filter bleiben beim Scrollen oben sichtbar -->
+      <div class="termine-sticky" id="termine-sticky">
+        <div class="viewseg" id="viewseg">
+          <button type="button" data-view="liste" onclick="setView('liste')">Liste</button>
+          <button type="button" data-view="monat" class="on" onclick="setView('monat')">Monat</button>
+          <button type="button" data-view="jahr" onclick="setView('jahr')">Jahr</button>
+        </div>
+        <div class="filter-row">
+          <div class="chip-scroll" id="filterbar"></div>
+          <button type="button" class="team-filter-btn" id="team-filter-btn" onclick="toggleTeamFilterPanel()">Mannschaften <span id="team-filter-count"></span> ▾</button>
+        </div>
+        <div id="team-filter-panel" class="team-filter-panel" style="display:none;"></div>
+        <div id="type-filter-banner"></div>
       </div>
-      <div class="chip-scroll" id="filterbar"></div>
-      <button type="button" class="team-filter-btn" id="team-filter-btn" onclick="toggleTeamFilterPanel()" style="margin-bottom:10px;">Mannschaften <span id="team-filter-count"></span> ▾</button>
-      <div id="team-filter-panel" class="team-filter-panel" style="display:none;"></div>
-      <div id="type-filter-banner"></div>
+      <div id="list-start-banner"></div>
       <div id="view-liste" style="display:none;"></div>
       <div id="view-monat" style="display:none;"></div>
       <div id="view-jahr" style="display:none;"></div>
@@ -976,7 +992,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='25.09.2026 · 8';
+const APP_VERSION='25.09.2026 · 9';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -1729,6 +1745,7 @@ function trackArea(area){
 function trackEvent(name){ clarityCall('event',name); try{ if(window.__gaReady&&window.gtag) gtag('event',name); }catch(e){} }
 function currentPaneArea(){
   const p=document.querySelector('.pane.active'); const n=p?p.dataset.pane:'start';
+  if(n==='termine') return 'termine/'+view;
   return n==='konto'&&session?'konto/'+(kontoTab||'profil'):n;
 }
 function goto(n){
@@ -1758,6 +1775,9 @@ function setView(v){
   document.querySelectorAll('#viewseg button').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
   ['liste','monat','jahr'].forEach(k=>document.getElementById('view-'+k).style.display=(k===v?'block':'none'));
   render();
+  scrollTermineTop();
+  const ap=document.querySelector('.pane.active');
+  if(ap&&ap.dataset.pane==='termine') trackArea(currentPaneArea());
 }
 function setFilter(f){
   filter=f;
@@ -2221,20 +2241,34 @@ function renderWeekNav(){
   return h;
 } // wie viele Tage ab heute geladen sind
 
+/* Die Liste beginnt am im Monat/Jahr gewählten Tag (selDate), sonst heute. So zeigt der Wechsel
+   Monat → Liste genau den angetippten Tag, auch Tage in der Vergangenheit. */
+function listStartDate(){ return selDate||todayStr; }
+function listFromToday(){ selDate=todayStr; curY=today.getFullYear(); curM=today.getMonth(); listDaysLoaded=30; render(); scrollTermineTop(); }
+function scrollTermineTop(){ const c=document.querySelector('.pane[data-pane="termine"] .content'); if(c)c.scrollTop=0; }
+function renderListStartBanner(){
+  const el=document.getElementById('list-start-banner'); if(!el)return;
+  const st=listStartDate();
+  if(view!=='liste'||st===todayStr){ el.innerHTML=''; return; }
+  const dt=new Date(st+'T00:00:00');
+  el.innerHTML='<div class="list-start"><span>Termine ab <b>'+DAYS[dt.getDay()]+', '+fmtShort(st)+'</b></span><button type="button" onclick="listFromToday()">Ab heute</button></div>';
+}
 function renderList(){
   const box=document.getElementById('view-liste');
-  // Events ab heute
-  let evs=filtered().filter(e=>e.d>=todayStr).slice();
+  const start=listStartDate();
+  const startDt=new Date(start+'T00:00:00');
+  // Termine ab dem Starttag
+  let evs=filtered().filter(e=>e.d>=start).slice();
   // Trainings für geladene Tage
   for(let i=0;i<listDaysLoaded;i++){
-    const dt=new Date(); dt.setDate(dt.getDate()+i);
+    const dt=new Date(startDt); dt.setDate(dt.getDate()+i);
     evs=evs.concat(trainingInstancesOn(ymd(dt)).filter(passesFilter));
     evs=evs.concat(cancelledTrainingInstancesOn(ymd(dt)).filter(passesFilter));
     evs=evs.concat(fussballDisplayInstancesOn(ymd(dt)).filter(passesFilter));
     evs=evs.concat(fussballDisplayAwayInstancesOn(ymd(dt)).filter(passesFilter));
   }
   // cutoff-Datum berechnen
-  const cutoff=new Date(); cutoff.setDate(cutoff.getDate()+listDaysLoaded);
+  const cutoff=new Date(startDt); cutoff.setDate(cutoff.getDate()+listDaysLoaded);
   const cutoffStr=ymd(cutoff);
   evs=evs.filter(e=>e.d<cutoffStr);
   evs.sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t));
@@ -5275,6 +5309,7 @@ function openHashEvent(){
 function render(){
   _conflictCache={};
   updateTypeFilterBanner();
+  renderListStartBanner();
   if(view==='liste')renderList();
   if(view==='monat')renderMonth();
   if(view==='jahr')renderYear();
