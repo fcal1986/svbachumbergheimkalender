@@ -249,11 +249,13 @@
       "note": "",
       "trainerIds": [
         "cfe0a536-f595-475a-aef0-df62dfb09885",
-        "bde8d374-560d-4037-9dea-322d7dd85ba9"
+        "bde8d374-560d-4037-9dea-322d7dd85ba9",
+        "35b36d62-9cf2-40c1-8eee-9940273a6353"
       ],
       "trainerNames": [
         "Daniel Schauerte-Becker",
-        "Sven Svejn"
+        "Sven Svejn",
+        "Salvatore Macri"
       ],
       "validFrom": "2026-09-09",
       "validUntil": null
@@ -516,11 +518,13 @@
       "note": "",
       "trainerIds": [
         "cfe0a536-f595-475a-aef0-df62dfb09885",
-        "bde8d374-560d-4037-9dea-322d7dd85ba9"
+        "bde8d374-560d-4037-9dea-322d7dd85ba9",
+        "35b36d62-9cf2-40c1-8eee-9940273a6353"
       ],
       "trainerNames": [
         "Daniel Schauerte-Becker",
-        "Sven Svejn"
+        "Sven Svejn",
+        "Salvatore Macri"
       ],
       "validFrom": "2026-09-09",
       "validUntil": null
