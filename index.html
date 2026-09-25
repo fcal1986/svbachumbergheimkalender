@@ -976,7 +976,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='25.09.2026 · 7';
+const APP_VERSION='25.09.2026 · 8';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -2447,7 +2447,11 @@ function renderPitchToday(){
     const sc=scoreInfo(e);
     return '<div class="pitch-today-row'+(running?' pt-running':'')+'" onclick="openTerminFromStart(\''+e.id+'\',\''+e.d+'\')">'
       +'<div class="pt-time">'+(running?'<span class="pt-live">●</span>':'')+e.t+'</div>'
-      +'<div class="pt-team"><div class="pt-team-name">'+esc(teamTxt)+'</div><div class="pt-type">'+esc(typeTxt)+'</div></div>'
+      // Eigene Termine (Trainerstammtisch, Freundschaftsspiel …): Name als Überschrift wie in der
+      // Terminübersicht, Art + Mannschaft darunter. Trainings und fussball.de-Spiele: Mannschaft oben.
+      +(!e.isTraining&&!e.isExternal&&e.title
+        ?'<div class="pt-team"><div class="pt-team-name">'+esc(e.title)+'</div><div class="pt-type">'+esc(typeTxt+' · '+teamTxt)+'</div></div>'
+        :'<div class="pt-team"><div class="pt-team-name">'+esc(teamTxt)+'</div><div class="pt-type">'+esc(typeTxt)+'</div></div>')
       +(sc?'<div class="score-pill '+sc.outcome+'" style="font-size:12px;padding:3px 8px;">'+sc.text+'</div>':'<div class="pt-visual">'+visual+'</div>')
       +'</div>';
   }).join('');
