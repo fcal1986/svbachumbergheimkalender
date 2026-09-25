@@ -224,11 +224,13 @@
       "note": "",
       "trainerIds": [
         "2def1cdd-2baf-4442-b139-4bc3abe69405",
-        "82278cba-af88-4663-bd3c-937db4a7b122"
+        "82278cba-af88-4663-bd3c-937db4a7b122",
+        "d1cc03c0-324c-40de-a4f8-49d75efeb828"
       ],
       "trainerNames": [
         "Sascha Rabura",
-        "Bülent Gencsen"
+        "Bülent Gencsen",
+        "Marcel Mohr"
       ],
       "cancelled": [],
       "validFrom": "2026-09-09",
@@ -496,11 +498,13 @@
       "note": "",
       "trainerIds": [
         "2def1cdd-2baf-4442-b139-4bc3abe69405",
-        "82278cba-af88-4663-bd3c-937db4a7b122"
+        "82278cba-af88-4663-bd3c-937db4a7b122",
+        "d1cc03c0-324c-40de-a4f8-49d75efeb828"
       ],
       "trainerNames": [
         "Sascha Rabura",
-        "Bülent Gencsen"
+        "Bülent Gencsen",
+        "Marcel Mohr"
       ],
       "validFrom": "2026-09-09",
       "validUntil": null,
