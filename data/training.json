@@ -227,8 +227,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "cfe0a536-f595-475a-aef0-df62dfb09885"
+      ],
+      "trainerNames": [
+        "Daniel Schauerte-Becker"
+      ],
       "validFrom": "2026-09-09",
       "validUntil": null
     },
@@ -464,8 +468,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "cfe0a536-f595-475a-aef0-df62dfb09885"
+      ],
+      "trainerNames": [
+        "Daniel Schauerte-Becker"
+      ],
       "validFrom": "2026-09-09",
       "validUntil": null
     },
