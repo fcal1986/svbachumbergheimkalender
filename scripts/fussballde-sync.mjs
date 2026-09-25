@@ -133,12 +133,19 @@ function parseMatches(html, debug) {
   // neuen Termin. Ohne diese Bereinigung erscheint das Spiel in Platzcoach zweimal, teils mit
   // dem veralteten Datum. Bei zwei Einträgen mit demselben Link wird das SPÄTERE Datum behalten
   // (eine Verlegung verschiebt so gut wie nie auf einen früheren Termin).
+  // Nachtrag 25.09.2026: Die Annahme "Verlegung = später" stimmt nicht immer (C1 bei JSG Balve
+  // wurde vom 27.09. 11:00 auf den 26.09. 13:30 VORverlegt, behalten wurde der alte Termin).
+  // Deshalb merken wir uns alle Kandidaten je Spiel; resolveMovedMatches() prüft danach auf der
+  // Spielseite von fussball.de, welcher Termin gilt. Die Regel unten ist nur noch der Fallback.
   const byLink = new Map();
+  const dupGroups = new Map();
   const noLinkMatches = [];
   for (const m of matches) {
     if (!m.link) { noLinkMatches.push(m); continue; }
     const existing = byLink.get(m.link);
     if (!existing) { byLink.set(m.link, m); continue; }
+    if (!dupGroups.has(m.link)) dupGroups.set(m.link, [existing]);
+    dupGroups.get(m.link).push(m);
     const existingKey = existing.date + ' ' + (existing.time || '');
     const currentKey = m.date + ' ' + (m.time || '');
     if (currentKey > existingKey) {
@@ -149,6 +156,7 @@ function parseMatches(html, debug) {
     }
   }
   const dedupedMatches = [...byLink.values(), ...noLinkMatches];
+  dedupedMatches.dupGroups = dupGroups;
   if (debug && dedupedMatches.length !== matches.length) {
     console.log(`  [debug] Deduplizierung: ${matches.length} Spiele vor, ${dedupedMatches.length} nach Bereinigung (${matches.length - dedupedMatches.length} Duplikat(e) entfernt).`);
   }
@@ -188,6 +196,57 @@ function looksLikeBlockedOrEmptyPage(html) {
   const lower = html.toLowerCase();
   const signals = ['captcha', 'cloudflare', 'access denied', 'just a moment', 'consent', 'cookie-einstellungen', 'bot detection', 'request unsuccessful'];
   return signals.some(s => lower.includes(s));
+}
+
+const FD_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36',
+  'Accept': 'text/html,application/xhtml+xml',
+  'Referer': 'https://www.fussball.de/',
+};
+
+// Liest Datum und Anstoßzeit von einer fussball.de-Spielseite. Das Datum steht verlässlich im
+// Seitentitel ("… - C-Junioren - 26.09.2026"), die Uhrzeit im Kopfbereich ("26.09.2026 … 13:30 Uhr").
+function parseDetailDateTime(html) {
+  const $ = cheerio.load(html);
+  const title = $('title').text();
+  const text = $('body').text().replace(/\s+/g, ' ');
+  let d = title.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+  if (!d) d = text.match(/(\d{2})\.(\d{2})\.(\d{4})(?=\D{0,20}\d{1,2}:\d{2}\s*Uhr)/i);
+  if (!d) return null;
+  const dateStr = `${d[1]}.${d[2]}.${d[3]}`;
+  // Uhrzeit nur direkt hinter DIESEM Datum suchen, damit keine fremde Zeit von der Seite greift.
+  const after = text.slice(text.indexOf(dateStr) >= 0 ? text.indexOf(dateStr) : 0);
+  const t = after.match(/^\d{2}\.\d{2}\.\d{4}\D{0,20}?(\d{1,2}):(\d{2})\s*Uhr/i);
+  return { date: `${d[3]}-${d[2]}-${d[1]}`, time: t ? `${t[1].padStart(2, '0')}:${t[2]}` : null };
+}
+
+// Doppelt gelistete Spiele (Spielverlegungen) anhand der Spielseite auflösen.
+async function resolveMovedMatches(matches, debug) {
+  const groups = matches.dupGroups;
+  if (!groups || !groups.size) return;
+  for (const [link, cands] of groups) {
+    const idx = matches.findIndex(m => m.link === link);
+    if (idx < 0) continue;
+    const cur = matches[idx];
+    try {
+      const res = await fetch(link, { headers: FD_HEADERS });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const info = parseDetailDateTime(await res.text());
+      if (!info) throw new Error('kein Datum auf der Spielseite gefunden');
+      const hit = cands.find(c => c.date === info.date && (!info.time || c.time === info.time))
+        || cands.find(c => c.date === info.date);
+      const chosen = hit ? { ...hit } : { ...cur, date: info.date, time: info.time || cur.time };
+      if (chosen.date !== cur.date || chosen.time !== cur.time) {
+        console.log(`  Spielverlegung laut Spielseite: "${cur.home}" vs "${cur.away}" – ${cur.date} ${cur.time} → ${chosen.date} ${chosen.time}`);
+      } else if (debug) {
+        console.log(`  [debug] Spielseite bestätigt ${cur.date} ${cur.time}: "${cur.home}" vs "${cur.away}"`);
+      }
+      matches[idx] = chosen;
+    } catch (err) {
+      console.warn(`  [warnung] Spielseite nicht auswertbar (${err.message}) – behalte ${cur.date} ${cur.time} für "${cur.home}" vs "${cur.away}" (${link})`);
+    }
+    await new Promise(r => setTimeout(r, 400)); // fussball.de nicht mit schnellen Folgeanfragen belasten
+  }
 }
 
 async function fetchClubMatches(clubId, debug) {
@@ -233,12 +292,16 @@ async function fetchClubMatches(clubId, debug) {
     });
     const html2 = await res2.text();
     if (!res2.ok) throw new Error(`fussball.de antwortete mit ${res2.status} für Verein ${clubId}`);
-    return parseMatches(html2, debug);
+    const parsed2 = parseMatches(html2, debug);
+    await resolveMovedMatches(parsed2, debug);
+    return parsed2;
   }
   if (looksLikeBlockedOrEmptyPage(html)) {
     console.warn('  [warnung] Antwort sieht nach Bot-Schutz-/Consent-/Fehlerseite aus, nicht nach der echten Spielplan-Tabelle.');
   }
-  return parseMatches(html, debug);
+  const parsed = parseMatches(html, debug);
+  await resolveMovedMatches(parsed, debug);
+  return parsed;
 }
 
 function isHomeMatch(match, clubMatch) {
