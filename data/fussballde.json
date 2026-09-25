@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-25T11:51:47.788Z",
+  "updated": "2026-09-25T17:12:12.670Z",
   "games": [
     {
       "d": "2026-09-04",
@@ -1792,6 +1792,16 @@
       "competition": "Kreisfreundschaftsspiele",
       "score": null,
       "link": "https://www.fussball.de/spiel/asc-09-dortmund-iii-sv-bachum-bergheim/-/spiel/0321O2JISG000000VS5489BUVSORQI22"
+    },
+    {
+      "d": "2026-10-07",
+      "t": "17:45",
+      "team": "D-Junioren",
+      "squad": 2,
+      "opponent": "SV Hüsten 09 1",
+      "competition": "Kreisfreundschaftsspiele",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-huesten-09-1-sv-bachum-bergheim-2/-/spiel/0326SITQQS000000VS5489BUVUFHD2VV"
     },
     {
       "d": "2026-10-08",
