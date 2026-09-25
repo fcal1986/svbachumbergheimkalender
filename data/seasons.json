@@ -20,7 +20,8 @@
         "2def1cdd-2baf-4442-b139-4bc3abe69405",
         "1d67889f-3194-43d7-9ead-2faa97e9b782",
         "82278cba-af88-4663-bd3c-937db4a7b122",
-        "dea0203f-f8a0-4230-8e3a-e51a728eb61a"
+        "dea0203f-f8a0-4230-8e3a-e51a728eb61a",
+        "35b36d62-9cf2-40c1-8eee-9940273a6353"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
@@ -90,6 +91,11 @@
         },
         "dea0203f-f8a0-4230-8e3a-e51a728eb61a": {
           "1. Herren": []
+        },
+        "35b36d62-9cf2-40c1-8eee-9940273a6353": {
+          "D-Jugend": [
+            2
+          ]
         }
       },
       "trainerNames": [
@@ -106,7 +112,8 @@
         "Sascha Rabura",
         "Damian Cvetkov",
         "Bülent Gencsen",
-        "Alex Ramm"
+        "Alex Ramm",
+        "Salvatore Macri"
       ]
     }
   ]
