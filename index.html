@@ -992,7 +992,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='25.09.2026 · 9';
+const APP_VERSION='25.09.2026 · 10';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -1785,6 +1785,7 @@ function setFilter(f){
   typeFilter=null; listDaysLoaded=30;
   document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f===f));
   updateTeamFilterBtn(); updateTypeFilterBanner();
+  const tp=document.getElementById('team-filter-panel'); if(tp&&tp.style.display!=='none') renderTeamFilterPanel();
   render(); renderStart();
 }
 function buildFilters(){
@@ -1847,42 +1848,47 @@ function allKnownTeamKeys(){
   fussballDisplayAwayAll().forEach(e=>add(e.team,e.squad));
   return [...map.entries()].map(([key,label])=>({key,label})).sort((a,b)=>a.label.localeCompare(b.label,'de',{numeric:true}));
 }
+/* Mannschaftsfilter: Antippen filtert SOFORT (kein "Anwenden" mehr – Nutzer erwarten, dass eine
+   schwarz markierte Mannschaft auch sofort gefiltert ist). Das Auswahlfeld bleibt offen, damit
+   mehrere Mannschaften nacheinander gewählt werden können; "Fertig" klappt es nur zu. */
 function toggleTeamFilterPanel(){
   const panel=document.getElementById('team-filter-panel');
   const opening=panel.style.display==='none';
-  if(opening){ teamFilterPending=new Set(teamMultiFilter); renderTeamFilterPanel(); }
+  if(opening) renderTeamFilterPanel();
   panel.style.display=opening?'block':'none';
 }
+function closeTeamFilterPanel(){ document.getElementById('team-filter-panel').style.display='none'; }
 function renderTeamFilterPanel(){
   const panel=document.getElementById('team-filter-panel');
   const teams=allKnownTeamKeys();
   if(!teams.length){ panel.innerHTML='<div style="font-size:12px;color:var(--ink-soft);">Noch keine Mannschaften bekannt.</div>'; return; }
+  const n=teamMultiFilter.size;
   panel.innerHTML='<div class="team-filter-grid">'+teams.map(t=>
-    '<label class="team-filter-opt'+(teamFilterPending.has(t.key)?' on':'')+'" onclick="toggleTeamFilterOpt(event,\''+t.key+'\')">'+
-    '<input type="checkbox"'+(teamFilterPending.has(t.key)?' checked':'')+'>'+esc(t.label)+'</label>'
+    '<label class="team-filter-opt'+(teamMultiFilter.has(t.key)?' on':'')+'" onclick="toggleTeamFilterOpt(event,\''+t.key+'\')">'+
+    '<input type="checkbox"'+(teamMultiFilter.has(t.key)?' checked':'')+'>'+esc(t.label)+'</label>'
   ).join('')+'</div>'
   +'<div class="team-filter-actions">'
-  +'<button class="reset-btn" type="button" onclick="resetTeamFilter()">Zurücksetzen</button>'
-  +'<button class="apply-btn" type="button" onclick="applyTeamFilter()">Anwenden ('+teamFilterPending.size+')</button>'
+  +'<button class="reset-btn" type="button" onclick="resetTeamFilter()"'+(n||filter!=='alle'?'':' disabled style="opacity:.5;"')+'>Zurücksetzen</button>'
+  +'<button class="apply-btn" type="button" onclick="closeTeamFilterPanel()">Fertig'+(n?' ('+n+' gewählt)':'')+'</button>'
   +'</div>';
 }
 function toggleTeamFilterOpt(ev,key){
   ev.preventDefault();
-  if(teamFilterPending.has(key))teamFilterPending.delete(key); else teamFilterPending.add(key);
-  renderTeamFilterPanel();
+  if(teamMultiFilter.has(key))teamMultiFilter.delete(key); else teamMultiFilter.add(key);
+  applyTeamFilter(false);
 }
-function applyTeamFilter(){
-  teamMultiFilter=new Set(teamFilterPending);
+function applyTeamFilter(close){
+  teamFilterPending=new Set(teamMultiFilter);
   if(filter!=='fussballde'){ filter=teamMultiFilter.size?'multi':'alle'; } // fussball.de-Auswahl bleibt erhalten
   listDaysLoaded=30;
-  document.getElementById('team-filter-panel').style.display='none';
+  if(close!==false) closeTeamFilterPanel(); else renderTeamFilterPanel();
   document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f===filter));
   updateTeamFilterBtn();
   render(); renderStart();
 }
 function resetTeamFilter(){
   teamFilterPending=new Set(); teamMultiFilter=new Set(); filter='alle'; listDaysLoaded=30;
-  document.getElementById('team-filter-panel').style.display='none';
+  renderTeamFilterPanel(); // bleibt offen, damit man direkt neu wählen kann
   document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f==='alle'));
   updateTeamFilterBtn();
   render(); renderStart();
