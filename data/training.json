@@ -550,8 +550,8 @@
     {
       "id": "2aec6df0-a5f2-4dbb-8efb-48a85579ed37",
       "day": 5,
-      "from": "18:00",
-      "to": "19:30",
+      "from": "17:30",
+      "to": "19:00",
       "team": "1. Herren",
       "squad": 1,
       "pitch": {
@@ -561,7 +561,10 @@
       "res": [],
       "note": "",
       "trainerIds": [],
-      "trainerNames": []
+      "trainerNames": [],
+      "validFrom": "2026-09-25",
+      "validUntil": null,
+      "cancelled": []
     },
     {
       "id": "be7f7f77-b1b2-4f7a-a05d-72c72faf0e05",
