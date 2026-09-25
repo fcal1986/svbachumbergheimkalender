@@ -18,9 +18,18 @@ import nodemailer from 'nodemailer';
 
 const CONFIG_PATH = 'data/config.json';
 const USERS_PATH = 'data/users.json';
+const SEASONS_PATH = 'data/seasons.json';
 
 async function loadConfig() {
   return JSON.parse(await fs.readFile(CONFIG_PATH, 'utf8'));
+}
+async function loadSeasons() {
+  try {
+    const raw = JSON.parse(await fs.readFile(SEASONS_PATH, 'utf8'));
+    return Array.isArray(raw.seasons) ? raw.seasons : [];
+  } catch (e) {
+    return [];
+  }
 }
 async function loadUsers() {
   try {
@@ -55,34 +64,62 @@ function escapeHtml(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// WHITELIST statt Blacklist: Nur Commit-Nachrichten, die Platzcoach selbst beim Speichern
-// erzeugt, gelten als benachrichtigungsrelevant. Grund: GitHub selbst erzeugt bei direkten
-// Änderungen über die Weboberfläche eigene Nachrichten ("Add files via upload", "Update
-// index.html", "Create ...", "Merge ..." usw.) – die lassen sich nicht vollständig vorher
-// aufzählen, eine Blacklist hätte also immer Lücken. Diese Liste hier ist die vollständige
-// Sammlung aller Präfixe aus index.html (jeder saveEvents/saveTraining/saveUsers/
-// saveSeasonDebounced-Aufruf) – wird dort eine neue Aktion ergänzt, muss ihr Präfix auch
-// hier ergänzt werden, sonst verschwindet sie stillschweigend aus der Sammel-Mail.
-const PLATZCOACH_PREFIXES = [
-  'Neuer Termin:', 'Termin geändert:', 'Termin gelöscht:',
-  'Trainingszeit angelegt:', 'Trainingszeit geändert:', 'Trainingszeit gelöscht:',
-  'Training abgesagt:', 'Absage zurückgenommen:',
-  'Zugang angelegt:', 'Zugang gelöscht:', 'Zugang gesperrt:', 'Zugang entsperrt:',
-  'Mannschaften zugewiesen:', 'Trainer-Zuordnung aktualisiert:', 'Trainer-Zuordnung entfernt:',
-  'Trainer zur Saison', 'Trainer aus Saison', 'Trainer auto-zugewiesen (',
-  'Admin-Recht vergeben:', 'Admin-Recht entzogen:',
-  'Profil geändert:', 'Passwort geändert:',
-];
-function isFromPlatzcoach(msg) {
-  return PLATZCOACH_PREFIXES.some(p => msg.startsWith(p));
-}
+// KATEGORIEN statt einer einzigen Whitelist: Nur Commit-Nachrichten, die Platzcoach selbst
+// beim Speichern erzeugt, werden berücksichtigt (GitHub-eigene Nachrichten wie "Add files via
+// upload" fallen automatisch raus). Jede Nachricht gehört zu genau einer Kategorie. Wer welche
+// Kategorie per E-Mail bekommt, legt die Rolle fest (siehe ROLE_CATEGORIES bzw.
+// config.json → notify.categories). Wird in index.html eine neue Aktion ergänzt, muss ihr
+// Präfix hier einer Kategorie zugeordnet werden, sonst wird sie nicht verschickt.
+const CATEGORIES = {
+  termine:     ['Neuer Termin:', 'Termin geändert:', 'Termin gelöscht:'],
+  training:    ['Trainingszeit angelegt:', 'Trainingszeit geändert:', 'Trainingszeit gelöscht:',
+                'Training abgesagt:', 'Absage zurückgenommen:'],
+  sperren:     ['Sperre angelegt:', 'Sperre aufgehoben:'],
+  verwaltung:  ['Zugang angelegt:', 'Zugang gelöscht:', 'Zugang gesperrt:', 'Zugang entsperrt:',
+                'Admin-Recht vergeben:', 'Admin-Recht entzogen:',
+                'Mannschaften zugewiesen:', 'Trainer-Zuordnung aktualisiert:', 'Trainer-Zuordnung entfernt:',
+                'Trainer zur Saison', 'Trainer aus Saison', 'Trainer auto-zugewiesen (',
+                'Saison angelegt:', 'Saison gelöscht:', 'Team-Zuordnung (', 'Aus Saison(s) entfernt'],
+  // Persönliches geht an NIEMANDEN per Mail (steht nur im Protokoll der App).
+  persoenlich: ['Passwort geändert:', 'Profil geändert:', 'E-Mail-Benachrichtigungen'],
+};
+// Standard: Trainer bekommen Termine, Training und Platzsperren; Admins zusätzlich die Verwaltung.
+// Überschreibbar in config.json: "notify": {"categories": {"trainer": [...], "admin": [...]}}
+const ROLE_CATEGORIES = {
+  trainer: ['termine', 'training', 'sperren'],
+  admin:   ['termine', 'training', 'sperren', 'verwaltung'],
+};
+// Mannschaften, die einem Trainer "gehören" können. Termine/Training anderer Kategorien
+// (z. B. "Alle Teams", "Vorstand") gelten als vereinsweit und gehen an alle Trainer.
+const TEAM_CLASSES = ['G-Jugend', 'F-Jugend', 'E-Jugend', 'D-Jugend', 'C-Jugend', 'B-Jugend', 'A-Jugend',
+  '1. Herren', '2. Herren', '3. Herren', 'Ü32 / Ü50'];
 
-// Von den (echten) Platzcoach-Nachrichten sollen diese TROTZDEM nicht in der allgemeinen
-// Sammel-Mail auftauchen: automatische Bot-Läufe (fussball.de-Sync, sonst alle 6h eine Mail)
-// und "Zugang angelegt" (die neue Person bekommt stattdessen ihre eigene Willkommens-Mail).
-function isNoisyCommit(msg) {
-  return /^Heimspiele von fussball\.de aktualisiert/i.test(msg)
-    || /^Zugang angelegt: /i.test(msg);
+// Zerlegt eine Commit-Nachricht in den sichtbaren Text (erster Absatz) und die unsichtbaren
+// Zusatzzeilen, die die App anhängt ("Platzcoach-Team: E-Jugend#2", "Platzcoach-By: <id>").
+function parseCommit(raw) {
+  const text = raw.split(/\n\s*\n/)[0].trim();
+  const team = raw.match(/^Platzcoach-Team: (.+)#(\d+)\s*$/m);
+  const by = raw.match(/^Platzcoach-By: (\S+)\s*$/m);
+  return {
+    text,
+    team: team ? team[1].trim() : null,
+    squad: team ? parseInt(team[2], 10) : null,
+    by: by ? by[1] : null,
+    category: categoryOf(text),
+  };
+}
+function categoryOf(text) {
+  for (const [cat, prefixes] of Object.entries(CATEGORIES)) {
+    if (prefixes.some(p => text.startsWith(p))) return cat;
+  }
+  return null; // nicht von Platzcoach -> ignorieren
+}
+function isFromPlatzcoach(msg) {
+  return categoryOf(msg.split(/\n\s*\n/)[0].trim()) !== null;
+}
+// Automatische Bot-Läufe und Aufräumarbeiten der App gehen nie per Mail raus.
+function isNoisyCommit(text) {
+  return /^Heimspiele von fussball\.de aktualisiert/i.test(text) || /\(automatisch\)/.test(text);
 }
 
 // Erkennt "Zugang angelegt: Marc Krause (Admin) – David Skwara" bzw. ohne "(Admin)" und
@@ -132,39 +169,50 @@ async function sendWelcomeEmails(messages, users, transporter, clubName, fromAdd
   }
 }
 
+// Mannschaften eines Trainers in der aktuell laufenden Saison ({Team: [Squads]}, [] = alle Squads).
+function trainerClassesFor(user, seasons, today) {
+  const cur = seasons.find(s => s.from <= today && s.to >= today);
+  if (cur && cur.trainerClasses && cur.trainerClasses[user.id]) return cur.trainerClasses[user.id];
+  return user.classes || {};
+}
+function concernsTrainer(c, classes) {
+  if (c.category !== 'termine' && c.category !== 'training') return true; // z. B. Platzsperren: vereinsweit
+  if (!c.team) return true;                               // ältere Nachricht ohne Mannschaftsangabe
+  if (!TEAM_CLASSES.includes(c.team)) return true;        // "Alle Teams", "Vorstand" usw.
+  const squads = classes[c.team];
+  if (!squads) return false;
+  return !squads.length || !/Jugend/.test(c.team) || squads.includes(c.squad);
+}
+
 async function main() {
   const cfg = await loadConfig();
   const notify = cfg.notify || {};
+  const roleCats = { ...ROLE_CATEGORIES, ...(notify.categories || {}) };
+  const today = new Date().toISOString().slice(0, 10);
 
-  // Empfänger kommen aus ZWEI Quellen, zusammengeführt und dedupliziert:
-  // 1. Jeder Platzcoach-Zugang mit aktivierten E-Mail-Benachrichtigungen (Login-E-Mail wird
-  //    verwendet – es gibt bewusst kein separates Notification-E-Mail-Feld). Ein fehlender
-  //    Wert (bei Zugängen von vor dieser Funktion) zählt als aktiviert, siehe index.html.
-  // 2. Die weiterhin unterstützte feste Liste "notify.emails" in config.json, z.B. für ein
-  //    allgemeines Vorstands-Postfach, das kein eigener Platzcoach-Zugang ist.
-  const users = await loadUsers();
-  const optedInUserEmails = users
-    .filter(u => u.emailNotificationsEnabled !== false && !u.locked)
-    .map(u => (u.email || '').trim().toLowerCase())
-    .filter(Boolean);
-  const configEmails = (Array.isArray(notify.emails) ? notify.emails : [])
-    .filter(Boolean).map(e => e.trim().toLowerCase());
-  const recipients = [...new Set([...optedInUserEmails, ...configEmails])];
-  console.log(`Empfänger: ${optedInUserEmails.length} User mit aktivierten Benachrichtigungen und nicht gesperrtem Zugang (von ${users.length} Zugängen insgesamt) + ${configEmails.length} feste Adresse(n) aus config.json = ${recipients.length} eindeutige Empfänger.`);
-
-  if (!recipients.length) {
-    console.log('Keine Empfänger (weder User mit aktivierten Benachrichtigungen noch "notify.emails" in config.json) – überspringe Benachrichtigung.');
-    return;
-  }
   if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
     console.log('SMTP-Zugangsdaten (Secrets) fehlen – überspringe Benachrichtigung.');
     return;
   }
+  const users = await loadUsers();
+  const seasons = await loadSeasons();
+
+  // Empfänger: jeder nicht gesperrte Zugang mit eingeschalteten Benachrichtigungen (Rolle aus
+  // dem Admin-Recht) plus die festen Adressen aus config.json → notify.emails (gelten als Admin).
+  const recipients = new Map();
+  users.filter(u => u.emailNotificationsEnabled !== false && !u.locked && u.email).forEach(u => {
+    recipients.set(u.email.trim().toLowerCase(), { email: u.email.trim().toLowerCase(), user: u, role: u.admin ? 'admin' : 'trainer' });
+  });
+  (Array.isArray(notify.emails) ? notify.emails : []).filter(Boolean).forEach(e => {
+    const email = e.trim().toLowerCase();
+    if (!recipients.has(email)) recipients.set(email, { email, user: null, role: 'admin' });
+  });
 
   const allMessages = getCommitMessages();
   const platzcoachMessages = allMessages.filter(isFromPlatzcoach);
-  const messages = platzcoachMessages.filter(m => !isNoisyCommit(m));
-  console.log(`${allMessages.length} Commit(s) im Push, davon ${platzcoachMessages.length} von Platzcoach selbst (Rest = z.B. direkte GitHub-Änderungen, wird ignoriert), davon ${messages.length} für die Sammel-Mail relevant.`);
+  // git log liefert neueste zuerst – für die Mail chronologisch (älteste zuerst) sortieren.
+  const changes = platzcoachMessages.map(parseCommit).filter(c => !isNoisyCommit(c.text)).reverse();
+  console.log(`${allMessages.length} Commit(s) im Push, davon ${platzcoachMessages.length} von Platzcoach, ${changes.length} nach Filter. Kategorien: ${JSON.stringify(changes.map(c => c.category))}`);
 
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -172,42 +220,55 @@ async function main() {
     secure: (process.env.SMTP_PORT || '587') === '465',
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
   });
-
   const clubName = cfg.clubName || cfg.club || 'Platzcoach';
   const fromAddress = notify.fromEmail || process.env.SMTP_USER;
   // Antworten auf Platzcoach-Mails landen hier statt bei der noreply-Absenderadresse.
   const replyTo = notify.replyTo || '';
 
-  // Willkommens-Mail(s) an neu angelegte Zugänge – bewusst aus ALLEN Commits erkannt
-  // (nicht aus der oben gefilterten "messages"-Liste!), da "Zugang angelegt" ja gerade
-  // NICHT in der allgemeinen Sammel-Mail unten auftauchen soll, aber die neue Person
-  // trotzdem ihre eigene Willkommens-Mail bekommen muss. Bewusst OHNE Passwort (siehe
-  // Absprache) – das kommt separat über den Dispatch-Weg (send-welcome-password.mjs).
-  await sendWelcomeEmails(platzcoachMessages, users, transporter, clubName, fromAddress, cfg.siteUrl, replyTo);
+  // Willkommens-Mail(s) an neu angelegte Zugänge (ohne Passwort – das kommt separat über den
+  // Dispatch-Weg, siehe send-welcome-password.mjs).
+  await sendWelcomeEmails(platzcoachMessages.map(m => m.split(/\n\s*\n/)[0].trim()), users, transporter, clubName, fromAddress, cfg.siteUrl, replyTo);
 
-  if (!messages.length) {
-    console.log('Keine für die Sammel-Mail relevanten Änderungen – keine weitere E-Mail nötig.');
+  if (!changes.length) {
+    console.log('Keine für die Benachrichtigung relevanten Änderungen.');
     return;
   }
 
-  const listHtml = messages.map(m => `<li style="margin-bottom:6px;">${escapeHtml(m)}</li>`).join('');
-  const html = `
+  // Jede Person bekommt eine EIGENE Mail (keine offene Empfängerliste) und nur das, was sie
+  // betrifft: passende Kategorie für ihre Rolle, bei Trainern nur eigene Mannschaften +
+  // Vereinsweites, und nie die eigenen Änderungen.
+  let sent = 0;
+  for (const r of recipients.values()) {
+    const allowed = roleCats[r.role] || [];
+    const classes = r.user ? trainerClassesFor(r.user, seasons, today) : {};
+    const mine = changes.filter(c =>
+      allowed.includes(c.category)
+      && !(r.user && c.by && c.by === r.user.id)
+      && (r.role === 'admin' || concernsTrainer(c, classes)));
+    if (!mine.length) continue;
+    const texts = mine.map(c => c.text);
+    const html = `
     <div style="font-family:Arial,sans-serif;font-size:14px;color:#0B1B32;">
-      <p><strong>${escapeHtml(clubName)}</strong> – es gab folgende Änderung${messages.length === 1 ? '' : 'en'} in Platzcoach:</p>
-      <ul>${listHtml}</ul>
-      <p style="color:#718191;font-size:12px;">Automatische Benachrichtigung von Platzcoach. Antworten auf diese E-Mail führt zu nichts – bitte direkt in der App nachsehen.</p>
+      <p><strong>${escapeHtml(clubName)}</strong> – es gab folgende Änderung${texts.length === 1 ? '' : 'en'} in Platzcoach:</p>
+      <ul>${texts.map(t => `<li style="margin-bottom:6px;">${escapeHtml(t)}</li>`).join('')}</ul>
+      <p style="color:#718191;font-size:12px;">Automatische Benachrichtigung von Platzcoach. Details siehst du in der App. Benachrichtigungen kannst du im Profil abschalten.</p>
     </div>`;
-  const text = `${clubName} – Änderungen in Platzcoach:\n\n` + messages.map(m => `- ${m}`).join('\n');
-
-  await transporter.sendMail({
-    from: `Platzcoach <${fromAddress}>`, // Absendername bewusst immer "Platzcoach" (SaaS); der Verein steht im Text
-    ...(replyTo ? { replyTo } : {}),
-    to: recipients.join(', '),
-    subject: `Platzcoach: ${messages.length} Änderung${messages.length === 1 ? '' : 'en'}`,
-    text,
-    html,
-  });
-  console.log(`E-Mail mit ${messages.length} Änderung(en) an ${recipients.length} Empfänger gesendet.`);
+    const text = `${clubName} – Änderungen in Platzcoach:\n\n` + texts.map(t => `- ${t}`).join('\n');
+    try {
+      await transporter.sendMail({
+        from: `Platzcoach <${fromAddress}>`, // Absendername bewusst immer "Platzcoach" (SaaS); der Verein steht im Text
+        ...(replyTo ? { replyTo } : {}),
+        to: r.email,
+        subject: `Platzcoach: ${texts.length} Änderung${texts.length === 1 ? '' : 'en'}`,
+        text,
+        html,
+      });
+      sent++;
+    } catch (err) {
+      console.error(`Senden an ${r.email} fehlgeschlagen:`, err.message);
+    }
+  }
+  console.log(`${sent} E-Mail(s) an einzelne Empfänger gesendet (von ${recipients.size} möglichen).`);
 }
 
 main().catch(err => {
