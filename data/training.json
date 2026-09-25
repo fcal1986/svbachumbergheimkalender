@@ -181,8 +181,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "123c8c2c-5a1a-43d6-be82-455af9f3b407"
+      ],
+      "trainerNames": [
+        "Younes Al Musaui"
+      ],
       "validFrom": "2026-09-01",
       "validUntil": null
     },
@@ -435,8 +439,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "123c8c2c-5a1a-43d6-be82-455af9f3b407"
+      ],
+      "trainerNames": [
+        "Younes Al Musaui"
+      ],
       "validFrom": "2026-09-01",
       "validUntil": null,
       "cancelled": []
