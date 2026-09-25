@@ -333,6 +333,27 @@
       "emailNotificationsEnabled": true,
       "phone": "+4916090347220",
       "contactPublic": "none"
+    },
+    {
+      "id": "d1cc03c0-324c-40de-a4f8-49d75efeb828",
+      "first": "Marcel",
+      "last": "Mohr",
+      "email": "atsche-mohr@web.de",
+      "admin": false,
+      "classes": {
+        "D-Jugend": [
+          1
+        ]
+      },
+      "enc": {
+        "salt": "VP+g/JZzVj28+NlAHwTJ3w==",
+        "iv": "VPoHGVtT2CU6St3e",
+        "cipher": "Inextabal1saSLxvV+r0L/B0ZgNqSD+fPrNpAUmAZnUHFcZIkwQneFe/sVEpV6ETdCmhpLM+RtLUde8pJaCeQMm9POzAgwrnTrJ0dMkhClueHv1g5ZgUNGIDvsNBF9+MScM2/uj79EmRIZEkig=="
+      },
+      "created": "2026-09-25T18:54:54.617Z",
+      "emailNotificationsEnabled": true,
+      "phone": "01738656922",
+      "contactPublic": "phone"
     }
   ]
 }
