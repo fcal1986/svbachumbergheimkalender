@@ -150,9 +150,9 @@
         ]
       },
       "enc": {
-        "salt": "BrK4XFI12EywV6k3TkPPGQ==",
-        "iv": "Yq6MctnslXel3Edm",
-        "cipher": "0blVkJxOJN8m4ACceXpS4ESr4QBeNnlUIOx7cd9qB7VOHXeixgmpzXrPoJLjWC9lKMa2jrlShZScfi7DEmm11MAvn9faEYZcjIZzBIf/K+zOE0JPI0j6BgPCBkjul3tAzRFuWiTjAZARluE0pA=="
+        "salt": "Zuze2GdSAfGHLDcsVFGmRg==",
+        "iv": "bBuULBoIXpThmHPt",
+        "cipher": "PQTaek6tyrUNZ0rVSAAFWFy71rlExqqx4ZfHDCpLTzKcgIuIihz+ubWAu/hCuYUYhAqnryjImILA0KcVDDQXk/7KX1DX2RY9WYCcvyxmtF6e3t3KI8XRDz3pVzDQCGOn8apiDEDT7YAl7US2NA=="
       },
       "created": "2026-09-25T11:57:50.462Z",
       "emailNotificationsEnabled": true,
