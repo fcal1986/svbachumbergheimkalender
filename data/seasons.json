@@ -17,7 +17,8 @@
         "bde8d374-560d-4037-9dea-322d7dd85ba9",
         "df7c1228-0999-452e-9a08-33244bf13cc0",
         "123c8c2c-5a1a-43d6-be82-455af9f3b407",
-        "2def1cdd-2baf-4442-b139-4bc3abe69405"
+        "2def1cdd-2baf-4442-b139-4bc3abe69405",
+        "1d67889f-3194-43d7-9ead-2faa97e9b782"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
@@ -75,6 +76,9 @@
           "D-Jugend": [
             1
           ]
+        },
+        "1d67889f-3194-43d7-9ead-2faa97e9b782": {
+          "C-Jugend": []
         }
       },
       "trainerNames": [
@@ -88,7 +92,8 @@
         "Sven Svejn",
         "Valerij Bolinger",
         "Younes Al Musaui",
-        "Sascha Rabura"
+        "Sascha Rabura",
+        "Damian Cvetkov"
       ]
     }
   ]
