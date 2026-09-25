@@ -13,7 +13,8 @@
         "cfe0a536-f595-475a-aef0-df62dfb09885",
         "f9f5d5e9-2907-46bb-b5a7-a04477c65b5a",
         "c5f27a4d-fc49-438a-9221-b72392d040b4",
-        "3a132e64-7713-4fe2-b6db-838da96eefa7"
+        "3a132e64-7713-4fe2-b6db-838da96eefa7",
+        "bde8d374-560d-4037-9dea-322d7dd85ba9"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
@@ -51,6 +52,11 @@
             2,
             3
           ]
+        },
+        "bde8d374-560d-4037-9dea-322d7dd85ba9": {
+          "D-Jugend": [
+            2
+          ]
         }
       },
       "trainerNames": [
@@ -60,7 +66,8 @@
         "Daniel Schauerte-Becker",
         "Malak Khalil",
         "Patrick Voß",
-        "Dirk Pfeiffer"
+        "Dirk Pfeiffer",
+        "Sven Svejn"
       ]
     }
   ]
