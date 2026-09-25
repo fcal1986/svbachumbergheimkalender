@@ -212,6 +212,27 @@
       "emailNotificationsEnabled": true,
       "phone": "01703564900",
       "contactPublic": "phone"
+    },
+    {
+      "id": "2def1cdd-2baf-4442-b139-4bc3abe69405",
+      "first": "Sascha",
+      "last": "Rabura",
+      "email": "sascharabura@icloud.com",
+      "admin": false,
+      "classes": {
+        "D-Jugend": [
+          1
+        ]
+      },
+      "enc": {
+        "salt": "Asy2gUHonsg12uE7JbrLiQ==",
+        "iv": "ZJzWUK6IGZTZqvYf",
+        "cipher": "zETyH6XPw+lVhTtD/DnLlrxv2ASLjbTRwVnZ0kq94EkdyMJM+XWp4NR+dDWUVTbYY+hLznf5HWwOpqWJ91Q1FxEG/bioWj6QjIALqcu9/in1atZ7ffTX0UIDApzSugwS6Hq+p2H0N1rnqtaNiQ=="
+      },
+      "created": "2026-09-25T18:36:48.779Z",
+      "emailNotificationsEnabled": true,
+      "phone": "015170164107",
+      "contactPublic": "phone"
     }
   ]
 }
