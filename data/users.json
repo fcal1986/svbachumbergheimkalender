@@ -156,21 +156,6 @@
       },
       "created": "2026-09-07T13:13:41.885Z",
       "locked": true
-    },
-    {
-      "id": "b9940d25-5870-424c-adff-06a307a83047",
-      "first": "Demo",
-      "last": "Demo",
-      "email": "demo@demo.de",
-      "admin": true,
-      "classes": {},
-      "enc": {
-        "salt": "Kc9oSLx7MEnXy+cWGVH4Fw==",
-        "iv": "5YYAI1/JZPaN1VG+",
-        "cipher": "wjq4Vk48z8RTki0RBOdEqlXsspNAzJTXm7Auu/lavr6nqDPVAOZbjYtGWBg4oo/2Lr/7JXRlCFNPQ0qVS10k98RrKbVra3znt3pqCSBG033IdVcLnWHnLFPjiKoXAuzsrR6o42xnp77r00OtAg=="
-      },
-      "created": "2026-09-21T12:49:28.823Z",
-      "emailNotificationsEnabled": true
     }
   ]
 }
