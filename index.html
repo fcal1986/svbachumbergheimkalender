@@ -136,7 +136,20 @@
   .score-pill.loss{background:#DC2626;}
   .event-card.has-score{opacity:1;}
   .status-row.conflict-row{cursor:pointer;}
-  .conflict-banner{display:flex;align-items:center;gap:8px;background:#FFF4ED;border:1.5px solid #FDBA8C;border-radius:10px;padding:7px 11px;margin:8px 0;font-size:12px;color:#9A3412;}
+  .conflict-banner{display:flex;align-items:center;gap:8px;background:#FFF4ED;border:1.5px solid #FDBA8C;border-radius:10px;padding:8px 11px;margin:8px 0;font-size:12px;color:#9A3412;width:100%;text-align:left;font-family:inherit;cursor:pointer;}
+  .conflict-banner svg{flex:none;width:16px;height:16px;}
+  .conflict-banner .cf-head{flex:1;min-width:0;line-height:1.4;}
+  .conflict-banner .cf-chev{flex:none;font-size:12px;transition:transform .15s;}
+  .conflict-banner.open{border-bottom-left-radius:0;border-bottom-right-radius:0;margin-bottom:0;}
+  .conflict-banner.open .cf-chev{transform:rotate(180deg);}
+  .conflict-detail{background:#FFFAF6;border:1.5px solid #FDBA8C;border-top:none;border-radius:0 0 10px 10px;padding:8px 11px 10px;margin:0 0 8px;font-size:12px;color:var(--ink);}
+  .cf-row{display:flex;flex-direction:column;gap:2px;padding:5px 0;}
+  .cf-lbl{font-size:10px;font-weight:700;color:#9A3412;text-transform:uppercase;letter-spacing:.04em;}
+  .cf-partner{border-top:1px dashed #FDBA8C;margin-top:4px;padding-top:2px;}
+  .cf-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+  .cf-btn{background:var(--black-btn);color:#fff;border:none;border-radius:9px;padding:8px 12px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;}
+  .cf-btn.ghost{background:var(--white);color:var(--ink);border:1.5px solid var(--line);}
+  .cf-hint{font-size:11px;color:var(--ink-soft);margin:8px 0 0;line-height:1.45;}
   .conflict-banner svg{width:16px;height:16px;flex:none;}
   .conf-mark{position:absolute;top:4px;left:5px;width:14px;height:14px;border-radius:50%;background:#EA580C;color:#fff;font-size:9.5px;font-weight:800;line-height:14px;text-align:center;}
   .cal-day.sel .conf-mark{box-shadow:0 0 0 1.5px #fff;}
@@ -963,7 +976,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='25.09.2026 · 6';
+const APP_VERSION='25.09.2026 · 7';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -2482,9 +2495,75 @@ function conflictIdsOn(ds){
   return (_conflictCache[ds]=ids);
 }
 function hasConflictOn(ds){ return conflictIdsOn(ds).size>0; }
+/* Konflikt-Hinweis auf der Terminkarte: nennt direkt, WOMIT sich der Termin überschneidet,
+   und klappt beim Antippen Details auf (Platzflächen, Ansprechpartner, Aktionen zum Lösen).
+   Vorher war das nur ein Schild ohne Funktion – laut Clarity der häufigste "Dead Click". */
+function conflictPartnersOf(e){
+  const partners=[];
+  conflictsOnDay(e.d).forEach(([A,B])=>{ if(A.id===e.id)partners.push(B); else if(B.id===e.id)partners.push(A); });
+  let capacity=null;
+  fussballCapacityWarningsOn(e.d).forEach(w=>{
+    if(w.games.some(g=>fussballGameLinkId(g)===e.id)) capacity=w;
+  });
+  return {partners:[...new Map(partners.map(x=>[x.id,x])).values()],capacity};
+}
+function conflictItemLabel(x){
+  if(x.isExternal) return (x.isAway?'Auswärtsspiel ':'Heimspiel ')+teamLabel(x.team,x.squad)+(x.opponent?' – '+x.opponent:'');
+  if(x.isTraining) return 'Training '+teamLabel(x.team,x.squad);
+  return (x.title||'Termin')+(x.team&&x.team!=='Alle Teams'?' ('+teamLabel(x.team,x.squad)+')':'');
+}
+function conflictContactHTML(x){
+  if(x.isExternal){ const t=fussballTrainersFor(x.team,x.squad); return t?getTrainersContactHTML(t):''; }
+  if(x.isTraining) return getTrainersContactHTML(x);
+  const ch=x.ownerId?getContactHTML(x.ownerId):'';
+  return '<div class="trainers-block"><div class="trainer-row"><div class="trainer-lbl">'+esc(x.ownerName||'–')+'</div>'
+    +(ch?'<div class="ev-contact" style="margin-top:4px;">'+ch+'</div>':'')+'</div></div>';
+}
+function conflictActionsHTML(e){
+  if(!session) return '<p class="cf-hint">Zum Lösen bitte anmelden.</p>';
+  const btns=[];
+  if(!e.isExternal&&!e.isTraining&&canEdit(e))
+    btns.push('<button class="cf-btn" onclick="event.stopPropagation();editEvent(\''+e.id+'\')">Termin anpassen</button>');
+  if(e.isTraining&&session.isAdmin&&e.trainingSlotId){
+    btns.push('<button class="cf-btn" onclick="event.stopPropagation();openCancelModal(\''+e.trainingSlotId+'\',\''+e.d+'\')">Training an diesem Tag absagen</button>');
+    btns.push('<button class="cf-btn ghost" onclick="event.stopPropagation();editTrainingSlot(\''+e.trainingSlotId+'\')">Trainingszeit bearbeiten</button>');
+  }
+  if(e.isExternal&&!e.isAway&&e.fbIndex!=null)
+    btns.push('<button class="cf-btn" onclick="event.stopPropagation();openRescheduleFinder('+e.fbIndex+')">Neue Ansetzung suchen</button>');
+  if(!btns.length) return '<p class="cf-hint">Bitte mit den Verantwortlichen abstimmen – ändern kann das nur, wer den anderen Termin angelegt hat, oder ein Admin.</p>';
+  return '<div class="cf-actions">'+btns.join('')+'</div>';
+}
+function toggleConflictBanner(btn,ev){
+  if(ev)ev.stopPropagation();
+  const open=btn.classList.toggle('open');
+  btn.setAttribute('aria-expanded',open?'true':'false');
+  const d=btn.nextElementSibling; if(d)d.style.display=open?'block':'none';
+  if(open) trackEvent('platzkonflikt_details_geoeffnet');
+}
 function conflictBannerHTML(e){
   if(!e||e.isCancelled||!e.d||!conflictIdsOn(e.d).has(e.id))return '';
-  return '<div class="conflict-banner">'+svgWarn+'<b>Platzkonflikt</b></div>';
+  const {partners,capacity}=conflictPartnersOf(e);
+  let head;
+  if(partners.length){
+    const p=partners[0];
+    head='Platzkonflikt mit <b>'+esc(conflictItemLabel(p))+'</b> ('+p.t+'–'+eventBis(p)+')'+(partners.length>1?' und '+(partners.length-1)+' weiteren':'');
+  }else if(capacity){
+    head='<b>Zu viele Spiele gleichzeitig</b> von fussball.de angesetzt';
+  }else head='<b>Platzkonflikt</b>';
+  let det='<div class="conflict-detail" style="display:none;">';
+  det+='<div class="cf-row"><span class="cf-lbl">Dieser Termin</span><span>'+esc(conflictItemLabel(e))+' · '+e.t+'–'+eventBis(e)+(pitchLabelOf(e)?' · '+esc(pitchLabelOf(e)):'')+'</span></div>';
+  partners.forEach(p=>{
+    det+='<div class="cf-partner"><div class="cf-row"><span class="cf-lbl">Überschneidet sich mit</span><span><b>'+esc(conflictItemLabel(p))+'</b> · '+p.t+'–'+eventBis(p)+(pitchLabelOf(p)?' · '+esc(pitchLabelOf(p)):'')+'</span></div>'
+      +'<div class="cf-row"><span class="cf-lbl">Ansprechpartner</span>'+(conflictContactHTML(p)||'<span style="color:var(--ink-soft);">Für diese Mannschaft ist noch kein Trainer hinterlegt.</span>')+'</div></div>';
+  });
+  if(capacity){
+    det+='<div class="cf-partner"><div class="cf-row"><span class="cf-lbl">fussball.de</span><span>'+capacity.games.length+' geteilte Jugendspiele laufen gleichzeitig ('
+      +capacity.games.map(g=>{const m=fussballFilterTeam(g.team,g.squad);return esc(teamLabel(m.team,m.squad))+' '+g.t;}).join(', ')
+      +'). Der Platz hat nur zwei Hälften – das muss mit dem Staffelleiter geklärt werden.</span></div></div>';
+  }
+  det+=conflictActionsHTML(e)+'</div>';
+  return '<button type="button" class="conflict-banner" aria-expanded="false" onclick="toggleConflictBanner(this,event)">'+svgWarn
+    +'<span class="cf-head">'+head+'</span><span class="cf-chev">▾</span></button>'+det;
 }
 function typeLabelOf(e){
   const t=classifyAgendaItem(e);
