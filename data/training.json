@@ -89,8 +89,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "3a132e64-7713-4fe2-b6db-838da96eefa7"
+      ],
+      "trainerNames": [
+        "Dirk Pfeiffer"
+      ],
       "trainerId": null,
       "trainerName": ""
     },
@@ -108,12 +112,10 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "a21f28cb-3527-4337-ba43-9752dab0bcdb",
-        "3a132e64-7713-4fe2-b6db-838da96eefa7"
+        "a21f28cb-3527-4337-ba43-9752dab0bcdb"
       ],
       "trainerNames": [
-        "Markus Vielhaber",
-        "Dirk Pfeiffer"
+        "Markus Vielhaber"
       ],
       "validFrom": "2026-07-18",
       "validUntil": null,
@@ -372,8 +374,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "3a132e64-7713-4fe2-b6db-838da96eefa7"
+      ],
+      "trainerNames": [
+        "Dirk Pfeiffer"
+      ],
       "trainerId": null,
       "trainerName": ""
     },
@@ -391,12 +397,10 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "a21f28cb-3527-4337-ba43-9752dab0bcdb",
-        "3a132e64-7713-4fe2-b6db-838da96eefa7"
+        "a21f28cb-3527-4337-ba43-9752dab0bcdb"
       ],
       "trainerNames": [
-        "Markus Vielhaber",
-        "Dirk Pfeiffer"
+        "Markus Vielhaber"
       ],
       "trainerId": null,
       "trainerName": ""
