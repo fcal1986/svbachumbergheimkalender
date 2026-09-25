@@ -62,7 +62,8 @@
       "created": "2026-09-25T11:57:50.462Z",
       "emailNotificationsEnabled": true,
       "phone": "01722342821",
-      "contactPublic": "phone"
+      "contactPublic": "both",
+      "contactEmail": "info@bcw-software.de"
     }
   ]
 }
