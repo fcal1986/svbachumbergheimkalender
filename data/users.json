@@ -274,6 +274,25 @@
       "emailNotificationsEnabled": true,
       "phone": "01736034687",
       "contactPublic": "phone"
+    },
+    {
+      "id": "dea0203f-f8a0-4230-8e3a-e51a728eb61a",
+      "first": "Alex",
+      "last": "Ramm",
+      "email": "alex75de1@web.de",
+      "admin": false,
+      "classes": {
+        "1. Herren": []
+      },
+      "enc": {
+        "salt": "4jNFxOZXEzRyMxVvgQRReQ==",
+        "iv": "4kIU39EbM/WB8CBy",
+        "cipher": "iTO3SSS2Voxum+URAp5kleoX1FfD7jZ6alo97e5ezN/Y8tCv12AeMhwhkQJrUDlT/hW9V1fmpivQkIIr5OoQvc/8cac0b/ryI4SkOcErdOhgbTRDP9dsJajT+E9Apj3DSHbAf1X5qiDdo0QlXA=="
+      },
+      "created": "2026-09-25T18:37:03.656Z",
+      "emailNotificationsEnabled": true,
+      "phone": "+49 151 59429047",
+      "contactPublic": "phone"
     }
   ]
 }
