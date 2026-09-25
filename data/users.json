@@ -86,6 +86,28 @@
       "emailNotificationsEnabled": true,
       "phone": "+4917620975763",
       "contactPublic": "phone"
+    },
+    {
+      "id": "f9f5d5e9-2907-46bb-b5a7-a04477c65b5a",
+      "first": "Malak",
+      "last": "Khalil",
+      "email": "malaknesseim@gmail.com",
+      "admin": false,
+      "classes": {
+        "F-Jugend": [
+          2,
+          3
+        ]
+      },
+      "enc": {
+        "salt": "3Xb0kZsgt9Sga7dVA+hoQA==",
+        "iv": "jyF3UXHnDLww3n/A",
+        "cipher": "YedLLKvVTxfFBlpUYs0bJx0XGjPM/3+rKlLZfHvAWn6w0VgIdiES4cszHs8DM7UHxrSKqBtRpjoiGv9UTIoL0+kFYC3AALdL4kiJ3oj0hStRfEzp+dIfmQwuEia5szu1GsvEom0Ea9VElD69VA=="
+      },
+      "created": "2026-09-25T18:32:56.533Z",
+      "emailNotificationsEnabled": true,
+      "phone": "015140375738",
+      "contactPublic": "phone"
     }
   ]
 }
