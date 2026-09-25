@@ -66,28 +66,6 @@
       "contactEmail": "info@bcw-software.de"
     },
     {
-      "id": "cfe0a536-f595-475a-aef0-df62dfb09885",
-      "first": "Daniel",
-      "last": "Schauerte-Becker",
-      "email": "d.schauertebecker@aol.de",
-      "admin": false,
-      "classes": {
-        "D-Jugend": [
-          2,
-          3
-        ]
-      },
-      "enc": {
-        "salt": "pVdE6Q3BjdnuOyVicxHIgw==",
-        "iv": "qXfb/ii60RlbEM5k",
-        "cipher": "z4ruF/P1JGLJjGcYNKdWeZqx0fOq2uogG9X8QaM2rCJMzlxHNZON2CIfOS7RhD2+PKJaz7fBlpjLd2bTdJCpbyao2WzU1IPzfSKtO/kZgQyMm4mxmXjJWxyh8tl9+oIPfRuWjzhFH2/P6QbiZQ=="
-      },
-      "created": "2026-09-25T18:30:59.220Z",
-      "emailNotificationsEnabled": true,
-      "phone": "+4917620975763",
-      "contactPublic": "phone"
-    },
-    {
       "id": "f9f5d5e9-2907-46bb-b5a7-a04477c65b5a",
       "first": "Malak",
       "last": "Khalil",
