@@ -220,8 +220,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "2def1cdd-2baf-4442-b139-4bc3abe69405"
+      ],
+      "trainerNames": [
+        "Sascha Rabura"
+      ],
       "cancelled": [],
       "validFrom": "2026-09-09",
       "validUntil": null,
@@ -478,8 +482,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "2def1cdd-2baf-4442-b139-4bc3abe69405"
+      ],
+      "trainerNames": [
+        "Sascha Rabura"
+      ],
       "validFrom": "2026-09-09",
       "validUntil": null,
       "trainerId": null,
