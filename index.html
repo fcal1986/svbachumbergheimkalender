@@ -963,7 +963,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='25.09.2026 · 4';
+const APP_VERSION='25.09.2026 · 5';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -1504,7 +1504,11 @@ async function ghPutRaw(path,text,msg){
   showSaving('Wird gespeichert …');
   try{
     const sha=await ghSha(path);
-    const body={message:msg,content:b64(enc.encode(text)),branch:CFG.branch};
+    // Unsichtbare Zusatzzeilen für die E-Mail-Benachrichtigung (scripts/notify-email.mjs):
+    // wer gespeichert hat (damit niemand Mails über eigene Änderungen bekommt). Das Protokoll
+    // in der App zeigt nur den ersten Absatz der Nachricht an.
+    const fullMsg=msg+(/\n\nPlatzcoach-/.test(msg)?'\n':'\n\n')+'Platzcoach-By: '+(session.id||'unbekannt');
+    const body={message:fullMsg,content:b64(enc.encode(text)),branch:CFG.branch};
     if(sha) body.sha=sha;
     const r=await fetch('https://api.github.com/repos/'+CFG.repo+'/contents/'+path,{
       method:'PUT',
@@ -1543,6 +1547,9 @@ async function ghDispatch(eventType,payload){
     throw new Error(e.message||'Dispatch fehlgeschlagen ('+r.status+')');
   }
 }
+/* Mannschaft als unsichtbare Zusatzzeile, damit die E-Mail-Benachrichtigung Trainern nur
+   Änderungen ihrer eigenen Mannschaften (plus Vereinsweites) schickt. */
+function teamTrailer(team,squad){ return '\n\nPlatzcoach-Team: '+(team||'Alle Teams')+'#'+(squad||1); }
 async function saveEvents(msg){
   await ghPutRaw('data/events.json',JSON.stringify({events:EVENTS},null,2),msg);
 }
@@ -2989,7 +2996,7 @@ async function submitEvent(){
     if(editingId)Object.assign(EVENTS.find(x=>x.id===editingId),{d,t:von,bis,title,team,squad,pitch,halle,res,note});
     else EVENTS.push({id:crypto.randomUUID(),d,t:von,bis,title,team,squad,pitch,halle,res,note,ownerId:session.id,ownerName:session.name});
     const wasEditing=!!editingId;
-    const logMsg=(wasEditing?'Termin geändert: ':'Neuer Termin: ')+title+' – '+teamLabel(team,squad)+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name;
+    const logMsg=(wasEditing?'Termin geändert: ':'Neuer Termin: ')+title+' – '+teamLabel(team,squad)+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name+teamTrailer(team,squad);
     editingId=null;formDirty=false;document.getElementById('cancel-btn').style.display='none';
     selDate=d;const dt=new Date(d+'T00:00:00');curY=dt.getFullYear();curM=dt.getMonth();yearShown=curY;
     goto('termine');setView('monat');render();renderStart();resetForm();
@@ -3006,7 +3013,7 @@ function deleteEvent(id){
     const backup=JSON.stringify(EVENTS);
     EVENTS=EVENTS.filter(x=>x.id!==id);
     render(); renderStart(); showToast('Termin gelöscht.');
-    saveEvents('Termin gelöscht: '+e.title+' – '+teamLabel(e.team,e.squad)+' · '+e.t+'–'+eventBis(e)+' · '+fmtShort(e.d)+' – '+session.name)
+    saveEvents('Termin gelöscht: '+e.title+' – '+teamLabel(e.team,e.squad)+' · '+e.t+'–'+eventBis(e)+' · '+fmtShort(e.d)+' – '+session.name+teamTrailer(e.team,e.squad))
       .catch(err=>{ EVENTS=JSON.parse(backup);render();renderStart();showToast('Rückgängig – Fehler: '+err.message,6000); });
   });
 }
@@ -3199,7 +3206,7 @@ async function doCancelSlot(){
   try{
     closeCancelModal(); renderTraining(); renderStart(); render();
     showToast('Training am '+fmtShort(date)+' abgesagt.');
-    saveTraining('Training abgesagt: '+trainName(s)+' am '+fmtShort(date)+' – '+session.name)
+    saveTraining('Training abgesagt: '+trainName(s)+' am '+fmtShort(date)+' – '+session.name+teamTrailer(s.team,s.squad))
       .catch(e=>{ TRAINING=JSON.parse(backup);renderTraining();renderStart();showToast('Fehler: '+e.message,6000); });
   }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   finally{ if(cmBtn){ cmBtn.disabled=false; cmBtn.textContent='Absagen'; } }
@@ -3211,7 +3218,7 @@ async function reactivateCancelled(id,date){
   s.cancelled=(s.cancelled||[]).filter(d=>d!==date);
   try{
     renderTraining(); renderStart(); render(); showToast('Training am '+fmtShort(date)+' findet wieder statt.');
-    saveTraining('Absage zurückgenommen: '+trainName(s)+' am '+fmtShort(date)+' – '+session.name)
+    saveTraining('Absage zurückgenommen: '+trainName(s)+' am '+fmtShort(date)+' – '+session.name+teamTrailer(s.team,s.squad))
       .catch(e=>{ TRAINING=JSON.parse(backup);renderTraining();renderStart();showToast('Fehler: '+e.message,6000); });
   }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   finally{ hideSaving(); }
@@ -3563,7 +3570,7 @@ async function saveTrainingSlot(){
       TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[...newCancels].sort()});
     }
     const tMsg=(tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+team+' (ab '+fmtShort(validFrom)+')'
-      +(newCancels.length?' – wegen Heimspielen abgesagt am '+newCancels.map(fmtShort).join(', '):'')+' – '+session.name;
+      +(newCancels.length?' – wegen Heimspielen abgesagt am '+newCancels.map(fmtShort).join(', '):'')+' – '+session.name+teamTrailer(team,squad);
     tEditId=null; renderTraining(); renderStart(); goto('training');
     if(warn.length) showToast('⚠ Gespeichert – Achtung: '+warn[0],5000);
     else if(newCancels.length) showToast('Trainingszeit gespeichert – an '+newCancels.length+' Spieltag'+(newCancels.length===1?'':'en')+' abgesagt.',5000);
@@ -3578,7 +3585,7 @@ function deleteTrainingSlot(id){
   askConfirm('Trainingszeit löschen?',trainName(s)+' am '+WDAYS[s.day]+' '+s.from+'–'+s.to+' wird entfernt.','Löschen',async()=>{
     const backup=JSON.stringify(TRAINING);
     TRAINING=TRAINING.filter(x=>x.id!==id);
-    try{ await saveTraining('Trainingszeit gelöscht: '+WDAYS[s.day]+' '+s.from+' '+s.team+' – '+session.name);
+    try{ await saveTraining('Trainingszeit gelöscht: '+WDAYS[s.day]+' '+s.from+' '+s.team+' – '+session.name+teamTrailer(s.team,s.squad));
       renderTraining(); showToast('Gelöscht.');
     }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   });
@@ -3912,7 +3919,7 @@ async function loadLogIfNeeded(){
         commits.forEach(cm=>all.push({
           sha:cm.sha.slice(0,7),
           ts:cm.commit.author.date,
-          msg:cm.commit.message.trim()
+          msg:cm.commit.message.split(/\n\s*\n/)[0].trim() // Zusatzzeilen ("Platzcoach-…") ausblenden
         }));
       }catch(e){}
     }));
