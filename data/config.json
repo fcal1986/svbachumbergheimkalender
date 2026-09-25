@@ -17,7 +17,7 @@
   "shareCategories": ["E-Junioren", "F-Junioren", "G-Junioren", "Bambini"]
   },
   "registration": {
-  "workerUrl": ""
+  "workerUrl": "https://odd-pine-7cbc.silent-shape-c920.workers.dev"
   },
   "notify": {
   "emails": ["fab.calcagno@gmail.com"],
