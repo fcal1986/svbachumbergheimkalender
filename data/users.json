@@ -252,6 +252,28 @@
       "emailNotificationsEnabled": true,
       "phone": "17634944920",
       "contactPublic": "phone"
+    },
+    {
+      "id": "82278cba-af88-4663-bd3c-937db4a7b122",
+      "first": "Bülent",
+      "last": "Gencsen",
+      "email": "familiegenco@gmx.de",
+      "admin": false,
+      "classes": {
+        "D-Jugend": [
+          1,
+          3
+        ]
+      },
+      "enc": {
+        "salt": "pJUp81ngeDSDXziiexHULQ==",
+        "iv": "4LzKnOcwjaRchxzV",
+        "cipher": "RTemJTE3cxJjiMzY0qGPShcGy6brWLWczCkPMqE8/dlgWiLXHD8nXZnRKwd+nifuaJ67qaa83GlTyQfyqW6rSET2auRD4WU6qRvg1J1YN9Gd1mW+2uveIgQ2QuKUGy/Q7rsEEx22Aq7ugcBLkQ=="
+      },
+      "created": "2026-09-25T18:36:58.386Z",
+      "emailNotificationsEnabled": true,
+      "phone": "01736034687",
+      "contactPublic": "phone"
     }
   ]
 }
