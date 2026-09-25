@@ -213,8 +213,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "871986c9-429e-4576-affb-961cf5f374f6"
+      ],
+      "trainerNames": [
+        "Cetin Kurt"
+      ],
       "cancelled": []
     },
     {
@@ -498,8 +502,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": []
+      "trainerIds": [
+        "871986c9-429e-4576-affb-961cf5f374f6"
+      ],
+      "trainerNames": [
+        "Cetin Kurt"
+      ]
     },
     {
       "id": "a4dbb675-3e10-40c6-afa2-40c2ca82a21c",
