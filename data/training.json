@@ -131,8 +131,12 @@
       },
       "res": [],
       "note": "Bei Wochenendspiel endet Training um 19:00 Uhr",
-      "trainerIds": [],
-      "trainerNames": []
+      "trainerIds": [
+        "849b22db-1ace-4865-ac73-8b325b5ff5d2"
+      ],
+      "trainerNames": [
+        "Marc Kemper"
+      ]
     },
     {
       "id": "3bc5eb93-4747-4202-8de0-65b5a74a4692",
@@ -404,8 +408,12 @@
       },
       "res": [],
       "note": "Bei Wochenendspiel endet Training um 19:00 Uhr",
-      "trainerIds": [],
-      "trainerNames": []
+      "trainerIds": [
+        "849b22db-1ace-4865-ac73-8b325b5ff5d2"
+      ],
+      "trainerNames": [
+        "Marc Kemper"
+      ]
     },
     {
       "id": "1b6e5d01-f80f-451d-94f4-766ecbb7fe79",
