@@ -108,6 +108,25 @@
       "emailNotificationsEnabled": true,
       "phone": "015140375738",
       "contactPublic": "phone"
+    },
+    {
+      "id": "c5f27a4d-fc49-438a-9221-b72392d040b4",
+      "first": "Patrick",
+      "last": "Voß",
+      "email": "patrick_voss@hotmail.de",
+      "admin": false,
+      "classes": {
+        "F-Jugend": []
+      },
+      "enc": {
+        "salt": "hk67gIBg9n3kC72ur7DLqw==",
+        "iv": "4aMgVTlyecgDBPwN",
+        "cipher": "PkRqv6CUBAbDgcEKPwENnSwI3O08NcETehfTAOzDaXjB7kExviREdWmbja9Idz5Uzu0CleIu3CHHtXZxHMVJQMbr8mTFrG/62rcts1VuDPuaEPEDfRc3sRD8n87prM/hQt0Anp0ncW8mHNKqsg=="
+      },
+      "created": "2026-09-25T18:33:01.764Z",
+      "emailNotificationsEnabled": true,
+      "phone": "015170190485",
+      "contactPublic": "none"
     }
   ]
 }
