@@ -170,6 +170,27 @@
       "emailNotificationsEnabled": true,
       "phone": "017631039889",
       "contactPublic": "phone"
+    },
+    {
+      "id": "df7c1228-0999-452e-9a08-33244bf13cc0",
+      "first": "Valerij",
+      "last": "Bolinger",
+      "email": "vbolinger82@web.de",
+      "admin": false,
+      "classes": {
+        "E-Jugend": [
+          3
+        ]
+      },
+      "enc": {
+        "salt": "537GmTBu+QxLJcFHqDNofQ==",
+        "iv": "+pESb+xVv37NRC2C",
+        "cipher": "c4HOeHcOy9PRke2RZVmHgWW3AVdGdUHGVjUqkdr1DQ2mGcC5kQUEx4Zqall90ZiOMRPI6nDFu0XA8P4N4GTrilVa2DH/hB/BmcSo7d+gcIenu9246fUBl1NMsgWiX+Mzgae7/TcFSdGLaFJuRg=="
+      },
+      "created": "2026-09-25T18:36:39.785Z",
+      "emailNotificationsEnabled": true,
+      "phone": "01701270274",
+      "contactPublic": "none"
     }
   ]
 }
