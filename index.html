@@ -992,7 +992,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='25.09.2026 · 10';
+const APP_VERSION='25.09.2026 · 11';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -2447,13 +2447,27 @@ function pitchVisualOf(e){
   return '';
 }
 function isFriendly(e){ return /freundschaft/i.test(e.competition||''); }
+/* Scrollt die Karte eines Termins in der aktiven Ansicht direkt unter die feste Leiste.
+   Wartet (bis ca. 3 s), bis die Karte wirklich sichtbar ist – auf langsameren Handys ist die
+   Monatsansicht nach dem Wechsel noch nicht fertig aufgebaut, ein fester Zeitpunkt ging dort
+   ins Leere. */
+function scrollToCard(id,tries){
+  tries=tries||0;
+  const c=document.querySelector('.pane.active .content');
+  const el=c&&c.querySelector('[id="ev-'+id+'"]');
+  if(!el||!el.getClientRects().length){ if(tries<30) setTimeout(()=>scrollToCard(id,tries+1),100); return; }
+  const sticky=c.querySelector('.termine-sticky');
+  const off=(sticky?sticky.offsetHeight:0)+8; // Abstand unter der festen Leiste
+  const top=c.scrollTop+el.getBoundingClientRect().top-c.getBoundingClientRect().top-off;
+  c.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+}
 function openTerminFromStart(id,d){
   const dt=new Date(d+'T00:00:00');
   curY=dt.getFullYear(); curM=dt.getMonth(); yearShown=curY; selDate=d;
   highlightId=id.startsWith('fb')?null:id; // externe Karten haben kein eigenes .hl-Styling, echte Termine/Training schon
   goto('termine'); setView('monat');
-  setTimeout(()=>{ const el=document.getElementById('ev-'+id); if(el)el.scrollIntoView({behavior:'smooth',block:'center'}); },250);
-  setTimeout(()=>{ highlightId=null; render(); },5000);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>scrollToCard(id)));
+  clearTimeout(window._hlTimer); window._hlTimer=setTimeout(()=>{ highlightId=null; render(); },5000);
 }
 function renderOccupiedBadge(){
   const box=document.getElementById('st-occupied-badge');
@@ -5307,8 +5321,8 @@ function openHashEvent(){
   const dt=new Date(e.d+'T00:00:00');
   curY=dt.getFullYear(); curM=dt.getMonth(); yearShown=curY;
   goto('termine'); setView('monat');
-  setTimeout(()=>{ const el=document.getElementById('ev-'+e.id); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); },250);
-  setTimeout(()=>{ highlightId=null; render(); },5000);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>scrollToCard(e.id)));
+  clearTimeout(window._hlTimer); window._hlTimer=setTimeout(()=>{ highlightId=null; render(); },5000);
 }
 
 /* ---------- Boot ---------- */
