@@ -171,27 +171,6 @@
       },
       "created": "2026-09-21T12:49:28.823Z",
       "emailNotificationsEnabled": true
-    },
-    {
-      "id": "5c23d154-6ca7-4006-b094-6e275d77740e",
-      "first": "Fabrizio",
-      "last": "Test",
-      "email": "fab.calcagno+@gmail.com",
-      "admin": false,
-      "classes": {
-        "E-Jugend": [
-          2
-        ]
-      },
-      "enc": {
-        "salt": "V+EyGslk5Nwf9kP9jlxrPQ==",
-        "iv": "IuwpvjaKVBKlNtCY",
-        "cipher": "TjU8xFRrCX2+rgs3dqaJ7etaRzZllOl3lWQ2kVCnwgaGmjezER2Z+wfBnUJ4JpdgL8SFcRIESP/CGEvnUEsj7URlSMz7dMxjpAZeEo2L2JwymV1xpuEnX0jLSi65RAaEGjGq4pp3/BzNTqLF4w=="
-      },
-      "created": "2026-09-25T11:32:12.030Z",
-      "emailNotificationsEnabled": true,
-      "phone": "0216694550000",
-      "contactPublic": "phone"
     }
   ]
 }
