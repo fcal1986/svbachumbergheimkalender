@@ -271,8 +271,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": []
+      "trainerIds": [
+        "dea0203f-f8a0-4230-8e3a-e51a728eb61a"
+      ],
+      "trainerNames": [
+        "Alex Ramm"
+      ]
     },
     {
       "id": "df0d5d76-b4b5-4cf6-8e20-402aa99a476b",
@@ -534,8 +538,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": []
+      "trainerIds": [
+        "dea0203f-f8a0-4230-8e3a-e51a728eb61a"
+      ],
+      "trainerNames": [
+        "Alex Ramm"
+      ]
     },
     {
       "id": "15b3cbb6-e38f-4b97-9865-9daa5d46b587",
@@ -612,8 +620,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "dea0203f-f8a0-4230-8e3a-e51a728eb61a"
+      ],
+      "trainerNames": [
+        "Alex Ramm"
+      ],
       "validFrom": "2026-09-25",
       "validUntil": null,
       "cancelled": []
