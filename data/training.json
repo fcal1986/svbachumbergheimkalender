@@ -59,8 +59,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "c5f27a4d-fc49-438a-9221-b72392d040b4"
+      ],
+      "trainerNames": [
+        "Patrick Voß"
+      ],
       "validFrom": "2026-07-19",
       "validUntil": null
     },
@@ -302,8 +306,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "c5f27a4d-fc49-438a-9221-b72392d040b4"
+      ],
+      "trainerNames": [
+        "Patrick Voß"
+      ],
       "validFrom": "2026-09-01",
       "validUntil": null
     },
