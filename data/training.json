@@ -80,13 +80,13 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "89d70bbf-9008-4563-b6ee-9724ed48fe7f",
-        "2091328f-05b9-4c7b-a912-b1cf0c006592"
+        "89d70bbf-9008-4563-b6ee-9724ed48fe7f"
       ],
       "trainerNames": [
-        "Damian Cvetkov",
-        "Michael Raneck"
-      ]
+        "Damian Cvetkov"
+      ],
+      "trainerId": null,
+      "trainerName": ""
     },
     {
       "id": "39c5be5c-b23c-41a0-88d1-76e4b5fe474e",
@@ -329,13 +329,13 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "89d70bbf-9008-4563-b6ee-9724ed48fe7f",
-        "2091328f-05b9-4c7b-a912-b1cf0c006592"
+        "89d70bbf-9008-4563-b6ee-9724ed48fe7f"
       ],
       "trainerNames": [
-        "Damian Cvetkov",
-        "Michael Raneck"
-      ]
+        "Damian Cvetkov"
+      ],
+      "trainerId": null,
+      "trainerName": ""
     },
     {
       "id": "8f1459db-27b3-42bf-be36-78c483ddcc58",
