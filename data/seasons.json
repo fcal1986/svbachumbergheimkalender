@@ -22,7 +22,8 @@
         "82278cba-af88-4663-bd3c-937db4a7b122",
         "dea0203f-f8a0-4230-8e3a-e51a728eb61a",
         "35b36d62-9cf2-40c1-8eee-9940273a6353",
-        "a73f2e9e-f267-4fcb-8b64-ff55ba5e46f3"
+        "a73f2e9e-f267-4fcb-8b64-ff55ba5e46f3",
+        "d1cc03c0-324c-40de-a4f8-49d75efeb828"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
@@ -100,6 +101,11 @@
         },
         "a73f2e9e-f267-4fcb-8b64-ff55ba5e46f3": {
           "F-Jugend": []
+        },
+        "d1cc03c0-324c-40de-a4f8-49d75efeb828": {
+          "D-Jugend": [
+            1
+          ]
         }
       },
       "trainerNames": [
@@ -118,7 +124,8 @@
         "Bülent Gencsen",
         "Alex Ramm",
         "Salvatore Macri",
-        "Florian Landgraf"
+        "Florian Landgraf",
+        "Marcel Mohr"
       ]
     }
   ]
