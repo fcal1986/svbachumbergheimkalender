@@ -127,6 +127,28 @@
       "emailNotificationsEnabled": true,
       "phone": "015170190485",
       "contactPublic": "none"
+    },
+    {
+      "id": "3a132e64-7713-4fe2-b6db-838da96eefa7",
+      "first": "Dirk",
+      "last": "Pfeiffer",
+      "email": "pfeifferd@gmx.de",
+      "admin": false,
+      "classes": {
+        "C-Jugend": [
+          2,
+          3
+        ]
+      },
+      "enc": {
+        "salt": "TPrAZwC9I0pmuXxpSAppaA==",
+        "iv": "j8HmahLYegEH4wU1",
+        "cipher": "5FMNRD43s3YtW1S6DGKflowMzPa9TUd+/cHg6MP8QbHORHJbsBSW93/+Y6RGUMPr9xGI8E8nSnEiGGpXUYyog3r3fXIrWOltdbc4QzoCTHodGIHXJrJj98ZGCJTlkZehk8rcjV66CXNg5gweaw=="
+      },
+      "created": "2026-09-25T18:33:06.129Z",
+      "emailNotificationsEnabled": true,
+      "phone": "01755210127",
+      "contactPublic": "none"
     }
   ]
 }
