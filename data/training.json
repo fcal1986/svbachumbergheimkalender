@@ -256,17 +256,17 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "cfe0a536-f595-475a-aef0-df62dfb09885",
         "bde8d374-560d-4037-9dea-322d7dd85ba9",
         "35b36d62-9cf2-40c1-8eee-9940273a6353"
       ],
       "trainerNames": [
-        "Daniel Schauerte-Becker",
         "Sven Svejn",
         "Salvatore Macri"
       ],
       "validFrom": "2026-09-09",
-      "validUntil": null
+      "validUntil": null,
+      "trainerId": null,
+      "trainerName": ""
     },
     {
       "id": "a0fba6c3-540b-44c1-aa2f-ee7d4d6f5907",
@@ -533,17 +533,17 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "cfe0a536-f595-475a-aef0-df62dfb09885",
         "bde8d374-560d-4037-9dea-322d7dd85ba9",
         "35b36d62-9cf2-40c1-8eee-9940273a6353"
       ],
       "trainerNames": [
-        "Daniel Schauerte-Becker",
         "Sven Svejn",
         "Salvatore Macri"
       ],
       "validFrom": "2026-09-09",
-      "validUntil": null
+      "validUntil": null,
+      "trainerId": null,
+      "trainerName": ""
     },
     {
       "id": "7f185be8-1d5e-4371-9fca-35974369c05d",
