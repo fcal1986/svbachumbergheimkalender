@@ -14,7 +14,8 @@
         "f9f5d5e9-2907-46bb-b5a7-a04477c65b5a",
         "c5f27a4d-fc49-438a-9221-b72392d040b4",
         "3a132e64-7713-4fe2-b6db-838da96eefa7",
-        "bde8d374-560d-4037-9dea-322d7dd85ba9"
+        "bde8d374-560d-4037-9dea-322d7dd85ba9",
+        "df7c1228-0999-452e-9a08-33244bf13cc0"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
@@ -57,6 +58,11 @@
           "D-Jugend": [
             2
           ]
+        },
+        "df7c1228-0999-452e-9a08-33244bf13cc0": {
+          "E-Jugend": [
+            3
+          ]
         }
       },
       "trainerNames": [
@@ -67,7 +73,8 @@
         "Malak Khalil",
         "Patrick Voß",
         "Dirk Pfeiffer",
-        "Sven Svejn"
+        "Sven Svejn",
+        "Valerij Bolinger"
       ]
     }
   ]
