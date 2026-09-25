@@ -12,7 +12,8 @@
         "a21f28cb-3527-4337-ba43-9752dab0bcdb",
         "cfe0a536-f595-475a-aef0-df62dfb09885",
         "f9f5d5e9-2907-46bb-b5a7-a04477c65b5a",
-        "c5f27a4d-fc49-438a-9221-b72392d040b4"
+        "c5f27a4d-fc49-438a-9221-b72392d040b4",
+        "3a132e64-7713-4fe2-b6db-838da96eefa7"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
@@ -44,6 +45,12 @@
         },
         "c5f27a4d-fc49-438a-9221-b72392d040b4": {
           "F-Jugend": []
+        },
+        "3a132e64-7713-4fe2-b6db-838da96eefa7": {
+          "C-Jugend": [
+            2,
+            3
+          ]
         }
       },
       "trainerNames": [
@@ -52,7 +59,8 @@
         "Markus Vielhaber",
         "Daniel Schauerte-Becker",
         "Malak Khalil",
-        "Patrick Voß"
+        "Patrick Voß",
+        "Dirk Pfeiffer"
       ]
     }
   ]
