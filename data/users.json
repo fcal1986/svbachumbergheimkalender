@@ -191,6 +191,27 @@
       "emailNotificationsEnabled": true,
       "phone": "01701270274",
       "contactPublic": "none"
+    },
+    {
+      "id": "123c8c2c-5a1a-43d6-be82-455af9f3b407",
+      "first": "Younes",
+      "last": "Al Musaui",
+      "email": "younes91@gmx.net",
+      "admin": false,
+      "classes": {
+        "G-Jugend": [
+          1
+        ]
+      },
+      "enc": {
+        "salt": "hHAR84G9ojPbtiEQ7nyMlQ==",
+        "iv": "yC1EjGodDKSdsujJ",
+        "cipher": "zlTE531OstS0W86m4k/LJ2oL0QDC71r73I4EfeMk5MuczWST+RmZwti3B04Mr/5SNNp5TTONg2hrHSh4x3f4wFXHefdz1ugfrrNCj01IwGU49n+fHdWQwTcU+mad7tUr3WnyIl7dbGVMvvnhBw=="
+      },
+      "created": "2026-09-25T18:36:44.452Z",
+      "emailNotificationsEnabled": true,
+      "phone": "01703564900",
+      "contactPublic": "phone"
     }
   ]
 }
