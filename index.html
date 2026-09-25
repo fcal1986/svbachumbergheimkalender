@@ -401,6 +401,11 @@
   .pitch-box .pitch::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--grass);opacity:.5;transform:translateX(-1px);pointer-events:none;z-index:3;}
   .pq{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#4E7A5C;cursor:pointer;border:1px dashed rgba(47,122,70,.3);}
   .pq.sel{background:var(--grass);color:#fff;border-color:var(--grass);}
+  .pq{flex-direction:column;gap:2px;text-align:center;}
+  .pq-lbl{display:block;font-size:8.5px;font-weight:600;line-height:1.25;padding:0 3px;max-width:100%;overflow:hidden;}
+  .fs-item-rev{flex-direction:row-reverse;justify-content:space-between;gap:8px;}
+  .fs-item-rev .fs-time{white-space:normal;font-size:12px;font-weight:600;}
+  .fs-item-rev .fs-btn{flex:none;white-space:nowrap;}
   .pq.busy{background:repeating-linear-gradient(45deg,#F2C9C4,#F2C9C4 4px,#FBE3E0 4px,#FBE3E0 8px);color:#9B3227;}
   .pitch-cap{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:11px;color:var(--ink-soft);gap:8px;}
   .pitch-cap b{color:var(--ink);}
@@ -723,6 +728,7 @@
             <div class="pq" data-q="4" onclick="tfPickPitch(4)">4</div>
           </div>
           <div class="pitch-cap" id="tf-pitch-cap"></div>
+          <div id="tf-game-note"></div>
         </div>
         <div id="free-slots-box-tf"></div>
       </div>
@@ -957,7 +963,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='25.09.2026 · 3';
+const APP_VERSION='25.09.2026 · 4';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -1150,9 +1156,45 @@ function fussballInstancesOn(d){
     return {
       id, d:g.d, t:win.s, bis:win.e,
       title:'Heimspiel: '+(g.team?g.team+' – ':'')+g.opponent, pitch:{mode:'ganz'}, halle:null, res:[],
-      isExternal:true, ownerName:'fussball.de (automatisch)', note:g.competition||''
+      isExternal:true, ownerName:'fussball.de (automatisch)', note:g.competition||'', game:g
     };
   }).filter(Boolean);
+}
+/* Buchungsformulare (Termin + Training): Auch geteilte Jugendspiele (E/F/G) belegen den Platz,
+   und zwar eine FESTE Hälfte, damit die Platzgrafik eindeutig ist und Speichern hart gesperrt
+   werden kann. fussball.de legt die Hälfte nicht fest – Regel: Hälfte A, außer dort ist zu der
+   Zeit schon etwas gebucht (Termin, Training, anderes Spiel), dann Hälfte B. Zwei gleichzeitige
+   Spiele belegen damit A und B, also den ganzen Platz. */
+function fussballShareInstancesOn(d,skipId,skipSlotId,extra){
+  const base=EVENTS.filter(e=>e.d===d&&e.id!==skipId)
+    .concat(trainingInstancesOn(d).filter(t=>!skipSlotId||t.trainingSlotId!==skipSlotId))
+    .concat(fussballInstancesOn(d)).concat(extra||[]);
+  const games=(FUSSBALLDE.games||[]).filter(g=>g.d===d&&g.t&&fussballTeamCategory(g.team)==='share'&&fussballGameLinkId(g)!==formSkipFussballLink)
+    .map(g=>({g,win:fussballGameWindow(g)}))
+    .sort((a,b)=>a.win.s.localeCompare(b.win.s)||fussballGameLinkId(a.g).localeCompare(fussballGameLinkId(b.g)));
+  const placed=[];
+  games.forEach(({g,win})=>{
+    const busyBy=(list,h)=>list.some(x=>win.s<eventBis(x)&&win.e>x.t&&pitchQuarters(x.pitch).some(q=>HALF[h].includes(q)));
+    const halfBusy=h=>busyBy(base.concat(placed),h);
+    // Ist keine Hälfte frei, haben Spiele Vorrang: dann die Hälfte, die kein anderes Spiel belegt
+    // (der Konflikt trifft so die eigene Buchung und wird sicher erkannt).
+    const gameBusy=h=>busyBy(placed.concat(fussballInstancesOn(d)),h);
+    const part=!halfBusy('A')?'A':(!halfBusy('B')?'B':(!gameBusy('A')?'A':(!gameBusy('B')?'B':'A')));
+    placed.push({
+      id:fussballGameLinkId(g), d:g.d, t:win.s, bis:win.e,
+      title:'Heimspiel: '+(g.team?g.team+' – ':'')+g.opponent, pitch:{mode:'haelfte',part}, halle:null, res:[],
+      isExternal:true, isSharedGame:true, ownerName:'fussball.de (automatisch)', note:g.competition||'', game:g
+    });
+  });
+  return placed;
+}
+function fussballBookingOccupations(d,skipId,skipSlotId,extra){
+  return fussballInstancesOn(d).concat(fussballShareInstancesOn(d,skipId,skipSlotId,extra));
+}
+function occupationLabel(e){
+  if(e.game){ const m=fussballFilterTeam(e.game.team,e.game.squad); return 'Spiel '+teamLabel(m.team,m.squad)+' · '+e.game.t; }
+  if(e.isTraining) return 'Training '+teamLabel(e.team,e.squad);
+  return e.title||'Termin';
 }
 /* Weiche Info (kein Blocker): teilbare Jugendspiele (E-Jugend abwärts), die sich
    zeitlich mit der geplanten Buchung überschneiden – zur Rücksprache, welche
@@ -1197,7 +1239,7 @@ function fussballCapacityWarningsUpcoming(days){
 /* KONFLIKTPRÜFUNG – gibt [{event,reasons}] zurück */
 function findConflicts(d,von,bis,pitch,halle,res,skipId){
   const result=[];
-  const occupations=EVENTS.filter(e=>e.d===d&&e.id!==skipId).concat(trainingInstancesOn(d)).concat(fussballInstancesOn(d));
+  const occupations=EVENTS.filter(e=>e.d===d&&e.id!==skipId).concat(trainingInstancesOn(d)).concat(fussballBookingOccupations(d,skipId));
   occupations.forEach(e=>{
     const eBis=eventBis(e);
     if(von>=eBis||bis<=e.t)return; // kein Zeitüberschnitt
@@ -1251,7 +1293,7 @@ function suggestFreeSlots(d,neededMin,skipId){
   const MIN_GAP=30; // immer alle Lücken ≥ 30min zeigen, egal wie lang der neue Termin ist
   const DS=timeToMin('07:00'),DE=timeToMin('22:00');
   const busy=[];
-  EVENTS.filter(e=>e.d===d&&e.id!==skipId).concat(trainingInstancesOn(d)).concat(fussballInstancesOn(d)).forEach(e=>{
+  EVENTS.filter(e=>e.d===d&&e.id!==skipId).concat(trainingInstancesOn(d)).concat(fussballBookingOccupations(d,skipId)).forEach(e=>{
     busy.push({s:timeToMin(e.t),e:timeToMin(eventBis(e))});
   });
   busy.sort((a,b)=>a.s-b.s);
@@ -1810,9 +1852,10 @@ function usedQuarters(d,skipId){
 }
 function usedQuartersWindow(d,von,bis,skipId){
   const s=new Set();
-  EVENTS.filter(e=>e.d===d&&e.id!==skipId).concat(trainingInstancesOn(d)).concat(fussballInstancesOn(d)).forEach(e=>{
+  s.labels={}; // Viertel -> Beschriftungen für die Platzgrafik ("Spiel G1-Jugend · 10:00")
+  EVENTS.filter(e=>e.d===d&&e.id!==skipId).concat(trainingInstancesOn(d)).concat(fussballBookingOccupations(d,skipId)).forEach(e=>{
     const eBis=eventBis(e);
-    if(von<eBis&&bis>e.t) pitchQuarters(e.pitch).forEach(q=>s.add(q));
+    if(von<eBis&&bis>e.t) pitchQuarters(e.pitch).forEach(q=>{ s.add(q); (s.labels[q]=s.labels[q]||[]).push(occupationLabel(e)); });
   });
   return s;
 }
@@ -2642,6 +2685,8 @@ function renderPitchGrid(ids,state,busy,capPrefixHtml){
     const q=parseInt(el.dataset.q);
     el.classList.toggle('sel',sel.has(q));
     el.classList.toggle('busy',busy.has(q));
+    const lbl=(busy.labels&&busy.labels[q])||[];
+    el.innerHTML=q+(lbl.length?'<span class="pq-lbl">'+[...new Set(lbl)].map(esc).join('<br>')+'</span>':'');
   });
   const clash=[...sel].filter(q=>busy.has(q));
   document.getElementById(ids.cap).innerHTML=capPrefixHtml+'<b>'+(4-busy.size)+'/4 frei</b></span>'+
@@ -2688,11 +2733,80 @@ function renderPitch(){
 function renderFussballShareNote(d,von,bis){
   const el=document.getElementById('fb-share-note');
   if(!el)return;
-  const notes=fussballShareNotesFor(d,von,bis).filter(({g})=>fussballGameLinkId(g)!==formSkipFussballLink);
-  if(!notes.length){ el.innerHTML=''; return; }
-  el.innerHTML=notes.map(({g})=>
-    '<div class="fb-note">ℹ️ Zeitgleich Heimspiel <b>'+esc(g.team||'')+' – '+esc(g.opponent)+'</b> ('+g.t+' Uhr) – bis E-Jugend teilen sich zwei Teams den Platz. Bitte kurz abstimmen, welche Hälfte frei bleibt.</div>'
-  ).join('');
+  if(!d||!von||!bis||von>=bis){ el.innerHTML=''; return; }
+  const games=fussballBookingOccupations(d,editingId).filter(e=>von<eventBis(e)&&bis>e.t)
+    .sort((x,y)=>x.game.t.localeCompare(y.game.t));
+  let h='';
+  games.forEach(e=>{
+    const m=fussballFilterTeam(e.game.team,e.game.squad);
+    h+='<div class="fb-note">⚽ Heimspiel <b>'+esc(teamLabel(m.team,m.squad))+' – '+esc(e.game.opponent)+'</b> · Anstoß '+e.game.t+' Uhr'
+      +'<br>belegt <b>'+(e.pitch.mode==='ganz'?'den ganzen Platz':'Hälfte '+e.pitch.part)+'</b> von '+e.t+' bis '+eventBis(e)+' Uhr</div>';
+  });
+  if(games.some(e=>e.isSharedGame))
+    h+='<p class="helptext" style="margin:4px 0 0;">Welche Hälfte ein E-, F- oder G-Jugendspiel nutzt, legt fussball.de nicht fest. Platzcoach plant es auf Hälfte A, bei einem zweiten gleichzeitigen Spiel oder belegter Hälfte A auf Hälfte B.</p>';
+  // Vorschläge, wenn die Auswahl nicht passt
+  const pitch=curPitch();
+  const busy=usedQuartersWindow(d,von,bis,editingId);
+  const clash=pitchQuarters(pitch).some(q=>busy.has(q));
+  if(clash){
+    const opts=[];
+    ['A','B'].forEach(hh=>{
+      if(HALF[hh].every(q=>!busy.has(q))&&!(pitch.mode==='haelfte'&&pitch.part===hh))
+        opts.push('<button class="fs-btn" onclick="applyFreeHalf(\''+hh+'\')">Hälfte '+hh+' buchen</button><span class="fs-time">Hälfte '+hh+' ist von '+von+' bis '+bis+' frei</span>');
+    });
+    const nxt=nextFreePitchWindow(d,von,bis,pitch,editingId);
+    if(nxt) opts.push('<button class="fs-btn" onclick="applySlot(\''+nxt.s+'\',\''+nxt.e+'\')">Zeit übernehmen</button><span class="fs-time">'+esc(pitchShort(pitch))+' ist ab '+nxt.s+' frei ('+nxt.s+'–'+nxt.e+')</span>');
+    h+='<div class="free-slots-box" style="margin-top:8px;"><div class="fs-header" style="color:var(--warn);">⚠ Deine Auswahl ist zu dieser Zeit belegt</div>'
+      +(opts.length?opts.map(o=>'<div class="fs-item fs-item-rev">'+o+'</div>').join(''):'<div class="fs-item"><span class="fs-time">Heute ist dafür keine passende Zeit mehr frei. Bitte einen anderen Tag wählen.</span></div>')
+      +'</div>';
+  }
+  el.innerHTML=h;
+}
+/* Nächstes Zeitfenster gleicher Länge (ab der Wunschzeit, in 15-Minuten-Schritten bis 22:00),
+   in dem die gewählte Platzfläche komplett frei ist. */
+function nextFreePitchWindow(d,von,bis,pitch,skipId){
+  const dur=timeToMin(bis)-timeToMin(von); if(dur<=0)return null;
+  const want=pitchQuarters(pitch);
+  for(let m=timeToMin(von)+15;m+dur<=timeToMin('22:00');m+=15){
+    const s=minToTime(m), e=minToTime(m+dur);
+    const busy=usedQuartersWindow(d,s,e,skipId);
+    if(!want.some(q=>busy.has(q))) return {s,e};
+  }
+  return null;
+}
+function applyFreeHalf(part){
+  pitchMode='haelfte'; pitchPart=part;
+  toggleModeButtons('pitch-modes','haelfte');
+  hideConflicts(); renderPitch();
+}
+/* Training: Trainingszeiten gelten wochenweise, Spiele nur an einzelnen Tagen. Deshalb werden
+   die konkreten Tage gesucht, an denen ein bekanntes Heimspiel die gewählte Platzfläche zur
+   Trainingszeit belegt. Diese Tage werden beim Speichern als abgesagt eingetragen.
+   Eine feste Trainingszeit zählt dabei wie eine bestehende Buchung: Ein E/F/G-Spiel weicht auf
+   die andere Hälfte aus, wenn die frei ist. Abgesagt wird nur, wenn wirklich kein Platz bleibt
+   (Ganzplatz-Spiel, zwei gleichzeitige Spiele oder andere Hälfte schon belegt). */
+function trainingGameCollisions(day,from,to,pitch,validFrom,validUntil,skipSlotId){
+  if(!pitch)return [];
+  const want=pitchQuarters(pitch), out=[];
+  const start=validFrom&&validFrom>todayStr?validFrom:todayStr;
+  const dates=[...new Set((FUSSBALLDE.games||[]).map(g=>g.d))].filter(d=>d>=start&&(!validUntil||d<=validUntil)&&dowOf(d)===day).sort();
+  dates.forEach(d=>{
+    const me={id:'tf-candidate',d,t:from,bis:to,pitch};
+    const hits=fussballBookingOccupations(d,null,skipSlotId,[me]).filter(e=>from<eventBis(e)&&to>e.t&&pitchQuarters(e.pitch).some(q=>want.includes(q)));
+    if(hits.length) out.push({d,labels:hits.map(occupationLabel)});
+  });
+  return out;
+}
+function renderTrainingGameNote(){
+  const el=document.getElementById('tf-game-note'); if(!el)return;
+  const day=parseInt(document.getElementById('tf-day').value);
+  const from=document.getElementById('tf-from').value, to=document.getElementById('tf-to').value;
+  if(!tfPitchOn()||!from||!to||from>=to){ el.innerHTML=''; return; }
+  const col=trainingGameCollisions(day,from,to,tfCurPitch(),document.getElementById('tf-validfrom').value,document.getElementById('tf-validuntil').value,tEditId);
+  if(!col.length){ el.innerHTML=''; return; }
+  el.innerHTML='<div class="fb-note" style="background:#FFF5F5;border:1px solid #F5C6C0;color:#8E2A1D;">⚽ An <b>'+col.length+' Tag'+(col.length===1?'':'en')+'</b> belegen Heimspiele diese Platzfläche zur Trainingszeit:<br>'
+    +col.slice(0,6).map(c=>fmtShort(c.d)+': '+esc(c.labels.join(', '))).join('<br>')+(col.length>6?'<br>… und '+(col.length-6)+' weitere':'')
+    +'<br>Beim Speichern wird das Training an diesen Tagen automatisch abgesagt.</div>';
 }
 function resetForm(){
   document.getElementById('f-anlass').value='';document.getElementById('f-bem').value='';
@@ -3350,6 +3464,7 @@ function tfRenderPitch(){
   const busy=tUsedQuarters(day,from,to,tEditId);
   const clash=renderPitchGrid({grid:'tf-pitch',cap:'tf-pitch-cap'},tfCurPitch(),busy,
     '<span>'+WDAYS[day]+' '+from+'–'+to+': ');
+  renderTrainingGameNote();
   // Freie Zeitfenster-Vorschläge für Training
   setTimeout(()=>updateTFormFreeSlots(clash.length>0),100);
 }
@@ -3424,6 +3539,17 @@ async function saveTrainingSlot(){
     const rh=(s.res||[]).filter(r=>res.includes(r));
     if(rh.length) warn.push(rh.join(', ')+' nutzt schon '+trainName(s)+' ('+s.from+'–'+s.to+')');
   });
+  // Heimspiele an einzelnen Tagen: dort findet das Training nicht statt (harte Regel wie bei Terminen).
+  const gameCol=trainingGameCollisions(day,from,to,pitch,validFrom,validUntil,tEditId);
+  const alreadyCancelled=tEditId?((TRAINING.find(x=>x.id===tEditId)||{}).cancelled||[]):[];
+  const newCancels=gameCol.map(c=>c.d).filter(d=>!alreadyCancelled.includes(d));
+  if(newCancels.length&&!saveTrainingSlot._confirmed){
+    const list=gameCol.filter(c=>newCancels.includes(c.d)).slice(0,5).map(c=>fmtShort(c.d)+' ('+c.labels.join(', ')+')').join('; ');
+    askConfirm('Heimspiele zur Trainingszeit',
+      'An '+newCancels.length+' Tag'+(newCancels.length===1?'':'en')+' belegen Heimspiele diese Platzfläche: '+list+(newCancels.length>5?' …':'')+'. Das Training wird an diesen Tagen automatisch abgesagt.',
+      'Speichern & absagen',async()=>{ saveTrainingSlot._confirmed=true; try{ await saveTrainingSlot(); } finally{ saveTrainingSlot._confirmed=false; } });
+    return;
+  }
   const btn=document.getElementById('tf-save'), lbl=document.getElementById('tf-label');
   const old=lbl.textContent; btn.disabled=true;
   lbl.innerHTML='<span class="spinner" style="width:13px;height:13px;border-color:rgba(0,0,0,.15);border-top-color:var(--ink);display:inline-block;vertical-align:middle;margin-right:5px;"></span>Speichere …';
@@ -3431,13 +3557,16 @@ async function saveTrainingSlot(){
   try{
     if(tEditId){
       const existing=TRAINING.find(x=>x.id===tEditId);
-      Object.assign(existing,{day,from,to,team,squad,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null});
+      Object.assign(existing,{day,from,to,team,squad,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,
+        cancelled:[...new Set([...(existing.cancelled||[]),...newCancels])].sort()});
     }else{
-      TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[]});
+      TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[...newCancels].sort()});
     }
-    const tMsg=(tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+team+' (ab '+fmtShort(validFrom)+') – '+session.name;
+    const tMsg=(tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+team+' (ab '+fmtShort(validFrom)+')'
+      +(newCancels.length?' – wegen Heimspielen abgesagt am '+newCancels.map(fmtShort).join(', '):'')+' – '+session.name;
     tEditId=null; renderTraining(); renderStart(); goto('training');
     if(warn.length) showToast('⚠ Gespeichert – Achtung: '+warn[0],5000);
+    else if(newCancels.length) showToast('Trainingszeit gespeichert – an '+newCancels.length+' Spieltag'+(newCancels.length===1?'':'en')+' abgesagt.',5000);
     else showToast('Trainingszeit gespeichert.');
     saveTraining(tMsg).catch(e=>{ showToast('GitHub-Fehler: '+e.message,6000); });
   }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
@@ -5140,7 +5269,7 @@ async function boot(){
 
   dateInput().value=todayStr;
   dateInput().addEventListener('change',()=>{updateWeekday();renderPitch();renderHalle();hideConflicts();setTimeout(updateFreeSlotsOnConflict,150);});
-  ['tf-day','tf-from','tf-to'].forEach(id=>document.getElementById(id).addEventListener('change',tfRenderPitch));
+  ['tf-day','tf-from','tf-to','tf-validfrom','tf-validuntil'].forEach(id=>document.getElementById(id).addEventListener('change',tfRenderPitch));
   updateWeekday(); onTeamChange(); setPitchMode('ganz');
   trainingSelectedDate=todayStr;
   tfTeamChange(); tfSetPitchMode('ganz');
