@@ -15,7 +15,8 @@
         "c5f27a4d-fc49-438a-9221-b72392d040b4",
         "3a132e64-7713-4fe2-b6db-838da96eefa7",
         "bde8d374-560d-4037-9dea-322d7dd85ba9",
-        "df7c1228-0999-452e-9a08-33244bf13cc0"
+        "df7c1228-0999-452e-9a08-33244bf13cc0",
+        "123c8c2c-5a1a-43d6-be82-455af9f3b407"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
@@ -63,6 +64,11 @@
           "E-Jugend": [
             3
           ]
+        },
+        "123c8c2c-5a1a-43d6-be82-455af9f3b407": {
+          "G-Jugend": [
+            1
+          ]
         }
       },
       "trainerNames": [
@@ -74,7 +80,8 @@
         "Patrick Voß",
         "Dirk Pfeiffer",
         "Sven Svejn",
-        "Valerij Bolinger"
+        "Valerij Bolinger",
+        "Younes Al Musaui"
       ]
     }
   ]
