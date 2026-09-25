@@ -166,7 +166,8 @@
       "created": "2026-09-25T18:36:39.785Z",
       "emailNotificationsEnabled": true,
       "phone": "01701270274",
-      "contactPublic": "none"
+      "contactPublic": "phone",
+      "contactEmail": "vbolinger82@web.de"
     },
     {
       "id": "123c8c2c-5a1a-43d6-be82-455af9f3b407",
