@@ -19,7 +19,8 @@
         "123c8c2c-5a1a-43d6-be82-455af9f3b407",
         "2def1cdd-2baf-4442-b139-4bc3abe69405",
         "1d67889f-3194-43d7-9ead-2faa97e9b782",
-        "82278cba-af88-4663-bd3c-937db4a7b122"
+        "82278cba-af88-4663-bd3c-937db4a7b122",
+        "dea0203f-f8a0-4230-8e3a-e51a728eb61a"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
@@ -86,6 +87,9 @@
             1,
             3
           ]
+        },
+        "dea0203f-f8a0-4230-8e3a-e51a728eb61a": {
+          "1. Herren": []
         }
       },
       "trainerNames": [
@@ -101,7 +105,8 @@
         "Younes Al Musaui",
         "Sascha Rabura",
         "Damian Cvetkov",
-        "Bülent Gencsen"
+        "Bülent Gencsen",
+        "Alex Ramm"
       ]
     }
   ]
