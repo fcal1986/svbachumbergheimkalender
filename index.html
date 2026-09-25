@@ -963,13 +963,13 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='25.09.2026 · 5';
+const APP_VERSION='25.09.2026 · 6';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
 let selectedSeasonFilter='';
 let kontoTab='profil'; // 'profil'|'saisons'|'zugaenge'|'protokoll'
-function setKontoTab(tab){kontoTab=tab;if(tab==='zugaenge')userListSearch='';renderKonto();}
+function setKontoTab(tab){kontoTab=tab;if(tab==='zugaenge')userListSearch='';renderKonto();trackArea(currentPaneArea());}
 
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const MONTHS_S=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
@@ -1591,8 +1591,8 @@ function lockBannerHTML(lock,item){
 }
 
 /* ---------- Login ---------- */
-function openLogin(hint){ document.getElementById('login').classList.add('show'); loginErr(hint||''); refreshBioBtn(); }
-function closeLogin(){ document.getElementById('login').classList.remove('show'); loginErr(''); }
+function openLogin(hint){ document.getElementById('login').classList.add('show'); loginErr(hint||''); refreshBioBtn(); trackArea('anmeldung'); }
+function closeLogin(){ document.getElementById('login').classList.remove('show'); loginErr(''); trackArea(currentPaneArea()); }
 function headerAction(){ session?goto('konto'):openLogin(); }
 function loginErr(m){
   const e=document.getElementById('login-err');
@@ -1625,6 +1625,7 @@ async function doLogin(){
   finally{ btn.disabled=false; btn.textContent='Anmelden'; }
 }
 function afterLogin(){
+  clarityCall('set','rolle',session&&session.isAdmin?'admin':'trainer');
   localStorage.setItem('svbb_session',JSON.stringify(session)); localStorage.setItem('pc_was_logged_in','1');
   document.getElementById('li-pass').value='';
   closeLogin();
@@ -1687,6 +1688,36 @@ function refreshBioBtn(){
 }
 
 /* ---------- Navigation ---------- */
+/* ---------- Bereichs-Tracking (Clarity + Google Analytics) ----------
+   Platzcoach ist eine einzige Seite, die Adresse ändert sich beim Wechsel der Reiter nicht.
+   Damit Auswertungen trotzdem nach Bereichen möglich sind, meldet trackArea() jeden Wechsel:
+   - Clarity: Tag "bereich" (Sitzungen filtern: "hat Konto besucht") + Ereignis "bereich_<name>"
+     (für Trichter/Zeitleiste, z. B. registrierung → registrierung_abgesendet)
+   - Google Analytics: eigener Seitenaufruf pro Bereich (virtuelle Adresse "/konto/zugaenge"),
+     bewusst OHNE #invite-Code in der Adresse.
+   Die Analytics-Skripte laden erst am Dateiende – bis dahin landen Aufrufe in einer Warteschlange. */
+const AREA_TITLES={start:'Start',termine:'Termine',training:'Training',tform:'Trainingszeit bearbeiten',neu:'Neuer Termin',
+  konto:'Konto',anmeldung:'Anmeldung',registrierung:'Registrierung'};
+let _lastArea=null;
+function clarityCall(){ try{ window.clarity=window.clarity||function(){(window.clarity.q=window.clarity.q||[]).push(arguments)}; window.clarity.apply(null,arguments); }catch(e){} }
+function sendGaPageView(area){
+  if(!window.__gaReady||!window.gtag)return;
+  const top=area.split('/')[0];
+  try{ gtag('event','page_view',{page_title:'Platzcoach – '+(AREA_TITLES[top]||top)+(area.includes('/')?' – '+area.split('/')[1]:''),
+    page_location:location.origin+location.pathname.replace(/index\.html$/,'')+area, page_path:'/'+area}); }catch(e){}
+}
+function trackArea(area){
+  if(!area||area===_lastArea)return;
+  _lastArea=area;
+  clarityCall('set','bereich',area);
+  clarityCall('event','bereich_'+area.replace(/[^a-z0-9]+/g,'_'));
+  sendGaPageView(area);
+}
+function trackEvent(name){ clarityCall('event',name); try{ if(window.__gaReady&&window.gtag) gtag('event',name); }catch(e){} }
+function currentPaneArea(){
+  const p=document.querySelector('.pane.active'); const n=p?p.dataset.pane:'start';
+  return n==='konto'&&session?'konto/'+(kontoTab||'profil'):n;
+}
 function goto(n){
   if(n!=='neu')formSkipFussballLink=null; // Verlassen des Formulars ohne Speichern: Ausnahme nicht stehen lassen
   document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.dataset.pane===n));
@@ -1700,6 +1731,7 @@ function goto(n){
   document.getElementById('hd-clock').style.display=(n==='start')?'block':'none';
   if(n==='konto') renderKonto();
   if(n==='training') renderTraining();
+  trackArea(currentPaneArea());
 }
 function updateHeaderClock(){
   const el=document.getElementById('hd-clock');
@@ -4822,15 +4854,17 @@ async function openRegister(code){
   CP.reg={};
   document.getElementById('register').classList.add('show');
   renderRegister();
+  trackArea('registrierung'); trackEvent('registrierung_geoeffnet');
   if(!regEnabled()){ REGFORM.state='invalid'; REGFORM.error='Die Selbstregistrierung ist bei diesem Verein noch nicht eingerichtet.'; renderRegister(); return; }
   try{
     const r=await regApi('/invite/'+encodeURIComponent(code));
     REGFORM.state=r.valid?'form':'invalid';
     if(!r.valid) REGFORM.error='Dieser Einladungslink ist abgelaufen oder wurde ersetzt. Bitte frag im Verein nach dem aktuellen Link.';
   }catch(e){ REGFORM.state='invalid'; REGFORM.error=e.message; }
+  if(REGFORM.state==='invalid') trackEvent('registrierung_link_ungueltig');
   renderRegister();
 }
-function closeRegister(){ document.getElementById('register').classList.remove('show'); clearInviteHash(); }
+function closeRegister(){ document.getElementById('register').classList.remove('show'); clearInviteHash(); trackArea(currentPaneArea()); }
 function renderRegister(){
   const box=document.getElementById('reg-body'); if(!box)return;
   const club=esc(String(CFG&&CFG.clubName||'deinem Verein').replace(/\.+$/,''));
@@ -4886,12 +4920,12 @@ async function submitRegister(){
   if(!Object.keys(CP.reg||{}).length) errs.push('Bitte mindestens eine Mannschaft auswählen.');
   if(!f.consent) errs.push('Bitte den Haken beim Einverständnis setzen.');
   if(!errs.length&&USERS.some(u=>(u.email||'').toLowerCase()===f.email)) errs.push('Für diese E-Mail gibt es schon einen Zugang. Du kannst dich direkt anmelden.');
-  if(errs.length){ f.error=errs.join(' '); renderRegister(); document.getElementById('register').scrollTop=0; return; }
+  if(errs.length){ f.error=errs.join(' '); trackEvent('registrierung_eingabefehler'); renderRegister(); document.getElementById('register').scrollTop=0; return; }
   f.error=''; f.state='sending'; renderRegister();
   try{
     await regApi('/register',{method:'POST',body:{code:f.code,first:f.first,last:f.last,email:f.email,phone:f.phone,showPhone:f.showPhone,classes:CP.reg,consent:true,website:f.website}});
-    f.state='done'; clearInviteHash();
-  }catch(e){ f.state='form'; f.error=e.message; }
+    f.state='done'; clearInviteHash(); trackEvent('registrierung_abgesendet');
+  }catch(e){ f.state='form'; f.error=e.message; trackEvent('registrierung_serverfehler'); }
   renderRegister(); document.getElementById('register').scrollTop=0;
 }
 
@@ -5027,7 +5061,7 @@ async function createInvite(){
   const doIt=async()=>{
     try{
       const r=await regApi('/admin/invite',{method:'POST',auth:true,body:{days:REGSTATE.days||14,by:session.name}});
-      REGSTATE.invite=r.invite; renderRegAdmin(); showToast('Einladungslink erzeugt.');
+      REGSTATE.invite=r.invite; renderRegAdmin(); showToast('Einladungslink erzeugt.'); trackEvent('einladungslink_erzeugt');
     }catch(e){ showToast('Fehler: '+e.message,6000); }
   };
   if(REGSTATE.invite) askConfirm('Neuen Link erzeugen?','Der bisherige Einladungslink funktioniert danach nicht mehr. Bereits eingegangene Anmeldungen bleiben erhalten.','Neuer Link',doIt);
@@ -5115,6 +5149,7 @@ function approveRegistration(id){
       REGSTATE.list=REGSTATE.list.filter(x=>x.id!==id); delete CP['r'+id];
       if(REGSTATE.editing===id) REGSTATE.editing=null;
       showToast(r.first+' ist freigeschaltet. Willkommens- und Passwort-Mail sind unterwegs.',5000);
+      trackEvent('registrierung_freigegeben');
       delete REGSTATE.busy[id];
       renderKonto(); updateRegBadges();
     }catch(e){
@@ -5131,6 +5166,7 @@ function rejectRegistration(id,silent){
       await regApi('/admin/registrations/'+id,{method:'DELETE',auth:true});
       REGSTATE.list=REGSTATE.list.filter(x=>x.id!==id); delete CP['r'+id];
       showToast(silent?'Anmeldung entfernt.':'Anmeldung von '+r.first+' abgelehnt und gelöscht.');
+      trackEvent(silent?'registrierung_entfernt':'registrierung_abgelehnt');
     }catch(e){ showToast('Fehler: '+e.message,6000); }
     delete REGSTATE.busy[id]; renderRegAdmin(); updateRegBadges();
   };
@@ -5289,6 +5325,8 @@ async function boot(){
   setView('monat'); renderStart(); renderTraining();
   document.getElementById('hd-clock').style.display='block'; updateHeaderClock(); // Start ist die aktive Pane beim Laden
   openHashEvent();
+  clarityCall('set','rolle',session?(session.isAdmin?'admin':'trainer'):'gast');
+  if(!/^#invite=/.test(location.hash)) trackArea(currentPaneArea());
   openInviteFromHash();
   window.addEventListener('hashchange',()=>{ openHashEvent(); openInviteFromHash(); });
 
@@ -5339,7 +5377,11 @@ maskSensitiveInputs();
   window.dataLayer=window.dataLayer||[];
   window.gtag=function(){dataLayer.push(arguments);};
   gtag('js', new Date());
-  gtag('config', 'G-NHNDPTRXF7', { anonymize_ip: true });
+  // send_page_view:false – Seitenaufrufe kommen aus trackArea() mit sauberer virtueller Adresse
+  // (ohne #invite-Code). Der bereits erreichte Bereich wird hier nachgemeldet.
+  gtag('config', 'G-NHNDPTRXF7', { anonymize_ip: true, send_page_view: false });
+  window.__gaReady=true;
+  if(_lastArea) sendGaPageView(_lastArea);
 })();
 
 </script>
