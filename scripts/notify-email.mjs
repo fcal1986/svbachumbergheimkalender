@@ -126,6 +126,13 @@ function isFromPlatzcoach(msg) {
 function isNoisyCommit(text) {
   return /^Heimspiele von fussball\.de aktualisiert/i.test(text) || /\(automatisch\)/.test(text);
 }
+// Torwarttraining anlegen / absagen / löschen: Dafür verschickt die App eine eigene Mail mit Button
+// (scripts/send-gk-request.mjs) – die normale Änderungsmail entfällt, damit niemand zwei Mails bekommt.
+// Änderungen, An-/Abmeldungen und zurückgenommene Absagen laufen weiter über diese Mail.
+const GK_OWN_MAIL = ['Neuer Termin:', 'Termin gelöscht:', 'Trainingszeit angelegt:', 'Trainingszeit gelöscht:', 'Training abgesagt:'];
+function hasOwnGkMail(c) {
+  return c.team === 'Torwarttraining' && GK_OWN_MAIL.some(p => c.text.startsWith(p));
+}
 
 // Erkennt "Zugang angelegt: Marc Krause (Admin) – David Skwara" bzw. ohne "(Admin)" und
 // liefert den vollen Namen ("Marc Krause") des NEU angelegten Nutzers zurück, oder null.
@@ -222,7 +229,7 @@ async function main() {
   const allMessages = getCommitMessages();
   const platzcoachMessages = allMessages.filter(isFromPlatzcoach);
   // git log liefert neueste zuerst – für die Mail chronologisch (älteste zuerst) sortieren.
-  const changes = platzcoachMessages.map(parseCommit).filter(c => !isNoisyCommit(c.text)).reverse();
+  const changes = platzcoachMessages.map(parseCommit).filter(c => !isNoisyCommit(c.text) && !hasOwnGkMail(c)).reverse();
   console.log(`${allMessages.length} Commit(s) im Push, davon ${platzcoachMessages.length} von Platzcoach, ${changes.length} nach Filter. Kategorien: ${JSON.stringify(changes.map(c => c.category))}`);
 
   const transporter = nodemailer.createTransport({

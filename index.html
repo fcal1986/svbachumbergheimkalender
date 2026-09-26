@@ -1064,7 +1064,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='26.09.2026 · 5';
+const APP_VERSION='26.09.2026 · 6';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -3473,6 +3473,11 @@ function todaysTrainingHTML(){
   h+='</div>';
   return h;
 }
+// Nächster tatsächlich stattfindender Termin einer festen Zeit (ab heute, nicht abgesagt).
+function nextGkOccurrence(s){
+  for(let i=0;i<120;i++){ const dt=new Date(todayStr+'T00:00:00'); dt.setDate(dt.getDate()+i); const ds=ymd(dt); if(slotActiveOn(s,ds)) return ds; }
+  return null;
+}
 function nextOccurrenceDate(s){
   for(let i=0;i<21;i++){
     const dt=new Date(); dt.setDate(dt.getDate()+i);
@@ -4020,7 +4025,14 @@ async function saveTrainingSlot(){
         cancelled:[...new Set([...(existing.cancelled||[]),...newCancels])].sort()});
     }else{
       TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,kind,gkTeams,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[...newCancels].sort()});
-      if(kind==='goalkeeper') setTimeout(()=>sendGkRequest(gkTeams,'Torwarttraining','jeden '+WDAYS[day]+' · '+from+'–'+to+' Uhr (ab '+fmtShort(validFrom)+')',location.origin+location.pathname,trainerIds),4000);
+      if(kind==='goalkeeper'){
+        // Anfrage bezieht sich auf den NÄCHSTEN Termin dieser festen Zeit; der Button springt dorthin.
+        const ns=TRAINING[TRAINING.length-1];
+        const nd=nextGkOccurrence(ns);
+        setTimeout(()=>sendGkRequest(gkTeams,'Torwarttraining',
+          nd?(DAYS[new Date(nd+'T00:00:00').getDay()]+', '+fmtShort(nd)+' · '+from+'–'+to+' Uhr (feste Zeit, jeden '+WDAYS[day]+')'):('jeden '+WDAYS[day]+' · '+from+'–'+to+' Uhr'),
+          location.origin+location.pathname+(nd?'#t='+encodeURIComponent('tr-'+ns.id+'-'+nd):''),trainerIds),4000);
+      }
     }
     const tMsg=(tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+msgTeam(team,squad,gkTeams)+' (ab '+fmtShort(validFrom)+')'
       +(newCancels.length?' – wegen Heimspielen abgesagt am '+newCancels.map(fmtShort).join(', '):'')+' – '+session.name+teamTrailer(team,squad,{gkTeams,trainerIds});
@@ -5440,7 +5452,7 @@ function gkRemindTrainers(id,d){
   const e=findOccurrence(id,d); if(!e) return;
   const teams=gkTeamsOf(e);
   askConfirm('Trainer erinnern?','Alle Trainer von '+gkTeamsText(teams)+' und du als Organisator bekommen eine E-Mail mit der Bitte, ihre Torhüter für das Torwarttraining am '+fmtShort(e.d)+' um '+e.t+' Uhr an- oder abzumelden.','E-Mail senden',async()=>{
-    const link=location.origin+location.pathname+(e.isTraining?'':'#t='+e.id);
+    const link=location.origin+location.pathname+'#t='+encodeURIComponent(e.id);
     if(await sendGkRequest(teams,'Torwarttraining',DAYS[new Date(e.d+'T00:00:00').getDay()]+', '+fmtShort(e.d)+' · '+e.t+'–'+eventBis(e)+' Uhr',link,gkOrganizersOf(e))) showToast('E-Mail an die Trainer und dich wird verschickt.');
   });
 }
@@ -6079,7 +6091,14 @@ function rejectRegistration(id,silent){
 function openHashEvent(){
   const m=location.hash.match(/^#t=(.+)$/);
   if(!m) return;
-  const e=EVENTS.find(x=>x.id===m[1]);
+  const hid=decodeURIComponent(m[1]);
+  let e=EVENTS.find(x=>x.id===hid);
+  // Einzelner Tag einer festen Trainingszeit: "tr-<Trainingszeit-ID>-<Datum>"
+  const tm=!e&&hid.match(/^tr-(.+)-(\d{4}-\d{2}-\d{2})$/);
+  if(tm){
+    e=trainingInstancesOn(tm[2]).find(x=>x.id===hid);
+    if(!e&&TRAINING.some(x=>x.id===tm[1])){ showToast('Dieses Training findet an dem Tag nicht statt (abgesagt).',4000); e={id:'trc-'+tm[1]+'-'+tm[2],d:tm[2]}; }
+  }
   if(!e){ showToast('Dieser Termin existiert nicht mehr.'); return; }
   highlightId=e.id; selDate=e.d;
   const dt=new Date(e.d+'T00:00:00');
