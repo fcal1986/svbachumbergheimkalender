@@ -128,7 +128,8 @@
       "team": "E-Jugend",
       "squad": 2,
       "pitch": {
-        "mode": "ganz"
+        "mode": "haelfte",
+        "part": "A"
       },
       "halle": null,
       "res": [
