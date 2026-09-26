@@ -1,11 +1,11 @@
-name: Torwarttraining – Bitte um An-/Abmeldung
+name: Torwarttraining – E-Mails (An-/Abmeldung, Absage)
 
-# Nur per repository_dispatch "gk-signup-request" aus der App (neues Torwarttraining oder
-# "Trainer erinnern"). Die Mail enthält keine Spielernamen.
+# Nur per repository_dispatch aus der App: "gk-signup-request" (neues Torwarttraining oder
+# "Trainer erinnern") und "gk-cancelled" (Absage/Löschung). Die Mails enthalten keine Spielernamen.
 
 on:
   repository_dispatch:
-    types: [gk-signup-request]
+    types: [gk-signup-request, gk-cancelled]
 
 jobs:
   send:
@@ -27,4 +27,5 @@ jobs:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+          MAIL_TYPE: ${{ github.event.action }}
         run: node scripts/send-gk-request.mjs

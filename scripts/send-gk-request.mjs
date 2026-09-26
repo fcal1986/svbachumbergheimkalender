@@ -1,12 +1,14 @@
 // scripts/send-gk-request.mjs
 //
-// E-Mail an die Trainer bestimmter Jugenden: "Bitte meldet eure Torhüter zum Torwarttraining an
-// oder ab." Ausgelöst von der App per repository_dispatch "gk-signup-request" (beim Anlegen eines
-// Torwarttrainings oder über "Trainer erinnern"). Enthält bewusst KEINE Spielernamen.
+// E-Mails zum Torwarttraining, ausgelöst von der App per repository_dispatch:
+//   gk-signup-request: "Bitte meldet eure Torhüter an oder ab" (beim Anlegen / "Trainer erinnern")
+//   gk-cancelled:      "Torwarttraining fällt aus" (Termin gelöscht, Tag abgesagt, feste Zeit gestrichen)
+// Enthält bewusst KEINE Spielernamen.
 //
-// Payload: teams (["E-Jugend","1. Herren"], leer = alle Mannschaften), title, when, link, byId, byName
-// Empfänger: alle nicht gesperrten Zugänge, die in der laufenden Saison eine der Mannschaften
-// trainieren und E-Mail-Benachrichtigungen nicht abgeschaltet haben – außer dem Auslöser selbst.
+// Payload: teams (["E-Jugend","1. Herren"], leer = alle Mannschaften), title, when, link, note,
+//          byId, byName, organizerIds
+// Empfänger: der Organisator (organizerIds, immer) + alle nicht gesperrten Zugänge, die in der
+// laufenden Saison eine der Mannschaften trainieren und E-Mails nicht abgeschaltet haben.
 
 import fs from 'node:fs/promises';
 import nodemailer from 'nodemailer';
@@ -29,8 +31,11 @@ async function main() {
   const classesOf = u => (cur && cur.trainerClasses && cur.trainerClasses[u.id]) || u.classes || {};
 
   const wanted = teams.length ? teams : null;
+  const organizers = new Set(Array.isArray(p.organizerIds) ? p.organizerIds : []);
   const recipients = users.filter(u => {
-    if (!u.email || u.locked || u.emailNotificationsEnabled === false || u.id === p.byId) return false;
+    if (!u.email || u.locked) return false;
+    if (organizers.has(u.id)) return true; // Organisator bekommt jede Mail (auch die eigene Erinnerung)
+    if (u.emailNotificationsEnabled === false) return false;
     const cls = Object.keys(classesOf(u));
     return cls.some(t => t !== 'Torwarttraining' && (!wanted || wanted.includes(t)));
   });
@@ -43,18 +48,30 @@ async function main() {
   const port = parseInt(process.env.SMTP_PORT || '587', 10);
   const transporter = nodemailer.createTransport({ host: process.env.SMTP_HOST, port, secure: port === 465, auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } });
 
+  const cancel = process.env.MAIL_TYPE === 'gk-cancelled';
+  const box = `<p style="background:#FFF8EE;border:1px solid #F5C58A;border-radius:10px;padding:10px 14px;"><b>${esc(p.when || '')}</b><br>Für: ${esc(teamsText)}</p>`;
+  const btn = link ? `<p><a href="${esc(link)}" style="display:inline-block;background:#0B1B32;color:#fff;text-decoration:none;font-weight:bold;padding:12px 20px;border-radius:10px;">Platzcoach öffnen</a></p>` : '';
+  const foot = `<p style="color:#718191;font-size:12px;">Automatische Benachrichtigung von Platzcoach (${esc(clubName)}).</p>`;
   for (const u of recipients) {
-    const text = `Hallo ${u.first},\n\n${p.byName || 'Der Torwarttrainer'} bittet dich, deine Torhüter für das ${p.title || 'Torwarttraining'} an- oder abzumelden:\n\n${p.when || ''}\nFür: ${teamsText}\n\nSo geht's: In Platzcoach anmelden → Termin öffnen → „Torhüter an-/abmelden“. Deine Torhüter trägst du einmalig unter Konto → Profil → „Meine Torhüter“ ein.\n${link ? '\n' + link + '\n' : ''}\nSo weiß der Torwarttrainer, wer kommt – und kann das Training rechtzeitig absagen, wenn zu wenige dabei sind.\n\n${clubName}`;
-    const html = `<div style="font-family:Arial,sans-serif;font-size:14px;color:#0B1B32;">
-      <p>Hallo ${esc(u.first)},</p>
-      <p>${esc(p.byName || 'Der Torwarttrainer')} bittet dich, deine <b>Torhüter</b> für das ${esc(p.title || 'Torwarttraining')} an- oder abzumelden:</p>
-      <p style="background:#FFF8EE;border:1px solid #F5C58A;border-radius:10px;padding:10px 14px;"><b>${esc(p.when || '')}</b><br>Für: ${esc(teamsText)}</p>
-      <p>So geht's: In Platzcoach anmelden → Termin öffnen → „Torhüter an-/abmelden“. Deine Torhüter trägst du einmalig unter <b>Konto → Profil → „Meine Torhüter“</b> ein.</p>
-      ${link ? `<p><a href="${esc(link)}" style="display:inline-block;background:#0B1B32;color:#fff;text-decoration:none;font-weight:bold;padding:12px 20px;border-radius:10px;">Platzcoach öffnen</a></p>` : ''}
-      <p>So weiß der Torwarttrainer, wer kommt – und kann das Training rechtzeitig absagen, wenn zu wenige dabei sind.</p>
-      <p style="color:#718191;font-size:12px;">Automatische Benachrichtigung von Platzcoach (${esc(clubName)}).</p></div>`;
+    const isOrg = organizers.has(u.id);
+    let subject, text, html;
+    if (cancel) {
+      subject = `Abgesagt: ${p.title || 'Torwarttraining'} (${p.when || ''})`;
+      text = `Hallo ${u.first},\n\ndas ${p.title || 'Torwarttraining'} fällt aus:\n\n${p.when || ''}\nFür: ${teamsText}\n${p.note ? '\n' + p.note + '\n' : ''}\nAbgesagt von: ${p.byName || 'Platzcoach'}\n${link ? '\n' + link + '\n' : ''}\n${clubName}`;
+      html = `<div style="font-family:Arial,sans-serif;font-size:14px;color:#0B1B32;"><p>Hallo ${esc(u.first)},</p>
+        <p>das <b>${esc(p.title || 'Torwarttraining')}</b> fällt aus:</p>${box}
+        ${p.note ? `<p>${esc(p.note)}</p>` : ''}<p>Abgesagt von: ${esc(p.byName || 'Platzcoach')}</p>${btn}${foot}</div>`;
+    } else {
+      subject = `Torwarttraining: bitte Torhüter an- oder abmelden (${p.when || ''})`;
+      const intro = isOrg && u.id === p.byId ? 'Kopie für dich als Organisator: Die Trainer wurden gebeten, ihre Torhüter' : `${p.byName || 'Der Torwarttrainer'} bittet dich, deine Torhüter`;
+      text = `Hallo ${u.first},\n\n${intro} für das ${p.title || 'Torwarttraining'} an- oder abzumelden:\n\n${p.when || ''}\nFür: ${teamsText}\n\nSo geht's: In Platzcoach anmelden → Termin öffnen → „Torhüter an-/abmelden“. Torhüter trägst du einmalig unter Konto → Profil → „Meine Torhüter“ ein.\n${link ? '\n' + link + '\n' : ''}\nSo weiß der Torwarttrainer, wer kommt – und kann das Training rechtzeitig absagen, wenn zu wenige dabei sind.\n\n${clubName}`;
+      html = `<div style="font-family:Arial,sans-serif;font-size:14px;color:#0B1B32;"><p>Hallo ${esc(u.first)},</p>
+        <p>${esc(intro)} für das ${esc(p.title || 'Torwarttraining')} an- oder abzumelden:</p>${box}
+        <p>So geht's: In Platzcoach anmelden → Termin öffnen → „Torhüter an-/abmelden“. Torhüter trägst du einmalig unter <b>Konto → Profil → „Meine Torhüter“</b> ein.</p>${btn}
+        <p>So weiß der Torwarttrainer, wer kommt – und kann das Training rechtzeitig absagen, wenn zu wenige dabei sind.</p>${foot}</div>`;
+    }
     try {
-      await transporter.sendMail({ from: `Platzcoach <${fromAddress}>`, ...(replyTo ? { replyTo } : {}), to: u.email, subject: `Torwarttraining: bitte Torhüter an- oder abmelden (${p.when || ''})`, text, html });
+      await transporter.sendMail({ from: `Platzcoach <${fromAddress}>`, ...(replyTo ? { replyTo } : {}), to: u.email, subject, text, html });
       console.log('Gesendet an ' + u.email);
     } catch (e) { console.error('Fehler bei ' + u.email + ': ' + e.message); }
   }

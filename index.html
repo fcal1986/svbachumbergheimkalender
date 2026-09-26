@@ -744,38 +744,18 @@
         <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Von</label><input type="time" id="tf-from" autocomplete="off" step="900" value="16:30" onchange="onSnapTime(this)"></div>
         <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Bis</label><input type="time" id="tf-to" autocomplete="off" step="900" value="18:00" onchange="onSnapTime(this)"></div>
       </div>
-      <div class="field required"><label><span class="req-dot"></span>Team</label>
+      <div class="field required"><label><span class="req-dot"></span>Art</label>
+        <div class="seg" id="tf-kind-seg">
+          <button type="button" class="on" data-kind="training" onclick="tfSetKind('training')">Training</button>
+          <button type="button" data-kind="goalkeeper" onclick="tfSetKind('goalkeeper')">Torwarttraining</button>
+        </div>
+      </div>
+      <div class="field required" id="tf-team-field"><label><span class="req-dot"></span>Team</label>
         <select id="tf-team" onchange="tfTeamChange()">
           <optgroup label="Jugend"><option>G-Jugend</option><option selected>F-Jugend</option><option>E-Jugend</option><option>D-Jugend</option><option>C-Jugend</option><option>B-Jugend</option><option>A-Jugend</option></optgroup>
           <optgroup label="Senioren"><option>1. Herren</option><option>2. Herren</option><option>3. Herren</option></optgroup>
-          <optgroup label="Sonstige"><option>Ü32 / Ü50</option><option>Torwarttraining</option></optgroup>
+          <optgroup label="Sonstige"><option>Ü32 / Ü50</option><option hidden>Torwarttraining</option></optgroup>
         </select>
-      </div>
-      <div class="field" id="tf-squad-field">
-        <label>Mannschaft der Altersklasse</label>
-        <div class="seg" id="tf-squad">
-          <button type="button" class="on" data-squad="1" onclick="setSquad(this);refreshTrainerChips()">1</button>
-          <button type="button" data-squad="2" onclick="setSquad(this);refreshTrainerChips()">2</button>
-          <button type="button" data-squad="3" onclick="setSquad(this);refreshTrainerChips()">3</button>
-        </div>
-      </div>
-      <div class="field required">
-        <label><span class="req-dot"></span>Trainer</label>
-        <div id="tf-trainers-chips" class="chip-group trainer-chips-wrap"></div>
-        <p class="helptext">Nur in der App angemeldete Zugänge wählbar. Noch nicht dabei? Erst unter Konto anlegen – bis dahin gilt „wird bald ergänzt".</p>
-      </div>
-      <p class="section-label">Ressourcen</p>
-      <div class="field"><label>Platz / Kabine</label>
-        <div class="chip-group" id="tf-res">
-          <div class="res-chip on" data-res="Großspielfeld" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="1.5"/><path d="M12 5v14"/><circle cx="12" cy="12" r="2.5"/></svg>Großspielfeld</div>
-          <div class="res-chip" data-res="Kleinspielfeld" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/></svg>Kleinspielfeld</div>
-          <div class="res-chip" data-res="Kabine 1" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 1</div>
-          <div class="res-chip" data-res="Kabine 2" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 2</div>
-          <div class="res-chip" data-res="Kabine 3" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 3</div>
-          <div class="res-chip" data-res="Kabine 4" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 4</div>
-        </div>
-        <p class="helptext" id="tf-gk-help" style="display:none;">Torwarttraining belegt keine Platzfläche: Es darf parallel zu einem Training laufen, aber nicht während eines Spiels.</p>
-        <div id="tf-game-note-gk"></div>
       </div>
       <div class="field required" id="tf-gkteams-field" style="display:none;"><label><span class="req-dot"></span>Für welche Mannschaften?</label>
         <div class="chip-group" id="tf-gkteams"></div>
@@ -800,6 +780,32 @@
         </div>
         <div id="free-slots-box-tf"></div>
       </div>
+      <div class="field" id="tf-squad-field">
+        <label>Mannschaft der Altersklasse</label>
+        <div class="seg" id="tf-squad">
+          <button type="button" class="on" data-squad="1" onclick="setSquad(this);refreshTrainerChips()">1</button>
+          <button type="button" data-squad="2" onclick="setSquad(this);refreshTrainerChips()">2</button>
+          <button type="button" data-squad="3" onclick="setSquad(this);refreshTrainerChips()">3</button>
+        </div>
+      </div>
+      <div class="field required">
+        <label><span class="req-dot"></span>Trainer</label>
+        <div id="tf-trainers-chips" class="chip-group trainer-chips-wrap"></div>
+        <p class="helptext">Nur in der App angemeldete Zugänge wählbar. Noch nicht dabei? Erst unter Konto anlegen – bis dahin gilt „wird bald ergänzt".</p>
+      </div>
+      <p class="section-label" id="tf-res-label">Ressourcen</p>
+      <div class="field"><label>Platz / Kabine</label>
+        <div class="chip-group" id="tf-res">
+          <div class="res-chip on" data-res="Großspielfeld" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="1.5"/><path d="M12 5v14"/><circle cx="12" cy="12" r="2.5"/></svg>Großspielfeld</div>
+          <div class="res-chip" data-res="Kleinspielfeld" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/></svg>Kleinspielfeld</div>
+          <div class="res-chip" data-res="Kabine 1" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 1</div>
+          <div class="res-chip" data-res="Kabine 2" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 2</div>
+          <div class="res-chip" data-res="Kabine 3" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 3</div>
+          <div class="res-chip" data-res="Kabine 4" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 4</div>
+        </div>
+        <p class="helptext" id="tf-gk-help" style="display:none;">Torwarttraining belegt keine Platzfläche: Es darf parallel zu einem Training laufen, aber nicht während eines Spiels.</p>
+        <div id="tf-game-note-gk"></div>
+      </div>
       <p class="section-label">Gültigkeit</p>
       <div style="display:flex;gap:10px;">
         <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Gültig ab</label><input type="date" id="tf-validfrom"></div>
@@ -820,7 +826,7 @@
       <p class="section-label">Pflichtangaben</p>
       <div class="field required"><label><span class="req-dot"></span>Datum</label><input type="date" id="f-datum"></div>
       <div class="field"><label>Wochentag</label><span class="readonly-pill" id="f-wochentag">–</span></div>
-      <div class="field required"><label><span class="req-dot"></span>Anlass</label><input type="text" id="f-anlass" autocomplete="off" oninput="formDirty=true;suggestKindFromTitle()" placeholder="z. B. Sommerfest, Turnier, Testspiel"></div>
+      <div class="field required"><label><span class="req-dot"></span>Anlass</label><input type="text" id="f-anlass" autocomplete="off" oninput="formDirty=true;this.dataset.auto='';suggestKindFromTitle()" placeholder="z. B. Sommerfest, Turnier, Testspiel"></div>
       <div class="field required"><label><span class="req-dot"></span>Terminart</label>
         <select id="f-kind" onchange="onKindChange(true)">
           <option value="game">Spiel</option><option value="training">Training</option><option value="goalkeeper">Torwarttraining</option><option value="other" selected>Sonstiges</option>
@@ -853,7 +859,7 @@
         </div>
       </div>
       </div>
-      <p class="section-label">Ressourcen</p>
+      <p class="section-label" id="f-res-label">Ressourcen</p>
       <div class="field"><label>Was wird gebraucht?</label>
         <div class="chip-group" id="f-res">
           <div class="res-chip on" data-res="Großspielfeld" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="1.5"/><path d="M12 5v14"/><circle cx="12" cy="12" r="2.5"/></svg>Großspielfeld</div>
@@ -1058,7 +1064,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='26.09.2026 · 3';
+const APP_VERSION='26.09.2026 · 4';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -2135,7 +2141,7 @@ function rowHTML(e){
   if(e.isTraining){
     // Team+Typ stehen jetzt direkt in der Headline -> Team-Chip und "Training"-Chip entfallen.
     title=kindOf(e)==='goalkeeper'?'Torwarttraining'+(e.team!==GK_TEAM?' · '+teamLabel(e.team,e.squad):''):'Training · '+teamLabel(e.team,e.squad);
-    if(kindOf(e)==='goalkeeper')b+=gkBadge();
+    if(kindOf(e)==='goalkeeper')b+=gkBadge()+'<span class="badge-team verein">'+esc(gkTeamsText(gkTeamsOf(e)))+'</span>';
     if(e.halle&&e.halle.thirds&&e.halle.thirds.length)b+=halleBadge(e.halle);
     (e.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
     if(e.pitch)pitchVisual=pitchBadge(e.pitch);
@@ -2648,7 +2654,7 @@ function renderPitchToday(){
   renderOccupiedBadge();
   const box=document.getElementById('st-pitch-today');
   if(!box)return;
-  const items=todaysCombinedAgenda().filter(e=>e.isCancelled||e.pitch||(e.halle&&e.halle.thirds&&e.halle.thirds.length)||e.isExternal||e.res&&e.res.length||classifyAgendaItem(e)==='sonstige');
+  const items=todaysCombinedAgenda().filter(e=>e.isCancelled||e.pitch||(e.halle&&e.halle.thirds&&e.halle.thirds.length)||e.isExternal||e.res&&e.res.length||classifyAgendaItem(e)==='sonstige'||classifyAgendaItem(e)==='torwart');
   if(!items.length){ box.innerHTML='<div class="empty-card">Heute keine Termine.</div>'; return; }
   const now=new Date(),nowHM=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
   box.innerHTML=items.map(e=>{
@@ -2661,7 +2667,8 @@ function renderPitchToday(){
         +'</div>';
     }
     const running=e.t<=nowHM&&eventBis(e)>nowHM;
-    const teamTxt=teamLabel(e.team,e.squad||1);
+    const isGkItem=kindOf(e)==='goalkeeper';
+    const teamTxt=isGkItem?('für '+gkTeamsText(gkTeamsOf(e))):teamLabel(e.team,e.squad||1);
     const type=classifyAgendaItem(e);
     let typeTxt=typeLabelOf(e);
     if(e.isExternal)typeTxt+=e.isAway?' · auswärts':' · heim';
@@ -2672,8 +2679,10 @@ function renderPitchToday(){
       // Eigene Termine (Trainerstammtisch, Freundschaftsspiel …): Name als Überschrift wie in der
       // Terminübersicht, Art + Mannschaft darunter. Trainings und fussball.de-Spiele: Mannschaft oben.
       +(!e.isTraining&&!e.isExternal&&e.title
-        ?'<div class="pt-team"><div class="pt-team-name">'+esc(e.title)+'</div><div class="pt-type">'+esc(typeTxt+' · '+teamTxt)+'</div></div>'
-        :'<div class="pt-team"><div class="pt-team-name">'+esc(teamTxt)+'</div><div class="pt-type">'+esc(typeTxt)+'</div></div>')
+        ?'<div class="pt-team"><div class="pt-team-name">'+esc(e.title)+'</div><div class="pt-type">'+esc(isGkItem?teamTxt:(typeTxt+' · '+teamTxt))+'</div></div>'
+        :(isGkItem
+          ?'<div class="pt-team"><div class="pt-team-name">Torwarttraining</div><div class="pt-type">'+esc(teamTxt)+'</div></div>'
+          :'<div class="pt-team"><div class="pt-team-name">'+esc(teamTxt)+'</div><div class="pt-type">'+esc(typeTxt)+'</div></div>'))
       +(sc?'<div class="score-pill '+sc.outcome+'" style="font-size:12px;padding:3px 8px;">'+sc.text+'</div>':'<div class="pt-visual">'+visual+'</div>')
       +'</div>';
   }).join('');
@@ -3025,6 +3034,16 @@ function formKind(){ const el=document.getElementById('f-kind'); return el?el.va
 function onKindChange(byUser){
   if(byUser) kindTouched=true;
   const k=formKind(), help=document.getElementById('f-kind-help');
+  // Anlass bei Torwarttraining automatisch vorbelegen (nur wenn leer bzw. noch der Automatik-Text).
+  const an=document.getElementById('f-anlass');
+  if(an&&byUser){
+    if(k==='goalkeeper'&&!an.value.trim()){ an.value='Torwarttraining'; an.dataset.auto='1'; }
+    else if(k!=='goalkeeper'&&an.dataset.auto==='1'&&an.value==='Torwarttraining'){ an.value=''; an.dataset.auto=''; }
+    // Ressourcen sind beim Torwarttraining optional: Vorauswahl "Großspielfeld" entfernen.
+    if(k==='goalkeeper'&&!editingId) setResChips('f-res',[]);
+    else if(!editingId&&![...document.querySelectorAll('#f-res .res-chip.on')].length) setResChips('f-res',['Großspielfeld']);
+  }
+  const rl=document.getElementById('f-res-label'); if(rl) rl.textContent=k==='goalkeeper'?'Ressourcen (optional)':'Ressourcen';
   if(help) help.textContent=occLevel(k)==='overlay'
     ?'Belegt keine Platzfläche: darf parallel zu einem Training laufen, aber nicht während eines Spiels.'
     :(occLevel(k)==='exclusive'?'Während eines Spiels ist auf dem Platz kein Torwarttraining möglich.':'');
@@ -3384,7 +3403,7 @@ async function submitEvent(){
     if(editingId)Object.assign(EVENTS.find(x=>x.id===editingId),{d,t:von,bis,title,kind,team,squad,pitch,halle,res,note,gkTeams});
     else{ newId=crypto.randomUUID(); EVENTS.push({id:newId,d,t:von,bis,title,kind,team,squad,pitch,halle,res,note,gkTeams,ownerId:session.id,ownerName:session.name}); }
     // Neues Torwarttraining: Trainer der gewählten Jugenden per Mail bitten, Torhüter an-/abzumelden.
-    if(newId&&kind==='goalkeeper') setTimeout(()=>sendGkRequest(gkTeams,title,DAYS[new Date(d+'T00:00:00').getDay()]+', '+fmtShort(d)+' · '+von+'–'+bis+' Uhr',location.origin+location.pathname+'#t='+newId),4000);
+    if(newId&&kind==='goalkeeper') setTimeout(()=>sendGkRequest(gkTeams,title,DAYS[new Date(d+'T00:00:00').getDay()]+', '+fmtShort(d)+' · '+von+'–'+bis+' Uhr',location.origin+location.pathname+'#t='+newId,[session.id]),4000);
     const wasEditing=!!editingId;
     const logMsg=(wasEditing?'Termin geändert: ':'Neuer Termin: ')+title+' – '+teamLabel(team,squad)+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name+teamTrailer(team,squad);
     editingId=null;formDirty=false;document.getElementById('cancel-btn').style.display='none';
@@ -3403,6 +3422,7 @@ function deleteEvent(id){
     const backup=JSON.stringify(EVENTS);
     EVENTS=EVENTS.filter(x=>x.id!==id);
     render(); renderStart(); showToast('Termin gelöscht.');
+    if(kindOf(e)==='goalkeeper') sendGkCancel(e.gkTeams||[],e.title||'Torwarttraining',DAYS[new Date(e.d+'T00:00:00').getDay()]+', '+fmtShort(e.d)+' · '+e.t+'–'+eventBis(e)+' Uhr',[e.ownerId],'Der Termin wurde gelöscht.');
     saveEvents('Termin gelöscht: '+e.title+' – '+teamLabel(e.team,e.squad)+' · '+e.t+'–'+eventBis(e)+' · '+fmtShort(e.d)+' – '+session.name+teamTrailer(e.team,e.squad))
       .catch(err=>{ EVENTS=JSON.parse(backup);render();renderStart();showToast('Rückgängig – Fehler: '+err.message,6000); });
   });
@@ -3596,6 +3616,7 @@ async function doCancelSlot(){
   try{
     closeCancelModal(); renderTraining(); renderStart(); render();
     showToast('Training am '+fmtShort(date)+' abgesagt.');
+    if(s.team===GK_TEAM||s.kind==='goalkeeper') sendGkCancel(s.gkTeams||[],'Torwarttraining',DAYS[new Date(date+'T00:00:00').getDay()]+', '+fmtShort(date)+' · '+s.from+'–'+s.to+' Uhr',s.trainerIds||[],'Das Torwarttraining fällt an diesem Tag aus.');
     saveTraining('Training abgesagt: '+trainName(s)+' am '+fmtShort(date)+' – '+session.name+teamTrailer(s.team,s.squad))
       .catch(e=>{ TRAINING=JSON.parse(backup);renderTraining();renderStart();showToast('Fehler: '+e.message,6000); });
   }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
@@ -3648,7 +3669,11 @@ function getTrainersContactHTML(s){
 }
 function renderTrainerChips(team,squad,selectedIds){
   const el=document.getElementById('tf-trainers-chips');if(!el)return;
-  const eligible=USERS.filter(u=>canTrainTeam(u,team,squad)).sort((a,b)=>(a.first+a.last).localeCompare(b.first+b.last));
+  // Torwarttraining: jeder Zugang wählbar (Torwarttrainer sind oft keiner Mannschaft zugeordnet),
+  // der Gruppe "Torwarttraining" zugeordnete zuerst.
+  const eligible=(team===GK_TEAM
+    ?USERS.filter(u=>!u.locked).sort((a,b)=>(canTrainTeam(b,team,1)?1:0)-(canTrainTeam(a,team,1)?1:0)||(a.first+a.last).localeCompare(b.first+b.last))
+    :USERS.filter(u=>canTrainTeam(u,team,squad)).sort((a,b)=>(a.first+a.last).localeCompare(b.first+b.last)));
   const ids=new Set(selectedIds||[]);
   if(!eligible.length){el.innerHTML='<p class="helptext" style="margin:0;color:var(--ink-soft);">Noch kein Trainer dieser Mannschaft zugeordnet – unter Konto anlegen.</p>';return;}
   el.innerHTML=eligible.map(u=>'<div class="res-chip'+(ids.has(u.id)?' on':'')+'" data-id="'+u.id+'" onclick="this.classList.toggle(\'on\')">'+esc(u.first+' '+u.last)+'</div>').join('');
@@ -3669,7 +3694,7 @@ function trainResBadges(s){
 }
 function fillTrainerSelect(selectedId){ renderTrainerChips(document.getElementById('tf-team')?.value||'F-Jugend',1,selectedId?[selectedId]:[]); }
 function trainLocHTML(s){
-  let h=(s.team===GK_TEAM||s.kind==='goalkeeper')?gkBadge():'';
+  let h=(s.team===GK_TEAM||s.kind==='goalkeeper')?gkBadge()+'<span class="badge-res">'+esc(gkTeamsText(s.gkTeams||[]))+'</span>':'';
   if(s.pitch) h+=pitchBadge(s.pitch);
   (s.res||[]).forEach(r=>h+='<span class="badge-res">'+esc(r)+'</span>');
   if(s.note) h+='<span class="badge-res">'+esc(s.note)+'</span>';
@@ -3838,8 +3863,21 @@ function renderTraining(){
 }
 function tfKind(){ return document.getElementById('tf-team').value===GK_TEAM?'goalkeeper':'training'; }
 function tfIsOverlay(){ return occLevel(tfKind())==='overlay'; }
+/* Art der Trainingszeit: normales Training oder Torwarttraining (dann statt Team-Dropliste
+   die Mehrfachauswahl der Mannschaften, Ressourcen optional – wie im Terminformular). */
+function tfSetKind(k,byUser){
+  const sel=document.getElementById('tf-team');
+  if(k==='goalkeeper'&&sel.value!==GK_TEAM){ sel.dataset.prevTeam=sel.value; sel.value=GK_TEAM; if(byUser!==false&&!tEditId) setResChips('tf-res',[]); }
+  else if(k!=='goalkeeper'&&sel.value===GK_TEAM){ sel.value=sel.dataset.prevTeam||'F-Jugend'; if(!tEditId) setResChips('tf-res',['Großspielfeld']); }
+  tfTeamChange();
+}
+function setResChips(containerId,onList){ document.querySelectorAll('#'+containerId+' .res-chip').forEach(c=>c.classList.toggle('on',onList.includes(c.dataset.res))); }
 function tfTeamChange(){
   const team=document.getElementById('tf-team').value;
+  const isGk=team===GK_TEAM;
+  document.querySelectorAll('#tf-kind-seg button').forEach(b=>b.classList.toggle('on',b.dataset.kind===(isGk?'goalkeeper':'training')));
+  const tfield=document.getElementById('tf-team-field'); if(tfield) tfield.style.display=isGk?'none':'block';
+  const rl=document.getElementById('tf-res-label'); if(rl) rl.textContent=isGk?'Ressourcen (optional)':'Ressourcen';
   document.getElementById('tf-squad-field').style.display=isJugend(team)?'block':'none';
   const gh=document.getElementById('tf-gk-help'); if(gh) gh.style.display=tfIsOverlay()?'block':'none';
   const gtf=document.getElementById('tf-gkteams-field'); if(gtf) gtf.style.display=tfKind()==='goalkeeper'?'block':'none';
@@ -3939,7 +3977,7 @@ async function saveTrainingSlot(){
   if(overlay&&tfPitchOn()) res.unshift('Großspielfeld');
   const pitch=(tfPitchOn()&&!overlay)?tfCurPitch():null;
   const note=document.getElementById('tf-note').value.trim();
-  if(!pitch&&!res.some(r=>FIELD_RES.includes(r))){ showToast('Bitte einen Platz auswählen (Großspielfeld oder Kleinspielfeld).'); return; }
+  if(kind!=='goalkeeper'&&!pitch&&!res.some(r=>FIELD_RES.includes(r))){ showToast('Bitte einen Platz auswählen (Großspielfeld oder Kleinspielfeld).'); return; }
   const warn=[];
   const me={t:from,bis:to,pitch,res,kind,team};
   TRAINING.filter(s=>s.day===day&&s.id!==tEditId&&from<s.to&&s.from<to).forEach(s=>{
@@ -3969,7 +4007,7 @@ async function saveTrainingSlot(){
         cancelled:[...new Set([...(existing.cancelled||[]),...newCancels])].sort()});
     }else{
       TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,kind,gkTeams,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[...newCancels].sort()});
-      if(kind==='goalkeeper') setTimeout(()=>sendGkRequest(gkTeams,'Torwarttraining','jeden '+WDAYS[day]+' · '+from+'–'+to+' Uhr (ab '+fmtShort(validFrom)+')',location.origin+location.pathname),4000);
+      if(kind==='goalkeeper') setTimeout(()=>sendGkRequest(gkTeams,'Torwarttraining','jeden '+WDAYS[day]+' · '+from+'–'+to+' Uhr (ab '+fmtShort(validFrom)+')',location.origin+location.pathname,trainerIds),4000);
     }
     const tMsg=(tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+team+' (ab '+fmtShort(validFrom)+')'
       +(newCancels.length?' – wegen Heimspielen abgesagt am '+newCancels.map(fmtShort).join(', '):'')+' – '+session.name+teamTrailer(team,squad);
@@ -3989,6 +4027,7 @@ function deleteTrainingSlot(id){
     TRAINING=TRAINING.filter(x=>x.id!==id);
     try{ await saveTraining('Trainingszeit gelöscht: '+WDAYS[s.day]+' '+s.from+' '+s.team+' – '+session.name+teamTrailer(s.team,s.squad));
       renderTraining(); showToast('Gelöscht.');
+      if(s.team===GK_TEAM||s.kind==='goalkeeper') sendGkCancel(s.gkTeams||[],'Torwarttraining','jeden '+WDAYS[s.day]+' · '+s.from+'–'+s.to+' Uhr',s.trainerIds||[],'Diese feste Torwarttrainingszeit wurde gestrichen und findet nicht mehr statt.');
     }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   });
 }
@@ -5369,19 +5408,26 @@ function openKeeperEditor(team,squad){
 }
 /* E-Mail an die Trainer der gewählten Jugenden: "Bitte Torhüter an- oder abmelden".
    Läuft über ein GitHub-Dispatch-Event (scripts/send-gk-request.mjs); enthält keine Spielernamen. */
-function gkRequestPayload(teams,title,when,link){
-  return {teams:teams||[],title,when,link,byId:session.id,byName:session.name};
+// organizerIds: Organisator (Ersteller/Trainer des Torwarttrainings) bekommt jede Mail ebenfalls.
+function gkRequestPayload(teams,title,when,link,organizerIds){
+  return {teams:teams||[],title,when,link,byId:session.id,byName:session.name,organizerIds:[...new Set([session.id,...(organizerIds||[])])].filter(x=>x&&x!=='admin')};
 }
-async function sendGkRequest(teams,title,when,link){
-  try{ await ghDispatch('gk-signup-request',gkRequestPayload(teams,title,when,link)); return true; }
+async function sendGkRequest(teams,title,when,link,organizerIds){
+  try{ await ghDispatch('gk-signup-request',gkRequestPayload(teams,title,when,link,organizerIds)); return true; }
   catch(e){ showToast('E-Mail an die Trainer konnte nicht ausgelöst werden: '+e.message,6000); return false; }
 }
+// Absage/Löschung eines Torwarttrainings: Trainer der Mannschaften + Organisator informieren.
+function sendGkCancel(teams,title,when,organizerIds,note){
+  const p=gkRequestPayload(teams,title,when,location.origin+location.pathname,organizerIds); p.note=note||'';
+  ghDispatch('gk-cancelled',p).catch(e=>showToast('Absage-Mail konnte nicht ausgelöst werden: '+e.message,6000));
+}
+function gkOrganizersOf(e){ return e.isTraining?(e.trainerIds||[]):[e.ownerId]; }
 function gkRemindTrainers(id,d){
   const e=findOccurrence(id,d); if(!e) return;
   const teams=gkTeamsOf(e);
-  askConfirm('Trainer erinnern?','Alle Trainer von '+gkTeamsText(teams)+' bekommen eine E-Mail mit der Bitte, ihre Torhüter für das Torwarttraining am '+fmtShort(e.d)+' um '+e.t+' Uhr an- oder abzumelden.','E-Mail senden',async()=>{
+  askConfirm('Trainer erinnern?','Alle Trainer von '+gkTeamsText(teams)+' und du als Organisator bekommen eine E-Mail mit der Bitte, ihre Torhüter für das Torwarttraining am '+fmtShort(e.d)+' um '+e.t+' Uhr an- oder abzumelden.','E-Mail senden',async()=>{
     const link=location.origin+location.pathname+(e.isTraining?'':'#t='+e.id);
-    if(await sendGkRequest(teams,'Torwarttraining',DAYS[new Date(e.d+'T00:00:00').getDay()]+', '+fmtShort(e.d)+' · '+e.t+'–'+eventBis(e)+' Uhr',link)) showToast('E-Mail an die Trainer wird verschickt.');
+    if(await sendGkRequest(teams,'Torwarttraining',DAYS[new Date(e.d+'T00:00:00').getDay()]+', '+fmtShort(e.d)+' · '+e.t+'–'+eventBis(e)+' Uhr',link,gkOrganizersOf(e))) showToast('E-Mail an die Trainer und dich wird verschickt.');
   });
 }
 /* Auswahl der Jugenden im Termin-/Trainingsformular */
