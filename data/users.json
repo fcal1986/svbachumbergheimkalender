@@ -395,6 +395,29 @@
       "phone": "0157 32117051",
       "contactPublic": "phone",
       "contactEmail": "cetin49@icloud.com"
+    },
+    {
+      "id": "030cee1e-0fb7-426d-a231-b3cbb92c7262",
+      "first": "Marcel",
+      "last": "Schomberg",
+      "email": "schombergmarcel@gmail.com",
+      "admin": false,
+      "classes": {
+        "G-Jugend": [
+          2,
+          3
+        ]
+      },
+      "enc": {
+        "salt": "xNAb/zAcwoC9hIu/Wm6UwA==",
+        "iv": "gf5YF6x7s2tHeHjW",
+        "cipher": "S8vZRw8FhJT6bNhCOIAC7nFXUnMEMUc5yaWs+QtWPhXfUfSm6vyGFyqzPeN1U48ae4jpWHNLDJHZQW6X0l2xVIIdVP+9Cta62VUZAmYaP9uf22fwr8Hy2vWFAg9Q2sLfFAirJCjAM9RHRRy67A=="
+      },
+      "created": "2026-09-26T09:15:50.374Z",
+      "emailNotificationsEnabled": true,
+      "pwChangeRequired": true,
+      "phone": "+491726553733",
+      "contactPublic": "phone"
     }
   ]
 }
