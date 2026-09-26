@@ -138,6 +138,27 @@
       "note": "",
       "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
       "ownerName": "David Skwara"
+    },
+    {
+      "id": "bce945af-b5af-451c-be93-73d27550021a",
+      "d": "2026-09-26",
+      "t": "15:00",
+      "bis": "17:00",
+      "title": "Test Kabine 2",
+      "kind": "game",
+      "team": "F-Jugend",
+      "squad": 1,
+      "pitch": {
+        "mode": "haelfte",
+        "part": "B"
+      },
+      "halle": null,
+      "res": [
+        "Kabine 2"
+      ],
+      "note": "",
+      "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
+      "ownerName": "David Skwara"
     }
   ]
 }
