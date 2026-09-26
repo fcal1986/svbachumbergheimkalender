@@ -593,6 +593,9 @@
   #register .reg-check input{width:18px;height:18px;flex:none;margin:2px 0 0;padding:0;accent-color:var(--green);}
   #register .reg-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;}
   .reg-item{border:1.5px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;}
+  .edit-banner{background:#FFF4CC;border:1.5px solid #F2C94C;color:#5C4400;border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:13px;line-height:1.5;}
+  .edit-banner b{color:#3D2E00;}
+  .edit-banner button{margin-top:8px;width:100%;background:#fff;border:1.5px solid #F2C94C;color:#5C4400;border-radius:10px;padding:10px;font-family:'Inter';font-weight:700;font-size:13px;cursor:pointer;}
   .badge-gk{display:inline-flex;align-items:center;gap:4px;background:#FFF1E0;color:#9A4A00;border:1px solid #F5C58A;border-radius:999px;padding:3px 9px;font-size:10.5px;font-weight:700;}
   .badge-gk svg{width:12px;height:12px;stroke:#9A4A00;}
   .event-card.gk-card{box-shadow:inset 4px 0 0 #F08C00,var(--card-shadow);}
@@ -822,6 +825,7 @@
   <!-- TERMIN FORM (NEU / BEARBEITEN) -->
   <div class="pane" data-pane="neu">
     <div class="content">
+      <div id="edit-banner" class="edit-banner" style="display:none;"></div>
       <div class="banner info">Ansprechpartner: <b id="owner-name">–</b></div>
       <p class="section-label">Pflichtangaben</p>
       <div class="field required"><label><span class="req-dot"></span>Datum</label><input type="date" id="f-datum"></div>
@@ -1064,7 +1068,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='26.09.2026 · 6';
+const APP_VERSION='26.09.2026 · 7';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -1925,6 +1929,7 @@ function currentPaneArea(){
   return n==='konto'&&session?'konto/'+(kontoTab||'profil'):n;
 }
 function goto(n){
+  if(n==='neu') setTimeout(updateEditBanner,0);
   if(n!=='neu')formSkipFussballLink=null; // Verlassen des Formulars ohne Speichern: Ausnahme nicht stehen lassen
   document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.dataset.pane===n));
   const navKey=(n==='tform')?'training':n;
@@ -3247,12 +3252,37 @@ function normalizeClasses(cls){
 }
 function navToNeu(){
   if(!requireLogin())return;
-  if(formDirty||editingId){
+  if(editingId){
+    // Offene Bearbeitung eines BESTEHENDEN Termins: nachfragen statt stillschweigend dorthin zu
+    // springen – sonst überschreibt man den alten Termin, obwohl man einen neuen anlegen wollte.
+    const e=EVENTS.find(x=>x.id===editingId);
+    if(!e){ newEvent(); return; }
+    askConfirm('Neuen Termin anlegen?',
+      'Du bearbeitest gerade „'+e.title+'" ('+fmtShort(e.d)+', '+e.t+' Uhr). Möchtest du stattdessen einen neuen Termin anlegen? Nicht gespeicherte Änderungen an „'+e.title+'" gehen dann verloren.',
+      'Neuen Termin anlegen',()=>{ newEvent(); });
+    const noBtn=document.querySelector('#modal .no');
+    if(noBtn){ noBtn.textContent='Bearbeitung fortsetzen'; noBtn.onclick=()=>{ closeModal(); goto('neu'); }; }
+    return;
+  }
+  if(formDirty){
     goto('neu');
-    if(formDirty&&!editingId)showToast('Entwurf noch vorhanden – nicht gespeichert.',2500);
+    showToast('Entwurf noch vorhanden – nicht gespeichert.',2500);
   }else{
     newEvent();
   }
+}
+// Gelber Hinweis oben im Formular, solange ein bestehender Termin bearbeitet wird.
+function updateEditBanner(){
+  const el=document.getElementById('edit-banner'); if(!el) return;
+  const e=editingId&&EVENTS.find(x=>x.id===editingId);
+  if(!e){ el.style.display='none'; el.innerHTML=''; return; }
+  el.innerHTML='✏️ Du bearbeitest einen <b>bestehenden Termin</b>: <b>'+esc(e.title)+'</b> ('+fmtShort(e.d)+', '+e.t+' Uhr). Speichern überschreibt diesen Termin.'
+    +'<button type="button" onclick="startNewInsteadOfEdit()">Stattdessen neuen Termin anlegen</button>';
+  el.style.display='block';
+}
+function startNewInsteadOfEdit(){
+  const e=editingId&&EVENTS.find(x=>x.id===editingId);
+  askConfirm('Neuen Termin anlegen?','Die Bearbeitung von „'+(e?e.title:'')+'" wird verworfen, der Termin selbst bleibt unverändert.','Neuen Termin anlegen',()=>{ newEvent(); });
 }
 function canBookAnyOfTeam(team){
   if(!session)return false;
