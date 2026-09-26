@@ -74,7 +74,7 @@
   .user-chip.in{background:var(--green);color:#fff;border-color:var(--green);}
 
   /* ── CONTENT ── */
-  .content{flex:1 1 auto;min-height:0;overflow-y:auto;padding:14px 14px calc(96px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch;}
+  .content{flex:1 1 auto;min-height:0;overflow-y:auto;padding:14px 14px calc(var(--nav-h, 96px) + 48px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch;}
   .content::-webkit-scrollbar{width:0;}
 
   /* ── NAV ── */
@@ -596,6 +596,26 @@
   .badge-gk{display:inline-flex;align-items:center;gap:4px;background:#FFF1E0;color:#9A4A00;border:1px solid #F5C58A;border-radius:999px;padding:3px 9px;font-size:10.5px;font-weight:700;}
   .badge-gk svg{width:12px;height:12px;stroke:#9A4A00;}
   .event-card.gk-card{box-shadow:inset 4px 0 0 #F08C00,var(--card-shadow);}
+  .pw-hint{font-size:12px;color:var(--ink-soft);margin:-4px 0 12px;min-height:16px;}
+  .pw-hint.ok{color:#1B7A3E;font-weight:600;} .pw-hint.bad{color:#B42318;font-weight:600;}
+  #gksheet{position:fixed;inset:0;z-index:70;background:rgba(1,27,50,.45);display:none;align-items:flex-end;justify-content:center;}
+  #gksheet.show{display:flex;}
+  #gksheet-body{background:var(--white);width:100%;max-width:520px;max-height:88dvh;overflow-y:auto;border-radius:18px 18px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom));}
+  #gksheet-body h3{margin:0 0 4px;font-size:17px;}
+  #gksheet-body .sub{font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;}
+  .gk-block{margin-top:10px;border:1px solid #F5C58A;background:#FFF8EE;border-radius:12px;padding:10px 12px;}
+  .gk-head{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;} .gk-head span{color:var(--ink-soft);}
+  .gk-count{font-size:12px;font-weight:700;color:#9A4A00;margin-top:6px;}
+  .gk-list{margin:4px 0 0;padding-left:18px;font-size:13px;line-height:1.6;} .gk-list span{color:var(--ink-soft);font-size:12px;}
+  .gk-note{font-size:12px;color:var(--ink-soft);margin-top:6px;line-height:1.5;}
+  .gk-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;} .gk-btn{margin:0!important;flex:1 1 auto;padding:9px 10px!important;font-size:12.5px!important;}
+  .gk-group{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin:12px 0 4px;}
+  .gk-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px;}
+  .gk-check{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line);font-size:14px;cursor:pointer;}
+  .gk-check input{width:20px;height:20px;accent-color:var(--green);} .gk-check.disabled{opacity:.5;}
+  .gk-add{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+  .gk-add input,.gk-add select{border:1.5px solid var(--line);border-radius:10px;padding:10px;font-size:14px;font-family:'Inter';background:var(--bg);min-width:0;}
+  .gk-add select,.gk-add .submit-btn{grid-column:1/-1;} .gk-add .submit-btn{margin:0;}
   #pwflow{position:fixed;inset:0;z-index:62;background:var(--white);display:none;flex-direction:column;align-items:center;padding:calc(24px + env(safe-area-inset-top)) 16px 32px;overflow-y:auto;}
   #pwflow.show{display:flex;}
   #pwflow .login-box{max-width:380px;margin:auto 0;}
@@ -757,6 +777,10 @@
         <p class="helptext" id="tf-gk-help" style="display:none;">Torwarttraining belegt keine Platzfläche: Es darf parallel zu einem Training laufen, aber nicht während eines Spiels.</p>
         <div id="tf-game-note-gk"></div>
       </div>
+      <div class="field" id="tf-gkteams-field" style="display:none;"><label>Torhüter aus welchen Jugenden?</label>
+        <div class="chip-group" id="tf-gkteams"></div>
+        <p class="helptext">Die Trainer dieser Jugenden bekommen beim Anlegen eine E-Mail mit der Bitte, ihre Torhüter an- oder abzumelden.</p>
+      </div>
       <div class="field" id="tf-pitch-field">
         <label>Anteil Großspielfeld</label>
         <div class="pitch-box">
@@ -802,6 +826,10 @@
           <option value="game">Spiel</option><option value="training">Training</option><option value="goalkeeper">Torwarttraining</option><option value="other" selected>Sonstiges</option>
         </select>
         <p class="helptext" id="f-kind-help"></p>
+      </div>
+      <div class="field" id="f-gkteams-field" style="display:none;"><label>Torhüter aus welchen Jugenden?</label>
+        <div class="chip-group" id="f-gkteams"></div>
+        <p class="helptext">Die Trainer dieser Jugenden bekommen beim Anlegen eine E-Mail mit der Bitte, ihre Torhüter an- oder abzumelden.</p>
       </div>
       <div style="display:flex;gap:10px;">
         <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Von</label><input type="time" id="f-von" autocomplete="off" step="900" value="15:00" onchange="onSnapTime(this)"></div>
@@ -942,6 +970,9 @@
   <div class="login-box" id="pwflow-body"></div>
 </div>
 
+<!-- TORHÜTER: Pflege + Anmeldung (Bottom-Sheet) -->
+<div id="gksheet" onclick="if(event.target===this)closeSheet()"><div id="gksheet-body"></div></div>
+
 <!-- REGISTRIERUNG (über Einladungslink #invite=…) -->
 <div id="register">
   <button class="login-close" onclick="closeRegister()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -1025,7 +1056,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='26.09.2026 · 1';
+const APP_VERSION='26.09.2026 · 2';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -2152,6 +2183,7 @@ function rowHTML(e){
     +conflictBannerHTML(e)+locksForItem(e).map(l=>lockBannerHTML(l,e)).join('')
     +(b?'<div class="badges" style="margin-top:10px;">'+b+'</div>':'')
     +(e.note&&!e.isTraining?'<div class="ev-note" style="margin-top:8px;">'+esc(e.note)+'</div>':'')
+    +gkSignupBlockHTML(e)
     +(contactHtml?'<div class="ev-contact">'+contactHtml+'</div>':'')
     +'</div>'
     +'</div>';
@@ -2992,6 +3024,7 @@ function onKindChange(byUser){
   if(help) help.textContent=occLevel(k)==='overlay'
     ?'Belegt keine Platzfläche: darf parallel zu einem Training laufen, aber nicht während eines Spiels.'
     :(occLevel(k)==='exclusive'?'Während eines Spiels ist auf dem Platz kein Torwarttraining möglich.':'');
+  const gf=document.getElementById('f-gkteams-field'); if(gf) gf.style.display=k==='goalkeeper'?'block':'none';
   hideConflicts(); renderPitch();
 }
 // Neuer Termin: Terminart aus dem Anlass vorschlagen, solange sie nicht bewusst gewählt wurde.
@@ -3154,7 +3187,7 @@ function resetForm(){
   document.querySelectorAll('#f-squad button').forEach((b,i)=>b.classList.toggle('on',i===0));
   document.querySelectorAll('#f-res .res-chip').forEach(c=>c.classList.toggle('on',c.dataset.res==='Großspielfeld'));
   pitchMode='ganz';pitchPart=null;document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode==='ganz'));
-  document.getElementById('f-kind').value='other'; kindTouched=false;
+  document.getElementById('f-kind').value='other'; kindTouched=false; renderGkTeamChips('f-gkteams',[]);
   halleThirds=[];onTeamChange();onKindChange(false);renderPitch();renderHalle();hideConflicts();formDirty=false;
   formSkipFussballLink=null;
 }
@@ -3260,7 +3293,7 @@ function fillForm(e){
   if(e.pitch){pitchMode=e.pitch.mode;pitchPart=e.pitch.part||null;document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode===pitchMode));}
   else{pitchMode='ganz';pitchPart=null;document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode==='ganz'));}
   halleThirds=e.halle&&e.halle.thirds?[...e.halle.thirds]:[];
-  document.getElementById('f-kind').value=kindOf(e); kindTouched=true;
+  document.getElementById('f-kind').value=kindOf(e); kindTouched=true; renderGkTeamChips('f-gkteams',e.gkTeams||[]);
   onTeamChange();onKindChange(false);updateWeekday();renderPitch();renderHalle();
 }
 function editEvent(id){
@@ -3331,8 +3364,12 @@ async function submitEvent(){
   showSaving(editingId?'Termin wird geändert …':'Termin wird gespeichert …');
   const backup=JSON.stringify(EVENTS);
   try{
-    if(editingId)Object.assign(EVENTS.find(x=>x.id===editingId),{d,t:von,bis,title,kind,team,squad,pitch,halle,res,note});
-    else EVENTS.push({id:crypto.randomUUID(),d,t:von,bis,title,kind,team,squad,pitch,halle,res,note,ownerId:session.id,ownerName:session.name});
+    const gkTeams=kind==='goalkeeper'?readGkTeamChips('f-gkteams'):undefined;
+    let newId=null;
+    if(editingId)Object.assign(EVENTS.find(x=>x.id===editingId),{d,t:von,bis,title,kind,team,squad,pitch,halle,res,note,gkTeams});
+    else{ newId=crypto.randomUUID(); EVENTS.push({id:newId,d,t:von,bis,title,kind,team,squad,pitch,halle,res,note,gkTeams,ownerId:session.id,ownerName:session.name}); }
+    // Neues Torwarttraining: Trainer der gewählten Jugenden per Mail bitten, Torhüter an-/abzumelden.
+    if(newId&&kind==='goalkeeper') setTimeout(()=>sendGkRequest(gkTeams,title,DAYS[new Date(d+'T00:00:00').getDay()]+', '+fmtShort(d)+' · '+von+'–'+bis+' Uhr',location.origin+location.pathname+'#t='+newId),4000);
     const wasEditing=!!editingId;
     const logMsg=(wasEditing?'Termin geändert: ':'Neuer Termin: ')+title+' – '+teamLabel(team,squad)+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name+teamTrailer(team,squad);
     editingId=null;formDirty=false;document.getElementById('cancel-btn').style.display='none';
@@ -3790,6 +3827,7 @@ function tfTeamChange(){
   const team=document.getElementById('tf-team').value;
   document.getElementById('tf-squad-field').style.display=isJugend(team)?'block':'none';
   const gh=document.getElementById('tf-gk-help'); if(gh) gh.style.display=tfIsOverlay()?'block':'none';
+  const gtf=document.getElementById('tf-gkteams-field'); if(gtf) gtf.style.display=tfKind()==='goalkeeper'?'block':'none';
   relabelSquad('tf-squad',team);
   setTimeout(refreshTrainerChips,0);
   tfRenderPitch();
@@ -3835,6 +3873,7 @@ function tfFill(s){
     document.querySelectorAll('#tf-pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode===tPitchMode));
   } else tfSetPitchMode('ganz');
   document.getElementById('tf-note').value=s.note||'';
+  renderGkTeamChips('tf-gkteams',s.gkTeams||[]);
   tfTeamChange(); tfRenderPitch();
   renderTrainerChips(s.team,s.squad||1,getTrainerIds(s));
 }
@@ -3878,6 +3917,7 @@ async function saveTrainingSlot(){
   const trainerIds=trainerChips.map(x=>x.dataset.id).filter(Boolean);
   const trainerNames=trainerIds.map(id=>{const u=USERS.find(x=>x.id===id);return u?(u.first+' '+u.last):'';}).filter(Boolean);
   const kind=tfKind(), overlay=tfIsOverlay();
+  const gkTeams=kind==='goalkeeper'?readGkTeamChips('tf-gkteams'):undefined;
   const res=[...document.querySelectorAll('#tf-res .res-chip.on')].map(c=>c.dataset.res).filter(r=>r!=='Großspielfeld');
   // Überlagerung (Torwarttraining): keine Platzfläche, nur "auf dem Großspielfeld".
   if(overlay&&tfPitchOn()) res.unshift('Großspielfeld');
@@ -3909,10 +3949,11 @@ async function saveTrainingSlot(){
   try{
     if(tEditId){
       const existing=TRAINING.find(x=>x.id===tEditId);
-      Object.assign(existing,{day,from,to,team,squad,kind,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,
+      Object.assign(existing,{day,from,to,team,squad,kind,gkTeams,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,
         cancelled:[...new Set([...(existing.cancelled||[]),...newCancels])].sort()});
     }else{
-      TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,kind,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[...newCancels].sort()});
+      TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,kind,gkTeams,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[...newCancels].sort()});
+      if(kind==='goalkeeper') setTimeout(()=>sendGkRequest(gkTeams,'Torwarttraining','jeden '+WDAYS[day]+' · '+from+'–'+to+' Uhr (ab '+fmtShort(validFrom)+')',location.origin+location.pathname),4000);
     }
     const tMsg=(tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+team+' (ab '+fmtShort(validFrom)+')'
       +(newCancels.length?' – wegen Heimspielen abgesagt am '+newCancels.map(fmtShort).join(', '):'')+' – '+session.name+teamTrailer(team,squad);
@@ -4010,8 +4051,8 @@ function pwCard(){
   return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Passwort ändern</h4>'+
     '<p class="sub">Dein Schreib-Token hängt am Passwort. Beim Ändern wird er neu verschlüsselt.</p>'+
     '<div class="field" style="margin:10px 0 8px;"><input type="password" id="pw-old" placeholder="Aktuelles Passwort" autocomplete="current-password"></div>'+
-    '<div class="field" style="margin-bottom:8px;"><input type="password" id="pw-new" placeholder="Neues Passwort (min. 12 Zeichen)" autocomplete="new-password"></div>'+
-    '<div class="field" style="margin-bottom:10px;"><input type="password" id="pw-new2" placeholder="Neues Passwort wiederholen" autocomplete="new-password"></div>'+
+    '<div class="field pw-wrap" style="margin-bottom:8px;"><input type="password" id="pw-new" placeholder="Neues Passwort (min. 12 Zeichen)" autocomplete="new-password">'+PW_EYE+'</div>'+
+    '<div class="field pw-wrap" style="margin-bottom:10px;"><input type="password" id="pw-new2" placeholder="Neues Passwort wiederholen" autocomplete="new-password">'+PW_EYE+'</div>'+
     '<button class="submit-btn" id="pw-btn" onclick="changePassword()"><span id="pw-label">Passwort ändern</span></button></div>';
 }
 function tokenCard(){
@@ -4359,7 +4400,8 @@ function renderKonto(){
   // ── Tab-Inhalt ──
   if(kontoTab==='profil'){
     h+=pwCard();
-    if(!session.isSuper)h+=profileCard()+notificationsCard();
+    if(!session.isSuper)h+=profileCard()+keeperCardHTML()+notificationsCard();
+    else if(session.token)h+=keeperCardHTML();
     h+=pwaCard();
   }else if(kontoTab==='saisons'){
     h+=seasonManagementCard()+resourceLockCard();
@@ -4376,8 +4418,10 @@ function renderKonto(){
 function saveAdminToken(){
   const t=document.getElementById('ad-token').value.trim();
   if(!t){showToast('Bitte Token eingeben.');return;}
+  const oldToken=session.token;
   localStorage.setItem('svbb_admin_token',t);
   session.token=t;
+  reencryptGkForNewToken(oldToken,t);
   localStorage.setItem('svbb_session',JSON.stringify(session)); localStorage.setItem('pc_was_logged_in','1');
   showToast('Token gespeichert.'); renderKonto();
 }
@@ -4850,7 +4894,8 @@ function seasonBodyHTML(s,active){
     if(!active)h+='<div style="font-size:10.5px;color:var(--ink-soft);margin-bottom:8px;">Zum Löschen dieser Saison zuerst alle Trainer unten entfernen (✕).</div>';
     h+='<div style="margin-bottom:10px;">'+trainers.map(u=>{
       const cls=normalizeClasses((s.trainerClasses||{})[u.id]||{});
-      const badges=Object.keys(cls).map(t=>{const sq=cls[t]||[];const sqLabel=isJugend(t)&&sq.length?(' · '+sq.map(x=>jugendLetter(t)+x).join(',')):'';return '<span class="badge-res" style="font-size:8px;padding:2px 6px;">'+esc(t)+esc(sqLabel)+'</span>';}).join('');
+      // Antippen einer Mannschaft öffnet die Torhüter-Liste dieser Mannschaft (Admins).
+      const badges=Object.keys(cls).map(t=>{const sq=cls[t]||[];const sqLabel=isJugend(t)&&sq.length?(' · '+sq.map(x=>jugendLetter(t)+x).join(',')):'';const clickable=t!==GK_TEAM&&t!=='Ü32 / Ü50';return '<span class="badge-res"'+(clickable?' title="Torhüter dieser Mannschaft" onclick="event.stopPropagation();openKeeperEditor(\''+esc(t)+'\','+(sq[0]||1)+')"':'')+' style="font-size:8px;padding:2px 6px;'+(clickable?'cursor:pointer;text-decoration:underline dotted;':'')+'">'+esc(t)+esc(sqLabel)+(clickable?' 🧤':'')+'</span>';}).join('');
       const editKey=s.id+'|'+u.id;
       const isOpen=seasonClassEditorOpen===editKey;
       let row='<div class="season-trainer-row" style="flex-direction:column;align-items:stretch;">'
@@ -5083,6 +5128,251 @@ async function changePassword(){
   finally{ btn.disabled=false; lbl.textContent=old; }
 }
 
+/* ---------- Torhüter & Anmeldung zum Torwarttraining ----------
+   Namen von (meist minderjährigen) Spielern dürfen NICHT lesbar ins öffentliche Repo.
+   data/goalkeepers.json enthält deshalb nur einen verschlüsselten Block (AES-GCM, Schlüssel aus
+   dem gemeinsamen Schreib-Token abgeleitet): lesbar nur für angemeldete Zugänge. Auch die
+   Commit-Nachrichten enthalten nie Spielernamen.
+   Inhalt (entschlüsselt):
+     keepers: [{id, first, last, team, squad}]            – Torhüter je Mannschaft
+     signups: {"<Termin-Schlüssel>": [keeperId, …]}        – Anmeldungen pro einzelnem Termin
+   Termin-Schlüssel: "e:<Termin-ID>" bzw. "s:<Trainingszeit-ID>:<Datum>".
+   Wird der Schreib-Token erneuert (Notzugang → Token speichern), verschlüsselt die App die
+   Datei automatisch mit dem neuen Token neu (reencryptGkForNewToken). */
+let GK={loaded:false,error:'',keepers:[],signups:{}};
+const GK_PATH='data/goalkeepers.json';
+async function gkKey(token){
+  const base=await crypto.subtle.importKey('raw',enc.encode(token),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:enc.encode('platzcoach-torhueter-v1'),iterations:100000,hash:'SHA-256'},
+    base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function gkEncrypt(data,token){
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},await gkKey(token),enc.encode(JSON.stringify(data)));
+  return {v:1,hinweis:'Verschlüsselt – Namen sind nur nach Anmeldung in Platzcoach sichtbar.',iv:b64(iv),cipher:b64(ct)};
+}
+async function gkDecrypt(file,token){
+  if(!file||!file.cipher) return {keepers:[],signups:{}};
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(file.iv)},await gkKey(token),unb64(file.cipher));
+  const d=JSON.parse(dec.decode(pt));
+  return {keepers:Array.isArray(d.keepers)?d.keepers:[],signups:d.signups&&typeof d.signups==='object'?d.signups:{}};
+}
+async function loadGK(){
+  if(!session||!session.token){ GK={loaded:false,error:'',keepers:[],signups:{}}; return; }
+  try{
+    let file=null;
+    try{ file=await loadJSON(GK_PATH); }catch(e){ file=null; } // Datei gibt es noch nicht
+    const d=await gkDecrypt(file,session.token);
+    GK={loaded:true,error:'',keepers:d.keepers,signups:d.signups};
+  }catch(e){ GK={loaded:false,error:'Torhüter-Liste konnte nicht entschlüsselt werden.',keepers:[],signups:{}}; }
+}
+// Ändern immer auf dem AKTUELLEN Stand von GitHub (andere Trainer könnten parallel speichern).
+async function mutateGK(fn,msg){
+  const r=await fetch('https://api.github.com/repos/'+CFG.repo+'/contents/'+GK_PATH+'?ref='+CFG.branch,{
+    headers:{Authorization:'Bearer '+session.token,Accept:'application/vnd.github+json'},cache:'no-store'});
+  let cur={keepers:[],signups:{}};
+  if(r.ok){
+    const j=await r.json();
+    if(j.sha) _shaCache[GK_PATH]=j.sha;
+    cur=await gkDecrypt(JSON.parse(dec.decode(unb64(String(j.content||'').replace(/\s/g,'')))),session.token);
+  }else if(r.status!==404) throw new Error('Torhüter-Liste nicht ladbar (GitHub '+r.status+').');
+  else _shaCache[GK_PATH]=null;
+  fn(cur);
+  await ghPutRaw(GK_PATH,JSON.stringify(await gkEncrypt(cur,session.token),null,2),msg);
+  GK={loaded:true,error:'',keepers:cur.keepers,signups:cur.signups};
+}
+async function reencryptGkForNewToken(oldToken,newToken){
+  if(!oldToken||oldToken===newToken) return;
+  try{
+    let file=null; try{ file=await loadJSON(GK_PATH); }catch(e){ return; }
+    if(!file||!file.cipher) return;
+    const d=await gkDecrypt(file,oldToken);
+    await ghPutRaw(GK_PATH,JSON.stringify(await gkEncrypt(d,newToken),null,2),'Torhüter-Liste neu verschlüsselt (neuer Token) (automatisch)');
+  }catch(e){ showToast('Hinweis: Torhüter-Liste konnte nicht neu verschlüsselt werden ('+e.message+').',6000); }
+}
+function keeperLabel(k){ return k.first+' '+k.last; }
+function keeperTeamLabel(k){ return teamLabel(k.team,k.squad||1); }
+function canEditKeeper(k){ return !!session&&(session.isAdmin||canBookTeam(k.team,k.squad||1)); }
+// Mannschaften, für die der angemeldete Zugang Torhüter pflegen darf.
+function myKeeperTeams(){
+  if(!session) return [];
+  const out=[];
+  const src=session.isAdmin?Object.fromEntries(ALL_CLASSES.filter(t=>t!==GK_TEAM&&t!=='Ü32 / Ü50').map(t=>[t,[]])):normalizeClasses(session.classes||{});
+  Object.keys(src).filter(t=>t!==GK_TEAM).forEach(t=>{
+    if(!isJugend(t)){ out.push({team:t,squad:1}); return; }
+    const sq=(src[t]&&src[t].length)?src[t]:[1,2,3];
+    sq.forEach(s=>out.push({team:t,squad:s}));
+  });
+  // Admins: eigene Mannschaften zuerst, damit die Auswahl passend vorbelegt ist.
+  if(session.isAdmin){ const own=normalizeClasses(session.classes||{}); const mine=x=>own.hasOwnProperty(x.team)&&(!(own[x.team]||[]).length||own[x.team].includes(x.squad)); out.sort((a,b)=>(mine(b)?1:0)-(mine(a)?1:0)); }
+  return out;
+}
+/* Termin-Schlüssel + passende Torhüter eines Torwarttrainings */
+function gkOccKey(e){ return e.isTraining?('s:'+e.trainingSlotId+':'+e.d):('e:'+e.id); }
+function gkTeamsOf(e){
+  if(e.isTraining){ const s=TRAINING.find(x=>x.id===e.trainingSlotId); return (s&&s.gkTeams)||[]; }
+  return e.gkTeams||[];
+}
+function gkEligibleKeepers(e){
+  const teams=gkTeamsOf(e);
+  return GK.keepers.filter(k=>!teams.length||teams.includes(k.team))
+    .sort((a,b)=>a.team.localeCompare(b.team)||(a.squad||1)-(b.squad||1)||keeperLabel(a).localeCompare(keeperLabel(b),'de'));
+}
+function isGkTrainerOf(e){
+  if(!session) return false;
+  if(session.isAdmin) return true;
+  if(e.isTraining) return (e.trainerIds||[]).includes(session.id);
+  return e.ownerId===session.id||canBookAnyOfTeam(GK_TEAM);
+}
+function gkTeamsText(teams){ return teams&&teams.length?teams.map(t=>t.replace('-Jugend','')).join(', ')+'-Jugend':'alle Mannschaften'; }
+// Block auf der Terminkarte eines Torwarttrainings
+function gkSignupBlockHTML(e){
+  if(kindOf(e)!=='goalkeeper'||e.isCancelled) return '';
+  const teams=gkTeamsOf(e);
+  let h='<div class="gk-block"><div class="gk-head"><b>Torhüter</b><span>'+esc(gkTeamsText(teams))+'</span></div>';
+  if(!session){ return h+'<div class="gk-note">Wer teilnimmt, ist nur nach Anmeldung in Platzcoach sichtbar.</div></div>'; }
+  if(!GK.loaded){ return h+'<div class="gk-note">'+esc(GK.error||'Torhüter werden geladen …')+'</div></div>'; }
+  const ids=new Set(GK.signups[gkOccKey(e)]||[]);
+  const list=GK.keepers.filter(k=>ids.has(k.id));
+  h+=list.length
+    ?'<div class="gk-count">'+list.length+' angemeldet</div><ul class="gk-list">'+list.map(k=>'<li>'+esc(keeperLabel(k))+' <span>– '+esc(keeperTeamLabel(k))+'</span></li>').join('')+'</ul>'
+    :'<div class="gk-note">Noch keine Torhüter angemeldet.</div>';
+  const canAny=gkEligibleKeepers(e).some(k=>canEditKeeper(k))||isGkTrainerOf(e);
+  if(canAny||isGkTrainerOf(e)){
+    h+='<div class="gk-acts">';
+    if(canAny) h+='<button class="ghost-btn gk-btn" onclick="openGkSignup(\''+esc(e.id)+'\',\''+e.d+'\')">Torhüter an-/abmelden</button>';
+    if(isGkTrainerOf(e)) h+='<button class="ghost-btn gk-btn" onclick="gkRemindTrainers(\''+esc(e.id)+'\',\''+e.d+'\')">Trainer erinnern</button>';
+    h+='</div>';
+  }
+  return h+'</div>';
+}
+function findOccurrence(id,d){ return agendaOn(d).find(x=>x.id===id)||null; }
+/* Sheet (Overlay) für Torhüter-Pflege und Anmeldung */
+function openSheet(html){ const s=document.getElementById('gksheet'); document.getElementById('gksheet-body').innerHTML=html; s.classList.add('show'); }
+function closeSheet(){ document.getElementById('gksheet').classList.remove('show'); }
+function openGkSignup(id,d){
+  const e=findOccurrence(id,d); if(!e){ showToast('Termin nicht gefunden.'); return; }
+  const ids=new Set(GK.signups[gkOccKey(e)]||[]);
+  const all=gkEligibleKeepers(e);
+  const trainerAll=isGkTrainerOf(e);
+  let h='<h3>Torwarttraining '+fmtShort(e.d)+' · '+e.t+'</h3><p class="sub">Haken = nimmt teil. '+esc(gkTeamsText(gkTeamsOf(e)))+'.</p>';
+  if(!all.length) h+='<p class="gk-note">Für diese Mannschaften sind noch keine Torhüter eingetragen. Trainer tragen ihre Torhüter unter <b>Konto → Profil → Meine Torhüter</b> ein.</p>';
+  let lastTeam='';
+  all.forEach(k=>{
+    const tl=keeperTeamLabel(k);
+    if(tl!==lastTeam){ h+='<div class="gk-group">'+esc(tl)+'</div>'; lastTeam=tl; }
+    const may=trainerAll||canEditKeeper(k);
+    h+='<label class="gk-check'+(may?'':' disabled')+'"><input type="checkbox" data-kid="'+k.id+'"'+(ids.has(k.id)?' checked':'')+(may?'':' disabled')+'> '+esc(keeperLabel(k))+'</label>';
+  });
+  h+='<button class="submit-btn" id="gk-save" onclick="saveGkSignup(\''+esc(e.id)+'\',\''+e.d+'\')">Speichern</button><button class="cancel-btn" onclick="closeSheet()">Abbrechen</button>';
+  openSheet(h);
+}
+async function saveGkSignup(id,d){
+  const e=findOccurrence(id,d); if(!e) return;
+  const key=gkOccKey(e);
+  const boxes=[...document.querySelectorAll('#gksheet-body input[data-kid]:not(:disabled)')];
+  const on=new Set(boxes.filter(b=>b.checked).map(b=>b.dataset.kid)), touched=new Set(boxes.map(b=>b.dataset.kid));
+  const btn=document.getElementById('gk-save'); btn.disabled=true; btn.textContent='Speichere …';
+  try{
+    await mutateGK(cur=>{
+      const s=new Set((cur.signups[key]||[]).filter(x=>!touched.has(x)));
+      on.forEach(x=>s.add(x));
+      // Anmeldungen vergangener Termine aufräumen (älter als 60 Tage)
+      const cut=ymd(new Date(Date.now()-60*86400000));
+      Object.keys(cur.signups).forEach(k=>{ const dd=k.startsWith('s:')?k.slice(-10):null; if(dd&&dd<cut) delete cur.signups[k]; });
+      if(s.size) cur.signups[key]=[...s]; else delete cur.signups[key];
+    },'Torwarttraining-Anmeldung geändert: '+fmtShort(e.d)+' '+e.t+' – '+session.name);
+    closeSheet(); render(); renderStart(); showToast('Anmeldung gespeichert.');
+  }catch(err){ showToast('Fehler: '+err.message,6000); btn.disabled=false; btn.textContent='Speichern'; }
+}
+/* Torhüter pflegen (Konto → Profil, Admins auch über Saisons) */
+function keeperCardHTML(){
+  if(!session||session.isSuper&&!session.token) return '';
+  const teams=myKeeperTeams(); if(!teams.length) return '';
+  let h='<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M8 13V6a1.5 1.5 0 013 0v5M11 11V4.5a1.5 1.5 0 013 0V11M14 11V6a1.5 1.5 0 013 0v7c0 4-2.5 7-6 7-2.5 0-4-1.5-5.5-4L4 13a1.5 1.5 0 012.5-1.5L8 13"/></svg>Meine Torhüter</h4>'
+    +'<p class="sub">Trage die Torhüter deiner Mannschaft ein, damit du sie zum Torwarttraining anmelden kannst. Die Namen sind verschlüsselt gespeichert und nur für angemeldete Trainer sichtbar.</p>';
+  if(!GK.loaded) return h+'<p class="gk-note">'+esc(GK.error||'Wird geladen …')+'</p></div>';
+  const mine=GK.keepers.filter(k=>teams.some(t=>t.team===k.team&&t.squad===(k.squad||1)));
+  const byTeam={};
+  mine.forEach(k=>{ (byTeam[keeperTeamLabel(k)]=byTeam[keeperTeamLabel(k)]||[]).push(k); });
+  const keys=Object.keys(byTeam).sort();
+  h+=keys.length?keys.map(t=>'<div class="gk-group">'+esc(t)+'</div>'+byTeam[t].map(k=>'<div class="gk-row"><span>'+esc(keeperLabel(k))+'</span><button class="ibtn del" title="Entfernen" onclick="removeKeeper(\''+k.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>').join('')).join('')
+    :'<p class="gk-note">Noch keine Torhüter eingetragen.</p>';
+  h+='<div class="gk-add"><input type="text" id="gk-first" placeholder="Vorname" autocomplete="off"><input type="text" id="gk-last" placeholder="Nachname" autocomplete="off">'
+    +'<select id="gk-team">'+teams.map(t=>'<option value="'+esc(t.team)+'|'+t.squad+'">'+esc(teamLabel(t.team,t.squad))+'</option>').join('')+'</select>'
+    +'<button class="submit-btn" id="gk-add-btn" onclick="addKeeper()">Torhüter hinzufügen</button></div></div>';
+  return h;
+}
+async function addKeeper(preset){
+  const first=(document.getElementById('gk-first').value||'').trim(), last=(document.getElementById('gk-last').value||'').trim();
+  const sel=(document.getElementById('gk-team')||{}).value||preset||'';
+  const [team,sq]=sel.split('|'); const squad=parseInt(sq||'1',10)||1;
+  if(!first||!last){ showToast('Bitte Vor- und Nachname eintragen.'); return; }
+  if(!team||!(session.isAdmin||canBookTeam(team,squad))){ showToast('Für diese Mannschaft darfst du keine Torhüter eintragen.'); return; }
+  const btn=document.getElementById('gk-add-btn'); if(btn){ btn.disabled=true; btn.textContent='Speichere …'; }
+  try{
+    await mutateGK(cur=>{
+      if(cur.keepers.some(k=>k.team===team&&(k.squad||1)===squad&&k.first.toLowerCase()===first.toLowerCase()&&k.last.toLowerCase()===last.toLowerCase())) throw new Error('Dieser Torhüter ist schon eingetragen.');
+      cur.keepers.push({id:crypto.randomUUID(),first,last,team,squad});
+    },'Torhüter-Liste geändert: '+teamLabel(team,squad)+' – '+session.name);
+    showToast('Torhüter eingetragen.');
+    if(document.getElementById('gksheet').classList.contains('show')) openKeeperEditor(team,squad); else renderKonto();
+  }catch(e){ showToast(e.message,5000); if(btn){ btn.disabled=false; btn.textContent='Torhüter hinzufügen'; } }
+}
+function removeKeeper(id){
+  const k=GK.keepers.find(x=>x.id===id); if(!k) return;
+  if(!canEditKeeper(k)){ showToast('Keine Berechtigung.'); return; }
+  const inSheet=document.getElementById('gksheet').classList.contains('show');
+  askConfirm('Torhüter entfernen?',keeperLabel(k)+' ('+keeperTeamLabel(k)+') wird aus der Liste und allen Anmeldungen entfernt.','Entfernen',async()=>{
+    try{
+      await mutateGK(cur=>{
+        cur.keepers=cur.keepers.filter(x=>x.id!==id);
+        Object.keys(cur.signups).forEach(key=>{ cur.signups[key]=cur.signups[key].filter(x=>x!==id); if(!cur.signups[key].length) delete cur.signups[key]; });
+      },'Torhüter-Liste geändert: '+keeperTeamLabel(k)+' – '+session.name);
+      showToast('Entfernt.');
+      if(inSheet) openKeeperEditor(k.team,k.squad||1); else renderKonto();
+    }catch(e){ showToast('Fehler: '+e.message,6000); }
+  });
+}
+// Admin: aus der Saisonübersicht die Torhüter einer Mannschaft pflegen
+function openKeeperEditor(team,squad){
+  if(!GK.loaded){ showToast(GK.error||'Torhüter-Liste wird noch geladen.'); return; }
+  const ks=GK.keepers.filter(k=>k.team===team&&(!isJugend(team)||(k.squad||1)===squad));
+  const opts=isJugend(team)?[1,2,3]:[1];
+  let h='<h3>Torhüter '+esc(isJugend(team)?team:teamLabel(team,1))+'</h3><p class="sub">Nur für angemeldete Trainer sichtbar.</p>';
+  h+='<div class="seg" style="margin-bottom:10px;">'+(isJugend(team)?opts.map(n=>'<button type="button"'+(n===squad?' class="on"':'')+' onclick="openKeeperEditor(\''+esc(team)+'\','+n+')">'+jugendLetter(team)+n+'</button>').join(''):'')+'</div>';
+  h+=ks.length?ks.map(k=>'<div class="gk-row"><span>'+esc(keeperLabel(k))+'</span><button class="ibtn del" onclick="removeKeeper(\''+k.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>').join(''):'<p class="gk-note">Noch keine Torhüter eingetragen.</p>';
+  h+='<div class="gk-add"><input type="text" id="gk-first" placeholder="Vorname" autocomplete="off"><input type="text" id="gk-last" placeholder="Nachname" autocomplete="off">'
+    +'<input type="hidden" id="gk-team" value="'+esc(team)+'|'+squad+'"><button class="submit-btn" id="gk-add-btn" onclick="addKeeper()">Torhüter hinzufügen</button></div>'
+    +'<button class="cancel-btn" onclick="closeSheet();renderKonto()">Schließen</button>';
+  openSheet(h);
+}
+/* E-Mail an die Trainer der gewählten Jugenden: "Bitte Torhüter an- oder abmelden".
+   Läuft über ein GitHub-Dispatch-Event (scripts/send-gk-request.mjs); enthält keine Spielernamen. */
+function gkRequestPayload(teams,title,when,link){
+  return {teams:teams||[],title,when,link,byId:session.id,byName:session.name};
+}
+async function sendGkRequest(teams,title,when,link){
+  try{ await ghDispatch('gk-signup-request',gkRequestPayload(teams,title,when,link)); return true; }
+  catch(e){ showToast('E-Mail an die Trainer konnte nicht ausgelöst werden: '+e.message,6000); return false; }
+}
+function gkRemindTrainers(id,d){
+  const e=findOccurrence(id,d); if(!e) return;
+  const teams=gkTeamsOf(e);
+  askConfirm('Trainer erinnern?','Alle Trainer von '+gkTeamsText(teams)+' bekommen eine E-Mail mit der Bitte, ihre Torhüter für das Torwarttraining am '+fmtShort(e.d)+' um '+e.t+' Uhr an- oder abzumelden.','E-Mail senden',async()=>{
+    const link=location.origin+location.pathname+(e.isTraining?'':'#t='+e.id);
+    if(await sendGkRequest(teams,'Torwarttraining',DAYS[new Date(e.d+'T00:00:00').getDay()]+', '+fmtShort(e.d)+' · '+e.t+'–'+eventBis(e)+' Uhr',link)) showToast('E-Mail an die Trainer wird verschickt.');
+  });
+}
+/* Auswahl der Jugenden im Termin-/Trainingsformular */
+const GK_TEAM_CHOICES=()=>ALL_CLASSES.filter(isJugend);
+function renderGkTeamChips(containerId,selected){
+  const el=document.getElementById(containerId); if(!el) return;
+  const sel=new Set(selected||[]);
+  el.innerHTML=GK_TEAM_CHOICES().map(t=>'<div class="res-chip'+(sel.has(t)?' on':'')+'" data-gkteam="'+esc(t)+'" onclick="this.classList.toggle(\'on\')">'+esc(t)+'</div>').join('');
+}
+function readGkTeamChips(containerId){ return [...document.querySelectorAll('#'+containerId+' .res-chip.on')].map(c=>c.dataset.gkteam); }
+
 /* ---------- Passwort: Pflichtwechsel, Admin-Reset, "Passwort vergessen" ----------
    Hintergrund: Jeder Zugang speichert den gemeinsamen Schreib-Token, verschlüsselt mit dem
    eigenen Passwort. Ein neues Passwort heißt also immer: Token neu verschlüsseln. Das kann nur,
@@ -5126,9 +5416,22 @@ function openForgotPassword(){
   openPwFlow('forgot');
   const m=document.getElementById('pf-mail'); if(m&&mail.includes('@')) m.value=mail.trim();
 }
+const PW_EYE='<button type="button" class="pw-eye" onclick="togglePw(this)" tabindex="-1"><svg viewBox="0 0 24 24"><g class="eye-open"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></g><g class="eye-shut" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></g></svg></button>';
 function pwFieldsHTML(){
-  return '<input type="password" id="pf-new" placeholder="Neues Passwort (min. 12 Zeichen)" autocomplete="new-password">'
-    +'<input type="password" id="pf-new2" placeholder="Neues Passwort wiederholen" autocomplete="new-password">';
+  return '<div class="pw-wrap"><input type="password" id="pf-new" placeholder="Neues Passwort (min. 12 Zeichen)" autocomplete="new-password" oninput="pwMatchHint()">'+PW_EYE+'</div>'
+    +'<div class="pw-wrap"><input type="password" id="pf-new2" placeholder="Neues Passwort wiederholen" autocomplete="new-password" oninput="pwMatchHint()">'+PW_EYE+'</div>'
+    +'<p class="pw-hint" id="pf-hint"></p>';
+}
+// Live-Rückmeldung unter den Feldern: Länge und Übereinstimmung, ohne erst "Speichern" zu drücken.
+function pwMatchHint(){
+  const a=(document.getElementById('pf-new')||{}).value||'', b=(document.getElementById('pf-new2')||{}).value||'';
+  const el=document.getElementById('pf-hint'); if(!el) return;
+  if(!a&&!b){ el.textContent=''; el.className='pw-hint'; return; }
+  if(a.length<12){ el.textContent='Noch '+(12-a.length)+' Zeichen bis zur Mindestlänge.'; el.className='pw-hint'; return; }
+  if(!b){ el.textContent='Länge passt. Jetzt wiederholen.'; el.className='pw-hint'; return; }
+  const ok=a===b;
+  el.textContent=ok?'✓ Die Passwörter stimmen überein.':'✗ Die Passwörter stimmen noch nicht überein.';
+  el.className='pw-hint '+(ok?'ok':'bad');
 }
 function renderPwFlow(){
   const box=document.getElementById('pwflow-body'); if(!box)return;
@@ -5854,6 +6157,15 @@ async function boot(){
   // Absicherung gegen "Kopf-/Fußzeile verschwunden nach Rückkehr aus dem Hintergrund" (z.B. nach
   // "Zum Spiel" auf fussball.de und zurück): manche mobilen Browser berechnen 100dvh nicht sofort
   // neu, wenn ein Tab wieder sichtbar wird. Erzwingt in dem Fall einen Reflow.
+  // Unterer Abstand der Inhalte = echte Höhe der Navigationsleiste (+ Luft). Auf manchen
+  // Android-Geräten ist die Leiste höher als angenommen – dann war der letzte Button verdeckt.
+  const nav=document.querySelector('.navbar');
+  const setNavH=()=>{ if(nav) document.documentElement.style.setProperty('--nav-h',nav.offsetHeight+'px'); };
+  setNavH(); window.addEventListener('resize',setNavH);
+  if(window.ResizeObserver&&nav) new ResizeObserver(setNavH).observe(nav);
+  if(window.visualViewport) window.visualViewport.addEventListener('resize',setNavH);
+  // Torhüter-Liste (verschlüsselt) nur für angemeldete Zugänge laden.
+  loadGK().then(()=>{ if(!GK.loaded&&!GK.error) return; render(); renderStart(); renderTraining(); if(document.querySelector('.pane.active')?.dataset.pane==='konto') renderKonto(); });
   document.addEventListener('visibilitychange',()=>{
     if(document.visibilityState==='visible'){
       const app=document.getElementById('app');

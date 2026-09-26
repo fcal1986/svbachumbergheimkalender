@@ -92,7 +92,7 @@ const ROLE_CATEGORIES = {
 // Mannschaften, die einem Trainer "gehören" können. Termine/Training anderer Kategorien
 // (z. B. "Alle Teams", "Vorstand") gelten als vereinsweit und gehen an alle Trainer.
 const TEAM_CLASSES = ['G-Jugend', 'F-Jugend', 'E-Jugend', 'D-Jugend', 'C-Jugend', 'B-Jugend', 'A-Jugend',
-  '1. Herren', '2. Herren', '3. Herren', 'Ü32 / Ü50'];
+  '1. Herren', '2. Herren', '3. Herren', 'Ü32 / Ü50', 'Torwarttraining'];
 
 // Zerlegt eine Commit-Nachricht in den sichtbaren Text (erster Absatz) und die unsichtbaren
 // Zusatzzeilen, die die App anhängt ("Platzcoach-Team: E-Jugend#2", "Platzcoach-By: <id>").
