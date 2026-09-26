@@ -117,9 +117,9 @@
         ]
       },
       "enc": {
-        "salt": "TPrAZwC9I0pmuXxpSAppaA==",
-        "iv": "j8HmahLYegEH4wU1",
-        "cipher": "5FMNRD43s3YtW1S6DGKflowMzPa9TUd+/cHg6MP8QbHORHJbsBSW93/+Y6RGUMPr9xGI8E8nSnEiGGpXUYyog3r3fXIrWOltdbc4QzoCTHodGIHXJrJj98ZGCJTlkZehk8rcjV66CXNg5gweaw=="
+        "salt": "7Db2GFRHJRauk1UgaO+Syg==",
+        "iv": "bwzNiAFyGL7XtmUH",
+        "cipher": "/KJbav7WlVO4xSicHChwSyiF9VmVmAPcDa1lEN/XH29Om982BLxF5ekxuaFg5NZkI+d6LvC928jdhpM9xg/LEOTugRre7f2pY/X/fRahHLgYZpeWHwQFgsTrCjSqPjVF3NXcTZ26s7Km+1odZA=="
       },
       "created": "2026-09-25T18:33:06.129Z",
       "emailNotificationsEnabled": true,
