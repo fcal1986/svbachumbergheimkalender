@@ -104,20 +104,19 @@
       "d": "2026-09-26",
       "t": "15:00",
       "bis": "17:00",
-      "title": "Schulfest",
-      "kind": "other",
-      "team": "Vorstand",
+      "title": "Test 2 Torwarttraining",
+      "kind": "goalkeeper",
+      "team": "Torwarttraining",
       "squad": 1,
       "pitch": null,
       "halle": null,
-      "res": [
-        "Vereinsheim",
-        "Theke",
-        "Kabine 1"
-      ],
+      "res": [],
       "note": "",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "ownerName": "Fabrizio Calcagno"
+      "ownerName": "Fabrizio Calcagno",
+      "gkTeams": [
+        "E-Jugend"
+      ]
     }
   ]
 }
