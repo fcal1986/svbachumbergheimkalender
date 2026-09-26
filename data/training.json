@@ -90,10 +90,12 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "3a132e64-7713-4fe2-b6db-838da96eefa7"
+        "3a132e64-7713-4fe2-b6db-838da96eefa7",
+        "1d67889f-3194-43d7-9ead-2faa97e9b782"
       ],
       "trainerNames": [
-        "Dirk Pfeiffer"
+        "Dirk Pfeiffer",
+        "Damian Cvetkov"
       ],
       "trainerId": null,
       "trainerName": ""
@@ -379,10 +381,12 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "3a132e64-7713-4fe2-b6db-838da96eefa7"
+        "3a132e64-7713-4fe2-b6db-838da96eefa7",
+        "1d67889f-3194-43d7-9ead-2faa97e9b782"
       ],
       "trainerNames": [
-        "Dirk Pfeiffer"
+        "Dirk Pfeiffer",
+        "Damian Cvetkov"
       ],
       "trainerId": null,
       "trainerName": ""
