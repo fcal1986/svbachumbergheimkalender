@@ -418,6 +418,28 @@
       "pwChangeRequired": true,
       "phone": "+491726553733",
       "contactPublic": "phone"
+    },
+    {
+      "id": "af1a6546-fdc2-4059-bef4-5a4966181701",
+      "first": "Michael",
+      "last": "Raneck",
+      "email": "michael.raneck@sv-bachum-bergheim.de",
+      "admin": false,
+      "classes": {
+        "C-Jugend": [
+          1
+        ]
+      },
+      "enc": {
+        "salt": "CMV8EQVjMmgo2nXby1xaHg==",
+        "iv": "mIHlRrvvzPDe2ZiO",
+        "cipher": "EtRRwm9ujrfxRH4hQTjgcSgEJ/jd91CH4R5sLfshfOmenF7GVCNmPGsvv/2/ufEwmBRT0pZhedgtTsQIrjr8T/8YBbYaDuEeOVHfwItTavjDxao0RpKglSCbk9QdjdXVqYNtoY9otklBYcIGnw=="
+      },
+      "created": "2026-09-26T19:32:42.476Z",
+      "emailNotificationsEnabled": true,
+      "pwChangeRequired": true,
+      "phone": "015560848519",
+      "contactPublic": "phone"
     }
   ]
 }
