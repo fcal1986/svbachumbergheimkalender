@@ -15,6 +15,7 @@
 import fs from 'node:fs/promises';
 import { execSync } from 'node:child_process';
 import nodemailer from 'nodemailer';
+import { randomUUID } from 'node:crypto';
 
 const CONFIG_PATH = 'data/config.json';
 const USERS_PATH = 'data/users.json';
@@ -167,6 +168,7 @@ async function sendWelcomeEmails(messages, users, transporter, clubName, fromAdd
     const text = `Hallo ${user.first},\n\ndein Zugang für ${clubName} in Platzcoach wurde eingerichtet – schön, dass du dabei bist!\n\nDeine Anmeldung erfolgt mit dieser E-Mail-Adresse: ${user.email}\nDas Start-Passwort dazu hast du (oder bekommst du) direkt vom Vorstand.\n${linkText}`;
     try {
       await transporter.sendMail({
+        headers: { 'X-Entity-Ref-ID': randomUUID() }, // eindeutig: Gmail gruppiert/kürzt Mails nicht
         from: `Platzcoach <${fromAddress}>`, // Absendername bewusst immer "Platzcoach" (SaaS); der Verein steht im Text
         ...(replyTo ? { replyTo } : {}),
         to: user.email,
@@ -274,6 +276,7 @@ async function main() {
     const text = `${clubName} – Änderungen in Platzcoach:\n\n` + texts.map(t => `- ${t}`).join('\n');
     try {
       await transporter.sendMail({
+        headers: { 'X-Entity-Ref-ID': randomUUID() }, // eindeutig: Gmail gruppiert/kürzt Mails nicht
         from: `Platzcoach <${fromAddress}>`, // Absendername bewusst immer "Platzcoach" (SaaS); der Verein steht im Text
         ...(replyTo ? { replyTo } : {}),
         to: r.email,

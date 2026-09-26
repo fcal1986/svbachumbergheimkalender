@@ -14,6 +14,7 @@
 
 import fs from 'node:fs/promises';
 import nodemailer from 'nodemailer';
+import { randomUUID } from 'node:crypto';
 
 function escapeHtml(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -65,6 +66,7 @@ async function main() {
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
   });
   await transporter.sendMail({
+        headers: { 'X-Entity-Ref-ID': randomUUID() }, // eindeutig: Gmail gruppiert/kürzt Mails nicht
     from: `Platzcoach <${fromAddress}>`,
     ...(replyTo ? { replyTo } : {}),
     to: email, subject, text, html,
