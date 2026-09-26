@@ -1068,7 +1068,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='26.09.2026 · 7';
+const APP_VERSION='26.09.2026 · 8';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -5468,8 +5468,9 @@ function openKeeperEditor(team,squad){
 function gkRequestPayload(teams,title,when,link,organizerIds){
   return {teams:teams||[],title,when,link,byId:session.id,byName:session.name,organizerIds:[...new Set([session.id,...(organizerIds||[])])].filter(x=>x&&x!=='admin')};
 }
-async function sendGkRequest(teams,title,when,link,organizerIds){
-  try{ await ghDispatch('gk-signup-request',gkRequestPayload(teams,title,when,link,organizerIds)); return true; }
+async function sendGkRequest(teams,title,when,link,organizerIds,reminder){
+  const payload=gkRequestPayload(teams,title,when,link,organizerIds); if(reminder) payload.reminder=true;
+  try{ await ghDispatch('gk-signup-request',payload); return true; }
   catch(e){ showToast('E-Mail an die Trainer konnte nicht ausgelöst werden: '+e.message,6000); return false; }
 }
 // Absage/Löschung eines Torwarttrainings: Trainer der Mannschaften + Organisator informieren.
@@ -5483,7 +5484,7 @@ function gkRemindTrainers(id,d){
   const teams=gkTeamsOf(e);
   askConfirm('Trainer erinnern?','Alle Trainer von '+gkTeamsText(teams)+' und du als Organisator bekommen eine E-Mail mit der Bitte, ihre Torhüter für das Torwarttraining am '+fmtShort(e.d)+' um '+e.t+' Uhr an- oder abzumelden.','E-Mail senden',async()=>{
     const link=location.origin+location.pathname+'#t='+encodeURIComponent(e.id);
-    if(await sendGkRequest(teams,'Torwarttraining',DAYS[new Date(e.d+'T00:00:00').getDay()]+', '+fmtShort(e.d)+' · '+e.t+'–'+eventBis(e)+' Uhr',link,gkOrganizersOf(e))) showToast('E-Mail an die Trainer und dich wird verschickt.');
+    if(await sendGkRequest(teams,'Torwarttraining',DAYS[new Date(e.d+'T00:00:00').getDay()]+', '+fmtShort(e.d)+' · '+e.t+'–'+eventBis(e)+' Uhr',link,gkOrganizersOf(e),true)) showToast('E-Mail an die Trainer und dich wird verschickt.');
   });
 }
 /* Auswahl der Jugenden im Termin-/Trainingsformular */
