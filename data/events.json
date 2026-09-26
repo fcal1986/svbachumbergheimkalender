@@ -137,27 +137,6 @@
       "note": "",
       "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
       "ownerName": "David Skwara"
-    },
-    {
-      "id": "7bf9cd6f-de2d-4f7a-b0f5-d5694df54704",
-      "d": "2027-09-26",
-      "t": "15:00",
-      "bis": "17:00",
-      "title": "Test kabine",
-      "kind": "game",
-      "team": "E-Jugend",
-      "squad": 2,
-      "pitch": {
-        "mode": "haelfte",
-        "part": "A"
-      },
-      "halle": null,
-      "res": [
-        "Kabine 1"
-      ],
-      "note": "",
-      "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
-      "ownerName": "David Skwara"
     }
   ]
 }
