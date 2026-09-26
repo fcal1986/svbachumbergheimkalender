@@ -1,14 +1,34 @@
-# fussball.de-Heimspiele in Platzcoach – Deployment-Anleitung
+# Platzcoach – Einrichtung und Betrieb
 
-Dieses Paket enthält alles, was ihr für das fussball.de-Feature braucht:
+Stand: 26.09.2026 · Version 1. Diese Anleitung beschreibt, woraus Platzcoach besteht und wie die einzelnen Teile eingerichtet werden. Teile, die schon laufen, stehen hier als Nachschlagewerk.
 
-```
-index.html                          → ersetzt eure aktuelle App-Datei
-data/fussballde.json                → neue Datei, Startzustand (leer)
-scripts/fussballde-sync.mjs         → Sync-Skript (holt Heimspiele von fussball.de)
-package.json                        → Abhängigkeit für das Sync-Skript (cheerio)
-.github/workflows/fussballde-sync.yml → GitHub Action, führt den Sync automatisch aus
-```
+## Überblick: Was liegt wo?
+
+| Datei / Dienst | Zweck | Wird geändert von |
+|---|---|---|
+| `index.html` | Die komplette App | Updates (ersetzen) |
+| `data/config.json` | Vereinseinstellungen, fussball.de, Belegungsregeln, Worker-Adressen | Hand, Updates |
+| `data/users.json`, `events.json`, `training.json`, `seasons.json`, `resource-locks.json` | Daten der App | **nur die App** – nie per Hand oder Update ersetzen |
+| `data/fussballde.json` | Aktuelle Spiele von fussball.de | **nur der Abgleich** (alle 6 h) – nie ersetzen, sonst sind die Spiele bis zum nächsten Lauf weg |
+| `scripts/fussballde-sync.mjs`, `package.json`, `.github/workflows/fussballde-sync.yml` | fussball.de-Abgleich | selten |
+| `scripts/notify-email.mjs`, `.github/workflows/notify-email.yml` | E-Mail-Benachrichtigungen bei Änderungen | selten |
+| `scripts/send-welcome-password.mjs`, `.github/workflows/welcome-password-email.yml` | Mail mit Start-Passwort | selten |
+| `scripts/send-password-mail.mjs`, `.github/workflows/password-mails.yml` | Mails „Passwort zurücksetzen“ und „Passwort geändert“ | selten |
+| `worker/password-reset-worker.js` | Vorlage für den Passwort-Worker in Cloudflare (läuft nicht auf GitHub) | selten |
+| Cloudflare-Worker `odd-pine-7cbc` | Selbstregistrierung mit Einladungslink | – |
+| Cloudflare-Worker „platzcoach-passwort“ | „Passwort vergessen?“ (siehe Teil B) | – |
+
+## Ein Update einspielen
+
+1. Nur die Dateien aus dem Update-Paket hochladen, mit genau demselben Pfad im Repo. Dateien, die nicht im Paket sind, bleiben unverändert.
+2. Vorher prüfen, ob seit dem Update-Stand jemand `index.html` oder `data/config.json` auf GitHub geändert hat – sonst geht diese Änderung beim Überschreiben verloren.
+3. Nach 1–2 Minuten die App neu laden und unter **Konto** die Versionsnummer prüfen.
+
+---
+
+# Teil A: fussball.de-Abgleich (bereits eingerichtet)
+
+Läuft seit September 2026. Die Schritte unten sind nur nötig, wenn Platzcoach für einen neuen Verein eingerichtet wird.
 
 ## Was das Feature macht
 
@@ -22,8 +42,8 @@ package.json                        → Abhängigkeit für das Sync-Skript (chee
 
 ## Schritt 1: Dateien ins Repo kopieren
 
-1. `index.html` → ersetzt die bestehende Datei im Repo-Root.
-2. `data/fussballde.json` → neu in den Ordner `data/` legen.
+1. `index.html` → ins Repo-Root.
+2. `data/fussballde.json` → nur bei einer **Neueinrichtung** anlegen, mit dem Inhalt `{"updated":null,"games":[],"awayGames":[]}`.
 3. `scripts/fussballde-sync.mjs` → neuer Ordner `scripts/` im Repo-Root.
 4. `package.json` → ins Repo-Root. **Falls dort schon eine `package.json` existiert**, nicht überschreiben, sondern den Eintrag `"cheerio": "^1.0.0"` manuell unter `"dependencies"` ergänzen.
 5. `.github/workflows/fussballde-sync.yml` → in den Ordner `.github/workflows/` (anlegen, falls nicht vorhanden).
@@ -108,7 +128,7 @@ Die Action braucht Schreibrechte, um `data/fussballde.json` zu committen. Das is
 
 ---
 
-# „Passwort vergessen?“ – Passwort-Worker einrichten (einmalig, ca. 10 Minuten)
+# Teil B: „Passwort vergessen?“ – Passwort-Worker einrichten (einmalig, ca. 10 Minuten)
 
 Solange `passwordReset.workerUrl` in `data/config.json` leer ist, zeigt „Passwort vergessen?“ nur den Hinweis, sich an den Vorstand zu wenden. Admins können Passwörter jederzeit unter **Konto → Zugänge → Passwort** neu setzen (neues Start-Passwort per Mail, Pflichtwechsel bei der nächsten Anmeldung).
 
@@ -130,7 +150,7 @@ Für den Self-Service per E-Mail-Link:
 
 **Wie es funktioniert:** Nur wenn Vorname, Nachname und E-Mail genau zu einem nicht gesperrten Zugang passen, verschickt der Worker einen Link (`#reset=…`), 60 Minuten gültig, nur einmal nutzbar; ein neuer Link macht ältere ungültig. Die Antwort in der App ist immer gleich, egal ob etwas passt. Begrenzung: 3 Anfragen pro E-Mail und 10 pro IP-Adresse und Stunde. Nach jeder Passwortänderung geht eine Bestätigungsmail raus.
 
-# Belegungsregeln (Terminarten)
+# Teil C: Belegungsregeln (Terminarten)
 
 In `data/config.json` unter `occupancy.levels` hat jede Terminart eine Belegungsstufe:
 
