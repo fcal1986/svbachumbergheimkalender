@@ -105,3 +105,40 @@ Die Action braucht Schreibrechte, um `data/fussballde.json` zu committen. Das is
 - **Rechtlicher Graubereich**: fussball.de bietet aktiv keinen Export mehr an. Die Abruffrequenz (alle 6h) ist bewusst zurückhaltend gewählt. Bei Zweifeln: Nutzungsbedingungen von fussball.de prüfen.
 - **Spieldauer ist geschätzt**, da fussball.de keine Endzeiten liefert – bei Bedarf in `data/config.json` justieren.
 - Die Kategorie-Erkennung (teilbar vs. Vollplatz) basiert auf dem Team-Namen von fussball.de (z. B. "E-Junioren"). Falls eure Liga andere Bezeichnungen nutzt, `shareCategories` in der Config anpassen.
+
+---
+
+# „Passwort vergessen?“ – Passwort-Worker einrichten (einmalig, ca. 10 Minuten)
+
+Solange `passwordReset.workerUrl` in `data/config.json` leer ist, zeigt „Passwort vergessen?“ nur den Hinweis, sich an den Vorstand zu wenden. Admins können Passwörter jederzeit unter **Konto → Zugänge → Passwort** neu setzen (neues Start-Passwort per Mail, Pflichtwechsel bei der nächsten Anmeldung).
+
+Für den Self-Service per E-Mail-Link:
+
+1. **Cloudflare → Workers & Pages → Create → Worker**, Name z. B. `platzcoach-passwort`. Inhalt von `worker/password-reset-worker.js` einfügen, **Deploy**.
+2. **Storage & Databases → KV → Create namespace** `platzcoach-passwort`. Im Worker unter **Settings → Bindings → KV namespace** mit dem Variablennamen **`PWRESET`** verbinden.
+3. Im Worker unter **Settings → Variables and Secrets**:
+   - `REPO` = `fcal1986/svbachumbergheimkalender`
+   - `BRANCH` = `main`
+   - `APP_URL` = `https://platzcoach.de/`
+   - `ALLOWED_ORIGINS` = `https://platzcoach.de`
+   - **Secret** `GITHUB_TOKEN` = derselbe Fine-grained Token, den die App nutzt (Contents: Read and write). **Wichtig:** Wenn der Token erneuert wird, auch hier austauschen.
+4. Worker-URL (z. B. `https://platzcoach-passwort.<konto>.workers.dev`) in `data/config.json` eintragen:
+   ```json
+   "passwordReset": { "workerUrl": "https://platzcoach-passwort.<konto>.workers.dev" }
+   ```
+5. Test: `…/health` im Browser öffnen → `{"ok":true}`. Dann in der App „Passwort vergessen?“ mit eigenem Namen und eigener Adresse ausprobieren. Die Mail kommt nach ca. 1 Minute (GitHub Action „Passwort-Mails“).
+
+**Wie es funktioniert:** Nur wenn Vorname, Nachname und E-Mail genau zu einem nicht gesperrten Zugang passen, verschickt der Worker einen Link (`#reset=…`), 60 Minuten gültig, nur einmal nutzbar; ein neuer Link macht ältere ungültig. Die Antwort in der App ist immer gleich, egal ob etwas passt. Begrenzung: 3 Anfragen pro E-Mail und 10 pro IP-Adresse und Stunde. Nach jeder Passwortänderung geht eine Bestätigungsmail raus.
+
+# Belegungsregeln (Terminarten)
+
+In `data/config.json` unter `occupancy.levels` hat jede Terminart eine Belegungsstufe:
+
+| Terminart | Stufe | Bedeutung |
+|---|---|---|
+| `game` (Spiel, auch alle fussball.de-Heimspiele) | `exclusive` | Kein Torwarttraining parallel auf dem Platz |
+| `training` | `shared` | Teilt den Platz nur über getrennte Viertel/Hälften (wie bisher) |
+| `goalkeeper` (Torwarttraining) | `overlay` | Belegt keine Fläche, darf parallel zu Training laufen, nicht zu Spielen oder anderem Torwarttraining |
+| `other` (Sonstiges) | `shared` | wie Training |
+
+Ausnahmen lassen sich ohne Code-Änderung ergänzen, z. B. zwei Torwarttrainings gleichzeitig erlauben: `"compatible": [["goalkeeper","goalkeeper"]]`. Kabinen, Vereinsheim, Theke und Halle sind immer exklusiv.
