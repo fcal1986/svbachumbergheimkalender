@@ -593,6 +593,8 @@
   #register .reg-check input{width:18px;height:18px;flex:none;margin:2px 0 0;padding:0;accent-color:var(--green);}
   #register .reg-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;}
   .reg-item{border:1.5px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;}
+  #update-banner{position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top));z-index:90;width:calc(100% - 24px);max-width:496px;display:none;align-items:center;justify-content:space-between;gap:10px;background:#0B1B32;color:#fff;border-radius:12px;padding:10px 12px;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.25);}
+  #update-banner button{background:#7AC943;color:#0B1B32;border:none;border-radius:9px;padding:8px 12px;font-family:'Inter';font-weight:800;font-size:12.5px;cursor:pointer;white-space:nowrap;}
   .edit-banner{background:#FFF4CC;border:1.5px solid #F2C94C;color:#5C4400;border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:13px;line-height:1.5;}
   .edit-banner b{color:#3D2E00;}
   .edit-banner button{margin-top:8px;width:100%;background:#fff;border:1.5px solid #F2C94C;color:#5C4400;border-radius:10px;padding:10px;font-family:'Inter';font-weight:700;font-size:13px;cursor:pointer;}
@@ -1068,7 +1070,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='26.09.2026 · 9';
+const APP_VERSION='26.09.2026 · 10';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -1788,10 +1790,64 @@ function mergeStore(name,local,remote){
   });
   return out;
 }
+/* ---------- Aktualität: neue App-Version erkennen + Daten beim Zurückkehren auffrischen ----------
+   Eine geöffnete App lädt sich nicht von selbst neu. Ein Gerät mit veralteter Version oder
+   veralteten Daten konnte so alte Stände anzeigen (bzw. vor Version 9 sogar zurückschreiben). */
+let APP_OUTDATED=false;
+async function checkForAppUpdate(){
+  try{
+    const r=await fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'});
+    if(!r.ok) return false;
+    const m=(await r.text()).match(/const APP_VERSION='([^']+)'/);
+    if(m&&m[1]!==APP_VERSION){ APP_OUTDATED=true; showUpdateBanner(m[1]); return true; }
+  }catch(e){}
+  return false;
+}
+function showUpdateBanner(v){
+  let el=document.getElementById('update-banner');
+  if(!el){
+    el=document.createElement('div'); el.id='update-banner';
+    el.innerHTML='<span>Neue Platzcoach-Version verfügbar.</span><button type="button" onclick="location.reload()">Jetzt aktualisieren</button>';
+    document.body.appendChild(el);
+  }
+  el.style.display='flex';
+}
+// Daten neu holen, wenn die App wieder in den Vordergrund kommt (z. B. Handy entsperrt).
+// Angemeldet direkt über die GitHub-API (sofort aktuell), sonst über die Webseite.
+let _lastDataRefresh=Date.now();
+async function refreshDataFromServer(){
+  if(Date.now()-_lastDataRefresh<20000) return;
+  _lastDataRefresh=Date.now();
+  const pane=(document.querySelector('.pane.active')||{}).dataset?.pane;
+  if(pane==='neu'||pane==='tform') return; // offenes Formular nicht unter den Füßen wegziehen
+  try{
+    let changed=false;
+    for(const name of ['events','training','seasons','locks','users']){
+      const st=STORES[name];
+      let data=null;
+      if(session&&session.token){
+        const r=await fetch('https://api.github.com/repos/'+CFG.repo+'/contents/'+st.path+'?ref='+CFG.branch,{
+          headers:{Authorization:'Bearer '+session.token,Accept:'application/vnd.github+json'},cache:'no-store'});
+        if(!r.ok) continue;
+        const j=await r.json(); if(!j.content) continue;
+        data=JSON.parse(dec.decode(unb64(String(j.content).replace(/\s/g,''))));
+        if(j.sha) _shaCache[st.path]=j.sha;
+      }else{
+        try{ data=await loadJSON(st.path); }catch(e){ continue; }
+      }
+      const arr=data&&Array.isArray(data[st.key])?data[st.key]:null;
+      if(!arr) continue;
+      if(JSON.stringify(arr)!==JSON.stringify(st.get())){ st.set(arr); changed=true; }
+      snapStore(name);
+    }
+    if(changed){ syncClassesFromActiveSeason(); snapStore('users'); render(); renderStart(); renderTraining(); }
+  }catch(e){}
+}
 let storeQueue=Promise.resolve();
 function saveStore(name,msg){
   const run=async()=>{
     const st=STORES[name];
+    if(APP_OUTDATED||await checkForAppUpdate()) throw new Error('Platzcoach wurde aktualisiert. Bitte oben auf „Jetzt aktualisieren“ tippen und dann erneut speichern.');
     for(let attempt=0;;attempt++){
       const r=await fetch('https://api.github.com/repos/'+CFG.repo+'/contents/'+st.path+'?ref='+CFG.branch,{
         headers:{Authorization:'Bearer '+session.token,Accept:'application/vnd.github+json'},cache:'no-store'});
@@ -6369,6 +6425,7 @@ async function boot(){
   // Torhüter-Liste (verschlüsselt) nur für angemeldete Zugänge laden.
   loadGK().then(()=>{ if(!GK.loaded&&!GK.error) return; render(); renderStart(); renderTraining(); if(document.querySelector('.pane.active')?.dataset.pane==='konto') renderKonto(); });
   document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible'){ checkForAppUpdate(); refreshDataFromServer(); }
     if(document.visibilityState==='visible'){
       const app=document.getElementById('app');
       app.style.display='none';
@@ -6379,6 +6436,8 @@ async function boot(){
   // Falls der Browser die Seite aus dem Back/Forward-Cache wiederherstellt (statt neu zu laden),
   // kann JS-Zustand veraltet sein – dann lieber sauber neu laden.
   window.addEventListener('pageshow',(e)=>{ if(e.persisted) location.reload(); });
+  // Zusätzlich alle 5 Minuten auf neue Version prüfen (App bleibt oft stundenlang offen).
+  setInterval(()=>{ if(document.visibilityState==='visible') checkForAppUpdate(); },5*60*1000);
 }
 /* Reset-Link (…/#reset=CODE): Code sofort aus der Adresszeile entfernen, BEVOR Clarity/GA
    (weiter unten) geladen werden – der Code darf nie in Analytics-Daten oder im Verlauf landen. */
