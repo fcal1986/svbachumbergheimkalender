@@ -56,10 +56,10 @@ async function main() {
       <p>Hallo ${escapeHtml(firstName)},</p>
       <p>hier ist dein Start-Passwort für Platzcoach (${escapeHtml(clubName)}):</p>
       <p style="font-size:20px;font-weight:bold;background:#F0FBF4;padding:10px 16px;border-radius:8px;display:inline-block;">${escapeHtml(password)}</p>
-      <p>Deine Login-E-Mail-Adresse findest du in der separaten Willkommens-Mail von Platzcoach. Bitte bewahre dieses Passwort sicher auf und leite diese E-Mail nicht weiter.</p>
+      <p>Deine Login-E-Mail-Adresse findest du in der separaten Willkommens-Mail von Platzcoach. Bei der ersten Anmeldung wirst du gebeten, ein eigenes Passwort festzulegen – das Start-Passwort gilt danach nicht mehr. Bitte leite diese E-Mail nicht weiter.</p>
       <p style="color:#718191;font-size:12px;">Automatische Benachrichtigung von Platzcoach.</p>
     </div>`;
-  const text = `Hallo ${firstName},\n\nhier ist dein Start-Passwort für Platzcoach (${clubName}):\n\n${password}\n\nDeine Login-E-Mail-Adresse findest du in der separaten Willkommens-Mail von Platzcoach. Bitte bewahre dieses Passwort sicher auf und leite diese E-Mail nicht weiter.`;
+  const text = `Hallo ${firstName},\n\nhier ist dein Start-Passwort für Platzcoach (${clubName}):\n\n${password}\n\nDeine Login-E-Mail-Adresse findest du in der separaten Willkommens-Mail von Platzcoach. Bei der ersten Anmeldung wirst du gebeten, ein eigenes Passwort festzulegen – das Start-Passwort gilt danach nicht mehr. Bitte leite diese E-Mail nicht weiter.`;
 
   await transporter.sendMail({
     from: `Platzcoach <${fromAddress}>`, // Absendername bewusst immer "Platzcoach" (SaaS); der Verein steht im Text
