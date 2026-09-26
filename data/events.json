@@ -117,6 +117,26 @@
       "gkTeams": [
         "E-Jugend"
       ]
+    },
+    {
+      "id": "1f70fd98-5959-4024-9e2a-5f9cbbf38780",
+      "d": "2026-09-26",
+      "t": "15:00",
+      "bis": "17:00",
+      "title": "Test kabine",
+      "kind": "game",
+      "team": "E-Jugend",
+      "squad": 2,
+      "pitch": {
+        "mode": "ganz"
+      },
+      "halle": null,
+      "res": [
+        "Kabine 1"
+      ],
+      "note": "",
+      "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
+      "ownerName": "David Skwara"
     }
   ]
 }
