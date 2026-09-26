@@ -1064,7 +1064,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='26.09.2026 · 4';
+const APP_VERSION='26.09.2026 · 5';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -1730,7 +1730,19 @@ async function ghDispatch(eventType,payload){
 }
 /* Mannschaft als unsichtbare Zusatzzeile, damit die E-Mail-Benachrichtigung Trainern nur
    Änderungen ihrer eigenen Mannschaften (plus Vereinsweites) schickt. */
-function teamTrailer(team,squad){ return '\n\nPlatzcoach-Team: '+(team||'Alle Teams')+'#'+(squad||1); }
+function teamTrailer(team,squad,item){
+  let t='\n\nPlatzcoach-Team: '+(team||'Alle Teams')+'#'+(squad||1);
+  // Torwarttraining: betroffene Mannschaften + Organisator(en), damit die E-Mail-Benachrichtigung
+  // die Trainer dieser Mannschaften und den Organisator erreicht (scripts/notify-email.mjs).
+  if(team===GK_TEAM&&item){
+    if(item.gkTeams&&item.gkTeams.length) t+='\nPlatzcoach-GK: '+item.gkTeams.join(',');
+    const org=(item.trainerIds&&item.trainerIds.length)?item.trainerIds:(item.ownerId?[item.ownerId]:[]);
+    if(org.length) t+='\nPlatzcoach-Orga: '+org.join(',');
+  }
+  return t;
+}
+// Mannschaft für Commit-Texte: beim Torwarttraining die gewählten Mannschaften statt "Torwarttraining".
+function msgTeam(team,squad,gkTeams){ return team===GK_TEAM?('Torwarttraining für '+gkTeamsText(gkTeams||[])):teamLabel(team,squad); }
 async function saveEvents(msg){
   await ghPutRaw('data/events.json',JSON.stringify({events:EVENTS},null,2),msg);
 }
@@ -3405,7 +3417,8 @@ async function submitEvent(){
     // Neues Torwarttraining: Trainer der gewählten Jugenden per Mail bitten, Torhüter an-/abzumelden.
     if(newId&&kind==='goalkeeper') setTimeout(()=>sendGkRequest(gkTeams,title,DAYS[new Date(d+'T00:00:00').getDay()]+', '+fmtShort(d)+' · '+von+'–'+bis+' Uhr',location.origin+location.pathname+'#t='+newId,[session.id]),4000);
     const wasEditing=!!editingId;
-    const logMsg=(wasEditing?'Termin geändert: ':'Neuer Termin: ')+title+' – '+teamLabel(team,squad)+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name+teamTrailer(team,squad);
+    const savedEv=EVENTS.find(x=>x.id===(newId||editingId))||{};
+    const logMsg=(wasEditing?'Termin geändert: ':'Neuer Termin: ')+title+' – '+msgTeam(team,squad,gkTeams)+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name+teamTrailer(team,squad,savedEv);
     editingId=null;formDirty=false;document.getElementById('cancel-btn').style.display='none';
     selDate=d;const dt=new Date(d+'T00:00:00');curY=dt.getFullYear();curM=dt.getMonth();yearShown=curY;
     goto('termine');setView('monat');render();renderStart();resetForm();
@@ -3423,7 +3436,7 @@ function deleteEvent(id){
     EVENTS=EVENTS.filter(x=>x.id!==id);
     render(); renderStart(); showToast('Termin gelöscht.');
     if(kindOf(e)==='goalkeeper') sendGkCancel(e.gkTeams||[],e.title||'Torwarttraining',DAYS[new Date(e.d+'T00:00:00').getDay()]+', '+fmtShort(e.d)+' · '+e.t+'–'+eventBis(e)+' Uhr',[e.ownerId],'Der Termin wurde gelöscht.');
-    saveEvents('Termin gelöscht: '+e.title+' – '+teamLabel(e.team,e.squad)+' · '+e.t+'–'+eventBis(e)+' · '+fmtShort(e.d)+' – '+session.name+teamTrailer(e.team,e.squad))
+    saveEvents('Termin gelöscht: '+e.title+' – '+msgTeam(e.team,e.squad,e.gkTeams)+' · '+e.t+'–'+eventBis(e)+' · '+fmtShort(e.d)+' – '+session.name+teamTrailer(e.team,e.squad,e))
       .catch(err=>{ EVENTS=JSON.parse(backup);render();renderStart();showToast('Rückgängig – Fehler: '+err.message,6000); });
   });
 }
@@ -3617,7 +3630,7 @@ async function doCancelSlot(){
     closeCancelModal(); renderTraining(); renderStart(); render();
     showToast('Training am '+fmtShort(date)+' abgesagt.');
     if(s.team===GK_TEAM||s.kind==='goalkeeper') sendGkCancel(s.gkTeams||[],'Torwarttraining',DAYS[new Date(date+'T00:00:00').getDay()]+', '+fmtShort(date)+' · '+s.from+'–'+s.to+' Uhr',s.trainerIds||[],'Das Torwarttraining fällt an diesem Tag aus.');
-    saveTraining('Training abgesagt: '+trainName(s)+' am '+fmtShort(date)+' – '+session.name+teamTrailer(s.team,s.squad))
+    saveTraining('Training abgesagt: '+msgTeam(s.team,s.squad,s.gkTeams)+' am '+fmtShort(date)+' – '+session.name+teamTrailer(s.team,s.squad,s))
       .catch(e=>{ TRAINING=JSON.parse(backup);renderTraining();renderStart();showToast('Fehler: '+e.message,6000); });
   }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   finally{ if(cmBtn){ cmBtn.disabled=false; cmBtn.textContent='Absagen'; } }
@@ -3629,7 +3642,7 @@ async function reactivateCancelled(id,date){
   s.cancelled=(s.cancelled||[]).filter(d=>d!==date);
   try{
     renderTraining(); renderStart(); render(); showToast('Training am '+fmtShort(date)+' findet wieder statt.');
-    saveTraining('Absage zurückgenommen: '+trainName(s)+' am '+fmtShort(date)+' – '+session.name+teamTrailer(s.team,s.squad))
+    saveTraining('Absage zurückgenommen: '+msgTeam(s.team,s.squad,s.gkTeams)+' am '+fmtShort(date)+' – '+session.name+teamTrailer(s.team,s.squad,s))
       .catch(e=>{ TRAINING=JSON.parse(backup);renderTraining();renderStart();showToast('Fehler: '+e.message,6000); });
   }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   finally{ hideSaving(); }
@@ -4009,8 +4022,8 @@ async function saveTrainingSlot(){
       TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,kind,gkTeams,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[...newCancels].sort()});
       if(kind==='goalkeeper') setTimeout(()=>sendGkRequest(gkTeams,'Torwarttraining','jeden '+WDAYS[day]+' · '+from+'–'+to+' Uhr (ab '+fmtShort(validFrom)+')',location.origin+location.pathname,trainerIds),4000);
     }
-    const tMsg=(tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+team+' (ab '+fmtShort(validFrom)+')'
-      +(newCancels.length?' – wegen Heimspielen abgesagt am '+newCancels.map(fmtShort).join(', '):'')+' – '+session.name+teamTrailer(team,squad);
+    const tMsg=(tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+msgTeam(team,squad,gkTeams)+' (ab '+fmtShort(validFrom)+')'
+      +(newCancels.length?' – wegen Heimspielen abgesagt am '+newCancels.map(fmtShort).join(', '):'')+' – '+session.name+teamTrailer(team,squad,{gkTeams,trainerIds});
     tEditId=null; renderTraining(); renderStart(); goto('training');
     if(warn.length) showToast('⚠ Gespeichert – Achtung: '+warn[0],5000);
     else if(newCancels.length) showToast('Trainingszeit gespeichert – an '+newCancels.length+' Spieltag'+(newCancels.length===1?'':'en')+' abgesagt.',5000);
@@ -4025,7 +4038,7 @@ function deleteTrainingSlot(id){
   askConfirm('Trainingszeit löschen?',trainName(s)+' am '+WDAYS[s.day]+' '+s.from+'–'+s.to+' wird entfernt.','Löschen',async()=>{
     const backup=JSON.stringify(TRAINING);
     TRAINING=TRAINING.filter(x=>x.id!==id);
-    try{ await saveTraining('Trainingszeit gelöscht: '+WDAYS[s.day]+' '+s.from+' '+s.team+' – '+session.name+teamTrailer(s.team,s.squad));
+    try{ await saveTraining('Trainingszeit gelöscht: '+WDAYS[s.day]+' '+s.from+' '+msgTeam(s.team,s.squad,s.gkTeams)+' – '+session.name+teamTrailer(s.team,s.squad,s));
       renderTraining(); showToast('Gelöscht.');
       if(s.team===GK_TEAM||s.kind==='goalkeeper') sendGkCancel(s.gkTeams||[],'Torwarttraining','jeden '+WDAYS[s.day]+' · '+s.from+'–'+s.to+' Uhr',s.trainerIds||[],'Diese feste Torwarttrainingszeit wurde gestrichen und findet nicht mehr statt.');
     }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
@@ -5340,7 +5353,8 @@ async function saveGkSignup(id,d){
       const cut=ymd(new Date(Date.now()-60*86400000));
       Object.keys(cur.signups).forEach(k=>{ const dd=k.startsWith('s:')?k.slice(-10):null; if(dd&&dd<cut) delete cur.signups[k]; });
       if(s.size) cur.signups[key]=[...s]; else delete cur.signups[key];
-    },'Torwarttraining-Anmeldung geändert: '+fmtShort(e.d)+' '+e.t+' – '+session.name);
+    },'Torwarttraining-Anmeldung geändert: '+DAYS_S[new Date(e.d+'T00:00:00').getDay()]+' '+fmtShort(e.d)+' '+e.t+' – jetzt '+((GK.signups[key]||[]).filter(x=>!touched.has(x)).length+on.size)+' Torhüter angemeldet – '+session.name
+      +teamTrailer(GK_TEAM,1,{gkTeams:gkTeamsOf(e),trainerIds:e.isTraining?(e.trainerIds||[]):null,ownerId:e.ownerId}));
     closeSheet(); render(); renderStart(); showToast('Anmeldung gespeichert.');
   }catch(err){ showToast('Fehler: '+err.message,6000); btn.disabled=false; btn.textContent='Speichern'; }
 }
