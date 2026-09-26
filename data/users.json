@@ -6,9 +6,9 @@
       "last": "Calcagno",
       "email": "fab.calcagno@gmail.com",
       "enc": {
-        "salt": "gFFwE0MifUy7DWyktW4kgQ==",
-        "iv": "QHMN8dJhCTiv5KJw",
-        "cipher": "VDalajpdz9WQjNqfqtpEZ11RAs6e40ZZQ1CzSY9yIa8Nf6goO+r8ssH4y9g6zcfw4Qs0kq+urHEd2ObcHxXEp7cSUsB1+IOUW+x+sc6GzsIP/0lGysgdF5gEBLMiwxXKLkNxJINLW1zqDyNvNQ=="
+        "salt": "xhuj2ewS69o2JXCrEHKsxQ==",
+        "iv": "TmpxQJ4ccWZGs6Qh",
+        "cipher": "Y1R9l9+J+M2n2HadRwJnFgghogL4YDZ4oy9xagYgFG9SaKWW2jvFJviTwrVxonA58Md+diNc/Gqb1uT0+LtrVmWIz0zUhmITqxZZtd/ZF7BiwlBlHrnJ0Aixii55aFKCrV8qPDtUYJk8z9yOpA=="
       },
       "created": "2026-07-15T06:12:45.752Z",
       "admin": true,
@@ -20,7 +20,8 @@
       "phone": "015224897699",
       "contactPublic": "none",
       "contactEmail": "fab.calcagno@gmail.com",
-      "emailNotificationsEnabled": true
+      "emailNotificationsEnabled": true,
+      "pwChangeRequired": true
     },
     {
       "id": "a30f8c9b-96f9-4557-b28b-619e122080ea",
@@ -218,7 +219,9 @@
       "email": "damian.cvetkov@gmail.com",
       "admin": false,
       "classes": {
-        "C-Jugend": []
+        "C-Jugend": [
+          1
+        ]
       },
       "enc": {
         "salt": "yHuEhywkFjHdS5kZFphZqA==",
@@ -258,7 +261,8 @@
       "email": "alex75de1@web.de",
       "admin": false,
       "classes": {
-        "1. Herren": []
+        "1. Herren": [],
+        "Torwarttraining": []
       },
       "enc": {
         "salt": "4jNFxOZXEzRyMxVvgQRReQ==",
