@@ -593,6 +593,15 @@
   #register .reg-check input{width:18px;height:18px;flex:none;margin:2px 0 0;padding:0;accent-color:var(--green);}
   #register .reg-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;}
   .reg-item{border:1.5px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;}
+  .badge-gk{display:inline-flex;align-items:center;gap:4px;background:#FFF1E0;color:#9A4A00;border:1px solid #F5C58A;border-radius:999px;padding:3px 9px;font-size:10.5px;font-weight:700;}
+  .badge-gk svg{width:12px;height:12px;stroke:#9A4A00;}
+  .event-card.gk-card{box-shadow:inset 4px 0 0 #F08C00,var(--card-shadow);}
+  #pwflow{position:fixed;inset:0;z-index:62;background:var(--white);display:none;flex-direction:column;align-items:center;padding:calc(24px + env(safe-area-inset-top)) 16px 32px;overflow-y:auto;}
+  #pwflow.show{display:flex;}
+  #pwflow .login-box{max-width:380px;margin:auto 0;}
+  .login-link{display:block;width:100%;background:none;border:none;color:var(--green);font-family:'Inter';font-weight:600;font-size:13px;cursor:pointer;margin-top:12px;padding:6px;text-align:center;}
+  .login-hint{color:var(--ink-soft);font-size:11.5px;line-height:1.5;margin:-2px 0 12px;}
+  .pw-ok{background:#F0FBF4;border:1px solid #BfE5CC;color:#1B5E36;font-size:12.5px;padding:12px;border-radius:10px;line-height:1.5;margin-bottom:12px;}
   .reg-actions{display:flex;gap:8px;margin-top:8px;}
   .reg-actions>button,.reg-actions>a{flex:1;min-width:0;}
   .reg-linkbtn{margin:0;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:12px;}
@@ -736,11 +745,17 @@
         <p class="helptext">Nur in der App angemeldete Zugänge wählbar. Noch nicht dabei? Erst unter Konto anlegen – bis dahin gilt „wird bald ergänzt".</p>
       </div>
       <p class="section-label">Ressourcen</p>
-      <div class="field"><label>Platz / Halle</label>
+      <div class="field"><label>Platz / Kabine</label>
         <div class="chip-group" id="tf-res">
           <div class="res-chip on" data-res="Großspielfeld" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="1.5"/><path d="M12 5v14"/><circle cx="12" cy="12" r="2.5"/></svg>Großspielfeld</div>
           <div class="res-chip" data-res="Kleinspielfeld" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/></svg>Kleinspielfeld</div>
+          <div class="res-chip" data-res="Kabine 1" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 1</div>
+          <div class="res-chip" data-res="Kabine 2" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 2</div>
+          <div class="res-chip" data-res="Kabine 3" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 3</div>
+          <div class="res-chip" data-res="Kabine 4" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 4</div>
         </div>
+        <p class="helptext" id="tf-gk-help" style="display:none;">Torwarttraining belegt keine Platzfläche: Es darf parallel zu einem Training laufen, aber nicht während eines Spiels.</p>
+        <div id="tf-game-note-gk"></div>
       </div>
       <div class="field" id="tf-pitch-field">
         <label>Anteil Großspielfeld</label>
@@ -781,7 +796,13 @@
       <p class="section-label">Pflichtangaben</p>
       <div class="field required"><label><span class="req-dot"></span>Datum</label><input type="date" id="f-datum"></div>
       <div class="field"><label>Wochentag</label><span class="readonly-pill" id="f-wochentag">–</span></div>
-      <div class="field required"><label><span class="req-dot"></span>Anlass</label><input type="text" id="f-anlass" autocomplete="off" oninput="formDirty=true" placeholder="z. B. Sommerfest, Turnier, Testspiel"></div>
+      <div class="field required"><label><span class="req-dot"></span>Anlass</label><input type="text" id="f-anlass" autocomplete="off" oninput="formDirty=true;suggestKindFromTitle()" placeholder="z. B. Sommerfest, Turnier, Testspiel"></div>
+      <div class="field required"><label><span class="req-dot"></span>Terminart</label>
+        <select id="f-kind" onchange="onKindChange(true)">
+          <option value="game">Spiel</option><option value="training">Training</option><option value="goalkeeper">Torwarttraining</option><option value="other" selected>Sonstiges</option>
+        </select>
+        <p class="helptext" id="f-kind-help"></p>
+      </div>
       <div style="display:flex;gap:10px;">
         <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Von</label><input type="time" id="f-von" autocomplete="off" step="900" value="15:00" onchange="onSnapTime(this)"></div>
         <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Bis</label><input type="time" id="f-bis" autocomplete="off" step="900" value="17:00" onchange="onSnapTime(this)"></div>
@@ -791,7 +812,7 @@
         <select id="f-team" onchange="onTeamChange()">
           <optgroup label="Jugend"><option>G-Jugend</option><option selected>F-Jugend</option><option>E-Jugend</option><option>D-Jugend</option><option>C-Jugend</option><option>B-Jugend</option><option>A-Jugend</option></optgroup>
           <optgroup label="Senioren"><option>1. Herren</option><option>2. Herren</option><option>3. Herren</option></optgroup>
-          <optgroup label="Sonstige"><option>Alle Teams</option><option>Vorstand</option></optgroup>
+          <optgroup label="Sonstige"><option>Torwarttraining</option><option>Alle Teams</option><option>Vorstand</option></optgroup>
         </select>
       </div>
       <div class="field" id="f-squad-field">
@@ -810,6 +831,10 @@
           <div class="res-chip" data-res="Kleinspielfeld" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/></svg>Kleinfeld</div>
           <div class="res-chip" data-res="Vereinsheim" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Vereinsheim</div>
           <div class="res-chip" data-res="Theke" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 3h12l-1 4H7L6 3z"/><path d="M7 7l3.5 5v7M17 7l-3.5 5v7M8 21h8"/></svg>Theke</div>
+          <div class="res-chip" data-res="Kabine 1" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 1</div>
+          <div class="res-chip" data-res="Kabine 2" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 2</div>
+          <div class="res-chip" data-res="Kabine 3" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 3</div>
+          <div class="res-chip" data-res="Kabine 4" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 4</div>
         </div>
       </div>
       <div class="field" id="f-pitch-field">
@@ -899,14 +924,22 @@
     <form id="li-form" onsubmit="event.preventDefault();doLogin();">
       <input type="text" id="li-user" name="username" placeholder="E-Mail oder Benutzername" autocomplete="username" autocapitalize="none" spellcheck="false">
       <div class="pw-wrap"><input type="password" id="li-pass" name="password" placeholder="Passwort" autocomplete="current-password"><button type="button" class="pw-eye" onclick="togglePw(this)" tabindex="-1"><svg viewBox="0 0 24 24"><g class="eye-open"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></g><g class="eye-shut" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></g></svg></button></div>
+      <p class="login-hint">Melde dich mit der E-Mail-Adresse aus deiner Willkommens-Mail an.</p>
       <button type="submit" class="btn-yellow" id="li-btn">Anmelden</button>
     </form>
+    <button type="button" class="login-link" id="li-forgot" onclick="openForgotPassword()">Passwort vergessen?</button>
     <button class="btn-ghost-light" id="bio-btn" style="display:none;" onclick="bioLogin()">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 11v3a4 4 0 0 1-1 2.5"/><path d="M8.5 8.5a5 5 0 0 1 7 4.5v1"/><path d="M5.5 6.5a9 9 0 0 1 13 6.5v2"/><path d="M15.5 19a12 12 0 0 0 1-5"/><path d="M8 20a8 8 0 0 0 1.5-6"/></svg>
       <span id="bio-label">Mit Fingerabdruck anmelden</span>
     </button>
     <p class="login-foot" id="login-foot">Zugang bekommst du vom Vorstand.</p>
   </div>
+</div>
+
+<!-- PASSWORT: vergessen / per Link zurücksetzen / Pflichtwechsel nach Erstanmeldung -->
+<div id="pwflow">
+  <button class="login-close" id="pwflow-close" onclick="closePwFlow()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <div class="login-box" id="pwflow-body"></div>
 </div>
 
 <!-- REGISTRIERUNG (über Einladungslink #invite=…) -->
@@ -992,7 +1025,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='25.09.2026 · 11';
+const APP_VERSION='26.09.2026 · 1';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -1007,7 +1040,7 @@ const DAYS_S=['SO','MO','DI','MI','DO','FR','SA'];
 const DOW=['Mo','Di','Mi','Do','Fr','Sa','So'];
 const WDAYS=['','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
 const HALF={A:[1,2],B:[3,4]};
-const ALL_CLASSES=['G-Jugend','F-Jugend','E-Jugend','D-Jugend','C-Jugend','B-Jugend','A-Jugend','1. Herren','2. Herren','3. Herren','Ü32 / Ü50'];
+const ALL_CLASSES=['G-Jugend','F-Jugend','E-Jugend','D-Jugend','C-Jugend','B-Jugend','A-Jugend','1. Herren','2. Herren','3. Herren','Ü32 / Ü50','Torwarttraining'];
 
 const today=new Date(), todayStr=ymd(today);
 let view='monat', filter='alle';
@@ -1070,7 +1103,7 @@ function trainingInstancesOn(d){
     ownerName:getTrainerNames(s)[0]||'Vorstand',
     trainerIds:getTrainerIds(s),
     trainerNames:getTrainerNames(s),
-    isTraining:true, trainingSlotId:s.id
+    isTraining:true, trainingSlotId:s.id, kind:s.kind||(s.team===GK_TEAM?'goalkeeper':'training')
   })).sort((a,b)=>a.t.localeCompare(b.t));
 }
 /* Abgesagte Regeltermine: sollen NICHT einfach aus Start/Termine verschwinden, sondern
@@ -1082,7 +1115,7 @@ function cancelledTrainingInstancesOn(d){
     id:'trc-'+s.id+'-'+d, d:d, t:s.from, bis:s.to,
     title:'Training', team:s.team, squad:s.squad||1,
     pitch:null, halle:null, res:[], note:s.note||'',
-    isTraining:true, isCancelled:true, trainingSlotId:s.id
+    isTraining:true, isCancelled:true, trainingSlotId:s.id, kind:s.kind||(s.team===GK_TEAM?'goalkeeper':'training')
   })).sort((a,b)=>a.t.localeCompare(b.t));
 }
 
@@ -1266,25 +1299,105 @@ function fussballCapacityWarningsUpcoming(days){
 }
 
 /* KONFLIKTPRÜFUNG – gibt [{event,reasons}] zurück */
-function findConflicts(d,von,bis,pitch,halle,res,skipId){
-  const result=[];
+/* ---------- Terminarten & Belegungsstufen (zentrale Konfliktregel) ----------
+   Jede Belegung hat eine Terminart (kind): game | training | goalkeeper | other.
+   Jede Terminart hat eine Belegungsstufe – einstellbar in data/config.json unter
+   "occupancy.levels", Standard siehe OCC_DEFAULT_LEVELS:
+     exclusive – Spiel: verträgt sich mit keiner Überlagerung auf demselben Platz
+     shared    – Training/Sonstiges: teilt sich den Platz nur über getrennte Viertel/Hälften
+     overlay   – Torwarttraining: belegt keine Fläche, darf parallel zu "shared" laufen,
+                 aber nie zu "exclusive" oder zu einem zweiten "overlay" auf demselben Platz
+   Zusätzliche Ausnahmen: "occupancy.compatible": [["goalkeeper","goalkeeper"], …].
+   ALLE Stellen, die Konflikte prüfen (Formular, Start-Seite, Saison-Scan, Trainingszeiten,
+   Spieltags-Absagen), gehen über occupationConflictReasons() – keine Sonderfälle im Code. */
+const KINDS=[
+  {id:'game',label:'Spiel'},
+  {id:'training',label:'Training'},
+  {id:'goalkeeper',label:'Torwarttraining'},
+  {id:'other',label:'Sonstiges'}
+];
+const OCC_DEFAULT_LEVELS={game:'exclusive',training:'shared',goalkeeper:'overlay',other:'shared'};
+const GK_TEAM='Torwarttraining';
+// Plätze, auf denen Überlagerung (overlay) möglich ist. Alles andere in res[] (Kabinen,
+// Vereinsheim, Theke …) ist immer exklusiv – zwei Buchungen derselben Kabine = Konflikt.
+const FIELD_RES=['Großspielfeld','Kleinspielfeld'];
+function kindLabel(k){ const x=KINDS.find(k2=>k2.id===k); return x?x.label:'Termin'; }
+function kindOf(e){
+  if(!e) return 'other';
+  if(e.isExternal) return 'game';
+  if(e.kind) return e.kind;
+  if(e.team===GK_TEAM) return 'goalkeeper';
+  if(e.isTraining) return 'training';
+  return /spiel/i.test(e.title||'')?'game':'other'; // Alt-Termine ohne Terminart
+}
+function occLevel(kind){
+  const cfg=(CFG&&CFG.occupancy&&CFG.occupancy.levels)||{};
+  return cfg[kind]||OCC_DEFAULT_LEVELS[kind]||'shared';
+}
+function isOverlay(e){ return occLevel(kindOf(e))==='overlay'; }
+function kindsCompatible(ka,kb){
+  const extra=(CFG&&CFG.occupancy&&CFG.occupancy.compatible)||[];
+  if(extra.some(p=>(p[0]===ka&&p[1]===kb)||(p[0]===kb&&p[1]===ka))) return true;
+  const la=occLevel(ka), lb=occLevel(kb);
+  return (la==='overlay'&&lb==='shared')||(la==='shared'&&lb==='overlay');
+}
+// Nutzt die Belegung das Großspielfeld (egal welchen Teil)?
+function onGrossfeld(e){
+  if(e.pitch) return true;
+  if((e.res||[]).includes('Großspielfeld')) return true;
+  if(e.isExternal&&!e.isAway){
+    if(e.t==='00:00'&&eventBis(e)==='23:59') return false; // fussball.de-Spiel ohne Anstoßzeit
+    return true;
+  }
+  return false;
+}
+/* Gründe, warum sich zwei zeitlich überlappende Belegungen stören (leer = verträglich).
+   pitchReason(A,B): Viertel-/Hälften-Vergleich des jeweiligen Aufrufers (Buchungsformular
+   kennt feste Hälften, Start-Seite nur "geteiltes Spiel") – gilt nur zwischen Belegungen,
+   die beide eine Fläche haben (keine Überlagerung). */
+function occupationConflictReasons(A,B,pitchReason){
+  const reasons=[];
+  const compatible=kindsCompatible(kindOf(A),kindOf(B));
+  // 1) Großspielfeld
+  if(!compatible){
+    if(isOverlay(A)||isOverlay(B)){
+      if(onGrossfeld(A)&&onGrossfeld(B)){
+        const ov=isOverlay(A)?A:B, other=(ov===A)?B:A;
+        reasons.push('Großspielfeld: '+kindLabel(kindOf(ov))+' nicht parallel zu '+kindLabel(kindOf(other)));
+      }
+    }else if(pitchReason){
+      const r=pitchReason(A,B); if(r) reasons.push(r);
+    }
+  }
+  // 2) Kleinspielfeld (ohne Viertel): wie Großspielfeld, aber als ganze Fläche
+  const kleinA=(A.res||[]).includes('Kleinspielfeld'), kleinB=(B.res||[]).includes('Kleinspielfeld');
+  if(kleinA&&kleinB&&!compatible) reasons.push('Kleinspielfeld');
+  // 3) Halle (Drittel) – immer exklusiv
+  if(A.halle&&A.halle.thirds&&A.halle.thirds.length&&B.halle&&B.halle.thirds){
+    const mine=new Set(A.halle.thirds);
+    const hit=B.halle.thirds.filter(x=>mine.has(x));
+    if(hit.length) reasons.push('Halle: Drittel '+hit.sort((a,b)=>a-b).join('+'));
+  }
+  // 4) Sonstige Ressourcen (Kabinen, Vereinsheim, Theke …) – immer exklusiv
+  const hitRes=(A.res||[]).filter(r=>!FIELD_RES.includes(r)&&(B.res||[]).includes(r));
+  if(hitRes.length) reasons.push(hitRes.join(', '));
+  return reasons;
+}
+function timesOverlap(A,B){ return A.t<eventBis(B)&&B.t<eventBis(A); }
+// Viertel-Vergleich für Buchungen mit festen Flächen (Formulare, Trainingszeiten).
+function quarterPitchReason(A,B){
+  if(!A.pitch||!B.pitch) return null;
+  const mine=new Set(pitchQuarters(A.pitch));
+  const hit=pitchQuarters(B.pitch).filter(q=>mine.has(q));
+  return hit.length?('Großspielfeld '+pitchShort(A.pitch)+' ↔ '+pitchShort(B.pitch)+' (Viertel '+hit.join('+')+')'):null;
+}
+function findConflicts(d,von,bis,pitch,halle,res,skipId,kind){
+  const me={id:'__candidate',d,t:von,bis,pitch,halle,res:res||[],kind:kind||'other'};
   const occupations=EVENTS.filter(e=>e.d===d&&e.id!==skipId).concat(trainingInstancesOn(d)).concat(fussballBookingOccupations(d,skipId));
+  const result=[];
   occupations.forEach(e=>{
-    const eBis=eventBis(e);
-    if(von>=eBis||bis<=e.t)return; // kein Zeitüberschnitt
-    const reasons=[];
-    if(pitch&&e.pitch){
-      const mine=new Set(pitchQuarters(pitch));
-      const hit=pitchQuarters(e.pitch).filter(q=>mine.has(q));
-      if(hit.length)reasons.push('Großspielfeld '+pitchShort(pitch)+' ↔ '+pitchShort(e.pitch)+' (Viertel '+hit.join('+')+')');
-    }
-    if(halle&&halle.thirds&&halle.thirds.length&&e.halle&&e.halle.thirds){
-      const mine=new Set(halle.thirds);
-      const hit=e.halle.thirds.filter(d=>mine.has(d));
-      if(hit.length)reasons.push('Halle: Drittel '+hit.sort((a,b)=>a-b).join('+'));
-    }
-    const hitRes=(res||[]).filter(r=>(e.res||[]).includes(r));
-    if(hitRes.length)reasons.push(hitRes.join(', '));
+    if(!timesOverlap(me,e))return;
+    const reasons=occupationConflictReasons(me,e,quarterPitchReason);
     if(reasons.length)result.push({event:e,reasons});
   });
   return result;
@@ -1597,6 +1710,7 @@ function activeLocksOn(ds){
 function lockAffectsItem(lock,item){
   if(lock.resource==='platz'){
     if(item.pitch)return true; // Training/eigener Termin mit Platz-Zuordnung
+    if((item.res||[]).includes('Großspielfeld'))return true; // Torwarttraining (ohne Fläche, aber auf dem Platz)
     if(item.isExternal&&!item.isAway)return true; // fussball.de-Heimspiel (nutzt immer den Platz)
     return false;
   }
@@ -1628,6 +1742,10 @@ function loginErr(m){
   if(!m){e.classList.remove('show');return;}
   e.textContent=m; e.classList.add('show');
 }
+/* Bewusst EINE Meldung für "E-Mail unbekannt" und "Passwort falsch": verrät nicht, ob eine
+   Adresse registriert ist (wird relevant, sobald die Nutzerliste nicht mehr öffentlich ist). */
+const LOGIN_FAIL_MSG='E-Mail oder Passwort ist falsch. Bitte die Adresse aus deiner Willkommens-Mail verwenden.';
+let _loginFails=0;
 async function doLogin(){
   loginErr('');
   const u=document.getElementById('li-user').value.trim().toLowerCase();
@@ -1637,20 +1755,27 @@ async function doLogin(){
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
   try{
     if(u===CFG.admin.user.toLowerCase()){
-      if(p!==CFG.admin.password) throw new Error('Passwort stimmt nicht.');
+      if(p!==CFG.admin.password) throw new Error(LOGIN_FAIL_MSG);
       session={id:'admin',name:CFG.admin.first+' '+CFG.admin.last,email:CFG.admin.user,
                isAdmin:true,isSuper:true,token:localStorage.getItem('svbb_admin_token')||''};
     }else{
       const rec=USERS.find(x=>x.email.toLowerCase()===u);
-      if(!rec) throw new Error('Kein Benutzer mit dieser E-Mail.');
+      if(!rec) throw new Error(LOGIN_FAIL_MSG);
       if(rec.locked) throw new Error('Dieser Zugang wurde gesperrt. Bitte an den Vorstand wenden.');
       let token;
-      try{ token=await decryptToken(rec.enc,p); }catch(e){ throw new Error('Passwort stimmt nicht.'); }
+      try{ token=await decryptToken(rec.enc,p); }catch(e){ throw new Error(LOGIN_FAIL_MSG); }
       session={id:rec.id,name:rec.first+' '+rec.last,email:rec.email,
                isAdmin:rec.admin===true,isSuper:false,classes:normalizeClasses(rec.classes||{}),token:token};
     }
     afterLogin();
-  }catch(e){ loginErr(e.message); }
+  }catch(e){
+    loginErr(e.message);
+    if(e.message===LOGIN_FAIL_MSG){
+      _loginFails++; trackEvent('login_fehlgeschlagen');
+      // Nach wiederholten Fehlversuchen den Weg zum Zurücksetzen deutlicher anbieten.
+      if(_loginFails>=2){ const f=document.getElementById('li-forgot'); if(f){ f.style.fontWeight='800'; f.textContent='Passwort vergessen? Hier neues Passwort anfordern'; } }
+    }
+  }
   finally{ btn.disabled=false; btn.textContent='Anmelden'; }
 }
 function afterLogin(){
@@ -1965,6 +2090,7 @@ function cancelledRowHTML(e){
     +'</div>'
     +'</div>';
 }
+function gkBadge(){ return '<span class="badge-gk"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M8 13V6a1.5 1.5 0 013 0v5M11 11V4.5a1.5 1.5 0 013 0V11M14 11V6a1.5 1.5 0 013 0v7c0 4-2.5 7-6 7-2.5 0-4-1.5-5.5-4L4 13a1.5 1.5 0 012.5-1.5L8 13"/></svg>Torwarttraining</span>'; }
 function rowHTML(e){
   if(e.isExternal) return externalRowHTML(e);
   if(e.isCancelled) return cancelledRowHTML(e);
@@ -1975,14 +2101,15 @@ function rowHTML(e){
   let title, b='', pitchVisual='';
   if(e.isTraining){
     // Team+Typ stehen jetzt direkt in der Headline -> Team-Chip und "Training"-Chip entfallen.
-    title='Training · '+teamLabel(e.team,e.squad);
+    title=kindOf(e)==='goalkeeper'?'Torwarttraining'+(e.team!==GK_TEAM?' · '+teamLabel(e.team,e.squad):''):'Training · '+teamLabel(e.team,e.squad);
+    if(kindOf(e)==='goalkeeper')b+=gkBadge();
     if(e.halle&&e.halle.thirds&&e.halle.thirds.length)b+=halleBadge(e.halle);
     (e.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
     if(e.pitch)pitchVisual=pitchBadge(e.pitch);
     else if(e.halle&&e.halle.thirds&&e.halle.thirds.length)pitchVisual=halleBadge(e.halle);
   }else{
     title=e.title;
-    b='<span class="badge-team '+cat(e.team)+'">'+esc(teamLabel(e.team,e.squad))+'</span>';
+    b=(kindOf(e)==='goalkeeper'?gkBadge():'')+'<span class="badge-team '+cat(e.team)+'">'+esc(teamLabel(e.team,e.squad))+'</span>';
     if(e.pitch)b+=pitchBadge(e.pitch);
     if(e.halle&&e.halle.thirds&&e.halle.thirds.length)b+=halleBadge(e.halle);
     (e.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
@@ -2008,7 +2135,8 @@ function rowHTML(e){
   }
   const mine=(session&&e.ownerId===session.id)?' mine':'';
   const hl=(e.id===highlightId)?' hl':'';
-  return '<div class="event-card'+mine+hl+'" id="ev-'+e.id+'">'
+  const gk=kindOf(e)==='goalkeeper'?' gk-card':'';
+  return '<div class="event-card'+mine+hl+gk+'" id="ev-'+e.id+'">'
     +'<div class="ev-head">'
     +'<div class="ev-date-box"><span class="ev-dow">'+dow+'</span><span class="ev-day">'+dd+'</span></div>'
     +'<div class="ev-sep"></div>'
@@ -2380,10 +2508,11 @@ function renderStart(){
   document.getElementById('st-date').textContent=DAYS[dt.getDay()]+', '+fmtShort(todayStr);
 
   const todays=todaysCombinedAgenda();
-  const counts={training:0,spiel:0,sonstige:0};
+  const counts={training:0,torwart:0,spiel:0,sonstige:0};
   todays.forEach(e=>{ if(!e.isCancelled) counts[classifyAgendaItem(e)]++; }); // abgesagte zählen nicht als stattfindend
   const parts=[];
   if(counts.training)parts.push(counts.training+' Training'+(counts.training===1?'':'s'));
+  if(counts.torwart)parts.push(counts.torwart+' Torwarttraining'+(counts.torwart===1?'':'s'));
   if(counts.spiel)parts.push(counts.spiel+' Spiel'+(counts.spiel===1?'':'e'));
   if(counts.sonstige)parts.push(counts.sonstige+' sonstige'+(counts.sonstige===1?'r Termin':' Termine'));
   document.getElementById('st-summary').textContent=parts.length?parts.join(' · '):'Heute nichts geplant';
@@ -2418,9 +2547,10 @@ function todaysCombinedAgenda(){
     .sort((a,b)=>a.t.localeCompare(b.t));
 }
 function classifyAgendaItem(e){
-  if(e.isTraining)return 'training';
-  if(e.isExternal)return 'spiel';
-  if(/spiel/i.test(e.title||''))return 'spiel';
+  const k=kindOf(e);
+  if(k==='goalkeeper')return 'torwart';
+  if(e.isTraining||k==='training')return 'training';
+  if(k==='game')return 'spiel';
   return 'sonstige';
 }
 function agendaOn(ds){
@@ -2438,7 +2568,9 @@ function pitchLabelOf(e){
   return '';
 }
 function pitchVisualOf(e){
-  if(e.pitch)return pitchBadge(e.pitch);
+  // Kabinen & Co. zusätzlich zur Platzfläche anzeigen (z. B. "Viertel 2 · Kabine 3").
+  const extra=(e.res||[]).filter(r=>!FIELD_RES.includes(r)).map(r=>' <span class="badge-res">'+esc(r)+'</span>').join('');
+  if(e.pitch)return pitchBadge(e.pitch)+extra;
   if(e.halle&&e.halle.thirds&&e.halle.thirds.length)return halleBadge(e.halle);
   if(e.isExternal)return '<span class="badge-pitch">'+(e.pitchIsFull?miniPitch([1,2,3,4]):'⚽')+esc(e.pitchLabelText||'fussball.de')+'</span>';
   // Auch reine Ressourcen-Buchungen (z.B. nur Theke/Vereinsheim, ohne Platz/Halle) sollen in
@@ -2495,7 +2627,7 @@ function renderPitchToday(){
     const running=e.t<=nowHM&&eventBis(e)>nowHM;
     const teamTxt=teamLabel(e.team,e.squad||1);
     const type=classifyAgendaItem(e);
-    let typeTxt=type==='training'?'Training':(type==='spiel'?(isFriendly(e)?'Freundschaftsspiel':'Spiel'):'Termin');
+    let typeTxt=typeLabelOf(e);
     if(e.isExternal)typeTxt+=e.isAway?' · auswärts':' · heim';
     const visual=pitchVisualOf(e)||'<span class="badge-pitch" style="opacity:.5;">–</span>';
     const sc=scoreInfo(e);
@@ -2518,25 +2650,27 @@ function isSharedHomeGame(e){ return !!(e&&e.isExternal&&!e.isAway&&!e.pitchIsFu
 function conflictsOnDay(ds){
   const items=agendaOn(ds);
   const found=[];
+  // Viertel-Vergleich für die Anzeige: fussball.de-Spiele haben hier keine feste Hälfte.
+  const pitchReason=(A,B)=>{
+    const qa=A.pitch?pitchQuarters(A.pitch):(A.isExternal&&A.pitchIsFull?[1,2,3,4]:[]);
+    const qb=B.pitch?pitchQuarters(B.pitch):(B.isExternal&&B.pitchIsFull?[1,2,3,4]:[]);
+    const shA=isSharedHomeGame(A), shB=isSharedHomeGame(B);
+    if(shA&&shB) return null; // zwei geteilte Spiele passen nebeneinander – mehr als zwei prüft fussballCapacityWarningsOn
+    if(shA||shB){
+      // Geteiltes Jugendspiel (z.B. E-Jugend) braucht irgendeine komplett freie Platzhälfte.
+      // Welche genau, legt fussball.de nicht fest – daher Konflikt nur, wenn der andere Termin
+      // KEINE Hälfte frei lässt (ganzer Platz, oder in beiden Hälften je ein Viertel belegt).
+      const other=shA?qb:qa;
+      const halfFree=Object.values(HALF).some(h=>h.every(q=>!other.includes(q)));
+      return (other.length&&!halfFree)?'Großspielfeld':null;
+    }
+    return qa.some(q=>qb.includes(q))?'Großspielfeld':null;
+  };
   for(let i=0;i<items.length;i++){
     for(let j=i+1;j<items.length;j++){
       const A=items[i],B=items[j];
-      if(A.t<eventBis(B)&&B.t<eventBis(A)){
-        const qa=A.pitch?pitchQuarters(A.pitch):(A.isExternal&&A.pitchIsFull?[1,2,3,4]:[]);
-        const qb=B.pitch?pitchQuarters(B.pitch):(B.isExternal&&B.pitchIsFull?[1,2,3,4]:[]);
-        const shA=isSharedHomeGame(A), shB=isSharedHomeGame(B);
-        if(shA&&shB) continue; // zwei geteilte Spiele passen nebeneinander – mehr als zwei prüft fussballCapacityWarningsOn
-        if(shA||shB){
-          // Geteiltes Jugendspiel (z.B. E-Jugend) braucht irgendeine komplett freie Platzhälfte.
-          // Welche genau, legt fussball.de nicht fest – daher Konflikt nur, wenn der andere Termin
-          // KEINE Hälfte frei lässt (ganzer Platz, oder in beiden Hälften je ein Viertel belegt).
-          const other=shA?qb:qa;
-          const halfFree=Object.values(HALF).some(h=>h.every(q=>!other.includes(q)));
-          if(other.length&&!halfFree)found.push([A,B]);
-          continue;
-        }
-        if(qa.some(q=>qb.includes(q)))found.push([A,B]);
-      }
+      if(!timesOverlap(A,B)) continue;
+      if(occupationConflictReasons(A,B,pitchReason).length) found.push([A,B]);
     }
   }
   return found;
@@ -2626,6 +2760,7 @@ function conflictBannerHTML(e){
 function typeLabelOf(e){
   const t=classifyAgendaItem(e);
   if(t==='training')return 'Training';
+  if(t==='torwart')return 'Torwarttraining';
   if(t==='spiel')return isFriendly(e)?'Freundschaftsspiel':'Spiel';
   return 'Termin';
 }
@@ -2824,6 +2959,7 @@ function newEventFromFussball(idx){
   if(!session)return; // requireLogin() in newEvent() already handled the redirect
   formSkipFussballLink=fussballGameLinkId(g); // eigenes Belegungsfenster nicht als Konflikt mit sich selbst werten
   document.getElementById('f-anlass').value='Heimspiel: '+g.team+' – '+g.opponent+(g.competition?' ('+g.competition+')':'');
+  document.getElementById('f-kind').value='game'; kindTouched=true; onKindChange(false);
   if(g.t){ document.getElementById('f-von').value=g.t; document.getElementById('f-bis').value=addMinutes(g.t,120); }
   onTimeChange();
   showToast('Aus fussball.de übernommen – bitte Team, Platz & Details prüfen.',3500);
@@ -2844,6 +2980,26 @@ function onTeamChange(){
   document.getElementById('f-squad-field').style.display=isJugend(team)?'block':'none';
   relabelSquad('f-squad',team);
   applySquadRestrictions('f-squad',team);
+  if(team===GK_TEAM&&formKind()!=='goalkeeper'){ document.getElementById('f-kind').value='goalkeeper'; onKindChange(false); }
+}
+/* Terminart im Terminformular. Torwarttraining (Belegungsstufe "overlay") hat keine
+   Platzfläche – die Viertel-Auswahl wird dann ausgeblendet, "Großspielfeld" heißt nur "auf dem Platz". */
+let kindTouched=false;
+function formKind(){ const el=document.getElementById('f-kind'); return el?el.value:'other'; }
+function onKindChange(byUser){
+  if(byUser) kindTouched=true;
+  const k=formKind(), help=document.getElementById('f-kind-help');
+  if(help) help.textContent=occLevel(k)==='overlay'
+    ?'Belegt keine Platzfläche: darf parallel zu einem Training laufen, aber nicht während eines Spiels.'
+    :(occLevel(k)==='exclusive'?'Während eines Spiels ist auf dem Platz kein Torwarttraining möglich.':'');
+  hideConflicts(); renderPitch();
+}
+// Neuer Termin: Terminart aus dem Anlass vorschlagen, solange sie nicht bewusst gewählt wurde.
+function suggestKindFromTitle(){
+  if(kindTouched||editingId) return;
+  const t=document.getElementById('f-anlass').value;
+  const k=/torwart/i.test(t)?'goalkeeper':(/spiel|turnier/i.test(t)?'game':(/training/i.test(t)?'training':'other'));
+  if(k!==formKind()){ document.getElementById('f-kind').value=k; onKindChange(false); }
 }
 function onTimeChange(){
   hideConflicts();renderPitch();renderHalle();
@@ -2897,8 +3053,9 @@ function pickPitch(q){ if(pitchMode==='ganz')return; pitchPart=pitchPartForPick(
 function curPitch(){return pitchMode==='ganz'?{mode:'ganz'}:{mode:pitchMode,part:pitchPart};}
 function renderPitch(){
   const f=document.getElementById('f-pitch-field');
-  f.style.display=pitchOn()?'block':'none';
-  if(!pitchOn())return;
+  const show=pitchOn()&&occLevel(formKind())!=='overlay';
+  f.style.display=show?'block':'none';
+  if(!show)return;
   const von=document.getElementById('f-von').value||'00:00';
   const bis=document.getElementById('f-bis').value||'23:59';
   const busy=usedQuartersWindow(dateInput().value,von,bis,editingId);
@@ -2961,26 +3118,32 @@ function applyFreeHalf(part){
    Eine feste Trainingszeit zählt dabei wie eine bestehende Buchung: Ein E/F/G-Spiel weicht auf
    die andere Hälfte aus, wenn die frei ist. Abgesagt wird nur, wenn wirklich kein Platz bleibt
    (Ganzplatz-Spiel, zwei gleichzeitige Spiele oder andere Hälfte schon belegt). */
-function trainingGameCollisions(day,from,to,pitch,validFrom,validUntil,skipSlotId){
-  if(!pitch)return [];
-  const want=pitchQuarters(pitch), out=[];
+function trainingGameCollisions(day,from,to,pitch,validFrom,validUntil,skipSlotId,opts){
+  const kind=(opts&&opts.kind)||'training', res=(opts&&opts.res)||[];
+  const overlay=occLevel(kind)==='overlay';
+  if(!pitch&&!(overlay&&res.includes('Großspielfeld')))return [];
+  const out=[];
   const start=validFrom&&validFrom>todayStr?validFrom:todayStr;
   const dates=[...new Set((FUSSBALLDE.games||[]).map(g=>g.d))].filter(d=>d>=start&&(!validUntil||d<=validUntil)&&dowOf(d)===day).sort();
   dates.forEach(d=>{
-    const me={id:'tf-candidate',d,t:from,bis:to,pitch};
-    const hits=fussballBookingOccupations(d,null,skipSlotId,[me]).filter(e=>from<eventBis(e)&&to>e.t&&pitchQuarters(e.pitch).some(q=>want.includes(q)));
+    const me={id:'tf-candidate',d,t:from,bis:to,pitch,res,kind};
+    // Überlagerung belegt keine Viertel → verdrängt kein E/F/G-Spiel auf die andere Hälfte.
+    const occ=fussballBookingOccupations(d,null,skipSlotId,overlay?[]:[me]);
+    const hits=occ.filter(e=>timesOverlap(me,e)&&occupationConflictReasons(me,e,quarterPitchReason).length);
     if(hits.length) out.push({d,labels:hits.map(occupationLabel)});
   });
   return out;
 }
 function renderTrainingGameNote(){
-  const el=document.getElementById('tf-game-note'); if(!el)return;
+  const other=document.getElementById(tfIsOverlay()?'tf-game-note':'tf-game-note-gk'); if(other) other.innerHTML='';
+  const el=document.getElementById(tfIsOverlay()?'tf-game-note-gk':'tf-game-note'); if(!el)return;
   const day=parseInt(document.getElementById('tf-day').value);
   const from=document.getElementById('tf-from').value, to=document.getElementById('tf-to').value;
   if(!tfPitchOn()||!from||!to||from>=to){ el.innerHTML=''; return; }
-  const col=trainingGameCollisions(day,from,to,tfCurPitch(),document.getElementById('tf-validfrom').value,document.getElementById('tf-validuntil').value,tEditId);
+  const ov=tfIsOverlay();
+  const col=trainingGameCollisions(day,from,to,ov?null:tfCurPitch(),document.getElementById('tf-validfrom').value,document.getElementById('tf-validuntil').value,tEditId,{kind:tfKind(),res:ov?['Großspielfeld']:[]});
   if(!col.length){ el.innerHTML=''; return; }
-  el.innerHTML='<div class="fb-note" style="background:#FFF5F5;border:1px solid #F5C6C0;color:#8E2A1D;">⚽ An <b>'+col.length+' Tag'+(col.length===1?'':'en')+'</b> belegen Heimspiele diese Platzfläche zur Trainingszeit:<br>'
+  el.innerHTML='<div class="fb-note" style="background:#FFF5F5;border:1px solid #F5C6C0;color:#8E2A1D;">⚽ An <b>'+col.length+' Tag'+(col.length===1?'':'en')+'</b> belegen Heimspiele '+(tfIsOverlay()?'den Platz':'diese Platzfläche')+' zur Trainingszeit:<br>'
     +col.slice(0,6).map(c=>fmtShort(c.d)+': '+esc(c.labels.join(', '))).join('<br>')+(col.length>6?'<br>… und '+(col.length-6)+' weitere':'')
     +'<br>Beim Speichern wird das Training an diesen Tagen automatisch abgesagt.</div>';
 }
@@ -2991,7 +3154,8 @@ function resetForm(){
   document.querySelectorAll('#f-squad button').forEach((b,i)=>b.classList.toggle('on',i===0));
   document.querySelectorAll('#f-res .res-chip').forEach(c=>c.classList.toggle('on',c.dataset.res==='Großspielfeld'));
   pitchMode='ganz';pitchPart=null;document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode==='ganz'));
-  halleThirds=[];onTeamChange();renderPitch();renderHalle();hideConflicts();formDirty=false;
+  document.getElementById('f-kind').value='other'; kindTouched=false;
+  halleThirds=[];onTeamChange();onKindChange(false);renderPitch();renderHalle();hideConflicts();formDirty=false;
   formSkipFussballLink=null;
 }
 function requireLogin(){
@@ -3089,14 +3253,15 @@ function fillForm(e){
   document.getElementById('f-team').value=e.team;
   document.querySelectorAll('#f-squad button').forEach((b,i)=>b.classList.toggle('on',i===((e.squad||1)-1)));
   document.querySelectorAll('#f-res .res-chip').forEach(c=>{
-    if(c.dataset.res==='Großspielfeld')c.classList.toggle('on',!!e.pitch);
+    if(c.dataset.res==='Großspielfeld')c.classList.toggle('on',!!e.pitch||(e.res||[]).includes('Großspielfeld'));
     else if(c.dataset.res==='Halle')c.classList.toggle('on',!!(e.halle&&e.halle.thirds&&e.halle.thirds.length));
     else c.classList.toggle('on',(e.res||[]).includes(c.dataset.res));
   });
   if(e.pitch){pitchMode=e.pitch.mode;pitchPart=e.pitch.part||null;document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode===pitchMode));}
   else{pitchMode='ganz';pitchPart=null;document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode==='ganz'));}
   halleThirds=e.halle&&e.halle.thirds?[...e.halle.thirds]:[];
-  onTeamChange();updateWeekday();renderPitch();renderHalle();
+  document.getElementById('f-kind').value=kindOf(e); kindTouched=true;
+  onTeamChange();onKindChange(false);updateWeekday();renderPitch();renderHalle();
 }
 function editEvent(id){
   if(!requireLogin()) return;
@@ -3146,13 +3311,17 @@ async function submitEvent(){
     const msg=sq.length?'Nur Mannschaft '+sq.map(s=>jugendLetter(team)+s).join(', ')+' erlaubt.':'Diese Altersklasse ist dir nicht zugewiesen.';
     showToast(msg,5000);return;
   }
+  const kind=formKind();
+  const overlay=occLevel(kind)==='overlay';
   const res=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res).filter(r=>r!=='Großspielfeld'&&r!=='Halle');
-  const pitch=pitchOn()?curPitch():null;
+  // Überlagerung (Torwarttraining): keine Platzfläche, nur "auf dem Großspielfeld".
+  if(overlay&&pitchOn()) res.unshift('Großspielfeld');
+  const pitch=(pitchOn()&&!overlay)?curPitch():null;
   const halle=halleResOn()&&halleThirds.length?{thirds:[...halleThirds].sort((a,b)=>a-b)}:null;
   if(halleResOn()&&!halleThirds.length){showToast('Bitte mindestens ein Hallen-Drittel auswählen.');return;}
   const note=document.getElementById('f-bem').value.trim();
   // HARTE KONFLIKTPRÜFUNG
-  const conflicts=findConflicts(d,von,bis,pitch,halle,res,editingId);
+  const conflicts=findConflicts(d,von,bis,pitch,halle,res,editingId,kind);
   if(conflicts.length){showConflicts(conflicts);renderFreeSlotsBox('free-slots-box',d,von,bis,editingId);return;}
   hideConflicts();
   const btn=document.getElementById('save-btn'),lblEl=document.getElementById('save-label');
@@ -3162,8 +3331,8 @@ async function submitEvent(){
   showSaving(editingId?'Termin wird geändert …':'Termin wird gespeichert …');
   const backup=JSON.stringify(EVENTS);
   try{
-    if(editingId)Object.assign(EVENTS.find(x=>x.id===editingId),{d,t:von,bis,title,team,squad,pitch,halle,res,note});
-    else EVENTS.push({id:crypto.randomUUID(),d,t:von,bis,title,team,squad,pitch,halle,res,note,ownerId:session.id,ownerName:session.name});
+    if(editingId)Object.assign(EVENTS.find(x=>x.id===editingId),{d,t:von,bis,title,kind,team,squad,pitch,halle,res,note});
+    else EVENTS.push({id:crypto.randomUUID(),d,t:von,bis,title,kind,team,squad,pitch,halle,res,note,ownerId:session.id,ownerName:session.name});
     const wasEditing=!!editingId;
     const logMsg=(wasEditing?'Termin geändert: ':'Neuer Termin: ')+title+' – '+teamLabel(team,squad)+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name+teamTrailer(team,squad);
     editingId=null;formDirty=false;document.getElementById('cancel-btn').style.display='none';
@@ -3448,7 +3617,7 @@ function trainResBadges(s){
 }
 function fillTrainerSelect(selectedId){ renderTrainerChips(document.getElementById('tf-team')?.value||'F-Jugend',1,selectedId?[selectedId]:[]); }
 function trainLocHTML(s){
-  let h='';
+  let h=(s.team===GK_TEAM||s.kind==='goalkeeper')?gkBadge():'';
   if(s.pitch) h+=pitchBadge(s.pitch);
   (s.res||[]).forEach(r=>h+='<span class="badge-res">'+esc(r)+'</span>');
   if(s.note) h+='<span class="badge-res">'+esc(s.note)+'</span>';
@@ -3615,11 +3784,15 @@ function renderTraining(){
 
   box.innerHTML=h;
 }
+function tfKind(){ return document.getElementById('tf-team').value===GK_TEAM?'goalkeeper':'training'; }
+function tfIsOverlay(){ return occLevel(tfKind())==='overlay'; }
 function tfTeamChange(){
   const team=document.getElementById('tf-team').value;
   document.getElementById('tf-squad-field').style.display=isJugend(team)?'block':'none';
+  const gh=document.getElementById('tf-gk-help'); if(gh) gh.style.display=tfIsOverlay()?'block':'none';
   relabelSquad('tf-squad',team);
   setTimeout(refreshTrainerChips,0);
+  tfRenderPitch();
 }
 function tfToggleRes(el){ el.classList.toggle('on'); if(el.dataset.res==='Großspielfeld') tfRenderPitch(); }
 function tfPitchOn(){ return resChipOn('tf-res','Großspielfeld'); }
@@ -3632,8 +3805,9 @@ function tfPickPitch(q){ if(tPitchMode==='ganz')return; tPitchPart=pitchPartForP
 function tfCurPitch(){ return tPitchMode==='ganz'?{mode:'ganz'}:{mode:tPitchMode,part:tPitchPart}; }
 function tfRenderPitch(){
   const f=document.getElementById('tf-pitch-field');
-  f.style.display=tfPitchOn()?'block':'none';
-  if(!tfPitchOn())return;
+  const show=tfPitchOn()&&!tfIsOverlay();
+  f.style.display=show?'block':'none';
+  if(!show){ renderTrainingGameNote(); return; }
   const day=parseInt(document.getElementById('tf-day').value);
   const from=document.getElementById('tf-from').value||'00:00';
   const to=document.getElementById('tf-to').value||'23:59';
@@ -3654,7 +3828,7 @@ function tfFill(s){
   // trainer chips werden nach tfTeamChange gesetzt
   document.querySelectorAll('#tf-squad button').forEach((b,i)=>b.classList.toggle('on',i===((s.squad||1)-1)));
   document.querySelectorAll('#tf-res .res-chip').forEach(c=>{
-    if(c.dataset.res==='Großspielfeld') c.classList.toggle('on',!!s.pitch);
+    if(c.dataset.res==='Großspielfeld') c.classList.toggle('on',!!s.pitch||(s.res||[]).includes('Großspielfeld'));
     else c.classList.toggle('on',(s.res||[]).includes(c.dataset.res));
   });
   if(s.pitch){ tPitchMode=s.pitch.mode; tPitchPart=s.pitch.part||null;
@@ -3703,20 +3877,22 @@ async function saveTrainingSlot(){
   const trainerChips=[...document.querySelectorAll('#tf-trainers-chips .res-chip.on')];
   const trainerIds=trainerChips.map(x=>x.dataset.id).filter(Boolean);
   const trainerNames=trainerIds.map(id=>{const u=USERS.find(x=>x.id===id);return u?(u.first+' '+u.last):'';}).filter(Boolean);
+  const kind=tfKind(), overlay=tfIsOverlay();
   const res=[...document.querySelectorAll('#tf-res .res-chip.on')].map(c=>c.dataset.res).filter(r=>r!=='Großspielfeld');
-  const pitch=tfPitchOn()?tfCurPitch():null;
+  // Überlagerung (Torwarttraining): keine Platzfläche, nur "auf dem Großspielfeld".
+  if(overlay&&tfPitchOn()) res.unshift('Großspielfeld');
+  const pitch=(tfPitchOn()&&!overlay)?tfCurPitch():null;
   const note=document.getElementById('tf-note').value.trim();
-  if(!pitch&&!res.length){ showToast('Bitte mindestens einen Platz auswählen.'); return; }
+  if(!pitch&&!res.some(r=>FIELD_RES.includes(r))){ showToast('Bitte einen Platz auswählen (Großspielfeld oder Kleinspielfeld).'); return; }
   const warn=[];
-  const mine=new Set(pitchQuarters(pitch));
+  const me={t:from,bis:to,pitch,res,kind,team};
   TRAINING.filter(s=>s.day===day&&s.id!==tEditId&&from<s.to&&s.from<to).forEach(s=>{
-    const hit=pitchQuarters(s.pitch).filter(q=>mine.has(q));
-    if(hit.length) warn.push('Viertel '+hit.join('/')+' nutzt schon '+trainName(s)+' ('+s.from+'–'+s.to+')');
-    const rh=(s.res||[]).filter(r=>res.includes(r));
-    if(rh.length) warn.push(rh.join(', ')+' nutzt schon '+trainName(s)+' ('+s.from+'–'+s.to+')');
+    const other={t:s.from,bis:s.to,pitch:s.pitch,res:s.res||[],team:s.team,isTraining:true,kind:s.kind||(s.team===GK_TEAM?'goalkeeper':'training')};
+    const reasons=occupationConflictReasons(me,other,quarterPitchReason);
+    if(reasons.length) warn.push(reasons.join(', ')+': schon belegt von '+trainName(s)+' ('+s.from+'–'+s.to+')');
   });
   // Heimspiele an einzelnen Tagen: dort findet das Training nicht statt (harte Regel wie bei Terminen).
-  const gameCol=trainingGameCollisions(day,from,to,pitch,validFrom,validUntil,tEditId);
+  const gameCol=trainingGameCollisions(day,from,to,pitch,validFrom,validUntil,tEditId,{kind,res});
   const alreadyCancelled=tEditId?((TRAINING.find(x=>x.id===tEditId)||{}).cancelled||[]):[];
   const newCancels=gameCol.map(c=>c.d).filter(d=>!alreadyCancelled.includes(d));
   if(newCancels.length&&!saveTrainingSlot._confirmed){
@@ -3733,10 +3909,10 @@ async function saveTrainingSlot(){
   try{
     if(tEditId){
       const existing=TRAINING.find(x=>x.id===tEditId);
-      Object.assign(existing,{day,from,to,team,squad,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,
+      Object.assign(existing,{day,from,to,team,squad,kind,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,
         cancelled:[...new Set([...(existing.cancelled||[]),...newCancels])].sort()});
     }else{
-      TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[...newCancels].sort()});
+      TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,kind,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[...newCancels].sort()});
     }
     const tMsg=(tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+team+' (ab '+fmtShort(validFrom)+')'
       +(newCancels.length?' – wegen Heimspielen abgesagt am '+newCancels.map(fmtShort).join(', '):'')+' – '+session.name+teamTrailer(team,squad);
@@ -3948,6 +4124,7 @@ function userListRowsHTML(){
         u.locked?
         '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0"/></svg><span>Entsperren</span>':
         '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg><span>Sperren</span>')+'</button>'
+      +'<button class="uact" onclick="adminResetPassword(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/></svg><span>Passwort</span></button>'
       +'<button class="uact danger" onclick="deleteUser(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg><span>Löschen</span></button>'
       +'</div>';
     return h+'</div>';
@@ -4239,7 +4416,7 @@ async function createUserCore({first,last,mail,pass,isAdm,classes,targetSeason,p
     // sonst zeigt die Zugänge-Liste kurzzeitig Teams einer noch gar nicht aktiven Saison an.
     const initialClasses=(targetSeason&&curSeasonForCreate&&targetSeason.id===curSeasonForCreate.id)?classes:{};
     const encRec=await encryptToken(session.token,pass);
-    const newU={id:crypto.randomUUID(),first,last,email:mail,admin:!!isAdm,classes:initialClasses,enc:encRec,created:new Date().toISOString(),emailNotificationsEnabled:true};
+    const newU={id:crypto.randomUUID(),first,last,email:mail,admin:!!isAdm,classes:initialClasses,enc:encRec,created:new Date().toISOString(),emailNotificationsEnabled:true,pwChangeRequired:true};
     if(phone){ newU.phone=phone; newU.contactPublic=contactPublic||'none'; }
     USERS.push(newU);
     await saveUsers('Zugang angelegt: '+first+' '+last+(isAdm?' (Admin)':'')+' – '+session.name);
@@ -4893,7 +5070,9 @@ async function changePassword(){
     try{ token=await decryptToken(u.enc,oldPw); }
     catch(e){ throw new Error('Aktuelles Passwort stimmt nicht.'); }
     u.enc=await encryptToken(token,newPw);
+    delete u.pwChangeRequired;
     await saveUsers('Passwort geändert: '+u.first+' '+u.last);
+    sendPwChangedMail(u);
     session.token=token;
     localStorage.setItem('svbb_session',JSON.stringify(session)); localStorage.setItem('pc_was_logged_in','1');
     document.getElementById('pw-old').value='';
@@ -4902,6 +5081,208 @@ async function changePassword(){
     showToast('Passwort geändert. Bitte merken – es lässt sich nicht wiederherstellen.',5000);
   }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   finally{ btn.disabled=false; lbl.textContent=old; }
+}
+
+/* ---------- Passwort: Pflichtwechsel, Admin-Reset, "Passwort vergessen" ----------
+   Hintergrund: Jeder Zugang speichert den gemeinsamen Schreib-Token, verschlüsselt mit dem
+   eigenen Passwort. Ein neues Passwort heißt also immer: Token neu verschlüsseln. Das kann nur,
+   wer den Token hat – der Nutzer selbst (angemeldet), ein Admin, oder der Passwort-Worker
+   (Cloudflare, siehe worker/password-reset-worker.js), der den Token nach einem gültigen
+   E-Mail-Link einmalig an den Browser übergibt. */
+let PWFLOW={mode:null,state:'form',error:'',code:null};
+function pwResetEnabled(){ return !!(CFG&&CFG.passwordReset&&CFG.passwordReset.workerUrl); }
+async function pwApi(path,body){
+  const base=String(CFG.passwordReset.workerUrl||'').replace(/\/+$/,'');
+  let r;
+  try{ r=await fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),cache:'no-store'}); }
+  catch(e){ throw new Error('Keine Verbindung zum Server. Bitte Internetverbindung prüfen.'); }
+  let data={}; try{ data=await r.json(); }catch(e){}
+  if(!r.ok) throw new Error(data.error||('Server antwortet mit Fehler '+r.status+'.'));
+  return data;
+}
+// Bestätigungsmail "Dein Passwort wurde geändert" (läuft wie die Start-Passwort-Mail über ein
+// GitHub-Dispatch-Event, nicht über einen Commit). Fehler hier dürfen nichts blockieren.
+function sendPwChangedMail(u){
+  if(!u||!u.email) return;
+  ghDispatch('password-changed',{name:u.first+' '+u.last,email:u.email}).catch(err=>console.warn('Bestätigungsmail nicht ausgelöst:',err));
+}
+function openPwFlow(mode){
+  PWFLOW={mode,state:'form',error:'',code:PWFLOW.code};
+  document.getElementById('pwflow').classList.add('show');
+  // Beim Pflichtwechsel gibt es kein "Schließen" – nur Abmelden.
+  document.getElementById('pwflow-close').style.display=(mode==='force')?'none':'flex';
+  renderPwFlow();
+  trackArea(mode==='forgot'?'passwort_vergessen':(mode==='reset'?'passwort_zuruecksetzen':'passwort_pflichtwechsel'));
+}
+function closePwFlow(){
+  if(PWFLOW.mode==='force') return;
+  document.getElementById('pwflow').classList.remove('show');
+  PWFLOW.mode=null; PWFLOW.code=null;
+  trackArea(currentPaneArea());
+}
+function openForgotPassword(){
+  const mail=(document.getElementById('li-user')||{}).value||'';
+  closeLogin();
+  openPwFlow('forgot');
+  const m=document.getElementById('pf-mail'); if(m&&mail.includes('@')) m.value=mail.trim();
+}
+function pwFieldsHTML(){
+  return '<input type="password" id="pf-new" placeholder="Neues Passwort (min. 12 Zeichen)" autocomplete="new-password">'
+    +'<input type="password" id="pf-new2" placeholder="Neues Passwort wiederholen" autocomplete="new-password">';
+}
+function renderPwFlow(){
+  const box=document.getElementById('pwflow-body'); if(!box)return;
+  const f=PWFLOW;
+  let h='<img class="login-crest" src="assets/logo.svg" alt="platzcoach" style="width:150px;margin-bottom:14px;">';
+  const err=f.error?'<div class="login-err show">'+esc(f.error)+'</div>':'';
+  const busy=f.state==='sending';
+  const btnLbl=t=>busy?'<span class="spinner"></span>':t;
+  if(f.mode==='forgot'){
+    h+='<h1>Passwort vergessen?</h1>';
+    if(f.state==='done'){
+      h+='<div class="pw-ok">Danke! Wenn die Angaben zu einem Zugang passen, bekommst du in den nächsten Minuten eine E-Mail mit einem Link. Der Link ist <b>60 Minuten</b> gültig und funktioniert nur einmal.<br><br>Keine Mail bekommen? Schau im Spam-Ordner nach oder wende dich an den Vorstand – ein Admin kann dein Passwort auch direkt neu setzen.</div>'
+        +'<button class="btn-yellow" onclick="closePwFlow();openLogin()">Zurück zur Anmeldung</button>';
+    }else if(!pwResetEnabled()){
+      h+='<p class="sub">Bitte wende dich an den Vorstand oder einen Admin deines Vereins. Ein Admin kann dir unter Konto → Zugänge ein neues Start-Passwort schicken.</p>'
+        +'<button class="btn-yellow" onclick="closePwFlow();openLogin()">Zurück zur Anmeldung</button>';
+    }else{
+      h+='<p class="sub">Gib deinen Namen und die E-Mail-Adresse deines Zugangs ein. Passt alles zusammen, schicken wir dir einen Link zum Zurücksetzen.</p>'+err
+        +'<form onsubmit="event.preventDefault();submitForgotPassword();">'
+        +'<input type="text" id="pf-first" placeholder="Vorname" autocomplete="given-name">'
+        +'<input type="text" id="pf-last" placeholder="Nachname" autocomplete="family-name">'
+        +'<input type="email" id="pf-mail" placeholder="E-Mail-Adresse" autocomplete="email" autocapitalize="none" spellcheck="false">'
+        +'<button type="submit" class="btn-yellow"'+(busy?' disabled':'')+'>'+btnLbl('Link anfordern')+'</button></form>'
+        +'<button type="button" class="login-link" onclick="closePwFlow();openLogin()">Zurück zur Anmeldung</button>';
+    }
+  }else if(f.mode==='reset'){
+    h+='<h1>Neues Passwort</h1>';
+    if(f.state==='done'){
+      h+='<div class="pw-ok">Dein Passwort wurde geändert. Du wirst jetzt angemeldet …</div>';
+    }else if(!pwResetEnabled()){
+      h+='<div class="login-err show">Das Zurücksetzen per Link ist bei diesem Verein nicht eingerichtet.</div>';
+    }else{
+      h+='<p class="sub">Lege jetzt ein neues Passwort für deinen Zugang fest.</p>'+err
+        +'<form onsubmit="event.preventDefault();submitResetPassword();">'+pwFieldsHTML()
+        +'<button type="submit" class="btn-yellow"'+(busy?' disabled':'')+'>'+btnLbl('Passwort speichern')+'</button></form>'
+        +'<button type="button" class="login-link" onclick="PWFLOW.code=null;openPwFlow(\'forgot\')">Neuen Link anfordern</button>';
+    }
+  }else if(f.mode==='force'){
+    h+='<h1>Neues Passwort festlegen</h1>'
+      +'<p class="sub">Du bist mit einem Start-Passwort angemeldet. Bitte lege jetzt ein eigenes Passwort fest – das Start-Passwort aus der E-Mail gilt danach nicht mehr.</p>'+err
+      +'<form onsubmit="event.preventDefault();submitForcedPassword();">'+pwFieldsHTML()
+      +'<button type="submit" class="btn-yellow"'+(busy?' disabled':'')+'>'+btnLbl('Passwort speichern')+'</button></form>'
+      +'<button type="button" class="login-link" onclick="forcedPwLogout()">Abmelden</button>';
+  }
+  box.innerHTML=h;
+}
+function readNewPw(){
+  const a=(document.getElementById('pf-new')||{}).value||'', b=(document.getElementById('pf-new2')||{}).value||'';
+  if(a.length<12) throw new Error('Das neue Passwort braucht mindestens 12 Zeichen.');
+  if(a!==b) throw new Error('Die beiden Passwörter stimmen nicht überein.');
+  return a;
+}
+async function submitForgotPassword(){
+  if(PWFLOW.state==='sending')return;
+  const v=id=>((document.getElementById(id)||{}).value||'').trim();
+  const first=v('pf-first'), last=v('pf-last'), email=v('pf-mail').toLowerCase();
+  if(!first||!last||!REG_MAIL_RE.test(email)){
+    PWFLOW.error='Bitte Vorname, Nachname und eine gültige E-Mail-Adresse eintragen.'; renderPwFlow();
+  }else{
+    PWFLOW.error=''; PWFLOW.state='sending'; renderPwFlow();
+    try{
+      await pwApi('/password/forgot',{first,last,email});
+      PWFLOW.state='done'; trackEvent('passwort_link_angefordert');
+    }catch(e){ PWFLOW.state='form'; PWFLOW.error=e.message; }
+    renderPwFlow();
+  }
+  if(PWFLOW.state==='form'){ const set=(id,val)=>{const el=document.getElementById(id); if(el) el.value=val;}; set('pf-first',first); set('pf-last',last); set('pf-mail',email); }
+}
+async function submitResetPassword(){
+  if(PWFLOW.state==='sending')return;
+  let pw; try{ pw=readNewPw(); }catch(e){ PWFLOW.error=e.message; renderPwFlow(); return; }
+  PWFLOW.error=''; PWFLOW.state='sending'; renderPwFlow();
+  try{
+    // 1) Link beim Worker einlösen (nur einmal möglich) → Zugangs-ID + Schreib-Token
+    const r=await pwApi('/password/redeem',{code:PWFLOW.code});
+    if(!r.token||!r.userId) throw new Error('Unerwartete Antwort vom Server.');
+    session={id:r.userId,name:'',email:'',isAdmin:false,isSuper:false,classes:{},token:r.token};
+    // 2) Aktuellen Stand der Zugänge holen, Token mit dem neuen Passwort verschlüsseln, speichern
+    await refreshUsersFromGitHub();
+    const u=USERS.find(x=>x.id===r.userId);
+    if(!u) throw new Error('Zugang nicht gefunden.');
+    if(u.locked) throw new Error('Dieser Zugang wurde gesperrt. Bitte an den Vorstand wenden.');
+    session={id:u.id,name:u.first+' '+u.last,email:u.email,isAdmin:u.admin===true,isSuper:false,classes:normalizeClasses(u.classes||{}),token:r.token};
+    u.enc=await encryptToken(r.token,pw);
+    delete u.pwChangeRequired;
+    await saveUsers('Passwort zurückgesetzt: '+u.first+' '+u.last);
+    sendPwChangedMail(u);
+    PWFLOW.state='done'; PWFLOW.code=null; renderPwFlow();
+    trackEvent('passwort_zurueckgesetzt');
+    setTimeout(()=>{ document.getElementById('pwflow').classList.remove('show'); PWFLOW.mode=null; afterLogin(); },1200);
+  }catch(e){
+    session=null;
+    PWFLOW.state='form';
+    PWFLOW.error=e.message;
+    renderPwFlow();
+  }
+}
+async function submitForcedPassword(){
+  if(PWFLOW.state==='sending')return;
+  let pw; try{ pw=readNewPw(); }catch(e){ PWFLOW.error=e.message; renderPwFlow(); return; }
+  const u=USERS.find(x=>x.id===session.id);
+  if(!u){ PWFLOW.error='Zugang nicht gefunden.'; renderPwFlow(); return; }
+  PWFLOW.error=''; PWFLOW.state='sending'; renderPwFlow();
+  const backup=JSON.stringify(USERS);
+  try{
+    u.enc=await encryptToken(session.token,pw);
+    delete u.pwChangeRequired;
+    await saveUsers('Passwort geändert: '+u.first+' '+u.last);
+    sendPwChangedMail(u);
+    PWFLOW.mode=null;
+    document.getElementById('pwflow').classList.remove('show');
+    trackArea(currentPaneArea());
+    showToast('Passwort gespeichert. Bitte gut merken.',4000);
+  }catch(e){ USERS=JSON.parse(backup); PWFLOW.state='form'; PWFLOW.error='Speichern fehlgeschlagen: '+e.message; renderPwFlow(); }
+}
+function forcedPwLogout(){ PWFLOW.mode=null; document.getElementById('pwflow').classList.remove('show'); logout(); }
+// Über einen Reset-Link gekommen: eine evtl. noch gespeicherte Sitzung (evtl. anderer Zugang) beenden.
+function openResetFlow(code){
+  PWFLOW.code=code;
+  if(session){ session=null; localStorage.removeItem('svbb_session'); refreshHeader(); }
+  closeLogin(); openPwFlow('reset');
+}
+function checkForcedPwChange(){
+  if(!session||session.isSuper||!session.token) return;
+  const u=USERS.find(x=>x.id===session.id);
+  if(u&&u.pwChangeRequired) openPwFlow('force');
+}
+// Admin: Passwort eines Zugangs direkt neu setzen (Rückfallebene, falls der Link nicht klappt).
+function adminResetPassword(id){
+  const u=USERS.find(x=>x.id===id); if(!u)return;
+  if(!session||!session.isAdmin||!session.token){ showToast('Nur für Admins mit Schreib-Token.'); return; }
+  askConfirm('Passwort neu setzen?',
+    u.first+' '+u.last+' bekommt ein neues Start-Passwort per E-Mail an '+u.email+' und muss es bei der nächsten Anmeldung ändern. Das bisherige Passwort gilt danach nicht mehr.',
+    'Neues Passwort senden', async()=>{ await doAdminResetPassword(id); });
+}
+async function doAdminResetPassword(id){
+  const pw=genStartPassword();
+  const backup=JSON.stringify(USERS);
+  let u;
+  try{
+    await refreshUsersFromGitHub();
+    u=USERS.find(x=>x.id===id); if(!u) throw new Error('Zugang nicht gefunden.');
+    u.enc=await encryptToken(session.token,pw);
+    u.pwChangeRequired=true;
+    await saveUsers('Passwort neu gesetzt: '+u.first+' '+u.last+' – '+session.name);
+  }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); return; }
+  renderUserListOnly();
+  try{
+    await ghDispatch('welcome-password',{name:u.first+' '+u.last,email:u.email,password:pw});
+    showToast('Neues Start-Passwort an '+u.email+' gesendet.',5000);
+  }catch(err){
+    // Mail ging nicht raus: Passwort einmalig anzeigen, damit der Admin es persönlich weitergeben kann.
+    setTimeout(()=>askConfirm('Mail konnte nicht gesendet werden','Neues Start-Passwort für '+u.first+' '+u.last+': '+pw+' – bitte persönlich weitergeben.','OK',()=>{}),300);
+  }
 }
 
 /* ---------- Selbstregistrierung mit Einladungslink ----------
@@ -5466,7 +5847,9 @@ async function boot(){
   clarityCall('set','rolle',session?(session.isAdmin?'admin':'trainer'):'gast');
   if(!/^#invite=/.test(location.hash)) trackArea(currentPaneArea());
   openInviteFromHash();
-  window.addEventListener('hashchange',()=>{ openHashEvent(); openInviteFromHash(); });
+  if(RESET_CODE_AT_LOAD) openResetFlow(RESET_CODE_AT_LOAD);
+  else checkForcedPwChange();
+  window.addEventListener('hashchange',()=>{ const rc=takeResetCodeFromHash(); if(rc){ openResetFlow(rc); return; } openHashEvent(); openInviteFromHash(); });
 
   // Absicherung gegen "Kopf-/Fußzeile verschwunden nach Rückkehr aus dem Hintergrund" (z.B. nach
   // "Zum Spiel" auf fussball.de und zurück): manche mobilen Browser berechnen 100dvh nicht sofort
@@ -5483,6 +5866,10 @@ async function boot(){
   // kann JS-Zustand veraltet sein – dann lieber sauber neu laden.
   window.addEventListener('pageshow',(e)=>{ if(e.persisted) location.reload(); });
 }
+/* Reset-Link (…/#reset=CODE): Code sofort aus der Adresszeile entfernen, BEVOR Clarity/GA
+   (weiter unten) geladen werden – der Code darf nie in Analytics-Daten oder im Verlauf landen. */
+function takeResetCodeFromHash(){ const m=location.hash.match(/^#reset=([A-Za-z0-9_-]{20,128})$/); if(m) history.replaceState(null,'',location.pathname+location.search); return m?m[1]:null; }
+const RESET_CODE_AT_LOAD=takeResetCodeFromHash();
 boot();
 
 /* ---------- Analytics: Microsoft Clarity + Google Analytics ----------

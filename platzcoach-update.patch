@@ -1,0 +1,1486 @@
+From 2e94edfb1286cf408175a29d5632f2bcfb0d5d06 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 26 Sep 2026 07:38:54 +0200
+Subject: [PATCH 1/3] Passwort-Funktionen, Terminarten mit Belegungsregeln,
+ Torwarttraining, Kabinen
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- Login: einheitliche Fehlermeldung, Hinweis auf Willkommens-Mail, "Passwort vergessen?"
+- Pflicht-Passwortwechsel nach Erstanmeldung und nach Admin-Reset (pwChangeRequired)
+- "Passwort vergessen?": Anfrage mit Vorname/Nachname/E-Mail an neuen Passwort-Worker,
+  Reset-Link 60 min/einmalig, Bestätigungsmail nach jeder Passwortänderung
+- Admin kann Passwort pro Zugang neu setzen (neues Start-Passwort per Mail)
+- Terminart (kind) an Terminen/Trainingszeiten, Belegungsstufen in config.json,
+  eine zentrale Konfliktregel für Formular, Start-Seite, Saison-Scan, Spieltags-Absagen
+- Torwarttraining als Gruppe: ohne Platzfläche, parallel zu Training erlaubt, nie zu Spielen
+- Kabine 1-4 in Termin- und Trainingsformular
+- Version 26.09.2026 · 1
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01J982m5yty77r7fZWBMCfM5
+---
+ .github/workflows/password-mails.yml |  40 ++
+ README-DEPLOY.md                     |  37 ++
+ data/config.json                     |   7 +
+ index.html                           | 559 ++++++++++++++++++++++-----
+ scripts/send-password-mail.mjs       |  78 ++++
+ scripts/send-welcome-password.mjs    |   4 +-
+ worker/password-reset-worker.js      | 171 ++++++++
+ 7 files changed, 808 insertions(+), 88 deletions(-)
+ create mode 100644 .github/workflows/password-mails.yml
+ create mode 100644 scripts/send-password-mail.mjs
+ create mode 100644 worker/password-reset-worker.js
+
+diff --git a/.github/workflows/password-mails.yml b/.github/workflows/password-mails.yml
+new file mode 100644
+index 0000000..6279529
+--- /dev/null
++++ b/.github/workflows/password-mails.yml
+@@ -0,0 +1,40 @@
++name: Passwort-Mails (Reset-Link, Bestätigung)
++
++# Nur per repository_dispatch – ausgelöst vom Passwort-Worker ("password-reset-link") bzw. von
++# der App nach einer Passwortänderung ("password-changed"). Der Reset-Link landet so nie in
++# einer Datei oder Commit-Nachricht.
++
++on:
++  repository_dispatch:
++    types: [password-reset-link, password-changed]
++
++jobs:
++  send:
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@v4
++
++      - uses: actions/setup-node@v4
++        with:
++          node-version: '20'
++
++      - name: Abhängigkeiten installieren
++        run: npm install --no-audit --no-fund
++
++      - name: Link für Logs maskieren
++        if: github.event.action == 'password-reset-link'
++        env:
++          LINK: ${{ github.event.client_payload.link }}
++        run: echo "::add-mask::$LINK"
++
++      - name: E-Mail senden
++        env:
++          SMTP_HOST: ${{ secrets.SMTP_HOST }}
++          SMTP_PORT: ${{ secrets.SMTP_PORT }}
++          SMTP_USER: ${{ secrets.SMTP_USER }}
++          SMTP_PASS: ${{ secrets.SMTP_PASS }}
++          MAIL_TYPE: ${{ github.event.action }}
++          PAYLOAD_NAME: ${{ github.event.client_payload.name }}
++          PAYLOAD_EMAIL: ${{ github.event.client_payload.email }}
++          PAYLOAD_LINK: ${{ github.event.client_payload.link }}
++        run: node scripts/send-password-mail.mjs
+diff --git a/README-DEPLOY.md b/README-DEPLOY.md
+index c237cbf..631aa4a 100644
+--- a/README-DEPLOY.md
++++ b/README-DEPLOY.md
+@@ -105,3 +105,40 @@ Die Action braucht Schreibrechte, um `data/fussballde.json` zu committen. Das is
+ - **Rechtlicher Graubereich**: fussball.de bietet aktiv keinen Export mehr an. Die Abruffrequenz (alle 6h) ist bewusst zurückhaltend gewählt. Bei Zweifeln: Nutzungsbedingungen von fussball.de prüfen.
+ - **Spieldauer ist geschätzt**, da fussball.de keine Endzeiten liefert – bei Bedarf in `data/config.json` justieren.
+ - Die Kategorie-Erkennung (teilbar vs. Vollplatz) basiert auf dem Team-Namen von fussball.de (z. B. "E-Junioren"). Falls eure Liga andere Bezeichnungen nutzt, `shareCategories` in der Config anpassen.
++
++---
++
++# „Passwort vergessen?“ – Passwort-Worker einrichten (einmalig, ca. 10 Minuten)
++
++Solange `passwordReset.workerUrl` in `data/config.json` leer ist, zeigt „Passwort vergessen?“ nur den Hinweis, sich an den Vorstand zu wenden. Admins können Passwörter jederzeit unter **Konto → Zugänge → Passwort** neu setzen (neues Start-Passwort per Mail, Pflichtwechsel bei der nächsten Anmeldung).
++
++Für den Self-Service per E-Mail-Link:
++
++1. **Cloudflare → Workers & Pages → Create → Worker**, Name z. B. `platzcoach-passwort`. Inhalt von `worker/password-reset-worker.js` einfügen, **Deploy**.
++2. **Storage & Databases → KV → Create namespace** `platzcoach-passwort`. Im Worker unter **Settings → Bindings → KV namespace** mit dem Variablennamen **`PWRESET`** verbinden.
++3. Im Worker unter **Settings → Variables and Secrets**:
++   - `REPO` = `fcal1986/svbachumbergheimkalender`
++   - `BRANCH` = `main`
++   - `APP_URL` = `https://platzcoach.de/`
++   - `ALLOWED_ORIGINS` = `https://platzcoach.de`
++   - **Secret** `GITHUB_TOKEN` = derselbe Fine-grained Token, den die App nutzt (Contents: Read and write). **Wichtig:** Wenn der Token erneuert wird, auch hier austauschen.
++4. Worker-URL (z. B. `https://platzcoach-passwort.<konto>.workers.dev`) in `data/config.json` eintragen:
++   ```json
++   "passwordReset": { "workerUrl": "https://platzcoach-passwort.<konto>.workers.dev" }
++   ```
++5. Test: `…/health` im Browser öffnen → `{"ok":true}`. Dann in der App „Passwort vergessen?“ mit eigenem Namen und eigener Adresse ausprobieren. Die Mail kommt nach ca. 1 Minute (GitHub Action „Passwort-Mails“).
++
++**Wie es funktioniert:** Nur wenn Vorname, Nachname und E-Mail genau zu einem nicht gesperrten Zugang passen, verschickt der Worker einen Link (`#reset=…`), 60 Minuten gültig, nur einmal nutzbar; ein neuer Link macht ältere ungültig. Die Antwort in der App ist immer gleich, egal ob etwas passt. Begrenzung: 3 Anfragen pro E-Mail und 10 pro IP-Adresse und Stunde. Nach jeder Passwortänderung geht eine Bestätigungsmail raus.
++
++# Belegungsregeln (Terminarten)
++
++In `data/config.json` unter `occupancy.levels` hat jede Terminart eine Belegungsstufe:
++
++| Terminart | Stufe | Bedeutung |
++|---|---|---|
++| `game` (Spiel, auch alle fussball.de-Heimspiele) | `exclusive` | Kein Torwarttraining parallel auf dem Platz |
++| `training` | `shared` | Teilt den Platz nur über getrennte Viertel/Hälften (wie bisher) |
++| `goalkeeper` (Torwarttraining) | `overlay` | Belegt keine Fläche, darf parallel zu Training laufen, nicht zu Spielen oder anderem Torwarttraining |
++| `other` (Sonstiges) | `shared` | wie Training |
++
++Ausnahmen lassen sich ohne Code-Änderung ergänzen, z. B. zwei Torwarttrainings gleichzeitig erlauben: `"compatible": [["goalkeeper","goalkeeper"]]`. Kabinen, Vereinsheim, Theke und Halle sind immer exklusiv.
+diff --git a/data/config.json b/data/config.json
+index 746b50f..7eead40 100644
+--- a/data/config.json
++++ b/data/config.json
+@@ -23,5 +23,12 @@
+   "emails": ["fab.calcagno@gmail.com"],
+   "fromEmail": "noreply@platzcoach.de",
+   "replyTo": "info@platzcoach.de"
++  },
++  "occupancy": {
++    "levels": {"game": "exclusive", "training": "shared", "goalkeeper": "overlay", "other": "shared"},
++    "compatible": []
++  },
++  "passwordReset": {
++    "workerUrl": ""
+   }
+ }
+diff --git a/index.html b/index.html
+index 731a3eb..52eb619 100644
+--- a/index.html
++++ b/index.html
+@@ -593,6 +593,15 @@
+   #register .reg-check input{width:18px;height:18px;flex:none;margin:2px 0 0;padding:0;accent-color:var(--green);}
+   #register .reg-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;}
+   .reg-item{border:1.5px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;}
++  .badge-gk{display:inline-flex;align-items:center;gap:4px;background:#FFF1E0;color:#9A4A00;border:1px solid #F5C58A;border-radius:999px;padding:3px 9px;font-size:10.5px;font-weight:700;}
++  .badge-gk svg{width:12px;height:12px;stroke:#9A4A00;}
++  .event-card.gk-card{box-shadow:inset 4px 0 0 #F08C00,var(--card-shadow);}
++  #pwflow{position:fixed;inset:0;z-index:62;background:var(--white);display:none;flex-direction:column;align-items:center;padding:calc(24px + env(safe-area-inset-top)) 16px 32px;overflow-y:auto;}
++  #pwflow.show{display:flex;}
++  #pwflow .login-box{max-width:380px;margin:auto 0;}
++  .login-link{display:block;width:100%;background:none;border:none;color:var(--green);font-family:'Inter';font-weight:600;font-size:13px;cursor:pointer;margin-top:12px;padding:6px;text-align:center;}
++  .login-hint{color:var(--ink-soft);font-size:11.5px;line-height:1.5;margin:-2px 0 12px;}
++  .pw-ok{background:#F0FBF4;border:1px solid #BfE5CC;color:#1B5E36;font-size:12.5px;padding:12px;border-radius:10px;line-height:1.5;margin-bottom:12px;}
+   .reg-actions{display:flex;gap:8px;margin-top:8px;}
+   .reg-actions>button,.reg-actions>a{flex:1;min-width:0;}
+   .reg-linkbtn{margin:0;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:12px;}
+@@ -736,11 +745,17 @@
+         <p class="helptext">Nur in der App angemeldete Zugänge wählbar. Noch nicht dabei? Erst unter Konto anlegen – bis dahin gilt „wird bald ergänzt".</p>
+       </div>
+       <p class="section-label">Ressourcen</p>
+-      <div class="field"><label>Platz / Halle</label>
++      <div class="field"><label>Platz / Kabine</label>
+         <div class="chip-group" id="tf-res">
+           <div class="res-chip on" data-res="Großspielfeld" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="1.5"/><path d="M12 5v14"/><circle cx="12" cy="12" r="2.5"/></svg>Großspielfeld</div>
+           <div class="res-chip" data-res="Kleinspielfeld" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/></svg>Kleinspielfeld</div>
++          <div class="res-chip" data-res="Kabine 1" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 1</div>
++          <div class="res-chip" data-res="Kabine 2" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 2</div>
++          <div class="res-chip" data-res="Kabine 3" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 3</div>
++          <div class="res-chip" data-res="Kabine 4" onclick="tfToggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 4</div>
+         </div>
++        <p class="helptext" id="tf-gk-help" style="display:none;">Torwarttraining belegt keine Platzfläche: Es darf parallel zu einem Training laufen, aber nicht während eines Spiels.</p>
++        <div id="tf-game-note-gk"></div>
+       </div>
+       <div class="field" id="tf-pitch-field">
+         <label>Anteil Großspielfeld</label>
+@@ -781,7 +796,13 @@
+       <p class="section-label">Pflichtangaben</p>
+       <div class="field required"><label><span class="req-dot"></span>Datum</label><input type="date" id="f-datum"></div>
+       <div class="field"><label>Wochentag</label><span class="readonly-pill" id="f-wochentag">–</span></div>
+-      <div class="field required"><label><span class="req-dot"></span>Anlass</label><input type="text" id="f-anlass" autocomplete="off" oninput="formDirty=true" placeholder="z. B. Sommerfest, Turnier, Testspiel"></div>
++      <div class="field required"><label><span class="req-dot"></span>Anlass</label><input type="text" id="f-anlass" autocomplete="off" oninput="formDirty=true;suggestKindFromTitle()" placeholder="z. B. Sommerfest, Turnier, Testspiel"></div>
++      <div class="field required"><label><span class="req-dot"></span>Terminart</label>
++        <select id="f-kind" onchange="onKindChange(true)">
++          <option value="game">Spiel</option><option value="training">Training</option><option value="goalkeeper">Torwarttraining</option><option value="other" selected>Sonstiges</option>
++        </select>
++        <p class="helptext" id="f-kind-help"></p>
++      </div>
+       <div style="display:flex;gap:10px;">
+         <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Von</label><input type="time" id="f-von" autocomplete="off" step="900" value="15:00" onchange="onSnapTime(this)"></div>
+         <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Bis</label><input type="time" id="f-bis" autocomplete="off" step="900" value="17:00" onchange="onSnapTime(this)"></div>
+@@ -791,7 +812,7 @@
+         <select id="f-team" onchange="onTeamChange()">
+           <optgroup label="Jugend"><option>G-Jugend</option><option selected>F-Jugend</option><option>E-Jugend</option><option>D-Jugend</option><option>C-Jugend</option><option>B-Jugend</option><option>A-Jugend</option></optgroup>
+           <optgroup label="Senioren"><option>1. Herren</option><option>2. Herren</option><option>3. Herren</option></optgroup>
+-          <optgroup label="Sonstige"><option>Alle Teams</option><option>Vorstand</option></optgroup>
++          <optgroup label="Sonstige"><option>Torwarttraining</option><option>Alle Teams</option><option>Vorstand</option></optgroup>
+         </select>
+       </div>
+       <div class="field" id="f-squad-field">
+@@ -810,6 +831,10 @@
+           <div class="res-chip" data-res="Kleinspielfeld" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/></svg>Kleinfeld</div>
+           <div class="res-chip" data-res="Vereinsheim" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Vereinsheim</div>
+           <div class="res-chip" data-res="Theke" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 3h12l-1 4H7L6 3z"/><path d="M7 7l3.5 5v7M17 7l-3.5 5v7M8 21h8"/></svg>Theke</div>
++          <div class="res-chip" data-res="Kabine 1" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 1</div>
++          <div class="res-chip" data-res="Kabine 2" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 2</div>
++          <div class="res-chip" data-res="Kabine 3" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 3</div>
++          <div class="res-chip" data-res="Kabine 4" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 4</div>
+         </div>
+       </div>
+       <div class="field" id="f-pitch-field">
+@@ -899,8 +924,10 @@
+     <form id="li-form" onsubmit="event.preventDefault();doLogin();">
+       <input type="text" id="li-user" name="username" placeholder="E-Mail oder Benutzername" autocomplete="username" autocapitalize="none" spellcheck="false">
+       <div class="pw-wrap"><input type="password" id="li-pass" name="password" placeholder="Passwort" autocomplete="current-password"><button type="button" class="pw-eye" onclick="togglePw(this)" tabindex="-1"><svg viewBox="0 0 24 24"><g class="eye-open"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></g><g class="eye-shut" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></g></svg></button></div>
++      <p class="login-hint">Melde dich mit der E-Mail-Adresse aus deiner Willkommens-Mail an.</p>
+       <button type="submit" class="btn-yellow" id="li-btn">Anmelden</button>
+     </form>
++    <button type="button" class="login-link" id="li-forgot" onclick="openForgotPassword()">Passwort vergessen?</button>
+     <button class="btn-ghost-light" id="bio-btn" style="display:none;" onclick="bioLogin()">
+       <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 11v3a4 4 0 0 1-1 2.5"/><path d="M8.5 8.5a5 5 0 0 1 7 4.5v1"/><path d="M5.5 6.5a9 9 0 0 1 13 6.5v2"/><path d="M15.5 19a12 12 0 0 0 1-5"/><path d="M8 20a8 8 0 0 0 1.5-6"/></svg>
+       <span id="bio-label">Mit Fingerabdruck anmelden</span>
+@@ -909,6 +936,12 @@
+   </div>
+ </div>
+ 
++<!-- PASSWORT: vergessen / per Link zurücksetzen / Pflichtwechsel nach Erstanmeldung -->
++<div id="pwflow">
++  <button class="login-close" id="pwflow-close" onclick="closePwFlow()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
++  <div class="login-box" id="pwflow-body"></div>
++</div>
++
+ <!-- REGISTRIERUNG (über Einladungslink #invite=…) -->
+ <div id="register">
+   <button class="login-close" onclick="closeRegister()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+@@ -992,7 +1025,7 @@
+    Trainingszeiten + Benutzer: nur Admin.
+    ========================================================= */
+ 
+-const APP_VERSION='25.09.2026 · 11';
++const APP_VERSION='26.09.2026 · 1';
+ let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
+ let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
+ let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
+@@ -1007,7 +1040,7 @@ const DAYS_S=['SO','MO','DI','MI','DO','FR','SA'];
+ const DOW=['Mo','Di','Mi','Do','Fr','Sa','So'];
+ const WDAYS=['','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
+ const HALF={A:[1,2],B:[3,4]};
+-const ALL_CLASSES=['G-Jugend','F-Jugend','E-Jugend','D-Jugend','C-Jugend','B-Jugend','A-Jugend','1. Herren','2. Herren','3. Herren','Ü32 / Ü50'];
++const ALL_CLASSES=['G-Jugend','F-Jugend','E-Jugend','D-Jugend','C-Jugend','B-Jugend','A-Jugend','1. Herren','2. Herren','3. Herren','Ü32 / Ü50','Torwarttraining'];
+ 
+ const today=new Date(), todayStr=ymd(today);
+ let view='monat', filter='alle';
+@@ -1070,7 +1103,7 @@ function trainingInstancesOn(d){
+     ownerName:getTrainerNames(s)[0]||'Vorstand',
+     trainerIds:getTrainerIds(s),
+     trainerNames:getTrainerNames(s),
+-    isTraining:true, trainingSlotId:s.id
++    isTraining:true, trainingSlotId:s.id, kind:s.kind||(s.team===GK_TEAM?'goalkeeper':'training')
+   })).sort((a,b)=>a.t.localeCompare(b.t));
+ }
+ /* Abgesagte Regeltermine: sollen NICHT einfach aus Start/Termine verschwinden, sondern
+@@ -1082,7 +1115,7 @@ function cancelledTrainingInstancesOn(d){
+     id:'trc-'+s.id+'-'+d, d:d, t:s.from, bis:s.to,
+     title:'Training', team:s.team, squad:s.squad||1,
+     pitch:null, halle:null, res:[], note:s.note||'',
+-    isTraining:true, isCancelled:true, trainingSlotId:s.id
++    isTraining:true, isCancelled:true, trainingSlotId:s.id, kind:s.kind||(s.team===GK_TEAM?'goalkeeper':'training')
+   })).sort((a,b)=>a.t.localeCompare(b.t));
+ }
+ 
+@@ -1266,25 +1299,105 @@ function fussballCapacityWarningsUpcoming(days){
+ }
+ 
+ /* KONFLIKTPRÜFUNG – gibt [{event,reasons}] zurück */
+-function findConflicts(d,von,bis,pitch,halle,res,skipId){
+-  const result=[];
++/* ---------- Terminarten & Belegungsstufen (zentrale Konfliktregel) ----------
++   Jede Belegung hat eine Terminart (kind): game | training | goalkeeper | other.
++   Jede Terminart hat eine Belegungsstufe – einstellbar in data/config.json unter
++   "occupancy.levels", Standard siehe OCC_DEFAULT_LEVELS:
++     exclusive – Spiel: verträgt sich mit keiner Überlagerung auf demselben Platz
++     shared    – Training/Sonstiges: teilt sich den Platz nur über getrennte Viertel/Hälften
++     overlay   – Torwarttraining: belegt keine Fläche, darf parallel zu "shared" laufen,
++                 aber nie zu "exclusive" oder zu einem zweiten "overlay" auf demselben Platz
++   Zusätzliche Ausnahmen: "occupancy.compatible": [["goalkeeper","goalkeeper"], …].
++   ALLE Stellen, die Konflikte prüfen (Formular, Start-Seite, Saison-Scan, Trainingszeiten,
++   Spieltags-Absagen), gehen über occupationConflictReasons() – keine Sonderfälle im Code. */
++const KINDS=[
++  {id:'game',label:'Spiel'},
++  {id:'training',label:'Training'},
++  {id:'goalkeeper',label:'Torwarttraining'},
++  {id:'other',label:'Sonstiges'}
++];
++const OCC_DEFAULT_LEVELS={game:'exclusive',training:'shared',goalkeeper:'overlay',other:'shared'};
++const GK_TEAM='Torwarttraining';
++// Plätze, auf denen Überlagerung (overlay) möglich ist. Alles andere in res[] (Kabinen,
++// Vereinsheim, Theke …) ist immer exklusiv – zwei Buchungen derselben Kabine = Konflikt.
++const FIELD_RES=['Großspielfeld','Kleinspielfeld'];
++function kindLabel(k){ const x=KINDS.find(k2=>k2.id===k); return x?x.label:'Termin'; }
++function kindOf(e){
++  if(!e) return 'other';
++  if(e.isExternal) return 'game';
++  if(e.kind) return e.kind;
++  if(e.team===GK_TEAM) return 'goalkeeper';
++  if(e.isTraining) return 'training';
++  return /spiel/i.test(e.title||'')?'game':'other'; // Alt-Termine ohne Terminart
++}
++function occLevel(kind){
++  const cfg=(CFG&&CFG.occupancy&&CFG.occupancy.levels)||{};
++  return cfg[kind]||OCC_DEFAULT_LEVELS[kind]||'shared';
++}
++function isOverlay(e){ return occLevel(kindOf(e))==='overlay'; }
++function kindsCompatible(ka,kb){
++  const extra=(CFG&&CFG.occupancy&&CFG.occupancy.compatible)||[];
++  if(extra.some(p=>(p[0]===ka&&p[1]===kb)||(p[0]===kb&&p[1]===ka))) return true;
++  const la=occLevel(ka), lb=occLevel(kb);
++  return (la==='overlay'&&lb==='shared')||(la==='shared'&&lb==='overlay');
++}
++// Nutzt die Belegung das Großspielfeld (egal welchen Teil)?
++function onGrossfeld(e){
++  if(e.pitch) return true;
++  if((e.res||[]).includes('Großspielfeld')) return true;
++  if(e.isExternal&&!e.isAway){
++    if(e.t==='00:00'&&eventBis(e)==='23:59') return false; // fussball.de-Spiel ohne Anstoßzeit
++    return true;
++  }
++  return false;
++}
++/* Gründe, warum sich zwei zeitlich überlappende Belegungen stören (leer = verträglich).
++   pitchReason(A,B): Viertel-/Hälften-Vergleich des jeweiligen Aufrufers (Buchungsformular
++   kennt feste Hälften, Start-Seite nur "geteiltes Spiel") – gilt nur zwischen Belegungen,
++   die beide eine Fläche haben (keine Überlagerung). */
++function occupationConflictReasons(A,B,pitchReason){
++  const reasons=[];
++  const compatible=kindsCompatible(kindOf(A),kindOf(B));
++  // 1) Großspielfeld
++  if(!compatible){
++    if(isOverlay(A)||isOverlay(B)){
++      if(onGrossfeld(A)&&onGrossfeld(B)){
++        const ov=isOverlay(A)?A:B, other=(ov===A)?B:A;
++        reasons.push('Großspielfeld: '+kindLabel(kindOf(ov))+' nicht parallel zu '+kindLabel(kindOf(other)));
++      }
++    }else if(pitchReason){
++      const r=pitchReason(A,B); if(r) reasons.push(r);
++    }
++  }
++  // 2) Kleinspielfeld (ohne Viertel): wie Großspielfeld, aber als ganze Fläche
++  const kleinA=(A.res||[]).includes('Kleinspielfeld'), kleinB=(B.res||[]).includes('Kleinspielfeld');
++  if(kleinA&&kleinB&&!compatible) reasons.push('Kleinspielfeld');
++  // 3) Halle (Drittel) – immer exklusiv
++  if(A.halle&&A.halle.thirds&&A.halle.thirds.length&&B.halle&&B.halle.thirds){
++    const mine=new Set(A.halle.thirds);
++    const hit=B.halle.thirds.filter(x=>mine.has(x));
++    if(hit.length) reasons.push('Halle: Drittel '+hit.sort((a,b)=>a-b).join('+'));
++  }
++  // 4) Sonstige Ressourcen (Kabinen, Vereinsheim, Theke …) – immer exklusiv
++  const hitRes=(A.res||[]).filter(r=>!FIELD_RES.includes(r)&&(B.res||[]).includes(r));
++  if(hitRes.length) reasons.push(hitRes.join(', '));
++  return reasons;
++}
++function timesOverlap(A,B){ return A.t<eventBis(B)&&B.t<eventBis(A); }
++// Viertel-Vergleich für Buchungen mit festen Flächen (Formulare, Trainingszeiten).
++function quarterPitchReason(A,B){
++  if(!A.pitch||!B.pitch) return null;
++  const mine=new Set(pitchQuarters(A.pitch));
++  const hit=pitchQuarters(B.pitch).filter(q=>mine.has(q));
++  return hit.length?('Großspielfeld '+pitchShort(A.pitch)+' ↔ '+pitchShort(B.pitch)+' (Viertel '+hit.join('+')+')'):null;
++}
++function findConflicts(d,von,bis,pitch,halle,res,skipId,kind){
++  const me={id:'__candidate',d,t:von,bis,pitch,halle,res:res||[],kind:kind||'other'};
+   const occupations=EVENTS.filter(e=>e.d===d&&e.id!==skipId).concat(trainingInstancesOn(d)).concat(fussballBookingOccupations(d,skipId));
++  const result=[];
+   occupations.forEach(e=>{
+-    const eBis=eventBis(e);
+-    if(von>=eBis||bis<=e.t)return; // kein Zeitüberschnitt
+-    const reasons=[];
+-    if(pitch&&e.pitch){
+-      const mine=new Set(pitchQuarters(pitch));
+-      const hit=pitchQuarters(e.pitch).filter(q=>mine.has(q));
+-      if(hit.length)reasons.push('Großspielfeld '+pitchShort(pitch)+' ↔ '+pitchShort(e.pitch)+' (Viertel '+hit.join('+')+')');
+-    }
+-    if(halle&&halle.thirds&&halle.thirds.length&&e.halle&&e.halle.thirds){
+-      const mine=new Set(halle.thirds);
+-      const hit=e.halle.thirds.filter(d=>mine.has(d));
+-      if(hit.length)reasons.push('Halle: Drittel '+hit.sort((a,b)=>a-b).join('+'));
+-    }
+-    const hitRes=(res||[]).filter(r=>(e.res||[]).includes(r));
+-    if(hitRes.length)reasons.push(hitRes.join(', '));
++    if(!timesOverlap(me,e))return;
++    const reasons=occupationConflictReasons(me,e,quarterPitchReason);
+     if(reasons.length)result.push({event:e,reasons});
+   });
+   return result;
+@@ -1597,6 +1710,7 @@ function activeLocksOn(ds){
+ function lockAffectsItem(lock,item){
+   if(lock.resource==='platz'){
+     if(item.pitch)return true; // Training/eigener Termin mit Platz-Zuordnung
++    if((item.res||[]).includes('Großspielfeld'))return true; // Torwarttraining (ohne Fläche, aber auf dem Platz)
+     if(item.isExternal&&!item.isAway)return true; // fussball.de-Heimspiel (nutzt immer den Platz)
+     return false;
+   }
+@@ -1628,6 +1742,10 @@ function loginErr(m){
+   if(!m){e.classList.remove('show');return;}
+   e.textContent=m; e.classList.add('show');
+ }
++/* Bewusst EINE Meldung für "E-Mail unbekannt" und "Passwort falsch": verrät nicht, ob eine
++   Adresse registriert ist (wird relevant, sobald die Nutzerliste nicht mehr öffentlich ist). */
++const LOGIN_FAIL_MSG='E-Mail oder Passwort ist falsch. Bitte die Adresse aus deiner Willkommens-Mail verwenden.';
++let _loginFails=0;
+ async function doLogin(){
+   loginErr('');
+   const u=document.getElementById('li-user').value.trim().toLowerCase();
+@@ -1637,20 +1755,27 @@ async function doLogin(){
+   btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
+   try{
+     if(u===CFG.admin.user.toLowerCase()){
+-      if(p!==CFG.admin.password) throw new Error('Passwort stimmt nicht.');
++      if(p!==CFG.admin.password) throw new Error(LOGIN_FAIL_MSG);
+       session={id:'admin',name:CFG.admin.first+' '+CFG.admin.last,email:CFG.admin.user,
+                isAdmin:true,isSuper:true,token:localStorage.getItem('svbb_admin_token')||''};
+     }else{
+       const rec=USERS.find(x=>x.email.toLowerCase()===u);
+-      if(!rec) throw new Error('Kein Benutzer mit dieser E-Mail.');
++      if(!rec) throw new Error(LOGIN_FAIL_MSG);
+       if(rec.locked) throw new Error('Dieser Zugang wurde gesperrt. Bitte an den Vorstand wenden.');
+       let token;
+-      try{ token=await decryptToken(rec.enc,p); }catch(e){ throw new Error('Passwort stimmt nicht.'); }
++      try{ token=await decryptToken(rec.enc,p); }catch(e){ throw new Error(LOGIN_FAIL_MSG); }
+       session={id:rec.id,name:rec.first+' '+rec.last,email:rec.email,
+                isAdmin:rec.admin===true,isSuper:false,classes:normalizeClasses(rec.classes||{}),token:token};
+     }
+     afterLogin();
+-  }catch(e){ loginErr(e.message); }
++  }catch(e){
++    loginErr(e.message);
++    if(e.message===LOGIN_FAIL_MSG){
++      _loginFails++; trackEvent('login_fehlgeschlagen');
++      // Nach wiederholten Fehlversuchen den Weg zum Zurücksetzen deutlicher anbieten.
++      if(_loginFails>=2){ const f=document.getElementById('li-forgot'); if(f){ f.style.fontWeight='800'; f.textContent='Passwort vergessen? Hier neues Passwort anfordern'; } }
++    }
++  }
+   finally{ btn.disabled=false; btn.textContent='Anmelden'; }
+ }
+ function afterLogin(){
+@@ -1965,6 +2090,7 @@ function cancelledRowHTML(e){
+     +'</div>'
+     +'</div>';
+ }
++function gkBadge(){ return '<span class="badge-gk"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M8 13V6a1.5 1.5 0 013 0v5M11 11V4.5a1.5 1.5 0 013 0V11M14 11V6a1.5 1.5 0 013 0v7c0 4-2.5 7-6 7-2.5 0-4-1.5-5.5-4L4 13a1.5 1.5 0 012.5-1.5L8 13"/></svg>Torwarttraining</span>'; }
+ function rowHTML(e){
+   if(e.isExternal) return externalRowHTML(e);
+   if(e.isCancelled) return cancelledRowHTML(e);
+@@ -1975,14 +2101,15 @@ function rowHTML(e){
+   let title, b='', pitchVisual='';
+   if(e.isTraining){
+     // Team+Typ stehen jetzt direkt in der Headline -> Team-Chip und "Training"-Chip entfallen.
+-    title='Training · '+teamLabel(e.team,e.squad);
++    title=kindOf(e)==='goalkeeper'?'Torwarttraining'+(e.team!==GK_TEAM?' · '+teamLabel(e.team,e.squad):''):'Training · '+teamLabel(e.team,e.squad);
++    if(kindOf(e)==='goalkeeper')b+=gkBadge();
+     if(e.halle&&e.halle.thirds&&e.halle.thirds.length)b+=halleBadge(e.halle);
+     (e.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
+     if(e.pitch)pitchVisual=pitchBadge(e.pitch);
+     else if(e.halle&&e.halle.thirds&&e.halle.thirds.length)pitchVisual=halleBadge(e.halle);
+   }else{
+     title=e.title;
+-    b='<span class="badge-team '+cat(e.team)+'">'+esc(teamLabel(e.team,e.squad))+'</span>';
++    b=(kindOf(e)==='goalkeeper'?gkBadge():'')+'<span class="badge-team '+cat(e.team)+'">'+esc(teamLabel(e.team,e.squad))+'</span>';
+     if(e.pitch)b+=pitchBadge(e.pitch);
+     if(e.halle&&e.halle.thirds&&e.halle.thirds.length)b+=halleBadge(e.halle);
+     (e.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
+@@ -2008,7 +2135,8 @@ function rowHTML(e){
+   }
+   const mine=(session&&e.ownerId===session.id)?' mine':'';
+   const hl=(e.id===highlightId)?' hl':'';
+-  return '<div class="event-card'+mine+hl+'" id="ev-'+e.id+'">'
++  const gk=kindOf(e)==='goalkeeper'?' gk-card':'';
++  return '<div class="event-card'+mine+hl+gk+'" id="ev-'+e.id+'">'
+     +'<div class="ev-head">'
+     +'<div class="ev-date-box"><span class="ev-dow">'+dow+'</span><span class="ev-day">'+dd+'</span></div>'
+     +'<div class="ev-sep"></div>'
+@@ -2380,10 +2508,11 @@ function renderStart(){
+   document.getElementById('st-date').textContent=DAYS[dt.getDay()]+', '+fmtShort(todayStr);
+ 
+   const todays=todaysCombinedAgenda();
+-  const counts={training:0,spiel:0,sonstige:0};
++  const counts={training:0,torwart:0,spiel:0,sonstige:0};
+   todays.forEach(e=>{ if(!e.isCancelled) counts[classifyAgendaItem(e)]++; }); // abgesagte zählen nicht als stattfindend
+   const parts=[];
+   if(counts.training)parts.push(counts.training+' Training'+(counts.training===1?'':'s'));
++  if(counts.torwart)parts.push(counts.torwart+' Torwarttraining'+(counts.torwart===1?'':'s'));
+   if(counts.spiel)parts.push(counts.spiel+' Spiel'+(counts.spiel===1?'':'e'));
+   if(counts.sonstige)parts.push(counts.sonstige+' sonstige'+(counts.sonstige===1?'r Termin':' Termine'));
+   document.getElementById('st-summary').textContent=parts.length?parts.join(' · '):'Heute nichts geplant';
+@@ -2418,9 +2547,10 @@ function todaysCombinedAgenda(){
+     .sort((a,b)=>a.t.localeCompare(b.t));
+ }
+ function classifyAgendaItem(e){
+-  if(e.isTraining)return 'training';
+-  if(e.isExternal)return 'spiel';
+-  if(/spiel/i.test(e.title||''))return 'spiel';
++  const k=kindOf(e);
++  if(k==='goalkeeper')return 'torwart';
++  if(e.isTraining||k==='training')return 'training';
++  if(k==='game')return 'spiel';
+   return 'sonstige';
+ }
+ function agendaOn(ds){
+@@ -2438,7 +2568,9 @@ function pitchLabelOf(e){
+   return '';
+ }
+ function pitchVisualOf(e){
+-  if(e.pitch)return pitchBadge(e.pitch);
++  // Kabinen & Co. zusätzlich zur Platzfläche anzeigen (z. B. "Viertel 2 · Kabine 3").
++  const extra=(e.res||[]).filter(r=>!FIELD_RES.includes(r)).map(r=>' <span class="badge-res">'+esc(r)+'</span>').join('');
++  if(e.pitch)return pitchBadge(e.pitch)+extra;
+   if(e.halle&&e.halle.thirds&&e.halle.thirds.length)return halleBadge(e.halle);
+   if(e.isExternal)return '<span class="badge-pitch">'+(e.pitchIsFull?miniPitch([1,2,3,4]):'⚽')+esc(e.pitchLabelText||'fussball.de')+'</span>';
+   // Auch reine Ressourcen-Buchungen (z.B. nur Theke/Vereinsheim, ohne Platz/Halle) sollen in
+@@ -2495,7 +2627,7 @@ function renderPitchToday(){
+     const running=e.t<=nowHM&&eventBis(e)>nowHM;
+     const teamTxt=teamLabel(e.team,e.squad||1);
+     const type=classifyAgendaItem(e);
+-    let typeTxt=type==='training'?'Training':(type==='spiel'?(isFriendly(e)?'Freundschaftsspiel':'Spiel'):'Termin');
++    let typeTxt=typeLabelOf(e);
+     if(e.isExternal)typeTxt+=e.isAway?' · auswärts':' · heim';
+     const visual=pitchVisualOf(e)||'<span class="badge-pitch" style="opacity:.5;">–</span>';
+     const sc=scoreInfo(e);
+@@ -2518,25 +2650,27 @@ function isSharedHomeGame(e){ return !!(e&&e.isExternal&&!e.isAway&&!e.pitchIsFu
+ function conflictsOnDay(ds){
+   const items=agendaOn(ds);
+   const found=[];
++  // Viertel-Vergleich für die Anzeige: fussball.de-Spiele haben hier keine feste Hälfte.
++  const pitchReason=(A,B)=>{
++    const qa=A.pitch?pitchQuarters(A.pitch):(A.isExternal&&A.pitchIsFull?[1,2,3,4]:[]);
++    const qb=B.pitch?pitchQuarters(B.pitch):(B.isExternal&&B.pitchIsFull?[1,2,3,4]:[]);
++    const shA=isSharedHomeGame(A), shB=isSharedHomeGame(B);
++    if(shA&&shB) return null; // zwei geteilte Spiele passen nebeneinander – mehr als zwei prüft fussballCapacityWarningsOn
++    if(shA||shB){
++      // Geteiltes Jugendspiel (z.B. E-Jugend) braucht irgendeine komplett freie Platzhälfte.
++      // Welche genau, legt fussball.de nicht fest – daher Konflikt nur, wenn der andere Termin
++      // KEINE Hälfte frei lässt (ganzer Platz, oder in beiden Hälften je ein Viertel belegt).
++      const other=shA?qb:qa;
++      const halfFree=Object.values(HALF).some(h=>h.every(q=>!other.includes(q)));
++      return (other.length&&!halfFree)?'Großspielfeld':null;
++    }
++    return qa.some(q=>qb.includes(q))?'Großspielfeld':null;
++  };
+   for(let i=0;i<items.length;i++){
+     for(let j=i+1;j<items.length;j++){
+       const A=items[i],B=items[j];
+-      if(A.t<eventBis(B)&&B.t<eventBis(A)){
+-        const qa=A.pitch?pitchQuarters(A.pitch):(A.isExternal&&A.pitchIsFull?[1,2,3,4]:[]);
+-        const qb=B.pitch?pitchQuarters(B.pitch):(B.isExternal&&B.pitchIsFull?[1,2,3,4]:[]);
+-        const shA=isSharedHomeGame(A), shB=isSharedHomeGame(B);
+-        if(shA&&shB) continue; // zwei geteilte Spiele passen nebeneinander – mehr als zwei prüft fussballCapacityWarningsOn
+-        if(shA||shB){
+-          // Geteiltes Jugendspiel (z.B. E-Jugend) braucht irgendeine komplett freie Platzhälfte.
+-          // Welche genau, legt fussball.de nicht fest – daher Konflikt nur, wenn der andere Termin
+-          // KEINE Hälfte frei lässt (ganzer Platz, oder in beiden Hälften je ein Viertel belegt).
+-          const other=shA?qb:qa;
+-          const halfFree=Object.values(HALF).some(h=>h.every(q=>!other.includes(q)));
+-          if(other.length&&!halfFree)found.push([A,B]);
+-          continue;
+-        }
+-        if(qa.some(q=>qb.includes(q)))found.push([A,B]);
+-      }
++      if(!timesOverlap(A,B)) continue;
++      if(occupationConflictReasons(A,B,pitchReason).length) found.push([A,B]);
+     }
+   }
+   return found;
+@@ -2626,6 +2760,7 @@ function conflictBannerHTML(e){
+ function typeLabelOf(e){
+   const t=classifyAgendaItem(e);
+   if(t==='training')return 'Training';
++  if(t==='torwart')return 'Torwarttraining';
+   if(t==='spiel')return isFriendly(e)?'Freundschaftsspiel':'Spiel';
+   return 'Termin';
+ }
+@@ -2824,6 +2959,7 @@ function newEventFromFussball(idx){
+   if(!session)return; // requireLogin() in newEvent() already handled the redirect
+   formSkipFussballLink=fussballGameLinkId(g); // eigenes Belegungsfenster nicht als Konflikt mit sich selbst werten
+   document.getElementById('f-anlass').value='Heimspiel: '+g.team+' – '+g.opponent+(g.competition?' ('+g.competition+')':'');
++  document.getElementById('f-kind').value='game'; kindTouched=true; onKindChange(false);
+   if(g.t){ document.getElementById('f-von').value=g.t; document.getElementById('f-bis').value=addMinutes(g.t,120); }
+   onTimeChange();
+   showToast('Aus fussball.de übernommen – bitte Team, Platz & Details prüfen.',3500);
+@@ -2844,6 +2980,26 @@ function onTeamChange(){
+   document.getElementById('f-squad-field').style.display=isJugend(team)?'block':'none';
+   relabelSquad('f-squad',team);
+   applySquadRestrictions('f-squad',team);
++  if(team===GK_TEAM&&formKind()!=='goalkeeper'){ document.getElementById('f-kind').value='goalkeeper'; onKindChange(false); }
++}
++/* Terminart im Terminformular. Torwarttraining (Belegungsstufe "overlay") hat keine
++   Platzfläche – die Viertel-Auswahl wird dann ausgeblendet, "Großspielfeld" heißt nur "auf dem Platz". */
++let kindTouched=false;
++function formKind(){ const el=document.getElementById('f-kind'); return el?el.value:'other'; }
++function onKindChange(byUser){
++  if(byUser) kindTouched=true;
++  const k=formKind(), help=document.getElementById('f-kind-help');
++  if(help) help.textContent=occLevel(k)==='overlay'
++    ?'Belegt keine Platzfläche: darf parallel zu einem Training laufen, aber nicht während eines Spiels.'
++    :(occLevel(k)==='exclusive'?'Während eines Spiels ist auf dem Platz kein Torwarttraining möglich.':'');
++  hideConflicts(); renderPitch();
++}
++// Neuer Termin: Terminart aus dem Anlass vorschlagen, solange sie nicht bewusst gewählt wurde.
++function suggestKindFromTitle(){
++  if(kindTouched||editingId) return;
++  const t=document.getElementById('f-anlass').value;
++  const k=/torwart/i.test(t)?'goalkeeper':(/spiel|turnier/i.test(t)?'game':(/training/i.test(t)?'training':'other'));
++  if(k!==formKind()){ document.getElementById('f-kind').value=k; onKindChange(false); }
+ }
+ function onTimeChange(){
+   hideConflicts();renderPitch();renderHalle();
+@@ -2897,8 +3053,9 @@ function pickPitch(q){ if(pitchMode==='ganz')return; pitchPart=pitchPartForPick(
+ function curPitch(){return pitchMode==='ganz'?{mode:'ganz'}:{mode:pitchMode,part:pitchPart};}
+ function renderPitch(){
+   const f=document.getElementById('f-pitch-field');
+-  f.style.display=pitchOn()?'block':'none';
+-  if(!pitchOn())return;
++  const show=pitchOn()&&occLevel(formKind())!=='overlay';
++  f.style.display=show?'block':'none';
++  if(!show)return;
+   const von=document.getElementById('f-von').value||'00:00';
+   const bis=document.getElementById('f-bis').value||'23:59';
+   const busy=usedQuartersWindow(dateInput().value,von,bis,editingId);
+@@ -2961,26 +3118,32 @@ function applyFreeHalf(part){
+    Eine feste Trainingszeit zählt dabei wie eine bestehende Buchung: Ein E/F/G-Spiel weicht auf
+    die andere Hälfte aus, wenn die frei ist. Abgesagt wird nur, wenn wirklich kein Platz bleibt
+    (Ganzplatz-Spiel, zwei gleichzeitige Spiele oder andere Hälfte schon belegt). */
+-function trainingGameCollisions(day,from,to,pitch,validFrom,validUntil,skipSlotId){
+-  if(!pitch)return [];
+-  const want=pitchQuarters(pitch), out=[];
++function trainingGameCollisions(day,from,to,pitch,validFrom,validUntil,skipSlotId,opts){
++  const kind=(opts&&opts.kind)||'training', res=(opts&&opts.res)||[];
++  const overlay=occLevel(kind)==='overlay';
++  if(!pitch&&!(overlay&&res.includes('Großspielfeld')))return [];
++  const out=[];
+   const start=validFrom&&validFrom>todayStr?validFrom:todayStr;
+   const dates=[...new Set((FUSSBALLDE.games||[]).map(g=>g.d))].filter(d=>d>=start&&(!validUntil||d<=validUntil)&&dowOf(d)===day).sort();
+   dates.forEach(d=>{
+-    const me={id:'tf-candidate',d,t:from,bis:to,pitch};
+-    const hits=fussballBookingOccupations(d,null,skipSlotId,[me]).filter(e=>from<eventBis(e)&&to>e.t&&pitchQuarters(e.pitch).some(q=>want.includes(q)));
++    const me={id:'tf-candidate',d,t:from,bis:to,pitch,res,kind};
++    // Überlagerung belegt keine Viertel → verdrängt kein E/F/G-Spiel auf die andere Hälfte.
++    const occ=fussballBookingOccupations(d,null,skipSlotId,overlay?[]:[me]);
++    const hits=occ.filter(e=>timesOverlap(me,e)&&occupationConflictReasons(me,e,quarterPitchReason).length);
+     if(hits.length) out.push({d,labels:hits.map(occupationLabel)});
+   });
+   return out;
+ }
+ function renderTrainingGameNote(){
+-  const el=document.getElementById('tf-game-note'); if(!el)return;
++  const other=document.getElementById(tfIsOverlay()?'tf-game-note':'tf-game-note-gk'); if(other) other.innerHTML='';
++  const el=document.getElementById(tfIsOverlay()?'tf-game-note-gk':'tf-game-note'); if(!el)return;
+   const day=parseInt(document.getElementById('tf-day').value);
+   const from=document.getElementById('tf-from').value, to=document.getElementById('tf-to').value;
+   if(!tfPitchOn()||!from||!to||from>=to){ el.innerHTML=''; return; }
+-  const col=trainingGameCollisions(day,from,to,tfCurPitch(),document.getElementById('tf-validfrom').value,document.getElementById('tf-validuntil').value,tEditId);
++  const ov=tfIsOverlay();
++  const col=trainingGameCollisions(day,from,to,ov?null:tfCurPitch(),document.getElementById('tf-validfrom').value,document.getElementById('tf-validuntil').value,tEditId,{kind:tfKind(),res:ov?['Großspielfeld']:[]});
+   if(!col.length){ el.innerHTML=''; return; }
+-  el.innerHTML='<div class="fb-note" style="background:#FFF5F5;border:1px solid #F5C6C0;color:#8E2A1D;">⚽ An <b>'+col.length+' Tag'+(col.length===1?'':'en')+'</b> belegen Heimspiele diese Platzfläche zur Trainingszeit:<br>'
++  el.innerHTML='<div class="fb-note" style="background:#FFF5F5;border:1px solid #F5C6C0;color:#8E2A1D;">⚽ An <b>'+col.length+' Tag'+(col.length===1?'':'en')+'</b> belegen Heimspiele '+(tfIsOverlay()?'den Platz':'diese Platzfläche')+' zur Trainingszeit:<br>'
+     +col.slice(0,6).map(c=>fmtShort(c.d)+': '+esc(c.labels.join(', '))).join('<br>')+(col.length>6?'<br>… und '+(col.length-6)+' weitere':'')
+     +'<br>Beim Speichern wird das Training an diesen Tagen automatisch abgesagt.</div>';
+ }
+@@ -2991,7 +3154,8 @@ function resetForm(){
+   document.querySelectorAll('#f-squad button').forEach((b,i)=>b.classList.toggle('on',i===0));
+   document.querySelectorAll('#f-res .res-chip').forEach(c=>c.classList.toggle('on',c.dataset.res==='Großspielfeld'));
+   pitchMode='ganz';pitchPart=null;document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode==='ganz'));
+-  halleThirds=[];onTeamChange();renderPitch();renderHalle();hideConflicts();formDirty=false;
++  document.getElementById('f-kind').value='other'; kindTouched=false;
++  halleThirds=[];onTeamChange();onKindChange(false);renderPitch();renderHalle();hideConflicts();formDirty=false;
+   formSkipFussballLink=null;
+ }
+ function requireLogin(){
+@@ -3089,14 +3253,15 @@ function fillForm(e){
+   document.getElementById('f-team').value=e.team;
+   document.querySelectorAll('#f-squad button').forEach((b,i)=>b.classList.toggle('on',i===((e.squad||1)-1)));
+   document.querySelectorAll('#f-res .res-chip').forEach(c=>{
+-    if(c.dataset.res==='Großspielfeld')c.classList.toggle('on',!!e.pitch);
++    if(c.dataset.res==='Großspielfeld')c.classList.toggle('on',!!e.pitch||(e.res||[]).includes('Großspielfeld'));
+     else if(c.dataset.res==='Halle')c.classList.toggle('on',!!(e.halle&&e.halle.thirds&&e.halle.thirds.length));
+     else c.classList.toggle('on',(e.res||[]).includes(c.dataset.res));
+   });
+   if(e.pitch){pitchMode=e.pitch.mode;pitchPart=e.pitch.part||null;document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode===pitchMode));}
+   else{pitchMode='ganz';pitchPart=null;document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode==='ganz'));}
+   halleThirds=e.halle&&e.halle.thirds?[...e.halle.thirds]:[];
+-  onTeamChange();updateWeekday();renderPitch();renderHalle();
++  document.getElementById('f-kind').value=kindOf(e); kindTouched=true;
++  onTeamChange();onKindChange(false);updateWeekday();renderPitch();renderHalle();
+ }
+ function editEvent(id){
+   if(!requireLogin()) return;
+@@ -3146,13 +3311,17 @@ async function submitEvent(){
+     const msg=sq.length?'Nur Mannschaft '+sq.map(s=>jugendLetter(team)+s).join(', ')+' erlaubt.':'Diese Altersklasse ist dir nicht zugewiesen.';
+     showToast(msg,5000);return;
+   }
++  const kind=formKind();
++  const overlay=occLevel(kind)==='overlay';
+   const res=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res).filter(r=>r!=='Großspielfeld'&&r!=='Halle');
+-  const pitch=pitchOn()?curPitch():null;
++  // Überlagerung (Torwarttraining): keine Platzfläche, nur "auf dem Großspielfeld".
++  if(overlay&&pitchOn()) res.unshift('Großspielfeld');
++  const pitch=(pitchOn()&&!overlay)?curPitch():null;
+   const halle=halleResOn()&&halleThirds.length?{thirds:[...halleThirds].sort((a,b)=>a-b)}:null;
+   if(halleResOn()&&!halleThirds.length){showToast('Bitte mindestens ein Hallen-Drittel auswählen.');return;}
+   const note=document.getElementById('f-bem').value.trim();
+   // HARTE KONFLIKTPRÜFUNG
+-  const conflicts=findConflicts(d,von,bis,pitch,halle,res,editingId);
++  const conflicts=findConflicts(d,von,bis,pitch,halle,res,editingId,kind);
+   if(conflicts.length){showConflicts(conflicts);renderFreeSlotsBox('free-slots-box',d,von,bis,editingId);return;}
+   hideConflicts();
+   const btn=document.getElementById('save-btn'),lblEl=document.getElementById('save-label');
+@@ -3162,8 +3331,8 @@ async function submitEvent(){
+   showSaving(editingId?'Termin wird geändert …':'Termin wird gespeichert …');
+   const backup=JSON.stringify(EVENTS);
+   try{
+-    if(editingId)Object.assign(EVENTS.find(x=>x.id===editingId),{d,t:von,bis,title,team,squad,pitch,halle,res,note});
+-    else EVENTS.push({id:crypto.randomUUID(),d,t:von,bis,title,team,squad,pitch,halle,res,note,ownerId:session.id,ownerName:session.name});
++    if(editingId)Object.assign(EVENTS.find(x=>x.id===editingId),{d,t:von,bis,title,kind,team,squad,pitch,halle,res,note});
++    else EVENTS.push({id:crypto.randomUUID(),d,t:von,bis,title,kind,team,squad,pitch,halle,res,note,ownerId:session.id,ownerName:session.name});
+     const wasEditing=!!editingId;
+     const logMsg=(wasEditing?'Termin geändert: ':'Neuer Termin: ')+title+' – '+teamLabel(team,squad)+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name+teamTrailer(team,squad);
+     editingId=null;formDirty=false;document.getElementById('cancel-btn').style.display='none';
+@@ -3448,7 +3617,7 @@ function trainResBadges(s){
+ }
+ function fillTrainerSelect(selectedId){ renderTrainerChips(document.getElementById('tf-team')?.value||'F-Jugend',1,selectedId?[selectedId]:[]); }
+ function trainLocHTML(s){
+-  let h='';
++  let h=(s.team===GK_TEAM||s.kind==='goalkeeper')?gkBadge():'';
+   if(s.pitch) h+=pitchBadge(s.pitch);
+   (s.res||[]).forEach(r=>h+='<span class="badge-res">'+esc(r)+'</span>');
+   if(s.note) h+='<span class="badge-res">'+esc(s.note)+'</span>';
+@@ -3615,11 +3784,15 @@ function renderTraining(){
+ 
+   box.innerHTML=h;
+ }
++function tfKind(){ return document.getElementById('tf-team').value===GK_TEAM?'goalkeeper':'training'; }
++function tfIsOverlay(){ return occLevel(tfKind())==='overlay'; }
+ function tfTeamChange(){
+   const team=document.getElementById('tf-team').value;
+   document.getElementById('tf-squad-field').style.display=isJugend(team)?'block':'none';
++  const gh=document.getElementById('tf-gk-help'); if(gh) gh.style.display=tfIsOverlay()?'block':'none';
+   relabelSquad('tf-squad',team);
+   setTimeout(refreshTrainerChips,0);
++  tfRenderPitch();
+ }
+ function tfToggleRes(el){ el.classList.toggle('on'); if(el.dataset.res==='Großspielfeld') tfRenderPitch(); }
+ function tfPitchOn(){ return resChipOn('tf-res','Großspielfeld'); }
+@@ -3632,8 +3805,9 @@ function tfPickPitch(q){ if(tPitchMode==='ganz')return; tPitchPart=pitchPartForP
+ function tfCurPitch(){ return tPitchMode==='ganz'?{mode:'ganz'}:{mode:tPitchMode,part:tPitchPart}; }
+ function tfRenderPitch(){
+   const f=document.getElementById('tf-pitch-field');
+-  f.style.display=tfPitchOn()?'block':'none';
+-  if(!tfPitchOn())return;
++  const show=tfPitchOn()&&!tfIsOverlay();
++  f.style.display=show?'block':'none';
++  if(!show){ renderTrainingGameNote(); return; }
+   const day=parseInt(document.getElementById('tf-day').value);
+   const from=document.getElementById('tf-from').value||'00:00';
+   const to=document.getElementById('tf-to').value||'23:59';
+@@ -3654,7 +3828,7 @@ function tfFill(s){
+   // trainer chips werden nach tfTeamChange gesetzt
+   document.querySelectorAll('#tf-squad button').forEach((b,i)=>b.classList.toggle('on',i===((s.squad||1)-1)));
+   document.querySelectorAll('#tf-res .res-chip').forEach(c=>{
+-    if(c.dataset.res==='Großspielfeld') c.classList.toggle('on',!!s.pitch);
++    if(c.dataset.res==='Großspielfeld') c.classList.toggle('on',!!s.pitch||(s.res||[]).includes('Großspielfeld'));
+     else c.classList.toggle('on',(s.res||[]).includes(c.dataset.res));
+   });
+   if(s.pitch){ tPitchMode=s.pitch.mode; tPitchPart=s.pitch.part||null;
+@@ -3703,20 +3877,22 @@ async function saveTrainingSlot(){
+   const trainerChips=[...document.querySelectorAll('#tf-trainers-chips .res-chip.on')];
+   const trainerIds=trainerChips.map(x=>x.dataset.id).filter(Boolean);
+   const trainerNames=trainerIds.map(id=>{const u=USERS.find(x=>x.id===id);return u?(u.first+' '+u.last):'';}).filter(Boolean);
++  const kind=tfKind(), overlay=tfIsOverlay();
+   const res=[...document.querySelectorAll('#tf-res .res-chip.on')].map(c=>c.dataset.res).filter(r=>r!=='Großspielfeld');
+-  const pitch=tfPitchOn()?tfCurPitch():null;
++  // Überlagerung (Torwarttraining): keine Platzfläche, nur "auf dem Großspielfeld".
++  if(overlay&&tfPitchOn()) res.unshift('Großspielfeld');
++  const pitch=(tfPitchOn()&&!overlay)?tfCurPitch():null;
+   const note=document.getElementById('tf-note').value.trim();
+-  if(!pitch&&!res.length){ showToast('Bitte mindestens einen Platz auswählen.'); return; }
++  if(!pitch&&!res.some(r=>FIELD_RES.includes(r))){ showToast('Bitte einen Platz auswählen (Großspielfeld oder Kleinspielfeld).'); return; }
+   const warn=[];
+-  const mine=new Set(pitchQuarters(pitch));
++  const me={t:from,bis:to,pitch,res,kind,team};
+   TRAINING.filter(s=>s.day===day&&s.id!==tEditId&&from<s.to&&s.from<to).forEach(s=>{
+-    const hit=pitchQuarters(s.pitch).filter(q=>mine.has(q));
+-    if(hit.length) warn.push('Viertel '+hit.join('/')+' nutzt schon '+trainName(s)+' ('+s.from+'–'+s.to+')');
+-    const rh=(s.res||[]).filter(r=>res.includes(r));
+-    if(rh.length) warn.push(rh.join(', ')+' nutzt schon '+trainName(s)+' ('+s.from+'–'+s.to+')');
++    const other={t:s.from,bis:s.to,pitch:s.pitch,res:s.res||[],team:s.team,isTraining:true,kind:s.kind||(s.team===GK_TEAM?'goalkeeper':'training')};
++    const reasons=occupationConflictReasons(me,other,quarterPitchReason);
++    if(reasons.length) warn.push(reasons.join(', ')+': schon belegt von '+trainName(s)+' ('+s.from+'–'+s.to+')');
+   });
+   // Heimspiele an einzelnen Tagen: dort findet das Training nicht statt (harte Regel wie bei Terminen).
+-  const gameCol=trainingGameCollisions(day,from,to,pitch,validFrom,validUntil,tEditId);
++  const gameCol=trainingGameCollisions(day,from,to,pitch,validFrom,validUntil,tEditId,{kind,res});
+   const alreadyCancelled=tEditId?((TRAINING.find(x=>x.id===tEditId)||{}).cancelled||[]):[];
+   const newCancels=gameCol.map(c=>c.d).filter(d=>!alreadyCancelled.includes(d));
+   if(newCancels.length&&!saveTrainingSlot._confirmed){
+@@ -3733,10 +3909,10 @@ async function saveTrainingSlot(){
+   try{
+     if(tEditId){
+       const existing=TRAINING.find(x=>x.id===tEditId);
+-      Object.assign(existing,{day,from,to,team,squad,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,
++      Object.assign(existing,{day,from,to,team,squad,kind,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,
+         cancelled:[...new Set([...(existing.cancelled||[]),...newCancels])].sort()});
+     }else{
+-      TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[...newCancels].sort()});
++      TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,kind,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[...newCancels].sort()});
+     }
+     const tMsg=(tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+team+' (ab '+fmtShort(validFrom)+')'
+       +(newCancels.length?' – wegen Heimspielen abgesagt am '+newCancels.map(fmtShort).join(', '):'')+' – '+session.name+teamTrailer(team,squad);
+@@ -3948,6 +4124,7 @@ function userListRowsHTML(){
+         u.locked?
+         '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0"/></svg><span>Entsperren</span>':
+         '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg><span>Sperren</span>')+'</button>'
++      +'<button class="uact" onclick="adminResetPassword(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/></svg><span>Passwort</span></button>'
+       +'<button class="uact danger" onclick="deleteUser(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg><span>Löschen</span></button>'
+       +'</div>';
+     return h+'</div>';
+@@ -4239,7 +4416,7 @@ async function createUserCore({first,last,mail,pass,isAdm,classes,targetSeason,p
+     // sonst zeigt die Zugänge-Liste kurzzeitig Teams einer noch gar nicht aktiven Saison an.
+     const initialClasses=(targetSeason&&curSeasonForCreate&&targetSeason.id===curSeasonForCreate.id)?classes:{};
+     const encRec=await encryptToken(session.token,pass);
+-    const newU={id:crypto.randomUUID(),first,last,email:mail,admin:!!isAdm,classes:initialClasses,enc:encRec,created:new Date().toISOString(),emailNotificationsEnabled:true};
++    const newU={id:crypto.randomUUID(),first,last,email:mail,admin:!!isAdm,classes:initialClasses,enc:encRec,created:new Date().toISOString(),emailNotificationsEnabled:true,pwChangeRequired:true};
+     if(phone){ newU.phone=phone; newU.contactPublic=contactPublic||'none'; }
+     USERS.push(newU);
+     await saveUsers('Zugang angelegt: '+first+' '+last+(isAdm?' (Admin)':'')+' – '+session.name);
+@@ -4893,7 +5070,9 @@ async function changePassword(){
+     try{ token=await decryptToken(u.enc,oldPw); }
+     catch(e){ throw new Error('Aktuelles Passwort stimmt nicht.'); }
+     u.enc=await encryptToken(token,newPw);
++    delete u.pwChangeRequired;
+     await saveUsers('Passwort geändert: '+u.first+' '+u.last);
++    sendPwChangedMail(u);
+     session.token=token;
+     localStorage.setItem('svbb_session',JSON.stringify(session)); localStorage.setItem('pc_was_logged_in','1');
+     document.getElementById('pw-old').value='';
+@@ -4904,6 +5083,208 @@ async function changePassword(){
+   finally{ btn.disabled=false; lbl.textContent=old; }
+ }
+ 
++/* ---------- Passwort: Pflichtwechsel, Admin-Reset, "Passwort vergessen" ----------
++   Hintergrund: Jeder Zugang speichert den gemeinsamen Schreib-Token, verschlüsselt mit dem
++   eigenen Passwort. Ein neues Passwort heißt also immer: Token neu verschlüsseln. Das kann nur,
++   wer den Token hat – der Nutzer selbst (angemeldet), ein Admin, oder der Passwort-Worker
++   (Cloudflare, siehe worker/password-reset-worker.js), der den Token nach einem gültigen
++   E-Mail-Link einmalig an den Browser übergibt. */
++let PWFLOW={mode:null,state:'form',error:'',code:null};
++function pwResetEnabled(){ return !!(CFG&&CFG.passwordReset&&CFG.passwordReset.workerUrl); }
++async function pwApi(path,body){
++  const base=String(CFG.passwordReset.workerUrl||'').replace(/\/+$/,'');
++  let r;
++  try{ r=await fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),cache:'no-store'}); }
++  catch(e){ throw new Error('Keine Verbindung zum Server. Bitte Internetverbindung prüfen.'); }
++  let data={}; try{ data=await r.json(); }catch(e){}
++  if(!r.ok) throw new Error(data.error||('Server antwortet mit Fehler '+r.status+'.'));
++  return data;
++}
++// Bestätigungsmail "Dein Passwort wurde geändert" (läuft wie die Start-Passwort-Mail über ein
++// GitHub-Dispatch-Event, nicht über einen Commit). Fehler hier dürfen nichts blockieren.
++function sendPwChangedMail(u){
++  if(!u||!u.email) return;
++  ghDispatch('password-changed',{name:u.first+' '+u.last,email:u.email}).catch(err=>console.warn('Bestätigungsmail nicht ausgelöst:',err));
++}
++function openPwFlow(mode){
++  PWFLOW={mode,state:'form',error:'',code:PWFLOW.code};
++  document.getElementById('pwflow').classList.add('show');
++  // Beim Pflichtwechsel gibt es kein "Schließen" – nur Abmelden.
++  document.getElementById('pwflow-close').style.display=(mode==='force')?'none':'flex';
++  renderPwFlow();
++  trackArea(mode==='forgot'?'passwort_vergessen':(mode==='reset'?'passwort_zuruecksetzen':'passwort_pflichtwechsel'));
++}
++function closePwFlow(){
++  if(PWFLOW.mode==='force') return;
++  document.getElementById('pwflow').classList.remove('show');
++  PWFLOW.mode=null; PWFLOW.code=null;
++  trackArea(currentPaneArea());
++}
++function openForgotPassword(){
++  const mail=(document.getElementById('li-user')||{}).value||'';
++  closeLogin();
++  openPwFlow('forgot');
++  const m=document.getElementById('pf-mail'); if(m&&mail.includes('@')) m.value=mail.trim();
++}
++function pwFieldsHTML(){
++  return '<input type="password" id="pf-new" placeholder="Neues Passwort (min. 12 Zeichen)" autocomplete="new-password">'
++    +'<input type="password" id="pf-new2" placeholder="Neues Passwort wiederholen" autocomplete="new-password">';
++}
++function renderPwFlow(){
++  const box=document.getElementById('pwflow-body'); if(!box)return;
++  const f=PWFLOW;
++  let h='<img class="login-crest" src="assets/logo.svg" alt="platzcoach" style="width:150px;margin-bottom:14px;">';
++  const err=f.error?'<div class="login-err show">'+esc(f.error)+'</div>':'';
++  const busy=f.state==='sending';
++  const btnLbl=t=>busy?'<span class="spinner"></span>':t;
++  if(f.mode==='forgot'){
++    h+='<h1>Passwort vergessen?</h1>';
++    if(f.state==='done'){
++      h+='<div class="pw-ok">Danke! Wenn die Angaben zu einem Zugang passen, bekommst du in den nächsten Minuten eine E-Mail mit einem Link. Der Link ist <b>60 Minuten</b> gültig und funktioniert nur einmal.<br><br>Keine Mail bekommen? Schau im Spam-Ordner nach oder wende dich an den Vorstand – ein Admin kann dein Passwort auch direkt neu setzen.</div>'
++        +'<button class="btn-yellow" onclick="closePwFlow();openLogin()">Zurück zur Anmeldung</button>';
++    }else if(!pwResetEnabled()){
++      h+='<p class="sub">Bitte wende dich an den Vorstand oder einen Admin deines Vereins. Ein Admin kann dir unter Konto → Zugänge ein neues Start-Passwort schicken.</p>'
++        +'<button class="btn-yellow" onclick="closePwFlow();openLogin()">Zurück zur Anmeldung</button>';
++    }else{
++      h+='<p class="sub">Gib deinen Namen und die E-Mail-Adresse deines Zugangs ein. Passt alles zusammen, schicken wir dir einen Link zum Zurücksetzen.</p>'+err
++        +'<form onsubmit="event.preventDefault();submitForgotPassword();">'
++        +'<input type="text" id="pf-first" placeholder="Vorname" autocomplete="given-name">'
++        +'<input type="text" id="pf-last" placeholder="Nachname" autocomplete="family-name">'
++        +'<input type="email" id="pf-mail" placeholder="E-Mail-Adresse" autocomplete="email" autocapitalize="none" spellcheck="false">'
++        +'<button type="submit" class="btn-yellow"'+(busy?' disabled':'')+'>'+btnLbl('Link anfordern')+'</button></form>'
++        +'<button type="button" class="login-link" onclick="closePwFlow();openLogin()">Zurück zur Anmeldung</button>';
++    }
++  }else if(f.mode==='reset'){
++    h+='<h1>Neues Passwort</h1>';
++    if(f.state==='done'){
++      h+='<div class="pw-ok">Dein Passwort wurde geändert. Du wirst jetzt angemeldet …</div>';
++    }else if(!pwResetEnabled()){
++      h+='<div class="login-err show">Das Zurücksetzen per Link ist bei diesem Verein nicht eingerichtet.</div>';
++    }else{
++      h+='<p class="sub">Lege jetzt ein neues Passwort für deinen Zugang fest.</p>'+err
++        +'<form onsubmit="event.preventDefault();submitResetPassword();">'+pwFieldsHTML()
++        +'<button type="submit" class="btn-yellow"'+(busy?' disabled':'')+'>'+btnLbl('Passwort speichern')+'</button></form>'
++        +'<button type="button" class="login-link" onclick="PWFLOW.code=null;openPwFlow(\'forgot\')">Neuen Link anfordern</button>';
++    }
++  }else if(f.mode==='force'){
++    h+='<h1>Neues Passwort festlegen</h1>'
++      +'<p class="sub">Du bist mit einem Start-Passwort angemeldet. Bitte lege jetzt ein eigenes Passwort fest – das Start-Passwort aus der E-Mail gilt danach nicht mehr.</p>'+err
++      +'<form onsubmit="event.preventDefault();submitForcedPassword();">'+pwFieldsHTML()
++      +'<button type="submit" class="btn-yellow"'+(busy?' disabled':'')+'>'+btnLbl('Passwort speichern')+'</button></form>'
++      +'<button type="button" class="login-link" onclick="forcedPwLogout()">Abmelden</button>';
++  }
++  box.innerHTML=h;
++}
++function readNewPw(){
++  const a=(document.getElementById('pf-new')||{}).value||'', b=(document.getElementById('pf-new2')||{}).value||'';
++  if(a.length<12) throw new Error('Das neue Passwort braucht mindestens 12 Zeichen.');
++  if(a!==b) throw new Error('Die beiden Passwörter stimmen nicht überein.');
++  return a;
++}
++async function submitForgotPassword(){
++  if(PWFLOW.state==='sending')return;
++  const v=id=>((document.getElementById(id)||{}).value||'').trim();
++  const first=v('pf-first'), last=v('pf-last'), email=v('pf-mail').toLowerCase();
++  if(!first||!last||!REG_MAIL_RE.test(email)){
++    PWFLOW.error='Bitte Vorname, Nachname und eine gültige E-Mail-Adresse eintragen.'; renderPwFlow();
++  }else{
++    PWFLOW.error=''; PWFLOW.state='sending'; renderPwFlow();
++    try{
++      await pwApi('/password/forgot',{first,last,email});
++      PWFLOW.state='done'; trackEvent('passwort_link_angefordert');
++    }catch(e){ PWFLOW.state='form'; PWFLOW.error=e.message; }
++    renderPwFlow();
++  }
++  if(PWFLOW.state==='form'){ const set=(id,val)=>{const el=document.getElementById(id); if(el) el.value=val;}; set('pf-first',first); set('pf-last',last); set('pf-mail',email); }
++}
++async function submitResetPassword(){
++  if(PWFLOW.state==='sending')return;
++  let pw; try{ pw=readNewPw(); }catch(e){ PWFLOW.error=e.message; renderPwFlow(); return; }
++  PWFLOW.error=''; PWFLOW.state='sending'; renderPwFlow();
++  try{
++    // 1) Link beim Worker einlösen (nur einmal möglich) → Zugangs-ID + Schreib-Token
++    const r=await pwApi('/password/redeem',{code:PWFLOW.code});
++    if(!r.token||!r.userId) throw new Error('Unerwartete Antwort vom Server.');
++    session={id:r.userId,name:'',email:'',isAdmin:false,isSuper:false,classes:{},token:r.token};
++    // 2) Aktuellen Stand der Zugänge holen, Token mit dem neuen Passwort verschlüsseln, speichern
++    await refreshUsersFromGitHub();
++    const u=USERS.find(x=>x.id===r.userId);
++    if(!u) throw new Error('Zugang nicht gefunden.');
++    if(u.locked) throw new Error('Dieser Zugang wurde gesperrt. Bitte an den Vorstand wenden.');
++    session={id:u.id,name:u.first+' '+u.last,email:u.email,isAdmin:u.admin===true,isSuper:false,classes:normalizeClasses(u.classes||{}),token:r.token};
++    u.enc=await encryptToken(r.token,pw);
++    delete u.pwChangeRequired;
++    await saveUsers('Passwort zurückgesetzt: '+u.first+' '+u.last);
++    sendPwChangedMail(u);
++    PWFLOW.state='done'; PWFLOW.code=null; renderPwFlow();
++    trackEvent('passwort_zurueckgesetzt');
++    setTimeout(()=>{ document.getElementById('pwflow').classList.remove('show'); PWFLOW.mode=null; afterLogin(); },1200);
++  }catch(e){
++    session=null;
++    PWFLOW.state='form';
++    PWFLOW.error=e.message;
++    renderPwFlow();
++  }
++}
++async function submitForcedPassword(){
++  if(PWFLOW.state==='sending')return;
++  let pw; try{ pw=readNewPw(); }catch(e){ PWFLOW.error=e.message; renderPwFlow(); return; }
++  const u=USERS.find(x=>x.id===session.id);
++  if(!u){ PWFLOW.error='Zugang nicht gefunden.'; renderPwFlow(); return; }
++  PWFLOW.error=''; PWFLOW.state='sending'; renderPwFlow();
++  const backup=JSON.stringify(USERS);
++  try{
++    u.enc=await encryptToken(session.token,pw);
++    delete u.pwChangeRequired;
++    await saveUsers('Passwort geändert: '+u.first+' '+u.last);
++    sendPwChangedMail(u);
++    PWFLOW.mode=null;
++    document.getElementById('pwflow').classList.remove('show');
++    trackArea(currentPaneArea());
++    showToast('Passwort gespeichert. Bitte gut merken.',4000);
++  }catch(e){ USERS=JSON.parse(backup); PWFLOW.state='form'; PWFLOW.error='Speichern fehlgeschlagen: '+e.message; renderPwFlow(); }
++}
++function forcedPwLogout(){ PWFLOW.mode=null; document.getElementById('pwflow').classList.remove('show'); logout(); }
++// Über einen Reset-Link gekommen: eine evtl. noch gespeicherte Sitzung (evtl. anderer Zugang) beenden.
++function openResetFlow(code){
++  PWFLOW.code=code;
++  if(session){ session=null; localStorage.removeItem('svbb_session'); refreshHeader(); }
++  closeLogin(); openPwFlow('reset');
++}
++function checkForcedPwChange(){
++  if(!session||session.isSuper||!session.token) return;
++  const u=USERS.find(x=>x.id===session.id);
++  if(u&&u.pwChangeRequired) openPwFlow('force');
++}
++// Admin: Passwort eines Zugangs direkt neu setzen (Rückfallebene, falls der Link nicht klappt).
++function adminResetPassword(id){
++  const u=USERS.find(x=>x.id===id); if(!u)return;
++  if(!session||!session.isAdmin||!session.token){ showToast('Nur für Admins mit Schreib-Token.'); return; }
++  askConfirm('Passwort neu setzen?',
++    u.first+' '+u.last+' bekommt ein neues Start-Passwort per E-Mail an '+u.email+' und muss es bei der nächsten Anmeldung ändern. Das bisherige Passwort gilt danach nicht mehr.',
++    'Neues Passwort senden', async()=>{ await doAdminResetPassword(id); });
++}
++async function doAdminResetPassword(id){
++  const pw=genStartPassword();
++  const backup=JSON.stringify(USERS);
++  let u;
++  try{
++    await refreshUsersFromGitHub();
++    u=USERS.find(x=>x.id===id); if(!u) throw new Error('Zugang nicht gefunden.');
++    u.enc=await encryptToken(session.token,pw);
++    u.pwChangeRequired=true;
++    await saveUsers('Passwort neu gesetzt: '+u.first+' '+u.last+' – '+session.name);
++  }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); return; }
++  renderUserListOnly();
++  try{
++    await ghDispatch('welcome-password',{name:u.first+' '+u.last,email:u.email,password:pw});
++    showToast('Neues Start-Passwort an '+u.email+' gesendet.',5000);
++  }catch(err){
++    // Mail ging nicht raus: Passwort einmalig anzeigen, damit der Admin es persönlich weitergeben kann.
++    setTimeout(()=>askConfirm('Mail konnte nicht gesendet werden','Neues Start-Passwort für '+u.first+' '+u.last+': '+pw+' – bitte persönlich weitergeben.','OK',()=>{}),300);
++  }
++}
++
+ /* ---------- Selbstregistrierung mit Einladungslink ----------
+    Ablauf: Admin erzeugt einen Einladungslink (Konto → Zugänge) und verschickt ihn z. B. per
+    WhatsApp. Über den Link (…/#invite=CODE) öffnet sich die Registrierungsmaske. Die Angaben
+@@ -5466,7 +5847,9 @@ async function boot(){
+   clarityCall('set','rolle',session?(session.isAdmin?'admin':'trainer'):'gast');
+   if(!/^#invite=/.test(location.hash)) trackArea(currentPaneArea());
+   openInviteFromHash();
+-  window.addEventListener('hashchange',()=>{ openHashEvent(); openInviteFromHash(); });
++  if(RESET_CODE_AT_LOAD) openResetFlow(RESET_CODE_AT_LOAD);
++  else checkForcedPwChange();
++  window.addEventListener('hashchange',()=>{ const rc=takeResetCodeFromHash(); if(rc){ openResetFlow(rc); return; } openHashEvent(); openInviteFromHash(); });
+ 
+   // Absicherung gegen "Kopf-/Fußzeile verschwunden nach Rückkehr aus dem Hintergrund" (z.B. nach
+   // "Zum Spiel" auf fussball.de und zurück): manche mobilen Browser berechnen 100dvh nicht sofort
+@@ -5483,6 +5866,10 @@ async function boot(){
+   // kann JS-Zustand veraltet sein – dann lieber sauber neu laden.
+   window.addEventListener('pageshow',(e)=>{ if(e.persisted) location.reload(); });
+ }
++/* Reset-Link (…/#reset=CODE): Code sofort aus der Adresszeile entfernen, BEVOR Clarity/GA
++   (weiter unten) geladen werden – der Code darf nie in Analytics-Daten oder im Verlauf landen. */
++function takeResetCodeFromHash(){ const m=location.hash.match(/^#reset=([A-Za-z0-9_-]{20,128})$/); if(m) history.replaceState(null,'',location.pathname+location.search); return m?m[1]:null; }
++const RESET_CODE_AT_LOAD=takeResetCodeFromHash();
+ boot();
+ 
+ /* ---------- Analytics: Microsoft Clarity + Google Analytics ----------
+diff --git a/scripts/send-password-mail.mjs b/scripts/send-password-mail.mjs
+new file mode 100644
+index 0000000..b9972da
+--- /dev/null
++++ b/scripts/send-password-mail.mjs
+@@ -0,0 +1,78 @@
++// scripts/send-password-mail.mjs
++//
++// Verschickt die beiden Passwort-Mails von Platzcoach:
++//   - MAIL_TYPE=password-reset-link: Link zum Zurücksetzen ("Passwort vergessen?"), ausgelöst
++//     vom Passwort-Worker (worker/password-reset-worker.js)
++//   - MAIL_TYPE=password-changed:    Bestätigung "Dein Passwort wurde geändert", ausgelöst von
++//     der App nach jeder Passwortänderung
++//
++// Wie bei send-welcome-password.mjs: ausgelöst per repository_dispatch, nie per Commit.
++// Der Reset-Link ist geheim – NIE loggen (auch nicht bei Fehlern, nur err.message ausgeben).
++//
++// Umgebungsvariablen: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS (Secrets),
++// MAIL_TYPE, PAYLOAD_NAME, PAYLOAD_EMAIL, PAYLOAD_LINK (nur beim Reset-Link).
++
++import fs from 'node:fs/promises';
++import nodemailer from 'nodemailer';
++
++function escapeHtml(s) {
++  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
++}
++
++async function main() {
++  const type = process.env.MAIL_TYPE || '';
++  const name = process.env.PAYLOAD_NAME || '';
++  const email = process.env.PAYLOAD_EMAIL || '';
++  const link = process.env.PAYLOAD_LINK || '';
++
++  if (!email || !name) { console.log('Fehlende Angaben im Dispatch-Payload – überspringe.'); return; }
++  if (type === 'password-reset-link' && !/^https:\/\/[^\s]+#reset=[A-Za-z0-9_-]+$/.test(link)) {
++    console.log('Ungültiger oder fehlender Link – überspringe.'); return;
++  }
++  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
++    console.log('SMTP-Zugangsdaten (Secrets) fehlen – überspringe.'); return;
++  }
++
++  const cfg = JSON.parse(await fs.readFile('data/config.json', 'utf8'));
++  const clubName = cfg.clubName || 'Platzcoach';
++  const fromAddress = (cfg.notify && cfg.notify.fromEmail) || process.env.SMTP_USER;
++  const replyTo = (cfg.notify && cfg.notify.replyTo) || '';
++  const firstName = name.split(' ')[0] || name;
++  const wrap = inner => `<div style="font-family:Arial,sans-serif;font-size:14px;color:#0B1B32;">${inner}<p style="color:#718191;font-size:12px;">Automatische Benachrichtigung von Platzcoach.</p></div>`;
++
++  let subject, text, html;
++  if (type === 'password-reset-link') {
++    subject = 'Passwort zurücksetzen – Platzcoach';
++    text = `Hallo ${firstName},\n\nfür deinen Platzcoach-Zugang (${clubName}) wurde ein neues Passwort angefordert. Über diesen Link kannst du ein neues Passwort festlegen:\n\n${link}\n\nDer Link ist 60 Minuten gültig und funktioniert nur einmal.\n\nDu hast das nicht angefordert? Dann ignoriere diese E-Mail einfach – dein bisheriges Passwort bleibt gültig.`;
++    html = wrap(`<p>Hallo ${escapeHtml(firstName)},</p>
++      <p>für deinen Platzcoach-Zugang (${escapeHtml(clubName)}) wurde ein neues Passwort angefordert.</p>
++      <p><a href="${escapeHtml(link)}" style="display:inline-block;background:#0B1B32;color:#fff;text-decoration:none;font-weight:bold;padding:12px 20px;border-radius:10px;">Neues Passwort festlegen</a></p>
++      <p>Der Link ist <b>60 Minuten</b> gültig und funktioniert nur einmal.</p>
++      <p>Du hast das nicht angefordert? Dann ignoriere diese E-Mail einfach – dein bisheriges Passwort bleibt gültig.</p>`);
++  } else if (type === 'password-changed') {
++    subject = 'Dein Platzcoach-Passwort wurde geändert';
++    text = `Hallo ${firstName},\n\ndas Passwort deines Platzcoach-Zugangs (${clubName}) wurde soeben geändert.\n\nWarst du das nicht? Dann melde dich bitte umgehend beim Vorstand oder antworte auf diese E-Mail.`;
++    html = wrap(`<p>Hallo ${escapeHtml(firstName)},</p>
++      <p>das Passwort deines Platzcoach-Zugangs (${escapeHtml(clubName)}) wurde soeben geändert.</p>
++      <p><b>Warst du das nicht?</b> Dann melde dich bitte umgehend beim Vorstand oder antworte auf diese E-Mail.</p>`);
++  } else {
++    console.log('Unbekannter Mail-Typ – überspringe.'); return;
++  }
++
++  const port = parseInt(process.env.SMTP_PORT || '587', 10);
++  const transporter = nodemailer.createTransport({
++    host: process.env.SMTP_HOST, port, secure: port === 465,
++    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
++  });
++  await transporter.sendMail({
++    from: `Platzcoach <${fromAddress}>`,
++    ...(replyTo ? { replyTo } : {}),
++    to: email, subject, text, html,
++  });
++  console.log(`${type}: E-Mail an ${email} gesendet.`);
++}
++
++main().catch(err => {
++  console.error('Passwort-Mail fehlgeschlagen:', err.message);
++  process.exit(1);
++});
+diff --git a/scripts/send-welcome-password.mjs b/scripts/send-welcome-password.mjs
+index 1b704c1..a3f4366 100644
+--- a/scripts/send-welcome-password.mjs
++++ b/scripts/send-welcome-password.mjs
+@@ -56,10 +56,10 @@ async function main() {
+       <p>Hallo ${escapeHtml(firstName)},</p>
+       <p>hier ist dein Start-Passwort für Platzcoach (${escapeHtml(clubName)}):</p>
+       <p style="font-size:20px;font-weight:bold;background:#F0FBF4;padding:10px 16px;border-radius:8px;display:inline-block;">${escapeHtml(password)}</p>
+-      <p>Deine Login-E-Mail-Adresse findest du in der separaten Willkommens-Mail von Platzcoach. Bitte bewahre dieses Passwort sicher auf und leite diese E-Mail nicht weiter.</p>
++      <p>Deine Login-E-Mail-Adresse findest du in der separaten Willkommens-Mail von Platzcoach. Bei der ersten Anmeldung wirst du gebeten, ein eigenes Passwort festzulegen – das Start-Passwort gilt danach nicht mehr. Bitte leite diese E-Mail nicht weiter.</p>
+       <p style="color:#718191;font-size:12px;">Automatische Benachrichtigung von Platzcoach.</p>
+     </div>`;
+-  const text = `Hallo ${firstName},\n\nhier ist dein Start-Passwort für Platzcoach (${clubName}):\n\n${password}\n\nDeine Login-E-Mail-Adresse findest du in der separaten Willkommens-Mail von Platzcoach. Bitte bewahre dieses Passwort sicher auf und leite diese E-Mail nicht weiter.`;
++  const text = `Hallo ${firstName},\n\nhier ist dein Start-Passwort für Platzcoach (${clubName}):\n\n${password}\n\nDeine Login-E-Mail-Adresse findest du in der separaten Willkommens-Mail von Platzcoach. Bei der ersten Anmeldung wirst du gebeten, ein eigenes Passwort festzulegen – das Start-Passwort gilt danach nicht mehr. Bitte leite diese E-Mail nicht weiter.`;
+ 
+   await transporter.sendMail({
+     from: `Platzcoach <${fromAddress}>`, // Absendername bewusst immer "Platzcoach" (SaaS); der Verein steht im Text
+diff --git a/worker/password-reset-worker.js b/worker/password-reset-worker.js
+new file mode 100644
+index 0000000..cad30f2
+--- /dev/null
++++ b/worker/password-reset-worker.js
+@@ -0,0 +1,171 @@
++// worker/password-reset-worker.js
++//
++// Cloudflare Worker für "Passwort vergessen?" in Platzcoach.
++//
++// Ablauf
++//   1. POST /password/forgot  {first, last, email}
++//      Passt die Kombination aus Vorname + Nachname + E-Mail genau zu einem (nicht gesperrten)
++//      Zugang in data/users.json, wird ein einmaliger Code erzeugt und ein Link
++//      https://platzcoach.de/#reset=CODE per E-Mail verschickt (über das GitHub-Dispatch-Event
++//      "password-reset-link" → .github/workflows/password-mails.yml).
++//      Die Antwort ist IMMER gleich ("ok"), egal ob etwas passt – so lässt sich nicht
++//      herausfinden, ob ein Zugang existiert.
++//   2. POST /password/redeem  {code}
++//      Prüft den Code (60 min gültig, nur einmal nutzbar) und gibt einmalig die Zugangs-ID und
++//      den gemeinsamen Schreib-Token zurück. Der Browser verschlüsselt den Token dann selbst mit
++//      dem neuen Passwort (PBKDF2 310.000 Runden – so viele erlaubt WebCrypto in Workers nicht)
++//      und speichert users.json.
++//
++// Schutz
++//   - Codes: 32 Zufallsbytes, im KV nur als SHA-256-Hash gespeichert, TTL 60 min, einmalig.
++//   - Pro Zugang gilt nur der zuletzt angeforderte Link (neuer Link macht alte ungültig).
++//   - Rate-Limits (KV): pro E-Mail 3 Anfragen/Stunde, pro IP 10 Anfragen/Stunde,
++//     pro IP 20 Einlöse-Versuche/Stunde.
++//   - CORS nur für ALLOWED_ORIGINS.
++//
++// Einrichtung in Cloudflare (siehe README-DEPLOY.md, Abschnitt "Passwort vergessen"):
++//   Variablen:  REPO (z. B. fcal1986/svbachumbergheimkalender), BRANCH (main),
++//               APP_URL (https://platzcoach.de/), ALLOWED_ORIGINS (https://platzcoach.de)
++//   Secret:     GITHUB_TOKEN  – derselbe Fine-grained Token, den die App nutzt
++//               (Contents: Read and write). Bei Token-Erneuerung hier mit austauschen!
++//   KV-Binding: PWRESET
++
++const CODE_TTL_SEC = 3600;
++const LIMITS = {
++  forgotPerEmail: 3,
++  forgotPerIp: 10,
++  redeemPerIp: 20,
++  windowSec: 3600,
++};
++
++export default {
++  async fetch(request, env) {
++    const origin = request.headers.get('Origin') || '';
++    const cors = corsHeaders(origin, env);
++    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
++    const url = new URL(request.url);
++    try {
++      if (request.method === 'GET' && url.pathname === '/health') return json({ ok: true }, 200, cors);
++      if (request.method === 'POST' && url.pathname === '/password/forgot') return await forgot(request, env, cors);
++      if (request.method === 'POST' && url.pathname === '/password/redeem') return await redeem(request, env, cors);
++      return json({ error: 'Nicht gefunden.' }, 404, cors);
++    } catch (e) {
++      console.log('Fehler:', e && e.message);
++      return json({ error: 'Serverfehler. Bitte später noch einmal versuchen.' }, 500, cors);
++    }
++  },
++};
++
++async function forgot(request, env, cors) {
++  const body = await readJson(request);
++  const first = norm(body.first), last = norm(body.last), email = normMail(body.email);
++  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
++  const OK = json({ ok: true }, 200, cors); // immer dieselbe Antwort
++
++  if (!first || !last || !email || email.length > 200 || first.length > 100 || last.length > 100) {
++    return json({ error: 'Bitte Vorname, Nachname und E-Mail-Adresse eintragen.' }, 400, cors);
++  }
++  // Rate-Limits: überschritten → trotzdem "ok" antworten, nur nichts tun.
++  if (!(await allow(env, 'rl:fip:' + ip, LIMITS.forgotPerIp))) return OK;
++  if (!(await allow(env, 'rl:fmail:' + (await sha256(email)), LIMITS.forgotPerEmail))) return OK;
++
++  const users = await loadUsers(env);
++  const user = users.find(u => normMail(u.email) === email && norm(u.first) === first && norm(u.last) === last);
++  if (!user || user.locked) return OK;
++
++  const code = randomCode();
++  const hash = await sha256(code);
++  await env.PWRESET.put('code:' + hash, JSON.stringify({ userId: user.id, created: Date.now() }), { expirationTtl: CODE_TTL_SEC });
++  await env.PWRESET.put('user:' + user.id, hash, { expirationTtl: CODE_TTL_SEC }); // nur der neueste Link zählt
++
++  const link = String(env.APP_URL || 'https://platzcoach.de/').replace(/#.*$/, '') + '#reset=' + code;
++  await dispatch(env, 'password-reset-link', { name: user.first + ' ' + user.last, email: user.email, link });
++  return OK;
++}
++
++async function redeem(request, env, cors) {
++  const body = await readJson(request);
++  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
++  if (!(await allow(env, 'rl:rip:' + ip, LIMITS.redeemPerIp))) {
++    return json({ error: 'Zu viele Versuche. Bitte in einer Stunde erneut probieren.' }, 429, cors);
++  }
++  const code = String(body.code || '');
++  const INVALID = json({ error: 'Dieser Link ist abgelaufen, wurde schon benutzt oder durch einen neueren ersetzt. Bitte einen neuen Link anfordern.' }, 400, cors);
++  if (!/^[A-Za-z0-9_-]{20,128}$/.test(code)) return INVALID;
++
++  const hash = await sha256(code);
++  const raw = await env.PWRESET.get('code:' + hash);
++  if (!raw) return INVALID;
++  const rec = JSON.parse(raw);
++  const latest = await env.PWRESET.get('user:' + rec.userId);
++  // Sofort entwerten – egal was danach passiert, dieser Code ist verbraucht.
++  await env.PWRESET.delete('code:' + hash);
++  if (latest !== hash) return INVALID;
++  await env.PWRESET.delete('user:' + rec.userId);
++  if (Date.now() - rec.created > CODE_TTL_SEC * 1000) return INVALID;
++
++  const users = await loadUsers(env);
++  const user = users.find(u => u.id === rec.userId);
++  if (!user || user.locked) return INVALID;
++  return json({ ok: true, userId: user.id, token: env.GITHUB_TOKEN }, 200, cors);
++}
++
++// ── Hilfsfunktionen ─────────────────────────────────────────────
++function norm(s) {
++  return String(s || '').normalize('NFKC').trim().replace(/\s+/g, ' ').toLowerCase();
++}
++function normMail(s) { return String(s || '').trim().toLowerCase(); }
++
++async function loadUsers(env) {
++  const r = await fetch(`https://api.github.com/repos/${env.REPO}/contents/data/users.json?ref=${env.BRANCH || 'main'}`, {
++    headers: gh(env, { Accept: 'application/vnd.github.raw+json' }),
++  });
++  if (!r.ok) throw new Error('users.json nicht ladbar (' + r.status + ')');
++  const data = await r.json();
++  return Array.isArray(data.users) ? data.users : [];
++}
++
++async function dispatch(env, eventType, payload) {
++  const r = await fetch(`https://api.github.com/repos/${env.REPO}/dispatches`, {
++    method: 'POST',
++    headers: gh(env, { Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' }),
++    body: JSON.stringify({ event_type: eventType, client_payload: payload }),
++  });
++  if (!r.ok) throw new Error('Dispatch fehlgeschlagen (' + r.status + ')');
++}
++
++function gh(env, extra) {
++  return Object.assign({ Authorization: 'Bearer ' + env.GITHUB_TOKEN, 'User-Agent': 'platzcoach-password-reset' }, extra || {});
++}
++
++async function allow(env, key, max) {
++  const n = parseInt((await env.PWRESET.get(key)) || '0', 10);
++  if (n >= max) return false;
++  await env.PWRESET.put(key, String(n + 1), { expirationTtl: LIMITS.windowSec });
++  return true;
++}
++
++function randomCode() {
++  const b = crypto.getRandomValues(new Uint8Array(32));
++  return btoa(String.fromCharCode(...b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
++}
++
++async function sha256(s) {
++  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
++  return [...new Uint8Array(d)].map(x => x.toString(16).padStart(2, '0')).join('');
++}
++
++async function readJson(request) {
++  try { return await request.json(); } catch (e) { return {}; }
++}
++
++function corsHeaders(origin, env) {
++  const allowed = String(env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
++  const h = { 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Max-Age': '86400', Vary: 'Origin' };
++  if (allowed.includes(origin)) h['Access-Control-Allow-Origin'] = origin;
++  return h;
++}
++
++function json(obj, status, cors) {
++  return new Response(JSON.stringify(obj), { status, headers: Object.assign({ 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }, cors) });
++}
+-- 
+2.43.0
+
+
+From 810b3241436bc4325b36060d1eb5b49d3bb3e693 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 26 Sep 2026 07:50:35 +0200
+Subject: [PATCH 2/3] =?UTF-8?q?README-DEPLOY:=20Kopf=20auf=20aktuellen=20S?=
+ =?UTF-8?q?tand=20(=C3=9Cberblick,=20Update-Anleitung,=20Teile=20A?=
+ =?UTF-8?q?=E2=80=93C)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01J982m5yty77r7fZWBMCfM5
+---
+ README-DEPLOY.md | 46 +++++++++++++++++++++++++++++++++-------------
+ 1 file changed, 33 insertions(+), 13 deletions(-)
+
+diff --git a/README-DEPLOY.md b/README-DEPLOY.md
+index 631aa4a..5fce7bc 100644
+--- a/README-DEPLOY.md
++++ b/README-DEPLOY.md
+@@ -1,14 +1,34 @@
+-# fussball.de-Heimspiele in Platzcoach – Deployment-Anleitung
++# Platzcoach – Einrichtung und Betrieb
+ 
+-Dieses Paket enthält alles, was ihr für das fussball.de-Feature braucht:
++Stand: 26.09.2026 · Version 1. Diese Anleitung beschreibt, woraus Platzcoach besteht und wie die einzelnen Teile eingerichtet werden. Teile, die schon laufen, stehen hier als Nachschlagewerk.
+ 
+-```
+-index.html                          → ersetzt eure aktuelle App-Datei
+-data/fussballde.json                → neue Datei, Startzustand (leer)
+-scripts/fussballde-sync.mjs         → Sync-Skript (holt Heimspiele von fussball.de)
+-package.json                        → Abhängigkeit für das Sync-Skript (cheerio)
+-.github/workflows/fussballde-sync.yml → GitHub Action, führt den Sync automatisch aus
+-```
++## Überblick: Was liegt wo?
++
++| Datei / Dienst | Zweck | Wird geändert von |
++|---|---|---|
++| `index.html` | Die komplette App | Updates (ersetzen) |
++| `data/config.json` | Vereinseinstellungen, fussball.de, Belegungsregeln, Worker-Adressen | Hand, Updates |
++| `data/users.json`, `events.json`, `training.json`, `seasons.json`, `resource-locks.json` | Daten der App | **nur die App** – nie per Hand oder Update ersetzen |
++| `data/fussballde.json` | Aktuelle Spiele von fussball.de | **nur der Abgleich** (alle 6 h) – nie ersetzen, sonst sind die Spiele bis zum nächsten Lauf weg |
++| `scripts/fussballde-sync.mjs`, `package.json`, `.github/workflows/fussballde-sync.yml` | fussball.de-Abgleich | selten |
++| `scripts/notify-email.mjs`, `.github/workflows/notify-email.yml` | E-Mail-Benachrichtigungen bei Änderungen | selten |
++| `scripts/send-welcome-password.mjs`, `.github/workflows/welcome-password-email.yml` | Mail mit Start-Passwort | selten |
++| `scripts/send-password-mail.mjs`, `.github/workflows/password-mails.yml` | Mails „Passwort zurücksetzen“ und „Passwort geändert“ | selten |
++| `worker/password-reset-worker.js` | Vorlage für den Passwort-Worker in Cloudflare (läuft nicht auf GitHub) | selten |
++| Cloudflare-Worker `odd-pine-7cbc` | Selbstregistrierung mit Einladungslink | – |
++| Cloudflare-Worker „platzcoach-passwort“ | „Passwort vergessen?“ (siehe Teil B) | – |
++
++## Ein Update einspielen
++
++1. Nur die Dateien aus dem Update-Paket hochladen, mit genau demselben Pfad im Repo. Dateien, die nicht im Paket sind, bleiben unverändert.
++2. Vorher prüfen, ob seit dem Update-Stand jemand `index.html` oder `data/config.json` auf GitHub geändert hat – sonst geht diese Änderung beim Überschreiben verloren.
++3. Nach 1–2 Minuten die App neu laden und unter **Konto** die Versionsnummer prüfen.
++
++---
++
++# Teil A: fussball.de-Abgleich (bereits eingerichtet)
++
++Läuft seit September 2026. Die Schritte unten sind nur nötig, wenn Platzcoach für einen neuen Verein eingerichtet wird.
+ 
+ ## Was das Feature macht
+ 
+@@ -22,8 +42,8 @@ package.json                        → Abhängigkeit für das Sync-Skript (chee
+ 
+ ## Schritt 1: Dateien ins Repo kopieren
+ 
+-1. `index.html` → ersetzt die bestehende Datei im Repo-Root.
+-2. `data/fussballde.json` → neu in den Ordner `data/` legen.
++1. `index.html` → ins Repo-Root.
++2. `data/fussballde.json` → nur bei einer **Neueinrichtung** anlegen, mit dem Inhalt `{"updated":null,"games":[],"awayGames":[]}`.
+ 3. `scripts/fussballde-sync.mjs` → neuer Ordner `scripts/` im Repo-Root.
+ 4. `package.json` → ins Repo-Root. **Falls dort schon eine `package.json` existiert**, nicht überschreiben, sondern den Eintrag `"cheerio": "^1.0.0"` manuell unter `"dependencies"` ergänzen.
+ 5. `.github/workflows/fussballde-sync.yml` → in den Ordner `.github/workflows/` (anlegen, falls nicht vorhanden).
+@@ -108,7 +128,7 @@ Die Action braucht Schreibrechte, um `data/fussballde.json` zu committen. Das is
+ 
+ ---
+ 
+-# „Passwort vergessen?“ – Passwort-Worker einrichten (einmalig, ca. 10 Minuten)
++# Teil B: „Passwort vergessen?“ – Passwort-Worker einrichten (einmalig, ca. 10 Minuten)
+ 
+ Solange `passwordReset.workerUrl` in `data/config.json` leer ist, zeigt „Passwort vergessen?“ nur den Hinweis, sich an den Vorstand zu wenden. Admins können Passwörter jederzeit unter **Konto → Zugänge → Passwort** neu setzen (neues Start-Passwort per Mail, Pflichtwechsel bei der nächsten Anmeldung).
+ 
+@@ -130,7 +150,7 @@ Für den Self-Service per E-Mail-Link:
+ 
+ **Wie es funktioniert:** Nur wenn Vorname, Nachname und E-Mail genau zu einem nicht gesperrten Zugang passen, verschickt der Worker einen Link (`#reset=…`), 60 Minuten gültig, nur einmal nutzbar; ein neuer Link macht ältere ungültig. Die Antwort in der App ist immer gleich, egal ob etwas passt. Begrenzung: 3 Anfragen pro E-Mail und 10 pro IP-Adresse und Stunde. Nach jeder Passwortänderung geht eine Bestätigungsmail raus.
+ 
+-# Belegungsregeln (Terminarten)
++# Teil C: Belegungsregeln (Terminarten)
+ 
+ In `data/config.json` unter `occupancy.levels` hat jede Terminart eine Belegungsstufe:
+ 
+-- 
+2.43.0
+
+
+From 2327be8b6eac953abb72eed4f70ce902579b4516 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 26 Sep 2026 08:00:53 +0200
+Subject: [PATCH 3/3] Passwort-Worker-Adresse eintragen
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01J982m5yty77r7fZWBMCfM5
+---
+ data/config.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/data/config.json b/data/config.json
+index 7eead40..8b3a9df 100644
+--- a/data/config.json
++++ b/data/config.json
+@@ -29,6 +29,6 @@
+     "compatible": []
+   },
+   "passwordReset": {
+-    "workerUrl": ""
++    "workerUrl": "https://platzcoach-passwort.silent-shape-c920.workers.dev"
+   }
+ }
+-- 
+2.43.0
+
