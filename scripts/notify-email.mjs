@@ -73,7 +73,7 @@ function escapeHtml(s) {
 const CATEGORIES = {
   termine:     ['Neuer Termin:', 'Termin geändert:', 'Termin gelöscht:'],
   training:    ['Trainingszeit angelegt:', 'Trainingszeit geändert:', 'Trainingszeit gelöscht:',
-                'Training abgesagt:', 'Absage zurückgenommen:'],
+                'Training abgesagt:', 'Absage zurückgenommen:', 'Torwarttraining-Anmeldung geändert:'],
   sperren:     ['Sperre angelegt:', 'Sperre aufgehoben:'],
   verwaltung:  ['Zugang angelegt:', 'Zugang gelöscht:', 'Zugang gesperrt:', 'Zugang entsperrt:',
                 'Admin-Recht vergeben:', 'Admin-Recht entzogen:',
@@ -100,8 +100,13 @@ function parseCommit(raw) {
   const text = raw.split(/\n\s*\n/)[0].trim();
   const team = raw.match(/^Platzcoach-Team: (.+)#(\d+)\s*$/m);
   const by = raw.match(/^Platzcoach-By: (\S+)\s*$/m);
+  // Torwarttraining: betroffene Mannschaften und Organisator(en)
+  const gk = raw.match(/^Platzcoach-GK: (.+)$/m);
+  const orga = raw.match(/^Platzcoach-Orga: (.+)$/m);
   return {
     text,
+    gkTeams: gk ? gk[1].split(',').map(s => s.trim()).filter(Boolean) : [],
+    orga: orga ? orga[1].split(',').map(s => s.trim()).filter(Boolean) : [],
     team: team ? team[1].trim() : null,
     squad: team ? parseInt(team[2], 10) : null,
     by: by ? by[1] : null,
@@ -175,8 +180,14 @@ function trainerClassesFor(user, seasons, today) {
   if (cur && cur.trainerClasses && cur.trainerClasses[user.id]) return cur.trainerClasses[user.id];
   return user.classes || {};
 }
-function concernsTrainer(c, classes) {
+function concernsTrainer(c, classes, userId) {
   if (c.category !== 'termine' && c.category !== 'training') return true; // z. B. Platzsperren: vereinsweit
+  // Torwarttraining: Organisator, Torwarttrainer und Trainer der gewählten Mannschaften
+  if (c.team === 'Torwarttraining') {
+    if (userId && c.orga.includes(userId)) return true;
+    if (classes['Torwarttraining']) return true;
+    return c.gkTeams.some(t => classes[t]);
+  }
   if (!c.team) return true;                               // ältere Nachricht ohne Mannschaftsangabe
   if (!TEAM_CLASSES.includes(c.team)) return true;        // "Alle Teams", "Vorstand" usw.
   const squads = classes[c.team];
@@ -244,7 +255,7 @@ async function main() {
     const mine = changes.filter(c =>
       allowed.includes(c.category)
       && !(r.user && c.by && c.by === r.user.id)
-      && (r.role === 'admin' || concernsTrainer(c, classes)));
+      && (r.role === 'admin' || concernsTrainer(c, classes, r.user && r.user.id)));
     if (!mine.length) continue;
     const texts = mine.map(c => c.text);
     const html = `
