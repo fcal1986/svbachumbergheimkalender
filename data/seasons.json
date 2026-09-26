@@ -26,7 +26,8 @@
         "849b22db-1ace-4865-ac73-8b325b5ff5d2",
         "0f7e4fdb-535c-4b5c-95d9-8bdbe98300c7",
         "871986c9-429e-4576-affb-961cf5f374f6",
-        "030cee1e-0fb7-426d-a231-b3cbb92c7262"
+        "030cee1e-0fb7-426d-a231-b3cbb92c7262",
+        "af1a6546-fdc2-4059-bef4-5a4966181701"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
@@ -121,6 +122,11 @@
           "G-Jugend": [
             1
           ]
+        },
+        "af1a6546-fdc2-4059-bef4-5a4966181701": {
+          "C-Jugend": [
+            1
+          ]
         }
       },
       "trainerNames": [
@@ -143,7 +149,8 @@
         "Marc Kemper",
         "Daniel Schauerte-Becker",
         "Cetin Kurt",
-        "Marcel Schomberg"
+        "Marcel Schomberg",
+        "Michael Raneck"
       ]
     }
   ]
