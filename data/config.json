@@ -29,6 +29,6 @@
     "compatible": []
   },
   "passwordReset": {
-    "workerUrl": ""
+    "workerUrl": "https://platzcoach-passwort.silent-shape-c920.workers.dev"
   }
 }
