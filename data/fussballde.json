@@ -1,36 +1,6 @@
 {
-  "updated": "2026-09-25T21:35:47.800Z",
+  "updated": "2026-09-26T04:59:13.539Z",
   "games": [
-    {
-      "d": "2026-09-04",
-      "t": "18:28",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "JSG Balve/Garb./La/Kü/Me 1",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-balve-garb-la-kue-me-1/-/spiel/031URH85RG000000VS5489BTVT7QHFUC"
-    },
-    {
-      "d": "2026-09-04",
-      "t": "18:39",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "FC Neheim-Erlenbruch (9er)",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fc-neheim-erlenbruch-9er/-/spiel/031URH85TG000000VS5489BTVT7QHFUC"
-    },
-    {
-      "d": "2026-09-04",
-      "t": "19:23",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "SC Neheim II",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sc-neheim-ii/-/spiel/031URH864K000000VS5489BTVT7QHFUC"
-    },
     {
       "d": "2026-09-05",
       "t": "10:09",
@@ -1373,46 +1343,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-09-04",
-      "t": "19:01",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "BSV Menden",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/bsv-menden-sv-bachum-bergheim/-/spiel/031URH8618000000VS5489BTVT7QHFUC"
-    },
-    {
-      "d": "2026-09-04",
-      "t": "19:30",
-      "team": "Herren",
-      "squad": 3,
-      "opponent": "SG Eintracht 25 II",
-      "competition": "Kreispokal",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sg-eintracht-25-ii-sv-bachum-bergheim-iii/-/spiel/031GJ4TCNS000000VS5489BTVVG7L386"
-    },
-    {
-      "d": "2026-09-04",
-      "t": "19:30",
-      "team": "A-Junioren",
-      "squad": 1,
-      "opponent": "DJK SG Bösperde",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/djk-sg-boesperde-sv-bachum-bergheim/-/spiel/031NPA8JNC000000VS5489BTVV1LNS7C"
-    },
-    {
-      "d": "2026-09-04",
-      "t": "19:34",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "FC Bor. Dröschede",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/fc-bor-droeschede-sv-bachum-bergheim/-/spiel/031URH867G000000VS5489BTVT7QHFUC"
-    },
     {
       "d": "2026-09-05",
       "t": "09:30",
