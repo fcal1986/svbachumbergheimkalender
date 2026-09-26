@@ -1068,7 +1068,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='26.09.2026 · 8';
+const APP_VERSION='26.09.2026 · 9';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -1713,7 +1713,7 @@ async function ghPutRaw(path,text,msg){
       // Sollte durch die Warteschlange oben eigentlich nicht mehr vorkommen – zur Sicherheit
       // trotzdem eine verständliche Meldung statt des rohen SHA-Diffs von GitHub.
       _shaCache[path]=null; // Cache verwerfen, damit der nächste Versuch den echten aktuellen Stand holt
-      throw new Error('Der Datei-Stand hat sich zwischenzeitlich geändert. Bitte nochmal versuchen.');
+      const err409=new Error('Der Datei-Stand hat sich zwischenzeitlich geändert. Bitte nochmal versuchen.'); err409.status=409; throw err409;
     }
     throw new Error(e.message||'Speichern fehlgeschlagen ('+r.status+')');
   }finally{
@@ -1747,12 +1747,79 @@ function teamTrailer(team,squad,item){
 }
 // Mannschaft für Commit-Texte: beim Torwarttraining die gewählten Mannschaften statt "Torwarttraining".
 function msgTeam(team,squad,gkTeams){ return team===GK_TEAM?('Torwarttraining für '+gkTeamsText(gkTeams||[])):teamLabel(team,squad); }
-async function saveEvents(msg){
-  await ghPutRaw('data/events.json',JSON.stringify({events:EVENTS},null,2),msg);
+/* ---------- Speichern mit Zusammenführen (gegen "verlorene Änderungen") ----------
+   Früher schrieb jedes Gerät seine KOMPLETTE lokale Liste zurück. Hatte ein anderes Gerät in der
+   Zwischenzeit etwas geändert oder gelöscht, wurde das stillschweigend überschrieben – gelöschte
+   Termine tauchten wieder auf, neue verschwanden. Jetzt wird vor jedem Speichern der aktuelle
+   Stand von GitHub geholt und nur die EIGENEN Änderungen darauf angewendet (3-Wege-Abgleich pro
+   Eintrag und Feld, Basis = Stand beim Laden bzw. letzten Speichern). */
+const STORES={
+  events:  {path:'data/events.json',          key:'events',  get:()=>EVENTS,   set:v=>{EVENTS=v;}},
+  users:   {path:'data/users.json',           key:'users',   get:()=>USERS,    set:v=>{USERS=v;}},
+  training:{path:'data/training.json',        key:'slots',   get:()=>TRAINING, set:v=>{TRAINING=v;}},
+  locks:   {path:'data/resource-locks.json',  key:'locks',   get:()=>LOCKS,    set:v=>{LOCKS=v;}},
+  seasons: {path:'data/seasons.json',         key:'seasons', get:()=>SEASONS,  set:v=>{SEASONS=v;}}
+};
+const STORE_BASE={};
+function snapStore(name){ const m={}; (STORES[name].get()||[]).forEach(x=>{ if(x&&x.id!=null) m[x.id]=JSON.stringify(x); }); STORE_BASE[name]=m; }
+function mergeFields(b,l,r){
+  const out={...r};
+  new Set([...Object.keys(b),...Object.keys(l)]).forEach(k=>{
+    if(JSON.stringify(l[k])!==JSON.stringify(b[k])){ if(l[k]===undefined) delete out[k]; else out[k]=l[k]; }
+  });
+  return out;
 }
-async function saveUsers(msg){ await ghPutRaw('data/users.json',JSON.stringify({users:USERS},null,2),msg); }
-async function saveTraining(msg){ await ghPutRaw('data/training.json',JSON.stringify({slots:TRAINING},null,2),msg); }
-async function saveLocks(msg){ await ghPutRaw('data/resource-locks.json',JSON.stringify({locks:LOCKS},null,2),msg); }
+function mergeStore(name,local,remote){
+  const base=STORE_BASE[name]||{}, lm=new Map(local.map(x=>[x.id,x])), out=[], seen=new Set();
+  remote.forEach(r=>{
+    if(!r||r.id==null){ out.push(r); return; }
+    seen.add(r.id);
+    const l=lm.get(r.id), bs=base[r.id];
+    if(bs===undefined){ out.push(l||r); return; }      // war beim Laden unbekannt: von anderswo neu
+    if(!l) return;                                     // hier gelöscht
+    out.push(JSON.stringify(l)===bs?r:mergeFields(JSON.parse(bs),l,r));
+  });
+  local.forEach(l=>{
+    if(seen.has(l.id)) return;
+    const bs=base[l.id];
+    if(bs===undefined) out.push(l);                    // hier neu angelegt
+    else if(JSON.stringify(l)!==bs) out.push(l);       // hier geändert, anderswo gelöscht → Änderung behalten
+    // sonst: anderswo gelöscht, hier unverändert → bleibt gelöscht
+  });
+  return out;
+}
+let storeQueue=Promise.resolve();
+function saveStore(name,msg){
+  const run=async()=>{
+    const st=STORES[name];
+    for(let attempt=0;;attempt++){
+      const r=await fetch('https://api.github.com/repos/'+CFG.repo+'/contents/'+st.path+'?ref='+CFG.branch,{
+        headers:{Authorization:'Bearer '+session.token,Accept:'application/vnd.github+json'},cache:'no-store'});
+      let remote=null, sha=null;
+      if(r.ok){ const j=await r.json(); sha=j.sha; if(j.content){ try{ remote=JSON.parse(dec.decode(unb64(String(j.content).replace(/\s/g,'')))); }catch(e){ remote=null; } } }
+      else if(r.status===401) throw new Error('Token ungültig oder abgelaufen.');
+      else if(r.status!==404) throw new Error('GitHub-Lesefehler '+r.status);
+      const local=st.get()||[];
+      const canMerge=remote&&Array.isArray(remote[st.key])&&local.every(x=>x&&x.id!=null);
+      const merged=canMerge?mergeStore(name,local,remote[st.key]):local;
+      _shaCache[st.path]=sha;
+      try{ await ghPutRaw(st.path,JSON.stringify({...(remote||{}),[st.key]:merged},null,2),msg); }
+      catch(e){ if(e.status===409&&attempt<2) continue; throw e; }
+      const othersChanged=JSON.stringify(merged)!==JSON.stringify(local);
+      st.set(merged); snapStore(name);
+      if(name==='users') syncClassesFromActiveSeason();
+      if(othersChanged){ try{ render(); renderStart(); renderTraining(); }catch(e){} }
+      return;
+    }
+  };
+  const p=storeQueue.catch(()=>{}).then(run);
+  storeQueue=p;
+  return p;
+}
+async function saveEvents(msg){ await saveStore('events',msg); }
+async function saveUsers(msg){ await saveStore('users',msg); }
+async function saveTraining(msg){ await saveStore('training',msg); }
+async function saveLocks(msg){ await saveStore('locks',msg); }
 
 /* ---------- Ressourcen-Sperren (z.B. Platz wegen Schnee gesperrt) ----------
    Bewusst NUR als Warnung gedacht, keine automatische Terminabsage: eine Wetter-Sperre kann
@@ -4556,6 +4623,7 @@ async function refreshUsersFromGitHub(){
   USERS=data.users;
   if(d.sha) _shaCache['data/users.json']=d.sha;
   syncClassesFromActiveSeason();
+  snapStore('users');
 }
 async function createUserCore({first,last,mail,pass,isAdm,classes,targetSeason,phone,contactPublic}){
   mail=normMail(mail);
@@ -4730,7 +4798,7 @@ let _seasonSaveMsg='';
 async function saveSeasons(msg){
   _seasonSaveMsg=msg||'Saison aktualisiert';
   // Sofortiger Write – kein Debounce nötig da optimistic updates schon re-rendern
-  await ghPutRaw('data/seasons.json',JSON.stringify({seasons:SEASONS},null,2),_seasonSaveMsg);
+  await saveStore('seasons',_seasonSaveMsg);
 }
 async function saveSeasonDebounced(msg){
   // Batching: sammelt schnelle Änderungen und schreibt einmal
@@ -6212,14 +6280,17 @@ async function boot(){
   try{
     const [ev,us]=await Promise.all([loadJSON('data/events.json'),loadJSON('data/users.json')]);
     EVENTS=ev.events||[]; USERS=us.users||[];
+    snapStore('events'); snapStore('users'); // Basis für den Abgleich beim Speichern – direkt nach dem Laden
   }catch(e){
     document.getElementById('nx-box').innerHTML='<div class="banner warn">Daten konnten nicht geladen werden: '+esc(e.message)+'</div>';
     return;
   }
   try{ const tr=await loadJSON('data/training.json'); TRAINING=tr.slots||[]; }
   catch(e){ TRAINING=[]; }
+  snapStore('training');
   try{ const sea=await loadJSON('data/seasons.json'); SEASONS=sea.seasons||[]; }
   catch(e){ SEASONS=[]; }
+  snapStore('seasons');
   // Einmalige Reparatur: verwaiste Trainer-IDs aus Saisons entfernen, die durch gelöschte
   // Zugänge vor diesem Fix übrig geblieben sind (zeigten z.B. "3 Trainer" an, obwohl beim
   // Aufklappen niemand mehr auftauchte, und verhinderten dadurch auch das Löschen der Saison).
@@ -6236,6 +6307,7 @@ async function boot(){
   catch(e){ FUSSBALLDE={updated:null,games:[],awayGames:[]}; }
   try{ const lk=await loadJSON('data/resource-locks.json'); LOCKS=Array.isArray(lk.locks)?lk.locks:[]; }
   catch(e){ LOCKS=[]; }
+  snapStore('locks');
 
   document.getElementById('login-foot').textContent=
     USERS.length?'Zugang bekommst du vom Vorstand.':'Noch keine Zugänge angelegt – bitte als Admin anmelden.';
