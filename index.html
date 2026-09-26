@@ -777,9 +777,9 @@
         <p class="helptext" id="tf-gk-help" style="display:none;">Torwarttraining belegt keine Platzfläche: Es darf parallel zu einem Training laufen, aber nicht während eines Spiels.</p>
         <div id="tf-game-note-gk"></div>
       </div>
-      <div class="field" id="tf-gkteams-field" style="display:none;"><label>Torhüter aus welchen Jugenden?</label>
+      <div class="field required" id="tf-gkteams-field" style="display:none;"><label><span class="req-dot"></span>Für welche Mannschaften?</label>
         <div class="chip-group" id="tf-gkteams"></div>
-        <p class="helptext">Die Trainer dieser Jugenden bekommen beim Anlegen eine E-Mail mit der Bitte, ihre Torhüter an- oder abzumelden.</p>
+        <p class="helptext">Mehrfachauswahl. Die Trainer dieser Mannschaften bekommen beim Anlegen eine E-Mail mit der Bitte, ihre Torhüter an- oder abzumelden.</p>
       </div>
       <div class="field" id="tf-pitch-field">
         <label>Anteil Großspielfeld</label>
@@ -827,14 +827,15 @@
         </select>
         <p class="helptext" id="f-kind-help"></p>
       </div>
-      <div class="field" id="f-gkteams-field" style="display:none;"><label>Torhüter aus welchen Jugenden?</label>
+      <div class="field required" id="f-gkteams-field" style="display:none;"><label><span class="req-dot"></span>Für welche Mannschaften?</label>
         <div class="chip-group" id="f-gkteams"></div>
-        <p class="helptext">Die Trainer dieser Jugenden bekommen beim Anlegen eine E-Mail mit der Bitte, ihre Torhüter an- oder abzumelden.</p>
+        <p class="helptext">Mehrfachauswahl. Die Trainer dieser Mannschaften bekommen beim Anlegen eine E-Mail mit der Bitte, ihre Torhüter an- oder abzumelden.</p>
       </div>
       <div style="display:flex;gap:10px;">
         <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Von</label><input type="time" id="f-von" autocomplete="off" step="900" value="15:00" onchange="onSnapTime(this)"></div>
         <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Bis</label><input type="time" id="f-bis" autocomplete="off" step="900" value="17:00" onchange="onSnapTime(this)"></div>
       </div>
+      <div id="f-team-section">
       <p class="section-label">Team</p>
       <div class="field required"><label><span class="req-dot"></span>Altersklasse</label>
         <select id="f-team" onchange="onTeamChange()">
@@ -850,6 +851,7 @@
           <button type="button" data-squad="2" onclick="setSquad(this)">2</button>
           <button type="button" data-squad="3" onclick="setSquad(this)">3</button>
         </div>
+      </div>
       </div>
       <p class="section-label">Ressourcen</p>
       <div class="field"><label>Was wird gebraucht?</label>
@@ -1056,7 +1058,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='26.09.2026 · 2';
+const APP_VERSION='26.09.2026 · 3';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -2140,7 +2142,9 @@ function rowHTML(e){
     else if(e.halle&&e.halle.thirds&&e.halle.thirds.length)pitchVisual=halleBadge(e.halle);
   }else{
     title=e.title;
-    b=(kindOf(e)==='goalkeeper'?gkBadge():'')+'<span class="badge-team '+cat(e.team)+'">'+esc(teamLabel(e.team,e.squad))+'</span>';
+    b=kindOf(e)==='goalkeeper'
+      ?gkBadge()+'<span class="badge-team verein">'+esc(gkTeamsText(gkTeamsOf(e)))+'</span>'
+      :'<span class="badge-team '+cat(e.team)+'">'+esc(teamLabel(e.team,e.squad))+'</span>';
     if(e.pitch)b+=pitchBadge(e.pitch);
     if(e.halle&&e.halle.thirds&&e.halle.thirds.length)b+=halleBadge(e.halle);
     (e.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
@@ -3024,7 +3028,16 @@ function onKindChange(byUser){
   if(help) help.textContent=occLevel(k)==='overlay'
     ?'Belegt keine Platzfläche: darf parallel zu einem Training laufen, aber nicht während eines Spiels.'
     :(occLevel(k)==='exclusive'?'Während eines Spiels ist auf dem Platz kein Torwarttraining möglich.':'');
-  const gf=document.getElementById('f-gkteams-field'); if(gf) gf.style.display=k==='goalkeeper'?'block':'none';
+  const gk=k==='goalkeeper';
+  const gf=document.getElementById('f-gkteams-field'); if(gf) gf.style.display=gk?'block':'none';
+  // Torwarttraining gehört keiner einzelnen Altersklasse: statt der Dropliste gilt die
+  // Mehrfachauswahl "Für welche Mannschaften?" – das Team wird intern auf "Torwarttraining" gesetzt.
+  const ts=document.getElementById('f-team-section'), sel=document.getElementById('f-team');
+  if(ts) ts.style.display=gk?'none':'block';
+  if(sel){
+    if(gk&&sel.value!==GK_TEAM){ sel.dataset.prevTeam=sel.value; sel.value=GK_TEAM; }
+    else if(!gk&&sel.value===GK_TEAM){ sel.value=sel.dataset.prevTeam||'F-Jugend'; if(typeof filterTeamOptions==='function') filterTeamOptions(); onTeamChange(); }
+  }
   hideConflicts(); renderPitch();
 }
 // Neuer Termin: Terminart aus dem Anlass vorschlagen, solange sie nicht bewusst gewählt wurde.
@@ -3336,8 +3349,10 @@ async function submitEvent(){
   const bis=snapTo15(document.getElementById('f-bis').value)||document.getElementById('f-bis').value;
   if(!von||!bis){showToast('Bitte Von- und Bis-Zeit eintragen.');return;}
   if(von>=bis){showToast('Die Bis-Zeit muss nach der Von-Zeit liegen.');return;}
-  const team=document.getElementById('f-team').value;
-  const sb=document.querySelector('#f-squad button.on');const squad=sb?parseInt(sb.dataset.squad):1;
+  const team=formKind()==='goalkeeper'?GK_TEAM:document.getElementById('f-team').value;
+  const sb=document.querySelector('#f-squad button.on');const squad=team===GK_TEAM?1:(sb?parseInt(sb.dataset.squad):1);
+  if(team===GK_TEAM&&!readGkTeamChips('f-gkteams').length){showToast('Bitte mindestens eine Mannschaft für das Torwarttraining auswählen.');return;}
+  if(team===GK_TEAM&&!canBookTeam(team,1)){showToast('Torwarttrainings können nur Torwarttrainer und Admins anlegen.',5000);return;}
   if(!canBookTeam(team,squad)){
     const cls=normalizeClasses(session.classes||{});
     const sq=cls[team]||[];
@@ -3918,6 +3933,7 @@ async function saveTrainingSlot(){
   const trainerNames=trainerIds.map(id=>{const u=USERS.find(x=>x.id===id);return u?(u.first+' '+u.last):'';}).filter(Boolean);
   const kind=tfKind(), overlay=tfIsOverlay();
   const gkTeams=kind==='goalkeeper'?readGkTeamChips('tf-gkteams'):undefined;
+  if(kind==='goalkeeper'&&!gkTeams.length){ showToast('Bitte mindestens eine Mannschaft für das Torwarttraining auswählen.'); return; }
   const res=[...document.querySelectorAll('#tf-res .res-chip.on')].map(c=>c.dataset.res).filter(r=>r!=='Großspielfeld');
   // Überlagerung (Torwarttraining): keine Platzfläche, nur "auf dem Großspielfeld".
   if(overlay&&tfPitchOn()) res.unshift('Großspielfeld');
@@ -4895,7 +4911,7 @@ function seasonBodyHTML(s,active){
     h+='<div style="margin-bottom:10px;">'+trainers.map(u=>{
       const cls=normalizeClasses((s.trainerClasses||{})[u.id]||{});
       // Antippen einer Mannschaft öffnet die Torhüter-Liste dieser Mannschaft (Admins).
-      const badges=Object.keys(cls).map(t=>{const sq=cls[t]||[];const sqLabel=isJugend(t)&&sq.length?(' · '+sq.map(x=>jugendLetter(t)+x).join(',')):'';const clickable=t!==GK_TEAM&&t!=='Ü32 / Ü50';return '<span class="badge-res"'+(clickable?' title="Torhüter dieser Mannschaft" onclick="event.stopPropagation();openKeeperEditor(\''+esc(t)+'\','+(sq[0]||1)+')"':'')+' style="font-size:8px;padding:2px 6px;'+(clickable?'cursor:pointer;text-decoration:underline dotted;':'')+'">'+esc(t)+esc(sqLabel)+(clickable?' 🧤':'')+'</span>';}).join('');
+      const badges=Object.keys(cls).map(t=>{const sq=cls[t]||[];const sqLabel=isJugend(t)&&sq.length?(' · '+sq.map(x=>jugendLetter(t)+x).join(',')):'';const clickable=t!==GK_TEAM;return '<span class="badge-res"'+(clickable?' title="Torhüter dieser Mannschaft" onclick="event.stopPropagation();openKeeperEditor(\''+esc(t)+'\','+(sq[0]||1)+')"':'')+' style="font-size:8px;padding:2px 6px;'+(clickable?'cursor:pointer;text-decoration:underline dotted;':'')+'">'+esc(t)+esc(sqLabel)+(clickable?' 🧤':'')+'</span>';}).join('');
       const editKey=s.id+'|'+u.id;
       const isOpen=seasonClassEditorOpen===editKey;
       let row='<div class="season-trainer-row" style="flex-direction:column;align-items:stretch;">'
@@ -5197,7 +5213,7 @@ function canEditKeeper(k){ return !!session&&(session.isAdmin||canBookTeam(k.tea
 function myKeeperTeams(){
   if(!session) return [];
   const out=[];
-  const src=session.isAdmin?Object.fromEntries(ALL_CLASSES.filter(t=>t!==GK_TEAM&&t!=='Ü32 / Ü50').map(t=>[t,[]])):normalizeClasses(session.classes||{});
+  const src=session.isAdmin?Object.fromEntries(ALL_CLASSES.filter(t=>t!==GK_TEAM).map(t=>[t,[]])):normalizeClasses(session.classes||{});
   Object.keys(src).filter(t=>t!==GK_TEAM).forEach(t=>{
     if(!isJugend(t)){ out.push({team:t,squad:1}); return; }
     const sq=(src[t]&&src[t].length)?src[t]:[1,2,3];
@@ -5224,7 +5240,11 @@ function isGkTrainerOf(e){
   if(e.isTraining) return (e.trainerIds||[]).includes(session.id);
   return e.ownerId===session.id||canBookAnyOfTeam(GK_TEAM);
 }
-function gkTeamsText(teams){ return teams&&teams.length?teams.map(t=>t.replace('-Jugend','')).join(', ')+'-Jugend':'alle Mannschaften'; }
+function gkTeamsText(teams){
+  if(!teams||!teams.length) return 'alle Mannschaften';
+  const j=teams.filter(isJugend), o=teams.filter(t=>!isJugend(t));
+  return [j.length?j.map(t=>t.replace('-Jugend','')).join(', ')+'-Jugend':'', ...o].filter(Boolean).join(', ');
+}
 // Block auf der Terminkarte eines Torwarttrainings
 function gkSignupBlockHTML(e){
   if(kindOf(e)!=='goalkeeper'||e.isCancelled) return '';
@@ -5365,7 +5385,7 @@ function gkRemindTrainers(id,d){
   });
 }
 /* Auswahl der Jugenden im Termin-/Trainingsformular */
-const GK_TEAM_CHOICES=()=>ALL_CLASSES.filter(isJugend);
+const GK_TEAM_CHOICES=()=>ALL_CLASSES.filter(t=>t!==GK_TEAM);
 function renderGkTeamChips(containerId,selected){
   const el=document.getElementById(containerId); if(!el) return;
   const sel=new Set(selected||[]);

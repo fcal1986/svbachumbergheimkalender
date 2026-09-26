@@ -4,8 +4,8 @@
 // oder ab." Ausgelöst von der App per repository_dispatch "gk-signup-request" (beim Anlegen eines
 // Torwarttrainings oder über "Trainer erinnern"). Enthält bewusst KEINE Spielernamen.
 //
-// Payload: teams (["E-Jugend","F-Jugend"], leer = alle Jugenden), title, when, link, byId, byName
-// Empfänger: alle nicht gesperrten Zugänge, die in der laufenden Saison eine der Jugenden
+// Payload: teams (["E-Jugend","1. Herren"], leer = alle Mannschaften), title, when, link, byId, byName
+// Empfänger: alle nicht gesperrten Zugänge, die in der laufenden Saison eine der Mannschaften
 // trainieren und E-Mail-Benachrichtigungen nicht abgeschaltet haben – außer dem Auslöser selbst.
 
 import fs from 'node:fs/promises';
@@ -32,14 +32,14 @@ async function main() {
   const recipients = users.filter(u => {
     if (!u.email || u.locked || u.emailNotificationsEnabled === false || u.id === p.byId) return false;
     const cls = Object.keys(classesOf(u));
-    return cls.some(t => /Jugend/.test(t) && (!wanted || wanted.includes(t)));
+    return cls.some(t => t !== 'Torwarttraining' && (!wanted || wanted.includes(t)));
   });
-  if (!recipients.length) { console.log('Keine Empfänger für ' + (teams.join(', ') || 'alle Jugenden') + '.'); return; }
+  if (!recipients.length) { console.log('Keine Empfänger für ' + (teams.join(', ') || 'alle Mannschaften') + '.'); return; }
 
   const clubName = cfg.clubName || 'Platzcoach';
   const fromAddress = (cfg.notify && cfg.notify.fromEmail) || process.env.SMTP_USER;
   const replyTo = (cfg.notify && cfg.notify.replyTo) || '';
-  const teamsText = teams.length ? teams.join(', ') : 'alle Jugenden';
+  const teamsText = teams.length ? teams.join(', ') : 'alle Mannschaften';
   const port = parseInt(process.env.SMTP_PORT || '587', 10);
   const transporter = nodemailer.createTransport({ host: process.env.SMTP_HOST, port, secure: port === 465, auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } });
 
