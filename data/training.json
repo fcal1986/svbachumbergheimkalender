@@ -194,10 +194,12 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "123c8c2c-5a1a-43d6-be82-455af9f3b407"
+        "123c8c2c-5a1a-43d6-be82-455af9f3b407",
+        "030cee1e-0fb7-426d-a231-b3cbb92c7262"
       ],
       "trainerNames": [
-        "Younes Al Musaui"
+        "Younes Al Musaui",
+        "Marcel Schomberg"
       ],
       "validFrom": "2026-09-01",
       "validUntil": null
@@ -484,10 +486,12 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "123c8c2c-5a1a-43d6-be82-455af9f3b407"
+        "123c8c2c-5a1a-43d6-be82-455af9f3b407",
+        "030cee1e-0fb7-426d-a231-b3cbb92c7262"
       ],
       "trainerNames": [
-        "Younes Al Musaui"
+        "Younes Al Musaui",
+        "Marcel Schomberg"
       ],
       "validFrom": "2026-09-01",
       "validUntil": null,
