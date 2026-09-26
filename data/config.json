@@ -23,5 +23,12 @@
   "emails": ["fab.calcagno@gmail.com"],
   "fromEmail": "noreply@platzcoach.de",
   "replyTo": "info@platzcoach.de"
+  },
+  "occupancy": {
+    "levels": {"game": "exclusive", "training": "shared", "goalkeeper": "overlay", "other": "shared"},
+    "compatible": []
+  },
+  "passwordReset": {
+    "workerUrl": "https://platzcoach-passwort.silent-shape-c920.workers.dev"
   }
 }
