@@ -162,3 +162,11 @@ In `data/config.json` unter `occupancy.levels` hat jede Terminart eine Belegungs
 | `other` (Sonstiges) | `shared` | wie Training |
 
 Ausnahmen lassen sich ohne Code-Änderung ergänzen, z. B. zwei Torwarttrainings gleichzeitig erlauben: `"compatible": [["goalkeeper","goalkeeper"]]`. Kabinen, Vereinsheim, Theke und Halle sind immer exklusiv.
+
+# Teil D: Torhüter und Anmeldung zum Torwarttraining
+
+- **Torhüter eintragen:** Jeder Trainer unter **Konto → Profil → „Meine Torhüter“** (Vor- und Nachname, Mannschaft). Admins zusätzlich unter **Konto → Saisons**: Antippen einer Mannschaft (🧤) öffnet deren Torhüter.
+- **Torwarttraining anlegen:** Team „Torwarttraining“ (Trainingszeit) bzw. Terminart „Torwarttraining“ (Termin) und die Jugenden auswählen, z. B. E und F. Beim Anlegen bekommen alle Trainer dieser Jugenden eine E-Mail mit der Bitte, ihre Torhüter an- oder abzumelden (Workflow „Torwarttraining – Bitte um An-/Abmeldung“). Auf jedem Termin kann der Torwarttrainer über „Trainer erinnern“ erneut eine Mail schicken.
+- **An-/Abmelden:** Auf der Terminkarte „Torhüter an-/abmelden“, pro einzelnem Termin. Mannschaftstrainer können ihre eigenen Torhüter an-/abmelden, Torwarttrainer und Admins alle.
+- **Datenschutz:** `data/goalkeepers.json` ist verschlüsselt (Schlüssel aus dem Schreib-Token). Namen sind nur nach Anmeldung sichtbar, weder in der öffentlichen Datei noch in Commit-Nachrichten oder E-Mails stehen Spielernamen. Anmeldungen vergangener Termine werden nach 60 Tagen automatisch gelöscht.
+- **Token erneuern:** Neuen Token als Notzugang `admin` unter Konto speichern, solange der alte noch gilt – die App verschlüsselt die Torhüter-Liste dann automatisch neu. Wird der alte Token vorher gelöscht, ist die Liste nicht mehr lesbar und muss neu eingetragen werden.
