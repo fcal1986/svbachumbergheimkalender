@@ -1,0 +1,31 @@
+name: Torwarttraining – E-Mails (An-/Abmeldung, Absage)
+
+# Nur per repository_dispatch aus der App: "gk-signup-request" (neues Torwarttraining oder
+# "Trainer erinnern") und "gk-cancelled" (Absage/Löschung). Die Mails enthalten keine Spielernamen.
+
+on:
+  repository_dispatch:
+    types: [gk-signup-request, gk-cancelled]
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Abhängigkeiten installieren
+        run: npm install --no-audit --no-fund
+
+      - name: E-Mails senden
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+          MAIL_TYPE: ${{ github.event.action }}
+        run: node scripts/send-gk-request.mjs
