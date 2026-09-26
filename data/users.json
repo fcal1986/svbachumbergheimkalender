@@ -6,9 +6,9 @@
       "last": "Calcagno",
       "email": "fab.calcagno@gmail.com",
       "enc": {
-        "salt": "xhuj2ewS69o2JXCrEHKsxQ==",
-        "iv": "TmpxQJ4ccWZGs6Qh",
-        "cipher": "Y1R9l9+J+M2n2HadRwJnFgghogL4YDZ4oy9xagYgFG9SaKWW2jvFJviTwrVxonA58Md+diNc/Gqb1uT0+LtrVmWIz0zUhmITqxZZtd/ZF7BiwlBlHrnJ0Aixii55aFKCrV8qPDtUYJk8z9yOpA=="
+        "salt": "31BqoitHQAdyo98qLX+L6A==",
+        "iv": "BnVvvD+jpeplE4rP",
+        "cipher": "cud152duAyvcg6OfEWWBpqlpgMyWP/YYfC22Gpq/6cWLoBGtavIHyD89YVw10smMULKOkdZejKE4VHgEH6O0upSMzAxz96kE8cM4WThEW4ZWxDWv4EtocGoO5w/1AKUmKOn2Tr4znKNkU2S3aQ=="
       },
       "created": "2026-07-15T06:12:45.752Z",
       "admin": true,
@@ -20,8 +20,7 @@
       "phone": "015224897699",
       "contactPublic": "none",
       "contactEmail": "fab.calcagno@gmail.com",
-      "emailNotificationsEnabled": true,
-      "pwChangeRequired": true
+      "emailNotificationsEnabled": true
     },
     {
       "id": "a30f8c9b-96f9-4557-b28b-619e122080ea",
