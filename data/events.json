@@ -114,27 +114,6 @@
       "note": "Auswärts in Sundern",
       "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
       "ownerName": "David Skwara"
-    },
-    {
-      "id": "a816c3e0-dd57-4db8-9fee-2094fb3d3352",
-      "d": "2026-09-27",
-      "t": "15:00",
-      "bis": "17:00",
-      "title": "Torwarttraining",
-      "kind": "goalkeeper",
-      "team": "Torwarttraining",
-      "squad": 1,
-      "pitch": null,
-      "halle": null,
-      "res": [
-        "Großspielfeld"
-      ],
-      "note": "",
-      "gkTeams": [
-        "E-Jugend"
-      ],
-      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "ownerName": "Fabrizio Calcagno"
     }
   ]
 }
