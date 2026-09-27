@@ -1,56 +1,6 @@
 {
-  "updated": "2026-09-26T21:11:22.009Z",
+  "updated": "2026-09-27T12:03:45.993Z",
   "games": [
-    {
-      "d": "2026-09-05",
-      "t": "10:09",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "Südener Sport-Verein 1905/06 Hamm",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-suedener-sport-verein-1905-06-hamm/-/spiel/031SC9KIMS000000VS5489BUVVE0O1R6"
-    },
-    {
-      "d": "2026-09-05",
-      "t": "10:48",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "VfR Sölde III",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-vfr-soelde-iii/-/spiel/031SC9KINO000000VS5489BUVVE0O1R6"
-    },
-    {
-      "d": "2026-09-05",
-      "t": "11:00",
-      "team": "B-Junioren",
-      "squad": 1,
-      "opponent": "JSG Balve/Garbeck/Langenhh./Kün./ Affe. I",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-balve-garbeck-langenhh-kuen-affe-i/-/spiel/031QCK9T04000000VS5489BTVT8K11BC"
-    },
-    {
-      "d": "2026-09-05",
-      "t": "11:47",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "JSG Hamm-Osten",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-hamm-osten/-/spiel/031SC9KKD8000000VS5489BUVVE0O1R6"
-    },
-    {
-      "d": "2026-09-05",
-      "t": "12:07",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "SSV Kalthof",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ssv-kalthof/-/spiel/031SC9KKMC000000VS5489BUVVE0O1R6"
-    },
     {
       "d": "2026-09-06",
       "t": "10:18",
@@ -324,16 +274,6 @@
     {
       "d": "2026-10-02",
       "t": "19:30",
-      "team": "Herren",
-      "squad": 1,
-      "opponent": "FC Neheim-Erlenbruch",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fc-neheim-erlenbruch/-/spiel/031I0BNGSK000000VS5489BUVVKNMR0J"
-    },
-    {
-      "d": "2026-10-02",
-      "t": "19:30",
       "team": "A-Junioren",
       "squad": 1,
       "opponent": "TuS Sundern II",
@@ -380,6 +320,16 @@
       "competition": "Kreisliga A",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-affeln-28/-/spiel/031I0BNAS8000000VS5489BUVVKNMR0J"
+    },
+    {
+      "d": "2026-10-08",
+      "t": "19:45",
+      "team": "Herren",
+      "squad": 1,
+      "opponent": "FC Neheim-Erlenbruch",
+      "competition": "Kreisliga A",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fc-neheim-erlenbruch/-/spiel/031I0BNGSK000000VS5489BUVVKNMR0J"
     },
     {
       "d": "2026-10-10",
@@ -1343,46 +1293,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-09-05",
-      "t": "09:30",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "JSG Hamm-Osten",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/jsg-hamm-osten-sv-bachum-bergheim/-/spiel/031SC9KIL8000000VS5489BUVVE0O1R6"
-    },
-    {
-      "d": "2026-09-05",
-      "t": "11:00",
-      "team": "D-Junioren",
-      "squad": 2,
-      "opponent": "JSG Niedereimer/Bruchhausen I",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/jsg-niedereimer-bruchhausen-i-sv-bachum-bergheim-2/-/spiel/031VQHQ1KG000000VS5489BUVSORQI22"
-    },
-    {
-      "d": "2026-09-05",
-      "t": "12:27",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "VfR Sölde III",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/vfr-soelde-iii-sv-bachum-bergheim/-/spiel/031SC9KL08000000VS5489BUVVE0O1R6"
-    },
-    {
-      "d": "2026-09-05",
-      "t": "14:00",
-      "team": "E-Junioren",
-      "squad": 2,
-      "opponent": "Ahlener Sport Klub 2015 - Kinderfestival",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": null
-    },
     {
       "d": "2026-09-06",
       "t": "09:42",
@@ -2405,7 +2315,7 @@
     },
     {
       "d": "2027-04-18",
-      "t": "15:00",
+      "t": "15:30",
       "team": "Herren",
       "squad": 1,
       "opponent": "SV Affeln 28",
