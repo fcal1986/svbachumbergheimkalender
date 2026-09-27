@@ -98,25 +98,6 @@
       "note": "Trainerstammtisch",
       "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
       "ownerName": "David Skwara"
-    },
-    {
-      "id": "b86e05d2-3c5e-43d0-b13f-3d9714825811",
-      "d": "2026-09-28",
-      "t": "10:00",
-      "bis": "12:00",
-      "title": "Torwarttraining Herren Test",
-      "kind": "goalkeeper",
-      "team": "Torwarttraining",
-      "squad": 1,
-      "pitch": null,
-      "halle": null,
-      "res": [],
-      "note": "",
-      "gkTeams": [
-        "1. Herren"
-      ],
-      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "ownerName": "Fabrizio Calcagno"
     }
   ]
 }
