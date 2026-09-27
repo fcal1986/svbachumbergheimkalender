@@ -98,6 +98,22 @@
       "note": "Trainerstammtisch",
       "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
       "ownerName": "David Skwara"
+    },
+    {
+      "id": "36d8f695-8151-4a2c-9a64-5fa3909d5d55",
+      "d": "2026-09-27",
+      "t": "09:30",
+      "bis": "13:00",
+      "title": "Turnier in Sundern - Volkswagen Kids Cup",
+      "kind": "game",
+      "team": "E-Jugend",
+      "squad": 2,
+      "pitch": null,
+      "halle": null,
+      "res": [],
+      "note": "Auswärts in Sundern",
+      "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
+      "ownerName": "David Skwara"
     }
   ]
 }
