@@ -91,11 +91,13 @@
       "note": "",
       "trainerIds": [
         "3a132e64-7713-4fe2-b6db-838da96eefa7",
-        "1d67889f-3194-43d7-9ead-2faa97e9b782"
+        "1d67889f-3194-43d7-9ead-2faa97e9b782",
+        "af1a6546-fdc2-4059-bef4-5a4966181701"
       ],
       "trainerNames": [
         "Dirk Pfeiffer",
-        "Damian Cvetkov"
+        "Damian Cvetkov",
+        "Michael Raneck"
       ],
       "trainerId": null,
       "trainerName": ""
@@ -384,11 +386,13 @@
       "note": "",
       "trainerIds": [
         "3a132e64-7713-4fe2-b6db-838da96eefa7",
-        "1d67889f-3194-43d7-9ead-2faa97e9b782"
+        "1d67889f-3194-43d7-9ead-2faa97e9b782",
+        "af1a6546-fdc2-4059-bef4-5a4966181701"
       ],
       "trainerNames": [
         "Dirk Pfeiffer",
-        "Damian Cvetkov"
+        "Damian Cvetkov",
+        "Michael Raneck"
       ],
       "trainerId": null,
       "trainerName": ""
