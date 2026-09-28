@@ -50,7 +50,18 @@
   .head-text .club{font-size:10.5px;font-weight:600;color:var(--ink-soft);line-height:1.25;}
   .head-text h2{font-weight:700;font-size:16px;color:var(--ink);margin:1px 0 0;line-height:1.2;}
   .user-chip{border:none;font-family:'Inter';font-size:11.5px;font-weight:700;padding:8px 14px;border-radius:999px;cursor:pointer;background:var(--bg);color:var(--ink-soft);border:1.5px solid var(--line);}
-  .hd-clock{flex:none;font-size:15px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;margin-right:4px;}
+  .hd-clock{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:52px;min-height:44px;padding:2px 6px;margin-right:4px;border:none;background:transparent;border-radius:10px;cursor:pointer;font-family:inherit;font-size:15px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.1;}
+  .hd-clock-l{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);}
+  .hd-clock.busy #hd-clock-t{opacity:.35;}
+  .hd-clock.flash{animation:hdflash 1.2s ease;}
+  @keyframes hdflash{0%{background:var(--green-dim);}100%{background:transparent;}}
+  /* Runterziehen zum Aktualisieren */
+  .ptr{position:fixed;left:50%;top:0;z-index:60;transform:translate(-50%,-60px);display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:var(--black-btn);color:#fff;font-size:13px;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,.18);pointer-events:none;opacity:0;transition:opacity .15s;}
+  .ptr.show{opacity:1;}
+  .ptr svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.4;transition:transform .15s;}
+  .ptr.ready svg{transform:rotate(180deg);}
+  .ptr.spin svg{animation:ptrspin .8s linear infinite;}
+  @keyframes ptrspin{to{transform:rotate(360deg);}}
   .pitch-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;margin-bottom:10px;}
   .occupied-badge{display:flex;align-items:center;gap:6px;background:var(--white);border:1.5px solid var(--line);border-radius:999px;padding:6px 11px;font-size:10.5px;font-weight:700;color:var(--ink);white-space:nowrap;box-shadow:var(--card-shadow);}
   .occupied-badge .dot{width:7px;height:7px;border-radius:50%;flex:none;}
@@ -702,7 +713,7 @@
         <div class="club" id="hd-club">SV Bachum / Bergheim e.V.</div>
         <h2 id="hd-title">Termine</h2>
       </div>
-      <div class="hd-clock" id="hd-clock" style="display:none;"></div>
+      <button type="button" class="hd-clock" id="hd-clock" onclick="manualRefresh()" aria-label="Daten aktualisieren" title="Antippen oder in der Liste nach unten ziehen zum Aktualisieren"><span class="hd-clock-l">Stand</span><span id="hd-clock-t">--:--</span></button>
       <button class="user-chip" id="hd-user" onclick="headerAction()">Anmelden</button>
     </div>
   </div>
@@ -1126,7 +1137,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='28.09.2026 · 13';
+const APP_VERSION='28.09.2026 · 14';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -1936,33 +1947,54 @@ function showUpdateBanner(v){
 // Daten neu holen, wenn die App wieder in den Vordergrund kommt (z. B. Handy entsperrt).
 // Angemeldet direkt über die GitHub-API (sofort aktuell), sonst über die Webseite.
 let _lastDataRefresh=Date.now();
-async function refreshDataFromServer(){
-  if(Date.now()-_lastDataRefresh<20000) return;
-  _lastDataRefresh=Date.now();
+// Eine Datei aktuell holen: angemeldet über die GitHub-API (sofort aktuell), sonst über die Webseite.
+async function fetchRepoJSON(path){
+  if(session&&session.token){
+    const r=await fetch('https://api.github.com/repos/'+CFG.repo+'/contents/'+path+'?ref='+CFG.branch,{
+      headers:{Authorization:'Bearer '+session.token,Accept:'application/vnd.github+json'},cache:'no-store'});
+    if(!r.ok) return null;
+    const j=await r.json();
+    let text=null;
+    if(j.content) text=dec.decode(unb64(String(j.content).replace(/\s/g,'')));
+    else if(j.download_url){ const r2=await fetch(j.download_url+(j.download_url.includes('?')?'&':'?')+'t='+Date.now(),{cache:'no-store'}); if(r2.ok) text=await r2.text(); } // > 1 MB
+    if(text===null) return null;
+    if(j.sha) _shaCache[path]=j.sha;
+    return JSON.parse(text);
+  }
+  try{ return await loadJSON(path); }catch(e){ return null; }
+}
+// force: vom Nutzer ausgelöst (Runterziehen / "Stand" antippen) – ohne 20-s-Sperre.
+// Rückgabe: true = aktualisiert, false = nichts erreichbar, 'form' = offenes Formular.
+async function refreshDataFromServer(force){
+  if(!force&&Date.now()-_lastDataRefresh<20000) return false;
   const pane=(document.querySelector('.pane.active')||{}).dataset?.pane;
-  if(pane==='neu'||pane==='tform') return; // offenes Formular nicht unter den Füßen wegziehen
+  if(pane==='neu'||pane==='tform') return force?'form':false; // offenes Formular nicht unter den Füßen wegziehen
+  _lastDataRefresh=Date.now();
+  let changed=false, reached=0;
   try{
-    let changed=false;
     for(const name of ['events','training','seasons','locks','users','moves']){
       const st=STORES[name];
       let data=null;
-      if(session&&session.token){
-        const r=await fetch('https://api.github.com/repos/'+CFG.repo+'/contents/'+st.path+'?ref='+CFG.branch,{
-          headers:{Authorization:'Bearer '+session.token,Accept:'application/vnd.github+json'},cache:'no-store'});
-        if(!r.ok) continue;
-        const j=await r.json(); if(!j.content) continue;
-        data=JSON.parse(dec.decode(unb64(String(j.content).replace(/\s/g,''))));
-        if(j.sha) _shaCache[st.path]=j.sha;
-      }else{
-        try{ data=await loadJSON(st.path); }catch(e){ continue; }
-      }
+      try{ data=await fetchRepoJSON(st.path); }catch(e){ data=null; }
       const arr=data&&Array.isArray(data[st.key])?data[st.key]:null;
       if(!arr) continue;
+      reached++;
       if(JSON.stringify(arr)!==JSON.stringify(st.get())){ st.set(arr); changed=true; }
       snapStore(name);
     }
+    // fussball.de-Spiele (per Abgleich alle 2 h aktualisiert) ebenfalls neu holen.
+    try{
+      const fb=await fetchRepoJSON('data/fussballde.json');
+      if(fb&&Array.isArray(fb.games)){
+        reached++;
+        if(!Array.isArray(fb.awayGames)) fb.awayGames=[];
+        if(JSON.stringify(fb)!==JSON.stringify(FUSSBALLDE_RAW)){ FUSSBALLDE_RAW=fb; applyGameMoves(); changed=true; }
+      }
+    }catch(e){}
     if(changed){ syncClassesFromActiveSeason(); snapStore('users'); render(); renderStart(); renderTraining(); }
   }catch(e){}
+  if(reached) markRefreshed();
+  return reached>0;
 }
 let storeQueue=Promise.resolve();
 function saveStore(name,msg){
@@ -2183,16 +2215,67 @@ function goto(n){
     neu:editingId?'Termin bearbeiten':'Neuer Termin',konto:session?'Mein Konto':'Kalender & Konto'};
   document.getElementById('hd-title').textContent=titles[n]||'Termine';
   document.querySelectorAll('.pane.active .content').forEach(c=>c.scrollTop=0);
-  document.getElementById('hd-clock').style.display=(n==='start')?'block':'none';
   if(n==='konto') renderKonto();
   if(n==='training') renderTraining();
   trackArea(currentPaneArea());
 }
+/* Kopfzeile zeigt auf jeder Seite, wann die Daten zuletzt vom Server geholt wurden ("Stand 22:31").
+   Antippen oder in einer Liste ganz oben nach unten ziehen aktualisiert sofort. */
+let LAST_REFRESH=null;
 function updateHeaderClock(){
+  const t=document.getElementById('hd-clock-t'); if(!t) return;
+  const n=LAST_REFRESH||new Date();
+  t.textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+}
+function markRefreshed(){
+  LAST_REFRESH=new Date(); updateHeaderClock();
   const el=document.getElementById('hd-clock');
-  if(!el||el.style.display==='none')return;
-  const n=new Date();
-  el.textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  if(el){ el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+}
+let _manualRefreshBusy=false;
+async function manualRefresh(){
+  if(_manualRefreshBusy) return;
+  const el=document.getElementById('hd-clock');
+  _manualRefreshBusy=true; if(el) el.classList.add('busy');
+  try{
+    const r=await refreshDataFromServer(true);
+    if(r==='form') showToast('Bitte erst das Formular speichern oder schließen.');
+    else if(r) showToast('Aktualisiert · Stand '+document.getElementById('hd-clock-t').textContent+' Uhr',2200);
+    else showToast('Aktualisieren nicht möglich – keine Verbindung?',3500);
+    checkForAppUpdate();
+  }finally{ _manualRefreshBusy=false; if(el) el.classList.remove('busy'); }
+}
+function setupPullToRefresh(){
+  const ind=document.createElement('div'); ind.className='ptr'; ind.setAttribute('aria-hidden','true');
+  ind.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg><span>Zum Aktualisieren ziehen</span>';
+  document.body.appendChild(ind);
+  const label=ind.querySelector('span'), THRESH=70;
+  let startY=null, dy=0, box=null;
+  const top=()=>{ const h=document.querySelector('.appheader'); return h?h.getBoundingClientRect().bottom:0; };
+  const place=d=>{ ind.style.transform='translate(-50%,'+(top()+Math.min(d,THRESH+30)*0.6-10)+'px)'; };
+  document.addEventListener('touchstart',e=>{
+    if(_manualRefreshBusy||e.touches.length!==1) return;
+    box=e.target.closest('.pane.active .content');
+    if(!box||box.scrollTop>0||e.target.closest('.modal.show')){ box=null; return; }
+    startY=e.touches[0].clientY; dy=0;
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(startY===null||!box) return;
+    dy=e.touches[0].clientY-startY;
+    if(dy<=0||box.scrollTop>0){ ind.classList.remove('show','ready'); return; }
+    if(e.cancelable) e.preventDefault(); // kein Mitscrollen/Überdehnen, solange gezogen wird
+    ind.classList.add('show'); ind.classList.toggle('ready',dy>=THRESH);
+    label.textContent=dy>=THRESH?'Loslassen zum Aktualisieren':'Zum Aktualisieren ziehen';
+    place(dy);
+  },{passive:false});
+  const end=async()=>{
+    if(startY===null) return;
+    const go=box&&dy>=THRESH; startY=null; box=null;
+    if(!go){ ind.classList.remove('show','ready'); return; }
+    ind.classList.remove('ready'); ind.classList.add('spin'); label.textContent='Aktualisiere …'; place(THRESH);
+    try{ await manualRefresh(); } finally{ ind.classList.remove('show','spin'); }
+  };
+  document.addEventListener('touchend',end); document.addEventListener('touchcancel',end);
 }
 setInterval(()=>{ updateHeaderClock(); renderStart(); },30000); // Uhr + Live-Status alle 30s auffrischen, während App offen ist
 function setView(v){
@@ -6885,7 +6968,7 @@ async function boot(){
 
   refreshHeader(); refreshBioBtn(); buildFilters();
   setView('monat'); renderStart(); renderTraining();
-  document.getElementById('hd-clock').style.display='block'; updateHeaderClock(); // Start ist die aktive Pane beim Laden
+  markRefreshed(); setupPullToRefresh(); // "Stand" = Zeitpunkt des Ladens; danach bei jedem Aktualisieren
   openHashEvent();
   clarityCall('set','rolle',session?(session.isAdmin?'admin':'trainer'):'gast');
   if(!/^#invite=/.test(location.hash)) trackArea(currentPaneArea());
