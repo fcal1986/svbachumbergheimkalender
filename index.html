@@ -658,6 +658,9 @@
   .yl-text{white-space:pre-wrap;word-break:break-word;background:var(--bg);border-radius:10px;padding:12px;margin:12px 0 0;font-family:'Inter';font-size:12.5px;line-height:1.45;color:var(--ink);max-height:42vh;overflow-y:auto;}
   .move-badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 9px;font-size:11.5px;font-weight:600;background:var(--green-dim);color:var(--green);}
   .move-badge.pending{background:#fff4e0;color:#a35b00;}
+  .move-badge.warn{background:#fdecea;color:#b3261e;}
+  .moved-card.clickable{cursor:pointer;}
+  .moved-jump{margin-top:10px;font-size:12.5px;font-weight:600;color:var(--green);}
   .moved-card .ev-title-box h4{text-decoration:line-through;color:var(--ink-soft);}
   .rs-result-row small.rs-own{display:block;font-weight:500;font-size:11px;color:var(--ink-soft);margin-top:2px;}
   .rs-empty{font-size:12.5px;color:var(--ink-soft);text-align:center;padding:12px 0;}
@@ -1109,7 +1112,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='28.09.2026 · 7';
+const APP_VERSION='28.09.2026 · 8';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -1260,7 +1263,11 @@ function applyGameMoves(){
     if(!m) return {...g};
     if(g.d===m.fromD&&(g.t||'')===(m.fromT||'')&&!(g.d===m.toD&&(g.t||'')===(m.toT||'')))
       return {...g, d:m.toD, t:m.toT, movedFrom:{d:g.d,t:g.t}, movePending:true, moveId:m.id};
-    return {...g, movedFrom:g.movedFrom||{d:m.fromD,t:m.fromT}, moveId:m.id, moveConfirmed:g.d===m.toD};
+    // fussball.de hat geändert: auf den vorgemerkten Tag (bestätigt) oder auf einen ANDEREN Tag
+    // (abweichend) – dann gilt fussball.de, die Vormerkung ist überholt und wird gemeldet.
+    const confirmed=g.d===m.toD;
+    return {...g, movedFrom:g.movedFrom||{d:m.fromD,t:m.fromT}, moveId:m.id, moveConfirmed:confirmed,
+      moveDiverged:!confirmed, plannedTo:{d:m.toD,t:m.toT}};
   })};
 }
 // Kurzer Direktlink auf ein fussball.de-Spiel in Platzcoach: "#t=fb-<Spiel-Code aus dem fussball.de-Link>".
@@ -1268,18 +1275,39 @@ function fbDeepLinkId(g){ const code=g&&g.link?String(g.link).replace(/\/+$/,'')
 function fbDeepLinkUrl(g){ const id=fbDeepLinkId(g); return id?baseUrl()+'#t='+id:''; }
 function moveOfGame(g){ return g&&g.link?MOVES.find(x=>x.link===g.link)||null:null; }
 function fmtDayShort(d){ const dt=new Date(d+'T00:00:00'); return DAYS_S[dt.getDay()]+' '+fmtShort(d).slice(0,6); }
-/* Alter Termin eines verlegten Heimspiels: nur zur Anzeige ("verlegt auf …"), belegt nichts. */
+/* Hinweiskarten eines verlegten Heimspiels, nur zur Anzeige (belegen nichts), antippbar → aktueller Termin:
+   - am alten Termin: "verlegt auf …"
+   - bei abweichender Verlegung zusätzlich am vorgemerkten Tag: "Vormerkung überholt – fussball.de: …" */
 function movedGameGhostsOn(d){
-  return (FUSSBALLDE.games||[]).map((g,idx)=>({g,idx})).filter(({g})=>g.movedFrom&&g.movedFrom.d===d&&g.movedFrom.d!==g.d).map(({g,idx})=>{
+  const out=[];
+  (FUSSBALLDE.games||[]).forEach((g,idx)=>{
     const mapped=fussballFilterTeam(g.team,g.squad);
-    return {
-      id:'fbmoved-'+(g.link||idx)+'-'+d, d, t:g.movedFrom.t||'00:00', bis:g.movedFrom.t?shiftTimeClamped(g.movedFrom.t,fussballDurationMin(g.team)):'23:59',
-      title:'Heimspiel: '+teamLabel(mapped.team,mapped.squad)+' – '+g.opponent, opponent:g.opponent,
-      team:mapped.team, squad:mapped.squad, pitch:null, halle:null, res:[], kind:'moved',
-      isMovedGhost:true, toD:g.d, toT:g.t, pending:!!g.movePending, fbIndex:idx
-    };
+    const base={opponent:g.opponent, team:mapped.team, squad:mapped.squad, pitch:null, halle:null, res:[], kind:'moved',
+      title:'Heimspiel: '+teamLabel(mapped.team,mapped.squad)+' – '+g.opponent,
+      isMovedGhost:true, toD:g.d, toT:g.t, pending:!!g.movePending, diverged:!!g.moveDiverged, plannedTo:g.plannedTo||null, fbIndex:idx};
+    if(g.movedFrom&&g.movedFrom.d===d&&g.movedFrom.d!==g.d)
+      out.push({...base, id:'fbmoved-'+(g.link||idx)+'-'+d, d, t:g.movedFrom.t||'00:00', bis:g.movedFrom.t?shiftTimeClamped(g.movedFrom.t,fussballDurationMin(g.team)):'23:59'});
+    if(g.moveDiverged&&g.plannedTo&&g.plannedTo.d===d&&g.plannedTo.d!==g.d&&!(g.movedFrom&&g.movedFrom.d===d))
+      out.push({...base, id:'fbstale-'+(g.link||idx)+'-'+d, d, t:g.plannedTo.t||'00:00', bis:g.plannedTo.t?shiftTimeClamped(g.plannedTo.t,fussballDurationMin(g.team)):'23:59', stalePlan:true});
   });
+  return out;
 }
+// Trainings, die wegen einer (inzwischen überholten) Vormerkung abgesagt wurden und noch abgesagt sind.
+function staleMoveCancelledTrainings(g){
+  const m=moveOfGame(g); if(!m||!g||!g.moveDiverged) return [];
+  return (m.cancelledTraining||[]).filter(c=>c.date!==g.d&&TRAINING.some(x=>x.id===c.slotId&&(x.cancelled||[]).includes(c.date)));
+}
+// Zum aktuellen Termin eines Heimspiels springen (Monatsansicht, Karte hervorheben).
+function focusEventCard(e){
+  highlightId=e.id; selDate=e.d;
+  const dt=new Date(e.d+'T00:00:00');
+  curY=dt.getFullYear(); curM=dt.getMonth(); yearShown=curY;
+  goto('termine'); setView('monat');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>scrollToCard(e.id)));
+  clearTimeout(window._hlTimer); window._hlTimer=setTimeout(()=>{ highlightId=null; render(); },5000);
+}
+function openStaleMove(idx){ jumpToGame(idx); if(session&&canMarkGameMove({fbIndex:idx})) setTimeout(()=>openMoveModal(idx),350); }
+function jumpToGame(idx){ const e=fussballDisplayAll()[idx]; if(e) focusEventCard(e); }
 
 /* ---------- fussball.de-Heimspiele in der Terminübersicht anzeigen (Liste/Monat/Jahr) ----------
    Getrennt von fussballInstancesOn() (das für die Konfliktprüfung den Vor-/Nachlauf-Puffer
@@ -1308,7 +1336,8 @@ function fussballDisplayAll(){
       team:mapped.team, squad:mapped.squad, competition:g.competition||'', score:g.score||null,
       isExternal:true, pitchIsFull:isFull, pitchLabelText:isFull?'Ganzer Platz':'Platz geteilt',
       fbIndex:idx, ownerName:'fussball.de', link:g.link||null,
-      movedFrom:g.movedFrom||null, movePending:!!g.movePending, moveConfirmed:!!g.moveConfirmed
+      movedFrom:g.movedFrom||null, movePending:!!g.movePending, moveConfirmed:!!g.moveConfirmed,
+      moveDiverged:!!g.moveDiverged, plannedTo:g.plannedTo||null
     };
   });
 }
@@ -2481,6 +2510,8 @@ function externalRowHTML(e){
 function moveBadgeHTML(e){
   if(!e||!e.movedFrom||!e.movedFrom.d||(e.movedFrom.d===e.d&&(e.movedFrom.t||'')===(e.t||''))) return '';
   const from=fmtDayShort(e.movedFrom.d)+(e.movedFrom.t?', '+e.movedFrom.t:'');
+  if(e.moveDiverged&&e.plannedTo)
+    return '<span class="move-badge warn" title="fussball.de hat einen anderen Termin angesetzt als vorgemerkt">↪ verlegt vom '+from+' · abweichend von der Vormerkung ('+fmtDayShort(e.plannedTo.d)+(e.plannedTo.t?', '+e.plannedTo.t:'')+')</span>';
   return e.movePending
     ? '<span class="move-badge pending" title="In Platzcoach vorgemerkt, bei fussball.de noch nicht übernommen">↪ verlegt vom '+from+' · fussball.de noch offen</span>'
     : '<span class="move-badge" title="Verlegung bei fussball.de übernommen">↪ verlegt vom '+from+'</span>';
@@ -2490,14 +2521,29 @@ function movedGhostRowHTML(e){
   const dow=DAYS_S[dt.getDay()];
   const dd=String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0');
   const to=fmtDayShort(e.toD)+(e.toT?', '+e.toT+' Uhr':'');
-  return '<div class="event-card cancelled-card moved-card" id="ev-'+e.id+'">'
+  const planned=e.plannedTo?fmtDayShort(e.plannedTo.d)+(e.plannedTo.t?', '+e.plannedTo.t:''):'';
+  let sub, badge;
+  if(e.stalePlan){
+    sub=e.t+' Uhr · vorgemerkt, aber fussball.de: '+to;
+    badge='<span class="move-badge warn">⚠ Vormerkung überholt – fussball.de hat einen anderen Termin angesetzt</span>';
+  }else if(e.diverged){
+    sub=e.t+' Uhr · verlegt auf '+to;
+    badge='<span class="move-badge warn">↪ Verlegt (fussball.de) · abweichend von der Vormerkung '+esc(planned)+'</span>';
+  }else{
+    sub=e.t+' Uhr · verlegt auf '+to;
+    badge='<span class="move-badge'+(e.pending?' pending':'')+'">↪ '+(e.pending?'Verlegung vorgemerkt · fussball.de noch offen':'Verlegt (fussball.de)')+'</span>';
+  }
+  const stale=e.stalePlan?staleMoveCancelledTrainings(FUSSBALLDE.games[e.fbIndex]).filter(c=>c.date===e.d):[];
+  return '<div class="event-card cancelled-card moved-card clickable" id="ev-'+e.id+'" role="button" tabindex="0" onclick="jumpToGame('+e.fbIndex+')" onkeydown="if(event.key===\'Enter\')jumpToGame('+e.fbIndex+')">'
     +'<div class="ev-head">'
     +'<div class="ev-date-box"><span class="ev-dow">'+dow+'</span><span class="ev-day">'+dd+'</span></div>'
     +'<div class="ev-sep"></div>'
     +'<div class="ev-title-box"><h4>'+esc(e.title)+'</h4>'
-    +'<div class="ev-sub">'+e.t+' Uhr · verlegt auf '+to+'</div></div>'
+    +'<div class="ev-sub">'+sub+'</div></div>'
     +'</div>'
-    +'<div class="ev-body"><span class="move-badge'+(e.pending?' pending':'')+'">↪ '+(e.pending?'Verlegung vorgemerkt · fussball.de noch offen':'Verlegt (fussball.de)')+'</span></div>'
+    +'<div class="ev-body">'+badge
+    +(stale.length?'<div class="ev-note" style="margin-top:8px;">Das Training an diesem Tag wurde wegen der Vormerkung abgesagt. Über das Kalender-Symbol am Spiel „Vormerkung abschließen“ – dann findet es wieder statt.</div>':'')
+    +'<div class="moved-jump">Zum aktuellen Termin: '+esc(to)+' →</div></div>'
     +'</div>';
 }
 function shareEvent(id){
@@ -3151,6 +3197,17 @@ function renderStartStatus(){
     if(noPitch)html+=warnRowHTML(noPitch+' Termin'+(noPitch===1?'':'e')+' heute ohne Platzzuordnung.');
   }
 
+  // Überholte Vormerkungen: fussball.de hat einen anderen Termin angesetzt als vorgemerkt.
+  (FUSSBALLDE.games||[]).forEach((g,idx)=>{
+    if(!g.moveDiverged||!g.plannedTo||g.d<todayStr) return;
+    const mp=fussballFilterTeam(g.team,g.squad);
+    const tr=staleMoveCancelledTrainings(g);
+    html+='<div class="status-row warn" style="cursor:pointer;" onclick="openStaleMove('+idx+')">'+svgWarn+'<div>'
+      +esc(teamLabel(mp.team,mp.squad)+' – '+g.opponent+': fussball.de hat '+fmtDayShort(g.d)+(g.t?', '+g.t:'')+' angesetzt, vorgemerkt war '+fmtDayShort(g.plannedTo.d)+(g.plannedTo.t?', '+g.plannedTo.t+' Uhr.':''))
+      +(tr.length?' '+esc('Wegen der Vormerkung abgesagtes Training am '+tr.map(c=>fmtDayShort(c.date)).join(', ')+' prüfen.'):'')
+      +' <b>Vormerkung abschließen ›</b></div></div>';
+  });
+
   // Saison-Konflikte: bei "Alle" nur die 3 dringendsten direkt zeigen (Rest hinter Toggle).
   // Bei "Nur fussball.de" werden IMMER alle Treffer der laufenden Saison gezeigt, ohne Limit.
   const allGroups=seasonConflictScan();
@@ -3780,11 +3837,14 @@ function openMoveModal(fbIndex,preDate,preTime){
   const mapped=fussballFilterTeam(g.team,g.squad);
   document.getElementById('mv-text').innerHTML=esc(teamLabel(mapped.team,mapped.squad)+' – '+g.opponent)
     +'<br>laut fussball.de: '+esc(fmtShare(raw.d)+(raw.t?', '+raw.t+' Uhr':''))
-    +(m&&g.movePending?'<br><b>vorgemerkt: '+esc(fmtShare(m.toD)+', '+m.toT+' Uhr')+'</b>':'');
+    +(m&&g.movePending?'<br><b>vorgemerkt: '+esc(fmtShare(m.toD)+', '+m.toT+' Uhr')+'</b>':'')
+    +(m&&g.moveDiverged?'<br><b style="color:#b3261e;">Vormerkung überholt:</b> vorgemerkt war '+esc(fmtShare(m.toD)+', '+m.toT+' Uhr')+', fussball.de hat '+esc(fmtShare(g.d)+(g.t?', '+g.t+' Uhr':''))+' angesetzt. Bitte Vormerkung abschließen.':'');
   document.getElementById('mv-date').value=preDate||(m&&g.movePending?m.toD:'');
   document.getElementById('mv-time').value=preTime||(m&&g.movePending?m.toT:(raw.t||''));
   document.getElementById('mv-yes').textContent=(m&&g.movePending)?'Ändern':'Vormerken';
-  document.getElementById('mv-remove').style.display=(m&&g.movePending)?'block':'none';
+  const rm=document.getElementById('mv-remove');
+  rm.style.display=(m&&(g.movePending||g.moveDiverged))?'block':'none';
+  rm.textContent=(m&&g.moveDiverged)?'Vormerkung abschließen':'Vormerkung aufheben';
   document.getElementById('mv-yl').style.display=(m&&g.movePending)?'block':'none';
   updateMoveTrainingHint();
   document.getElementById('move-modal').classList.add('show');
@@ -3807,9 +3867,9 @@ function updateMoveTrainingHint(){
       +'<b style="font-weight:600;">Training '+esc(teamLabel(t.team,t.squad))+' am '+fmtDayShort(date)+' ('+t.t+'–'+eventBis(t)+') absagen</b></label>';
   });
   const m=moveOfGame(g);
-  const ct=m&&g&&g.movePending?(m.cancelledTraining||[]).filter(c=>{ const s=TRAINING.find(x=>x.id===c.slotId); return s&&(s.cancelled||[]).includes(c.date); }):[];
+  const ct=m&&g&&(g.movePending||g.moveDiverged)?(m.cancelledTraining||[]).filter(c=>{ const s=TRAINING.find(x=>x.id===c.slotId); return s&&(s.cancelled||[]).includes(c.date)&&!(g.moveDiverged&&c.date===g.d); }):[];
   if(ct.length) h+='<label class="rs-result-row rs-selectable on" style="margin-top:10px;"><input type="checkbox" id="mv-reactivate" checked onchange="this.parentElement.classList.toggle(\'on\',this.checked)">'
-    +'<b style="font-weight:600;">Beim Aufheben: wegen der Verlegung abgesagtes Training am '+ct.map(c=>fmtDayShort(c.date)).join(', ')+' wieder stattfinden lassen</b></label>';
+    +'<b style="font-weight:600;">Beim '+(g.moveDiverged?'Abschließen':'Aufheben')+': wegen der Vormerkung abgesagtes Training am '+ct.map(c=>fmtDayShort(c.date)).join(', ')+' wieder stattfinden lassen</b></label>';
   box.innerHTML=h;
 }
 async function saveGameMove(){
@@ -3891,7 +3951,8 @@ async function removeGameMove(){
   const g=FUSSBALLDE.games[moveGameIdx], m=moveOfGame(g);
   if(!session||!m) return;
   const react=document.getElementById('mv-reactivate');
-  const ct=(react&&react.checked)?(m.cancelledTraining||[]):[];
+  const diverged=!!g.moveDiverged, curD=g.d, curT=g.t;
+  const ct=(react&&react.checked)?(m.cancelledTraining||[]).filter(c=>!(diverged&&c.date===curD)):[];
   const mapped=fussballFilterTeam(m.team,m.squad), label=teamLabel(mapped.team,mapped.squad);
   const backupM=JSON.stringify(MOVES), backupT=JSON.stringify(TRAINING);
   MOVES=MOVES.filter(x=>x.id!==m.id);
@@ -3900,10 +3961,12 @@ async function removeGameMove(){
   applyGameMoves(); closeMoveModal(); render(); renderStart(); renderTraining();
   showSaving('Vormerkung wird aufgehoben …');
   try{
-    await saveStore('moves','Spielverlegung aufgehoben: '+label+' – '+m.opponent+' (war vorgemerkt für '+fmtShort(m.toD)+' '+m.toT+' Uhr)'
+    await saveStore('moves',(diverged
+        ?'Spielverlegung abgeschlossen: '+label+' – '+m.opponent+': fussball.de hat '+fmtShort(curD)+(curT?' '+curT:'')+' Uhr angesetzt statt vorgemerkt '+fmtShort(m.toD)+' '+m.toT+' Uhr'
+        :'Spielverlegung aufgehoben: '+label+' – '+m.opponent+' (war vorgemerkt für '+fmtShort(m.toD)+' '+m.toT+' Uhr)')
       +(reactivated?', Training am '+ct.map(c=>fmtShort(c.date)).join(', ')+' findet wieder statt':'')+' – '+session.name+teamTrailer(mapped.team,mapped.squad)+'\nPlatzcoach-Link: '+fbDeepLinkId(m));
     if(reactivated) await saveTraining('Absage zurückgenommen: '+label+' am '+ct.map(c=>fmtShort(c.date)).join(', ')+' wegen Spielverlegung (automatisch) – '+session.name+teamTrailer(mapped.team,mapped.squad));
-    showToast('Vormerkung aufgehoben'+(reactivated?', Training findet wieder statt.':'.'),4500);
+    showToast('Vormerkung '+(diverged?'abgeschlossen':'aufgehoben')+(reactivated?', Training findet wieder statt.':'.'),4500);
   }catch(e){
     MOVES=JSON.parse(backupM); TRAINING=JSON.parse(backupT); applyGameMoves(); render(); renderStart(); renderTraining();
     showToast('Fehler: '+e.message,6000);
@@ -6606,12 +6669,7 @@ function openHashEvent(){
   const fm=!e&&hid.match(/^fb-([A-Za-z0-9]{12,})$/);
   if(fm) e=fussballDisplayAll().find(x=>x.link&&fbDeepLinkId(x)===hid)||null;
   if(!e){ showToast('Dieser Termin existiert nicht mehr.'); return; }
-  highlightId=e.id; selDate=e.d;
-  const dt=new Date(e.d+'T00:00:00');
-  curY=dt.getFullYear(); curM=dt.getMonth(); yearShown=curY;
-  goto('termine'); setView('monat');
-  requestAnimationFrame(()=>requestAnimationFrame(()=>scrollToCard(e.id)));
-  clearTimeout(window._hlTimer); window._hlTimer=setTimeout(()=>{ highlightId=null; render(); },5000);
+  focusEventCard(e);
 }
 
 /* ---------- Boot ---------- */

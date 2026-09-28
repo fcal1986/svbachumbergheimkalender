@@ -73,7 +73,8 @@ function escapeHtml(s) {
 // Präfix hier einer Kategorie zugeordnet werden, sonst wird sie nicht verschickt.
 const CATEGORIES = {
   termine:     ['Neuer Termin:', 'Termin geändert:', 'Termin gelöscht:',
-                'Spielverlegung vorgemerkt:', 'Spielverlegung geändert:', 'Spielverlegung aufgehoben:'],
+                'Spielverlegung vorgemerkt:', 'Spielverlegung geändert:', 'Spielverlegung aufgehoben:',
+                'Spielverlegung abgeschlossen:'],
   training:    ['Trainingszeit angelegt:', 'Trainingszeit geändert:', 'Trainingszeit gelöscht:',
                 'Training abgesagt:', 'Absage zurückgenommen:', 'Torwarttraining-Anmeldung geändert:'],
   sperren:     ['Sperre angelegt:', 'Sperre aufgehoben:'],
@@ -128,7 +129,7 @@ function isFromPlatzcoach(msg) {
 }
 // Spielverlegungen gehen an ALLE Trainer der Mannschaft – auch an den, der sie eingetragen hat
 // (Bestätigung + Info für den Mit-Trainer). Sonst gilt: keine Mail über eigene Änderungen.
-const NOTIFY_AUTHOR_TOO = ['Spielverlegung vorgemerkt:', 'Spielverlegung geändert:', 'Spielverlegung aufgehoben:'];
+const NOTIFY_AUTHOR_TOO = ['Spielverlegung vorgemerkt:', 'Spielverlegung geändert:', 'Spielverlegung aufgehoben:', 'Spielverlegung abgeschlossen:'];
 function notifyAuthorToo(c) { return NOTIFY_AUTHOR_TOO.some(p => c.text.startsWith(p)); }
 // Automatische Bot-Läufe und Aufräumarbeiten der App gehen nie per Mail raus.
 function isNoisyCommit(text) {
