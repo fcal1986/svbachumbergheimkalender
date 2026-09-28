@@ -246,6 +246,7 @@ async function main() {
     try { entries = JSON.parse(await fs.readFile(changesFile, 'utf8')); } catch (e) { entries = []; }
     changes = (Array.isArray(entries) ? entries : []).filter(e => e && e.text).map(e => ({
       text: e.text, team: e.team || null, squad: e.squad || 1, link: e.link || null,
+      priority: e.priority === 'info' ? 'info' : 'action', type: e.type || null,
       by: null, gkTeams: [], orga: [], category: 'termine',
     }));
     console.log(`${changes.length} Änderung(en) aus dem fussball.de-Abgleich (${changesFile}).`);
@@ -292,22 +293,36 @@ async function main() {
     const texts = mine.map(c => c.text);
     const siteUrl = String(cfg.siteUrl || 'https://platzcoach.de/').replace(/\/?$/, '/');
     const linkOf = c => (c.link ? siteUrl + '#t=' + encodeURIComponent(c.link) : '');
+    const li = c => `<li style="margin-bottom:6px;">${escapeHtml(c.text)}${c.link ? `<br><a href="${escapeHtml(linkOf(c))}" style="color:#16A34A;">In Platzcoach öffnen</a>` : ''}</li>`;
+    const txt = c => `- ${c.text}` + (c.link ? `\n  ${linkOf(c)}` : '');
+    // fussball.de-Abgleich: "Bitte prüfen" (Handlungsbedarf) zuerst, "Zur Info" (Bestätigungen) danach.
+    const act = changesFile ? mine.filter(c => c.priority !== 'info') : mine;
+    const inf = changesFile ? mine.filter(c => c.priority === 'info') : [];
+    const sectionsHtml = changesFile
+      ? (act.length ? `<p style="margin:14px 0 4px;"><strong style="color:#B3261E;">Bitte prüfen</strong></p><ul>${act.map(li).join('')}</ul>` : '')
+        + (inf.length ? `<p style="margin:14px 0 4px;"><strong style="color:#16A34A;">Zur Info</strong></p><ul>${inf.map(li).join('')}</ul>` : '')
+      : `<ul>${mine.map(li).join('')}</ul>`;
     const html = `
     <div style="font-family:Arial,sans-serif;font-size:14px;color:#0B1B32;">
-      <p><strong>${escapeHtml(clubName)}</strong> – es gab folgende Änderung${texts.length === 1 ? '' : 'en'} in Platzcoach:</p>
-      <ul>${mine.map(c => `<li style="margin-bottom:6px;">${escapeHtml(c.text)}${c.link ? `<br><a href="${escapeHtml(linkOf(c))}" style="color:#16A34A;">In Platzcoach öffnen</a>` : ''}</li>`).join('')}</ul>
+      <p><strong>${escapeHtml(clubName)}</strong> – ${changesFile ? 'Neuigkeiten von fussball.de' : 'es gab folgende Änderung' + (texts.length === 1 ? '' : 'en') + ' in Platzcoach'}:</p>
+      ${sectionsHtml}
       <p style="color:#718191;font-size:12px;">Automatische Benachrichtigung von Platzcoach. Details siehst du in der App. Benachrichtigungen kannst du im Profil abschalten.</p>
     </div>`;
-    const text = `${clubName} – Änderungen in Platzcoach:\n\n` + mine.map(c => `- ${c.text}` + (c.link ? `\n  ${linkOf(c)}` : '')).join('\n');
+    const text = changesFile
+      ? `${clubName} – Neuigkeiten von fussball.de:\n\n`
+        + (act.length ? 'BITTE PRÜFEN\n' + act.map(txt).join('\n') + '\n\n' : '')
+        + (inf.length ? 'ZUR INFO\n' + inf.map(txt).join('\n') : '')
+      : `${clubName} – Änderungen in Platzcoach:\n\n` + mine.map(txt).join('\n');
+    const subjectFb = act.length
+      ? `Platzcoach: Bitte prüfen – ${act.length === 1 ? 'Änderung' : act.length + ' Änderungen'} bei fussball.de` + (inf.length ? ` (+${inf.length} Info)` : '')
+      : (inf.length === 1 && inf[0].type === 'confirmed' ? 'Platzcoach: Verlegung von fussball.de bestätigt' : `Platzcoach: ${inf.length} Infos von fussball.de`);
     try {
       await transporter.sendMail({
         headers: { 'X-Entity-Ref-ID': randomUUID() }, // eindeutig: Gmail gruppiert/kürzt Mails nicht
         from: `Platzcoach <${fromAddress}>`, // Absendername bewusst immer "Platzcoach" (SaaS); der Verein steht im Text
         ...(replyTo ? { replyTo } : {}),
         to: r.email,
-        subject: changesFile
-          ? `Platzcoach: ${texts.length === 1 ? 'Änderung' : texts.length + ' Änderungen'} bei fussball.de`
-          : `Platzcoach: ${texts.length} Änderung${texts.length === 1 ? '' : 'en'}`,
+        subject: changesFile ? subjectFb : `Platzcoach: ${texts.length} Änderung${texts.length === 1 ? '' : 'en'}`,
         text,
         html,
       });

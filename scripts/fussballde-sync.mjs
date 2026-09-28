@@ -628,46 +628,126 @@ function trainingHint(slots, at, d) {
     && (!s.validFrom || s.validFrom <= d) && (!s.validUntil || d <= s.validUntil) && !(s.cancelled || []).includes(d));
   return hits.length ? ` Am Spieltag ist auch euer Training ${hits.map(s => s.from + '–' + s.to).join(', ')} eingetragen – bitte ggf. in Platzcoach absagen.` : '';
 }
+/* ---------- Platzprüfung für die Mail (vereinfachte Fassung der App-Regeln) ----------
+   Dauer nach Altersklasse (config.fussballde.durationByAge überschreibt), E/F/G ("shareCategories")
+   brauchen eine Hälfte, sonst ganzer Platz. Belegt: Trainingszeiten (außer die eigene Mannschaft),
+   Termine mit Platzfläche, andere Heimspiele (ganzer Platz bzw. je eine Hälfte), vorgemerkte
+   Verlegungen am neuen Termin. Ergebnis nur als Hinweis in der Mail. */
+const DURATION_BY_AGE = { Senioren: 110, A: 110, B: 100, C: 90, D: 80, E: 70, F: 60, G: 60 };
+const HALF = { A: [1, 2], B: [3, 4] };
+function ageKey(team) { const m = (team || '').trim().match(/^([A-G])-(Junioren|Juniorinnen|Jugend)/i); return m ? m[1].toUpperCase() : 'Senioren'; }
+function toMin(t) { const [h, m] = String(t || '0:0').split(':').map(Number); return h * 60 + (m || 0); }
+function toTime(n) { n = ((n % 1440) + 1440) % 1440; return String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 60).padStart(2, '0'); }
+function pitchQuarters(p) { if (!p) return []; if (p.mode === 'ganz') return [1, 2, 3, 4]; if (p.mode === 'haelfte') return HALF[p.part] || []; return [p.part]; }
+function makePitchChecker(cfg, games, slots, events, moves) {
+  const fb = cfg.fussballde || {};
+  const share = fb.shareCategories || ['E-Junioren', 'F-Junioren', 'G-Junioren', 'Bambini'];
+  const isShare = team => share.some(c => (team || '').toLowerCase().startsWith(c.toLowerCase()));
+  const dur = team => (fb.durationByAge && fb.durationByAge[ageKey(team)]) || DURATION_BY_AGE[ageKey(team)] || 110;
+  const buffer = fb.bufferBeforeMin ?? 15;
+  // Heimspiele mit vorgemerkten Verlegungen (fussball.de noch am alten Termin) am neuen Termin führen.
+  const effGames = games.map(g => {
+    const m = g.link && moves.find(x => x.link === g.link && x.fromD === g.d && (x.fromT || '') === (g.t || ''));
+    return m ? { ...g, d: m.toD, t: m.toT } : g;
+  });
+  return function check(g, d, t) {
+    if (!t) return null;
+    const at = appTeam(g.team, g.squad);
+    const from = toMin(t), to = from + dur(g.team);
+    const overlaps = (s, e) => from < e && to > s;
+    const busy = []; // {label, q: [quarters] | 'half'}
+    const dow = ((new Date(d + 'T00:00:00').getDay()) + 6) % 7 + 1;
+    for (const s of slots) {
+      if (!s.pitch || s.day !== dow || (s.validFrom && s.validFrom > d) || (s.validUntil && d > s.validUntil) || (s.cancelled || []).includes(d)) continue;
+      if (s.team === at.team && (s.squad || 1) === at.squad) continue; // eigene Trainingszeit zählt als frei
+      if (overlaps(toMin(s.from), toMin(s.to))) busy.push({ label: `Training ${appTeamLabel(s.team, s.squad || 1)} ${s.from}–${s.to}`, q: pitchQuarters(s.pitch) });
+    }
+    for (const e of events) {
+      if (e.d !== d || !e.pitch || !e.t) continue;
+      if (overlaps(toMin(e.t), toMin(e.bis || toTime(toMin(e.t) + 120)))) busy.push({ label: `${e.title || 'Termin'} ${e.t}–${e.bis || ''}`.trim(), q: pitchQuarters(e.pitch) });
+    }
+    for (const x of effGames) {
+      if (x.d !== d || !x.t || (g.link && x.link === g.link)) continue;
+      const s = toMin(x.t) - buffer, e = toMin(x.t) + dur(x.team);
+      if (!overlaps(s, e)) continue;
+      const xt = appTeam(x.team, x.squad);
+      busy.push({ label: `Heimspiel ${appTeamLabel(xt.team, xt.squad)} ${x.t}`, q: isShare(x.team) ? 'half' : [1, 2, 3, 4] });
+    }
+    const fixed = new Set(busy.filter(b => b.q !== 'half').flatMap(b => b.q));
+    const freeHalves = ['A', 'B'].filter(h => HALF[h].every(q => !fixed.has(q)));
+    const sharedGames = busy.filter(b => b.q === 'half').length;
+    const ok = isShare(g.team) ? freeHalves.length - sharedGames >= 1 : fixed.size === 0 && sharedGames === 0;
+    return { ok, from: toTime(from), to: toTime(to), busy: busy.map(b => b.label), half: isShare(g.team) ? freeHalves[sharedGames] || null : null };
+  };
+}
+function pitchText(c) {
+  if (!c) return '';
+  return c.ok
+    ? ` Platz frei (${c.from}–${c.to}${c.half ? ', Hälfte ' + c.half : ''}).`
+    : ` ACHTUNG Platzkonflikt ${c.from}–${c.to}: ${c.busy.join(', ')}.`;
+}
+
 async function detectGameChanges(home, away, previous) {
   if (!previous || !Array.isArray(previous.games)) return []; // erster Lauf: nichts vergleichen
+  const cfg = await readJson('data/config.json', {});
   const moves = ((await readJson('data/game-moves.json', {})).moves) || [];
   const slots = ((await readJson('data/training.json', {})).slots) || [];
+  const events = ((await readJson('data/events.json', {})).events) || [];
+  const checkPitch = makePitchChecker(cfg, home, slots, events, moves);
   const today = new Date().toISOString().slice(0, 10);
+  // priority: "action" = bitte prüfen (oben in der Mail), "info" = zur Info (z. B. Bestätigung)
   const out = [], added = [], removed = [];
   const lists = [[home, previous.games || [], 'Heimspiel'], [away, previous.awayGames || [], 'Auswärtsspiel']];
   for (const [list, prevList, kind] of lists) {
+    const isHome = kind === 'Heimspiel';
     const prevByLink = new Map(prevList.filter(g => g && g.link).map(g => [g.link, g]));
     const nowLinks = new Set(list.filter(g => g.link).map(g => g.link));
     for (const g of list) {
       if (!g.link) continue;
       const at = appTeam(g.team, g.squad), label = appTeamLabel(at.team, at.squad);
-      const who = `${label} – ${g.opponent} (${kind})`;
+      const who = `${label} – ${g.opponent} (${kind}${g.competition ? ', ' + g.competition : ''})`;
       const p = prevByLink.get(g.link);
       if (!p) {
-        if (g.d >= today) added.push({ text: `Neues Spiel bei fussball.de: ${who} am ${fmtGameDate(g.d, g.t)}.` + trainingHint(slots, at, g.d), team: at.team, squad: at.squad, link: fbLinkId(g.link) });
+        if (g.d >= today) {
+          const c = isHome ? checkPitch(g, g.d, g.t) : null;
+          added.push({ text: `Neues Spiel bei fussball.de: ${who} am ${fmtGameDate(g.d, g.t)}.` + pitchText(c) + trainingHint(slots, at, g.d),
+            team: at.team, squad: at.squad, link: fbLinkId(g.link), priority: 'action', type: 'new' });
+        }
         continue;
       }
       const moved = p.d !== g.d || (p.t || '') !== (g.t || '');
       if (!moved || (g.d < today && p.d < today)) continue;
-      let text = p.d === g.d
-        ? `Anstoßzeit bei fussball.de geändert: ${who} am ${fmtGameDate(g.d)}: ${p.t || '?'} → ${g.t || '?'} Uhr.`
-        : `Spielverlegung bei fussball.de: ${who} von ${fmtGameDate(p.d, p.t)} auf ${fmtGameDate(g.d, g.t)}.`;
+      const sameDay = p.d === g.d;
+      const change = sameDay ? `am ${fmtGameDate(g.d)}: ${p.t || '?'} → ${g.t || '?'} Uhr` : `von ${fmtGameDate(p.d, p.t)} auf ${fmtGameDate(g.d, g.t)}`;
       const m = moves.find(x => x.link === g.link);
+      let text, priority = 'action', type = 'moved';
       if (m && m.toD === g.d) {
-        text += ' Wie in Platzcoach vorgemerkt' + ((m.toT || '') !== (g.t || '') && g.t ? ` (Anstoß jetzt ${g.t} statt ${m.toT} Uhr)` : '') + '.';
+        // Wie vorgemerkt – gute Nachricht; Platz wurde schon beim Vormerken geprüft.
+        type = 'confirmed'; priority = 'info';
+        text = `Verlegung bestätigt: ${who} jetzt auch bei fussball.de am ${fmtGameDate(g.d, g.t)}`
+          + (sameDay ? ` (statt ${p.t || '?'} Uhr).` : ` (bisher ${fmtGameDate(p.d, p.t)}).`)
+          + ((m.toT || '') !== (g.t || '') && g.t ? ` Achtung: Anstoß ${g.t} statt vorgemerkt ${m.toT} Uhr.` : '');
+        if ((m.toT || '') !== (g.t || '') && g.t) { priority = 'action'; text += pitchText(isHome ? checkPitch(g, g.d, g.t) : null); }
       } else if (m) {
+        type = 'diverged';
         const stillCancelled = (m.cancelledTraining || []).filter(c => c.date !== g.d && slots.some(s => s.id === c.slotId && (s.cancelled || []).includes(c.date)));
-        text += ` ACHTUNG: abweichend von der Vormerkung in Platzcoach (${fmtGameDate(m.toD, m.toT)}). Bitte in Platzcoach „Vormerkung abschließen“`
-          + (stillCancelled.length ? ` – das dafür abgesagte Training am ${stillCancelled.map(c => fmtGameDate(c.date)).join(', ')} findet sonst nicht statt` : '') + '.';
+        text = `${sameDay ? 'Anstoßzeit bei fussball.de geändert' : 'Spielverlegung bei fussball.de'}: ${who} ${change}. `
+          + `ACHTUNG: abweichend von der Vormerkung in Platzcoach (${fmtGameDate(m.toD, m.toT)}). Bitte in Platzcoach „Vormerkung abschließen“`
+          + (stillCancelled.length ? ` – das dafür abgesagte Training am ${stillCancelled.map(c => fmtGameDate(c.date)).join(', ')} findet sonst nicht statt` : '') + '.'
+          + pitchText(isHome ? checkPitch(g, g.d, g.t) : null);
+      } else {
+        text = `${sameDay ? 'Anstoßzeit bei fussball.de geändert' : 'Spielverlegung bei fussball.de'}: ${who} ${change}.`
+          + pitchText(isHome ? checkPitch(g, g.d, g.t) : null);
       }
       text += trainingHint(slots, at, g.d);
-      out.push({ text, team: at.team, squad: at.squad, link: fbLinkId(g.link) });
+      out.push({ text, team: at.team, squad: at.squad, link: fbLinkId(g.link), priority, type });
     }
     if (list.length) {
       for (const p of prevList) {
         if (!p.link || nowLinks.has(p.link) || p.d < today) continue;
         const at = appTeam(p.team, p.squad);
-        removed.push({ text: `Spiel nicht mehr bei fussball.de gelistet: ${appTeamLabel(at.team, at.squad)} – ${p.opponent} (${kind}), war ${fmtGameDate(p.d, p.t)}. Abgesetzt oder zurückgezogen? Bitte prüfen.`, team: at.team, squad: at.squad, link: null });
+        removed.push({ text: `Spiel nicht mehr bei fussball.de gelistet: ${appTeamLabel(at.team, at.squad)} – ${p.opponent} (${kind}${p.competition ? ', ' + p.competition : ''}), war ${fmtGameDate(p.d, p.t)}. Abgesetzt oder zurückgezogen? Bitte prüfen.`,
+          team: at.team, squad: at.squad, link: null, priority: 'action', type: 'removed' });
       }
     }
   }

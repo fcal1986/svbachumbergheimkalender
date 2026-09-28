@@ -2,8 +2,9 @@ name: fussball.de Heimspiele synchronisieren
 
 on:
   schedule:
-    # Alle 6 Stunden. Bewusst nicht häufiger, um fussball.de nicht unnötig zu belasten.
-    - cron: '17 */6 * * *'
+    # Alle 2 Stunden (seit 28.09.2026, vorher 6): Änderungen bei fussball.de erreichen die Trainer so
+    # zeitnah per Mail. Pro Lauf eine Spielplan-Anfrage, Spielseiten nur bei Bedarf (max. 40, mit Pause).
+    - cron: '17 */2 * * *'
   workflow_dispatch:
     inputs:
       debug:
