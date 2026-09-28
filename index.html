@@ -650,7 +650,8 @@
   .rs-result-row.rs-selectable input[type=checkbox]{width:18px;height:18px;flex:none;accent-color:var(--green);margin:0;}
   .rs-result-row.rs-selectable b{flex:1;}
   .rs-result-row b{color:var(--ink);}
-  .rs-result-row span{color:var(--green);font-weight:700;font-size:11.5px;}
+  .rs-result-row span{color:var(--green);font-weight:700;font-size:11.5px;text-align:right;}
+  .rs-result-row small.rs-own{display:block;font-weight:500;font-size:11px;color:var(--ink-soft);margin-top:2px;}
   .rs-empty{font-size:12.5px;color:var(--ink-soft);text-align:center;padding:12px 0;}
   .rs-showmore{cursor:pointer;font-weight:700;color:var(--green);background:var(--bg);border-radius:10px;margin-top:4px;}
   .weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
@@ -1053,7 +1054,7 @@
       <div class="field" style="flex:1;margin-bottom:0;"><label>Von</label><input type="time" id="rs-von" value="14:00"></div>
       <div class="field" style="flex:1;margin-bottom:0;"><label>Bis</label><input type="time" id="rs-bis" value="18:00"></div>
     </div>
-    <p class="hint" style="margin-top:8px;">Sucht freie Termine ab morgen bis 6 Wochen nach dem ursprünglichen Spieltermin, im gewählten Zeitfenster an den gewählten Tagen. Tage, an denen die Mannschaft bereits ein anderes Spiel hat (auch auswärts), werden ausgeschlossen.</p>
+    <p class="hint" style="margin-top:8px;">Sucht freie Termine ab morgen bis 6 Wochen nach dem ursprünglichen Spieltermin, im gewählten Zeitfenster an den gewählten Tagen. Tage, an denen die Mannschaft bereits ein anderes Spiel hat (auch auswärts), werden ausgeschlossen. E-, F- und G-Jugend brauchen eine Platzhälfte, ab D-Jugend den ganzen Platz. Die eigene Trainingszeit der Mannschaft zählt als frei.</p>
     <div class="modal-acts" style="margin-top:16px;">
       <button class="no" onclick="closeRescheduleModal()">Schließen</button>
       <button class="yes" onclick="runRescheduleSearch()">Suchen</button>
@@ -1070,7 +1071,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='26.09.2026 · 10';
+const APP_VERSION='28.09.2026 · 1';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -3669,6 +3670,25 @@ function toggleRescheduleDay(d){
   if(rescheduleDays.has(d))rescheduleDays.delete(d); else rescheduleDays.add(d);
   document.querySelectorAll('#rs-days .weekday-chip').forEach(c=>c.classList.toggle('on',rescheduleDays.has(parseInt(c.dataset.day))));
 }
+/* Belegungen eines Tages für die Ansetzungssuche, aufgeteilt in "eigenes Training" und alles andere.
+   Eigenes Training = Trainingszeit (oder Termin der Art Training) derselben Mannschaft mit derselben
+   Nummer wie das zu verlegende Spiel. Das Spiel darf in diese Zeit gelegt werden – die Mannschaft
+   trainiert dann eben nicht. Trainings anderer Mannschaften (auch E1 bei einem E2-Spiel),
+   Torwarttraining, Termine und Spiele blockieren weiter. */
+function isOwnTrainingFor(e,own){
+  return kindOf(e)==='training' && e.team===own.team && (e.squad||1)===(own.squad||1);
+}
+function rescheduleOccupationsOn(ds,own){
+  const trainings=trainingInstancesOn(ds);
+  const events=EVENTS.filter(e=>e.d===ds);
+  const ownList=trainings.concat(events).filter(e=>isOwnTrainingFor(e,own));
+  const ownSlot=ownList.find(e=>e.trainingSlotId);
+  // Teilbare fussball.de-Spiele werden einer Hälfte zugeordnet; ohne das eigene Training als Belegung,
+  // damit ein anderes E/F/G-Spiel nicht nur wegen unseres Trainings auf die andere Hälfte rückt.
+  const games=fussballBookingOccupations(ds,null,ownSlot?ownSlot.trainingSlotId:null);
+  const others=trainings.concat(events).filter(e=>!isOwnTrainingFor(e,own)).concat(games);
+  return {own:ownList, others};
+}
 function runRescheduleSearch(){
   const box=document.getElementById('rs-results');
   rescheduleResults=[]; rescheduleSelected=new Set(); rescheduleShowAll=false;
@@ -3679,11 +3699,13 @@ function runRescheduleSearch(){
 
   const g=rescheduleGame;
   const durationMin=fussballDurationMin(g.team);
-  // Vereinfachung: es wird immer der GANZE Platz geprüft, unabhängig davon, ob das Original-Spiel
-  // laut fussball.de nur einen Teil des Platzes braucht ("Platz geteilt") – bei geteilten Plätzen
-  // kennen wir das exakt benötigte Viertel nicht, daher lieber sicher (ganzer Platz frei) als ein
-  // Ergebnis vorschlagen, das sich später doch als belegt herausstellt.
-  const neededQuarters=[1,2,3,4];
+  // Benötigte Fläche nach derselben Regel wie die Platzbelegung (ab 25.09.2026 · 4):
+  // E/F/G-Spiele ("share") brauchen genau eine Hälfte, ab D-Jugend den ganzen Platz.
+  const isShare=fussballTeamCategory(g.team)==='share';
+  const areaOptions=isShare?[{part:'A',q:HALF.A},{part:'B',q:HALF.B}]:[{part:null,q:[1,2,3,4]}];
+  // Eigene Mannschaft: Abgleich über Mannschaft + Nummer (nicht über den Titel). fussball.de
+  // liefert z. B. "E-Junioren" + 2, intern heißt das "E-Jugend" + 2 (fussballFilterTeam).
+  const own=fussballFilterTeam(g.team,g.squad);
   // Maximal mögliche Spanne: Start immer ab morgen (heute+1, nie in der Vergangenheit suchen),
   // Ende immer Original-Spieltermin + 6 Wochen (auch wenn der Original-Termin selbst schon
   // Wochen in der Zukunft liegt) – so werden auch Termine VOR dem Original-Termin als mögliche
@@ -3707,20 +3729,32 @@ function runRescheduleSearch(){
       (FUSSBALLDE.games||[]).some(x=>x.team===g.team&&(x.squad||1)===(g.squad||1)&&x.d===ds)
       || (FUSSBALLDE.awayGames||[]).some(x=>x.team===g.team&&(x.squad||1)===(g.squad||1)&&x.d===ds);
     if(teamBusyThatDay)continue;
-    let windows=[]; let curStart=null, curLastValidStart=null;
+    const occ=rescheduleOccupationsOn(ds,own);
     const vonMin=timeToMin(von), bisMin=timeToMin(bis);
-    for(let t=vonMin;t+durationMin<=bisMin;t+=15){
-      const startStr=minToTime(t), endStr=minToTime(t+durationMin);
-      const used=usedQuartersWindow(ds,startStr,endStr,null);
-      const free=neededQuarters.every(q=>!used.has(q));
-      if(free){ if(curStart===null)curStart=t; curLastValidStart=t; }
-      else if(curStart!==null){ windows.push([curStart,curLastValidStart+durationMin]); curStart=null; }
-    }
-    if(curStart!==null)windows.push([curStart,curLastValidStart+durationMin]);
-    if(windows.length){
-      const [ws,we]=windows.reduce((a,b)=>(b[1]-b[0])>(a[1]-a[0])?b:a);
-      results.push({date:ds,freeFrom:minToTime(ws),freeTo:minToTime(we)});
-    }
+    let best=null;
+    areaOptions.forEach(opt=>{
+      let curStart=null, curLastValidStart=null;
+      const windows=[];
+      for(let t=vonMin;t+durationMin<=bisMin;t+=15){
+        const startStr=minToTime(t), endStr=minToTime(t+durationMin);
+        const free=!occ.others.some(e=>startStr<eventBis(e)&&endStr>e.t&&pitchQuarters(e.pitch).some(q=>opt.q.includes(q)));
+        if(free){ if(curStart===null)curStart=t; curLastValidStart=t; }
+        else if(curStart!==null){ windows.push([curStart,curLastValidStart+durationMin]); curStart=null; }
+      }
+      if(curStart!==null)windows.push([curStart,curLastValidStart+durationMin]);
+      windows.forEach(([ws,we])=>{
+        const f=minToTime(ws), to=minToTime(we);
+        // Liegt das Fenster in einem eigenen Training auf dieser Fläche? Dann als solches kennzeichnen.
+        const ownHit=occ.own.find(e=>f<eventBis(e)&&to>e.t&&pitchQuarters(e.pitch).some(q=>opt.q.includes(q)));
+        const cand={date:ds,freeFrom:f,freeTo:to,part:opt.part,
+          ownTraining:ownHit?{from:ownHit.t,to:eventBis(ownHit),part:(ownHit.pitch&&ownHit.pitch.mode==='haelfte')?ownHit.pitch.part:null}:null,
+          len:we-ws};
+        // Vorrang: Fenster in der eigenen Trainingszeit (andere Mannschaften bleiben unberührt),
+        // dann das längste Fenster, bei Gleichstand Hälfte A.
+        if(!best||(!!cand.ownTraining!==!!best.ownTraining?!!cand.ownTraining:cand.len>best.len))best=cand;
+      });
+    });
+    if(best){ delete best.len; results.push(best); }
   }
   rescheduleResults=results;
   if(!results.length){
@@ -3739,7 +3773,9 @@ function renderRescheduleResults(){
       const checked=rescheduleSelected.has(i);
       return '<label class="rs-result-row rs-selectable'+(checked?' on':'')+'">'
         +'<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleRescheduleSelect('+i+')">'
-        +'<b>'+DAYS_S[dt.getDay()]+' '+fmtShort(r.date)+'</b><span>'+r.freeFrom+'–'+r.freeTo+' frei</span></label>';
+        +'<b>'+DAYS_S[dt.getDay()]+' '+fmtShort(r.date)
+        +(r.ownTraining?'<small class="rs-own">in eurer Trainingszeit '+r.ownTraining.from+'–'+r.ownTraining.to+(r.ownTraining.part?' (Hälfte '+r.ownTraining.part+')':'')+'</small>':'')
+        +'</b><span>'+r.freeFrom+'–'+r.freeTo+' frei'+(r.part?'<br>Hälfte '+r.part:'')+'</span></label>';
     }).join('')
     +(results.length>shown.length?'<div class="rs-empty rs-showmore" onclick="expandRescheduleResults()">+ '+(results.length-shown.length)+' weitere anzeigen ▾</div>':'')
     +'<div id="rs-share-bar"></div>';
