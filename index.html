@@ -1080,6 +1080,8 @@
       <div class="field" style="flex:3;margin-bottom:0;"><label>Neues Datum</label><input type="date" id="mv-date" onchange="updateMoveTrainingHint()"></div>
       <div class="field" style="flex:2;margin-bottom:0;"><label>Anstoß</label><input type="time" id="mv-time" onchange="updateMoveTrainingHint()"></div>
     </div>
+    <div class="field" style="margin:12px 0 0;"><label>Grund der Verlegung (für den DFBnet-Antrag)</label>
+      <textarea id="mv-reason" rows="2" maxlength="300" placeholder="z. B. Herbstferien, mehrere Spieler fehlen" style="width:100%;box-sizing:border-box;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;font-family:'Inter';font-size:14px;resize:vertical;"></textarea></div>
     <div id="mv-training"></div>
     <p class="hint" style="margin-top:10px;">Platzcoach führt das Spiel ab sofort am neuen Termin (Platzbelegung, Konflikte, Übersicht). Am alten Termin steht „verlegt auf …“. Sobald fussball.de die Verlegung übernimmt, gilt sie als bestätigt.</p>
     <div class="modal-acts" style="margin-top:16px;">
@@ -1112,7 +1114,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='28.09.2026 · 10';
+const APP_VERSION='28.09.2026 · 11';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3842,6 +3844,7 @@ function openMoveModal(fbIndex,preDate,preTime){
   document.getElementById('mv-date').value=preDate||(m&&g.movePending?m.toD:'');
   document.getElementById('mv-time').value=preTime||(m&&g.movePending?m.toT:(raw.t||''));
   document.getElementById('mv-yes').textContent=(m&&g.movePending)?'Ändern':'Vormerken';
+  document.getElementById('mv-reason').value=(m&&g.movePending&&m.reason)||'';
   const rm=document.getElementById('mv-remove');
   rm.style.display=(m&&(g.movePending||g.moveDiverged))?'block':'none';
   rm.textContent=(m&&g.moveDiverged)?'Vormerkung abschließen':'Vormerkung aufheben';
@@ -3879,12 +3882,14 @@ async function saveGameMove(){
   if(!toD||!toT){ showToast('Bitte Datum und Anstoß angeben.'); return; }
   if(toD<todayStr){ showToast('Das Datum liegt in der Vergangenheit.'); return; }
   if(toD===raw.d&&toT===(raw.t||'')){ showToast('Das ist der aktuelle Termin bei fussball.de.'); return; }
+  const reason=document.getElementById('mv-reason').value.replace(/\s+/g,' ').trim();
+  if(reason.length<3){ showToast('Bitte einen Grund für die Verlegung angeben – der DFBnet-Antrag braucht ihn.',5000); document.getElementById('mv-reason').focus(); return; }
   const mapped=fussballFilterTeam(raw.team,raw.squad), label=teamLabel(mapped.team,mapped.squad);
   const slotIds=[...document.querySelectorAll('#mv-training .mv-cancel')].filter(c=>c.checked).map(c=>c.dataset.slot);
   const old=moveOfGame(raw);
   const backupM=JSON.stringify(MOVES), backupT=JSON.stringify(TRAINING);
   const rec={id:old?old.id:crypto.randomUUID(), link:raw.link, team:raw.team, squad:raw.squad||1, opponent:raw.opponent,
-    fromD:raw.d, fromT:raw.t||'', toD, toT, byId:session.id, byName:session.name, at:new Date().toISOString(),
+    fromD:raw.d, fromT:raw.t||'', toD, toT, reason, byId:session.id, byName:session.name, at:new Date().toISOString(),
     cancelledTraining:[...((old&&old.cancelledTraining)||[]), ...slotIds.map(id=>({slotId:id,date:toD}))]};
   MOVES=MOVES.filter(x=>x.link!==raw.link).concat([rec]);
   slotIds.forEach(id=>{ const s=TRAINING.find(x=>x.id===id); if(s&&!(s.cancelled||[]).includes(toD)) s.cancelled=[...(s.cancelled||[]),toD].sort(); });
@@ -3893,7 +3898,7 @@ async function saveGameMove(){
   try{
     // Eine Mail für alles: die Trainingsabsage steht im Text der Verlegung, der Trainings-Commit ist "(automatisch)".
     await saveStore('moves',(old?'Spielverlegung geändert: ':'Spielverlegung vorgemerkt: ')+label+' – '+raw.opponent+' von '+fmtShort(raw.d)+(raw.t?' '+raw.t:'')+' auf '+fmtShort(toD)+' '+toT+' Uhr'
-      +(slotIds.length?', Training am '+fmtShort(toD)+' abgesagt':'')+' – '+session.name+teamTrailer(mapped.team,mapped.squad)+'\nPlatzcoach-Link: '+fbDeepLinkId(raw));
+      +(slotIds.length?', Training am '+fmtShort(toD)+' abgesagt':'')+'. Grund: '+reason+' – '+session.name+teamTrailer(mapped.team,mapped.squad)+'\nPlatzcoach-Link: '+fbDeepLinkId(raw));
     if(slotIds.length) await saveTraining('Training abgesagt: '+label+' am '+fmtShort(toD)+' wegen Spielverlegung (automatisch) – '+session.name+teamTrailer(mapped.team,mapped.squad));
     showToast('Verlegung auf '+fmtShort(toD)+', '+toT+' Uhr vorgemerkt'+(slotIds.length?', Training abgesagt.':'.'),4500);
     openYouthLeaderModal(rec,true);
@@ -3927,7 +3932,8 @@ function youthLeaderMessage(m){
     +'✅ *Neu*\n'
     +'Spieldatum: '+fmtShare(m.toD)+'\n'
     +'Anstoßzeit: '+m.toT+' Uhr\n'
-    +'Spielstätte: unverändert'+(raw.venue?' – '+raw.venue:'')+'\n\n'
+    +'Spielstätte: unverändert'+(raw.venue?' – '+raw.venue:'')+'\n'
+    +'Begründung: '+(m.reason||'bitte ergänzen')+'\n\n'
     +'Der Platz ist am neuen Termin frei und in Platzcoach vorgemerkt.\n'
     +(m.link?'\nSpiel bei fussball.de: '+m.link+'\n':'')
     +(m.link?'In Platzcoach: '+fbDeepLinkUrl(m)+'\n':'')
