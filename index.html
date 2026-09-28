@@ -1112,7 +1112,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='28.09.2026 · 8';
+const APP_VERSION='28.09.2026 · 9';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -6667,7 +6667,7 @@ function openHashEvent(){
   }
   // fussball.de-Heimspiel: "fb-<Spiel-Code>" (bei vorgemerkter Verlegung am neuen Termin)
   const fm=!e&&hid.match(/^fb-([A-Za-z0-9]{12,})$/);
-  if(fm) e=fussballDisplayAll().find(x=>x.link&&fbDeepLinkId(x)===hid)||null;
+  if(fm) e=fussballDisplayAll().concat(fussballDisplayAwayAll()).find(x=>x.link&&fbDeepLinkId(x)===hid)||null;
   if(!e){ showToast('Dieser Termin existiert nicht mehr.'); return; }
   focusEventCard(e);
 }

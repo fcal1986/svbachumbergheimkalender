@@ -236,11 +236,26 @@ async function main() {
     if (!recipients.has(email)) recipients.set(email, { email, user: null, role: 'admin' });
   });
 
-  const allMessages = getCommitMessages();
-  const platzcoachMessages = allMessages.filter(isFromPlatzcoach);
-  // git log liefert neueste zuerst – für die Mail chronologisch (älteste zuerst) sortieren.
-  const changes = platzcoachMessages.map(parseCommit).filter(c => !isNoisyCommit(c.text) && !hasOwnGkMail(c)).reverse();
-  console.log(`${allMessages.length} Commit(s) im Push, davon ${platzcoachMessages.length} von Platzcoach, ${changes.length} nach Filter. Kategorien: ${JSON.stringify(changes.map(c => c.category))}`);
+  // Zweiter Modus: Änderungen aus dem fussball.de-Abgleich (Datei statt Commit-Nachrichten).
+  // Commits eines Workflows lösen keinen weiteren Workflow aus – deshalb ruft der Sync-Workflow
+  // dieses Skript selbst mit PLATZCOACH_CHANGES_FILE auf.
+  const changesFile = process.env.PLATZCOACH_CHANGES_FILE;
+  let allMessages = [], platzcoachMessages = [], changes;
+  if (changesFile) {
+    let entries = [];
+    try { entries = JSON.parse(await fs.readFile(changesFile, 'utf8')); } catch (e) { entries = []; }
+    changes = (Array.isArray(entries) ? entries : []).filter(e => e && e.text).map(e => ({
+      text: e.text, team: e.team || null, squad: e.squad || 1, link: e.link || null,
+      by: null, gkTeams: [], orga: [], category: 'termine',
+    }));
+    console.log(`${changes.length} Änderung(en) aus dem fussball.de-Abgleich (${changesFile}).`);
+  } else {
+    allMessages = getCommitMessages();
+    platzcoachMessages = allMessages.filter(isFromPlatzcoach);
+    // git log liefert neueste zuerst – für die Mail chronologisch (älteste zuerst) sortieren.
+    changes = platzcoachMessages.map(parseCommit).filter(c => !isNoisyCommit(c.text) && !hasOwnGkMail(c)).reverse();
+    console.log(`${allMessages.length} Commit(s) im Push, davon ${platzcoachMessages.length} von Platzcoach, ${changes.length} nach Filter. Kategorien: ${JSON.stringify(changes.map(c => c.category))}`);
+  }
 
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -255,7 +270,7 @@ async function main() {
 
   // Willkommens-Mail(s) an neu angelegte Zugänge (ohne Passwort – das kommt separat über den
   // Dispatch-Weg, siehe send-welcome-password.mjs).
-  await sendWelcomeEmails(platzcoachMessages.map(m => m.split(/\n\s*\n/)[0].trim()), users, transporter, clubName, fromAddress, cfg.siteUrl, replyTo);
+  if (!changesFile) await sendWelcomeEmails(platzcoachMessages.map(m => m.split(/\n\s*\n/)[0].trim()), users, transporter, clubName, fromAddress, cfg.siteUrl, replyTo);
 
   if (!changes.length) {
     console.log('Keine für die Benachrichtigung relevanten Änderungen.');
@@ -290,7 +305,9 @@ async function main() {
         from: `Platzcoach <${fromAddress}>`, // Absendername bewusst immer "Platzcoach" (SaaS); der Verein steht im Text
         ...(replyTo ? { replyTo } : {}),
         to: r.email,
-        subject: `Platzcoach: ${texts.length} Änderung${texts.length === 1 ? '' : 'en'}`,
+        subject: changesFile
+          ? `Platzcoach: ${texts.length === 1 ? 'Änderung' : texts.length + ' Änderungen'} bei fussball.de`
+          : `Platzcoach: ${texts.length} Änderung${texts.length === 1 ? '' : 'en'}`,
         text,
         html,
       });

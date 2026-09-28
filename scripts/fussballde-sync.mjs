@@ -560,9 +560,99 @@ async function main() {
   // Spielnummer, Staffel und Spielort von den Spielseiten der Heimspiele (für den DFBnet-Verlegungsantrag).
   await enrichGameInfo(allGames, previous && previous.games, debug);
 
+  // Änderungen gegenüber dem letzten Lauf für die E-Mail an die Trainer (verschickt der Workflow
+  // danach mit scripts/notify-email.mjs, siehe .github/workflows/fussballde-sync.yml).
+  const changes = await detectGameChanges(allGames, awayGames, previous);
+  const changesPath = process.env.FUSSBALLDE_CHANGES_FILE || 'fussballde-changes.json';
+  if (changes.length) {
+    await fs.writeFile(changesPath, JSON.stringify(changes, null, 2) + '\n');
+    console.log(`${changes.length} Änderung(en) für die Trainer-Mail:`);
+    changes.forEach(c => console.log('  - ' + c.text));
+  } else {
+    await fs.rm(changesPath, { force: true });
+  }
+
   const output = { updated: new Date().toISOString(), games: allGames, awayGames, strategy: usedStrategy };
   await fs.writeFile(OUTPUT_PATH, JSON.stringify(output, null, 2) + '\n');
   console.log(`Fertig: ${allGames.length} Heimspiele + ${awayGames.length} Auswärtsspiele nach ${OUTPUT_PATH} geschrieben.`);
+}
+
+/* ---------- Änderungen für die Trainer-Mail ----------
+   Ziel: Trainer entlasten – jede Änderung bei fussball.de, die ihre Mannschaft betrifft, kommt per Mail:
+   verlegt (Datum/Uhrzeit), bestätigt oder ABWEICHEND von einer Vormerkung in Platzcoach, neu angesetzt,
+   nicht mehr gelistet. Schutz vor Mail-Fluten: neue Spiele nur bis 10 pro Lauf (Saisonstart = Import),
+   entfernte nur bis 5 und nie, wenn der Lauf gar keine Spiele geliefert hat. */
+const WD = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+function fmtGameDate(d, t) {
+  const dt = new Date(d + 'T00:00:00');
+  const [y, m, day] = d.split('-');
+  return `${WD[dt.getDay()]} ${day}.${m}.${y}${t ? ', ' + t + ' Uhr' : ''}`;
+}
+// fussball.de-Team → Platzcoach-Mannschaft (wie fussballFilterTeam in index.html)
+function appTeam(team, squad) {
+  const t = (team || '').trim();
+  if (/junioren/i.test(t)) return { team: t.replace(/junioren/i, 'Jugend'), squad: squad || 1 };
+  if (/^herren$/i.test(t)) return { team: squad && squad > 1 ? squad + '. Herren' : '1. Herren', squad: 1 };
+  return { team: t || 'Verein', squad: squad || 1 };
+}
+function appTeamLabel(team, squad) {
+  const m = team.match(/^([A-G])-Jugend$/);
+  return m ? `${m[1]}${squad || 1}-Jugend` : team;
+}
+function fbLinkId(link) { const code = String(link || '').replace(/\/+$/, '').split('/').pop(); return code ? 'fb-' + code : null; }
+async function readJson(path, fallback) { try { return JSON.parse(await fs.readFile(path, 'utf8')); } catch (e) { return fallback; } }
+function trainingHint(slots, at, d) {
+  const dow = ((new Date(d + 'T00:00:00').getDay()) + 6) % 7 + 1; // 1 = Mo … 7 = So (wie in der App)
+  const hits = slots.filter(s => s.team === at.team && (s.squad || 1) === at.squad && s.day === dow
+    && (!s.validFrom || s.validFrom <= d) && (!s.validUntil || d <= s.validUntil) && !(s.cancelled || []).includes(d));
+  return hits.length ? ` Am Spieltag ist auch euer Training ${hits.map(s => s.from + '–' + s.to).join(', ')} eingetragen – bitte ggf. in Platzcoach absagen.` : '';
+}
+async function detectGameChanges(home, away, previous) {
+  if (!previous || !Array.isArray(previous.games)) return []; // erster Lauf: nichts vergleichen
+  const moves = ((await readJson('data/game-moves.json', {})).moves) || [];
+  const slots = ((await readJson('data/training.json', {})).slots) || [];
+  const today = new Date().toISOString().slice(0, 10);
+  const out = [], added = [], removed = [];
+  const lists = [[home, previous.games || [], 'Heimspiel'], [away, previous.awayGames || [], 'Auswärtsspiel']];
+  for (const [list, prevList, kind] of lists) {
+    const prevByLink = new Map(prevList.filter(g => g && g.link).map(g => [g.link, g]));
+    const nowLinks = new Set(list.filter(g => g.link).map(g => g.link));
+    for (const g of list) {
+      if (!g.link) continue;
+      const at = appTeam(g.team, g.squad), label = appTeamLabel(at.team, at.squad);
+      const who = `${label} – ${g.opponent} (${kind})`;
+      const p = prevByLink.get(g.link);
+      if (!p) {
+        if (g.d >= today) added.push({ text: `Neues Spiel bei fussball.de: ${who} am ${fmtGameDate(g.d, g.t)}.` + trainingHint(slots, at, g.d), team: at.team, squad: at.squad, link: fbLinkId(g.link) });
+        continue;
+      }
+      const moved = p.d !== g.d || (p.t || '') !== (g.t || '');
+      if (!moved || (g.d < today && p.d < today)) continue;
+      let text = `Spielverlegung bei fussball.de: ${who} von ${fmtGameDate(p.d, p.t)} auf ${fmtGameDate(g.d, g.t)}.`;
+      const m = moves.find(x => x.link === g.link);
+      if (m && m.toD === g.d) {
+        text += ' Wie in Platzcoach vorgemerkt' + ((m.toT || '') !== (g.t || '') && g.t ? ` (Anstoß jetzt ${g.t} statt ${m.toT} Uhr)` : '') + '.';
+      } else if (m) {
+        const stillCancelled = (m.cancelledTraining || []).filter(c => c.date !== g.d && slots.some(s => s.id === c.slotId && (s.cancelled || []).includes(c.date)));
+        text += ` ACHTUNG: abweichend von der Vormerkung in Platzcoach (${fmtGameDate(m.toD, m.toT)}). Bitte in Platzcoach „Vormerkung abschließen“`
+          + (stillCancelled.length ? ` – das dafür abgesagte Training am ${stillCancelled.map(c => fmtGameDate(c.date)).join(', ')} findet sonst nicht statt` : '') + '.';
+      }
+      text += trainingHint(slots, at, g.d);
+      out.push({ text, team: at.team, squad: at.squad, link: fbLinkId(g.link) });
+    }
+    if (list.length) {
+      for (const p of prevList) {
+        if (!p.link || nowLinks.has(p.link) || p.d < today) continue;
+        const at = appTeam(p.team, p.squad);
+        removed.push({ text: `Spiel nicht mehr bei fussball.de gelistet: ${appTeamLabel(at.team, at.squad)} – ${p.opponent} (${kind}), war ${fmtGameDate(p.d, p.t)}. Abgesetzt oder zurückgezogen? Bitte prüfen.`, team: at.team, squad: at.squad, link: null });
+      }
+    }
+  }
+  if (added.length > 10) console.log(`  ${added.length} neue Spiele auf einmal (Saisonimport?) – keine Einzel-Mails dafür.`);
+  else out.push(...added);
+  if (removed.length > 5) console.warn(`  ${removed.length} Spiele auf einmal verschwunden – vermutlich Abruffehler, keine Mails dafür.`);
+  else out.push(...removed);
+  return out;
 }
 
 function markMovedGames(games, prevGames) {
