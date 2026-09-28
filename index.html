@@ -668,6 +668,10 @@
   .moved-label{display:inline-flex;align-items:center;gap:6px;margin:10px 14px 0;padding:4px 10px;border-radius:999px;background:var(--mv);color:#fff;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
   .moved-card .ev-title-box h4{text-decoration:line-through;text-decoration-thickness:2px;color:var(--ink-soft);}
   .moved-jump{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;margin-top:12px;padding:11px 14px;border:none;border-radius:12px;background:var(--mv);color:#fff;font-family:'Inter';font-size:13.5px;font-weight:700;cursor:pointer;text-align:left;}
+  .ev-t-old{font-size:12px;font-weight:600;color:#a35b00;text-decoration:line-through;margin-top:1px;}
+  .mv-check{margin-top:10px;border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.4;}
+  .mv-check.ok{background:var(--green-dim);color:#2f6a12;}
+  .mv-check.warn{background:#fdecea;color:#b3261e;}
   .move-badge.back{cursor:pointer;border:none;font-family:'Inter';}
   .move-badge.back u{text-underline-offset:2px;}
   .rs-result-row small.rs-own{display:block;font-weight:500;font-size:11px;color:var(--ink-soft);margin-top:2px;}
@@ -1122,7 +1126,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='28.09.2026 · 12';
+const APP_VERSION='28.09.2026 · 13';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2505,7 +2509,7 @@ function externalRowHTML(e){
     +'</div>'
     +'<div class="ev-body">'
     +'<div class="ev-times">'
-    +'<div class="ev-time-col"><div class="ev-t">'+e.t+'</div><div class="ev-tl">Von</div></div>'
+    +'<div class="ev-time-col"><div class="ev-t">'+e.t+'</div>'+(e.movedFrom&&e.movedFrom.d===e.d&&e.movedFrom.t&&e.movedFrom.t!==e.t?'<div class="ev-t-old">statt '+e.movedFrom.t+'</div>':'')+'<div class="ev-tl">Von</div></div>'
     +'<div class="ev-time-col"><div class="ev-t">'+bis+'</div><div class="ev-tl">Bis</div></div>'
     +'</div>'
     +conflictBannerHTML(e)+locksForItem(e).map(l=>lockBannerHTML(l,e)).join('')
@@ -2519,6 +2523,13 @@ function externalRowHTML(e){
 }
 function moveBadgeHTML(e){
   if(!e||!e.movedFrom||!e.movedFrom.d||(e.movedFrom.d===e.d&&(e.movedFrom.t||'')===(e.t||''))) return '';
+  // Gleicher Tag, nur andere Anstoßzeit: kein "alter Termin" zum Hinspringen, sondern "13:00 → 11:30".
+  if(e.movedFrom.d===e.d){
+    const earlier=(e.movedFrom.t||'')>(e.t||'');
+    const txt='⏱ Anstoß '+(earlier?'vorverlegt':'nach hinten verlegt')+': '+(e.movedFrom.t||'?')+' → '+(e.t||'?');
+    if(e.moveDiverged&&e.plannedTo) return '<span class="move-badge warn">'+txt+' · abweichend von der Vormerkung ('+fmtDayShort(e.plannedTo.d)+(e.plannedTo.t?', '+e.plannedTo.t:'')+')</span>';
+    return '<span class="move-badge'+(e.movePending?' pending':'')+'">'+txt+(e.movePending?' · fussball.de noch offen':'')+'</span>';
+  }
   const from=fmtDayShort(e.movedFrom.d)+(e.movedFrom.t?', '+e.movedFrom.t:'');
   // Antippen springt zum alten Termin (Hinweiskarte "Alter Termin"), wenn die Spiel-Nummer bekannt ist.
   const back=e.fbIndex!=null?' back" role="button" tabindex="0" onclick="event.stopPropagation();jumpToOldDate('+e.fbIndex+')" title="Zum alten Termin':'';
@@ -3880,11 +3891,33 @@ function ownTrainingsForMove(g,date,time){
   const from=shiftTimeClamped(time,-fussballBufferBeforeMin()), to=shiftTimeClamped(time,fussballDurationMin(g.team));
   return trainingInstancesOn(date).filter(t=>t.trainingSlotId&&isOwnTrainingFor(t,own)&&from<eventBis(t)&&to>t.t);
 }
+/* Platzprüfung für einen Anstoß dieses Spiels: das Spiel selbst zählt nicht mit, die eigene Trainingszeit
+   gilt als frei (wie in der Ansetzungssuche). E/F/G: eine freie Hälfte genügt, sonst ganzer Platz. */
+function pitchCheckForGame(g,date,time){
+  const own=fussballFilterTeam(g.team,g.squad);
+  const from=time, to=shiftTimeClamped(time,fussballDurationMin(g.team));
+  const prevSkip=formSkipFussballLink; formSkipFussballLink=fussballGameLinkId(g);
+  let occ; try{ occ=rescheduleOccupationsOn(date,own); } finally{ formSkipFussballLink=prevSkip; }
+  const opts=fussballTeamCategory(g.team)==='share'?[{part:'A',q:HALF.A},{part:'B',q:HALF.B}]:[{part:null,q:[1,2,3,4]}];
+  const hits=o=>occ.others.filter(e=>from<eventBis(e)&&to>e.t&&pitchQuarters(e.pitch).some(q=>o.q.includes(q)));
+  const free=opts.find(o=>!hits(o).length);
+  if(free) return {ok:true,part:free.part,from,to};
+  return {ok:false,from,to,conflicts:[...new Map(opts.flatMap(hits).map(e=>[e.id,e])).values()].sort((a,b)=>a.t.localeCompare(b.t))};
+}
 function updateMoveTrainingHint(){
   const box=document.getElementById('mv-training'); if(!box) return;
   const g=FUSSBALLDE.games[moveGameIdx];
   const date=document.getElementById('mv-date').value, time=document.getElementById('mv-time').value;
   let h='';
+  // Platz am neuen Termin prüfen (nur Hinweis, Speichern bleibt möglich – oft lässt sich mit den anderen Mannschaften tauschen).
+  if(g&&date&&time){
+    const c=pitchCheckForGame(g,date,time);
+    h+=c.ok
+      ?'<div class="mv-check ok">Platz frei am '+fmtDayShort(date)+', '+c.from+'–'+c.to+(c.part?' (Hälfte '+c.part+')':' (ganzer Platz)')+'.</div>'
+      :'<div class="mv-check warn"><b>Achtung, Platzkonflikt</b> am '+fmtDayShort(date)+', '+c.from+'–'+c.to+': '
+        +c.conflicts.map(e=>esc(occupationLabel(e))+' ('+e.t+'–'+eventBis(e)+')').join('; ')
+        +'. Speichern geht trotzdem – bitte mit den Betroffenen abstimmen.</div>';
+  }
   ownTrainingsForMove(g,date,time).forEach(t=>{
     h+='<label class="rs-result-row rs-selectable on" style="margin-top:10px;"><input type="checkbox" class="mv-cancel" data-slot="'+esc(t.trainingSlotId)+'" checked onchange="this.parentElement.classList.toggle(\'on\',this.checked)">'
       +'<b style="font-weight:600;">Training '+esc(teamLabel(t.team,t.squad))+' am '+fmtDayShort(date)+' ('+t.t+'–'+eventBis(t)+') absagen</b></label>';
@@ -3917,7 +3950,8 @@ async function saveGameMove(){
   showSaving('Verlegung wird gespeichert …');
   try{
     // Eine Mail für alles: die Trainingsabsage steht im Text der Verlegung, der Trainings-Commit ist "(automatisch)".
-    await saveStore('moves',(old?'Spielverlegung geändert: ':'Spielverlegung vorgemerkt: ')+label+' – '+raw.opponent+' von '+fmtShort(raw.d)+(raw.t?' '+raw.t:'')+' auf '+fmtShort(toD)+' '+toT+' Uhr'
+    await saveStore('moves',(old?'Spielverlegung geändert: ':'Spielverlegung vorgemerkt: ')+label+' – '+raw.opponent
+      +(toD===raw.d?', Anstoßzeit am '+fmtShort(toD)+' von '+(raw.t||'?')+' auf '+toT+' Uhr':' von '+fmtShort(raw.d)+(raw.t?' '+raw.t:'')+' auf '+fmtShort(toD)+' '+toT+' Uhr')
       +(slotIds.length?', Training am '+fmtShort(toD)+' abgesagt':'')+'. Grund: '+reason+' – '+session.name+teamTrailer(mapped.team,mapped.squad)+'\nPlatzcoach-Link: '+fbDeepLinkId(raw));
     if(slotIds.length) await saveTraining('Training abgesagt: '+label+' am '+fmtShort(toD)+' wegen Spielverlegung (automatisch) – '+session.name+teamTrailer(mapped.team,mapped.squad));
     showToast('Verlegung auf '+fmtShort(toD)+', '+toT+' Uhr vorgemerkt'+(slotIds.length?', Training abgesagt.':'.'),4500);
@@ -3950,8 +3984,9 @@ function youthLeaderMessage(m){
     +'Gast: '+(raw.opponent||m.opponent)+'\n\n'
     +'❌ *Bisher:* '+fmtShare(fromD)+(fromT?', '+fromT+' Uhr':'')+'\n\n'
     +'✅ *Neu*\n'
-    +'Spieldatum: '+fmtShare(m.toD)+'\n'
-    +'Anstoßzeit: '+m.toT+' Uhr\n'
+    +(m.toD===fromD
+      ?'Spieldatum: unverändert ('+fmtShare(m.toD)+')\n'+'Anstoßzeit: '+m.toT+' Uhr (statt '+(fromT||'?')+' Uhr)\n'
+      :'Spieldatum: '+fmtShare(m.toD)+'\n'+'Anstoßzeit: '+m.toT+' Uhr\n')
     +'Spielstätte: unverändert'+(raw.venue?' – '+raw.venue:'')+'\n'
     +'Begründung: '+(m.reason||'bitte ergänzen')+'\n\n'
     +'Der Platz ist am neuen Termin frei und in Platzcoach vorgemerkt.\n'
@@ -4092,18 +4127,21 @@ function runRescheduleSearch(){
   for(let offset=0;offset<=totalDays;offset++){
     const d=new Date(searchStart); d.setDate(d.getDate()+offset);
     const ds=ymd(d);
-    if(ds===g.d)continue;
-    if(!rescheduleDays.has(dowOf(ds)))continue;
+    // Der ursprüngliche Spieltag wird IMMER mitgesucht (andere Anstoßzeit am selben Tag), mit dem
+    // Zeitfenster seines Wochentags; das Spiel selbst belegt dabei nichts.
+    const sameDay=ds===g.d;
+    if(!sameDay&&!rescheduleDays.has(dowOf(ds)))continue;
     // Team-Ganztags-Sperre: hat DIESE Mannschaft an dem Tag bereits irgendein anderes Spiel
     // (Heim ODER Auswärts)? Auswärtsspiele belegen unseren Platz nicht und wären in der reinen
     // Platzprüfung unten unsichtbar – ein Team kann aber nicht an einem Tag zwei Pflichtspiele
     // bestreiten, unabhängig von der genauen Uhrzeit. Daher kompletter Tages-Ausschluss, nicht
     // nur ein Zeitfenster-Abgleich.
     const teamBusyThatDay=
-      (FUSSBALLDE.games||[]).some(x=>x.team===g.team&&(x.squad||1)===(g.squad||1)&&x.d===ds)
+      (FUSSBALLDE.games||[]).some(x=>x!==g&&x.link!==g.link&&x.team===g.team&&(x.squad||1)===(g.squad||1)&&x.d===ds)
       || (FUSSBALLDE.awayGames||[]).some(x=>x.team===g.team&&(x.squad||1)===(g.squad||1)&&x.d===ds);
     if(teamBusyThatDay)continue;
-    const occ=rescheduleOccupationsOn(ds,own);
+    const prevSkip=formSkipFussballLink; if(sameDay) formSkipFussballLink=fussballGameLinkId(g);
+    let occ; try{ occ=rescheduleOccupationsOn(ds,own); } finally{ formSkipFussballLink=prevSkip; }
     const dayTimes=rescheduleTimesFor(dowOf(ds));
     const vonMin=timeToMin(dayTimes.von), bisMin=timeToMin(dayTimes.bis);
     let best=null;
@@ -4122,7 +4160,7 @@ function runRescheduleSearch(){
         // Liegt das Fenster in einem eigenen Training auf dieser Fläche? Dann als solches kennzeichnen.
         const ownHit=occ.own.find(e=>f<eventBis(e)&&to>e.t&&pitchQuarters(e.pitch).some(q=>opt.q.includes(q)));
         // Anstoß frühestens zu Fensterbeginn, spätestens so, dass das Spiel bis Fensterende fertig ist.
-        const cand={date:ds,freeFrom:f,freeTo:to,kickFrom:f,kickTo:minToTime(we-durationMin),part:opt.part,
+        const cand={date:ds,sameDay,freeFrom:f,freeTo:to,kickFrom:f,kickTo:minToTime(we-durationMin),part:opt.part,
           ownTraining:ownHit?{from:ownHit.t,to:eventBis(ownHit),part:(ownHit.pitch&&ownHit.pitch.mode==='haelfte')?ownHit.pitch.part:null}:null,
           len:we-ws};
         // Vorrang: Fenster in der eigenen Trainingszeit (andere Mannschaften bleiben unberührt),
@@ -4150,6 +4188,7 @@ function renderRescheduleResults(){
       return '<label class="rs-result-row rs-selectable'+(checked?' on':'')+'">'
         +'<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleRescheduleSelect('+i+')">'
         +'<b>'+DAYS_S[dt.getDay()]+' '+fmtShort(r.date)
+        +(r.sameDay?'<small class="rs-own">gleicher Tag, andere Anstoßzeit (bisher '+esc(rescheduleGame.t||'?')+')</small>':'')
         +(r.ownTraining?'<small class="rs-own">in eurer Trainingszeit '+r.ownTraining.from+'–'+r.ownTraining.to+(r.ownTraining.part?' (Hälfte '+r.ownTraining.part+')':'')+'</small>':'')
         +'</b><span>Anstoß '+kickoffRangeText(r,'short')+(r.part?'<br>Hälfte '+r.part:'')+'</span></label>';
     }).join('')

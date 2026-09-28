@@ -649,7 +649,9 @@ async function detectGameChanges(home, away, previous) {
       }
       const moved = p.d !== g.d || (p.t || '') !== (g.t || '');
       if (!moved || (g.d < today && p.d < today)) continue;
-      let text = `Spielverlegung bei fussball.de: ${who} von ${fmtGameDate(p.d, p.t)} auf ${fmtGameDate(g.d, g.t)}.`;
+      let text = p.d === g.d
+        ? `Anstoßzeit bei fussball.de geändert: ${who} am ${fmtGameDate(g.d)}: ${p.t || '?'} → ${g.t || '?'} Uhr.`
+        : `Spielverlegung bei fussball.de: ${who} von ${fmtGameDate(p.d, p.t)} auf ${fmtGameDate(g.d, g.t)}.`;
       const m = moves.find(x => x.link === g.link);
       if (m && m.toD === g.d) {
         text += ' Wie in Platzcoach vorgemerkt' + ((m.toT || '') !== (g.t || '') && g.t ? ` (Anstoß jetzt ${g.t} statt ${m.toT} Uhr)` : '') + '.';
