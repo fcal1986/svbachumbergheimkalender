@@ -105,6 +105,7 @@ function parseCommit(raw) {
   // Torwarttraining: betroffene Mannschaften und Organisator(en)
   const gk = raw.match(/^Platzcoach-GK: (.+)$/m);
   const orga = raw.match(/^Platzcoach-Orga: (.+)$/m);
+  const link = raw.match(/^Platzcoach-Link: (\S+)\s*$/m); // Direktlink-ID in der App ("fb-…", Termin-ID)
   return {
     text,
     gkTeams: gk ? gk[1].split(',').map(s => s.trim()).filter(Boolean) : [],
@@ -112,6 +113,7 @@ function parseCommit(raw) {
     team: team ? team[1].trim() : null,
     squad: team ? parseInt(team[2], 10) : null,
     by: by ? by[1] : null,
+    link: link ? link[1] : null,
     category: categoryOf(text),
   };
 }
@@ -124,6 +126,10 @@ function categoryOf(text) {
 function isFromPlatzcoach(msg) {
   return categoryOf(msg.split(/\n\s*\n/)[0].trim()) !== null;
 }
+// Spielverlegungen gehen an ALLE Trainer der Mannschaft – auch an den, der sie eingetragen hat
+// (Bestätigung + Info für den Mit-Trainer). Sonst gilt: keine Mail über eigene Änderungen.
+const NOTIFY_AUTHOR_TOO = ['Spielverlegung vorgemerkt:', 'Spielverlegung geändert:', 'Spielverlegung aufgehoben:'];
+function notifyAuthorToo(c) { return NOTIFY_AUTHOR_TOO.some(p => c.text.startsWith(p)); }
 // Automatische Bot-Läufe und Aufräumarbeiten der App gehen nie per Mail raus.
 function isNoisyCommit(text) {
   return /^Heimspiele von fussball\.de aktualisiert/i.test(text) || /\(automatisch\)/.test(text);
@@ -264,17 +270,19 @@ async function main() {
     const classes = r.user ? trainerClassesFor(r.user, seasons, today) : {};
     const mine = changes.filter(c =>
       allowed.includes(c.category)
-      && !(r.user && c.by && c.by === r.user.id)
+      && (notifyAuthorToo(c) || !(r.user && c.by && c.by === r.user.id))
       && (r.role === 'admin' || concernsTrainer(c, classes, r.user && r.user.id)));
     if (!mine.length) continue;
     const texts = mine.map(c => c.text);
+    const siteUrl = String(cfg.siteUrl || 'https://platzcoach.de/').replace(/\/?$/, '/');
+    const linkOf = c => (c.link ? siteUrl + '#t=' + encodeURIComponent(c.link) : '');
     const html = `
     <div style="font-family:Arial,sans-serif;font-size:14px;color:#0B1B32;">
       <p><strong>${escapeHtml(clubName)}</strong> – es gab folgende Änderung${texts.length === 1 ? '' : 'en'} in Platzcoach:</p>
-      <ul>${texts.map(t => `<li style="margin-bottom:6px;">${escapeHtml(t)}</li>`).join('')}</ul>
+      <ul>${mine.map(c => `<li style="margin-bottom:6px;">${escapeHtml(c.text)}${c.link ? `<br><a href="${escapeHtml(linkOf(c))}" style="color:#16A34A;">In Platzcoach öffnen</a>` : ''}</li>`).join('')}</ul>
       <p style="color:#718191;font-size:12px;">Automatische Benachrichtigung von Platzcoach. Details siehst du in der App. Benachrichtigungen kannst du im Profil abschalten.</p>
     </div>`;
-    const text = `${clubName} – Änderungen in Platzcoach:\n\n` + texts.map(t => `- ${t}`).join('\n');
+    const text = `${clubName} – Änderungen in Platzcoach:\n\n` + mine.map(c => `- ${c.text}` + (c.link ? `\n  ${linkOf(c)}` : '')).join('\n');
     try {
       await transporter.sendMail({
         headers: { 'X-Entity-Ref-ID': randomUUID() }, // eindeutig: Gmail gruppiert/kürzt Mails nicht
