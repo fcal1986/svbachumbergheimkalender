@@ -1071,7 +1071,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='28.09.2026 · 1';
+const APP_VERSION='28.09.2026 · 2';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
@@ -3798,15 +3798,18 @@ function shareRescheduleProposal(){
   const mapped=fussballFilterTeam(g.team,g.squad);
   const teamTxt=teamLabel(mapped.team,mapped.squad);
   const picked=[...rescheduleSelected].sort((a,b)=>a-b).map(i=>rescheduleResults[i]);
+  const one=picked.length===1;
   const lines=picked.map(r=>{
     const dt=new Date(r.date+'T00:00:00');
     return '• '+DAYS_S[dt.getDay()]+' '+fmtShort(r.date)+', '+r.freeFrom+'–'+r.freeTo+' Uhr';
   }).join('\n');
   const txt='📅 *Neue Ansetzung gesucht: '+teamTxt+' vs. '+g.opponent+'*\n'
     +'(bisher: '+fmtShare(g.d)+', '+g.t+' Uhr)\n\n'
-    +'Folgende Termine wären bei uns frei – passt einer davon?\n\n'
+    +(one?'Folgender Termin wäre bei uns frei – würde der passen?\n\n'
+         :'Folgende Termine wären bei uns frei – passt einer davon?\n\n')
     +lines+'\n\n'
-    +'Bitte kurz Rückmeldung, welcher Termin passt 🙏';
+    +(one?'Bitte kurz Rückmeldung, ob der Termin passt 🙏'
+         :'Bitte kurz Rückmeldung, welcher Termin passt 🙏');
   window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
 }
 async function doCancelSlot(){
