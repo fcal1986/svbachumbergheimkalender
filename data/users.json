@@ -431,13 +431,12 @@
         ]
       },
       "enc": {
-        "salt": "CMV8EQVjMmgo2nXby1xaHg==",
-        "iv": "mIHlRrvvzPDe2ZiO",
-        "cipher": "EtRRwm9ujrfxRH4hQTjgcSgEJ/jd91CH4R5sLfshfOmenF7GVCNmPGsvv/2/ufEwmBRT0pZhedgtTsQIrjr8T/8YBbYaDuEeOVHfwItTavjDxao0RpKglSCbk9QdjdXVqYNtoY9otklBYcIGnw=="
+        "salt": "0s4R1UFthWbehZ2ve1aKGg==",
+        "iv": "MKT7glTlYkWSOJro",
+        "cipher": "4kyLAOkMeChC995fjN0A29VX/2Lcxf3k5DIerB4JPS5IRRYCd2YHO+SnQ9oNOj5XSqtAfq2Yfm2MpndbzztheXKRMwWRg6X1NVLekOMZ2vLOMhvUMzOYoOwFrUDoMCB4DxYWRbudG+aBBiBXBQ=="
       },
       "created": "2026-09-26T19:32:42.476Z",
       "emailNotificationsEnabled": true,
-      "pwChangeRequired": true,
       "phone": "015560848519",
       "contactPublic": "phone"
     }
