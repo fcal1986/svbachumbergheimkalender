@@ -438,7 +438,8 @@
       "created": "2026-09-26T19:32:42.476Z",
       "emailNotificationsEnabled": true,
       "phone": "015560848519",
-      "contactPublic": "phone"
+      "contactPublic": "both",
+      "contactEmail": "michael.raneck@sv-bachum-bergheim.de"
     }
   ]
 }
