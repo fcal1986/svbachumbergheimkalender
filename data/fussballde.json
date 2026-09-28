@@ -1,76 +1,6 @@
 {
-  "updated": "2026-09-27T21:21:53.234Z",
+  "updated": "2026-09-28T05:25:02.236Z",
   "games": [
-    {
-      "d": "2026-09-06",
-      "t": "10:18",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "JSG Balve/Garb./La/Kü/Me 1",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-balve-garb-la-kue-me-1/-/spiel/031VGSP02G000000VS5489BTVT7QHFUC"
-    },
-    {
-      "d": "2026-09-06",
-      "t": "10:54",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "SV Wersten 04 I",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-wersten-04-i/-/spiel/031VGSP048000000VS5489BTVT7QHFUC"
-    },
-    {
-      "d": "2026-09-06",
-      "t": "11:00",
-      "team": "Herren",
-      "squad": 3,
-      "opponent": "DJK GW Arnsberg II",
-      "competition": "Kreisliga D",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-djk-gw-arnsberg-ii/-/spiel/031KK1IQ2K000000VS5489BUVVKNMR0J"
-    },
-    {
-      "d": "2026-09-06",
-      "t": "13:15",
-      "team": "Herren",
-      "squad": 2,
-      "opponent": "TuS Niedereimer",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-tus-niedereimer/-/spiel/031IK2S2DO000000VS5489BUVVKNMR0J"
-    },
-    {
-      "d": "2026-09-06",
-      "t": "13:48",
-      "team": "E-Junioren",
-      "squad": 1,
-      "opponent": "Tus Plettenberg 1",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-tus-plettenberg-1/-/spiel/0320G24SEG000000VS5489BTVT7QHFUC"
-    },
-    {
-      "d": "2026-09-06",
-      "t": "15:00",
-      "team": "E-Junioren",
-      "squad": 1,
-      "opponent": "DJK Grün-Weiß Menden 2",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-djk-gruen-weiss-menden-2/-/spiel/0320G24SI4000000VS5489BTVT7QHFUC"
-    },
-    {
-      "d": "2026-09-06",
-      "t": "15:30",
-      "team": "Herren",
-      "squad": 1,
-      "opponent": "FSG Ruhrtal II",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fsg-ruhrtal-ii/-/spiel/031I0BNDL8000000VS5489BUVVKNMR0J"
-    },
     {
       "d": "2026-09-07",
       "t": "18:00",
@@ -1293,46 +1223,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-09-06",
-      "t": "09:42",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "SSV Meschede I",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/ssv-meschede-i-sv-bachum-bergheim/-/spiel/031VGSP00K000000VS5489BTVT7QHFUC"
-    },
-    {
-      "d": "2026-09-06",
-      "t": "11:18",
-      "team": "D-Junioren",
-      "squad": 1,
-      "opponent": "SV Affeln 28",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-affeln-28-sv-bachum-bergheim/-/spiel/031VGSP05G000000VS5489BTVT7QHFUC"
-    },
-    {
-      "d": "2026-09-06",
-      "t": "13:12",
-      "team": "E-Junioren",
-      "squad": 1,
-      "opponent": "SC LWL 05 1",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sc-lwl-05-1-sv-bachum-bergheim-1/-/spiel/0320G24SCK000000VS5489BTVT7QHFUC"
-    },
-    {
-      "d": "2026-09-06",
-      "t": "14:24",
-      "team": "E-Junioren",
-      "squad": 1,
-      "opponent": "SC Lüdenscheid 1",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sc-luedenscheid-1-sv-bachum-bergheim-1/-/spiel/0320G24SG0000000VS5489BTVT7QHFUC"
-    },
     {
       "d": "2026-09-10",
       "t": "19:30",
