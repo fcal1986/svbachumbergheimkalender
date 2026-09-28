@@ -72,7 +72,8 @@ function escapeHtml(s) {
 // config.json → notify.categories). Wird in index.html eine neue Aktion ergänzt, muss ihr
 // Präfix hier einer Kategorie zugeordnet werden, sonst wird sie nicht verschickt.
 const CATEGORIES = {
-  termine:     ['Neuer Termin:', 'Termin geändert:', 'Termin gelöscht:'],
+  termine:     ['Neuer Termin:', 'Termin geändert:', 'Termin gelöscht:',
+                'Spielverlegung vorgemerkt:', 'Spielverlegung geändert:', 'Spielverlegung aufgehoben:'],
   training:    ['Trainingszeit angelegt:', 'Trainingszeit geändert:', 'Trainingszeit gelöscht:',
                 'Training abgesagt:', 'Absage zurückgenommen:', 'Torwarttraining-Anmeldung geändert:'],
   sperren:     ['Sperre angelegt:', 'Sperre aufgehoben:'],

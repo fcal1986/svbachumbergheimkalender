@@ -490,9 +490,40 @@ async function main() {
 
   console.log(`${allGames.length} Heimspiele (inkl. letzte 3 Wochen) und ${awayGames.length} Auswärtsspiele gefunden.`);
 
+  // Verlegungen erkennen: Ein Spiel behält bei fussball.de seinen Link, wenn es verlegt wird.
+  // Hat sich Datum oder Uhrzeit gegenüber dem letzten Lauf geändert, merken wir uns den
+  // ursprünglichen Termin (movedFrom). Bei mehreren Verlegungen bleibt der erste Termin stehen,
+  // bei einer Rückverlegung auf den ursprünglichen Termin entfällt die Markierung.
+  let previous = null;
+  try { previous = JSON.parse(await fs.readFile(OUTPUT_PATH, 'utf8')); } catch (e) { previous = null; }
+  markMovedGames(allGames, previous && previous.games);
+  markMovedGames(awayGames, previous && previous.awayGames);
+
   const output = { updated: new Date().toISOString(), games: allGames, awayGames, strategy: usedStrategy };
   await fs.writeFile(OUTPUT_PATH, JSON.stringify(output, null, 2) + '\n');
   console.log(`Fertig: ${allGames.length} Heimspiele + ${awayGames.length} Auswärtsspiele nach ${OUTPUT_PATH} geschrieben.`);
+}
+
+function markMovedGames(games, prevGames) {
+  const prevByLink = new Map((prevGames || []).filter(g => g && g.link).map(g => [g.link, g]));
+  let moved = 0;
+  for (const g of games) {
+    const prev = g.link ? prevByLink.get(g.link) : null;
+    if (!prev) continue;
+    const changed = prev.d !== g.d || (prev.t || '') !== (g.t || '');
+    if (changed) {
+      const origin = prev.movedFrom || { d: prev.d, t: prev.t || null };
+      if (origin.d === g.d && (origin.t || '') === (g.t || '')) continue; // zurück auf den Ursprung
+      g.movedFrom = origin;
+      g.movedAt = new Date().toISOString();
+      moved++;
+      console.log(`  Verlegung erkannt: ${g.team} ${g.squad || ''} vs ${g.opponent}: ${prev.d} ${prev.t || '?'} -> ${g.d} ${g.t || '?'}`);
+    } else if (prev.movedFrom) {
+      g.movedFrom = prev.movedFrom;
+      if (prev.movedAt) g.movedAt = prev.movedAt;
+    }
+  }
+  return moved;
 }
 
 main().catch(err => {
