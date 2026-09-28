@@ -463,6 +463,7 @@ async function main() {
       t: m.time,
       team: m.ownTeam,
       squad: extractSquadNumber(m.home), // "wir" sind bei einem Heimspiel die Heim-Mannschaft
+      ownName: m.home, // unser Mannschaftsname bei fussball.de, z. B. "SV Bachum/Bergheim 2"
       opponent: m.away,
       competition: m.competition,
       score: m.score || null, // {home,away} sobald das Spiel gespielt wurde, sonst null
@@ -481,6 +482,7 @@ async function main() {
       t: m.time,
       team: m.ownTeam,
       squad: extractSquadNumber(m.away), // "wir" sind bei einem Auswärtsspiel die Gast-Mannschaft
+      ownName: m.away,
       opponent: m.home, // bei einem Auswärtsspiel ist "home" der Gegner
       competition: m.competition,
       score: m.score || null,

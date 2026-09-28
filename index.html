@@ -1094,7 +1094,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='28.09.2026 · 3';
+const APP_VERSION='28.09.2026 · 4';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3869,7 +3869,11 @@ function openRescheduleFinder(fbIndex){
   document.querySelectorAll('#rs-days .weekday-chip').forEach(c=>c.classList.toggle('on',rescheduleDays.has(parseInt(c.dataset.day))));
   renderRescheduleTimes();
   const mapped=fussballFilterTeam(rescheduleGame.team,rescheduleGame.squad);
-  document.getElementById('rs-text').textContent=teamLabel(mapped.team,mapped.squad)+' – '+rescheduleGame.opponent+' (bisher '+fmtShort(rescheduleGame.d)+', '+rescheduleGame.t+' Uhr)';
+  const g0=rescheduleGame;
+  document.getElementById('rs-text').innerHTML=esc(teamLabel(mapped.team,mapped.squad)+' – '+g0.opponent)
+    +(g0.competition?' · <b>'+esc(g0.competition)+'</b>':'')
+    +'<br>bisher '+esc(fmtShort(g0.d)+', '+g0.t+' Uhr')
+    +(g0.link?' · <a href="'+esc(g0.link)+'" target="_blank" rel="noopener" style="color:var(--green);font-weight:600;">Zum Spiel ↗</a>':'');
   document.getElementById('rs-results').innerHTML='';
   document.getElementById('reschedule-modal').classList.add('show');
 }
@@ -3956,7 +3960,8 @@ function runRescheduleSearch(){
         const f=minToTime(ws), to=minToTime(we);
         // Liegt das Fenster in einem eigenen Training auf dieser Fläche? Dann als solches kennzeichnen.
         const ownHit=occ.own.find(e=>f<eventBis(e)&&to>e.t&&pitchQuarters(e.pitch).some(q=>opt.q.includes(q)));
-        const cand={date:ds,freeFrom:f,freeTo:to,part:opt.part,
+        // Anstoß frühestens zu Fensterbeginn, spätestens so, dass das Spiel bis Fensterende fertig ist.
+        const cand={date:ds,freeFrom:f,freeTo:to,kickFrom:f,kickTo:minToTime(we-durationMin),part:opt.part,
           ownTraining:ownHit?{from:ownHit.t,to:eventBis(ownHit),part:(ownHit.pitch&&ownHit.pitch.mode==='haelfte')?ownHit.pitch.part:null}:null,
           len:we-ws};
         // Vorrang: Fenster in der eigenen Trainingszeit (andere Mannschaften bleiben unberührt),
@@ -3985,7 +3990,7 @@ function renderRescheduleResults(){
         +'<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleRescheduleSelect('+i+')">'
         +'<b>'+DAYS_S[dt.getDay()]+' '+fmtShort(r.date)
         +(r.ownTraining?'<small class="rs-own">in eurer Trainingszeit '+r.ownTraining.from+'–'+r.ownTraining.to+(r.ownTraining.part?' (Hälfte '+r.ownTraining.part+')':'')+'</small>':'')
-        +'</b><span>'+r.freeFrom+'–'+r.freeTo+' frei'+(r.part?'<br>Hälfte '+r.part:'')+'</span></label>';
+        +'</b><span>Anstoß '+kickoffRangeText(r,'short')+(r.part?'<br>Hälfte '+r.part:'')+'</span></label>';
     }).join('')
     +(results.length>shown.length?'<div class="rs-empty rs-showmore" onclick="expandRescheduleResults()">+ '+(results.length-shown.length)+' weitere anzeigen ▾</div>':'')
     +'<div id="rs-share-bar"></div>';
@@ -4012,18 +4017,35 @@ function renderRescheduleShareBar(){
     +(rescheduleSelected.size===1&&rescheduleGame&&rescheduleGame.link&&session
       ?'<button class="ghost-btn" style="margin-top:8px;" onclick="markMoveFromResult()">Zugesagt? Als Verlegung vormerken</button>':'');
 }
+// Anstoß-Spanne eines Suchergebnisses ("zwischen 16:00 und 16:15 Uhr" bzw. "um 16:00 Uhr").
+function kickoffRangeText(r,mode){
+  const a=r.kickFrom||r.freeFrom, b=r.kickTo||r.freeFrom;
+  if(mode==='short') return a===b?a:a+'–'+b;
+  return a===b?'um '+a+' Uhr':'zwischen '+a+' und '+b+' Uhr';
+}
+// Unsere Mannschaft so, wie sie bei fussball.de heißt (z. B. "SV Bachum/Bergheim 2"). Der Sync liefert
+// den Namen ab 28.09.2026 · 4 als ownName; für ältere Daten aus dem Vereinsnamen abgeleitet.
+function fussballOwnTeamName(g){
+  if(g&&g.ownName) return g.ownName;
+  const club=String((CFG&&CFG.clubName)||'').replace(/\s*e\.\s*V\.?\s*$/i,'').replace(/\s*\/\s*/g,'/').trim();
+  return club+((g&&g.squad>1)?' '+g.squad:'');
+}
 function shareRescheduleProposal(){
   const g=rescheduleGame; if(!g||!rescheduleSelected.size)return;
   const mapped=fussballFilterTeam(g.team,g.squad);
   const teamTxt=teamLabel(mapped.team,mapped.squad);
   const picked=[...rescheduleSelected].sort((a,b)=>a-b).map(i=>rescheduleResults[i]);
   const one=picked.length===1;
+  const orig=rawGameOf(g)||g; // bei vorgemerkter Verlegung: Termin laut fussball.de
   const lines=picked.map(r=>{
     const dt=new Date(r.date+'T00:00:00');
-    return '• '+DAYS_S[dt.getDay()]+' '+fmtShort(r.date)+', '+r.freeFrom+'–'+r.freeTo+' Uhr';
+    return '• '+DAYS_S[dt.getDay()]+' '+fmtShort(r.date)+', Anstoß '+kickoffRangeText(r);
   }).join('\n');
-  const txt='📅 *Neue Ansetzung gesucht: '+teamTxt+' vs. '+g.opponent+'*\n'
-    +'(bisher: '+fmtShare(g.d)+', '+g.t+' Uhr)\n\n'
+  const txt='📅 *Neue Ansetzung gesucht*\n'
+    +'*'+fussballOwnTeamName(g)+' ('+teamTxt+') – '+g.opponent+'*\n'
+    +(g.competition?g.competition+' · ':'')+'bisher '+fmtShare(orig.d)+', '+orig.t+' Uhr\n'
+    +(g.link?'Spiel bei fussball.de: '+g.link+'\n':'')
+    +'\n'
     +(one?'Folgender Termin wäre bei uns frei – würde der passen?\n\n'
          :'Folgende Termine wären bei uns frei – passt einer davon?\n\n')
     +lines+'\n\n'
