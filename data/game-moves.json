@@ -1,24 +1,3 @@
 {
-  "moves": [
-    {
-      "id": "9f5d7fdf-153d-4e37-b086-a988735cb962",
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-1-oeventrop-freienohl-wennemen/-/spiel/031J8LLJOS000000VS5489BUVVKNMR0J",
-      "team": "E-Junioren",
-      "squad": 2,
-      "opponent": "JSG Oeventrop/Freie./Wen. I",
-      "fromD": "2026-10-10",
-      "fromT": "13:45",
-      "toD": "2026-11-06",
-      "toT": "16:15",
-      "byId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "byName": "Fabrizio Calcagno",
-      "at": "2026-09-28T11:58:20.012Z",
-      "cancelledTraining": [
-        {
-          "slotId": "c48dfe28-58b5-4e17-8cfe-41926fb33bbc",
-          "date": "2026-11-06"
-        }
-      ]
-    }
-  ]
+  "moves": []
 }
