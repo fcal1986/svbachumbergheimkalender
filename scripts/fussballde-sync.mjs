@@ -220,6 +220,62 @@ function parseDetailDateTime(html) {
   return { date: `${d[3]}-${d[2]}-${d[1]}`, time: t ? `${t[1].padStart(2, '0')}:${t[2]}` : null };
 }
 
+// Spielnummer, Spieltag, Staffel und Spielort von einer Spielseite. Aufbau laut Seite (28.09.2026):
+//   "Spiel: 210931013 / 4. Spieltag", "Staffel-ID: 210931", Staffel als Link auf /spieltag/…
+//   ("KL B Gruppe 1"), Spielort als Google-Maps-Link ("Kunstrasenplatz, Höllenbergkampfbahn …").
+// Bewusst über sichtbaren Text und Link-Ziele statt über CSS-Klassen, die sich eher ändern.
+function parseGameInfo(html, date) {
+  const $ = cheerio.load(html);
+  const text = cleanText($('body').text());
+  const info = {};
+  const no = text.match(/Spiel:\s*(\d{6,12})(?:\s*\/\s*(\d{1,2})\.\s*Spieltag)?/);
+  if (no) { info.gameNo = no[1]; if (no[2]) info.matchday = parseInt(no[2], 10); }
+  if (!info.matchday) { const md = text.match(/(\d{1,2})\.\s*Spieltag/); if (md) info.matchday = parseInt(md[1], 10); }
+  const sid = text.match(/Staffel-ID:\s*(\d{3,12})/);
+  if (sid) info.staffelId = sid[1];
+  // Staffel-Link: /spieltag/…/staffel/…, bevorzugt der zum Spieldatum ("/spieldatum/2026-10-10/").
+  const staffelLinks = $('a[href*="/spieltag/"]').filter((_, a) => /\/staffel\//.test($(a).attr('href') || ''));
+  const byDate = date ? staffelLinks.filter((_, a) => ($(a).attr('href') || '').includes('/spieldatum/' + date)) : staffelLinks.slice(0, 0);
+  const staffelLink = (byDate.length ? byDate : staffelLinks).first();
+  if (staffelLink.length) { const n = cleanText(staffelLink.text()); if (n) info.staffelName = n; }
+  const venueLink = $('a[href*="maps"]').filter((_, a) => /google\.[a-z.]+\/maps|maps\.google/i.test($(a).attr('href') || '')).first();
+  if (venueLink.length) { const v = cleanText(venueLink.text()); if (v) info.venue = v; }
+  return info;
+}
+const GAME_INFO_FIELDS = ['gameNo', 'matchday', 'staffelId', 'staffelName', 'venue', 'infoAt'];
+// Holt die Angaben nur, wo sie fehlen, sich der Termin geändert hat oder sie älter als 7 Tage sind –
+// sonst werden sie aus dem letzten Lauf übernommen. Höchstens 40 Seitenabrufe pro Lauf, mit Pause.
+async function enrichGameInfo(games, prevGames, debug) {
+  const prevByLink = new Map((prevGames || []).filter(g => g && g.link).map(g => [g.link, g]));
+  const today = new Date().toISOString().slice(0, 10);
+  const staleBefore = new Date(Date.now() - 7 * 86400000).toISOString();
+  let fetched = 0, ok = 0;
+  for (const g of games) {
+    if (!g.link) continue;
+    const prev = prevByLink.get(g.link);
+    if (prev) for (const f of GAME_INFO_FIELDS) if (prev[f] !== undefined && g[f] === undefined) g[f] = prev[f];
+    const sameSlot = prev && prev.d === g.d && (prev.t || '') === (g.t || '');
+    const fresh = g.infoAt && g.infoAt > staleBefore && g.gameNo;
+    if (g.d < today || (sameSlot && fresh) || fetched >= 40) continue;
+    fetched++;
+    try {
+      const res = await fetch(g.link, { headers: FD_HEADERS });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const html = await res.text();
+      if (looksLikeBlockedOrEmptyPage(html)) throw new Error('Bot-Schutz/Consent-Seite');
+      const info = parseGameInfo(html, g.d);
+      if (!info.gameNo && !info.venue) throw new Error('keine Spielangaben gefunden');
+      Object.assign(g, info, { infoAt: new Date().toISOString() });
+      ok++;
+      if (debug) console.log(`  [debug] Spielinfo ${g.d} ${g.team} ${g.squad}: ${JSON.stringify(info)}`);
+    } catch (err) {
+      console.warn(`  [warnung] Spielinfo nicht lesbar (${err.message}) für ${g.d} ${g.team} vs ${g.opponent} (${g.link})`);
+    }
+    await new Promise(r => setTimeout(r, 400)); // fussball.de nicht mit schnellen Folgeanfragen belasten
+  }
+  console.log(`Spielinfos: ${ok} von ${fetched} Spielseiten gelesen (Rest aus dem letzten Lauf übernommen).`);
+}
+
 // Doppelt gelistete Spiele (Spielverlegungen) anhand der Spielseite auflösen.
 async function resolveMovedMatches(matches, debug) {
   const groups = matches.dupGroups;
@@ -500,6 +556,9 @@ async function main() {
   try { previous = JSON.parse(await fs.readFile(OUTPUT_PATH, 'utf8')); } catch (e) { previous = null; }
   markMovedGames(allGames, previous && previous.games);
   markMovedGames(awayGames, previous && previous.awayGames);
+
+  // Spielnummer, Staffel und Spielort von den Spielseiten der Heimspiele (für den DFBnet-Verlegungsantrag).
+  await enrichGameInfo(allGames, previous && previous.games, debug);
 
   const output = { updated: new Date().toISOString(), games: allGames, awayGames, strategy: usedStrategy };
   await fs.writeFile(OUTPUT_PATH, JSON.stringify(output, null, 2) + '\n');
