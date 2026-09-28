@@ -76,6 +76,13 @@ function parseMatches(html, debug) {
       return; // noch nie ein Datum gesehen – Zeile kann nicht zugeordnet werden
     }
     const timeMatch = rowText.match(/(\d{1,2}):(\d{2})/);
+    // Spielnummer (DFBnet/fussball.de, z. B. "210931013"): 8–12 Ziffern am Ende einer Zelle der
+    // Wettbewerbszeile. Bewusst je Zelle geprüft – der Zeilentext klebt Zellen ohne Leerzeichen
+    // aneinander ("Kreisliga A 2025" + "21093" würde sonst zu "202521093").
+    const cellTexts = $row.find('td').map((_, td) => cleanText($(td).text())).get();
+    const noCell = cellTexts.map(t => t.match(/(?:^|\D)(\d{8,12})$/)).find(Boolean);
+    const noMatch = noCell || null;
+    if (!matches.sampleRow) matches.sampleRow = cellTexts.join(' | ').slice(0, 200);
 
     // "Mannschaft | Wettbewerb", z.B. "Herren | Kreisliga A"
     const compText = cleanText($row.find('td.column-team').first().text());
@@ -124,6 +131,7 @@ function parseMatches(html, debug) {
       date: iso,
       time: timeMatch ? `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}` : null,
       home, away, ownTeam, competition, score,
+      gameNo: noMatch ? noMatch[1] : null,
       link: matchLink ? new URL(matchLink, 'https://www.fussball.de').toString() : null,
     });
   });
@@ -157,6 +165,7 @@ function parseMatches(html, debug) {
   }
   const dedupedMatches = [...byLink.values(), ...noLinkMatches];
   dedupedMatches.dupGroups = dupGroups;
+  dedupedMatches.sampleRow = matches.sampleRow;
   if (debug && dedupedMatches.length !== matches.length) {
     console.log(`  [debug] Deduplizierung: ${matches.length} Spiele vor, ${dedupedMatches.length} nach Bereinigung (${matches.length - dedupedMatches.length} Duplikat(e) entfernt).`);
   }
@@ -249,7 +258,7 @@ async function enrichGameInfo(games, prevGames, debug) {
   const prevByLink = new Map((prevGames || []).filter(g => g && g.link).map(g => [g.link, g]));
   const today = new Date().toISOString().slice(0, 10);
   const staleBefore = new Date(Date.now() - 7 * 86400000).toISOString();
-  let fetched = 0, ok = 0;
+  let fetched = 0, ok = 0, diagnosed = false;
   for (const g of games) {
     if (!g.link) continue;
     const prev = prevByLink.get(g.link);
@@ -262,9 +271,18 @@ async function enrichGameInfo(games, prevGames, debug) {
       const res = await fetch(g.link, { headers: FD_HEADERS });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const html = await res.text();
-      if (looksLikeBlockedOrEmptyPage(html)) throw new Error('Bot-Schutz/Consent-Seite');
+      // Bewusst KEIN looksLikeBlockedOrEmptyPage(): Spielseiten enthalten immer den Cookie-Banner
+      // ("consent") – die Prüfung schlug deshalb bei jeder Seite an (28.09.2026, 0 von 122).
       const info = parseGameInfo(html, g.d);
-      if (!info.gameNo && !info.venue) throw new Error('keine Spielangaben gefunden');
+      if (!info.gameNo && !info.venue) {
+        if (!diagnosed) {
+          diagnosed = true;
+          const $d = cheerio.load(html), t = cleanText($d('body').text());
+          const i = t.search(/Spiel\s*:|Spieltag|Staffel/);
+          console.warn(`  [diagnose] Spielseite ohne Spielangaben (${html.length} Zeichen, Titel "${cleanText($d('title').text()).slice(0, 80)}"). Textauszug: "${(i >= 0 ? t.slice(Math.max(0, i - 80), i + 220) : t.slice(0, 300))}"`);
+        }
+        throw new Error('keine Spielangaben gefunden');
+      }
       Object.assign(g, info, { infoAt: new Date().toISOString() });
       ok++;
       if (debug) console.log(`  [debug] Spielinfo ${g.d} ${g.team} ${g.squad}: ${JSON.stringify(info)}`);
@@ -520,6 +538,7 @@ async function main() {
       team: m.ownTeam,
       squad: extractSquadNumber(m.home), // "wir" sind bei einem Heimspiel die Heim-Mannschaft
       ownName: m.home, // unser Mannschaftsname bei fussball.de, z. B. "SV Bachum/Bergheim 2"
+      ...(m.gameNo ? { gameNo: m.gameNo } : {}),
       opponent: m.away,
       competition: m.competition,
       score: m.score || null, // {home,away} sobald das Spiel gespielt wurde, sonst null
@@ -547,6 +566,8 @@ async function main() {
     .sort((a, b) => (a.d + (a.t || '')).localeCompare(b.d + (b.t || '')));
 
   console.log(`${allGames.length} Heimspiele (inkl. letzte 3 Wochen) und ${awayGames.length} Auswärtsspiele gefunden.`);
+  console.log(`Spielnummer aus dem Vereinsspielplan: ${allGames.filter(g => g.gameNo).length} von ${allGames.length} Heimspielen.`
+    + (matches.sampleRow ? ` Beispielzeile: "${matches.sampleRow}"` : ''));
 
   // Verlegungen erkennen: Ein Spiel behält bei fussball.de seinen Link, wenn es verlegt wird.
   // Hat sich Datum oder Uhrzeit gegenüber dem letzten Lauf geändert, merken wir uns den
