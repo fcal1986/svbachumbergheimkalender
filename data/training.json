@@ -658,7 +658,9 @@
       "trainerName": "",
       "validFrom": "2026-09-01",
       "validUntil": null,
-      "cancelled": []
+      "cancelled": [
+        "2026-10-09"
+      ]
     },
     {
       "id": "2aec6df0-a5f2-4dbb-8efb-48a85579ed37",
