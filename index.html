@@ -655,6 +655,7 @@
   .rs-time-row b{width:26px;font-size:13px;color:var(--ink);}
   .rs-time-row input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;font-family:'Inter';font-size:14px;background:var(--white);color:var(--ink);}
   .rs-time-row span{color:var(--ink-soft);}
+  .yl-text{white-space:pre-wrap;word-break:break-word;background:var(--bg);border-radius:10px;padding:12px;margin:12px 0 0;font-family:'Inter';font-size:12.5px;line-height:1.45;color:var(--ink);max-height:42vh;overflow-y:auto;}
   .move-badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 9px;font-size:11.5px;font-weight:600;background:var(--green-dim);color:var(--green);}
   .move-badge.pending{background:#fff4e0;color:#a35b00;}
   .moved-card .ev-title-box h4{text-decoration:line-through;color:var(--ink-soft);}
@@ -1082,7 +1083,21 @@
       <button class="no" onclick="closeMoveModal()">Abbrechen</button>
       <button class="yes" id="mv-yes" style="background:var(--green);" onclick="saveGameMove()">Vormerken</button>
     </div>
+    <button class="ghost-btn" id="mv-yl" style="display:none;margin-top:10px;" onclick="openYouthLeaderModal(moveOfGame(FUSSBALLDE.games[moveGameIdx]))">Nachricht an Jugendleiter (DFBnet)</button>
     <button class="ghost-btn" id="mv-remove" style="display:none;margin-top:10px;" onclick="removeGameMove()">Vormerkung aufheben</button>
+  </div>
+</div>
+
+<div class="modal" id="yl-modal">
+  <div class="modal-box" style="max-width:380px;max-height:85vh;overflow-y:auto;">
+    <h3 id="yl-title">Nachricht an den Jugendleiter</h3>
+    <p class="sub" style="margin-top:2px;">Für den Verlegungsantrag im DFBnet. Mit WhatsApp senden oder kopieren und weiterleiten.</p>
+    <pre id="yl-text" class="yl-text"></pre>
+    <button class="submit-btn" style="margin-top:12px;background:#25D366;" onclick="shareYouthLeaderMessage()">Per WhatsApp senden</button>
+    <div class="modal-acts" style="margin-top:8px;">
+      <button class="no" onclick="closeYouthLeaderModal()">Schließen</button>
+      <button class="yes" style="background:var(--black-btn);" onclick="copyYouthLeaderMessage()">Kopieren</button>
+    </div>
   </div>
 </div>
 
@@ -1094,7 +1109,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='28.09.2026 · 4';
+const APP_VERSION='28.09.2026 · 5';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3767,6 +3782,7 @@ function openMoveModal(fbIndex,preDate,preTime){
   document.getElementById('mv-time').value=preTime||(m&&g.movePending?m.toT:(raw.t||''));
   document.getElementById('mv-yes').textContent=(m&&g.movePending)?'Ändern':'Vormerken';
   document.getElementById('mv-remove').style.display=(m&&g.movePending)?'block':'none';
+  document.getElementById('mv-yl').style.display=(m&&g.movePending)?'block':'none';
   updateMoveTrainingHint();
   document.getElementById('move-modal').classList.add('show');
 }
@@ -3815,10 +3831,51 @@ async function saveGameMove(){
     await saveStore('moves',(old?'Spielverlegung geändert: ':'Spielverlegung vorgemerkt: ')+label+' – '+raw.opponent+' von '+fmtShort(raw.d)+(raw.t?' '+raw.t:'')+' auf '+fmtShort(toD)+' '+toT+' Uhr – '+session.name+teamTrailer(mapped.team,mapped.squad));
     if(slotIds.length) await saveTraining('Training abgesagt: '+label+' am '+fmtShort(toD)+' (Spielverlegung) – '+session.name+teamTrailer(mapped.team,mapped.squad));
     showToast('Verlegung auf '+fmtShort(toD)+', '+toT+' Uhr vorgemerkt'+(slotIds.length?', Training abgesagt.':'.'),4500);
+    openYouthLeaderModal(rec,true);
   }catch(e){
     MOVES=JSON.parse(backupM); TRAINING=JSON.parse(backupT); applyGameMoves(); render(); renderStart(); renderTraining();
     showToast('Fehler: '+e.message,6000);
   }finally{ hideSaving(); }
+}
+/* Nachricht an den Jugendleiter für den Verlegungsantrag im DFBnet – nur aus vorhandenen Daten
+   (fussball.de-Spiel + Vormerkung). */
+let ylText='';
+function youthLeaderMessage(m){
+  const raw=(FUSSBALLDE_RAW.games||[]).find(x=>x.link===m.link)||{};
+  const team=raw.team||m.team, squad=raw.squad||m.squad||1;
+  const mapped=fussballFilterTeam(team,squad);
+  const fromD=raw.movedFrom&&raw.d!==m.fromD?raw.movedFrom.d:m.fromD; // falls fussball.de schon geändert hat
+  const fromT=raw.movedFrom&&raw.d!==m.fromD?raw.movedFrom.t:m.fromT;
+  const first=String((session&&session.name)||'').split(' ')[0];
+  return 'Hallo,\n\n'
+    +'bitte im DFBnet einen Antrag auf Spielverlegung stellen – der Gegner hat zugestimmt.\n\n'
+    +'⚽ *Spiel*\n'
+    +team+(raw.competition?' · '+raw.competition:'')+'\n'
+    +'Heim: '+fussballOwnTeamName({...raw,squad})+' ('+teamLabel(mapped.team,mapped.squad)+')\n'
+    +'Gast: '+(raw.opponent||m.opponent)+'\n\n'
+    +'❌ *Bisher:* '+fmtShare(fromD)+(fromT?', '+fromT+' Uhr':'')+'\n'
+    +'✅ *Neu:* '+fmtShare(m.toD)+', '+m.toT+' Uhr\n\n'
+    +'Der Platz ist am neuen Termin frei und in Platzcoach vorgemerkt.\n'
+    +(m.link?'\nSpiel bei fussball.de: '+m.link+'\n':'')
+    +'\nDanke!'+(first?'\n'+first:'');
+}
+function openYouthLeaderModal(m,justSaved){
+  if(!m) return;
+  closeMoveModal();
+  ylText=youthLeaderMessage(m);
+  document.getElementById('yl-title').textContent=justSaved?'Vorgemerkt – jetzt an den Jugendleiter':'Nachricht an den Jugendleiter';
+  document.getElementById('yl-text').textContent=ylText;
+  document.getElementById('yl-modal').classList.add('show');
+}
+function closeYouthLeaderModal(){ document.getElementById('yl-modal').classList.remove('show'); }
+function shareYouthLeaderMessage(){ if(ylText) window.open('https://wa.me/?text='+encodeURIComponent(ylText),'_blank'); }
+async function copyYouthLeaderMessage(){
+  try{ await navigator.clipboard.writeText(ylText); showToast('Nachricht kopiert.'); }
+  catch(e){
+    const r=document.createRange(); r.selectNodeContents(document.getElementById('yl-text'));
+    const sel=getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    try{ document.execCommand('copy'); showToast('Nachricht kopiert.'); }catch(_){ showToast('Bitte Text markieren und kopieren.'); }
+  }
 }
 async function removeGameMove(){
   const g=FUSSBALLDE.games[moveGameIdx], m=moveOfGame(g);
