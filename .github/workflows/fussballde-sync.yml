@@ -43,3 +43,15 @@ jobs:
             git commit -m "Heimspiele von fussball.de aktualisiert"
             git push
           fi
+
+      # Verlegungen, Abweichungen von Vormerkungen, neue und entfallene Spiele per Mail an die
+      # betroffenen Trainer (und Admins). Die Datei schreibt scripts/fussballde-sync.mjs nur bei Änderungen.
+      - name: Trainer über Änderungen bei fussball.de informieren
+        if: hashFiles('fussballde-changes.json') != ''
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          PLATZCOACH_CHANGES_FILE: fussballde-changes.json
+        run: node scripts/notify-email.mjs
