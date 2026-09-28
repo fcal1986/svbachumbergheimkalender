@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-28T13:57:09.924Z",
+  "updated": "2026-09-28T19:20:39.136Z",
   "games": [
     {
       "d": "2026-09-07",
@@ -275,6 +275,22 @@
       "infoAt": "2026-09-28T12:50:37.522Z"
     },
     {
+      "d": "2026-10-03",
+      "t": "13:30",
+      "team": "D-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum-Bergheim 2",
+      "gameNo": "240283022",
+      "opponent": "SC Neheim I",
+      "competition": "Kreisfreundschaftsspiele",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-sc-neheim-i/-/spiel/0327RNNSL4000000VS5489BUVUFHD2VV",
+      "staffelId": "240283",
+      "staffelName": "Freundschaftsspiele Kreis Arnsberg",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:20.883Z"
+    },
+    {
       "d": "2026-10-04",
       "t": "11:00",
       "team": "B-Junioren",
@@ -378,7 +394,7 @@
     },
     {
       "d": "2026-10-10",
-      "t": "13:00",
+      "t": "11:30",
       "team": "D-Junioren",
       "squad": 2,
       "ownName": "SV Bachum-Bergheim II",
@@ -387,10 +403,16 @@
       "competition": "Kreisliga B",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-sv-affeln-28/-/spiel/031OEI7Q68000000VS5489BUVT2M8LCU",
+      "movedFrom": {
+        "d": "2026-10-10",
+        "t": "13:00"
+      },
+      "movedAt": "2026-09-28T19:20:20.515Z",
       "matchday": 4,
       "staffelId": "210420",
       "staffelName": "KL B Gruppe 2",
-      "infoAt": "2026-09-28T12:50:42.744Z"
+      "infoAt": "2026-09-28T19:20:21.478Z",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg"
     },
     {
       "d": "2026-10-10",
@@ -1595,7 +1617,12 @@
       "opponent": "DJK GW Arnsberg",
       "competition": "Kreisliga B",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-djk-gw-arnsberg/-/spiel/031IK2SA8O000000VS5489BUVVKNMR0J"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-djk-gw-arnsberg/-/spiel/031IK2SA8O000000VS5489BUVVKNMR0J",
+      "matchday": 25,
+      "staffelId": "211386",
+      "staffelName": "Kreisliga B Arnsberg",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:22.270Z"
     },
     {
       "d": "2027-04-25",
@@ -1607,7 +1634,12 @@
       "opponent": "SG Allendorf/Amecke",
       "competition": "Kreisliga A",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sg-allendorf-amecke/-/spiel/031I0BNLSO000000VS5489BUVVKNMR0J"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sg-allendorf-amecke/-/spiel/031I0BNLSO000000VS5489BUVVKNMR0J",
+      "matchday": 25,
+      "staffelId": "210697",
+      "staffelName": "Kreisliga A Arnsberg",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:23.066Z"
     },
     {
       "d": "2027-04-28",
@@ -1619,7 +1651,12 @@
       "opponent": "JSG Herdringen/Mü./Ho. I",
       "competition": "Kreisliga A",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-herdringen-mueschede-holzen-1/-/spiel/031OEC8Q20000000VS5489BUVT2M8LCU"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-herdringen-mueschede-holzen-1/-/spiel/031OEC8Q20000000VS5489BUVT2M8LCU",
+      "matchday": 13,
+      "staffelId": "211396",
+      "staffelName": "KL A Meisterrunde",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:23.843Z"
     },
     {
       "d": "2027-05-02",
@@ -1631,7 +1668,12 @@
       "opponent": "BSV Menden",
       "competition": "Bezirksliga",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-bsv-menden/-/spiel/031GM5ID7K000000VS5489BTVVG7L386"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-bsv-menden/-/spiel/031GM5ID7K000000VS5489BTVVG7L386",
+      "matchday": 21,
+      "staffelId": "211049",
+      "staffelName": "B-Junioren - Bezirksliga, Staffel 3",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:24.636Z"
     },
     {
       "d": "2027-05-02",
@@ -1643,7 +1685,12 @@
       "opponent": "TuS Bruchhausen 02 II",
       "competition": "Kreisliga D",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-tus-bruchhausen-02-ii/-/spiel/031KK1IRJ0000000VS5489BUVVKNMR0J"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-tus-bruchhausen-02-ii/-/spiel/031KK1IRJ0000000VS5489BUVVKNMR0J",
+      "matchday": 18,
+      "staffelId": "210824",
+      "staffelName": "Kreisliga D Arnsberg",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:25.418Z"
     },
     {
       "d": "2027-05-07",
@@ -1655,7 +1702,12 @@
       "opponent": "JSG Hachen/Langs.-Enkh./Westf./Sto. I",
       "competition": "Kreisliga A",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-hachen-langscheid-enkhausen-westenfeld-stockum/-/spiel/031JKQC84G000000VS5489BUVVKNMR0J"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-hachen-langscheid-enkhausen-westenfeld-stockum/-/spiel/031JKQC84G000000VS5489BUVVKNMR0J",
+      "matchday": 17,
+      "staffelId": "211375",
+      "staffelName": "KL A",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:26.193Z"
     },
     {
       "d": "2027-05-09",
@@ -1667,7 +1719,12 @@
       "opponent": "Türkiyemspor Neh.-Hüsten",
       "competition": "Kreisliga B",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-tuerkiyemspor-neh-huesten/-/spiel/031IK2S8BO000000VS5489BUVVKNMR0J"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-tuerkiyemspor-neh-huesten/-/spiel/031IK2S8BO000000VS5489BUVVKNMR0J",
+      "matchday": 27,
+      "staffelId": "211386",
+      "staffelName": "Kreisliga B Arnsberg",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:26.989Z"
     },
     {
       "d": "2027-05-09",
@@ -1679,7 +1736,12 @@
       "opponent": "TuS Hachen",
       "competition": "Kreisliga A",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-hachen/-/spiel/031I0BNJSK000000VS5489BUVVKNMR0J"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-hachen/-/spiel/031I0BNJSK000000VS5489BUVVKNMR0J",
+      "matchday": 27,
+      "staffelId": "210697",
+      "staffelName": "Kreisliga A Arnsberg",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:27.808Z"
     },
     {
       "d": "2027-05-22",
@@ -1691,7 +1753,12 @@
       "opponent": "JSG Niedereimer/Bruchhausen I",
       "competition": "Kreisliga A",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-jsg-niedereimer-bruchhausen/-/spiel/031J8I254K000000VS5489BUVVKNMR0J"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-jsg-niedereimer-bruchhausen/-/spiel/031J8I254K000000VS5489BUVVKNMR0J",
+      "matchday": 12,
+      "staffelId": "210883",
+      "staffelName": "KL A Gruppe 1",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:28.582Z"
     },
     {
       "d": "2027-05-22",
@@ -1703,7 +1770,12 @@
       "opponent": "JSG Vosswinkel/Echthausen I",
       "competition": "Kreisliga B",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-vosswinkel-echthausen/-/spiel/031J8LLKGG000000VS5489BUVVKNMR0J"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-vosswinkel-echthausen/-/spiel/031J8LLKGG000000VS5489BUVVKNMR0J",
+      "matchday": 12,
+      "staffelId": "210931",
+      "staffelName": "KL B Gruppe 1",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:29.359Z"
     },
     {
       "d": "2027-05-22",
@@ -1715,7 +1787,12 @@
       "opponent": "SC Neheim I",
       "competition": "Kreisliga A",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sc-neheim-i/-/spiel/031OEC8PVG000000VS5489BUVT2M8LCU"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sc-neheim-i/-/spiel/031OEC8PVG000000VS5489BUVT2M8LCU",
+      "matchday": 14,
+      "staffelId": "211396",
+      "staffelName": "KL A Meisterrunde",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:30.132Z"
     },
     {
       "d": "2027-05-22",
@@ -1727,7 +1804,12 @@
       "opponent": "JSG Balve/Garb./La/Kü/Me III",
       "competition": "Kreisliga B",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-balve-garbeck-la-kue-me-3/-/spiel/031OEI7R0K000000VS5489BUVT2M8LCU"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-balve-garbeck-la-kue-me-3/-/spiel/031OEI7R0K000000VS5489BUVT2M8LCU",
+      "matchday": 13,
+      "staffelId": "210420",
+      "staffelName": "KL B Gruppe 2",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:30.917Z"
     },
     {
       "d": "2027-05-22",
@@ -1739,7 +1821,12 @@
       "opponent": "JSG Allendorf/Am. I (9er)",
       "competition": "Kreisliga B",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-sg-allendorf-amecke/-/spiel/031I192S00000000VS5489BUVVKNMR0J"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-sg-allendorf-amecke/-/spiel/031I192S00000000VS5489BUVVKNMR0J",
+      "matchday": 13,
+      "staffelId": "212741",
+      "staffelName": "KL B",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:31.693Z"
     },
     {
       "d": "2027-05-23",
@@ -1751,7 +1838,12 @@
       "opponent": "FC Brünninghausen II",
       "competition": "Bezirksliga",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fc-bruenninghausen-ii/-/spiel/031GM5ICPG000000VS5489BTVVG7L386"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fc-bruenninghausen-ii/-/spiel/031GM5ICPG000000VS5489BTVVG7L386",
+      "matchday": 23,
+      "staffelId": "211049",
+      "staffelName": "B-Junioren - Bezirksliga, Staffel 3",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:32.483Z"
     },
     {
       "d": "2027-05-23",
@@ -1763,7 +1855,12 @@
       "opponent": "TuS Rumbeck",
       "competition": "Kreisliga B",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-tus-rumbeck/-/spiel/031IK2S6HK000000VS5489BUVVKNMR0J"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-tus-rumbeck/-/spiel/031IK2S6HK000000VS5489BUVVKNMR0J",
+      "matchday": 29,
+      "staffelId": "211386",
+      "staffelName": "Kreisliga B Arnsberg",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:33.272Z"
     },
     {
       "d": "2027-05-23",
@@ -1775,7 +1872,12 @@
       "opponent": "TuS Langenholthausen",
       "competition": "Kreisliga A",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-langenholthausen/-/spiel/031I0BNHTC000000VS5489BUVVKNMR0J"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-langenholthausen/-/spiel/031I0BNHTC000000VS5489BUVVKNMR0J",
+      "matchday": 29,
+      "staffelId": "210697",
+      "staffelName": "Kreisliga A Arnsberg",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:34.072Z"
     },
     {
       "d": "2027-05-30",
@@ -1787,7 +1889,12 @@
       "opponent": "TuS Niedereimer II",
       "competition": "Kreisliga D",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-tus-niedereimer-ii/-/spiel/031KK1IR7O000000VS5489BUVVKNMR0J"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-tus-niedereimer-ii/-/spiel/031KK1IR7O000000VS5489BUVVKNMR0J",
+      "matchday": 20,
+      "staffelId": "210824",
+      "staffelName": "Kreisliga D Arnsberg",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:34.854Z"
     },
     {
       "d": "2027-06-05",
@@ -1799,7 +1906,12 @@
       "opponent": "SC Neheim II",
       "competition": "Kreisliga A",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-sc-neheim-ii/-/spiel/031J8I24U0000000VS5489BUVVKNMR0J"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-sc-neheim-ii/-/spiel/031J8I24U0000000VS5489BUVVKNMR0J",
+      "matchday": 13,
+      "staffelId": "210883",
+      "staffelName": "KL A Gruppe 1",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:35.624Z"
     },
     {
       "d": "2027-06-05",
@@ -1811,7 +1923,12 @@
       "opponent": "SC Neheim I",
       "competition": "Kreisliga B",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-sc-neheim-i/-/spiel/031J8LLKB0000000VS5489BUVVKNMR0J"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-sc-neheim-i/-/spiel/031J8LLKB0000000VS5489BUVVKNMR0J",
+      "matchday": 13,
+      "staffelId": "210931",
+      "staffelName": "KL B Gruppe 1",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:36.399Z"
     },
     {
       "d": "2027-06-05",
@@ -1823,7 +1940,12 @@
       "opponent": "TuS Sundern II",
       "competition": "Kreisliga A",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-sundern-2/-/spiel/031I1BDPA4000000VS5489BUVVKNMR0J"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-sundern-2/-/spiel/031I1BDPA4000000VS5489BUVVKNMR0J",
+      "matchday": 18,
+      "staffelId": "210825",
+      "staffelName": "KL A",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:37.178Z"
     },
     {
       "d": "2027-06-05",
@@ -1835,7 +1957,11 @@
       "opponent": "JSG Vosswinkel/Echthausen III",
       "competition": "Kreisliga C",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-3-jsg-vosswinkel-echthausen-iii/-/spiel/031J8T2L40000000VS5489BUVVKNMR0J"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-3-jsg-vosswinkel-echthausen-iii/-/spiel/031J8T2L40000000VS5489BUVVKNMR0J",
+      "matchday": 13,
+      "staffelId": "210869",
+      "staffelName": "KL C Gruppe 2",
+      "infoAt": "2026-09-28T19:20:37.955Z"
     },
     {
       "d": "2027-06-06",
@@ -1847,7 +1973,12 @@
       "opponent": "SV Brilon",
       "competition": "Bezirksliga",
       "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-brilon/-/spiel/031GM5IBVC000000VS5489BTVVG7L386"
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-brilon/-/spiel/031GM5IBVC000000VS5489BTVVG7L386",
+      "matchday": 25,
+      "staffelId": "211049",
+      "staffelName": "B-Junioren - Bezirksliga, Staffel 3",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-09-28T19:20:38.733Z"
     }
   ],
   "awayGames": [
