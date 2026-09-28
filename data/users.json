@@ -424,7 +424,7 @@
       "first": "Michael",
       "last": "Raneck",
       "email": "michael.raneck@sv-bachum-bergheim.de",
-      "admin": false,
+      "admin": true,
       "classes": {
         "C-Jugend": [
           1
