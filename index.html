@@ -1109,7 +1109,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='28.09.2026 · 5';
+const APP_VERSION='28.09.2026 · 6';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3850,11 +3850,15 @@ function youthLeaderMessage(m){
   return 'Hallo,\n\n'
     +'bitte im DFBnet einen Antrag auf Spielverlegung stellen – der Gegner hat zugestimmt.\n\n'
     +'⚽ *Spiel*\n'
+    +(raw.gameNo?'Spiel-Nr.: '+raw.gameNo+(raw.matchday?' · '+raw.matchday+'. Spieltag':'')+'\n':'')
     +team+(raw.competition?' · '+raw.competition:'')+'\n'
+    +(raw.staffelName||raw.staffelId?'Staffel: '+[raw.staffelName,raw.staffelId?'ID '+raw.staffelId:''].filter(Boolean).join(' · ')+'\n':'')
     +'Heim: '+fussballOwnTeamName({...raw,squad})+' ('+teamLabel(mapped.team,mapped.squad)+')\n'
     +'Gast: '+(raw.opponent||m.opponent)+'\n\n'
     +'❌ *Bisher:* '+fmtShare(fromD)+(fromT?', '+fromT+' Uhr':'')+'\n'
-    +'✅ *Neu:* '+fmtShare(m.toD)+', '+m.toT+' Uhr\n\n'
+    +'✅ *Neu:* '+fmtShare(m.toD)+', '+m.toT+' Uhr\n'
+    +(raw.venue?'📍 Spielort (unverändert): '+raw.venue+'\n':'')
+    +'\n'
     +'Der Platz ist am neuen Termin frei und in Platzcoach vorgemerkt.\n'
     +(m.link?'\nSpiel bei fussball.de: '+m.link+'\n':'')
     +'\nDanke!'+(first?'\n'+first:'');
