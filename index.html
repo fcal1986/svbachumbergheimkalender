@@ -659,9 +659,17 @@
   .move-badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 9px;font-size:11.5px;font-weight:600;background:var(--green-dim);color:var(--green);}
   .move-badge.pending{background:#fff4e0;color:#a35b00;}
   .move-badge.warn{background:#fdecea;color:#b3261e;}
+  /* Alter Termin eines verlegten Spiels: deutlich anders als normale Karten (gestrichelter Rahmen,
+     Etikett oben, Knopf zum neuen Termin). Farbe je Status: vorgemerkt orange, bestätigt grün, überholt rot. */
+  .moved-card{--mv:#d98a00;--mv-bg:#fff8ec;border:2px dashed var(--mv)!important;background:var(--mv-bg)!important;opacity:1!important;position:relative;padding-top:4px;}
+  .moved-card.mv-done{--mv:#6b8f71;--mv-bg:#f3f7f3;}
+  .moved-card.mv-stale{--mv:#c62828;--mv-bg:#fdf1f0;}
   .moved-card.clickable{cursor:pointer;}
-  .moved-jump{margin-top:10px;font-size:12.5px;font-weight:600;color:var(--green);}
-  .moved-card .ev-title-box h4{text-decoration:line-through;color:var(--ink-soft);}
+  .moved-label{display:inline-flex;align-items:center;gap:6px;margin:10px 14px 0;padding:4px 10px;border-radius:999px;background:var(--mv);color:#fff;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
+  .moved-card .ev-title-box h4{text-decoration:line-through;text-decoration-thickness:2px;color:var(--ink-soft);}
+  .moved-jump{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;margin-top:12px;padding:11px 14px;border:none;border-radius:12px;background:var(--mv);color:#fff;font-family:'Inter';font-size:13.5px;font-weight:700;cursor:pointer;text-align:left;}
+  .move-badge.back{cursor:pointer;border:none;font-family:'Inter';}
+  .move-badge.back u{text-underline-offset:2px;}
   .rs-result-row small.rs-own{display:block;font-weight:500;font-size:11px;color:var(--ink-soft);margin-top:2px;}
   .rs-empty{font-size:12.5px;color:var(--ink-soft);text-align:center;padding:12px 0;}
   .rs-showmore{cursor:pointer;font-weight:700;color:var(--green);background:var(--bg);border-radius:10px;margin-top:4px;}
@@ -1114,7 +1122,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='28.09.2026 · 11';
+const APP_VERSION='28.09.2026 · 12';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2512,11 +2520,20 @@ function externalRowHTML(e){
 function moveBadgeHTML(e){
   if(!e||!e.movedFrom||!e.movedFrom.d||(e.movedFrom.d===e.d&&(e.movedFrom.t||'')===(e.t||''))) return '';
   const from=fmtDayShort(e.movedFrom.d)+(e.movedFrom.t?', '+e.movedFrom.t:'');
+  // Antippen springt zum alten Termin (Hinweiskarte "Alter Termin"), wenn die Spiel-Nummer bekannt ist.
+  const back=e.fbIndex!=null?' back" role="button" tabindex="0" onclick="event.stopPropagation();jumpToOldDate('+e.fbIndex+')" title="Zum alten Termin':'';
+  const fromTxt=e.fbIndex!=null?'<u>verlegt vom '+from+'</u>':'verlegt vom '+from;
   if(e.moveDiverged&&e.plannedTo)
-    return '<span class="move-badge warn" title="fussball.de hat einen anderen Termin angesetzt als vorgemerkt">↪ verlegt vom '+from+' · abweichend von der Vormerkung ('+fmtDayShort(e.plannedTo.d)+(e.plannedTo.t?', '+e.plannedTo.t:'')+')</span>';
+    return '<span class="move-badge warn'+back+'">← '+fromTxt+' · abweichend von der Vormerkung ('+fmtDayShort(e.plannedTo.d)+(e.plannedTo.t?', '+e.plannedTo.t:'')+')</span>';
   return e.movePending
-    ? '<span class="move-badge pending" title="In Platzcoach vorgemerkt, bei fussball.de noch nicht übernommen">↪ verlegt vom '+from+' · fussball.de noch offen</span>'
-    : '<span class="move-badge" title="Verlegung bei fussball.de übernommen">↪ verlegt vom '+from+'</span>';
+    ? '<span class="move-badge pending'+back+'">← '+fromTxt+' · fussball.de noch offen</span>'
+    : '<span class="move-badge'+back+'">← '+fromTxt+'</span>';
+}
+// Vom neuen Termin zurück zur Hinweiskarte am alten Termin.
+function jumpToOldDate(idx){
+  const g=FUSSBALLDE.games[idx]; if(!g||!g.movedFrom) return;
+  const ghost=movedGameGhostsOn(g.movedFrom.d).find(x=>x.fbIndex===idx&&!x.stalePlan);
+  if(ghost) focusEventCard(ghost);
 }
 function movedGhostRowHTML(e){
   const dt=new Date(e.d+'T00:00:00');
@@ -2536,7 +2553,10 @@ function movedGhostRowHTML(e){
     badge='<span class="move-badge'+(e.pending?' pending':'')+'">↪ '+(e.pending?'Verlegung vorgemerkt · fussball.de noch offen':'Verlegt (fussball.de)')+'</span>';
   }
   const stale=e.stalePlan?staleMoveCancelledTrainings(FUSSBALLDE.games[e.fbIndex]).filter(c=>c.date===e.d):[];
-  return '<div class="event-card cancelled-card moved-card clickable" id="ev-'+e.id+'" role="button" tabindex="0" onclick="jumpToGame('+e.fbIndex+')" onkeydown="if(event.key===\'Enter\')jumpToGame('+e.fbIndex+')">'
+  const cls=e.stalePlan?' mv-stale':(e.diverged?' mv-stale':(e.pending?'':' mv-done'));
+  const label=e.stalePlan?'⚠ Vormerkung überholt':(e.pending?'↪ Alter Termin – Verlegung vorgemerkt':'↪ Alter Termin – verlegt');
+  return '<div class="event-card cancelled-card moved-card clickable'+cls+'" id="ev-'+e.id+'" role="button" tabindex="0" onclick="jumpToGame('+e.fbIndex+')" onkeydown="if(event.key===\'Enter\')jumpToGame('+e.fbIndex+')">'
+    +'<span class="moved-label">'+label+'</span>'
     +'<div class="ev-head">'
     +'<div class="ev-date-box"><span class="ev-dow">'+dow+'</span><span class="ev-day">'+dd+'</span></div>'
     +'<div class="ev-sep"></div>'
@@ -2545,7 +2565,7 @@ function movedGhostRowHTML(e){
     +'</div>'
     +'<div class="ev-body">'+badge
     +(stale.length?'<div class="ev-note" style="margin-top:8px;">Das Training an diesem Tag wurde wegen der Vormerkung abgesagt. Über das Kalender-Symbol am Spiel „Vormerkung abschließen“ – dann findet es wieder statt.</div>':'')
-    +'<div class="moved-jump">Zum aktuellen Termin: '+esc(to)+' →</div></div>'
+    +'<button type="button" class="moved-jump" onclick="event.stopPropagation();jumpToGame('+e.fbIndex+')"><span>Zum '+(e.stalePlan||e.diverged?'aktuellen':'neuen')+' Termin: '+esc(to)+'</span><span>→</span></button></div>'
     +'</div>';
 }
 function shareEvent(id){
