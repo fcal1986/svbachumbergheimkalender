@@ -89,8 +89,9 @@
   .content::-webkit-scrollbar{width:0;}
 
   /* ── NAV ── */
-  .navbar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:520px;display:flex;justify-content:space-around;background:var(--white);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:10;box-shadow:0 -2px 10px rgba(1,27,50,.08);}
-  .navbtn{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;color:var(--ink-soft);font-family:'Inter';font-size:9px;font-weight:600;cursor:pointer;padding:2px 6px;}
+  .navbar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:520px;display:flex;justify-content:stretch;background:var(--white);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:10;box-shadow:0 -2px 10px rgba(1,27,50,.08);}
+  .navbtn{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;color:var(--ink-soft);font-family:'Inter';font-size:9px;font-weight:600;cursor:pointer;padding:2px 0;-webkit-tap-highlight-color:transparent;}
+  .navbtn .nbico,.navbtn svg{pointer-events:none;} /* Tipp zählt immer für den ganzen Knopf */
   .navbtn .nbico{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .18s;}
   .navbtn svg{width:20px;height:20px;stroke:var(--ink-soft);}
   .navbtn.active .nbico{background:var(--green);}
@@ -309,8 +310,8 @@
   .cal-head{display:flex;align-items:center;justify-content:space-between;margin:2px 0 12px;}
   .cal-title{font-weight:800;font-size:16px;color:var(--ink);}
   .cal-btns{display:flex;gap:6px;}
-  .cal-btn{width:32px;height:32px;border-radius:10px;border:1.5px solid var(--line);background:var(--white);cursor:pointer;font-size:16px;font-weight:700;color:var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:var(--card-shadow);}
-  .today-chip{font-size:11px;font-weight:700;padding:7px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--white);color:var(--ink);cursor:pointer;box-shadow:var(--card-shadow);}
+  .cal-btn{width:40px;height:40px;border-radius:10px;border:1.5px solid var(--line);background:var(--white);cursor:pointer;font-size:16px;font-weight:700;color:var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:var(--card-shadow);}
+  .today-chip{font-size:11px;font-weight:700;padding:11px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--white);color:var(--ink);cursor:pointer;box-shadow:var(--card-shadow);}
   .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
   .cal-dow{font-size:10px;font-weight:600;color:var(--ink-soft);text-align:center;padding:2px 0 6px;}
   .cal-day{aspect-ratio:1/1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;cursor:pointer;background:var(--white);border:1px solid var(--line);position:relative;}
@@ -332,6 +333,13 @@
   .cal-legend{display:flex;gap:12px;margin:10px 0 0;font-size:10.5px;color:var(--ink-soft);flex-wrap:wrap;align-items:center;}
   .cal-legend span{display:flex;align-items:center;gap:5px;}
   .cal-legend .cdot{width:7px;height:7px;}
+  .cal-legend{cursor:pointer;}
+  .cal-legend .legend-info{margin-left:auto;font-weight:700;color:var(--green);}
+  .legend-help{background:var(--white);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:11.5px;line-height:1.5;color:var(--ink-soft);box-shadow:var(--card-shadow);}
+  .legend-help b{color:var(--ink);}
+  .legend-help p{margin:0 0 6px;}
+  .legend-help p:last-child{margin:0;}
+  .legend-help .cal-day-demo{display:inline-flex;vertical-align:middle;}
   .cap-bar{background:var(--white);border:1.5px solid var(--line);border-radius:12px;padding:11px 14px;margin-top:12px;display:flex;align-items:center;gap:12px;box-shadow:var(--card-shadow);}
   .cap-text{font-size:11.5px;color:var(--ink-soft);line-height:1.5;flex:1;}
   .cap-text b{color:var(--ink);display:block;font-size:13px;}
@@ -725,13 +733,13 @@
       <div id="reg-banner"></div>
       <div id="session-debug" style="display:none;font-size:10px;color:var(--ink-soft);background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:6px 10px;margin-bottom:8px;"></div>
       <div id="lock-start-banner"></div>
-      <div class="start-daycard">
+      <div class="start-daycard" onclick="openTodayFromStart()" style="cursor:pointer;">
         <div class="start-date" id="st-date">–</div>
         <div class="start-summary" id="st-summary">–</div>
       </div>
 
-      <div class="pitch-section-head">
-        <p class="section-label" style="margin:0;">Platzbelegung heute</p>
+      <div class="pitch-section-head" onclick="openTodayFromStart()" style="cursor:pointer;">
+        <p class="section-label" style="margin:0;">Platzbelegung heute <span style="color:var(--green);">›</span></p>
         <div id="st-occupied-badge"></div>
       </div>
       <div id="st-pitch-today"></div>
@@ -1084,6 +1092,7 @@
       <span class="weekday-chip" data-day="6" onclick="toggleRescheduleDay(6)">Sa</span>
       <span class="weekday-chip" data-day="7" onclick="toggleRescheduleDay(7)">So</span>
     </div>
+    <p class="hint" id="rs-preselect" style="margin-top:6px;"></p>
     <p class="field-label" style="margin-top:14px;">Uhrzeit je Wochentag</p>
     <div id="rs-times"></div>
     <p class="hint" style="margin-top:8px;">Sucht freie Termine ab morgen bis 6 Wochen nach dem ursprünglichen Spieltermin, an jedem gewählten Tag nur im Zeitfenster dieses Tages. Tage, an denen die Mannschaft bereits ein anderes Spiel hat (auch auswärts), werden ausgeschlossen. E-, F- und G-Jugend brauchen eine Platzhälfte, ab D-Jugend den ganzen Platz. Die eigene Trainingszeit der Mannschaft zählt als frei.</p>
@@ -1137,7 +1146,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='28.09.2026 · 14';
+const APP_VERSION='29.09.2026 · 1';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2287,6 +2296,25 @@ function setView(v){
   const ap=document.querySelector('.pane.active');
   if(ap&&ap.dataset.pane==='termine') trackArea(currentPaneArea());
 }
+/* Filterwahl pro Gerät merken (Heatmap: Mannschaftsfilter wurde bei fast jedem Besuch neu gesetzt). */
+const FILTER_KEY='pc_filter';
+function saveFilterPref(){
+  try{ localStorage.setItem(FILTER_KEY,JSON.stringify({f:filter,teams:[...teamMultiFilter]})); }catch(e){}
+}
+function restoreFilterPref(){
+  try{
+    const p=JSON.parse(localStorage.getItem(FILTER_KEY)||'null'); if(!p) return;
+    const known=new Set(allKnownTeamKeys().map(t=>t.key));
+    teamMultiFilter=new Set((p.teams||[]).filter(k=>known.has(k)));
+    const chips=[...document.querySelectorAll('#filterbar .filter-chip')].map(c=>c.dataset.f);
+    if(p.f==='multi') filter=teamMultiFilter.size?'multi':'alle';
+    else filter=chips.includes(p.f)?p.f:'alle';
+    if(filter!=='fussballde'&&filter!=='multi'&&filter!=='alle') teamMultiFilter=new Set();
+    if(filter==='alle'&&teamMultiFilter.size) filter='multi';
+    document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f===filter));
+    updateTeamFilterBtn();
+  }catch(e){}
+}
 function setFilter(f){
   filter=f;
   if(f!=='fussballde') teamMultiFilter=new Set(); // fussball.de bleibt bewusst mit Mannschaftsauswahl kombinierbar
@@ -2294,6 +2322,7 @@ function setFilter(f){
   document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f===f));
   updateTeamFilterBtn(); updateTypeFilterBanner();
   const tp=document.getElementById('team-filter-panel'); if(tp&&tp.style.display!=='none') renderTeamFilterPanel();
+  saveFilterPref();
   render(); renderStart();
 }
 function buildFilters(){
@@ -2391,14 +2420,14 @@ function applyTeamFilter(close){
   listDaysLoaded=30;
   if(close!==false) closeTeamFilterPanel(); else renderTeamFilterPanel();
   document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f===filter));
-  updateTeamFilterBtn();
+  updateTeamFilterBtn(); saveFilterPref();
   render(); renderStart();
 }
 function resetTeamFilter(){
   teamFilterPending=new Set(); teamMultiFilter=new Set(); filter='alle'; listDaysLoaded=30;
   renderTeamFilterPanel(); // bleibt offen, damit man direkt neu wählen kann
   document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f==='alle'));
-  updateTeamFilterBtn();
+  updateTeamFilterBtn(); saveFilterPref();
   render(); renderStart();
 }
 function updateTeamFilterBtn(){
@@ -2912,7 +2941,8 @@ function renderMonth(){
     h+='<div class="'+cls+'" onclick="selectDay(\''+ds+'\')">'+load+(conf?'<span class="conf-mark" title="Platzkonflikt">!</span>':'')+dt.getDate()+'<div class="cal-dots">'+
       cats.slice(0,3).map(c=>'<span class="cdot '+c+'"></span>').join('')+'</div></div>';
   }
-  h+='</div><div class="cal-legend"><span><span class="cdot jugend"></span>Jugend</span><span><span class="cdot senioren"></span>Senioren</span><span><span class="cdot verein"></span>Verein</span><span>'+miniPitch([1,2])+'Platzbelegung</span><span><span class="conf-mark legend">!</span>Platzkonflikt</span></div>';
+  h+='</div><div class="cal-legend" role="button" aria-expanded="'+legendHelpOpen+'" onclick="toggleLegendHelp()"><span><span class="cdot jugend"></span>Jugend</span><span><span class="cdot senioren"></span>Senioren</span><span><span class="cdot verein"></span>Verein</span><span>'+miniPitch([1,2])+'Platzbelegung</span><span><span class="conf-mark legend">!</span>Platzkonflikt</span><span class="legend-info">'+(legendHelpOpen?'Schließen ✕':'Was heißt das? ⓘ')+'</span></div>';
+  if(legendHelpOpen) h+=legendHelpHTML();
   const evs=eventsOn(selDate);
   h+='<div style="margin-top:14px;"><p class="section-label" id="month-day-head" style="scroll-margin-top:8px;">'+fmtHead(selDate)+'</p>';
   h+=evs.length?evs.map(rowHTML).join(''):'<div class="empty-day">Kein Termin an diesem Tag.</div>';
@@ -2920,6 +2950,18 @@ function renderMonth(){
   box.innerHTML=h;
 }
 function newForDay(){ newEvent(selDate); }
+/* Erklärung der Kalender-Zeichen (Heatmap 27.–29.09.2026: Legende und Konflikt-Markierung wurden
+   angetippt, obwohl nichts passierte). */
+let legendHelpOpen=false;
+function toggleLegendHelp(){ legendHelpOpen=!legendHelpOpen; renderMonth(); if(legendHelpOpen) trackEvent('legende_geoeffnet'); }
+function legendHelpHTML(){
+  return '<div class="legend-help">'
+    +'<p><b>Punkte unter dem Datum:</b> an dem Tag gibt es Termine – <span class="cdot jugend" style="display:inline-block;"></span> Jugend, <span class="cdot senioren" style="display:inline-block;"></span> Senioren, <span class="cdot verein" style="display:inline-block;"></span> Verein (z. B. Vereinsheim, Torwarttraining). Maximal drei Punkte, auch wenn es mehr Termine sind.</p>'
+    +'<p><b>Kleiner Platz oben rechts:</b> welche Viertel des Großspielfelds an dem Tag irgendwann belegt sind (grün = belegt). Hälfte A links, Hälfte B rechts.</p>'
+    +'<p><b><span class="conf-mark legend">!</span>Platzkonflikt:</b> zwei Buchungen überschneiden sich zeitlich auf derselben Fläche. Tag antippen – die betroffenen Termine stehen darunter.</p>'
+    +'<p><b>Grüner Rahmen</b> = heute, <b>schwarz</b> = ausgewählter Tag. Mit ‹ › blätterst du Monate, „Heute“ springt zurück.</p>'
+    +'</div>';
+}
 function moveYear(s){yearShown+=s;render();}
 function renderYear(){
   const box=document.getElementById('view-jahr');
@@ -3043,12 +3085,28 @@ function scrollToCard(id,tries){
   c.scrollTo({top:Math.max(0,top),behavior:'smooth'});
 }
 function openTerminFromStart(id,d){
+  // Die Startseite zeigt immer alles, der Kalender nur, was durch den Filter passt. Würde der Filter
+  // die Karte ausblenden, lief der Sprung ins Leere → Filter für diesen Sprung aufheben. Die
+  // gespeicherte Filterwahl bleibt unberührt und gilt beim nächsten Öffnen wieder.
+  const item=todaysCombinedAgenda().concat(agendaOn(d)).find(x=>x.id===id);
+  if(item&&!passesFilter(item)){
+    typeFilter=null; teamMultiFilter=new Set(); filter='alle';
+    document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f==='alle'));
+    updateTeamFilterBtn(); updateTypeFilterBanner();
+    showToast('Filter aufgehoben, damit der Termin sichtbar ist.',3500);
+  }
   const dt=new Date(d+'T00:00:00');
   curY=dt.getFullYear(); curM=dt.getMonth(); yearShown=curY; selDate=d;
   highlightId=id.startsWith('fb')?null:id; // externe Karten haben kein eigenes .hl-Styling, echte Termine/Training schon
   goto('termine'); setView('monat');
   requestAnimationFrame(()=>requestAnimationFrame(()=>scrollToCard(id)));
   clearTimeout(window._hlTimer); window._hlTimer=setTimeout(()=>{ highlightId=null; render(); },5000);
+}
+// Überschrift "Platzbelegung heute" und Tageszusammenfassung: Tipp öffnet den heutigen Tag im Kalender.
+function openTodayFromStart(){
+  curY=today.getFullYear(); curM=today.getMonth(); yearShown=curY; selDate=todayStr;
+  goto('termine'); setView('monat');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ const h=document.getElementById('month-day-head'); if(h) h.scrollIntoView({behavior:'smooth',block:'start'}); }));
 }
 function renderOccupiedBadge(){
   const box=document.getElementById('st-occupied-badge');
@@ -4124,9 +4182,21 @@ async function removeGameMove(){
 let rescheduleGame=null, rescheduleDays=new Set(), rescheduleResults=[], rescheduleSelected=new Set(), rescheduleShowAll=false;
 // Zeitfenster je Wochentag (1=Mo … 7=So). Bleibt für die Sitzung erhalten, damit man z. B.
 // "Fr ab 16 Uhr, Sa ab 10 Uhr" nicht bei jedem Spiel neu einstellen muss.
-const rescheduleTimes={};
+// Ab 29.09.2026: selbst eingestellte Zeiten bleiben auf dem Gerät gespeichert (pc_rs_times).
+// Ohne eigene Einstellung: Standardfenster, an Trainingstagen der Mannschaft so erweitert, dass die
+// eigene Trainingszeit darin liegt (rescheduleAutoTimes, pro geöffnetem Spiel neu berechnet).
+const RS_TIMES_KEY='pc_rs_times';
+const rescheduleTimes=(()=>{ try{ return JSON.parse(localStorage.getItem(RS_TIMES_KEY)||'{}')||{}; }catch(e){ return {}; } })();
+let rescheduleAutoTimes={};
 function rescheduleDefaultTimes(day){ return day>=6?{von:'10:00',bis:'18:00'}:{von:'14:00',bis:'18:00'}; }
-function rescheduleTimesFor(day){ return rescheduleTimes[day]||(rescheduleTimes[day]=rescheduleDefaultTimes(day)); }
+function rescheduleTimesFor(day){ return rescheduleTimes[day]||rescheduleAutoTimes[day]||(rescheduleAutoTimes[day]=rescheduleDefaultTimes(day)); }
+// Aktive Trainingszeiten (Art Training) einer Mannschaft + Nummer, die im Suchzeitraum noch gelten.
+function ownTrainingSlotsFor(own){
+  const tomorrow=ymd(new Date(today.getTime()+86400000));
+  return TRAINING.filter(s=>(s.kind||(s.team===GK_TEAM?'goalkeeper':'training'))==='training'
+    && s.team===own.team && (s.squad||1)===(own.squad||1)
+    && (!s.validUntil||s.validUntil>=tomorrow));
+}
 function renderRescheduleTimes(){
   const box=document.getElementById('rs-times'); if(!box)return;
   const days=[...rescheduleDays].sort((a,b)=>a-b);
@@ -4140,10 +4210,27 @@ function renderRescheduleTimes(){
       +'</div>';
   }).join('');
 }
-function setRescheduleTime(day,field,val){ rescheduleTimesFor(day)[field]=val; }
+function setRescheduleTime(day,field,val){
+  rescheduleTimes[day]={...rescheduleTimesFor(day),[field]:val};
+  try{ localStorage.setItem(RS_TIMES_KEY,JSON.stringify(rescheduleTimes)); }catch(e){}
+}
 function openRescheduleFinder(fbIndex){
   rescheduleGame=FUSSBALLDE.games[fbIndex]; if(!rescheduleGame)return;
-  rescheduleDays=new Set([dowOf(rescheduleGame.d)]); // Wochentag des Original-Termins als sinnvoller Startpunkt vorausgewählt
+  // Vorausgewählt: Wochentag des Original-Termins + Trainingstage der Mannschaft (dort zählt die
+  // eigene Trainingszeit als frei – Heatmap: der Freitag-Chip war der meistgetippte Knopf im Fenster).
+  const ownT=fussballFilterTeam(rescheduleGame.team,rescheduleGame.squad);
+  const slots=ownTrainingSlotsFor(ownT);
+  rescheduleDays=new Set([dowOf(rescheduleGame.d)].concat(slots.map(s=>s.day)));
+  rescheduleAutoTimes={};
+  slots.forEach(s=>{
+    const t=rescheduleAutoTimes[s.day]||rescheduleDefaultTimes(s.day);
+    rescheduleAutoTimes[s.day]={von:s.from<t.von?s.from:t.von, bis:s.to>t.bis?s.to:t.bis};
+  });
+  const trDays=[...new Set(slots.map(s=>s.day))].sort((a,b)=>a-b);
+  const pre=document.getElementById('rs-preselect');
+  if(pre) pre.textContent='Vorausgewählt: Spieltag ('+DOW[dowOf(rescheduleGame.d)-1]+')'
+    +(trDays.length?' und Trainingstag'+(trDays.length>1?'e':'')+' ('+trDays.map(d=>DOW[d-1]).join(', ')+')':'')
+    +'. Eigene Uhrzeiten bleiben auf diesem Gerät gespeichert.';
   rescheduleResults=[]; rescheduleSelected=new Set(); rescheduleShowAll=false;
   document.querySelectorAll('#rs-days .weekday-chip').forEach(c=>c.classList.toggle('on',rescheduleDays.has(parseInt(c.dataset.day))));
   renderRescheduleTimes();
@@ -6966,7 +7053,7 @@ async function boot(){
   // Bei jeder Änderung APP_VERSION hochzählen.
   document.getElementById('ver-note').textContent='Platzcoach · Version '+APP_VERSION;
 
-  refreshHeader(); refreshBioBtn(); buildFilters();
+  refreshHeader(); refreshBioBtn(); buildFilters(); restoreFilterPref();
   setView('monat'); renderStart(); renderTraining();
   markRefreshed(); setupPullToRefresh(); // "Stand" = Zeitpunkt des Ladens; danach bei jedem Aktualisieren
   openHashEvent();
