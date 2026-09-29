@@ -186,10 +186,6 @@
           "squad": 2
         },
         {
-          "team": "F-Jugend",
-          "squad": 3
-        },
-        {
           "team": "E-Jugend",
           "squad": 1,
           "fd": {
@@ -345,7 +341,7 @@
         }
       ],
       "teamSync": {
-        "checkedAt": "2026-09-29T10:32:20.020Z",
+        "checkedAt": "2026-09-29T10:32:24.292Z",
         "removed": [
           {
             "team": "G-Jugend",
@@ -354,6 +350,11 @@
           },
           {
             "team": "G-Jugend",
+            "squad": 3,
+            "at": "2026-09-29"
+          },
+          {
+            "team": "F-Jugend",
             "squad": 3,
             "at": "2026-09-29"
           }
