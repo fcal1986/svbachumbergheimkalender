@@ -333,7 +333,8 @@
       "created": "2026-09-25T18:54:54.617Z",
       "emailNotificationsEnabled": true,
       "phone": "01738656922",
-      "contactPublic": "phone"
+      "contactPublic": "both",
+      "contactEmail": ""
     },
     {
       "id": "849b22db-1ace-4865-ac73-8b325b5ff5d2",
