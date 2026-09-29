@@ -441,6 +441,29 @@
       "phone": "015560848519",
       "contactPublic": "both",
       "contactEmail": "michael.raneck@sv-bachum-bergheim.de"
+    },
+    {
+      "id": "6085b3aa-f111-47fa-9d20-7e59a0a987e8",
+      "first": "Marc",
+      "last": "Geauf",
+      "email": "marc-g@gmx.de",
+      "admin": false,
+      "classes": {
+        "E-Jugend": [
+          2,
+          3
+        ]
+      },
+      "enc": {
+        "salt": "1u23KPYygC+4wvehuGkhtA==",
+        "iv": "9IYDDETvnp1dYsTY",
+        "cipher": "rSjE0lUWzfAz0t8JkK1KV01pJ8qJky20YBh/LkfaOcr1bltLxnQVLMqPZZ0r/fG8LDtiVPnuUXK+lOINd1cg7azHQVF0f1GPtprNFJ3jo16D4lRIoBqXw0akklk7yA3J2Up7P7yT1RICZ4LobQ=="
+      },
+      "created": "2026-09-29T09:52:57.547Z",
+      "emailNotificationsEnabled": true,
+      "pwChangeRequired": true,
+      "phone": "01773077726",
+      "contactPublic": "none"
     }
   ]
 }
