@@ -1224,7 +1224,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='29.09.2026 · 11';
+const APP_VERSION='29.09.2026 · 12';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3267,7 +3267,7 @@ function weekRowHTML(e,withDate){
     right='<span class="hoff-pill">Abgesagt</span>';
   }else if(e.isExternal){
     name=(e.isAway?'bei ':'gegen ')+e.opponent;
-    sub=[e.competition,e.isAway?'':e.pitchLabelText].filter(Boolean).join(' · ');
+    sub=[e.movePending?'Vorgemerkt':'',e.competition,e.isAway?'':e.pitchLabelText].filter(Boolean).join(' · '); // ab · 12: vorgemerkte Verlegung wie Freundschaftsspiel
     const sc=scoreInfo(e);
     right=sc?'<div class="score-pill '+sc.outcome+'" style="font-size:12px;padding:3px 8px;">'+sc.text+'</div>':haPill(e);
   }else if(kindOf(e)==='goalkeeper'){
