@@ -713,8 +713,9 @@ function makePitchChecker(cfg, games, slots, events, moves) {
       if (s.team === at.team && (s.squad || 1) === at.squad) continue; // eigene Trainingszeit zählt als frei
       if (overlaps(toMin(s.from), toMin(s.to))) busy.push({ label: `Training ${appTeamLabel(s.team, s.squad || 1)} ${s.from}–${s.to}`, q: pitchQuarters(s.pitch) });
     }
+    const ownEv = ownFriendlyFor(g, events, true);
     for (const e of events) {
-      if (e.d !== d || !e.pitch || !e.t) continue;
+      if (e.d !== d || !e.pitch || !e.t || e === ownEv) continue;
       if (overlaps(toMin(e.t), toMin(e.bis || toTime(toMin(e.t) + 120)))) busy.push({ label: `${e.title || 'Termin'} ${e.t}–${e.bis || ''}`.trim(), q: pitchQuarters(e.pitch) });
     }
     for (const x of effGames) {
@@ -730,6 +731,27 @@ function makePitchChecker(cfg, games, slots, events, moves) {
     const ok = isShare(g.team) ? freeHalves.length - sharedGames >= 1 : fixed.size === 0 && sharedGames === 0;
     return { ok, from: toTime(from), to: toTime(to), busy: busy.map(b => b.label), half: isShare(g.team) ? freeHalves[sharedGames] || null : null };
   };
+}
+/* ---------- Eigene Freundschaftsspiele (Platzcoach-Termine) ↔ fussball.de ----------
+   Gleiche Regel wie linkOwnMatches() in index.html: gleicher Tag, gleiche Mannschaft, Gegner passt
+   (oder das einzige Freundschaftsspiel der Mannschaft an dem Tag). */
+function normTeamName(s) {
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss')
+    .replace(/\b(e\.?\s?v\.?|iv|v?i{1,3}|[0-9]+)\b/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim();
+}
+function opponentMatches(a, b) {
+  const A = normTeamName(a), B = normTeamName(b);
+  if (!A || !B) return false;
+  if (A.includes(B) || B.includes(A)) return true;
+  const wb = new Set(B.split(' '));
+  return A.split(' ').filter(w => w.length >= 4).some(w => wb.has(w));
+}
+function ownFriendlyFor(g, events, isHome) {
+  const at = appTeam(g.team, g.squad);
+  const cands = events.filter(e => e.kind === 'game' && e.opponent && e.ha === (isHome ? 'home' : 'away') && e.d === g.d
+    && e.team === at.team && (!/Jugend/.test(e.team) || (e.squad || 1) === at.squad));
+  return cands.find(e => opponentMatches(e.opponent, g.opponent))
+    || (cands.length === 1 && /freundschaft/i.test(g.competition || '') ? cands[0] : null);
 }
 function pitchText(c) {
   if (!c) return '';
@@ -759,6 +781,15 @@ async function detectGameChanges(home, away, previous) {
       const who = `${label} – ${g.opponent} (${kind}${g.competition ? ', ' + g.competition : ''})`;
       const p = prevByLink.get(g.link);
       if (!p) {
+        const own = g.d >= today ? ownFriendlyFor(g, events, isHome) : null;
+        if (own) {
+          // In Platzcoach eingetragenes Freundschaftsspiel ist jetzt bei fussball.de angesetzt.
+          const diff = own.kickoff && g.t && own.kickoff !== g.t;
+          out.push({ text: `Freundschaftsspiel jetzt bei fussball.de angesetzt: ${who} am ${fmtGameDate(g.d, g.t)}.`
+              + (diff ? ` ACHTUNG: In Platzcoach steht Anstoß ${own.kickoff} Uhr – bitte den Termin anpassen.` : ' Passt zum Termin in Platzcoach.'),
+            team: at.team, squad: at.squad, link: own.id, priority: diff ? 'action' : 'info', type: 'confirmed' });
+          continue;
+        }
         if (g.d >= today) {
           const c = isHome ? checkPitch(g, g.d, g.t) : null;
           added.push({ text: `Neues Spiel bei fussball.de: ${who} am ${fmtGameDate(g.d, g.t)}.` + pitchText(c) + trainingHint(slots, at, g.d),
