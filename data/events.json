@@ -98,26 +98,6 @@
       "note": "Trainerstammtisch",
       "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
       "ownerName": "David Skwara"
-    },
-    {
-      "id": "86aba57b-e094-4aa4-9831-da95f7f12b3b",
-      "d": "2026-10-14",
-      "t": "16:30",
-      "bis": "17:45",
-      "title": "Freundschaftsspiel bei SC Neheim",
-      "kind": "game",
-      "team": "E-Jugend",
-      "squad": 2,
-      "pitch": null,
-      "halle": null,
-      "res": [],
-      "note": "",
-      "ha": "away",
-      "opponent": "SC Neheim",
-      "address": "Sportzentrum Binnerfeld",
-      "kickoff": "16:30",
-      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "ownerName": "Fabrizio Calcagno"
     }
   ]
 }
