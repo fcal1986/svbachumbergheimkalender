@@ -111,6 +111,7 @@
   .stat-row{display:flex;gap:10px;margin-bottom:6px;}
   .stat-card{flex:1;background:var(--white);border-radius:16px;padding:14px 16px;box-shadow:var(--card-shadow);}
   .start-daycard{background:var(--white);border-radius:16px;padding:16px 18px;box-shadow:var(--card-shadow);margin-bottom:6px;}
+  .start-dayhead{font-size:15px;font-weight:800;color:var(--ink);margin:4px 2px 0;}
   .start-date{font-size:13px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;}
   .start-summary{font-size:20px;font-weight:800;color:var(--ink);margin-top:4px;}
   .start-next-card{background:var(--white);border-radius:16px;padding:14px 16px;box-shadow:var(--card-shadow);margin-bottom:10px;display:flex;align-items:center;gap:12px;}
@@ -182,6 +183,15 @@
   .wk-team{display:inline-block;font-size:10px;font-weight:800;padding:1px 6px;border-radius:6px;background:var(--bg);color:var(--ink);margin-right:5px;vertical-align:1px;}
   .wk-row .pt-type{white-space:normal;}
   .wk-row .move-badge{display:inline-block;margin-top:3px;}
+  .wk-row{padding:6px 11px;margin-bottom:5px;border-radius:11px;}
+  .wk-row .pt-team-name{font-size:12.5px;}
+  .wk-empty{font-size:12px;color:var(--ink-soft);padding:2px 2px 4px;}
+  .wk-day .wk-empty{display:inline;font-weight:500;padding:0;}
+  .ha-pill{flex:none;font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap;}
+  .ha-pill.home{background:var(--green-dim);color:#1E5730;}
+  .ha-pill.away{background:var(--bg);color:var(--ink-soft);border:1px solid var(--line);}
+  .wk-row .pt-time.two{line-height:1.25;font-size:11px;min-width:52px;}
+  .wk-row .pt-time.two b{display:block;font-size:12px;}
   .wk-next{font-size:12px;color:var(--ink-soft);padding:6px 2px 0;}
   .wk-next b{color:var(--ink);}
   .wk-picker{background:var(--white);border-radius:14px;box-shadow:var(--card-shadow);padding:12px 14px;margin-bottom:6px;}
@@ -742,7 +752,7 @@
       <div class="head-text">
         <div class="brand-name">platzcoach</div>
         <div class="club" id="hd-club">SV Bachum / Bergheim e.V.</div>
-        <h2 id="hd-title">Termine</h2>
+        <h2 id="hd-title">Start</h2>
       </div>
       <button type="button" class="hd-clock" id="hd-clock" onclick="manualRefresh()" aria-label="Daten aktualisieren" title="Antippen oder in der Liste nach unten ziehen zum Aktualisieren"><span class="hd-clock-l">Stand</span><span id="hd-clock-t">--:--</span></button>
       <button class="user-chip" id="hd-user" onclick="headerAction()">Anmelden</button>
@@ -756,21 +766,21 @@
       <div id="reg-banner"></div>
       <div id="session-debug" style="display:none;font-size:10px;color:var(--ink-soft);background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:6px 10px;margin-bottom:8px;"></div>
       <div id="lock-start-banner"></div>
+      <div class="start-dayhead" id="st-date">–</div>
       <div id="st-todo"></div>
       <div id="st-week"></div>
-      <div class="start-daycard" onclick="openTodayFromStart()" style="cursor:pointer;">
-        <div class="start-date" id="st-date">–</div>
-        <div class="start-summary" id="st-summary">–</div>
-      </div>
 
       <div class="pitch-section-head" onclick="openTodayFromStart()" style="cursor:pointer;">
-        <p class="section-label" style="margin:0;">Platzbelegung heute <span style="color:var(--green);">›</span></p>
+        <p class="section-label" style="margin:0;">Heute im Verein <span style="color:var(--green);">›</span></p>
         <div id="st-occupied-badge"></div>
       </div>
       <div id="st-pitch-today"></div>
 
-      <p class="section-label">Status · gesamte Saison</p>
-      <div id="st-status"></div>
+      <!-- Konfliktliste der Saison ist Verwaltungsinfo: nur für angemeldete Zugänge (ab 29.09.2026 · 3) -->
+      <div id="st-status-wrap" style="display:none;">
+        <p class="section-label">Status · gesamte Saison</p>
+        <div id="st-status"></div>
+      </div>
     </div>
   </div>
 
@@ -1171,7 +1181,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='29.09.2026 · 2';
+const APP_VERSION='29.09.2026 · 3';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2244,7 +2254,7 @@ function goto(n){
   document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.dataset.pane===n));
   const navKey=(n==='tform')?'training':n;
   document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.nav===navKey));
-  const titles={start:'Termine',termine:'Terminübersicht',training:'Trainingszeiten',
+  const titles={start:'Start',termine:'Terminübersicht',training:'Trainingszeiten',
     tform:tEditId?'Trainingszeit ändern':'Neue Trainingszeit',
     neu:editingId?'Termin bearbeiten':'Neuer Termin',konto:session?'Mein Konto':'Kalender & Konto'};
   document.getElementById('hd-title').textContent=titles[n]||'Termine';
@@ -3019,10 +3029,8 @@ function renderYear(){
   h+='<div class="year-sum"><b>'+evs.length+' Termine</b> in '+yearShown+' · Voller Monat: <b>'+(best>0?MONTHS[bi]+' ('+best+')':'–')+'</b><br>Monat antippen für die Monatsansicht.'+(confDaysYear?'<br><span style="color:#9A3412;"><span class="conf-mark legend">!</span>'+confDaysYear+' Tag'+(confDaysYear===1?'':'e')+' mit Platzkonflikt (orange umrandet)</span>':'')+'</div>';
   box.innerHTML=h;
 }
-function renderStart(){
-  const dt=new Date(todayStr+'T00:00:00');
-  document.getElementById('st-date').textContent=DAYS[dt.getDay()]+', '+fmtShort(todayStr);
-
+// "6 Trainings · 1 Spiel" für heute im ganzen Verein (abgesagte zählen nicht).
+function todaySummaryText(){
   const todays=todaysCombinedAgenda();
   const counts={training:0,torwart:0,spiel:0,sonstige:0};
   todays.forEach(e=>{ if(!e.isCancelled) counts[classifyAgendaItem(e)]++; }); // abgesagte zählen nicht als stattfindend
@@ -3031,14 +3039,19 @@ function renderStart(){
   if(counts.torwart)parts.push(counts.torwart+' Torwarttraining'+(counts.torwart===1?'':'s'));
   if(counts.spiel)parts.push(counts.spiel+' Spiel'+(counts.spiel===1?'':'e'));
   if(counts.sonstige)parts.push(counts.sonstige+' sonstige'+(counts.sonstige===1?'r Termin':' Termine'));
-  document.getElementById('st-summary').textContent=parts.length?parts.join(' · '):'Heute nichts geplant';
-
+  return parts.length?parts.join(' · '):'Heute nichts geplant';
+}
+function renderStart(){
+  const dt=new Date(todayStr+'T00:00:00');
+  document.getElementById('st-date').textContent=DAYS[dt.getDay()]+', '+dt.getDate()+'. '+MONTHS[dt.getMonth()];
   renderInstallBanner();
   renderRegBanner();
   renderLockStartBanner();
   renderMyWeek();
   renderPitchToday();
-  renderStartStatus();
+  const sw=document.getElementById('st-status-wrap');
+  if(sw) sw.style.display=session?'':'none';
+  if(session) renderStartStatus();
 }
 /* ---------- Meine Woche (ab 29.09.2026 · 2) ----------
    Oben auf der Startseite: Training, Spiele, Absagen und Verlegungen der eigenen Mannschaften für
@@ -3117,7 +3130,7 @@ function gkSignedCountText(e){
   return n?n+' Torhüter angemeldet':'noch kein Torhüter angemeldet';
 }
 function jsArg(v){ return String(v).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
-function weekRowHTML(e){
+function weekRowHTML(e,withDate){
   const chip='<span class="wk-team">'+esc(e.team===GK_TEAM||kindOf(e)==='goalkeeper'?'TW':teamShort(e.team,e.squad))+'</span>';
   const click=e.isMovedGhost?'jumpToGame('+e.fbIndex+')':'openTerminFromStart(\''+jsArg(e.id)+'\',\''+e.d+'\')';
   let name, sub='', right='';
@@ -3130,10 +3143,10 @@ function weekRowHTML(e){
     sub=cancelReasonOf(e);
     right='<span class="hoff-pill">Abgesagt</span>';
   }else if(e.isExternal){
-    name=e.isAway?'Auswärts bei '+e.opponent:'Heimspiel gegen '+e.opponent;
+    name=(e.isAway?'bei ':'gegen ')+e.opponent;
     sub=[e.competition,e.isAway?'':e.pitchLabelText].filter(Boolean).join(' · ');
     const sc=scoreInfo(e);
-    right=sc?'<div class="score-pill '+sc.outcome+'" style="font-size:12px;padding:3px 8px;">'+sc.text+'</div>':'';
+    right=sc?'<div class="score-pill '+sc.outcome+'" style="font-size:12px;padding:3px 8px;">'+sc.text+'</div>':haPill(e);
   }else if(kindOf(e)==='goalkeeper'){
     name='Torwarttraining';
     sub=['für '+gkTeamsText(gkTeamsOf(e)),gkSignedCountText(e)].filter(Boolean).join(' · ');
@@ -3144,17 +3157,19 @@ function weekRowHTML(e){
     right='<div class="pt-visual">'+(pitchVisualOf(e)||'')+'</div>';
   }
   return '<div class="pitch-today-row wk-row'+(e.isCancelled?' pt-cancelled':'')+'" onclick="'+esc(click)+'">'
-    +'<div class="pt-time">'+e.t+'</div>'
+    +(withDate?'<div class="pt-time two"><b>'+esc(dayCase(e.d))+'</b>'+e.t+'</div>':'<div class="pt-time">'+e.t+'</div>')
     +'<div class="pt-team"><div class="pt-team-name">'+chip+esc(name)+'</div>'
     +(sub?'<div class="pt-type">'+esc(sub)+'</div>':'')
     +(e.isExternal&&!e.isAway?moveBadgeHTML(e):'')
     +'</div>'+right+'</div>';
 }
+function dayCase(ds){ return DOW[dowOf(ds)-1]+' '+fmtShort(ds).slice(0,6); } // "Mi 30.09."
+function haPill(e){ return e.isAway?'<span class="ha-pill away">Auswärts</span>':'<span class="ha-pill home">Heim</span>'; }
 function weekDayLabel(ds){
-  if(ds===todayStr) return 'Heute';
+  if(ds===todayStr) return 'Heute · '+dayCase(ds);
   const t=new Date(todayStr+'T00:00:00'); t.setDate(t.getDate()+1);
-  if(ds===ymd(t)) return 'Morgen · '+fmtDayShort(ds);
-  return DAYS[new Date(ds+'T00:00:00').getDay()]+' · '+fmtShort(ds).slice(0,6);
+  if(ds===ymd(t)) return 'Morgen · '+dayCase(ds);
+  return dayCase(ds);
 }
 // Nächstes Spiel je Mannschaft, die in den 7 Tagen kein Spiel hat (z. B. spielfreies Wochenende).
 function nextGamesBeyondWeek(isMine,items){
@@ -3227,14 +3242,18 @@ function renderMyWeek(){
              :'<span class="wk-teams static">'+esc(src.label)+'</span>')+'</div>';
   if(canPick&&weekPickerOpen) h+=weekPickerHTML(false);
   const items=weekItems(isMine);
-  if(!items.length) h+='<div class="empty-card" style="padding:14px 16px;">In den nächsten 7 Tagen nichts für '+esc(src.label)+'.</div>';
+  // "Heute" steht immer oben – ohne Termine mit dem Hinweis "Nichts für …", damit klar ist, dass heute nichts ansteht.
+  if(!items.some(e=>e.d===todayStr)) h+='<div class="wk-day">Heute · '+esc(dayCase(todayStr))+' <span class="wk-empty">– nichts für '+esc(src.label)+'</span></div>';
+  if(!items.length) h+='<div class="wk-empty">Auch in den nächsten 6 Tagen steht nichts an.</div>';
   const shown=weekShowAll?items:items.slice(0,WEEK_MAX_ROWS);
   let lastDay='';
   shown.forEach(e=>{ if(e.d!==lastDay){ h+='<div class="wk-day">'+esc(weekDayLabel(e.d))+'</div>'; lastDay=e.d; } h+=weekRowHTML(e); });
   if(items.length>WEEK_MAX_ROWS) h+='<button type="button" class="wk-more" onclick="weekShowAll=!weekShowAll;renderMyWeek();">'+(weekShowAll?'Weniger anzeigen ▴':'Alle '+items.length+' anzeigen ▾')+'</button>';
-  nextGamesBeyondWeek(isMine,items).forEach(e=>{
-    h+='<div class="wk-next" style="cursor:pointer;" onclick="'+esc('openTerminFromStart(\''+jsArg(e.id)+'\',\''+e.d+'\')')+'">Nächstes Spiel '+esc(teamShort(e.team,e.squad))+': <b>'+esc(fmtDayShort(e.d)+', '+e.t)+'</b> '+esc(e.isAway?'bei '+e.opponent:'gegen '+e.opponent)+' ›</div>';
-  });
+  const next=nextGamesBeyondWeek(isMine,items);
+  if(next.length){
+    h+='<p class="section-label" style="margin-top:16px;">Nächste Spiele</p>';
+    next.forEach(e=>{ h+=weekRowHTML(e,true); });
+  }
   box.innerHTML=h;
 }
 function weekPickerHTML(intro){
@@ -3372,8 +3391,8 @@ function renderPitchToday(){
   // Mit "Meine Woche" darüber startet die Liste zugeklappt (eine Zeile mit Anzahl + Konflikten).
   const collapsible=weekHasContent();
   if(collapsible&&!lsGet(PITCH_OPEN_KEY,false)){
-    const n=items.filter(e=>!e.isCancelled).length, conf=conflictsOnDay(todayStr).length;
-    box.innerHTML='<div class="pt-collapsed" onclick="setPitchOpen(true)"><span><b>'+n+' Termin'+(n===1?'':'e')+'</b> heute</span>'
+    const conf=conflictsOnDay(todayStr).length;
+    box.innerHTML='<div class="pt-collapsed" onclick="setPitchOpen(true)"><span><b>'+esc(todaySummaryText())+'</b></span>'
       +(conf?'<span class="pt-conf">· '+conf+' Konflikt'+(conf===1?'':'e')+'</span>':'')
       +'<span class="pt-open">Alle anzeigen ▾</span></div>';
     return;
