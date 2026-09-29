@@ -74,7 +74,9 @@ function escapeHtml(s) {
 const CATEGORIES = {
   termine:     ['Neuer Termin:', 'Termin geändert:', 'Termin gelöscht:',
                 'Spielverlegung vorgemerkt:', 'Spielverlegung geändert:', 'Spielverlegung aufgehoben:',
-                'Spielverlegung abgeschlossen:'],
+                'Spielverlegung abgeschlossen:',
+                'Freundschaftsspiel angelegt:', 'Freundschaftsspiel geändert:', 'Freundschaftsspiel gelöscht:',
+                'Turnier angelegt:', 'Turnier geändert:', 'Turnier gelöscht:'],
   training:    ['Trainingszeit angelegt:', 'Trainingszeit geändert:', 'Trainingszeit gelöscht:',
                 'Training abgesagt:', 'Absage zurückgenommen:', 'Torwarttraining-Anmeldung geändert:'],
   sperren:     ['Sperre angelegt:', 'Sperre aufgehoben:'],
@@ -129,7 +131,9 @@ function isFromPlatzcoach(msg) {
 }
 // Spielverlegungen gehen an ALLE Trainer der Mannschaft – auch an den, der sie eingetragen hat
 // (Bestätigung + Info für den Mit-Trainer). Sonst gilt: keine Mail über eigene Änderungen.
-const NOTIFY_AUTHOR_TOO = ['Spielverlegung vorgemerkt:', 'Spielverlegung geändert:', 'Spielverlegung aufgehoben:', 'Spielverlegung abgeschlossen:'];
+// Freundschaftsspiele/Turniere ebenso: der Organisator bekommt die Mail als Bestätigung mit Link.
+const NOTIFY_AUTHOR_TOO = ['Spielverlegung vorgemerkt:', 'Spielverlegung geändert:', 'Spielverlegung aufgehoben:', 'Spielverlegung abgeschlossen:',
+  'Freundschaftsspiel angelegt:', 'Freundschaftsspiel geändert:', 'Freundschaftsspiel gelöscht:', 'Turnier angelegt:', 'Turnier geändert:', 'Turnier gelöscht:'];
 function notifyAuthorToo(c) { return NOTIFY_AUTHOR_TOO.some(p => c.text.startsWith(p)); }
 // Automatische Bot-Läufe und Aufräumarbeiten der App gehen nie per Mail raus.
 function isNoisyCommit(text) {
@@ -322,7 +326,9 @@ async function main() {
         from: `Platzcoach <${fromAddress}>`, // Absendername bewusst immer "Platzcoach" (SaaS); der Verein steht im Text
         ...(replyTo ? { replyTo } : {}),
         to: r.email,
-        subject: changesFile ? subjectFb : `Platzcoach: ${texts.length} Änderung${texts.length === 1 ? '' : 'en'}`,
+        subject: changesFile ? subjectFb : (texts.length === 1 && /^(Freundschaftsspiel|Turnier) /.test(texts[0])
+          ? 'Platzcoach: ' + texts[0].split(' · ')[0].replace(/: /, ' – ')   // z. B. "Freundschaftsspiel angelegt – E2-Jugend bei SC Neheim"
+          : `Platzcoach: ${texts.length} Änderung${texts.length === 1 ? '' : 'en'}`),
         text,
         html,
       });

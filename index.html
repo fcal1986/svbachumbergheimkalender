@@ -197,6 +197,9 @@
   .dfb-badge.ok{background:var(--green-dim);color:#1E5730;}
   .dfb-badge.open{background:#FFF7ED;color:#9A3412;}
   .dfb-badge.warn{background:#FFF5F5;color:#8E2A1D;}
+  .event-card.match-planned{border:1.5px dashed #F59E0B;}
+  .event-card.match-planned .ev-head{background:#FFF7ED;}
+  .plan-tag{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#9A3412;background:#FFEDD5;border-radius:6px;padding:2px 7px;margin-bottom:3px;}
   .wk-row .pt-time.two{line-height:1.25;font-size:11px;min-width:52px;}
   .wk-row .pt-time.two b{display:block;font-size:12px;}
   .wk-next{font-size:12px;color:var(--ink-soft);padding:6px 2px 0;}
@@ -1217,7 +1220,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='29.09.2026 · 6';
+const APP_VERSION='29.09.2026 · 7';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -1847,6 +1850,8 @@ function updateFreeSlotsOnConflict(){
     const d=dateInput&&dateInput().value;
     const von=document.getElementById('f-von')?.value;
     const bis=document.getElementById('f-bis')?.value;
+    // Auswärtsspiel/-turnier belegt bei uns nichts → keine freien Zeitfenster anbieten.
+    if(isMatchKind(formKind())&&formHA==='away'){ const fs=document.getElementById('free-slots-box'); if(fs) fs.innerHTML=''; return; }
     if(d&&von&&bis) renderFreeSlotsBox('free-slots-box',d,von,bis,editingId);
   }catch(e){ console.warn('updateFreeSlotsOnConflict:',e); }
 }
@@ -2696,12 +2701,13 @@ function rowHTML(e){
   }
   const mine=(session&&e.ownerId===session.id)?' mine':'';
   const hl=(e.id===highlightId)?' hl':'';
+  const planned=isMatchPlanned(e)?' match-planned':'';
   const gk=kindOf(e)==='goalkeeper'?' gk-card':'';
-  return '<div class="event-card'+mine+hl+gk+'" id="ev-'+e.id+'">'
+  return '<div class="event-card'+mine+hl+gk+planned+'" id="ev-'+e.id+'">'
     +'<div class="ev-head">'
     +'<div class="ev-date-box"><span class="ev-dow">'+dow+'</span><span class="ev-day">'+dd+'</span></div>'
     +'<div class="ev-sep"></div>'
-    +'<div class="ev-title-box"><h4>'+esc(title)+'</h4>'+(sub?'<div class="ev-sub">'+sub+'</div>':'')+'</div>'
+    +'<div class="ev-title-box">'+(planned?'<div class="plan-tag">Vorgemerkt</div>':'')+'<h4>'+esc(title)+'</h4>'+(sub?'<div class="ev-sub">'+sub+'</div>':'')+'</div>'
     +'<div class="row-acts">'+acts+'</div>'
     +'</div>'
     +'<div class="ev-body">'
@@ -3264,7 +3270,7 @@ function weekRowHTML(e,withDate){
     right='<div class="pt-visual">'+(pitchVisualOf(e)||'')+'</div>';
   }else if(!e.isTraining&&kindOf(e)==='game'&&e.ha&&e.opponent){
     name=(e.ha==='away'?'bei ':'gegen ')+e.opponent;
-    sub='Freundschaftsspiel'+(e.kickoff?' · Anstoß '+e.kickoff:'');
+    sub=(isMatchPlanned(e)?'Vorgemerkt · noch nicht bei fussball.de':'Freundschaftsspiel')+(e.kickoff?' · Anstoß '+e.kickoff:'');
     right=haPill({isAway:e.ha==='away'});
   }else{
     name=e.isTraining?'Training':(e.title||'Termin');
@@ -4396,7 +4402,9 @@ async function submitEvent(){
     if(newId&&kind==='goalkeeper') setTimeout(()=>sendGkRequest(gkTeams,title,DAYS[new Date(d+'T00:00:00').getDay()]+', '+fmtShort(d)+' · '+von+'–'+bis+' Uhr',location.origin+location.pathname+'#t='+newId,[session.id]),4000);
     const wasEditing=!!editingId;
     const savedEv=EVENTS.find(x=>x.id===(newId||editingId))||{};
-    const logMsg=(wasEditing?'Termin geändert: ':'Neuer Termin: ')+title+' – '+msgTeam(team,squad,gkTeams)+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name+teamTrailer(team,squad,savedEv);
+    const logMsg=isMatchKind(kind)&&mf.ha
+      ?matchLogMsg(savedEv,wasEditing?'geändert':'angelegt')
+      :(wasEditing?'Termin geändert: ':'Neuer Termin: ')+title+' – '+msgTeam(team,squad,gkTeams)+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name+teamTrailer(team,squad,savedEv);
     editingId=null;formDirty=false;document.getElementById('cancel-btn').style.display='none';
     selDate=d;const dt=new Date(d+'T00:00:00');curY=dt.getFullYear();curM=dt.getMonth();yearShown=curY;
     goto('termine');setView('monat');render();renderStart();resetForm();
@@ -4420,7 +4428,7 @@ function deleteEvent(id){
     EVENTS=EVENTS.filter(x=>x.id!==id); applyGameMoves();
     render(); renderStart(); showToast('Termin gelöscht.');
     if(kindOf(e)==='goalkeeper') sendGkCancel(e.gkTeams||[],e.title||'Torwarttraining',DAYS[new Date(e.d+'T00:00:00').getDay()]+', '+fmtShort(e.d)+' · '+e.t+'–'+eventBis(e)+' Uhr',[e.ownerId],'Der Termin wurde gelöscht.');
-    saveEvents('Termin gelöscht: '+e.title+' – '+msgTeam(e.team,e.squad,e.gkTeams)+' · '+e.t+'–'+eventBis(e)+' · '+fmtShort(e.d)+' – '+session.name+teamTrailer(e.team,e.squad,e))
+    saveEvents(isMatchKind(kindOf(e))&&e.ha?matchLogMsg(e,'gelöscht'):'Termin gelöscht: '+e.title+' – '+msgTeam(e.team,e.squad,e.gkTeams)+' · '+e.t+'–'+eventBis(e)+' · '+fmtShort(e.d)+' – '+session.name+teamTrailer(e.team,e.squad,e))
       .catch(err=>{ EVENTS=JSON.parse(backup);render();renderStart();showToast('Rückgängig – Fehler: '+err.message,6000); });
   });
 }
@@ -4645,6 +4653,8 @@ function openYouthLeaderText(title,sub,text){
   document.getElementById('yl-text').textContent=text;
   document.getElementById('yl-modal').classList.add('show');
 }
+// Eigenes Freundschaftsspiel, das bei fussball.de (noch) nicht auftaucht – nur für künftige Termine.
+function isMatchPlanned(e){ return !!e&&!e.isTraining&&!e.isExternal&&kindOf(e)==='game'&&!!e.ha&&e.d>=todayStr&&!OWN_MATCH_FB[e.id]; }
 function matchInfoHTML(e){
   const k=kindOf(e), lines=[], fb=OWN_MATCH_FB[e.id];
   if(k==='game'&&e.opponent) lines.push((e.ha==='away'?'Bei: ':'Gegner: ')+'<b>'+esc(e.opponent)+'</b>');
@@ -4655,8 +4665,10 @@ function matchInfoHTML(e){
     const diff=fb.t&&e.kickoff&&fb.t!==e.kickoff;
     st='<span class="dfb-badge '+(diff?'warn':'ok')+'">'+(diff?'⚠ fussball.de: Anstoß '+esc(fb.t)+' statt '+esc(e.kickoff):'✓ bei fussball.de angesetzt')+'</span>'
       +(fb.link?' <a href="'+esc(fb.link)+'" target="_blank" rel="noopener" class="fb-link-btn" onclick="event.stopPropagation();">Zum Spiel</a>':'');
+  }else if(k==='game'&&e.d>=todayStr){
+    st='<span class="dfb-badge open">Vorgemerkt · noch nicht bei fussball.de</span>';
   }else if(e.ha==='home'&&e.d>=todayStr){
-    st='<span class="dfb-badge open">'+(k==='game'?'Noch nicht bei fussball.de':'DFBnet-Anmeldung über den Jugendleiter')+'</span>';
+    st='<span class="dfb-badge open">DFBnet-Anmeldung über den Jugendleiter</span>';
   }
   const yl=(session&&e.ha==='home')?'<button class="ghost-btn" style="margin-top:8px;border-style:solid;" onclick="event.stopPropagation();openMatchYouthLeader(\''+e.id+'\')">💬 Nachricht an den Jugendleiter</button>':'';
   return '<div class="match-info">'+lines.join('<br>')+(st?'<div style="margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'+st+'</div>':'')+yl+'</div>';
@@ -4714,6 +4726,19 @@ function matchYouthLeaderMessage(e){
     +(e.note?'Bemerkung: '+e.note+'\n':'')
     +'\nIn Platzcoach: '+link+'\n'
     +'\nDanke!'+(first?'\n'+first:'');
+}
+/* Commit-Nachricht (= Text der E-Mail an die Trainer der Mannschaft, inkl. Organisator – siehe
+   NOTIFY_AUTHOR_TOO in scripts/notify-email.mjs), z. B.
+   "Freundschaftsspiel angelegt: E2-Jugend bei SC Neheim · Mi 14.10.2026, Anstoß 16:30 · Spielort … · vorgemerkt, noch nicht bei fussball.de – Fabrizio Calcagno" */
+function matchLogMsg(e,action){
+  const k=kindOf(e), away=e.ha==='away', label=teamLabel(e.team,e.squad);
+  const dt=new Date(e.d+'T00:00:00'), day=DAYS_S[dt.getDay()].charAt(0)+DAYS_S[dt.getDay()].slice(1).toLowerCase()+' '+fmtShort(e.d);
+  const head=k==='game'?'Freundschaftsspiel '+action+': '+label+(away?' bei ':' gegen ')+(e.opponent||''):'Turnier '+action+': '+kindLabel(k)+' ('+(away?'auswärts':'Heim')+') – '+label;
+  const when=k==='game'&&e.kickoff?day+', Anstoß '+e.kickoff:day+', '+e.t+'–'+eventBis(e);
+  const place=away?(e.address?'Spielort: '+e.address:'auswärts')
+    :(e.pitch?'Platz '+(e.pitch.mode==='ganz'?'ganz':(e.pitch.mode==='haelfte'?'Hälfte '+e.pitch.part:'Viertel '+e.pitch.part))+' '+e.t+'–'+eventBis(e):(e.halle&&e.halle.thirds&&e.halle.thirds.length?halleShort(e.halle):''));
+  const status=action==='gelöscht'?'':(k==='game'&&!OWN_MATCH_FB[e.id]?(away?'vorgemerkt, noch nicht bei fussball.de':'vorgemerkt, Ansetzung im DFBnet über den Jugendleiter'):'');
+  return [head,when,place,status].filter(Boolean).join(' · ')+' – '+session.name+teamTrailer(e.team,e.squad,e)+(action!=='gelöscht'?'\nPlatzcoach-Link: '+e.id:'');
 }
 function openMatchYouthLeader(id,title){
   const e=EVENTS.find(x=>x.id===id); if(!e) return;
@@ -5746,6 +5771,9 @@ function logMeta(msg){
   if(m.startsWith('Neuer Termin'))       return{cat:'Termin',col:'var(--ok)',    icon:'M12 5v14M5 12h14'};
   if(m.startsWith('Termin geändert'))    return{cat:'Termin',col:'var(--blue)',  icon:'M4 20h4l10-10-4-4L4 16v4zM13.5 6.5l4 4'};
   if(m.startsWith('Termin gelöscht'))    return{cat:'Termin',col:'var(--warn)',  icon:'M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13'};
+  if(/^(Freundschaftsspiel|Turnier) angelegt/.test(m)) return{cat:'Spiel',col:'var(--ok)',icon:'M12 5v14M5 12h14'};
+  if(/^(Freundschaftsspiel|Turnier) geändert/.test(m)) return{cat:'Spiel',col:'var(--blue)',icon:'M4 20h4l10-10-4-4L4 16v4zM13.5 6.5l4 4'};
+  if(/^(Freundschaftsspiel|Turnier) gelöscht/.test(m)) return{cat:'Spiel',col:'var(--warn)',icon:'M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13'};
   if(m.startsWith('Training abgesagt'))  return{cat:'Training',col:'var(--warn)',icon:'M6 6l12 12M18 6L6 18'};
   if(m.startsWith('Absage zurück'))      return{cat:'Training',col:'var(--ok)', icon:'M20 6L9 17l-5-5'};
   if(m.startsWith('Trainingszeit'))      return{cat:'Training',col:'var(--blue)',icon:'M12 7v5l3 3M12 3a9 9 0 100 18A9 9 0 0012 3'};
