@@ -1224,7 +1224,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='29.09.2026 · 12';
+const APP_VERSION='29.09.2026 · 13';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2359,6 +2359,7 @@ function currentPaneArea(){
   return n==='konto'&&session?'konto/'+(kontoTab||'profil'):n;
 }
 function goto(n){
+  const prevPane=(document.querySelector('.pane.active')||{dataset:{}}).dataset.pane||'start';
   if(n==='neu') setTimeout(updateEditBanner,0);
   if(n!=='neu')formSkipFussballLink=null; // Verlassen des Formulars ohne Speichern: Ausnahme nicht stehen lassen
   document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.dataset.pane===n));
@@ -2372,6 +2373,43 @@ function goto(n){
   if(n==='konto') renderKonto();
   if(n==='training') renderTraining();
   trackArea(currentPaneArea());
+  navHistoryPush(prevPane,n);
+}
+/* Zurück-Taste (Android-Leiste, Wischgeste, Browser-Zurück) ab 29.09.2026 · 13:
+   Jeder Seitenwechsel legt einen Eintrag im Browser-Verlauf an (Adresse bleibt gleich).
+   Zurück schließt zuerst ein offenes Fenster (Dialog, Blatt, Anmeldung), sonst geht es zur vorigen Seite.
+   Erst auf der ersten Seite schließt Zurück die App wie bisher.
+   Verlassen eines Formulars (Neu, Trainingszeit) ersetzt dessen Eintrag – nach dem Speichern führt Zurück
+   also nicht ins Formular zurück, sondern dorthin, wo man vorher war. */
+let NAV_FROM_HISTORY=false, NAV_READY=false;
+function navHistoryPush(prev,n){
+  if(!NAV_READY||NAV_FROM_HISTORY||prev===n) return;
+  try{
+    const st={pc:1,page:n};
+    if(prev==='neu'||prev==='tform') history.replaceState(st,''); else history.pushState(st,'');
+  }catch(e){}
+}
+function closeTopOverlay(){
+  const shown=id=>{ const el=document.getElementById(id); return !!el&&el.classList.contains('show'); };
+  if(document.getElementById('month-picker-overlay')){ closeMonthPicker(); return true; }
+  if(shown('modal')){ const y=document.getElementById('mo-yes'); if(!(y&&y.disabled)) closeModal(); return true; }
+  const list=[['gksheet',closeSheet],['yl-modal',closeYouthLeaderModal],['move-modal',closeMoveModal],['reschedule-modal',closeRescheduleModal],
+    ['cancel-modal',closeCancelModal],['season-create-modal',closeSeasonCreateModal],['register',closeRegister],['login',closeLogin]];
+  for(const [id,fn] of list){ if(shown(id)){ fn(); return true; } }
+  if(shown('pwflow')) return true; // Pflicht-Passwortwechsel/Zurücksetzen: nicht wegklicken
+  return false;
+}
+function setupBackButton(){
+  try{ history.replaceState(Object.assign({},history.state||{},{pc:1,page:'start'}),''); }catch(e){}
+  NAV_READY=true;
+  window.addEventListener('popstate',ev=>{
+    const cur=(document.querySelector('.pane.active')||{dataset:{}}).dataset.pane||'start';
+    if(closeTopOverlay()){ try{ history.pushState({pc:1,page:cur},''); }catch(e){} return; }
+    const page=(ev.state&&ev.state.page)||'start';
+    if(page===cur) return;
+    NAV_FROM_HISTORY=true;
+    try{ goto(page); if(page==='termine') render(); }finally{ NAV_FROM_HISTORY=false; }
+  });
 }
 /* Kopfzeile zeigt auf jeder Seite, wann die Daten zuletzt vom Server geholt wurden ("Stand 22:31").
    Antippen oder in einer Liste ganz oben nach unten ziehen aktualisiert sofort. */
@@ -7968,6 +8006,7 @@ async function boot(){
   refreshHeader(); refreshBioBtn(); buildFilters(); restoreFilterPref();
   setView('monat'); renderStart(); renderTraining();
   markRefreshed(); setupPullToRefresh(); // "Stand" = Zeitpunkt des Ladens; danach bei jedem Aktualisieren
+  setupBackButton();
   openHashEvent();
   clarityCall('set','rolle',session?(session.isAdmin?'admin':'trainer'):'gast');
   if(!/^#invite=/.test(location.hash)) trackArea(currentPaneArea());
