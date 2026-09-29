@@ -953,7 +953,7 @@
         </div>
         <div class="field required" id="f-opp-field"><label><span class="req-dot"></span>Gegner</label><input type="text" id="f-opponent" autocomplete="off" oninput="formDirty=true;autoMatchTitle()" placeholder="z. B. SV Hüsten 09 II"></div>
         <div class="field" id="f-part-field"><label>Teilnehmer (optional)</label><input type="text" id="f-participants" autocomplete="off" oninput="formDirty=true" placeholder="z. B. SC Neheim, TuS Oeventrop"></div>
-        <div class="field required" id="f-kick-field"><label><span class="req-dot"></span>Anstoß</label><input type="time" id="f-kickoff" step="300" onchange="onKickoffChange(true)"></div>
+        <div class="field required" id="f-kick-field"><label><span class="req-dot"></span>Anstoß</label><input type="time" id="f-kickoff" step="300" onchange="onKickoffChange(true)"><p class="helptext" id="f-kick-info" style="margin-top:6px;"></p></div>
         <div class="field" id="f-addr-field"><label>Adresse (Spielort)</label><input type="text" id="f-address" autocomplete="off" oninput="formDirty=true" placeholder="Straße, Ort"></div>
         <p class="helptext" id="f-match-help"></p>
       </div>
@@ -961,7 +961,7 @@
         <div class="chip-group" id="f-gkteams"></div>
         <p class="helptext">Mehrfachauswahl. Die Trainer dieser Mannschaften bekommen beim Anlegen eine E-Mail mit der Bitte, ihre Torhüter an- oder abzumelden.</p>
       </div>
-      <div style="display:flex;gap:10px;">
+      <div style="display:flex;gap:10px;" id="f-times">
         <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Von</label><input type="time" id="f-von" autocomplete="off" step="900" value="15:00" onchange="onSnapTime(this)"></div>
         <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Bis</label><input type="time" id="f-bis" autocomplete="off" step="900" value="17:00" onchange="onSnapTime(this)"></div>
       </div>
@@ -1221,7 +1221,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='29.09.2026 · 8';
+const APP_VERSION='29.09.2026 · 9';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3968,6 +3968,7 @@ function applyMatchForm(byUser){
   show('f-match-fields',match);
   show('f-opp-field',k==='game'); show('f-kick-field',k==='game');
   show('f-part-field',match&&k!=='game'); show('f-addr-field',away);
+  show('f-times',k!=='game'); // Freundschaftsspiel: nur Anstoß – Von/Bis rechnet die App (kickInfo)
   show('f-res-label',!away); show('f-res-field',!away);
   const help=document.getElementById('f-match-help');
   if(help) help.textContent=!match?'':(away
@@ -3995,8 +3996,10 @@ function onKickoffChange(byUser){
   const ko=document.getElementById('f-kickoff').value; if(!ko) return;
   if(byUser) formDirty=true;
   const team=document.getElementById('f-team').value, away=formHA==='away';
-  const von=away?ko:shiftTimeClamped(ko,-fussballBufferBeforeMin());
-  const bis=shiftTimeClamped(ko,fussballDurationMin(team));
+  // Auf Viertelstunden: Beginn abgerundet, Ende aufgerundet (so wird auch gespeichert).
+  const q15=(t,up)=>{ const [h,m]=t.split(':').map(Number); let n=h*60+m; n=up?Math.ceil(n/15)*15:Math.floor(n/15)*15; n=Math.min(n,23*60+45); return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0'); };
+  const von=q15(away?ko:shiftTimeClamped(ko,-fussballBufferBeforeMin()),false);
+  const bis=q15(shiftTimeClamped(ko,fussballDurationMin(team)),true);
   document.getElementById('f-von').value=von; document.getElementById('f-bis').value=bis<von?'23:45':bis;
   if(!away&&pitchOn()){
     if(/^[EFG]-Jugend$/.test(team)){
@@ -4005,7 +4008,25 @@ function onKickoffChange(byUser){
       setPitchMode('haelfte'); pitchPart=part;
     } else setPitchMode('ganz');
   }
-  onTimeChange(); updateWeekday&&updateWeekday();
+  onTimeChange(); updateWeekday&&updateWeekday(); updateKickInfo();
+}
+// Zeile unter dem Anstoß: welche Zeit die App daraus für den Platz reserviert.
+function updateKickInfo(){
+  const el=document.getElementById('f-kick-info'); if(!el) return;
+  const ko=document.getElementById('f-kickoff').value;
+  if(formKind()!=='game'||!ko){ el.textContent=''; return; }
+  const team=document.getElementById('f-team').value, von=document.getElementById('f-von').value, bis=document.getElementById('f-bis').value;
+  if(formHA==='away'){ el.textContent='Im Kalender '+von+'–'+bis+' Uhr (Spieldauer '+fussballDurationMin(team)+' min).'; el.style.color=''; return; }
+  let txt='Platz '+von+'–'+bis+' Uhr ('+fussballBufferBeforeMin()+' min vorher bis Spielende, '+fussballDurationMin(team)+' min Spiel)';
+  // Gleich hier prüfen, ob der Platz frei ist (eigenes Training der Mannschaft zählt als frei).
+  const d=dateInput().value, sb=document.querySelector('#f-squad button.on'), own={team,squad:sb?parseInt(sb.dataset.squad):1};
+  if(d&&pitchOn()){
+    const res=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res).filter(r=>r!=='Großspielfeld'&&r!=='Halle');
+    const hits=findConflicts(d,von,bis,curPitch(),null,res,editingId,'game').filter(c=>!isOwnTeamTraining(c.event,own));
+    txt+=hits.length?' – ⚠ belegt: '+[...new Set(hits.map(c=>occupationLabel(c.event)))].join(', '):' – ✓ frei';
+    el.style.color=hits.length?'var(--warn)':'var(--grass)';
+  } else el.style.color='';
+  el.textContent=txt+'.';
 }
 function readMatchFields(kind){
   if(!isMatchKind(kind)) return {ha:undefined,opponent:undefined,participants:undefined,address:undefined,kickoff:undefined};
@@ -4072,6 +4093,7 @@ function setPitchMode(m){
 function pickPitch(q){ if(pitchMode==='ganz')return; pitchPart=pitchPartForPick(pitchMode,q); renderPitch(); }
 function curPitch(){return pitchMode==='ganz'?{mode:'ganz'}:{mode:pitchMode,part:pitchPart};}
 function renderPitch(){
+  updateKickInfo(); // Freundschaftsspiel: Platzprüfung unter dem Anstoß mitziehen (Datum, Fläche, Mannschaft)
   const f=document.getElementById('f-pitch-field');
   const show=pitchOn()&&occLevel(formKind())!=='overlay';
   f.style.display=show?'block':'none';
@@ -4315,7 +4337,7 @@ function fillForm(e){
   document.getElementById('f-anlass').dataset.auto=''; setHomeAway(e.ha==='away'?'away':'home',false);
   fillingForm=true;
   try{ onTeamChange();onKindChange(false); } finally{ fillingForm=false; }
-  updateWeekday();renderPitch();renderHalle();
+  updateWeekday();renderPitch();renderHalle();updateKickInfo();
 }
 function editEvent(id){
   if(!requireLogin()) return;
@@ -5605,7 +5627,8 @@ function squadPickMissingMsg(teams){ return 'Bitte bei '+teams.join(', ')+' noch
 function squadChipsHTML(pk,team,cur,s,onSquad,onAll,review){
   const open=PICK_OPEN.has(pk+'|'+team), all=squadsFor(team,s), L=jugendLetter(team);
   const isAll=!open&&!(cur&&cur.length);
-  let h=all.map(n=>'<span class="squad-sq-chip'+(!open&&!isAll&&cur.includes(n)?' on':'')+'" onclick="'+onSquad.replace('{n}',n)+'">'+L+n+'</span>').join('');
+  // Nur eine Mannschaft in der Klasse (z. B. G1): gilt als gewählt und wird grün angezeigt.
+  let h=all.map(n=>'<span class="squad-sq-chip'+(!open&&((isAll&&all.length===1)||(!isAll&&cur.includes(n)))?' on':'')+'" onclick="'+onSquad.replace('{n}',n)+'">'+L+n+'</span>').join('');
   if(all.length>1) h+='<span class="squad-sq-chip'+(isAll?' on':'')+'" onclick="'+onAll+'">Alle</span>';
   if(open) h+='<span class="squad-hint">Welche Mannschaft? Bitte antippen</span>';
   else if(isAll&&all.length>1&&review) h+='<span class="squad-hint">Alle '+esc(team.replace('-Jugend',''))+'-Mannschaften – stimmt das?</span>';
