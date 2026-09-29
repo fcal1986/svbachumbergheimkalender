@@ -159,7 +159,202 @@
         "Marcel Schomberg",
         "Michael Raneck",
         "Marc Geauf"
-      ]
+      ],
+      "teams": [
+        {
+          "team": "G-Jugend",
+          "squad": 1,
+          "fd": {
+            "type": "G-Junioren",
+            "squad": 1,
+            "name": "SV Bachum/Bergheim",
+            "teamId": "023VO81ADC000000VS548985VVRPGK5E"
+          }
+        },
+        {
+          "team": "G-Jugend",
+          "squad": 2
+        },
+        {
+          "team": "G-Jugend",
+          "squad": 3
+        },
+        {
+          "team": "F-Jugend",
+          "squad": 1,
+          "fd": {
+            "type": "F-Junioren",
+            "squad": 1,
+            "name": "SV Bachum/Bergheim I",
+            "teamId": "011MIAKB1G000000VTVG0001VTR8C1K7"
+          }
+        },
+        {
+          "team": "F-Jugend",
+          "squad": 2
+        },
+        {
+          "team": "F-Jugend",
+          "squad": 3
+        },
+        {
+          "team": "E-Jugend",
+          "squad": 1,
+          "fd": {
+            "type": "E-Junioren",
+            "squad": 1,
+            "name": "SV Bachum/Bergheim I",
+            "teamId": "011MIBAMEC000000VTVG0001VTR8C1K7"
+          }
+        },
+        {
+          "team": "E-Jugend",
+          "squad": 2,
+          "fd": {
+            "type": "E-Junioren",
+            "squad": 2,
+            "name": "SV Bachum/Bergheim II",
+            "teamId": "027IVP92OK000000VS5489B1VUA37ON8"
+          }
+        },
+        {
+          "team": "E-Jugend",
+          "squad": 3,
+          "fd": {
+            "type": "E-Junioren",
+            "squad": 3,
+            "name": "SV Bachum/Bergheim III",
+            "teamId": "031BFRLD74000000VS5489BRVTPI24NQ"
+          }
+        },
+        {
+          "team": "D-Jugend",
+          "squad": 1,
+          "fd": {
+            "type": "D-Junioren",
+            "squad": 1,
+            "name": "SV Bachum-Bergh. I",
+            "teamId": "011MI9U4VO000000VTVG0001VTR8C1K7"
+          }
+        },
+        {
+          "team": "D-Jugend",
+          "squad": 2,
+          "fd": {
+            "type": "D-Junioren",
+            "squad": 2,
+            "name": "SV Bachum-Bergheim II",
+            "teamId": "02PU7K56SO000000VS5489B2VSE05932"
+          }
+        },
+        {
+          "team": "D-Jugend",
+          "squad": 3
+        },
+        {
+          "team": "C-Jugend",
+          "squad": 1,
+          "fd": {
+            "type": "C-Junioren",
+            "squad": 1,
+            "name": "SV Bachum-Bergh. I",
+            "teamId": "011MIB6N6S000000VTVG0001VTR8C1K7"
+          }
+        },
+        {
+          "team": "C-Jugend",
+          "squad": 2,
+          "fd": {
+            "type": "C-Junioren",
+            "squad": 2,
+            "name": "SV Bachum-Bergh. II",
+            "teamId": "031A86T3J0000000VS5489BSVU0ORN69"
+          }
+        },
+        {
+          "team": "C-Jugend",
+          "squad": 3
+        },
+        {
+          "team": "B-Jugend",
+          "squad": 1,
+          "fd": {
+            "type": "B-Junioren",
+            "squad": 1,
+            "name": "SV Bachum/Bergheim",
+            "teamId": "02B9BQVPIG000000VS5489B1VU20GQ5T"
+          }
+        },
+        {
+          "team": "B-Jugend",
+          "squad": 2
+        },
+        {
+          "team": "B-Jugend",
+          "squad": 3
+        },
+        {
+          "team": "A-Jugend",
+          "squad": 1,
+          "fd": {
+            "type": "A-Junioren",
+            "squad": 1,
+            "name": "SV Bachum/Bergheim",
+            "teamId": "027IVI3RO8000000VS5489B1VUA37ON8"
+          }
+        },
+        {
+          "team": "A-Jugend",
+          "squad": 2
+        },
+        {
+          "team": "A-Jugend",
+          "squad": 3
+        },
+        {
+          "team": "1. Herren",
+          "squad": 1,
+          "fd": {
+            "type": "Herren",
+            "squad": 1,
+            "name": "SV Bachum/Bergheim",
+            "teamId": "011MIANBCK000000VTVG0001VTR8C1K7"
+          }
+        },
+        {
+          "team": "2. Herren",
+          "squad": 1,
+          "fd": {
+            "type": "Herren",
+            "squad": 2,
+            "name": "SV Bachum/Bergheim II",
+            "teamId": "011MIBAEQC000000VTVG0001VTR8C1K7"
+          }
+        },
+        {
+          "team": "3. Herren",
+          "squad": 1,
+          "fd": {
+            "type": "Herren",
+            "squad": 3,
+            "name": "SV Bachum/Bergheim III",
+            "teamId": "02M8390780000000VS5489B2VUHJA7LU"
+          }
+        },
+        {
+          "team": "Ü32 / Ü50",
+          "squad": 1,
+          "fd": {
+            "type": "Herren Ü32",
+            "squad": 1,
+            "name": "SV Bachum/Bergheim",
+            "teamId": "01OR4F5HES000000VV0AG811VS8BP574"
+          }
+        }
+      ],
+      "teamSync": {
+        "checkedAt": "2026-09-29T09:56:24.417Z"
+      }
     }
   ]
 }
