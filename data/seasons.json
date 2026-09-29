@@ -173,10 +173,6 @@
         },
         {
           "team": "G-Jugend",
-          "squad": 2
-        },
-        {
-          "team": "G-Jugend",
           "squad": 3
         },
         {
@@ -353,7 +349,14 @@
         }
       ],
       "teamSync": {
-        "checkedAt": "2026-09-29T09:56:24.417Z"
+        "checkedAt": "2026-09-29T10:32:15.615Z",
+        "removed": [
+          {
+            "team": "G-Jugend",
+            "squad": 2,
+            "at": "2026-09-29"
+          }
+        ]
       }
     }
   ]
