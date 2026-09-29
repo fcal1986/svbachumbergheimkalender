@@ -306,6 +306,7 @@
   .log-cat{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:1px 7px;font-size:9.5px;font-weight:700;color:var(--ink-soft);}
   .squad-sq-chip{font-size:10px;font-weight:700;padding:4px 8px;border-radius:6px;background:var(--bg);border:1.5px solid var(--line);color:var(--ink-soft);cursor:pointer;user-select:none;}
   .squad-sq-chip.on{background:var(--green);border-color:var(--green);color:#fff;}
+  .squad-hint{font-size:10.5px;font-weight:700;color:#9A3412;background:#FFEDD5;border-radius:6px;padding:3px 8px;}
   .log-more{font-size:11px;color:var(--ink-soft);padding:10px 2px;text-align:center;}
   .badge-res{font-size:10px;font-weight:600;padding:3px 9px;border-radius:16px;background:var(--bg);color:var(--ink-soft);}
   .badge-admin{font-size:9px;font-weight:700;padding:2px 7px;border-radius:12px;background:var(--green);color:#fff;}
@@ -1220,7 +1221,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='29.09.2026 · 7';
+const APP_VERSION='29.09.2026 · 8';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -5577,21 +5578,51 @@ function tokenCard(){
      '<button class="ghost-btn" style="margin-top:0;" onclick="saveAdminToken()">Token speichern</button></div>';
   return h;
 }
+/* ---------- Mannschafts-Nummer wählen (ab 29.09.2026 · 8) ----------
+   Vorher waren nach dem Antippen einer Altersklasse ALLE Nummern grün, Antippen hat eine Nummer ABgewählt.
+   Viele haben die Mannschaft angetippt, die sie trainieren – und damit genau die falschen übrig gelassen
+   (z. B. E1-Trainer mit „E2, E3“). Jetzt: nach dem Antippen der Altersklasse ist noch KEINE Nummer gewählt,
+   man tippt die eigene Mannschaft an; „Alle“ wählt alle. Gibt es in der Saison nur eine Mannschaft der
+   Klasse (z. B. G1), gilt sie direkt. Gespeichert wird erst, wenn überall eine Nummer gewählt ist.
+   Datenformat unverändert: {Klasse: [Nummern]}, [] = alle. PICK_OPEN merkt "noch nicht gewählt". */
+const PICK_OPEN=new Set();
+function squadPickStart(pk,team,s){ if(isJugend(team)&&squadsFor(team,s).length>1) PICK_OPEN.add(pk+'|'+team); }
+function squadPickEnd(pk,team){ PICK_OPEN.delete(pk+'|'+team); }
+function squadPickToggle(pk,team,cur,n,s){
+  const key=pk+'|'+team, all=squadsFor(team,s);
+  let list=PICK_OPEN.has(key)?[]:((cur&&cur.length)?[...cur]:null); // null = bisher "alle"
+  if(list===null) list=[n];                                        // von "alle" auf genau diese Mannschaft
+  else{ const i=list.indexOf(n); if(i>=0) list.splice(i,1); else list.push(n); }
+  list.sort((a,b)=>a-b);
+  if(!list.length){ PICK_OPEN.add(key); return []; }
+  PICK_OPEN.delete(key);
+  return all.every(x=>list.includes(x))?[]:list;
+}
+function squadPickAll(pk,team){ PICK_OPEN.delete(pk+'|'+team); return []; }
+function squadPickMissing(pk,cls){ return Object.keys(cls||{}).filter(t=>PICK_OPEN.has(pk+'|'+t)); }
+function squadPickMissingMsg(teams){ return 'Bitte bei '+teams.join(', ')+' noch die Mannschaft antippen (z. B. '+jugendLetter(teams[0])+'1).'; }
+// Nummern-Chips einer Klasse. onSquad enthält {n} als Platzhalter für die Nummer.
+function squadChipsHTML(pk,team,cur,s,onSquad,onAll,review){
+  const open=PICK_OPEN.has(pk+'|'+team), all=squadsFor(team,s), L=jugendLetter(team);
+  const isAll=!open&&!(cur&&cur.length);
+  let h=all.map(n=>'<span class="squad-sq-chip'+(!open&&!isAll&&cur.includes(n)?' on':'')+'" onclick="'+onSquad.replace('{n}',n)+'">'+L+n+'</span>').join('');
+  if(all.length>1) h+='<span class="squad-sq-chip'+(isAll?' on':'')+'" onclick="'+onAll+'">Alle</span>';
+  if(open) h+='<span class="squad-hint">Welche Mannschaft? Bitte antippen</span>';
+  else if(isAll&&all.length>1&&review) h+='<span class="squad-hint">Alle '+esc(team.replace('-Jugend',''))+'-Mannschaften – stimmt das?</span>';
+  else h+='<span style="font-size:9.5px;color:var(--ink-soft);">'+(isAll?(all.length>1?'alle '+esc(team.replace('-Jugend',''))+'-Mannschaften':L+all[0]+'-Jugend'):cur.map(x=>L+x+'-Jugend').join(', '))+'</span>';
+  return h;
+}
 let nuClasses={}; // Mannschafts-Zuordnung beim Anlegen eines neuen Zugangs (Team -> [Squad-Nummern])
 function nuToggleTeam(team){
-  if(nuClasses.hasOwnProperty(team))delete nuClasses[team]; else nuClasses[team]=[];
+  if(nuClasses.hasOwnProperty(team)){ delete nuClasses[team]; squadPickEnd('nu',team); }
+  else{ nuClasses[team]=[]; squadPickStart('nu',team); }
   renderNuClassPicker();
 }
 function nuToggleSquad(team,squad){
-  if(!nuClasses.hasOwnProperty(team))nuClasses[team]=[];
-  const sq=[...(nuClasses[team]||[])];
-  const all=squadsFor(team), expanded=sq.length?sq:all.slice();
-  const i=expanded.indexOf(squad);
-  if(i>=0)expanded.splice(i,1); else expanded.push(squad);
-  expanded.sort((a,b)=>a-b);
-  nuClasses[team]=all.every(n=>expanded.includes(n))?[]:expanded;
+  nuClasses[team]=squadPickToggle('nu',team,nuClasses[team],squad);
   renderNuClassPicker();
 }
+function nuAllSquads(team){ nuClasses[team]=squadPickAll('nu',team); renderNuClassPicker(); }
 function renderNuClassPicker(){
   const el=document.getElementById('nu-classes-picker');
   if(!el)return;
@@ -5602,13 +5633,7 @@ function renderNuClassPicker(){
     const L=jugendLetter(team);
     let row='<div style="margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">';
     row+='<div class="res-chip'+(on?' on':'')+'" onclick="nuToggleTeam(\''+team+'\')" style="padding:6px 10px;font-size:11px;">'+esc(team)+'</div>';
-    if(on&&isJ){
-      squadsFor(team).forEach(n=>{
-        const sqOn=!sq.length||sq.includes(n);
-        row+='<span class="squad-sq-chip'+(sqOn?' on':'')+'" onclick="nuToggleSquad(\''+team+'\','+n+')">'+L+n+'</span>';
-      });
-      row+='<span style="font-size:9.5px;color:var(--ink-soft);">'+(sq.length?sq.map(s=>L+s+'-Jugend').join(', '):'alle Mannschaften')+'</span>';
-    }
+    if(on&&isJ) row+=squadChipsHTML('nu',team,sq,undefined,'nuToggleSquad(\''+team+'\',{n})','nuAllSquads(\''+team+'\')');
     row+='</div>';
     return row;
   }).join('');
@@ -6004,6 +6029,7 @@ async function createUser(){
   const isAdm=document.getElementById('nu-admin').classList.contains('on');
   const classes=JSON.parse(JSON.stringify(nuClasses));
   if(!first||!last||!mail){showToast('Bitte Vorname, Nachname und E-Mail ausfüllen.');return;}
+  const nuOpen=squadPickMissing('nu',nuClasses); if(nuOpen.length){showToast(squadPickMissingMsg(nuOpen),5000);return;}
   if(!/^\S+@\S+\.\S+$/.test(mail)){showToast('E-Mail sieht nicht gültig aus.');return;}
   if(pass.length<12){showToast('Passwort braucht mindestens 12 Zeichen.');return;}
   if(USERS.some(u=>u.email.toLowerCase()===mail)){showToast('Diese E-Mail gibt es schon.');return;}
@@ -6017,7 +6043,7 @@ async function createUser(){
     await refreshUsersFromGitHub();
     await createUserCore({first,last,mail,pass,isAdm,classes,targetSeason});
     showToast(first+' kann sich jetzt anmelden'+(isAdm?' und darf alles verwalten.':'.')+(targetSeason?' Bereits "'+targetSeason.label+'" zugeordnet.':''));
-    nuClasses={};
+    nuClasses={}; [...PICK_OPEN].filter(k=>k.startsWith('nu|')).forEach(k=>PICK_OPEN.delete(k));
     renderKonto();
   }catch(e){
     showToast('Fehler: '+e.message,6000);
@@ -6669,13 +6695,7 @@ function seasonClassPickerHTML(s,u){
     const L=jugendLetter(team);
     eh+='<div style="margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">';
     eh+='<div class="res-chip'+(on?' on':'')+'" onclick="toggleSeasonTrainerTeam(\''+s.id+'\',\''+u.id+'\',\''+team+'\')" style="padding:6px 11px;font-size:11.5px;">'+esc(team)+'</div>';
-    if(on&&isJ){
-      squadsFor(team,s).forEach(n=>{
-        const sqOn=!sq.length||sq.includes(n);
-        eh+='<span class="squad-sq-chip'+(sqOn?' on':'')+'" onclick="toggleSeasonTrainerSquad(\''+s.id+'\',\''+u.id+'\',\''+team+'\','+n+')">'+L+n+'</span>';
-      });
-      eh+='<span style="font-size:9.5px;color:var(--ink-soft);">'+(sq.length?sq.map(x=>L+x+'-Jugend').join(', '):'alle Mannschaften')+'</span>';
-    }
+    if(on&&isJ) eh+=squadChipsHTML('se:'+s.id+':'+u.id,team,sq,s,'toggleSeasonTrainerSquad(\''+s.id+'\',\''+u.id+'\',\''+team+'\',{n})','allSeasonTrainerSquads(\''+s.id+'\',\''+u.id+'\',\''+team+'\')');
     eh+='</div>';
   });
   eh+='<button class="ghost-btn" style="margin-top:4px;" onclick="saveSeasonTrainerClasses(\''+s.id+'\',\''+u.id+'\')">Speichern</button></div>';
@@ -6689,28 +6709,30 @@ function toggleSeasonClassEditor(seasonId,userId){
 function toggleSeasonTrainerTeam(seasonId,userId,team){
   const s=SEASONS.find(x=>x.id===seasonId); if(!s)return;
   s.trainerClasses=s.trainerClasses||{};
-  const cls=normalizeClasses(s.trainerClasses[userId]||{});
-  if(cls.hasOwnProperty(team))delete cls[team]; else cls[team]=[];
+  const cls=normalizeClasses(s.trainerClasses[userId]||{}), pk='se:'+seasonId+':'+userId;
+  if(cls.hasOwnProperty(team)){ delete cls[team]; squadPickEnd(pk,team); } else{ cls[team]=[]; squadPickStart(pk,team,s); }
   s.trainerClasses[userId]=cls;
+  renderKonto();
+}
+function allSeasonTrainerSquads(seasonId,userId,team){
+  const s=SEASONS.find(x=>x.id===seasonId); if(!s)return;
+  const cls=normalizeClasses((s.trainerClasses||{})[userId]||{});
+  cls[team]=squadPickAll('se:'+seasonId+':'+userId,team); s.trainerClasses[userId]=cls;
   renderKonto();
 }
 function toggleSeasonTrainerSquad(seasonId,userId,team,squad){
   const s=SEASONS.find(x=>x.id===seasonId); if(!s)return;
   s.trainerClasses=s.trainerClasses||{};
   const cls=normalizeClasses(s.trainerClasses[userId]||{});
-  if(!cls.hasOwnProperty(team))cls[team]=[];
-  const sq=[...(cls[team]||[])];
-  const all=squadsFor(team,s), expanded=sq.length?sq:all.slice();
-  const i=expanded.indexOf(squad);
-  if(i>=0)expanded.splice(i,1); else expanded.push(squad);
-  expanded.sort((a,b)=>a-b);
-  cls[team]=all.every(n=>expanded.includes(n))?[]:expanded;
+  cls[team]=squadPickToggle('se:'+seasonId+':'+userId,team,cls[team],squad,s);
   s.trainerClasses[userId]=cls;
   renderKonto();
 }
 async function saveSeasonTrainerClasses(seasonId,userId){
   const s=SEASONS.find(x=>x.id===seasonId); if(!s)return;
   const u=USERS.find(x=>x.id===userId); if(!u)return;
+  const seOpen=squadPickMissing('se:'+seasonId+':'+userId,(s.trainerClasses||{})[userId]);
+  if(seOpen.length){ showToast(squadPickMissingMsg(seOpen),5000); return; }
   showSaving('Team-Zuordnung wird gespeichert …');
   const backup=JSON.stringify(SEASONS);
   try{
@@ -7387,15 +7409,10 @@ function classesLabelHTML(cls){
 /* Mannschafts-Auswahl, wiederverwendbar (Registrierungsmaske + Anpassen bei der Freigabe).
    Gleiches Format wie beim manuellen Anlegen: {Team: [Squad-Nummern]}, leeres Array = alle. */
 const CP={};
-function cpToggleTeam(pid,team){ const c=CP[pid]; if(c.hasOwnProperty(team))delete c[team]; else c[team]=[]; cpRender(pid); }
-function cpToggleSquad(pid,team,n){
-  const c=CP[pid]; if(!c.hasOwnProperty(team))c[team]=[];
-  const all=squadsFor(team), ex=(c[team]&&c[team].length)?[...c[team]]:all.slice();
-  const i=ex.indexOf(n); if(i>=0)ex.splice(i,1); else ex.push(n);
-  ex.sort((a,b)=>a-b);
-  if(!ex.length){ delete c[team]; } else c[team]=all.every(x=>ex.includes(x))?[]:ex;
-  cpRender(pid);
-}
+function cpToggleTeam(pid,team){ const c=CP[pid]; if(c.hasOwnProperty(team)){ delete c[team]; squadPickEnd('cp:'+pid,team); } else{ c[team]=[]; squadPickStart('cp:'+pid,team); } cpRender(pid); }
+function cpToggleSquad(pid,team,n){ const c=CP[pid]; c[team]=squadPickToggle('cp:'+pid,team,c[team],n); cpRender(pid); }
+function cpAllSquads(pid,team){ CP[pid][team]=squadPickAll('cp:'+pid,team); cpRender(pid); }
+function cpMissing(pid){ return squadPickMissing('cp:'+pid,CP[pid]); }
 function cpRender(pid){
   if(pid!=='reg'){ renderRegAdmin(); return; } // Admin-Karte komplett neu, damit die Mannschafts-Anzeige oben mitzieht
   const el=document.getElementById('cp-'+pid); if(el) el.innerHTML=cpHTML(pid);
@@ -7407,11 +7424,7 @@ function cpHTML(pid){
     const wide=on&&isJugend(team);
     let row='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;'+(wide?'flex-basis:100%;':'')+'">';
     row+='<div class="res-chip'+(on?' on':'')+'" onclick="cpToggleTeam(\''+pid+'\',\''+team+'\')" style="padding:6px 10px;font-size:11.5px;">'+esc(team)+'</div>';
-    if(on&&isJugend(team)){
-      squadsFor(team).forEach(n=>{ const sqOn=!sq.length||sq.includes(n);
-        row+='<span class="squad-sq-chip'+(sqOn?' on':'')+'" onclick="cpToggleSquad(\''+pid+'\',\''+team+'\','+n+')">'+L+n+'</span>'; });
-      row+='<span style="font-size:10px;color:var(--ink-soft);">'+(sq.length?sq.map(s=>L+s).join(', '):'alle '+esc(team.replace('-Jugend',''))+'-Teams')+'</span>';
-    }
+    if(on&&isJugend(team)) row+=squadChipsHTML('cp:'+pid,team,sq,undefined,'cpToggleSquad(\''+pid+'\',\''+team+'\',{n})','cpAllSquads(\''+pid+'\',\''+team+'\')',pid!=='reg');
     return row+'</div>';
   }).join('')+'</div>';
 }
@@ -7425,7 +7438,7 @@ function openInviteFromHash(){
 function clearInviteHash(){ if(/^#invite=/.test(location.hash)) history.replaceState(null,'',location.pathname+location.search); }
 async function openRegister(code){
   REGFORM={code,state:'checking',error:''};
-  CP.reg={};
+  CP.reg={}; [...PICK_OPEN].filter(k=>k.startsWith('cp:reg|')).forEach(k=>PICK_OPEN.delete(k));
   document.getElementById('register').classList.add('show');
   renderRegister();
   trackArea('registrierung'); trackEvent('registrierung_geoeffnet');
@@ -7465,7 +7478,7 @@ function renderRegister(){
       +'<input type="tel" id="rg-phone" placeholder="Telefonnummer" autocomplete="tel" value="'+esc(REGFORM.phone||'')+'">'
       +'<input type="text" id="rg-website" class="reg-hp" tabindex="-1" autocomplete="off" aria-hidden="true">'
       +'<span class="reg-label">Welche Mannschaft(en) trainierst du?</span>'
-      +'<p class="helptext" style="margin:0 0 8px;">Bei Jugendmannschaften danach dein Team antippen, z. B. nur E2. Mehrere Mannschaften sind möglich.</p>'
+      +'<p class="helptext" style="margin:0 0 8px;">Erst die Altersklasse antippen, dann <b>deine</b> Mannschaft, z. B. E1. Mehrere sind möglich.</p>'
       +'<div id="cp-reg">'+cpHTML('reg')+'</div>'
       +'<label class="reg-check"><input type="checkbox" id="rg-showphone"'+(REGFORM.showPhone?' checked':'')+'><span>Meine Telefonnummer auch <b>öffentlich</b> anzeigen, also für Besucher ohne Anmeldung. <span style="color:var(--ink-soft);">Angemeldete Trainer im Verein sehen deine Kontaktdaten immer. Später im Profil änderbar.</span></span></label>'
       +'<label class="reg-check"><input type="checkbox" id="rg-consent"'+(REGFORM.consent?' checked':'')+'><span>Ich bin einverstanden, dass meine Angaben an den Vorstand von '+club+' übermittelt und nach der Freigabe in Platzcoach gespeichert werden und angemeldete Trainer im Verein meine Telefonnummer und E-Mail sehen.</span></label>'
@@ -7492,6 +7505,7 @@ async function submitRegister(){
   if(!REG_MAIL_RE.test(f.email)) errs.push('Bitte eine gültige E-Mail-Adresse eintragen.');
   if(!REG_PHONE_RE.test(f.phone)) errs.push('Bitte eine gültige Telefonnummer eintragen (z. B. 0172 1234567).');
   if(!Object.keys(CP.reg||{}).length) errs.push('Bitte mindestens eine Mannschaft auswählen.');
+  else if(cpMissing('reg').length) errs.push(squadPickMissingMsg(cpMissing('reg')));
   if(!f.consent) errs.push('Bitte den Haken beim Einverständnis setzen.');
   if(!errs.length&&USERS.some(u=>(u.email||'').toLowerCase()===f.email)) errs.push('Für diese E-Mail gibt es schon einen Zugang. Du kannst dich direkt anmelden.');
   if(errs.length){ f.error=errs.join(' '); trackEvent('registrierung_eingabefehler'); renderRegister(); document.getElementById('register').scrollTop=0; return; }
@@ -7704,6 +7718,7 @@ function approveRegistration(id){
   const r=REGSTATE.list.find(x=>x.id===id); if(!r)return;
   const classes=JSON.parse(JSON.stringify(CP['r'+id]||r.classes||{}));
   if(!Object.keys(classes).length){ showToast('Bitte mindestens eine Mannschaft auswählen.'); return; }
+  if(cpMissing('r'+id).length){ showToast(squadPickMissingMsg(cpMissing('r'+id)),5000); return; }
   const cur=getCurrentSeason();
   askConfirm('Zugang freigeben?',r.first+' '+r.last+' bekommt eine Willkommens-Mail und eine zweite Mail mit dem Start-Passwort'+(cur?' und wird der Saison „'+cur.label+'" zugeordnet.':'.'),'Freigeben',async()=>{
     REGSTATE.busy[id]=true; renderRegAdmin();
