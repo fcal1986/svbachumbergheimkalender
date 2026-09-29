@@ -199,6 +199,8 @@
   .dfb-badge.warn{background:#FFF5F5;color:#8E2A1D;}
   .event-card.match-planned{border:1.5px dashed #F59E0B;}
   .event-card.match-planned .ev-head{background:#FFF7ED;}
+  .event-card.external-card.match-planned{border:1.5px dashed #F59E0B;}
+  .wk-row.wk-planned{background:#FFF7ED;border:1.5px dashed #F59E0B;}
   .plan-tag{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#9A3412;background:#FFEDD5;border-radius:6px;padding:2px 7px;margin-bottom:3px;}
   .wk-row .pt-time.two{line-height:1.25;font-size:11px;min-width:52px;}
   .wk-row .pt-time.two b{display:block;font-size:12px;}
@@ -1221,7 +1223,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='29.09.2026 · 9';
+const APP_VERSION='29.09.2026 · 10';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2765,11 +2767,13 @@ function externalRowHTML(e){
   const trainerObj=fussballTrainersFor(e.team,e.squad);
   const trainerHtml=trainerObj?getTrainersContactHTML(trainerObj):'';
   const sc=scoreInfo(e);
-  return '<div class="event-card external-card'+(e.isAway?' external-away':'')+(sc?' has-score '+sc.outcome:'')+'" id="ev-'+e.id+'">'
+  // Vorgemerkte Verlegung (fussball.de zeigt noch den alten Termin): gleich gekennzeichnet wie ein vorgemerktes Freundschaftsspiel.
+  const planned=!!e.movePending;
+  return '<div class="event-card external-card'+(e.isAway?' external-away':'')+(sc?' has-score '+sc.outcome:'')+(planned?' match-planned':'')+'" id="ev-'+e.id+'">'
     +'<div class="ev-head">'
     +'<div class="ev-date-box"><span class="ev-dow">'+dow+'</span><span class="ev-day">'+dd+'</span></div>'
     +'<div class="ev-sep"></div>'
-    +'<div class="ev-title-box"><h4>'+esc(e.title)+'</h4><div class="ev-sub">'+e.t+'–'+bis+' · '+(e.movePending?'vorgemerkt':'fussball.de')+(e.isAway?' · belegt keinen eigenen Platz':'')+'</div></div>'
+    +'<div class="ev-title-box">'+(planned?'<div class="plan-tag">Vorgemerkt</div>':'')+'<h4>'+esc(e.title)+'</h4><div class="ev-sub">'+e.t+'–'+bis+' · '+(e.movePending?'vorgemerkt':'fussball.de')+(e.isAway?' · belegt keinen eigenen Platz':'')+'</div></div>'
     +(sc?'<div class="score-pill '+sc.outcome+'">'+sc.text+'</div>':'<div class="row-acts">'+acts+'</div>')
     +'</div>'
     +'<div class="ev-body">'
@@ -3278,7 +3282,8 @@ function weekRowHTML(e,withDate){
     sub=e.isTraining?'':typeLabelOf(e);
     right='<div class="pt-visual">'+(pitchVisualOf(e)||'')+'</div>';
   }
-  return '<div class="pitch-today-row wk-row'+(e.isCancelled?' pt-cancelled':'')+'" onclick="'+esc(click)+'">'
+  const planned=!e.isMovedGhost&&(e.movePending||isMatchPlanned(e));
+  return '<div class="pitch-today-row wk-row'+(e.isCancelled?' pt-cancelled':'')+(planned?' wk-planned':'')+'" onclick="'+esc(click)+'">'
     +(withDate?'<div class="pt-time two"><b>'+esc(dayCase(e.d))+'</b>'+e.t+'</div>':'<div class="pt-time">'+e.t+'</div>')
     +'<div class="pt-team"><div class="pt-team-name">'+chip+esc(name)+'</div>'
     +(sub?'<div class="pt-type">'+esc(sub)+'</div>':'')
@@ -3293,14 +3298,25 @@ function weekDayLabel(ds){
   if(ds===ymd(t)) return 'Morgen · '+dayCase(ds);
   return dayCase(ds);
 }
-// Nächstes Spiel je Mannschaft, die in den 7 Tagen kein Spiel hat (z. B. spielfreies Wochenende).
+/* Nächste Spiele nach der Woche (ab 29.09.2026 · 10):
+   - je Mannschaft das nächste Spiel von fussball.de (wenn sie in den 7 Tagen keins hat),
+   - dazu ALLE vorgemerkten Spiele: eigene Freundschaftsspiele/Turniere und vorgemerkte Verlegungen,
+     damit man z. B. sieht „E2: 14.10. bei SC Neheim (vorgemerkt), 06.11. gegen Oeventrop (verlegt)“.
+   Nach Datum sortiert, höchstens NEXT_MAX Zeilen. */
+const NEXT_MAX=8;
 function nextGamesBeyondWeek(isMine,items){
   const end=weekEndStr();
   const withGame=new Set(items.filter(e=>e.isExternal).map(e=>e.team+':'+(e.squad||1)));
-  const later=fussballDisplayAll().concat(fussballDisplayAwayAll()).filter(e=>e.d>end&&isMine(e)).sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t));
+  const fb=fussballDisplayAll().concat(fussballDisplayAwayAll()).filter(e=>e.d>end&&isMine(e)).sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t));
   const seen=new Set(), out=[];
-  later.forEach(e=>{ const k=e.team+':'+(e.squad||1); if(withGame.has(k)||seen.has(k)) return; seen.add(k); out.push(e); });
-  return out;
+  fb.forEach(e=>{
+    const k=e.team+':'+(e.squad||1);
+    if(e.movePending){ out.push(e); seen.add(k); return; } // vorgemerkte Verlegung immer zeigen (zählt als nächstes Spiel)
+    if(withGame.has(k)||seen.has(k)) return; seen.add(k); out.push(e);
+  });
+  EVENTS.filter(e=>e.d>end&&isMatchKind(kindOf(e))&&e.ha&&isMine(e)).forEach(e=>out.push(e));
+  const uniq=[...new Map(out.map(e=>[e.id,e])).values()];
+  return uniq.sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t)).slice(0,NEXT_MAX);
 }
 /* "Zu erledigen": nur angemeldet. Mit Mannschaften nur deren Punkte, Admins ohne Mannschaft alles. */
 function myTodos(isMine,hasTeams){
