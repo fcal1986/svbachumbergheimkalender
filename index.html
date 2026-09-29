@@ -1197,7 +1197,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='29.09.2026 · 4';
+const APP_VERSION='29.09.2026 · 5';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -6062,7 +6062,7 @@ function togglePastSeasons(){ showPastSeasons=!showPastSeasons; renderKonto(); }
    - "Nicht bei fussball.de": in Platzcoach vorhanden, bei fussball.de ohne Spiel im Zeitraum (z. B. G2, G3)
    Der Admin übernimmt oder verwirft jeden Vorschlag; Verworfenes merkt sich die Saison
    (season.teamSync.ignored), damit es beim nächsten Abgleich nicht wieder auftaucht. */
-let teamSyncShowOk=false;
+let teamSyncShowOk=false, teamSyncShowRemoved=false;
 function tsTeamKey(t){ return t.team+'#'+(t.squad||1); }
 function tsFdKey(f){ return (f.type||'').trim()+'#'+(f.squad||1); }
 function tsFdLabel(f){ return f.type+((f.squad||1)>1||/junioren/i.test(f.type)?' '+(f.squad||1):''); }
@@ -6140,7 +6140,7 @@ function teamSyncAccept(kind,key){
     tsSave(s,'Mannschaftsabgleich '+s.label+': '+tsFdLabel(item.f)+' → '+tsAppLabel(target),backup);
   }else{
     const item=d.remove.find(x=>x.key===key); if(!item) return;
-    tsMaterialize(s,d); s.teams=s.teams.filter(t=>tsTeamKey(t)!==key);
+    tsMaterialize(s,d); s.teams=s.teams.filter(t=>tsTeamKey(t)!==key); tsRemember(s,item.app);
     tsSave(s,'Mannschaftsabgleich '+s.label+': '+tsAppLabel(item.app)+' entfernt',backup);
   }
 }
@@ -6162,7 +6162,7 @@ function teamSyncAcceptAll(){
     'Übernehmen',()=>{
       adds.forEach(item=>tsApplyAdd(s,d,item,tsTarget(item)));
       tsMaterialize(s,d);
-      const rm=new Set(d.remove.map(x=>x.key)); s.teams=s.teams.filter(t=>!rm.has(tsTeamKey(t)));
+      const rm=new Set(d.remove.map(x=>x.key)); s.teams=s.teams.filter(t=>!rm.has(tsTeamKey(t))); d.remove.forEach(x=>tsRemember(s,x.app));
       tsSave(s,'Mannschaftsabgleich '+s.label+': '+(adds.length+d.remove.length)+' Änderung(en) übernommen',backup);
     });
 }
@@ -6180,6 +6180,51 @@ function teamSyncResetIgnored(){
   tsSave(s,'Mannschaftsabgleich '+s.label+': verworfene Vorschläge zurückgeholt',backup);
 }
 function toggleTeamSyncOk(){ teamSyncShowOk=!teamSyncShowOk; renderKonto(); }
+/* ---------- Mannschaft von Hand hinzufügen / entfernte zurückholen (ab 29.09.2026 · 5) ----------
+   Entfernte Mannschaften merkt sich die Saison (teamSync.removed), damit sie mit einem Tipp
+   zurückkommen. Von Hand hinzugefügte Mannschaften gelten als "behalten" (teamSync.ignored 'app:…'),
+   sonst schlüge der Abgleich sie gleich wieder zum Entfernen vor, solange sie keine Spiele hat. */
+function tsRemember(s,t){
+  s.teamSync=s.teamSync||{}; const l=s.teamSync.removed||(s.teamSync.removed=[]);
+  const k=tsTeamKey(t); if(!l.some(x=>tsTeamKey(x)===k)) l.push({team:t.team,squad:t.squad||1,at:todayStr});
+}
+function tsMissingTeams(s){
+  const have=new Set(seasonTeams(s).map(tsTeamKey)), out=[];
+  ALL_CLASSES.filter(t=>t!==GK_TEAM).forEach(team=>{ (isJugend(team)?[1,2,3,4,5]:[1]).forEach(n=>{ if(!have.has(team+'#'+n)) out.push({team,squad:n}); }); });
+  return out;
+}
+function teamSyncAddTeam(key){
+  if(!requireAdmin()) return;
+  const s=getCurrentSeason(); if(!s) return;
+  if(!key){ const el=document.getElementById('ts-add-sel'); key=el?el.value:''; }
+  if(!key){ showToast('Bitte eine Mannschaft wählen.'); return; }
+  const [team,q]=key.split('#'), t={team,squad:isJugend(team)?(parseInt(q)||1):1};
+  if(seasonTeams(s).some(x=>tsTeamKey(x)===tsTeamKey(t))){ showToast('Die Mannschaft gibt es schon.'); return; }
+  const backup=JSON.stringify(SEASONS);
+  tsMaterialize(s,teamSyncDiff(s));
+  s.teams.push(t);
+  s.teams.sort((a,b)=>ALL_CLASSES.indexOf(a.team)-ALL_CLASSES.indexOf(b.team)||(a.squad||1)-(b.squad||1));
+  if(s.teamSync&&s.teamSync.removed) s.teamSync.removed=s.teamSync.removed.filter(x=>tsTeamKey(x)!==tsTeamKey(t));
+  tsIgnore(s,'app:'+tsTeamKey(t));
+  tsSave(s,'Mannschaft hinzugefügt ('+s.label+'): '+tsAppLabel(t),backup);
+}
+function toggleTeamSyncRemoved(){ teamSyncShowRemoved=!teamSyncShowRemoved; renderKonto(); }
+function teamSyncManualHTML(s){
+  const removed=((s.teamSync&&s.teamSync.removed)||[]).filter(t=>!seasonTeams(s).some(x=>tsTeamKey(x)===tsTeamKey(t)));
+  const missing=tsMissingTeams(s);
+  let h='<div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px;">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Mannschaft hinzufügen</div>';
+  if(removed.length){
+    h+='<div class="ts-sum" style="margin:0 0 8px;" onclick="toggleTeamSyncRemoved()">'+removed.length+' entfernte Mannschaft'+(removed.length===1?'':'en')+' '+(teamSyncShowRemoved?'▴':'▾')+'</div>';
+    if(teamSyncShowRemoved) h+=removed.map(t=>'<div class="ts-acts" style="justify-content:space-between;margin-bottom:6px;"><span class="ts-title">'+esc(tsAppLabel(t))+'</span>'
+      +'<button class="ts-btn no" onclick="teamSyncAddTeam(\''+jsArg(tsTeamKey(t))+'\')">Wieder hinzufügen</button></div>').join('');
+  }
+  h+='<div class="ts-acts"><select id="ts-add-sel" aria-label="Mannschaft hinzufügen"><option value="">Mannschaft wählen …</option>'
+    +missing.map(t=>'<option value="'+esc(tsTeamKey(t))+'">'+esc(tsAppLabel(t))+'</option>').join('')+'</select>'
+    +'<button class="ts-btn yes" onclick="teamSyncAddTeam()">Hinzufügen</button></div>'
+    +'<div class="ts-meta" style="margin-top:6px;">Für Mannschaften ohne Spiele bei fussball.de, z. B. eine neue Bambini-Gruppe.</div></div>';
+  return h;
+}
 function openTeamSync(){ goto('konto'); setKontoTab('saisons'); setTimeout(()=>{ const el=document.getElementById('team-sync-card'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },60); }
 function tsTargetOptions(item){
   const opts=['<option value="">Platzcoach-Mannschaft wählen …</option>'];
@@ -6196,7 +6241,7 @@ function teamSyncCard(){
   const ico='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:16px;height:16px;stroke:var(--green)"><path d="M4 12a8 8 0 0 1 14-5.3L20 9"/><path d="M20 4v5h-5"/><path d="M20 12a8 8 0 0 1-14 5.3L4 15"/><path d="M4 20v-5h5"/></svg>';
   let h='<div class="card" id="team-sync-card"><h4>'+ico+'Mannschaften abgleichen</h4>';
   const d=teamSyncDiff(s);
-  if(!d){ return h+'<p class="sub">Noch keine Mannschaftsliste von fussball.de. Sie kommt mit dem nächsten Abgleich (alle 2 Stunden).</p></div>'; }
+  if(!d){ return h+'<p class="sub">Noch keine Mannschaftsliste von fussball.de. Sie kommt mit dem nächsten Abgleich (alle 2 Stunden).</p>'+teamSyncManualHTML(s)+'</div>'; }
   const upd=FUSSBALLDE_RAW.updated?new Date(FUSSBALLDE_RAW.updated):null;
   h+='<p class="sub">'+esc(s.label)+': Mannschaften in Platzcoach und Mannschaften mit Spielen bei fussball.de'
     +(d.from?' (ab '+fmtShort(d.from)+')':'')+(upd?', Stand '+upd.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})+' '+upd.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'')+'. Nichts ändert sich ohne dein OK.</p>';
@@ -6233,6 +6278,7 @@ function teamSyncCard(){
     if(teamSyncShowOk) h+='<div class="ts-okgrid">'+d.ok.map(({f,app})=>'<span class="badge-res" title="'+esc((f.names||[]).join(' / '))+'">'+esc(tsAppLabel(app))+' ↔ '+esc(tsFdLabel(f))+'</span>').join('')+'</div>';
   }
   if(d.ignored.length) h+='<div class="ts-sum" onclick="teamSyncResetIgnored()">'+d.ignored.length+' verworfene'+(d.ignored.length===1?'r Vorschlag':' Vorschläge')+' · wieder anzeigen</div>';
+  h+=teamSyncManualHTML(s);
   return h+'</div>';
 }
 function seasonManagementCard(){
