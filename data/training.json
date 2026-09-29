@@ -175,8 +175,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "6085b3aa-f111-47fa-9d20-7e59a0a987e8"
+      ],
+      "trainerNames": [
+        "Marc Geauf"
+      ],
       "validFrom": "2026-07-19",
       "validUntil": null,
       "trainerId": null,
@@ -468,8 +472,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "6085b3aa-f111-47fa-9d20-7e59a0a987e8"
+      ],
+      "trainerNames": [
+        "Marc Geauf"
+      ],
       "validFrom": "2026-07-19",
       "validUntil": null,
       "cancelled": [],
