@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-29T08:27:44.054Z",
+  "updated": "2026-09-29T09:54:27.492Z",
   "games": [
     {
       "d": "2026-09-08",
@@ -3357,5 +3357,292 @@
       "link": "https://www.fussball.de/spiel/spielverein-westfalia-soest-ii-sv-bachum-bergheim/-/spiel/031GM5IBJ8000000VS5489BTVVG7L386"
     }
   ],
+  "teams": [
+    {
+      "type": "A-Junioren",
+      "squad": 1,
+      "names": [
+        "SV Bachum/Bergheim"
+      ],
+      "teamIds": [
+        "027IVI3RO8000000VS5489B1VUA37ON8"
+      ],
+      "competitions": [
+        "Kreisliga A",
+        "Kreispokal"
+      ],
+      "games": 17,
+      "homeGames": 8,
+      "first": "2026-09-11",
+      "last": "2027-05-21",
+      "teamId": "027IVI3RO8000000VS5489B1VUA37ON8"
+    },
+    {
+      "type": "B-Junioren",
+      "squad": 1,
+      "names": [
+        "SV Bachum/Bergheim"
+      ],
+      "teamIds": [
+        "02B9BQVPIG000000VS5489B1VU20GQ5T"
+      ],
+      "competitions": [
+        "Kreisfreundschaftsspiele",
+        "Bezirksliga",
+        "Kreispokal"
+      ],
+      "games": 27,
+      "homeGames": 15,
+      "first": "2026-09-08",
+      "last": "2027-06-13",
+      "teamId": "02B9BQVPIG000000VS5489B1VU20GQ5T"
+    },
+    {
+      "type": "C-Junioren",
+      "squad": 1,
+      "names": [
+        "SV Bachum-Bergh. I"
+      ],
+      "teamIds": [
+        "011MIB6N6S000000VTVG0001VTR8C1K7"
+      ],
+      "competitions": [
+        "Kreisliga A",
+        "Kreispokal"
+      ],
+      "games": 18,
+      "homeGames": 8,
+      "first": "2026-09-12",
+      "last": "2027-06-05",
+      "teamId": "011MIB6N6S000000VTVG0001VTR8C1K7"
+    },
+    {
+      "type": "C-Junioren",
+      "squad": 2,
+      "names": [
+        "SV Bachum-Bergh. II",
+        "SV Bachum-Bergheim 2"
+      ],
+      "teamIds": [
+        "031A86T3J0000000VS5489BSVU0ORN69"
+      ],
+      "competitions": [
+        "Kreisliga B",
+        "Kreisfreundschaftsspiele"
+      ],
+      "games": 13,
+      "homeGames": 6,
+      "first": "2026-09-12",
+      "last": "2027-06-05",
+      "teamId": "031A86T3J0000000VS5489BSVU0ORN69"
+    },
+    {
+      "type": "D-Junioren",
+      "squad": 1,
+      "names": [
+        "SV Bachum-Bergh. I",
+        "SV Bachum-Bergheim",
+        "SV Bachum-Berg. I"
+      ],
+      "teamIds": [
+        "011MI9U4VO000000VTVG0001VTR8C1K7"
+      ],
+      "competitions": [
+        "Kreisliga A",
+        "Kreisfreundschaftsspiele",
+        "Vereinsturnier",
+        "Kreispokal"
+      ],
+      "games": 28,
+      "homeGames": 13,
+      "first": "2026-09-12",
+      "last": "2027-06-05",
+      "teamId": "011MI9U4VO000000VTVG0001VTR8C1K7"
+    },
+    {
+      "type": "D-Junioren",
+      "squad": 2,
+      "names": [
+        "SV Bachum-Bergheim II",
+        "SV Bachum-Bergheim 2"
+      ],
+      "teamIds": [
+        "02PU7K56SO000000VS5489B2VSE05932"
+      ],
+      "competitions": [
+        "Kreisliga B",
+        "Kreisfreundschaftsspiele"
+      ],
+      "games": 15,
+      "homeGames": 7,
+      "first": "2026-09-18",
+      "last": "2027-06-05",
+      "teamId": "02PU7K56SO000000VS5489B2VSE05932"
+    },
+    {
+      "type": "E-Junioren",
+      "squad": 1,
+      "names": [
+        "SV Bachum/Bergheim I"
+      ],
+      "teamIds": [
+        "011MIBAMEC000000VTVG0001VTR8C1K7"
+      ],
+      "competitions": [
+        "Kreisliga A"
+      ],
+      "games": 14,
+      "homeGames": 7,
+      "first": "2026-09-12",
+      "last": "2027-06-12",
+      "teamId": "011MIBAMEC000000VTVG0001VTR8C1K7"
+    },
+    {
+      "type": "E-Junioren",
+      "squad": 2,
+      "names": [
+        "SV Bachum/Bergheim II"
+      ],
+      "teamIds": [
+        "027IVP92OK000000VS5489B1VUA37ON8"
+      ],
+      "competitions": [
+        "Kreisliga B"
+      ],
+      "games": 14,
+      "homeGames": 7,
+      "first": "2026-09-12",
+      "last": "2027-06-12",
+      "teamId": "027IVP92OK000000VS5489B1VUA37ON8"
+    },
+    {
+      "type": "E-Junioren",
+      "squad": 3,
+      "names": [
+        "SV Bachum/Bergheim III"
+      ],
+      "teamIds": [
+        "031BFRLD74000000VS5489BRVTPI24NQ"
+      ],
+      "competitions": [
+        "Kreisliga C"
+      ],
+      "games": 14,
+      "homeGames": 7,
+      "first": "2026-09-17",
+      "last": "2027-06-12",
+      "teamId": "031BFRLD74000000VS5489BRVTPI24NQ"
+    },
+    {
+      "type": "F-Junioren",
+      "squad": 1,
+      "names": [
+        "SV Bachum/Bergheim I"
+      ],
+      "teamIds": [
+        "011MIAKB1G000000VTVG0001VTR8C1K7"
+      ],
+      "competitions": [
+        "Kinderfußball"
+      ],
+      "games": 7,
+      "homeGames": 4,
+      "first": "2026-09-12",
+      "last": "2026-11-21",
+      "teamId": "011MIAKB1G000000VTVG0001VTR8C1K7"
+    },
+    {
+      "type": "G-Junioren",
+      "squad": 1,
+      "names": [
+        "SV Bachum/Bergheim"
+      ],
+      "teamIds": [
+        "023VO81ADC000000VS548985VVRPGK5E"
+      ],
+      "competitions": [
+        "Kinderfußball"
+      ],
+      "games": 4,
+      "homeGames": 3,
+      "first": "2026-09-12",
+      "last": "2026-10-10",
+      "teamId": "023VO81ADC000000VS548985VVRPGK5E"
+    },
+    {
+      "type": "Herren Ü32",
+      "squad": 1,
+      "names": [
+        "SV Bachum/Bergheim"
+      ],
+      "teamIds": [
+        "01OR4F5HES000000VV0AG811VS8BP574"
+      ],
+      "competitions": [
+        "Kreisturnier",
+        "Kreispokal"
+      ],
+      "games": 5,
+      "homeGames": 1,
+      "first": "2026-09-17",
+      "last": "2026-11-16",
+      "teamId": "01OR4F5HES000000VV0AG811VS8BP574"
+    },
+    {
+      "type": "Herren",
+      "squad": 1,
+      "names": [
+        "SV Bachum/Bergheim"
+      ],
+      "teamIds": [
+        "011MIANBCK000000VTVG0001VTR8C1K7"
+      ],
+      "competitions": [
+        "Kreisliga A"
+      ],
+      "games": 28,
+      "homeGames": 14,
+      "first": "2026-09-10",
+      "last": "2027-05-30",
+      "teamId": "011MIANBCK000000VTVG0001VTR8C1K7"
+    },
+    {
+      "type": "Herren",
+      "squad": 2,
+      "names": [
+        "SV Bachum/Bergheim II"
+      ],
+      "teamIds": [
+        "011MIBAEQC000000VTVG0001VTR8C1K7"
+      ],
+      "competitions": [
+        "Kreisliga B"
+      ],
+      "games": 26,
+      "homeGames": 13,
+      "first": "2026-09-20",
+      "last": "2027-05-30",
+      "teamId": "011MIBAEQC000000VTVG0001VTR8C1K7"
+    },
+    {
+      "type": "Herren",
+      "squad": 3,
+      "names": [
+        "SV Bachum/Bergheim III"
+      ],
+      "teamIds": [
+        "02M8390780000000VS5489B2VUHJA7LU"
+      ],
+      "competitions": [
+        "Kreisliga D"
+      ],
+      "games": 18,
+      "homeGames": 9,
+      "first": "2026-09-17",
+      "last": "2027-05-30",
+      "teamId": "02M8390780000000VS5489B2VUHJA7LU"
+    }
+  ],
+  "teamsFrom": "2026-09-08",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
