@@ -114,6 +114,12 @@ function parseMatches(html, debug) {
     // muss daher rausgefiltert werden, statt als "Heimspiel gegen spielfrei" zu erscheinen.
     if (/^spielfrei/i.test(home) || /^spielfrei/i.test(away)) return;
 
+    // Mannschafts-ID (team-id) der beiden Seiten, falls fussball.de die Vereinsnamen auf die
+    // Mannschaftsseite verlinkt ("/mannschaft/…/-/saison/2627/team-id/<ID>"). Nur ein Zusatz für
+    // den Mannschaftsabgleich; fehlt der Link, bleibt das Feld leer.
+    const teamIdOf = cell => { const m = ($(cell).find('a[href*="team-id"]').first().attr('href') || '').match(/team-id\/([A-Za-z0-9]+)/); return m ? m[1] : null; };
+    const homeTeamId = teamIdOf(clubCells[0]), awayTeamId = teamIdOf(clubCells[1]);
+
     const matchLink = $teamRow.find('a[href*="/spiel/"]').first().attr('href')
       || $row.find('a[href*="/spiel/"]').first().attr('href') || '';
 
@@ -130,7 +136,7 @@ function parseMatches(html, debug) {
     matches.push({
       date: iso,
       time: timeMatch ? `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}` : null,
-      home, away, ownTeam, competition, score,
+      home, away, ownTeam, competition, score, homeTeamId, awayTeamId,
       gameNo: noMatch ? noMatch[1] : null,
       link: matchLink ? new URL(matchLink, 'https://www.fussball.de').toString() : null,
     });
@@ -569,6 +575,13 @@ async function main() {
   console.log(`Spielnummer aus dem Vereinsspielplan: ${allGames.filter(g => g.gameNo).length} von ${allGames.length} Heimspielen.`
     + (matches.sampleRow ? ` Beispielzeile: "${matches.sampleRow}"` : ''));
 
+  // Mannschaftsliste für den Abgleich in der App (Konto → Saisons): welche Mannschaften des Vereins
+  // im Zeitraum (letzte 3 Wochen bis 1 Jahr voraus) bei fussball.de Spiele haben.
+  const teams = summarizeTeams(matches, clubMatch, cutoffIso);
+  console.log(`Mannschaften bei fussball.de: ${teams.length} (${teams.map(t => t.type + ' ' + t.squad + ' [' + t.games + ']').join(', ')}); `
+    + `mit Mannschafts-ID: ${teams.filter(t => t.teamId).length}.`);
+  await loadTeamMap();
+
   // Verlegungen erkennen: Ein Spiel behält bei fussball.de seinen Link, wenn es verlegt wird.
   // Hat sich Datum oder Uhrzeit gegenüber dem letzten Lauf geändert, merken wir uns den
   // ursprünglichen Termin (movedFrom). Bei mehreren Verlegungen bleibt der erste Termin stehen,
@@ -593,9 +606,36 @@ async function main() {
     await fs.rm(changesPath, { force: true });
   }
 
-  const output = { updated: new Date().toISOString(), games: allGames, awayGames, strategy: usedStrategy };
+  const output = { updated: new Date().toISOString(), games: allGames, awayGames, teams, teamsFrom: cutoffIso, strategy: usedStrategy };
   await fs.writeFile(OUTPUT_PATH, JSON.stringify(output, null, 2) + '\n');
   console.log(`Fertig: ${allGames.length} Heimspiele + ${awayGames.length} Auswärtsspiele nach ${OUTPUT_PATH} geschrieben.`);
+}
+
+/* ---------- Mannschaftsliste ----------
+   Eine Zeile je Mannschaft (Mannschaftsart + Nummer), wie sie bei fussball.de in Spielen auftaucht.
+   Mannschaften ohne Spiel im Zeitraum fehlen – deshalb entscheidet in der App immer der Admin. */
+function summarizeTeams(matches, clubMatch, fromIso) {
+  const map = new Map();
+  for (const m of matches) {
+    if (m.date < fromIso || !m.ownTeam) continue;
+    const home = isHomeMatch(m, clubMatch);
+    const away = !home && isHomeMatch({ ...m, home: m.away }, clubMatch);
+    if (!home && !away) continue;
+    const name = home ? m.home : m.away;
+    const squad = extractSquadNumber(name);
+    const key = m.ownTeam + '#' + squad;
+    let t = map.get(key);
+    if (!t) { t = { type: m.ownTeam, squad, names: [], teamIds: [], competitions: [], games: 0, homeGames: 0, first: m.date, last: m.date }; map.set(key, t); }
+    t.games++; if (home) t.homeGames++;
+    if (!t.names.includes(name)) t.names.push(name);
+    const tid = home ? m.homeTeamId : m.awayTeamId;
+    if (tid && !t.teamIds.includes(tid)) t.teamIds.push(tid);
+    if (m.competition && !t.competitions.includes(m.competition)) t.competitions.push(m.competition);
+    if (m.date < t.first) t.first = m.date;
+    if (m.date > t.last) t.last = m.date;
+  }
+  return [...map.values()].map(t => ({ ...t, teamId: t.teamIds[0] || null }))
+    .sort((a, b) => (a.type + a.squad).localeCompare(b.type + b.squad, 'de', { numeric: true }));
 }
 
 /* ---------- Änderungen für die Trainer-Mail ----------
@@ -610,7 +650,18 @@ function fmtGameDate(d, t) {
   return `${WD[dt.getDay()]} ${day}.${m}.${y}${t ? ', ' + t + ' Uhr' : ''}`;
 }
 // fussball.de-Team → Platzcoach-Mannschaft (wie fussballFilterTeam in index.html)
+// Zuordnung aus dem Mannschaftsabgleich der laufenden Saison (seasons.json → teams[].fd), z. B.
+// "Herren Ü32" → "Ü32 / Ü50". Ohne Eintrag gelten die Standardregeln unten.
+const TEAM_MAP = new Map();
+async function loadTeamMap() {
+  const today = new Date().toISOString().slice(0, 10);
+  const seasons = ((await readJson('data/seasons.json', {})).seasons) || [];
+  const s = seasons.find(x => x.from <= today && x.to >= today);
+  (s && s.teams || []).forEach(t => { if (t.fd && t.fd.type) TEAM_MAP.set(t.fd.type + '#' + (t.fd.squad || 1), { team: t.team, squad: t.squad || 1 }); });
+}
 function appTeam(team, squad) {
+  const mapped = TEAM_MAP.get((team || '').trim() + '#' + (squad || 1));
+  if (mapped) return { ...mapped };
   const t = (team || '').trim();
   if (/junioren/i.test(t)) return { team: t.replace(/junioren/i, 'Jugend'), squad: squad || 1 };
   if (/^herren$/i.test(t)) return { team: squad && squad > 1 ? squad + '. Herren' : '1. Herren', squad: 1 };

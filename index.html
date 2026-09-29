@@ -534,6 +534,22 @@
   .mncht-res{color:var(--ink-soft);}
   .konto-header{display:flex;align-items:center;justify-content:space-between;background:var(--white);border-radius:16px;padding:12px 14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(1,27,50,.08);}
   .konto-info{display:flex;align-items:center;gap:10px;}
+  .ts-row{display:flex;flex-direction:column;gap:6px;padding:10px 0;border-top:1px solid var(--line);}
+  .ts-row:first-of-type{border-top:none;}
+  .ts-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+  .ts-title{font-size:13px;font-weight:700;color:var(--ink);}
+  .ts-meta{font-size:11px;color:var(--ink-soft);line-height:1.4;}
+  .ts-warn{font-size:11px;color:var(--warn);line-height:1.4;}
+  .ts-pill{flex:none;font-size:9.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:999px;}
+  .ts-pill.add{background:var(--green-dim);color:var(--grass);}
+  .ts-pill.del{background:var(--yellow-soft);color:#8a6a00;}
+  .ts-acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .ts-acts select{flex:1;min-width:140px;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-family:Inter;font-size:12px;background:var(--bg);color:var(--ink);}
+  .ts-btn{border:none;border-radius:10px;padding:9px 14px;font-family:Inter;font-size:12px;font-weight:700;cursor:pointer;min-height:36px;}
+  .ts-btn.yes{background:var(--black-btn);color:#fff;}
+  .ts-btn.no{background:var(--bg);color:var(--ink-soft);border:1.5px solid var(--line);}
+  .ts-sum{font-size:11.5px;color:var(--ink-soft);margin-top:8px;cursor:pointer;}
+  .ts-okgrid{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
   .season-card{background:var(--bg);border-radius:12px;padding:12px;margin-bottom:10px;border:1.5px solid var(--line);}
   .season-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
   .season-title{font-size:13px;font-weight:800;color:var(--ink);}
@@ -1181,7 +1197,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='29.09.2026 · 3';
+const APP_VERSION='29.09.2026 · 4';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -1199,6 +1215,28 @@ const DOW=['Mo','Di','Mi','Do','Fr','Sa','So'];
 const WDAYS=['','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
 const HALF={A:[1,2],B:[3,4]};
 const ALL_CLASSES=['G-Jugend','F-Jugend','E-Jugend','D-Jugend','C-Jugend','B-Jugend','A-Jugend','1. Herren','2. Herren','3. Herren','Ü32 / Ü50','Torwarttraining'];
+/* ---------- Mannschaften der Saison (ab 29.09.2026 · 4) ----------
+   season.teams = [{team, squad, fd?:{type, squad, name, teamId}}] legt fest, welche Mannschaften es in
+   der Saison gibt (z. B. nur G1 statt G1–G3) und welche fussball.de-Mannschaft dazugehört
+   (z. B. "Herren Ü32" → "Ü32 / Ü50"). Fehlt teams, gelten wie bisher alle Klassen, Jugend mit 1–3.
+   Gepflegt über den Mannschaftsabgleich in Konto → Saisons. "[] = alle" in trainerClasses heißt
+   damit "alle Mannschaften dieser Klasse in der Saison". */
+function defaultSeasonTeams(){ const out=[]; ALL_CLASSES.filter(t=>t!=='Torwarttraining').forEach(t=>{ (isJugend(t)?[1,2,3]:[1]).forEach(n=>out.push({team:t,squad:n})); }); return out; }
+function seasonTeams(s){ if(s===undefined) s=(typeof SEASONS!=='undefined')?getCurrentSeason():null; return (s&&Array.isArray(s.teams))?s.teams:defaultSeasonTeams(); }
+function activeClasses(s){ const set=new Set(seasonTeams(s).map(t=>t.team)); return ALL_CLASSES.filter(t=>t==='Torwarttraining'||set.has(t)); }
+function squadsFor(team,s){
+  if(!isJugend(team)) return [1];
+  const list=[...new Set(seasonTeams(s).filter(t=>t.team===team).map(t=>t.squad||1))].sort((a,b)=>a-b);
+  return list.length?list:[1];
+}
+// fussball.de-Mannschaft (Mannschaftsart + Nummer) → Platzcoach-Mannschaft laut Abgleich der laufenden Saison.
+function fdTeamMapping(type,squad){
+  const cur=(typeof SEASONS!=='undefined')?getCurrentSeason():null;
+  if(!cur||!Array.isArray(cur.teams)) return null;
+  const t=(type||'').trim(), q=squad||1;
+  const hit=cur.teams.find(x=>x.fd&&x.fd.type===t&&(x.fd.squad||1)===q);
+  return hit?{team:hit.team,squad:hit.squad||1}:null;
+}
 
 const today=new Date(), todayStr=ymd(today);
 let view='monat', filter='alle';
@@ -1382,6 +1420,7 @@ function jumpToGame(idx){ const e=fussballDisplayAll()[idx]; if(e) focusEventCar
    Getrennt von fussballInstancesOn() (das für die Konfliktprüfung den Vor-/Nachlauf-Puffer
    einrechnet): hier zeigen wir die reale Anstoßzeit, wie sie auch auf der Start-Seite steht. */
 function fussballFilterTeam(team,squad){
+  const fm=fdTeamMapping(team,squad); if(fm) return fm; // Zuordnung aus dem Mannschaftsabgleich
   const t=(team||'').trim();
   // fussball.de nennt Jugendmannschaften "…-Junioren" + Squad-Nummer getrennt; intern heißt
   // die Kategorie "…-Jugend" mit Squad-Nummer (z.B. "E-Jugend" + 2 -> "E2-Jugend"). Das passt
@@ -2366,7 +2405,7 @@ function buildFilters(){
     const cls=normalizeClasses(session.classes||{});
     Object.entries(cls).forEach(([team,squads])=>{
       if(isJugend(team)){
-        const sq=squads.length?[...squads].sort((a,b)=>a-b):[1,2,3];
+        const sq=squads.length?[...squads].sort((a,b)=>a-b):squadsFor(team);
         sq.forEach(s=>fs.push([team+':'+s, jugendLetter(team)+s+'-Jugend']));
       }else{
         fs.push([team+':1', team.replace(' Herren','').replace('U32 / ','U')]);
@@ -3183,6 +3222,8 @@ function nextGamesBeyondWeek(isMine,items){
 /* "Zu erledigen": nur angemeldet. Mit Mannschaften nur deren Punkte, Admins ohne Mannschaft alles. */
 function myTodos(isMine,hasTeams){
   const out=[];
+  const tsOpen=teamSyncOpenCount();
+  if(tsOpen) out.push({click:'openTeamSync()',txt:'Mannschaften: '+tsOpen+(tsOpen===1?' Abweichung':' Abweichungen')+' zwischen Platzcoach und fussball.de.',act:'Prüfen'});
   const end=weekEndStr();
   (FUSSBALLDE.games||[]).forEach((g,idx)=>{
     if(!g.moveDiverged||!g.plannedTo||g.d<todayStr) return;
@@ -3768,9 +3809,20 @@ function updateWeekday(){
   const v=dateInput().value; if(!v)return;
   document.getElementById('f-wochentag').textContent=DAYS[new Date(v+'T00:00:00').getDay()]+' · automatisch';
 }
+// Nummern-Knöpfe der Altersklasse aus den Saison-Mannschaften aufbauen (z. B. nur G1, dafür E1–E4).
+// force: Nummer eines bestehenden Termins, die auch dann angezeigt wird, wenn es sie in der Saison nicht mehr gibt.
+function setSquadSeg(segId,team,squad,force){
+  const seg=document.getElementById(segId); if(!seg) return;
+  if(force){ seg.dataset.force=team+'#'+squad; } else if(force===false){ delete seg.dataset.force; }
+  const list=squadsFor(team).slice();
+  if(seg.dataset.force===team+'#'+squad&&!list.includes(squad)){ list.push(squad); list.sort((a,b)=>a-b); }
+  const sel=list.includes(squad)?squad:list[0];
+  const L=jugendLetter(team), extra=segId==='tf-squad'?';refreshTrainerChips()':'';
+  seg.innerHTML=list.map(n=>'<button type="button"'+(n===sel?' class="on"':'')+' data-squad="'+n+'" onclick="setSquad(this)'+extra+'">'+(L?L+n:n)+'</button>').join('');
+}
 function relabelSquad(segId,team){
-  const L=jugendLetter(team);
-  document.querySelectorAll('#'+segId+' button').forEach(b=>{ b.textContent=L?(L+b.dataset.squad):b.dataset.squad; });
+  const cur=document.querySelector('#'+segId+' button.on');
+  setSquadSeg(segId,team,cur?parseInt(cur.dataset.squad):1);
 }
 function onTeamChange(){
   const team=document.getElementById('f-team').value;
@@ -3968,7 +4020,7 @@ function resetForm(){
   document.getElementById('f-anlass').value='';document.getElementById('f-bem').value='';
   document.getElementById('f-von').value='15:00';document.getElementById('f-bis').value='17:00';
   document.getElementById('f-team').value='F-Jugend';
-  document.querySelectorAll('#f-squad button').forEach((b,i)=>b.classList.toggle('on',i===0));
+  setSquadSeg('f-squad',document.getElementById('f-team').value,1,false);
   document.querySelectorAll('#f-res .res-chip').forEach(c=>c.classList.toggle('on',c.dataset.res==='Großspielfeld'));
   pitchMode='ganz';pitchPart=null;document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode==='ganz'));
   document.getElementById('f-kind').value='other'; kindTouched=false; renderGkTeamChips('f-gkteams',[]);
@@ -4058,8 +4110,10 @@ function applySquadRestrictions(segId,team){
 function filterTeamOptions(){
   const sel=document.getElementById('f-team');
   let firstAllowed=null;
+  const act=activeClasses(), keep=editingId?((EVENTS.find(x=>x.id===editingId)||{}).team):null;
   [...sel.options].forEach(o=>{
-    const allowed=canBookAnyOfTeam(o.value);
+    const inSeason=!ALL_CLASSES.includes(o.value)||act.includes(o.value)||o.value===keep;
+    const allowed=inSeason&&canBookAnyOfTeam(o.value);
     o.disabled=!allowed; o.hidden=!allowed;
     if(allowed&&!firstAllowed)firstAllowed=o.value;
   });
@@ -4093,7 +4147,7 @@ function fillForm(e){
   dateInput().value=e.d;document.getElementById('f-von').value=e.t;document.getElementById('f-bis').value=e.bis||addMinutes(e.t,120);
   document.getElementById('f-anlass').value=e.title;document.getElementById('f-bem').value=e.note||'';
   document.getElementById('f-team').value=e.team;
-  document.querySelectorAll('#f-squad button').forEach((b,i)=>b.classList.toggle('on',i===((e.squad||1)-1)));
+  setSquadSeg('f-squad',e.team,e.squad||1,true);
   document.querySelectorAll('#f-res .res-chip').forEach(c=>{
     if(c.dataset.res==='Großspielfeld')c.classList.toggle('on',!!e.pitch||(e.res||[]).includes('Großspielfeld'));
     else if(c.dataset.res==='Halle')c.classList.toggle('on',!!(e.halle&&e.halle.thirds&&e.halle.thirds.length));
@@ -5006,6 +5060,8 @@ function tfRenderPitch(){
   setTimeout(()=>updateTFormFreeSlots(clash.length>0),100);
 }
 function tfFill(s){
+  const act=activeClasses();
+  [...document.getElementById('tf-team').options].forEach(o=>{ if(o.value===GK_TEAM) return; o.hidden=ALL_CLASSES.includes(o.value)&&!act.includes(o.value)&&o.value!==s.team; });
   document.getElementById('tf-day').value=s.day;
   document.getElementById('tf-from').value=s.from;
   document.getElementById('tf-to').value=s.to;
@@ -5013,7 +5069,7 @@ function tfFill(s){
   document.getElementById('tf-validuntil').value=s.validUntil||'';
   document.getElementById('tf-team').value=s.team;
   // trainer chips werden nach tfTeamChange gesetzt
-  document.querySelectorAll('#tf-squad button').forEach((b,i)=>b.classList.toggle('on',i===((s.squad||1)-1)));
+  setSquadSeg('tf-squad',s.team,s.squad||1,true);
   document.querySelectorAll('#tf-res .res-chip').forEach(c=>{
     if(c.dataset.res==='Großspielfeld') c.classList.toggle('on',!!s.pitch||(s.res||[]).includes('Großspielfeld'));
     else c.classList.toggle('on',(s.res||[]).includes(c.dataset.res));
@@ -5234,17 +5290,17 @@ function nuToggleTeam(team){
 function nuToggleSquad(team,squad){
   if(!nuClasses.hasOwnProperty(team))nuClasses[team]=[];
   const sq=[...(nuClasses[team]||[])];
-  const expanded=sq.length?sq:[1,2,3];
+  const all=squadsFor(team), expanded=sq.length?sq:all.slice();
   const i=expanded.indexOf(squad);
   if(i>=0)expanded.splice(i,1); else expanded.push(squad);
   expanded.sort((a,b)=>a-b);
-  nuClasses[team]=expanded.length===3?[]:expanded;
+  nuClasses[team]=all.every(n=>expanded.includes(n))?[]:expanded;
   renderNuClassPicker();
 }
 function renderNuClassPicker(){
   const el=document.getElementById('nu-classes-picker');
   if(!el)return;
-  el.innerHTML=ALL_CLASSES.map(team=>{
+  el.innerHTML=activeClasses().map(team=>{
     const on=nuClasses.hasOwnProperty(team);
     const sq=on?(nuClasses[team]||[]):[];
     const isJ=isJugend(team);
@@ -5252,7 +5308,7 @@ function renderNuClassPicker(){
     let row='<div style="margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">';
     row+='<div class="res-chip'+(on?' on':'')+'" onclick="nuToggleTeam(\''+team+'\')" style="padding:6px 10px;font-size:11px;">'+esc(team)+'</div>';
     if(on&&isJ){
-      [1,2,3].forEach(n=>{
+      squadsFor(team).forEach(n=>{
         const sqOn=!sq.length||sq.includes(n);
         row+='<span class="squad-sq-chip'+(sqOn?' on':'')+'" onclick="nuToggleSquad(\''+team+'\','+n+')">'+L+n+'</span>';
       });
@@ -5562,7 +5618,7 @@ function renderKonto(){
     else if(session.token)h+=keeperCardHTML();
     h+=pwaCard();
   }else if(kontoTab==='saisons'){
-    h+=seasonManagementCard()+resourceLockCard();
+    h+=teamSyncCard()+seasonManagementCard()+resourceLockCard();
   }else if(kontoTab==='zugaenge'){
     h+='<div id="reg-admin"></div>'+adminNewUserCard()+adminUserListCard();
   }else if(kontoTab==='protokoll'){
@@ -5854,6 +5910,7 @@ async function createSeason(year,copyFrom){
     newS.trainerIds=[...(copyFrom.trainerIds||[])];
     newS.trainerNames=[...(copyFrom.trainerNames||[])];
     newS.trainerClasses=JSON.parse(JSON.stringify(copyFrom.trainerClasses||{}));
+    if(Array.isArray(copyFrom.teams)) newS.teams=JSON.parse(JSON.stringify(copyFrom.teams));
   }
   SEASONS.push(newS);SEASONS.sort((a,b)=>b.startYear-a.startYear);
   kontoTab='saisons'; renderKonto(); showToast(newS.label+' angelegt'+(copyFrom?' (Zuordnungen übernommen).':'.'));  // sofort
@@ -5998,6 +6055,186 @@ function toggleSeasonExpand(id){
   renderKonto();
 }
 function togglePastSeasons(){ showPastSeasons=!showPastSeasons; renderKonto(); }
+/* ---------- Mannschaftsabgleich mit fussball.de (ab 29.09.2026 · 4) ----------
+   Der Sync schreibt die Mannschaften des Vereins, die bei fussball.de Spiele haben, nach
+   fussballde.json → teams. Hier vergleichen wir sie mit den Mannschaften der laufenden Saison:
+   - "Neu bei fussball.de": dort vorhanden, in Platzcoach nicht (oder ohne klare Zuordnung, z. B. Herren Ü32)
+   - "Nicht bei fussball.de": in Platzcoach vorhanden, bei fussball.de ohne Spiel im Zeitraum (z. B. G2, G3)
+   Der Admin übernimmt oder verwirft jeden Vorschlag; Verworfenes merkt sich die Saison
+   (season.teamSync.ignored), damit es beim nächsten Abgleich nicht wieder auftaucht. */
+let teamSyncShowOk=false;
+function tsTeamKey(t){ return t.team+'#'+(t.squad||1); }
+function tsFdKey(f){ return (f.type||'').trim()+'#'+(f.squad||1); }
+function tsFdLabel(f){ return f.type+((f.squad||1)>1||/junioren/i.test(f.type)?' '+(f.squad||1):''); }
+function tsAppLabel(t){ return isJugend(t.team)?teamLabel(t.team,t.squad||1):t.team; }
+// Standard-Zuordnung wie fussballFilterTeam, ohne Abgleich-Eintrag. guess = nur ein Vorschlag, Admin muss bestätigen.
+function tsDefaultApp(f){
+  const t=(f.type||'').trim(), q=f.squad||1;
+  if(/junioren$/i.test(t)){ const team=t.replace(/junioren$/i,'Jugend'); return ALL_CLASSES.includes(team)?{team,squad:q}:null; }
+  if(/^herren$/i.test(t)){ const team=q>1?q+'. Herren':'1. Herren'; return ALL_CLASSES.includes(team)?{team,squad:1}:null; }
+  if(/^(herren|alte herren|senioren).*(ü|ue|alt)/i.test(t)||/ü\s?\d/i.test(t)) return {team:'Ü32 / Ü50',squad:1,guess:true};
+  return null;
+}
+function teamSyncData(){ return (FUSSBALLDE_RAW&&Array.isArray(FUSSBALLDE_RAW.teams))?FUSSBALLDE_RAW:null; }
+function teamSyncDiff(s){
+  s=s||getCurrentSeason(); const data=teamSyncData();
+  if(!s||!data) return null;
+  const cur=seasonTeams(s), ign=new Set((s.teamSync&&s.teamSync.ignored)||[]);
+  const used=new Set(), ok=[], link=[], add=[];
+  data.teams.forEach(f=>{
+    const k=tsFdKey(f);
+    const explicit=cur.find(t=>t.fd&&tsFdKey(t.fd)===k);
+    if(explicit){ used.add(tsTeamKey(explicit)); ok.push({f,app:explicit}); return; }
+    const def=tsDefaultApp(f);
+    const hit=def&&!def.guess?cur.find(t=>tsTeamKey(t)===tsTeamKey(def)):null;
+    if(hit){ used.add(tsTeamKey(hit)); link.push({f,app:hit}); return; }
+    if(def) used.add(tsTeamKey(def)); // vorgeschlagenes Ziel nicht gleichzeitig zum Entfernen anbieten
+    if(ign.has('fd:'+k)) return;
+    add.push({f,key:k,suggest:def?{team:def.team,squad:def.squad}:null,exists:!!(def&&cur.find(t=>tsTeamKey(t)===tsTeamKey(def)))});
+  });
+  const remove=cur.filter(t=>!used.has(tsTeamKey(t))&&!ign.has('app:'+tsTeamKey(t))).map(t=>({app:t,key:tsTeamKey(t),refs:tsRefs(s,t)}));
+  return {season:s, add, remove, ok:[...ok,...link], link, ignored:[...ign], open:add.length+remove.length, from:data.teamsFrom||null};
+}
+// Was hängt an einer Mannschaft? (für den Hinweis beim Entfernen)
+function tsRefs(s,t){
+  const q=t.squad||1, same=x=>x.team===t.team&&(!isJugend(t.team)||(x.squad||1)===q);
+  const slots=TRAINING.filter(x=>same(x)&&(!x.validUntil||x.validUntil>=todayStr)).length;
+  const events=EVENTS.filter(x=>same(x)&&x.d>=todayStr).length;
+  const trainers=Object.entries(s.trainerClasses||{}).filter(([,c])=>{ const n=normalizeClasses(c); return n.hasOwnProperty(t.team)&&isJugend(t.team)&&(n[t.team]||[]).includes(q); }).length;
+  return {slots,events,trainers};
+}
+function teamSyncOpenCount(){ if(!session||!session.isAdmin) return 0; const d=teamSyncDiff(); return d?d.open:0; }
+// Saison bekommt eine eigene Mannschaftsliste (vorher: Standard) und die eindeutig passenden fussball.de-Zuordnungen.
+function tsMaterialize(s,diff){
+  if(!Array.isArray(s.teams)) s.teams=defaultSeasonTeams().map(t=>({...t}));
+  (diff?diff.link:[]).forEach(({f,app})=>{ const e=s.teams.find(t=>tsTeamKey(t)===tsTeamKey(app)); if(e&&!e.fd) e.fd=tsFdRef(f); });
+}
+function tsFdRef(f){ const r={type:f.type,squad:f.squad||1}; if(f.names&&f.names[0]) r.name=f.names[0]; if(f.teamId) r.teamId=f.teamId; return r; }
+function tsIgnore(s,key){ s.teamSync=s.teamSync||{}; const l=s.teamSync.ignored||(s.teamSync.ignored=[]); if(!l.includes(key)) l.push(key); }
+function tsApplyAdd(s,diff,item,target){
+  tsMaterialize(s,diff);
+  s.teams.forEach(t=>{ if(t.fd&&tsFdKey(t.fd)===item.key) delete t.fd; });
+  let e=s.teams.find(t=>tsTeamKey(t)===tsTeamKey(target));
+  if(!e){ e={team:target.team,squad:isJugend(target.team)?target.squad:1}; s.teams.push(e); }
+  e.fd=tsFdRef(item.f);
+  s.teams.sort((a,b)=>ALL_CLASSES.indexOf(a.team)-ALL_CLASSES.indexOf(b.team)||(a.squad||1)-(b.squad||1));
+}
+async function tsSave(s,msg,backup){
+  s.teamSync=s.teamSync||{}; s.teamSync.checkedAt=new Date().toISOString();
+  renderKonto(); renderStart();
+  try{ await saveSeasons(msg); showToast('Gespeichert.'); }
+  catch(e){ SEASONS=JSON.parse(backup); renderKonto(); showToast('Fehler: '+e.message,6000); }
+}
+function tsTarget(item){
+  const sel=document.getElementById('ts-sel-'+item.key.replace(/[^A-Za-z0-9]/g,'_'));
+  if(sel){ if(!sel.value) return null; const [team,q]=sel.value.split('#'); return {team,squad:parseInt(q)||1}; }
+  return item.suggest;
+}
+function teamSyncAccept(kind,key){
+  if(!requireAdmin()) return;
+  const d=teamSyncDiff(); if(!d) return; const s=d.season, backup=JSON.stringify(SEASONS);
+  if(kind==='add'){
+    const item=d.add.find(x=>x.key===key); if(!item) return;
+    const target=tsTarget(item); if(!target){ showToast('Bitte zuerst eine Platzcoach-Mannschaft wählen.'); return; }
+    tsApplyAdd(s,d,item,target);
+    tsSave(s,'Mannschaftsabgleich '+s.label+': '+tsFdLabel(item.f)+' → '+tsAppLabel(target),backup);
+  }else{
+    const item=d.remove.find(x=>x.key===key); if(!item) return;
+    tsMaterialize(s,d); s.teams=s.teams.filter(t=>tsTeamKey(t)!==key);
+    tsSave(s,'Mannschaftsabgleich '+s.label+': '+tsAppLabel(item.app)+' entfernt',backup);
+  }
+}
+function teamSyncReject(kind,key){
+  if(!requireAdmin()) return;
+  const d=teamSyncDiff(); if(!d) return; const s=d.season, backup=JSON.stringify(SEASONS);
+  tsIgnore(s,(kind==='add'?'fd:':'app:')+key);
+  const label=kind==='add'?tsFdLabel((d.add.find(x=>x.key===key)||{}).f||{type:key}):tsAppLabel((d.remove.find(x=>x.key===key)||{}).app||{team:key});
+  tsSave(s,'Mannschaftsabgleich '+s.label+': '+label+(kind==='add'?' nicht übernommen':' bleibt'),backup);
+}
+function teamSyncAcceptAll(){
+  if(!requireAdmin()) return;
+  const d=teamSyncDiff(); if(!d) return; const s=d.season, backup=JSON.stringify(SEASONS);
+  const adds=d.add.filter(x=>tsTarget(x)), skipped=d.add.length-adds.length;
+  askConfirm('Alle Vorschläge übernehmen?',
+    [adds.length?adds.length+' Mannschaft'+(adds.length===1?'':'en')+' von fussball.de übernehmen':'',
+     d.remove.length?d.remove.length+' Mannschaft'+(d.remove.length===1?'':'en')+' entfernen ('+d.remove.map(x=>tsAppLabel(x.app)).join(', ')+')':'',
+     skipped?skipped+' ohne gewählte Zuordnung bleiben offen':''].filter(Boolean).join(' · ')+'.',
+    'Übernehmen',()=>{
+      adds.forEach(item=>tsApplyAdd(s,d,item,tsTarget(item)));
+      tsMaterialize(s,d);
+      const rm=new Set(d.remove.map(x=>x.key)); s.teams=s.teams.filter(t=>!rm.has(tsTeamKey(t)));
+      tsSave(s,'Mannschaftsabgleich '+s.label+': '+(adds.length+d.remove.length)+' Änderung(en) übernommen',backup);
+    });
+}
+function teamSyncLinkOnly(){
+  // Nur eindeutige Zuordnungen speichern (z. B. beim ersten Abgleich ohne offene Punkte).
+  if(!requireAdmin()) return;
+  const d=teamSyncDiff(); if(!d) return; const s=d.season, backup=JSON.stringify(SEASONS);
+  tsMaterialize(s,d);
+  tsSave(s,'Mannschaftsabgleich '+s.label+': Zuordnung zu fussball.de gespeichert',backup);
+}
+function teamSyncResetIgnored(){
+  if(!requireAdmin()) return;
+  const s=getCurrentSeason(); if(!s||!s.teamSync) return; const backup=JSON.stringify(SEASONS);
+  s.teamSync.ignored=[];
+  tsSave(s,'Mannschaftsabgleich '+s.label+': verworfene Vorschläge zurückgeholt',backup);
+}
+function toggleTeamSyncOk(){ teamSyncShowOk=!teamSyncShowOk; renderKonto(); }
+function openTeamSync(){ goto('konto'); setKontoTab('saisons'); setTimeout(()=>{ const el=document.getElementById('team-sync-card'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },60); }
+function tsTargetOptions(item){
+  const opts=['<option value="">Platzcoach-Mannschaft wählen …</option>'];
+  ALL_CLASSES.filter(t=>t!==GK_TEAM).forEach(team=>{
+    (isJugend(team)?[1,2,3,4,5]:[1]).forEach(n=>{
+      const v=team+'#'+n, sel=item.suggest&&tsTeamKey(item.suggest)===v;
+      opts.push('<option value="'+esc(v)+'"'+(sel?' selected':'')+'>'+esc(isJugend(team)?teamLabel(team,n):team)+'</option>');
+    });
+  });
+  return opts.join('');
+}
+function teamSyncCard(){
+  const s=getCurrentSeason(); if(!s) return '';
+  const ico='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:16px;height:16px;stroke:var(--green)"><path d="M4 12a8 8 0 0 1 14-5.3L20 9"/><path d="M20 4v5h-5"/><path d="M20 12a8 8 0 0 1-14 5.3L4 15"/><path d="M4 20v-5h5"/></svg>';
+  let h='<div class="card" id="team-sync-card"><h4>'+ico+'Mannschaften abgleichen</h4>';
+  const d=teamSyncDiff(s);
+  if(!d){ return h+'<p class="sub">Noch keine Mannschaftsliste von fussball.de. Sie kommt mit dem nächsten Abgleich (alle 2 Stunden).</p></div>'; }
+  const upd=FUSSBALLDE_RAW.updated?new Date(FUSSBALLDE_RAW.updated):null;
+  h+='<p class="sub">'+esc(s.label)+': Mannschaften in Platzcoach und Mannschaften mit Spielen bei fussball.de'
+    +(d.from?' (ab '+fmtShort(d.from)+')':'')+(upd?', Stand '+upd.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})+' '+upd.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'')+'. Nichts ändert sich ohne dein OK.</p>';
+  if(!d.open){
+    h+='<div class="ts-meta" style="margin:8px 0 2px;color:var(--grass);font-weight:700;">✓ Alles passt zusammen.</div>';
+    if(d.link.length) h+='<button class="ghost-btn" onclick="teamSyncLinkOnly()">Zuordnung zu fussball.de speichern ('+d.link.length+')</button>';
+  }
+  d.add.forEach(item=>{
+    const f=item.f, id=item.key.replace(/[^A-Za-z0-9]/g,'_');
+    const clear=item.suggest&&!tsDefaultApp(f).guess;
+    h+='<div class="ts-row"><div class="ts-head"><div><div class="ts-title">'+esc(tsFdLabel(f))+'</div>'
+      +'<div class="ts-meta">bei fussball.de: '+esc((f.names||[]).join(' / '))+' · '+f.games+' Spiel'+(f.games===1?'':'e')+(f.competitions&&f.competitions.length?' · '+esc(f.competitions.slice(0,3).join(', ')):'')+'</div></div>'
+      +'<span class="ts-pill add">Neu bei fussball.de</span></div>'
+      +'<div class="ts-meta">'+(clear?'In Platzcoach als <b>'+esc(tsAppLabel(item.suggest))+'</b> anlegen?':item.exists?'Zu welcher Platzcoach-Mannschaft gehört sie? Vorschlag: <b>'+esc(tsAppLabel(item.suggest))+'</b>':'Zu welcher Platzcoach-Mannschaft gehört sie?')+'</div>'
+      +'<div class="ts-acts">'+(clear?'':'<select id="ts-sel-'+id+'" aria-label="Platzcoach-Mannschaft">'+tsTargetOptions(item)+'</select>')
+      +'<button class="ts-btn yes" onclick="teamSyncAccept(\'add\',\''+jsArg(item.key)+'\')">Übernehmen</button>'
+      +'<button class="ts-btn no" onclick="teamSyncReject(\'add\',\''+jsArg(item.key)+'\')">Verwerfen</button></div></div>';
+  });
+  d.remove.forEach(item=>{
+    const r=item.refs, bits=[];
+    if(r.slots) bits.push(r.slots+' Trainingszeit'+(r.slots===1?'':'en'));
+    if(r.events) bits.push(r.events+' kommende'+(r.events===1?'r Termin':' Termine'));
+    if(r.trainers) bits.push(r.trainers+' Trainer');
+    h+='<div class="ts-row"><div class="ts-head"><div><div class="ts-title">'+esc(tsAppLabel(item.app))+'</div>'
+      +'<div class="ts-meta">bei fussball.de keine Spiele'+(d.from?' ab '+fmtShort(d.from):'')+'. Gibt es die Mannschaft in dieser Saison?</div></div>'
+      +'<span class="ts-pill del">Nicht bei fussball.de</span></div>'
+      +(bits.length?'<div class="ts-warn">Noch eingetragen: '+bits.join(', ')+'. Sie bleiben erhalten, die Mannschaft ist dann nur nicht mehr auswählbar.</div>':'')
+      +'<div class="ts-acts"><button class="ts-btn yes" onclick="teamSyncAccept(\'remove\',\''+jsArg(item.key)+'\')">Entfernen</button>'
+      +'<button class="ts-btn no" onclick="teamSyncReject(\'remove\',\''+jsArg(item.key)+'\')">Behalten</button></div></div>';
+  });
+  if(d.open>1) h+='<button class="submit-btn" style="margin-top:10px;" onclick="teamSyncAcceptAll()">Alle Vorschläge übernehmen</button>';
+  if(d.ok.length){
+    h+='<div class="ts-sum" onclick="toggleTeamSyncOk()">'+d.ok.length+' Mannschaft'+(d.ok.length===1?'':'en')+' passen '+(teamSyncShowOk?'▴':'▾')+'</div>';
+    if(teamSyncShowOk) h+='<div class="ts-okgrid">'+d.ok.map(({f,app})=>'<span class="badge-res" title="'+esc((f.names||[]).join(' / '))+'">'+esc(tsAppLabel(app))+' ↔ '+esc(tsFdLabel(f))+'</span>').join('')+'</div>';
+  }
+  if(d.ignored.length) h+='<div class="ts-sum" onclick="teamSyncResetIgnored()">'+d.ignored.length+' verworfene'+(d.ignored.length===1?'r Vorschlag':' Vorschläge')+' · wieder anzeigen</div>';
+  return h+'</div>';
+}
 function seasonManagementCard(){
   const ico='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:16px;height:16px;stroke:var(--green)"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>';
   let h='<div class="card"><h4>'+ico+'Saisons</h4><p class="sub">Definiert, welche Trainer in welcher Spielzeit welche Mannschaften betreuen – ändert sich das (z.B. Wechsel von E2 auf E1), einfach hier für die jeweilige Saison anpassen.</p>';
@@ -6081,7 +6318,7 @@ function seasonBodyHTML(s,active){
 function seasonClassPickerHTML(s,u){
   const cls=normalizeClasses((s.trainerClasses||{})[u.id]||{});
   let eh='<div style="padding:10px 2px 4px;margin-top:6px;border-top:1px dashed var(--line);">';
-  ALL_CLASSES.forEach(team=>{
+  activeClasses(s).forEach(team=>{
     const on=cls.hasOwnProperty(team);
     const sq=on?(cls[team]||[]):[];
     const isJ=isJugend(team);
@@ -6089,7 +6326,7 @@ function seasonClassPickerHTML(s,u){
     eh+='<div style="margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">';
     eh+='<div class="res-chip'+(on?' on':'')+'" onclick="toggleSeasonTrainerTeam(\''+s.id+'\',\''+u.id+'\',\''+team+'\')" style="padding:6px 11px;font-size:11.5px;">'+esc(team)+'</div>';
     if(on&&isJ){
-      [1,2,3].forEach(n=>{
+      squadsFor(team,s).forEach(n=>{
         const sqOn=!sq.length||sq.includes(n);
         eh+='<span class="squad-sq-chip'+(sqOn?' on':'')+'" onclick="toggleSeasonTrainerSquad(\''+s.id+'\',\''+u.id+'\',\''+team+'\','+n+')">'+L+n+'</span>';
       });
@@ -6119,11 +6356,11 @@ function toggleSeasonTrainerSquad(seasonId,userId,team,squad){
   const cls=normalizeClasses(s.trainerClasses[userId]||{});
   if(!cls.hasOwnProperty(team))cls[team]=[];
   const sq=[...(cls[team]||[])];
-  const expanded=sq.length?sq:[1,2,3];
+  const all=squadsFor(team,s), expanded=sq.length?sq:all.slice();
   const i=expanded.indexOf(squad);
   if(i>=0)expanded.splice(i,1); else expanded.push(squad);
   expanded.sort((a,b)=>a-b);
-  cls[team]=expanded.length===3?[]:expanded;
+  cls[team]=all.every(n=>expanded.includes(n))?[]:expanded;
   s.trainerClasses[userId]=cls;
   renderKonto();
 }
@@ -6356,10 +6593,10 @@ function canEditKeeper(k){ return !!session&&(session.isAdmin||canBookTeam(k.tea
 function myKeeperTeams(){
   if(!session) return [];
   const out=[];
-  const src=session.isAdmin?Object.fromEntries(ALL_CLASSES.filter(t=>t!==GK_TEAM).map(t=>[t,[]])):normalizeClasses(session.classes||{});
+  const src=session.isAdmin?Object.fromEntries(activeClasses().filter(t=>t!==GK_TEAM).map(t=>[t,[]])):normalizeClasses(session.classes||{});
   Object.keys(src).filter(t=>t!==GK_TEAM).forEach(t=>{
     if(!isJugend(t)){ out.push({team:t,squad:1}); return; }
-    const sq=(src[t]&&src[t].length)?src[t]:[1,2,3];
+    const sq=(src[t]&&src[t].length)?src[t]:squadsFor(t);
     sq.forEach(s=>out.push({team:t,squad:s}));
   });
   // Admins: eigene Mannschaften zuerst, damit die Auswahl passend vorbelegt ist.
@@ -6502,7 +6739,7 @@ function removeKeeper(id){
 function openKeeperEditor(team,squad){
   if(!GK.loaded){ showToast(GK.error||'Torhüter-Liste wird noch geladen.'); return; }
   const ks=GK.keepers.filter(k=>k.team===team&&(!isJugend(team)||(k.squad||1)===squad));
-  const opts=isJugend(team)?[1,2,3]:[1];
+  const opts=squadsFor(team);
   let h='<h3>Torhüter '+esc(isJugend(team)?team:teamLabel(team,1))+'</h3><p class="sub">Nur für angemeldete Trainer sichtbar.</p>';
   h+='<div class="seg" style="margin-bottom:10px;">'+(isJugend(team)?opts.map(n=>'<button type="button"'+(n===squad?' class="on"':'')+' onclick="openKeeperEditor(\''+esc(team)+'\','+n+')">'+jugendLetter(team)+n+'</button>').join(''):'')+'</div>';
   h+=ks.length?ks.map(k=>'<div class="gk-row"><span>'+esc(keeperLabel(k))+'</span><button class="ibtn del" onclick="removeKeeper(\''+k.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>').join(''):'<p class="gk-note">Noch keine Torhüter eingetragen.</p>';
@@ -6537,7 +6774,7 @@ function gkRemindTrainers(id,d){
   });
 }
 /* Auswahl der Jugenden im Termin-/Trainingsformular */
-const GK_TEAM_CHOICES=()=>ALL_CLASSES.filter(t=>t!==GK_TEAM);
+const GK_TEAM_CHOICES=()=>activeClasses().filter(t=>t!==GK_TEAM);
 function renderGkTeamChips(containerId,selected){
   const el=document.getElementById(containerId); if(!el) return;
   const sel=new Set(selected||[]);
@@ -6809,10 +7046,10 @@ const CP={};
 function cpToggleTeam(pid,team){ const c=CP[pid]; if(c.hasOwnProperty(team))delete c[team]; else c[team]=[]; cpRender(pid); }
 function cpToggleSquad(pid,team,n){
   const c=CP[pid]; if(!c.hasOwnProperty(team))c[team]=[];
-  const ex=(c[team]&&c[team].length)?[...c[team]]:[1,2,3];
+  const all=squadsFor(team), ex=(c[team]&&c[team].length)?[...c[team]]:all.slice();
   const i=ex.indexOf(n); if(i>=0)ex.splice(i,1); else ex.push(n);
   ex.sort((a,b)=>a-b);
-  if(!ex.length){ delete c[team]; } else c[team]=ex.length===3?[]:ex;
+  if(!ex.length){ delete c[team]; } else c[team]=all.every(x=>ex.includes(x))?[]:ex;
   cpRender(pid);
 }
 function cpRender(pid){
@@ -6821,13 +7058,13 @@ function cpRender(pid){
 }
 function cpHTML(pid){
   const c=CP[pid]||{};
-  return '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:6px;">'+ALL_CLASSES.map(team=>{
+  return '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:6px;">'+activeClasses().map(team=>{
     const on=c.hasOwnProperty(team), sq=on?(c[team]||[]):[], L=jugendLetter(team);
     const wide=on&&isJugend(team);
     let row='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;'+(wide?'flex-basis:100%;':'')+'">';
     row+='<div class="res-chip'+(on?' on':'')+'" onclick="cpToggleTeam(\''+pid+'\',\''+team+'\')" style="padding:6px 10px;font-size:11.5px;">'+esc(team)+'</div>';
     if(on&&isJugend(team)){
-      [1,2,3].forEach(n=>{ const sqOn=!sq.length||sq.includes(n);
+      squadsFor(team).forEach(n=>{ const sqOn=!sq.length||sq.includes(n);
         row+='<span class="squad-sq-chip'+(sqOn?' on':'')+'" onclick="cpToggleSquad(\''+pid+'\',\''+team+'\','+n+')">'+L+n+'</span>'; });
       row+='<span style="font-size:10px;color:var(--ink-soft);">'+(sq.length?sq.map(s=>L+s).join(', '):'alle '+esc(team.replace('-Jugend',''))+'-Teams')+'</span>';
     }
