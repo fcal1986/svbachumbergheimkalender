@@ -27,7 +27,8 @@
         "0f7e4fdb-535c-4b5c-95d9-8bdbe98300c7",
         "871986c9-429e-4576-affb-961cf5f374f6",
         "030cee1e-0fb7-426d-a231-b3cbb92c7262",
-        "af1a6546-fdc2-4059-bef4-5a4966181701"
+        "af1a6546-fdc2-4059-bef4-5a4966181701",
+        "6085b3aa-f111-47fa-9d20-7e59a0a987e8"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
@@ -127,6 +128,12 @@
           "C-Jugend": [
             1
           ]
+        },
+        "6085b3aa-f111-47fa-9d20-7e59a0a987e8": {
+          "E-Jugend": [
+            2,
+            3
+          ]
         }
       },
       "trainerNames": [
@@ -150,7 +157,8 @@
         "Daniel Schauerte-Becker",
         "Cetin Kurt",
         "Marcel Schomberg",
-        "Michael Raneck"
+        "Michael Raneck",
+        "Marc Geauf"
       ]
     }
   ]
