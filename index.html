@@ -176,6 +176,7 @@
   /* Meine Woche (ab 29.09.2026 · 2) */
   .wk-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 0 8px;}
   .wk-head .section-label{margin:0;}
+  .sec-range{font-size:11.5px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--ink-soft);opacity:.8;}
   .wk-teams{flex:0 1 auto;min-width:0;font-family:'Inter';font-size:11.5px;font-weight:700;color:var(--ink);background:var(--white);border:1.5px solid var(--line);border-radius:999px;padding:5px 11px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .wk-teams.static{cursor:default;border-color:transparent;background:none;color:var(--ink-soft);padding-right:0;}
   .wk-day{font-size:11px;font-weight:700;color:var(--ink-soft);margin:10px 2px 5px;}
@@ -1223,7 +1224,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='29.09.2026 · 10';
+const APP_VERSION='29.09.2026 · 11';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3299,20 +3300,20 @@ function weekDayLabel(ds){
   return dayCase(ds);
 }
 /* Nächste Spiele nach der Woche (ab 29.09.2026 · 10):
-   - je Mannschaft das nächste Spiel von fussball.de (wenn sie in den 7 Tagen keins hat),
+   - je Mannschaft das nächste Spiel von fussball.de nach den 7 Tagen – auch wenn sie in der Woche schon spielt
+     (ab 29.09.2026 · 11: „was kommt danach?“),
    - dazu ALLE vorgemerkten Spiele: eigene Freundschaftsspiele/Turniere und vorgemerkte Verlegungen,
      damit man z. B. sieht „E2: 14.10. bei SC Neheim (vorgemerkt), 06.11. gegen Oeventrop (verlegt)“.
    Nach Datum sortiert, höchstens NEXT_MAX Zeilen. */
 const NEXT_MAX=8;
 function nextGamesBeyondWeek(isMine,items){
   const end=weekEndStr();
-  const withGame=new Set(items.filter(e=>e.isExternal).map(e=>e.team+':'+(e.squad||1)));
   const fb=fussballDisplayAll().concat(fussballDisplayAwayAll()).filter(e=>e.d>end&&isMine(e)).sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t));
   const seen=new Set(), out=[];
   fb.forEach(e=>{
     const k=e.team+':'+(e.squad||1);
     if(e.movePending){ out.push(e); seen.add(k); return; } // vorgemerkte Verlegung immer zeigen (zählt als nächstes Spiel)
-    if(withGame.has(k)||seen.has(k)) return; seen.add(k); out.push(e);
+    if(seen.has(k)) return; seen.add(k); out.push(e);
   });
   EVENTS.filter(e=>e.d>end&&isMatchKind(kindOf(e))&&e.ha&&isMine(e)).forEach(e=>out.push(e));
   const uniq=[...new Map(out.map(e=>[e.id,e])).values()];
@@ -3377,7 +3378,8 @@ function renderMyWeek(){
       :weekPickerHTML(true);
     return;
   }
-  let h='<div class="wk-head"><p class="section-label">Meine Woche</p>'
+  const endD=weekEndStr(), nextD=(()=>{ const d=new Date(endD+'T00:00:00'); d.setDate(d.getDate()+1); return ymd(d); })();
+  let h='<div class="wk-head"><p class="section-label">Meine Woche <span class="sec-range">bis '+esc(dayCase(endD))+'</span></p>'
     +(canPick?'<button type="button" class="wk-teams" onclick="toggleWeekPicker()">'+esc(src.label)+' ✎</button>'
              :'<span class="wk-teams static">'+esc(src.label)+'</span>')+'</div>';
   if(canPick&&weekPickerOpen) h+=weekPickerHTML(false);
@@ -3390,10 +3392,10 @@ function renderMyWeek(){
   shown.forEach(e=>{ if(e.d!==lastDay){ h+='<div class="wk-day">'+esc(weekDayLabel(e.d))+'</div>'; lastDay=e.d; } h+=weekRowHTML(e); });
   if(items.length>WEEK_MAX_ROWS) h+='<button type="button" class="wk-more" onclick="weekShowAll=!weekShowAll;renderMyWeek();">'+(weekShowAll?'Weniger anzeigen ▴':'Alle '+items.length+' anzeigen ▾')+'</button>';
   const next=nextGamesBeyondWeek(isMine,items);
-  if(next.length){
-    h+='<p class="section-label" style="margin-top:16px;">Nächste Spiele</p>';
-    next.forEach(e=>{ h+=weekRowHTML(e,true); });
-  }
+  // Immer zeigen (ab · 11) – ohne Spiele mit Hinweis statt leer, damit es nicht wie ein Fehler wirkt.
+  h+='<p class="section-label" style="margin-top:16px;">Nächste Spiele <span class="sec-range">ab '+esc(dayCase(nextD))+'</span></p>';
+  if(next.length) next.forEach(e=>{ h+=weekRowHTML(e,true); });
+  else h+='<div class="wk-empty">Keine weiteren Spiele geplant.</div>';
   box.innerHTML=h;
 }
 function weekPickerHTML(intro){
