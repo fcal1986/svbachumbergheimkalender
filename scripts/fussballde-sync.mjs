@@ -271,7 +271,7 @@ async function enrichGameInfo(games, prevGames, debug) {
     if (prev) for (const f of GAME_INFO_FIELDS) if (prev[f] !== undefined && g[f] === undefined) g[f] = prev[f];
     const sameSlot = prev && prev.d === g.d && (prev.t || '') === (g.t || '');
     const fresh = g.infoAt && g.infoAt > staleBefore && g.gameNo;
-    if (g.d < today || (sameSlot && fresh) || fetched >= 40) continue;
+    if (g.d < today || (sameSlot && fresh) || fetched >= 40 || g.withdrawn) continue; // zurückgezogen: Spielseite ohne Angaben
     fetched++;
     try {
       const res = await fetch(g.link, { headers: FD_HEADERS });
@@ -545,7 +545,8 @@ async function main() {
       squad: extractSquadNumber(m.home), // "wir" sind bei einem Heimspiel die Heim-Mannschaft
       ownName: m.home, // unser Mannschaftsname bei fussball.de, z. B. "SV Bachum/Bergheim 2"
       ...(m.gameNo ? { gameNo: m.gameNo } : {}),
-      opponent: m.away,
+      opponent: splitWithdrawn(m.away).name,
+      ...(splitWithdrawn(m.away).withdrawn ? { withdrawn: true } : {}),
       competition: m.competition,
       score: m.score || null, // {home,away} sobald das Spiel gespielt wurde, sonst null
       link: m.link,
@@ -564,7 +565,8 @@ async function main() {
       team: m.ownTeam,
       squad: extractSquadNumber(m.away), // "wir" sind bei einem Auswärtsspiel die Gast-Mannschaft
       ownName: m.away,
-      opponent: m.home, // bei einem Auswärtsspiel ist "home" der Gegner
+      opponent: splitWithdrawn(m.home).name, // bei einem Auswärtsspiel ist "home" der Gegner
+      ...(splitWithdrawn(m.home).withdrawn ? { withdrawn: true } : {}),
       competition: m.competition,
       score: m.score || null,
       link: m.link,
@@ -671,6 +673,43 @@ function appTeamLabel(team, squad) {
   const m = team.match(/^([A-G])-Jugend$/);
   return m ? `${m[1]}${squad || 1}-Jugend` : team;
 }
+/* ---------- Zurückgezogene Mannschaften (ab 30.09.2026) ----------
+   fussball.de lässt die Spiele einer abgemeldeten Mannschaft stehen und hängt „zg.“ an den Namen
+   (z. B. „SV Hüsten 09 I zg.“). Diese Spiele finden nicht statt: Gegnername ohne Zusatz speichern,
+   withdrawn: true setzen. „a.K.“ (außer Konkurrenz) ist bewusst NICHT betroffen – das Spiel findet statt. */
+const WITHDRAWN_RE = /\s+zg\.?\s*$/i;
+function isWithdrawnGame(g) { return !!(g && (g.withdrawn || WITHDRAWN_RE.test(g.opponent || ''))); }
+function splitWithdrawn(name) {
+  const n = String(name || '');
+  return WITHDRAWN_RE.test(n) ? { name: n.replace(WITHDRAWN_RE, '').trim(), withdrawn: true } : { name: n, withdrawn: false };
+}
+/* Heimspiel auf fremdem Platz (z. B. Turnier mit Heimrecht in Hamm): belegt unseren Platz nicht.
+   config.fussballde.homeVenues = Namensteile der eigenen Spielstätten; ohne Spielort gilt das Spiel als bei uns. */
+function isOwnVenue(g, cfg) {
+  const list = ((cfg && cfg.fussballde && cfg.fussballde.homeVenues) || []).filter(Boolean);
+  if (!list.length || !g || !g.venue) return true;
+  const v = String(g.venue).toLowerCase();
+  return list.some(x => v.includes(String(x).toLowerCase()));
+}
+function occupiesOwnPitch(g, cfg) { return !isWithdrawnGame(g) && isOwnVenue(g, cfg); }
+/* Mannschaft doppelt angesetzt: weitere Spiele derselben Mannschaft am selben Tag (Heim, Auswärts,
+   eigene Freundschaftsspiele). Zurückgezogene Spiele und Spiele desselben Turniers zählen nicht. */
+const MULTI_GAME_RE = /turnier|festival|spielfest|kinderfu/i;
+function sameTournament(a, b) { return (a.competition || '') === (b.competition || '') && MULTI_GAME_RE.test(a.competition || ''); }
+function sameDayGamesText(g, home, away, events) {
+  if (isWithdrawnGame(g)) return '';
+  const at = appTeam(g.team, g.squad);
+  const same = x => x !== g && x.link !== g.link && x.d === g.d && !isWithdrawnGame(x) && !sameTournament(g, x)
+    && appTeam(x.team, x.squad).team === at.team && appTeam(x.team, x.squad).squad === at.squad;
+  const parts = [
+    ...home.filter(same).map(x => `Heimspiel gegen ${x.opponent}${x.t ? ', ' + x.t + ' Uhr' : ''}`),
+    ...away.filter(same).map(x => `Auswärtsspiel bei ${x.opponent}${x.t ? ', ' + x.t + ' Uhr' : ''}`),
+    ...events.filter(e => e.kind === 'game' && e.ha && e.d === g.d && e.team === at.team && (!/Jugend/.test(e.team) || (e.squad || 1) === at.squad)
+      && !(e.opponent && opponentMatches(e.opponent, g.opponent)))
+      .map(e => `Freundschaftsspiel ${e.ha === 'away' ? 'bei' : 'gegen'} ${e.opponent || '?'}${e.kickoff ? ', ' + e.kickoff + ' Uhr' : ''} (Platzcoach)`),
+  ];
+  return parts.length ? ` ACHTUNG: ${appTeamLabel(at.team, at.squad)} hat am selben Tag noch ${parts.length === 1 ? 'ein Spiel' : parts.length + ' Spiele'}: ${parts.join('; ')}.` : '';
+}
 function fbLinkId(link) { const code = String(link || '').replace(/\/+$/, '').split('/').pop(); return code ? 'fb-' + code : null; }
 async function readJson(path, fallback) { try { return JSON.parse(await fs.readFile(path, 'utf8')); } catch (e) { return fallback; } }
 function trainingHint(slots, at, d) {
@@ -697,12 +736,12 @@ function makePitchChecker(cfg, games, slots, events, moves) {
   const dur = team => (fb.durationByAge && fb.durationByAge[ageKey(team)]) || DURATION_BY_AGE[ageKey(team)] || 110;
   const buffer = fb.bufferBeforeMin ?? 15;
   // Heimspiele mit vorgemerkten Verlegungen (fussball.de noch am alten Termin) am neuen Termin führen.
-  const effGames = games.map(g => {
+  const effGames = games.filter(g => occupiesOwnPitch(g, cfg)).map(g => {
     const m = g.link && moves.find(x => x.link === g.link && x.fromD === g.d && (x.fromT || '') === (g.t || ''));
     return m ? { ...g, d: m.toD, t: m.toT } : g;
   });
   return function check(g, d, t) {
-    if (!t) return null;
+    if (!t || !occupiesOwnPitch(g, cfg)) return null;
     const at = appTeam(g.team, g.squad);
     const from = toMin(t), to = from + dur(g.team);
     const overlaps = (s, e) => from < e && to > s;
@@ -780,6 +819,15 @@ async function detectGameChanges(home, away, previous) {
       const at = appTeam(g.team, g.squad), label = appTeamLabel(at.team, at.squad);
       const who = `${label} – ${g.opponent} (${kind}${g.competition ? ', ' + g.competition : ''})`;
       const p = prevByLink.get(g.link);
+      const dayHint = g.d >= today ? sameDayGamesText(g, home, away, events) : '';
+      if (isWithdrawnGame(g)) {
+        // Gegner hat zurückgezogen: einmal melden, wenn es neu ist; sonst nichts (keine Verlegungs-/Neu-Mails).
+        if (p && !isWithdrawnGame(p) && g.d >= today)
+          out.push({ text: `Gegner hat zurückgezogen: ${label} – ${g.opponent} (${kind}${g.competition ? ', ' + g.competition : ''}) am ${fmtGameDate(g.d, g.t)} entfällt.`
+              + (isHome ? ' Der Platz ist zu der Zeit wieder frei.' : ''),
+            team: at.team, squad: at.squad, link: fbLinkId(g.link), priority: 'info', type: 'withdrawn' });
+        continue;
+      }
       if (!p) {
         const own = g.d >= today ? ownFriendlyFor(g, events, isHome) : null;
         if (own) {
@@ -792,7 +840,7 @@ async function detectGameChanges(home, away, previous) {
         }
         if (g.d >= today) {
           const c = isHome ? checkPitch(g, g.d, g.t) : null;
-          added.push({ text: `Neues Spiel bei fussball.de: ${who} am ${fmtGameDate(g.d, g.t)}.` + pitchText(c) + trainingHint(slots, at, g.d),
+          added.push({ text: `Neues Spiel bei fussball.de: ${who} am ${fmtGameDate(g.d, g.t)}.` + pitchText(c) + dayHint + trainingHint(slots, at, g.d),
             team: at.team, squad: at.squad, link: fbLinkId(g.link), priority: 'action', type: 'new' });
         }
         continue;
@@ -821,12 +869,13 @@ async function detectGameChanges(home, away, previous) {
         text = `${sameDay ? 'Anstoßzeit bei fussball.de geändert' : 'Spielverlegung bei fussball.de'}: ${who} ${change}.`
           + pitchText(isHome ? checkPitch(g, g.d, g.t) : null);
       }
+      if (dayHint) { text += dayHint; priority = 'action'; }
       text += trainingHint(slots, at, g.d);
       out.push({ text, team: at.team, squad: at.squad, link: fbLinkId(g.link), priority, type });
     }
     if (list.length) {
       for (const p of prevList) {
-        if (!p.link || nowLinks.has(p.link) || p.d < today) continue;
+        if (!p.link || nowLinks.has(p.link) || p.d < today || isWithdrawnGame(p)) continue;
         const at = appTeam(p.team, p.squad);
         removed.push({ text: `Spiel nicht mehr bei fussball.de gelistet: ${appTeamLabel(at.team, at.squad)} – ${p.opponent} (${kind}${p.competition ? ', ' + p.competition : ''}), war ${fmtGameDate(p.d, p.t)}. Abgesetzt oder zurückgezogen? Bitte prüfen.`,
           team: at.team, squad: at.squad, link: null, priority: 'action', type: 'removed' });

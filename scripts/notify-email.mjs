@@ -319,7 +319,9 @@ async function main() {
       : `${clubName} – Änderungen in Platzcoach:\n\n` + mine.map(txt).join('\n');
     const subjectFb = act.length
       ? `Platzcoach: Bitte prüfen – ${act.length === 1 ? 'Änderung' : act.length + ' Änderungen'} bei fussball.de` + (inf.length ? ` (+${inf.length} Info)` : '')
-      : (inf.length === 1 && inf[0].type === 'confirmed' ? 'Platzcoach: Verlegung von fussball.de bestätigt' : `Platzcoach: ${inf.length} Infos von fussball.de`);
+      : (inf.length === 1 && inf[0].type === 'confirmed' ? 'Platzcoach: Verlegung von fussball.de bestätigt'
+        : inf.length === 1 && inf[0].type === 'withdrawn' ? 'Platzcoach: Spiel entfällt – Gegner hat zurückgezogen'
+        : `Platzcoach: ${inf.length} Infos von fussball.de`);
     try {
       await transporter.sendMail({
         headers: { 'X-Entity-Ref-ID': randomUUID() }, // eindeutig: Gmail gruppiert/kürzt Mails nicht

@@ -14,7 +14,8 @@
   "bufferBeforeMin": 15,
   "durationMinFull": 110,
   "durationMinYouth": 75,
-  "shareCategories": ["E-Junioren", "F-Junioren", "G-Junioren", "Bambini"]
+  "shareCategories": ["E-Junioren", "F-Junioren", "G-Junioren", "Bambini"],
+  "homeVenues": ["Höllenbergkampfbahn"]
   },
   "registration": {
   "workerUrl": "https://odd-pine-7cbc.silent-shape-c920.workers.dev"
