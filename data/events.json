@@ -138,26 +138,6 @@
       "kickoff": "16:30",
       "ownerId": "123c8c2c-5a1a-43d6-be82-455af9f3b407",
       "ownerName": "Younes Al Musaui"
-    },
-    {
-      "id": "66122c3c-2495-48b6-8aec-fbf0eabdef65",
-      "d": "2026-10-02",
-      "t": "16:00",
-      "bis": "17:00",
-      "title": "Test Torwarttraining",
-      "kind": "goalkeeper",
-      "team": "Torwarttraining",
-      "squad": 1,
-      "pitch": null,
-      "halle": null,
-      "res": [],
-      "note": "",
-      "gkTeams": [
-        "F-Jugend",
-        "E-Jugend"
-      ],
-      "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
-      "ownerName": "David Skwara"
     }
   ]
 }
