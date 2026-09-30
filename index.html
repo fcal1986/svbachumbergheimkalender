@@ -1246,7 +1246,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='30.09.2026 · 3';
+const APP_VERSION='30.09.2026 · 4';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3451,40 +3451,43 @@ function gkSignedCountText(e){
   return n?n+' Torhüter angemeldet':'noch kein Torhüter angemeldet';
 }
 function jsArg(v){ return String(v).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
-function weekRowHTML(e,withDate){
-  const chip='<span class="wk-team">'+esc(e.team===GK_TEAM||kindOf(e)==='goalkeeper'?'TW':teamShort(e.team,e.squad))+'</span>';
-  const click=e.isMovedGhost?'jumpToGame('+e.fbIndex+')':'openTerminFromStart(\''+jsArg(e.id)+'\',\''+e.d+'\')';
-  let name, sub='', right='';
+// Name, Unterzeile und Etikett einer Zeile – gemeinsam für die Startseite und die Wochenmail (ab 30.09.2026 · 4).
+function weekRowParts(e){
+  let name, sub='', tag='';
   if(e.isMovedGhost){
     name=e.stalePlan?'Vormerkung überholt: '+e.opponent:'Spiel gegen '+e.opponent;
     sub=e.stalePlan?'fussball.de: '+fmtDayShort(e.toD)+(e.toT?', '+e.toT:''):'verlegt auf '+fmtDayShort(e.toD)+(e.toT?', '+e.toT:'')+(e.pending?' · fussball.de noch offen':'');
-    right='<span class="hoff-pill" style="background:#FFF7ED;color:#9A3412;">Verlegt</span>';
+    tag='Verlegt';
   }else if(e.withdrawn){
-    name=(e.isAway?'bei ':'gegen ')+e.opponent;
-    sub='Gegner hat zurückgezogen';
-    right='<span class="hoff-pill">Entfällt</span>';
+    name=(e.isAway?'bei ':'gegen ')+e.opponent; sub='Gegner hat zurückgezogen'; tag='Entfällt';
   }else if(e.isCancelled){
-    name=kindOf(e)==='goalkeeper'?'Torwarttraining':'Training';
-    sub=cancelReasonOf(e);
-    right='<span class="hoff-pill">Abgesagt</span>';
+    name=kindOf(e)==='goalkeeper'?'Torwarttraining':'Training'; sub=cancelReasonOf(e); tag='Abgesagt';
   }else if(e.isExternal){
     name=(e.isAway?'bei ':'gegen ')+e.opponent;
     sub=[e.movePending?'Vorgemerkt':'',e.competition,e.isAway?'':e.pitchLabelText].filter(Boolean).join(' · '); // ab · 12: vorgemerkte Verlegung wie Freundschaftsspiel
-    const sc=scoreInfo(e);
-    right=sc?'<div class="score-pill '+sc.outcome+'" style="font-size:12px;padding:3px 8px;">'+sc.text+'</div>':haPill(e);
+    const sc=scoreInfo(e); tag=sc?sc.text:(e.isAway?'Auswärts':'Heim');
   }else if(kindOf(e)==='goalkeeper'){
-    name='Torwarttraining';
-    sub=['für '+gkTeamsText(gkTeamsOf(e)),gkSignedCountText(e)].filter(Boolean).join(' · ');
-    right='<div class="pt-visual">'+(pitchVisualOf(e)||'')+'</div>';
+    name='Torwarttraining'; sub=['für '+gkTeamsText(gkTeamsOf(e)),gkSignedCountText(e)].filter(Boolean).join(' · ');
   }else if(!e.isTraining&&kindOf(e)==='game'&&e.ha&&e.opponent){
     name=(e.ha==='away'?'bei ':'gegen ')+e.opponent;
     sub=(isMatchPlanned(e)?'Vorgemerkt · noch nicht bei fussball.de':'Freundschaftsspiel')+(e.kickoff?' · Anstoß '+e.kickoff:'');
-    right=haPill({isAway:e.ha==='away'});
+    tag=e.ha==='away'?'Auswärts':'Heim';
   }else{
-    name=e.isTraining?'Training':(e.title||'Termin');
-    sub=e.isTraining?'':typeLabelOf(e);
-    right='<div class="pt-visual">'+(pitchVisualOf(e)||'')+'</div>';
+    name=e.isTraining?'Training':(e.title||'Termin'); sub=e.isTraining?'':typeLabelOf(e);
   }
+  return {name, sub, tag};
+}
+function weekRowHTML(e,withDate){
+  const chip='<span class="wk-team">'+esc(e.team===GK_TEAM||kindOf(e)==='goalkeeper'?'TW':teamShort(e.team,e.squad))+'</span>';
+  const click=e.isMovedGhost?'jumpToGame('+e.fbIndex+')':'openTerminFromStart(\''+jsArg(e.id)+'\',\''+e.d+'\')';
+  const {name, sub}=weekRowParts(e);
+  let right;
+  if(e.isMovedGhost) right='<span class="hoff-pill" style="background:#FFF7ED;color:#9A3412;">Verlegt</span>';
+  else if(e.withdrawn) right='<span class="hoff-pill">Entfällt</span>';
+  else if(e.isCancelled) right='<span class="hoff-pill">Abgesagt</span>';
+  else if(e.isExternal){ const sc=scoreInfo(e); right=sc?'<div class="score-pill '+sc.outcome+'" style="font-size:12px;padding:3px 8px;">'+sc.text+'</div>':haPill(e); }
+  else if(kindOf(e)!=='goalkeeper'&&!e.isTraining&&kindOf(e)==='game'&&e.ha&&e.opponent) right=haPill({isAway:e.ha==='away'});
+  else right='<div class="pt-visual">'+(pitchVisualOf(e)||'')+'</div>';
   const planned=!e.isMovedGhost&&(e.movePending||isMatchPlanned(e));
   return '<div class="pitch-today-row wk-row'+(e.isCancelled||e.withdrawn?' pt-cancelled':'')+(planned?' wk-planned':'')+'" onclick="'+esc(click)+'">'
     +(withDate?'<div class="pt-time two"><b>'+esc(dayCase(e.d))+'</b>'+e.t+'</div>':'<div class="pt-time">'+e.t+'</div>')
@@ -3564,6 +3567,83 @@ function myTodos(isMine,hasTeams){
     }
   }
   return out;
+}
+/* ---------- Wochenmail (ab 30.09.2026 · 4) ----------
+   Liefert den Inhalt der Wochenübersicht für einen Zugang als einfache Daten. Aufgerufen von
+   scripts/weekly-digest.mjs im Headless-Browser (Uhr auf Montag gestellt), damit Mail und App
+   dieselben Regeln nutzen (Meine Woche, Zu erledigen, Konfliktprüfung). In der App ungenutzt.
+   Trainer: ihre Mannschaften. Admins ohne Mannschaft: Spiele/Termine des Vereins + alle Konflikte. */
+const DIGEST_CONFLICT_DAYS=14;
+function digestLinkId(e){
+  if(!e) return '';
+  if(e.isMovedGhost){ const g=(FUSSBALLDE.games||[])[e.fbIndex]; return g?fbDeepLinkId(g):''; }
+  if(e.isExternal) return fbDeepLinkId(e);
+  if(e.isCancelled&&e.trainingSlotId) return 'tr-'+e.trainingSlotId+'-'+e.d;
+  return e.id||'';
+}
+function digestRow(e){
+  const p=weekRowParts(e);
+  return {d:e.d, day:weekDayLabel(e.d), dayShort:dayCase(e.d), t:e.t, bis:e.bis||'',
+    team:e.team===GK_TEAM||kindOf(e)==='goalkeeper'?'TW':teamShort(e.team,e.squad),
+    name:p.name, sub:p.sub, tag:p.tag,
+    cancelled:!!(e.isCancelled||e.withdrawn), moved:!!e.isMovedGhost,
+    planned:!e.isMovedGhost&&!!(e.movePending||isMatchPlanned(e)),
+    training:!!e.isTraining&&!e.isCancelled, doubleGame:teamDayPartners(e).length>0,
+    link:digestLinkId(e)};
+}
+function digestTodoLink(click){
+  let m=String(click||'').match(/^openTerminFromStart\('((?:[^'\\]|\\.)*)'/);
+  if(m){ const id=m[1].replace(/\\(.)/g,'$1'); return id.replace(/^trc-/,'tr-'); }
+  m=String(click||'').match(/^openStaleMove\((\d+)\)/);
+  if(m){ const g=(FUSSBALLDE.games||[])[+m[1]]; return g?fbDeepLinkId(g):''; }
+  return '';
+}
+function weeklyDigestFor(userId){
+  const u=USERS.find(x=>x.id===userId); if(!u) return null;
+  const cls=normalizeClasses(u.classes||{});
+  const hasTeams=Object.keys(cls).length>0;
+  const clubWide=!hasTeams&&!!u.admin;
+  if(!hasTeams&&!clubWide) return null;
+  const prev=session;
+  session={id:u.id,name:(u.first+' '+(u.last||'')).trim(),isAdmin:!!u.admin,classes:cls,token:prev&&prev.token};
+  _conflictCache={};
+  try{
+    const src=hasTeams?sessionWeekTeams():null;
+    const isMine=hasTeams?weekMatcher(src):()=>true;
+    const endD=weekEndStr();
+    let items=weekItems(isMine);
+    let stats=null;
+    if(clubWide){
+      stats={trainings:items.filter(e=>e.isTraining&&!e.isCancelled).length, cancelled:items.filter(e=>e.isTraining&&e.isCancelled).length};
+      items=items.filter(e=>!e.isTraining&&!(e.isExternal&&e.isAway&&!e.movePending)); // Heimspiele, eigene Termine, Verlegungen
+    }
+    const week=items.map(digestRow);
+    // Konflikte der nächsten 14 Tage (mit eigener Beteiligung; Admins ohne Mannschaft alle)
+    const lbl=x=>(x.team===GK_TEAM?'Torwarttraining':teamShort(x.team,x.squad))+' '+(x.isExternal?'Spiel':x.isTraining?'Training':(x.title||'Termin'));
+    const conflicts=[];
+    for(let i=0;i<DIGEST_CONFLICT_DAYS;i++){
+      const d=new Date(todayStr+'T00:00:00'); d.setDate(d.getDate()+i); const ds=ymd(d);
+      conflictsOnDay(ds).forEach(([A,B])=>{
+        if(hasTeams&&!isMine(A)&&!isMine(B)) return;
+        const mine=hasTeams&&isMine(B)&&!isMine(A)?B:A;
+        conflicts.push({d:ds, day:dayCase(ds),
+          text:lbl(A)+' '+A.t+(A.bis?'–'+A.bis:'')+' und '+lbl(B)+' '+B.t+(B.bis?'–'+B.bis:''),
+          link:digestLinkId(mine)});
+      });
+    }
+    // Zu erledigen (ohne die Platzkonflikte, die stehen oben für 14 Tage)
+    const todos=myTodos(isMine,hasTeams).filter(t=>!/^Platzkonflikt /.test(t.txt))
+      .map(t=>({text:t.txt, action:t.act, link:digestTodoLink(t.click)}));
+    // Noch nicht bei fussball.de: vorgemerkte Freundschaftsspiele/Turniere und Verlegungen nach dieser Woche
+    const open=EVENTS.filter(e=>e.d>endD&&isMatchPlanned(e)&&isMine(e))
+      .concat(fussballDisplayAll().concat(fussballDisplayAwayAll()).filter(e=>e.d>endD&&e.movePending&&isMine(e)))
+      .sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t)).map(digestRow);
+    const next=nextGamesBeyondWeek(isMine,items).map(digestRow);
+    return {userId:u.id, first:u.first||'', email:u.email, admin:!!u.admin, clubWide,
+      teamsLabel:src?src.label:'Verein', from:todayStr, fromShort:dayCase(todayStr), to:endD, toShort:dayCase(endD),
+      conflictsTo:dayCase((()=>{ const d=new Date(todayStr+'T00:00:00'); d.setDate(d.getDate()+DIGEST_CONFLICT_DAYS-1); return ymd(d); })()),
+      stats, week, conflicts, todos, open, next, gkLoaded:!!GK.loaded};
+  }finally{ session=prev; _conflictCache={}; }
 }
 function renderMyWeek(){
   const todoBox=document.getElementById('st-todo'), box=document.getElementById('st-week');
@@ -5753,6 +5833,12 @@ function notificationsCard(){
     '<div class="notif-row-text"><b>E-Mail-Benachrichtigungen</b>'+
     '<p>Erhalte wichtige Benachrichtigungen zu Änderungen und Aktivitäten in Platzcoach per E-Mail.</p></div>'+
     '<label class="toggle-switch"><input type="checkbox" id="notif-toggle"'+(enabled?' checked':'')+' onchange="toggleEmailNotifications(this.checked)"><span class="toggle-slider"></span></label>'+
+    '</div>'+
+    // Wochenübersicht (ab 30.09.2026 · 4): eigener Schalter, unabhängig von den Änderungsmails; fehlend = an.
+    '<div class="notif-row" style="margin-top:12px;">'+
+    '<div class="notif-row-text"><b>Wochenübersicht</b>'+
+    '<p>Sonntags gegen 18 Uhr: deine Woche mit Training, Spielen und Absagen, dazu Platzkonflikte der nächsten 14 Tage.</p></div>'+
+    '<label class="toggle-switch"><input type="checkbox" id="digest-toggle"'+(u.weeklyDigest!==false?' checked':'')+' onchange="toggleWeeklyDigest(this.checked)"><span class="toggle-slider"></span></label>'+
     '</div></div>';
 }
 function profileCard(){
@@ -6319,6 +6405,21 @@ async function toggleEmailNotifications(newVal){
   }catch(e){
     USERS=JSON.parse(backup);
     const el=document.getElementById('notif-toggle'); if(el)el.checked=prevVal;
+    showToast('Fehler beim Speichern: '+e.message,6000);
+  }
+}
+async function toggleWeeklyDigest(newVal){
+  const u=USERS.find(x=>x.id===session.id); if(!u)return;
+  const prevVal=u.weeklyDigest!==false;
+  const backup=JSON.stringify(USERS);
+  u.weeklyDigest=newVal;
+  try{
+    // Präfix "E-Mail-Benachrichtigungen" = Kategorie persoenlich → löst keine Mail aus.
+    await saveUsers('E-Mail-Benachrichtigungen: Wochenübersicht '+(newVal?'aktiviert':'deaktiviert')+': '+u.first+' '+u.last);
+    showToast(newVal?'Wochenübersicht aktiviert.':'Wochenübersicht deaktiviert.');
+  }catch(e){
+    USERS=JSON.parse(backup);
+    const el=document.getElementById('digest-toggle'); if(el)el.checked=prevVal;
     showToast('Fehler beim Speichern: '+e.message,6000);
   }
 }

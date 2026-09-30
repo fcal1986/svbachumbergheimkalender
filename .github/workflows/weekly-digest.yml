@@ -1,0 +1,72 @@
+name: Wochenübersicht per E-Mail
+
+# Sonntags gegen 18 Uhr (17:55 Berlin) an alle Trainer und Admins ohne Mannschaft.
+# Zwei Zeitpläne wegen Sommer-/Winterzeit; das Skript lässt jeweils nur den passenden laufen.
+# Von Hand ("Run workflow") zum Testen:
+#   preview – nichts wird verschickt, die Mails liegen als HTML-Dateien unter "Artifacts"
+#   test    – alle (oder die unter "as" gewählten) Mails gehen NUR an "test_to"
+#   send    – echter Versand an alle (wie sonntags)
+
+on:
+  schedule:
+    - cron: '55 15 * * 0'   # Sommerzeit (UTC+2)
+    - cron: '55 16 * * 0'   # Winterzeit (UTC+1)
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'preview = nur ansehen, test = an eine Adresse, send = an alle'
+        type: choice
+        options: [preview, test, send]
+        default: preview
+      test_to:
+        description: 'Nur bei test: Empfänger aller Testmails'
+        default: ''
+      as:
+        description: 'Optional: nur diese Zugänge (E-Mail oder Name, Komma-getrennt; leer = alle)'
+        default: ''
+      date:
+        description: 'Optional: Montag der Woche (JJJJ-MM-TT); leer = nächster Montag'
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Abhängigkeiten installieren
+        run: |
+          npm install --no-audit --no-fund
+          npm install --no-save --no-audit --no-fund playwright@1.56.0
+          npx playwright install --with-deps chromium
+
+      - name: Wochenübersicht erstellen
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          PLATZCOACH_TOKEN: ${{ secrets.PLATZCOACH_TOKEN }}
+          DIGEST_MODE: ${{ github.event.inputs.mode || 'send' }}
+          DIGEST_TEST_TO: ${{ github.event.inputs.test_to }}
+          DIGEST_AS: ${{ github.event.inputs.as }}
+          DIGEST_DATE: ${{ github.event.inputs.date }}
+          DIGEST_SCHEDULE: ${{ github.event.schedule }}
+          DIGEST_OUT: digest-preview
+        run: node scripts/weekly-digest.mjs
+
+      - name: Vorschau bereitstellen
+        if: github.event.inputs.mode == 'preview'
+        uses: actions/upload-artifact@v4
+        with:
+          name: wochenuebersicht-vorschau
+          path: digest-preview/
+          retention-days: 7
