@@ -266,12 +266,27 @@ ${foot}
 }
 
 /* ---------- Ablauf ---------- */
+// Meldungen als GitHub-Annotation: stehen direkt auf der Übersichtsseite des Laufs (auch am Handy).
+const ghMsg = (lvl, m) => console.log(`::${lvl}::` + String(m).replace(/\r?\n/g, ' '));
+const note = m => { console.log(m); ghMsg('notice', m); };
+const fail = m => { ghMsg('error', m); process.exit(1); };
+// Datum aus JJJJ-MM-TT oder TT.MM.JJJJ; jeder Tag zählt, es gilt der Montag dieser Woche.
+function mondayOf(input) {
+  let v = String(input || '').trim();
+  const de = v.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (de) v = `${de[3]}-${de[2].padStart(2, '0')}-${de[1].padStart(2, '0')}`;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v) || isNaN(new Date(v + 'T12:00:00Z'))) return null;
+  const d = new Date(v + 'T12:00:00Z');
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+  return d.toISOString().slice(0, 10);
+}
+
 async function main() {
   if (MODE === 'send' && !scheduleAllowsRun()) return;
-  const monday = (process.env.DIGEST_DATE || '').trim() || nextMonday();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(monday) || new Date(monday + 'T12:00:00Z').getUTCDay() !== 1) {
-    console.error('DIGEST_DATE muss ein Montag im Format JJJJ-MM-TT sein: ' + monday); process.exit(1);
-  }
+  const rawDate = (process.env.DIGEST_DATE || '').trim();
+  const monday = rawDate ? mondayOf(rawDate) : nextMonday();
+  if (!monday) fail(`Datum „${rawDate}“ nicht lesbar – bitte als JJJJ-MM-TT (z. B. 2026-10-05) oder leer lassen.`);
+  if (MODE === 'test' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(TEST_TO)) fail(`Testmodus: Bei „test_to“ fehlt eine gültige E-Mail-Adresse (eingetragen: „${TEST_TO}“).`);
   const cfg = await readJson('data/config.json', {});
   const dc = cfg.weeklyDigest || {};
   if (dc.enabled === false && MODE === 'send') { console.log('Wochenübersicht in config.json abgeschaltet (weeklyDigest.enabled=false).'); return; }
@@ -284,7 +299,10 @@ async function main() {
   console.log(`${out.length} mögliche Empfänger berechnet${process.env.PLATZCOACH_TOKEN ? ', Torhüter-Anmeldungen ' + (gk ? 'geladen' : 'NICHT entschlüsselbar') : ''}.`);
 
   let list = out;
-  if (AS.length) list = list.filter(d => AS.some(a => d.email.toLowerCase() === a || (d.first + ' ' + d.last).toLowerCase().includes(a)));
+  if (AS.length) {
+    list = list.filter(d => AS.some(a => d.email.toLowerCase() === a || (d.first + ' ' + d.last).toLowerCase().includes(a)));
+    if (!list.length) fail(`Bei „as“ passt „${AS.join(', ')}“ zu keinem Trainer mit Mannschaft. Mögliche Namen: ${out.map(d => d.first + ' ' + d.last).join(', ')}.`);
+  }
   if (MODE === 'send') list = list.filter(d => d.weeklyDigest);
   const mails = list.map(d => ({ d, ...buildMail(d, { siteUrl, clubName, news }) }));
 
@@ -297,12 +315,13 @@ async function main() {
       idx.push(`<li><a href="${esc(f)}">${esc(m.d.first + ' ' + m.d.last)}</a> – ${esc(m.subject)}${m.d.weeklyDigest ? '' : ' <i>(abgeschaltet)</i>'}</li>`);
       console.log(`Vorschau: ${f}  |  ${m.subject}`);
     }
+    note(`Vorschau: ${mails.length} Mails (Woche ab ${monday}) unter „Artifacts“ → wochenuebersicht-vorschau. Es wurde nichts verschickt.`);
     await fs.writeFile(path.join(OUT, 'index.html'), `<!doctype html><meta charset="utf-8"><title>Wochenübersicht ${monday}</title><body style="font-family:Arial,sans-serif;"><h3>Wochenübersicht ab ${monday}</h3><ul>${idx.join('')}</ul></body>`);
     return;
   }
 
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) { console.log('SMTP-Secrets fehlen – kein Versand.'); return; }
-  if (MODE === 'test' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(TEST_TO)) { console.error('Testmodus braucht DIGEST_TEST_TO (E-Mail-Adresse).'); process.exit(1); }
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) fail('SMTP-Secrets fehlen – kein Versand.');
+  if (!mails.length) { note('Keine Empfänger (alle haben die Wochenübersicht abgeschaltet oder keine Mannschaft).'); return; }
   const nodemailer = (await import('nodemailer')).default;
   const port = parseInt(process.env.SMTP_PORT || '587', 10);
   const transporter = nodemailer.createTransport({ host: process.env.SMTP_HOST, port, secure: port === 465, auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } });
@@ -318,9 +337,11 @@ async function main() {
       sent++;
       console.log(`Gesendet an ${to}${MODE === 'test' ? ' (Inhalt von ' + m.d.first + ' ' + m.d.last + ')' : ''}: ${subject}`);
       await new Promise(r => setTimeout(r, 400)); // Brevo nicht fluten
-    } catch (e) { console.error(`Fehler bei ${to}: ${e.message}`); }
+    } catch (e) { ghMsg('warning', `Fehler bei ${to}: ${e.message}`); }
   }
-  console.log(`${sent} von ${mails.length} Wochenübersichten verschickt.`);
+  const summary = `${sent} von ${mails.length} Wochenübersichten (Woche ab ${monday}) verschickt` + (MODE === 'test' ? ` – alle an ${TEST_TO}` : '') + '.';
+  if (!sent) fail(summary + ' Siehe Warnungen oben.');
+  note(summary);
 }
 
-main().catch(e => { console.error(e); process.exit(1); });
+main().catch(e => { console.error(e); fail('Abbruch: ' + (e && e.message || e)); });
