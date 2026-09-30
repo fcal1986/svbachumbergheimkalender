@@ -19,7 +19,7 @@ on:
         options: [preview, test, send]
         default: preview
       test_to:
-        description: 'Nur bei test: Empfänger aller Testmails'
+        description: 'Nur bei test: Empfänger aller Testmails (mehrere mit Komma trennen)'
         default: ''
       as:
         description: 'Optional: nur diese Zugänge (E-Mail oder Name, Komma-getrennt; leer = alle)'
