@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-30T01:18:06.039Z",
+  "updated": "2026-09-30T08:32:00.580Z",
   "games": [
     {
       "d": "2026-09-12",
@@ -2355,6 +2355,17 @@
       "link": "https://www.fussball.de/spiel/sc-neheim-i-sv-bachum-bergheim/-/spiel/031OEC8PC8000000VS5489BUVT2M8LCU"
     },
     {
+      "d": "2026-10-10",
+      "t": "13:00",
+      "team": "C-Junioren",
+      "squad": 1,
+      "ownName": "SV Bachum-Bergheim",
+      "opponent": "JSG Meschede/Eversberg/Heinr./Wehrst.",
+      "competition": "Kreisfreundschaftsspiele",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/jsg-meschede-eversberg-heinr-wehrst-sv-bachum-bergheim/-/spiel/0328C6737K000000VS5489BUVUFHD2VV"
+    },
+    {
       "d": "2026-10-11",
       "t": "15:00",
       "team": "Herren",
@@ -3388,16 +3399,18 @@
       "type": "C-Junioren",
       "squad": 1,
       "names": [
-        "SV Bachum-Bergh. I"
+        "SV Bachum-Bergh. I",
+        "SV Bachum-Bergheim"
       ],
       "teamIds": [
         "011MIB6N6S000000VTVG0001VTR8C1K7"
       ],
       "competitions": [
         "Kreisliga A",
-        "Kreispokal"
+        "Kreispokal",
+        "Kreisfreundschaftsspiele"
       ],
-      "games": 18,
+      "games": 19,
       "homeGames": 8,
       "first": "2026-09-12",
       "last": "2027-06-05",
