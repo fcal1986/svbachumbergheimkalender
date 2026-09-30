@@ -1,18 +1,6 @@
 {
-  "updated": "2026-09-29T22:13:45.754Z",
+  "updated": "2026-09-30T01:18:06.039Z",
   "games": [
-    {
-      "d": "2026-09-08",
-      "t": "18:00",
-      "team": "B-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "gameNo": "240244005",
-      "opponent": "BSV Menden II",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-bsv-menden-ii/-/spiel/031D1H4ML4000000VS5489BUVUR5FS5A"
-    },
     {
       "d": "2026-09-12",
       "t": "10:00",
@@ -3387,13 +3375,12 @@
         "02B9BQVPIG000000VS5489B1VU20GQ5T"
       ],
       "competitions": [
-        "Kreisfreundschaftsspiele",
         "Bezirksliga",
         "Kreispokal"
       ],
-      "games": 27,
-      "homeGames": 15,
-      "first": "2026-09-08",
+      "games": 26,
+      "homeGames": 14,
+      "first": "2026-09-13",
       "last": "2027-06-13",
       "teamId": "02B9BQVPIG000000VS5489B1VU20GQ5T"
     },
@@ -3643,6 +3630,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-09-08",
+  "teamsFrom": "2026-09-09",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
