@@ -118,6 +118,26 @@
       "kickoff": "16:30",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
       "ownerName": "Fabrizio Calcagno"
+    },
+    {
+      "id": "82637955-55dc-45be-8444-42da53b39640",
+      "d": "2026-10-16",
+      "t": "16:30",
+      "bis": "17:30",
+      "title": "Testspiel",
+      "kind": "game",
+      "team": "G-Jugend",
+      "squad": 1,
+      "pitch": null,
+      "halle": null,
+      "res": [],
+      "note": "",
+      "ha": "away",
+      "opponent": "TuS Bruchhausen",
+      "address": "Am Hackeland 1, 59759 Arnsberg-Bruchhausen, Deutschland",
+      "kickoff": "16:30",
+      "ownerId": "123c8c2c-5a1a-43d6-be82-455af9f3b407",
+      "ownerName": "Younes Al Musaui"
     }
   ]
 }
