@@ -341,19 +341,31 @@
   .filter-chip{flex:none;font-size:11.5px;font-weight:600;padding:6px 13px;border-radius:20px;border:1.5px solid var(--line);background:var(--white);color:var(--ink-soft);white-space:nowrap;cursor:pointer;box-shadow:var(--card-shadow);}
   .filter-chip.on{background:var(--black-btn);border-color:var(--black-btn);color:#fff;}
   .termine-sticky{position:sticky;top:-14px;z-index:5;background:var(--bg);margin:-14px -14px 10px;padding:14px 14px 8px;box-shadow:0 6px 10px -8px rgba(11,27,50,.18);}
-  .termine-sticky .viewseg{margin-bottom:8px;}
   .filter-row{display:flex;align-items:center;gap:7px;}
   .filter-row .chip-scroll{flex:1 1 auto;min-width:0;flex-wrap:nowrap;overflow-x:auto;margin-bottom:0;padding-bottom:0;scrollbar-width:none;}
   .filter-row .chip-scroll::-webkit-scrollbar{display:none;}
   .filter-row .team-filter-btn{margin:0;}
   .termine-sticky .team-filter-panel{max-height:45vh;overflow-y:auto;margin:8px 0 0;}
   .termine-sticky #type-filter-banner:not(:empty){margin-top:8px;}
-  .list-start{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--white);border:1.5px solid var(--line);border-radius:12px;padding:9px 12px;margin-bottom:10px;font-size:12.5px;box-shadow:var(--card-shadow);}
-  .list-start button{flex:none;border:1.5px solid var(--green);color:var(--green);background:var(--white);border-radius:8px;padding:5px 10px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;}
-  .viewseg{display:flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden;background:var(--white);margin-bottom:12px;box-shadow:var(--card-shadow);}
-  .viewseg button{flex:1;border:none;background:none;padding:10px 0;font-family:'Inter';font-size:12.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;border-right:1.5px solid var(--line);}
-  .viewseg button:last-child{border-right:none;}
-  .viewseg button.on{background:var(--black-btn);color:#fff;}
+  /* Kalender-Kopf mit Herauszoomen und Wochenleiste (ab 30.09.2026 · 5) */
+  .cal-head.cal-nav-head{margin:0 0 8px;gap:8px;}
+  .cal-zoom{display:flex;flex-direction:column;align-items:flex-start;background:none;border:none;padding:2px 4px 2px 0;margin:0;cursor:pointer;font-family:inherit;text-align:left;min-width:0;color:var(--ink);}
+  .cal-zoom.static{cursor:default;}
+  .cal-zoom .cal-title{display:flex;align-items:center;gap:6px;white-space:nowrap;}
+  .cal-caret{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:6px;background:var(--green-dim);color:var(--green);font-size:10px;}
+  .cal-sub{font-size:11px;font-weight:600;color:var(--ink-soft);margin-top:2px;white-space:nowrap;}
+  .wk-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:0 0 8px;touch-action:pan-y;}
+  .wk-day{position:relative;display:flex;flex-direction:column;align-items:center;margin:0;padding:5px 0 4px;border-radius:10px;border:1px solid var(--line);background:var(--white);cursor:pointer;font-family:inherit;color:var(--ink);min-width:0;box-shadow:var(--card-shadow);}
+  .wk-day .wk-wd{font-size:10px;font-weight:600;color:var(--ink-soft);}
+  .wk-day .wk-num{font-size:15px;font-weight:700;line-height:1.25;}
+  .wk-day .cal-dots{margin-top:1px;}
+  .wk-day.today{border:2px solid var(--green);padding:4px 0 3px;}
+  .wk-day.sel{background:var(--black-btn);border-color:var(--black-btn);color:#fff;}
+  .wk-day.sel .wk-wd{color:rgba(255,255,255,.75);}
+  .wk-day.sel .cdot.jugend{background:#9FC0F2;}
+  .wk-day .conf-mark{top:2px;left:3px;}
+  .wk-day.sel .conf-mark{box-shadow:0 0 0 1.5px #fff;}
+  .wk-daygroup{margin-bottom:12px;}
 
   /* ── CALENDAR ── */
   .cal-head{display:flex;align-items:center;justify-content:space-between;margin:2px 0 12px;}
@@ -841,11 +853,8 @@
     <div class="content">
       <!-- Feste Leiste: Ansicht + Filter bleiben beim Scrollen oben sichtbar -->
       <div class="termine-sticky" id="termine-sticky">
-        <div class="viewseg" id="viewseg">
-          <button type="button" data-view="liste" onclick="setView('liste')">Liste</button>
-          <button type="button" data-view="monat" class="on" onclick="setView('monat')">Monat</button>
-          <button type="button" data-view="jahr" onclick="setView('jahr')">Jahr</button>
-        </div>
+        <!-- Ab 30.09.2026 · 5: kein Umschalter mehr. Überschrift antippen = herauszoomen (Woche → Monat → Jahr) -->
+        <div id="cal-nav"></div>
         <div class="filter-row">
           <div class="chip-scroll" id="filterbar"></div>
           <button type="button" class="team-filter-btn" id="team-filter-btn" onclick="toggleTeamFilterPanel()">Mannschaften <span id="team-filter-count"></span> ▾</button>
@@ -853,8 +862,7 @@
         <div id="team-filter-panel" class="team-filter-panel" style="display:none;"></div>
         <div id="type-filter-banner"></div>
       </div>
-      <div id="list-start-banner"></div>
-      <div id="view-liste" style="display:none;"></div>
+      <div id="view-woche" style="display:none;"></div>
       <div id="view-monat" style="display:none;"></div>
       <div id="view-jahr" style="display:none;"></div>
     </div>
@@ -1246,7 +1254,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='30.09.2026 · 4';
+const APP_VERSION='30.09.2026 · 5';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -1288,7 +1296,7 @@ function fdTeamMapping(type,squad){
 }
 
 const today=new Date(), todayStr=ymd(today);
-let view='monat', filter='alle';
+let view='woche', filter='alle';
 let teamMultiFilter=new Set(), teamFilterPending=new Set(); // Mehrfachauswahl bestimmter Mannschaften (z.B. E1+E2), ersetzt bei Nutzung den Einzel-Filter
 let typeFilter=null; // 'training' | 'spiele' | null – von den Start-Kacheln "Training/Spiele diesen Monat" gesetzt
 let curY=today.getFullYear(), curM=today.getMonth(), yearShown=today.getFullYear();
@@ -1515,7 +1523,7 @@ function focusEventCard(e){
   highlightId=e.id; selDate=e.d;
   const dt=new Date(e.d+'T00:00:00');
   curY=dt.getFullYear(); curM=dt.getMonth(); yearShown=curY;
-  goto('termine'); setView('monat');
+  goto('termine'); setView('woche');
   requestAnimationFrame(()=>requestAnimationFrame(()=>scrollToCard(e.id)));
   clearTimeout(window._hlTimer); window._hlTimer=setTimeout(()=>{ highlightId=null; render(); },5000);
 }
@@ -2451,6 +2459,7 @@ function setupBackButton(){
   window.addEventListener('popstate',ev=>{
     const cur=(document.querySelector('.pane.active')||{dataset:{}}).dataset.pane||'start';
     if(closeTopOverlay()){ try{ history.pushState({pc:1,page:cur},''); }catch(e){} return; }
+    if(cur==='termine'&&view!=='woche'){ zoomIn(); try{ history.pushState({pc:1,page:cur},''); }catch(e){} return; } // Jahr → Monat → Woche
     const page=(ev.state&&ev.state.page)||'start';
     if(page===cur) return;
     NAV_FROM_HISTORY=true;
@@ -2516,10 +2525,14 @@ function setupPullToRefresh(){
   document.addEventListener('touchend',end); document.addEventListener('touchcancel',end);
 }
 setInterval(()=>{ updateHeaderClock(); renderStart(); },30000); // Uhr + Live-Status alle 30s auffrischen, während App offen ist
+/* Terminübersicht ab 30.09.2026 · 5 (Wunsch Fabrizio, Vorbild Windows-Kalender/Quinbook):
+   Standard ist die Woche. Überschrift antippen zoomt heraus (Woche → Monat → Jahr), ein Tag im Monat
+   öffnet wieder die Woche, ein Monat im Jahr den Monat. Die Zurück-Taste zoomt hinein. */
+const VIEW_LEVELS=['woche','monat','jahr'];
 function setView(v){
-  view=v; if(v==='liste') listDaysLoaded=30;
-  document.querySelectorAll('#viewseg button').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
-  ['liste','monat','jahr'].forEach(k=>document.getElementById('view-'+k).style.display=(k===v?'block':'none'));
+  if(!VIEW_LEVELS.includes(v)) v='woche';
+  view=v;
+  VIEW_LEVELS.forEach(k=>{ const el=document.getElementById('view-'+k); if(el) el.style.display=(k===v?'block':'none'); });
   render();
   scrollTermineTop();
   const ap=document.querySelector('.pane.active');
@@ -2547,7 +2560,7 @@ function restoreFilterPref(){
 function setFilter(f){
   filter=f;
   if(f!=='fussballde') teamMultiFilter=new Set(); // fussball.de bleibt bewusst mit Mannschaftsauswahl kombinierbar
-  typeFilter=null; listDaysLoaded=30;
+  typeFilter=null;
   document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f===f));
   updateTeamFilterBtn(); updateTypeFilterBanner();
   const tp=document.getElementById('team-filter-panel'); if(tp&&tp.style.display!=='none') renderTeamFilterPanel();
@@ -2588,7 +2601,7 @@ function countSpieleInMonth(monthKey){
 function goToMonthFiltered(type){
   typeFilter=type; teamMultiFilter=new Set(); filter='alle';
   curY=today.getFullYear(); curM=today.getMonth(); selDate=todayStr;
-  goto('termine'); setView('monat');
+  goto('termine'); setView('woche');
   updateTeamFilterBtn(); updateTypeFilterBanner();
 }
 function clearTypeFilter(){ typeFilter=null; updateTypeFilterBanner(); render(); }
@@ -2646,14 +2659,13 @@ function toggleTeamFilterOpt(ev,key){
 function applyTeamFilter(close){
   teamFilterPending=new Set(teamMultiFilter);
   if(filter!=='fussballde'){ filter=teamMultiFilter.size?'multi':'alle'; } // fussball.de-Auswahl bleibt erhalten
-  listDaysLoaded=30;
   if(close!==false) closeTeamFilterPanel(); else renderTeamFilterPanel();
   document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f===filter));
   updateTeamFilterBtn(); saveFilterPref();
   render(); renderStart();
 }
 function resetTeamFilter(){
-  teamFilterPending=new Set(); teamMultiFilter=new Set(); filter='alle'; listDaysLoaded=30;
+  teamFilterPending=new Set(); teamMultiFilter=new Set(); filter='alle';
   renderTeamFilterPanel(); // bleibt offen, damit man direkt neu wählen kann
   document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f==='alle'));
   updateTeamFilterBtn(); saveFilterPref();
@@ -3057,7 +3069,6 @@ function shareEvent(id){
     (e.note?'Info: '+e.note+'\n':'')+baseUrl()+'#t='+e.id;
   window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
 }
-let listDaysLoaded = 30;
 let trainingView = 'mannschaften';
 let trainingSelectedDate = '';  // wird in boot gesetzt
 
@@ -3207,66 +3218,117 @@ function renderWeekNav(){
   return h;
 } // wie viele Tage ab heute geladen sind
 
-/* Die Liste beginnt am im Monat/Jahr gewählten Tag (selDate), sonst heute. So zeigt der Wechsel
-   Monat → Liste genau den angetippten Tag, auch Tage in der Vergangenheit. */
-function listStartDate(){ return selDate||todayStr; }
-function listFromToday(){ selDate=todayStr; curY=today.getFullYear(); curM=today.getMonth(); listDaysLoaded=30; render(); scrollTermineTop(); }
 function scrollTermineTop(){ const c=document.querySelector('.pane[data-pane="termine"] .content'); if(c)c.scrollTop=0; }
-function renderListStartBanner(){
-  const el=document.getElementById('list-start-banner'); if(!el)return;
-  const st=listStartDate();
-  if(view!=='liste'||st===todayStr){ el.innerHTML=''; return; }
-  const dt=new Date(st+'T00:00:00');
-  el.innerHTML='<div class="list-start"><span>Termine ab <b>'+DAYS[dt.getDay()]+', '+fmtShort(st)+'</b></span><button type="button" onclick="listFromToday()">Ab heute</button></div>';
+function isoWeekNo(ds){
+  const d=new Date(ds+'T00:00:00'); d.setDate(d.getDate()+3-((d.getDay()+6)%7)); // Donnerstag der Woche
+  const w1=new Date(d.getFullYear(),0,4);
+  return 1+Math.round(((d-w1)/864e5-3+((w1.getDay()+6)%7))/7);
 }
-function renderList(){
-  const box=document.getElementById('view-liste');
-  const start=listStartDate();
-  const startDt=new Date(start+'T00:00:00');
-  // Termine ab dem Starttag
-  let evs=filtered().filter(e=>e.d>=start).slice();
-  // Trainings für geladene Tage
-  for(let i=0;i<listDaysLoaded;i++){
-    const dt=new Date(startDt); dt.setDate(dt.getDate()+i);
-    evs=evs.concat(trainingInstancesOn(ymd(dt)).filter(passesFilter));
-    evs=evs.concat(cancelledTrainingInstancesOn(ymd(dt)).filter(passesFilter));
-    evs=evs.concat(movedGameGhostsOn(ymd(dt)).filter(passesFilter));
-    evs=evs.concat(fussballDisplayInstancesOn(ymd(dt)).filter(passesFilter));
-    evs=evs.concat(fussballDisplayAwayInstancesOn(ymd(dt)).filter(passesFilter));
-  }
-  // cutoff-Datum berechnen
-  const cutoff=new Date(startDt); cutoff.setDate(cutoff.getDate()+listDaysLoaded);
-  const cutoffStr=ymd(cutoff);
-  evs=evs.filter(e=>e.d<cutoffStr);
-  evs.sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t));
-  if(!evs.length){
-    box.innerHTML='<div class="empty-day">Keine Termine für diesen Filter.</div>'
-      +'<button class="ghost-btn" onclick="loadMoreDays()">+ Weitere 30 Tage laden</button>';
-    return;
-  }
-  let h='',last='';
-  evs.forEach(e=>{
-    if(e.d!==last){ if(last)h+='</div>'; const sum=daySummaryText(evs.filter(x=>x.d===e.d)); h+='<div class="day-group"><span class="day-head">'+fmtHead(e.d)+(sum?'<span class="day-sum">'+esc(sum)+'</span>':'')+'</span>'; last=e.d; }
-    h+=rowHTML(e);
-  });
-  h+='</div>';
-  // Lade-mehr-Button + Info
-  const rangeEnd=cutoff.getDate()+'. '+MONTHS[cutoff.getMonth()];
-  h+='<div style="text-align:center;padding:6px 0 4px;font-size:11px;color:var(--ink-soft);">Angezeigt bis '+rangeEnd+'</div>'
-    +'<button class="ghost-btn" onclick="loadMoreDays()">+ Weitere 30 Tage laden</button>';
+function fmtDM(d){ const dt=new Date(d+'T00:00:00'); return String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0')+'.'; }
+function syncMonthToSel(){ const dt=new Date(selDate+'T00:00:00'); curY=dt.getFullYear(); curM=dt.getMonth(); }
+function zoomOut(){
+  if(view==='woche'){ syncMonthToSel(); setView('monat'); trackEvent('kalender_monat'); }
+  else if(view==='monat'){ yearShown=curY; setView('jahr'); trackEvent('kalender_jahr'); }
+}
+function zoomIn(){
+  if(view==='jahr') setView('monat');
+  else if(view==='monat') setView('woche');
+}
+function calStep(s){ if(view==='woche') moveWeek(s); else if(view==='monat') moveMonth(s); else moveYear(s); }
+function moveWeek(s){ const dt=new Date(selDate+'T00:00:00'); dt.setDate(dt.getDate()+7*s); selDate=ymd(dt); syncMonthToSel(); render(); scrollTermineTop(); }
+/* Kopf über allen drei Ansichten (in der festen Leiste): Titel zum Herauszoomen, Heute, ‹ ›; in der Woche die Tagesleiste. */
+function renderCalNav(){
+  const box=document.getElementById('cal-nav'); if(!box) return;
+  let title, sub;
+  if(view==='woche'){
+    const wd=getWeekDates(selDate), sel=new Date(selDate+'T00:00:00');
+    title=MONTHS[sel.getMonth()]+' '+sel.getFullYear();
+    sub='KW '+isoWeekNo(selDate)+' · '+fmtDM(wd[0])+'–'+fmtDM(wd[6]);
+  }else if(view==='monat'){ title=MONTHS[curM]+' '+curY; sub='Tag antippen öffnet die Woche'; }
+  else{ title=String(yearShown); sub='Monat antippen öffnet den Monat'; }
+  const zoom=view!=='jahr';
+  const inner='<span class="cal-title">'+esc(title)+(zoom?'<span class="cal-caret" aria-hidden="true">▼</span>':'')+'</span><span class="cal-sub">'+esc(sub)+'</span>';
+  let h='<div class="cal-head cal-nav-head">'
+    +(zoom?'<button type="button" class="cal-zoom" onclick="zoomOut()" aria-label="'+(view==='woche'?'Monatsansicht öffnen':'Jahresansicht öffnen')+'">'+inner+'</button>'
+          :'<div class="cal-zoom static">'+inner+'</div>')
+    +'<div class="cal-btns"><button type="button" class="today-chip" onclick="gotoToday()">Heute</button>'
+    +'<button type="button" class="cal-btn" onclick="calStep(-1)" aria-label="Zurück">‹</button><button type="button" class="cal-btn" onclick="calStep(1)" aria-label="Weiter">›</button></div></div>';
+  if(view==='woche') h+=weekStripHTML();
   box.innerHTML=h;
 }
-
-function loadMoreDays(){
-  listDaysLoaded+=30;
-  renderList();
-  // Scroll zum Ende des bisherigen Inhalts
-  const box=document.getElementById('view-liste');
-  if(box) box.lastElementChild?.scrollIntoView({behavior:'smooth',block:'nearest'});
+function weekStripHTML(){
+  return '<div class="wk-strip">'+getWeekDates(selDate).map(d=>{
+    const dt=new Date(d+'T00:00:00'), evs=eventsOn(d);
+    const cats=[...new Set(evs.map(e=>cat(e.team)))];
+    const conf=hasConflictOn(d);
+    const cls='wk-day'+(d===selDate?' sel':'')+(d===todayStr?' today':'');
+    return '<button type="button" class="'+cls+'" onclick="pickWeekDay(\''+d+'\')" aria-label="'+DAYS[dt.getDay()]+', '+fmtDM(d)+(conf?' – Platzkonflikt':'')+'">'
+      +(conf?'<span class="conf-mark">!</span>':'')
+      +'<span class="wk-wd">'+DOW[(dt.getDay()+6)%7]+'</span><span class="wk-num">'+dt.getDate()+'</span>'
+      +'<span class="cal-dots">'+cats.slice(0,3).map(c=>'<span class="cdot '+c+'"></span>').join('')+'</span></button>';
+  }).join('')+'</div>';
 }
+/* „Ganze Woche als Liste“ ersetzt die frühere Listenansicht; Wahl pro Gerät gemerkt. */
+const WEEK_ALL_KEY='pc_week_all';
+let weekAll=(()=>{ try{ return localStorage.getItem(WEEK_ALL_KEY)==='1'; }catch(e){ return false; } })();
+function toggleWeekAll(){
+  weekAll=!weekAll; try{ localStorage.setItem(WEEK_ALL_KEY,weekAll?'1':'0'); }catch(e){}
+  trackEvent(weekAll?'woche_als_liste':'woche_nur_tag');
+  render(); scrollToWeekDay(selDate);
+}
+function pickWeekDay(d){
+  selDate=d; syncMonthToSel(); render();
+  if(weekAll) scrollToWeekDay(d); else scrollTermineTop();
+}
+// Tag in der Wochenansicht unter die feste Leiste scrollen (sonst verdeckt die Leiste die Überschrift).
+function scrollToWeekDay(d){
+  requestAnimationFrame(()=>{
+    const c=document.querySelector('.pane[data-pane="termine"] .content'); if(!c) return;
+    const el=c.querySelector('[data-wkday="'+d+'"]'); if(!el){ c.scrollTop=0; return; }
+    const sticky=c.querySelector('.termine-sticky');
+    const top=c.scrollTop+el.getBoundingClientRect().top-c.getBoundingClientRect().top-(sticky?sticky.offsetHeight:0)-6;
+    c.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+  });
+}
+function renderWeek(){
+  const box=document.getElementById('view-woche'); if(!box) return;
+  const days=weekAll?getWeekDates(selDate):[selDate];
+  let h='';
+  days.forEach(d=>{
+    const evs=eventsOn(d), sum=daySummaryText(evs), isSel=d===selDate;
+    h+='<div class="wk-daygroup"><p class="section-label"'+(isSel?' id="month-day-head"':'')+' data-wkday="'+d+'">'+fmtHead(d)+(sum?'<span class="day-sum">'+esc(sum)+'</span>':'')+'</p>';
+    h+=evs.length?evs.map(rowHTML).join(''):'<div class="empty-day">Kein Termin an diesem Tag.</div>';
+    if(isSel) h+='<button class="ghost-btn" onclick="newForDay()">＋ Termin für diesen Tag eintragen</button>';
+    h+='</div>';
+  });
+  h+='<button class="ghost-btn" onclick="toggleWeekAll()">'+(weekAll?'Nur den gewählten Tag zeigen':'Ganze Woche als Liste zeigen')+'</button>';
+  box.innerHTML=h;
+}
+/* Wischen links/rechts blättert Woche, Monat oder Jahr (wie ‹ ›). Nicht in Filterleisten und Formularfeldern,
+   nicht vom Bildschirmrand (Zurück-Geste von Android/iOS). */
+function setupCalSwipe(){
+  const c=document.querySelector('.pane[data-pane="termine"] .content'); if(!c) return;
+  let x0=null,y0=0;
+  c.addEventListener('touchstart',ev=>{
+    x0=null; if(ev.touches.length!==1) return;
+    const t=ev.touches[0], w=window.innerWidth;
+    if(t.clientX<24||t.clientX>w-24) return;
+    if(ev.target.closest('.chip-scroll,.team-filter-panel,input,select,textarea,.pitch-wrap')) return;
+    x0=t.clientX; y0=t.clientY;
+  },{passive:true});
+  c.addEventListener('touchend',ev=>{
+    if(x0===null) return;
+    const t=ev.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0; x0=null;
+    if(Math.abs(dx)<60||Math.abs(dx)<Math.abs(dy)*1.5) return;
+    calStep(dx<0?1:-1);
+  },{passive:true});
+}
+
 function moveMonth(s){curM+=s;if(curM<0){curM=11;curY--;}if(curM>11){curM=0;curY++;}render();}
-function gotoToday(){curY=today.getFullYear();curM=today.getMonth();selDate=todayStr;render();}
-function selectDay(d){selDate=d;const dt=new Date(d+'T00:00:00');curY=dt.getFullYear();curM=dt.getMonth();render();}
+// „Heute“ führt aus jeder Ansicht in die Woche mit dem heutigen Tag.
+function gotoToday(){ curY=today.getFullYear(); curM=today.getMonth(); yearShown=curY; selDate=todayStr; setView('woche'); }
+// Tag im Monat antippen → Woche mit diesem Tag.
+function selectDay(d){ selDate=d; syncMonthToSel(); setView('woche'); }
 function capBarHTML(d){
   const used=usedQuarters(d);const free=4-used.size;
   const msg=used.size===0?'Platz komplett frei':(free===0?'Platz voll belegt':free+' von 4 Vierteln noch frei');
@@ -3274,9 +3336,7 @@ function capBarHTML(d){
 }
 function renderMonth(){
   const box=document.getElementById('view-monat');
-  let h='<div class="cal-head"><div class="cal-title">'+MONTHS[curM]+' '+curY+'</div><div class="cal-btns">'+
-    '<button class="today-chip" onclick="gotoToday()">Heute</button>'+
-    '<button class="cal-btn" onclick="moveMonth(-1)">‹</button><button class="cal-btn" onclick="moveMonth(1)">›</button></div></div><div class="cal-grid">';
+  let h='<div class="cal-grid">';
   DOW.forEach(d=>h+='<div class="cal-dow">'+d+'</div>');
   const offset=(new Date(curY,curM,1).getDay()+6)%7;
   const daysIn=new Date(curY,curM+1,0).getDate(), prevDays=new Date(curY,curM,0).getDate();
@@ -3298,11 +3358,6 @@ function renderMonth(){
   }
   h+='</div><div class="cal-legend" role="button" aria-expanded="'+legendHelpOpen+'" onclick="toggleLegendHelp()"><span><span class="cdot jugend"></span>Jugend</span><span><span class="cdot senioren"></span>Senioren</span><span><span class="cdot verein"></span>Verein</span><span>'+miniPitch([1,2])+'Platzbelegung</span><span><span class="conf-mark legend">!</span>Platzkonflikt</span><span class="legend-info">'+(legendHelpOpen?'Schließen ✕':'Was heißt das? ⓘ')+'</span></div>';
   if(legendHelpOpen) h+=legendHelpHTML();
-  const evs=eventsOn(selDate);
-  const sum=daySummaryText(evs);
-  h+='<div style="margin-top:14px;"><p class="section-label" id="month-day-head" style="scroll-margin-top:8px;">'+fmtHead(selDate)+(sum?'<span class="day-sum">'+esc(sum)+'</span>':'')+'</p>';
-  h+=evs.length?evs.map(rowHTML).join(''):'<div class="empty-day">Kein Termin an diesem Tag.</div>';
-  h+='<button class="ghost-btn" onclick="newForDay()">＋ Termin für diesen Tag eintragen</button></div>';
   box.innerHTML=h;
 }
 function newForDay(){ newEvent(selDate); }
@@ -3314,8 +3369,8 @@ function legendHelpHTML(){
   return '<div class="legend-help">'
     +'<p><b>Punkte unter dem Datum:</b> an dem Tag gibt es Termine – <span class="cdot jugend" style="display:inline-block;"></span> Jugend, <span class="cdot senioren" style="display:inline-block;"></span> Senioren, <span class="cdot verein" style="display:inline-block;"></span> Verein (z. B. Vereinsheim, Torwarttraining). Maximal drei Punkte, auch wenn es mehr Termine sind.</p>'
     +'<p><b>Kleiner Platz oben rechts:</b> welche Viertel des Großspielfelds an dem Tag irgendwann belegt sind (grün = belegt). Hälfte A links, Hälfte B rechts.</p>'
-    +'<p><b><span class="conf-mark legend">!</span>Platzkonflikt:</b> zwei Buchungen überschneiden sich zeitlich auf derselben Fläche. Tag antippen – die betroffenen Termine stehen darunter.</p>'
-    +'<p><b>Grüner Rahmen</b> = heute, <b>schwarz</b> = ausgewählter Tag. Mit ‹ › blätterst du Monate, „Heute“ springt zurück.</p>'
+    +'<p><b><span class="conf-mark legend">!</span>Platzkonflikt:</b> zwei Buchungen überschneiden sich zeitlich auf derselben Fläche. Tag antippen – die Woche mit den betroffenen Terminen öffnet sich.</p>'
+    +'<p><b>Grüner Rahmen</b> = heute, <b>schwarz</b> = ausgewählter Tag. Mit ‹ › oder Wischen blätterst du, „Heute“ springt zur aktuellen Woche. Überschrift antippen zeigt das ganze Jahr.</p>'
     +'</div>';
 }
 function moveYear(s){yearShown+=s;render();}
@@ -3324,8 +3379,7 @@ function renderYear(){
   const evs=filtered().filter(e=>e.d.slice(0,4)==yearShown)
     .concat(fussballDisplayAll().filter(e=>e.d.slice(0,4)==yearShown&&passesFilter(e)))
     .concat(fussballDisplayAwayAll().filter(e=>e.d.slice(0,4)==yearShown&&passesFilter(e)));
-  let h='<div class="cal-head"><div class="cal-title">Jahresübersicht '+yearShown+'</div><div class="cal-btns">'+
-    '<button class="cal-btn" onclick="moveYear(-1)">‹</button><button class="cal-btn" onclick="moveYear(1)">›</button></div></div><div class="year-grid">';
+  let h='<div class="year-grid">';
   for(let m=0;m<12;m++){
     const me=evs.filter(e=>parseInt(e.d.slice(5,7))===m+1), cnt=me.length;
     h+='<div class="mini-month" onclick="curY='+yearShown+';curM='+m+';setView(\'monat\')"><div class="mini-title">'+MONTHS_S[m]+(cnt?'<span class="mini-count">'+cnt+'</span>':'')+'</div><div class="mini-grid">';
@@ -3793,15 +3847,15 @@ function openTerminFromStart(id,d){
   const dt=new Date(d+'T00:00:00');
   curY=dt.getFullYear(); curM=dt.getMonth(); yearShown=curY; selDate=d;
   highlightId=id.startsWith('fb')?null:id; // externe Karten haben kein eigenes .hl-Styling, echte Termine/Training schon
-  goto('termine'); setView('monat');
+  goto('termine'); setView('woche');
   requestAnimationFrame(()=>requestAnimationFrame(()=>scrollToCard(id)));
   clearTimeout(window._hlTimer); window._hlTimer=setTimeout(()=>{ highlightId=null; render(); },5000);
 }
 // Überschrift "Platzbelegung heute" und Tageszusammenfassung: Tipp öffnet den heutigen Tag im Kalender.
 function openTodayFromStart(){
   curY=today.getFullYear(); curM=today.getMonth(); yearShown=curY; selDate=todayStr;
-  goto('termine'); setView('monat');
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{ const h=document.getElementById('month-day-head'); if(h) h.scrollIntoView({behavior:'smooth',block:'start'}); }));
+  goto('termine'); setView('woche');
+  scrollToWeekDay(todayStr);
 }
 function renderOccupiedBadge(){
   const box=document.getElementById('st-occupied-badge');
@@ -4025,9 +4079,9 @@ function jumpToDay(ds){
   const hadFilter=(filter!=='alle')||teamMultiFilter.size>0||typeFilter;
   if(hadFilter) setFilter('alle');
   goto('termine');
-  setView('monat');
+  setView('woche');
   if(hadFilter) showToast('Filter zurückgesetzt, damit alle beteiligten Termine sichtbar sind.');
-  setTimeout(()=>{ const h=document.getElementById('month-day-head'); if(h) h.scrollIntoView({block:'start',behavior:'smooth'}); },50);
+  scrollToWeekDay(ds);
 }
 function toggleConflictDetail(id){
   const el=document.getElementById(id);
@@ -4741,7 +4795,7 @@ async function submitEvent(){
       :(wasEditing?'Termin geändert: ':'Neuer Termin: ')+title+' – '+msgTeam(team,squad,gkTeams)+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name+teamTrailer(team,squad,savedEv);
     editingId=null;formDirty=false;document.getElementById('cancel-btn').style.display='none';
     selDate=d;const dt=new Date(d+'T00:00:00');curY=dt.getFullYear();curM=dt.getMonth();yearShown=curY;
-    goto('termine');setView('monat');render();renderStart();resetForm();
+    goto('termine');setView('woche');render();renderStart();resetForm();
     showToast('Gespeichert: '+title);
     saveEvents(logMsg).catch(err=>{ EVENTS=JSON.parse(backup);applyGameMoves();render();renderStart();showToast('Speichern fehlgeschlagen: '+err.message,6000); });
     // Heimspiel/-turnier: Training der Mannschaft zur selben Zeit absagen? Danach Text für den Jugendleiter.
@@ -8141,8 +8195,8 @@ function openHashEvent(){
 function render(){
   _conflictCache={};
   updateTypeFilterBanner();
-  renderListStartBanner();
-  if(view==='liste')renderList();
+  renderCalNav();
+  if(view==='woche')renderWeek();
   if(view==='monat')renderMonth();
   if(view==='jahr')renderYear();
 }
@@ -8280,7 +8334,7 @@ async function boot(){
   document.getElementById('ver-note').textContent='Platzcoach · Version '+APP_VERSION;
 
   refreshHeader(); refreshBioBtn(); buildFilters(); restoreFilterPref();
-  setView('monat'); renderStart(); renderTraining();
+  setView('woche'); renderStart(); renderTraining(); setupCalSwipe();
   markRefreshed(); setupPullToRefresh(); // "Stand" = Zeitpunkt des Ladens; danach bei jedem Aktualisieren
   setupBackButton();
   openHashEvent();
