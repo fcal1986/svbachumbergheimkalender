@@ -145,7 +145,8 @@
       "created": "2026-09-25T18:36:35.119Z",
       "emailNotificationsEnabled": true,
       "phone": "017631039889",
-      "contactPublic": "phone"
+      "contactPublic": "both",
+      "contactEmail": "svejn.sven@outlook.com"
     },
     {
       "id": "df7c1228-0999-452e-9a08-33244bf13cc0",
@@ -450,8 +451,7 @@
       "admin": false,
       "classes": {
         "E-Jugend": [
-          2,
-          3
+          1
         ]
       },
       "enc": {
