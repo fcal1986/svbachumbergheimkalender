@@ -102,8 +102,8 @@
     {
       "id": "81d166cb-a75f-40ab-af89-d59301beb3b3",
       "d": "2026-10-14",
-      "t": "16:30",
-      "bis": "17:45",
+      "t": "17:00",
+      "bis": "18:15",
       "title": "Freundschaftsspiel bei SC Neheim",
       "kind": "game",
       "team": "E-Jugend",
@@ -115,7 +115,7 @@
       "ha": "away",
       "opponent": "SC Neheim II",
       "address": "Binnerfeld, Neheim",
-      "kickoff": "16:30",
+      "kickoff": "17:00",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
       "ownerName": "Fabrizio Calcagno"
     },
