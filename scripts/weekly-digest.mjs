@@ -301,7 +301,7 @@ async function main() {
   let list = out;
   if (AS.length) {
     list = list.filter(d => AS.some(a => d.email.toLowerCase() === a || (d.first + ' ' + d.last).toLowerCase().includes(a)));
-    if (!list.length) fail(`Bei „as“ passt „${AS.join(', ')}“ zu keinem Trainer mit Mannschaft. Mögliche Namen: ${out.map(d => d.first + ' ' + d.last).join(', ')}.`);
+    if (!list.length) fail(`Bei „as“ passt „${AS.join(', ')}“ zu keinem Trainer mit Mannschaft. Bitte Vorname oder Login-E-Mail eintragen.`);
   }
   if (MODE === 'send') list = list.filter(d => d.weeklyDigest);
   const mails = list.map(d => ({ d, ...buildMail(d, { siteUrl, clubName, news }) }));
