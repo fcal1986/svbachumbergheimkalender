@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-30T16:24:37.427Z",
+  "updated": "2026-09-30T22:13:55.146Z",
   "games": [
     {
       "d": "2026-09-12",
@@ -2390,6 +2390,17 @@
       "link": "https://www.fussball.de/spiel/djk-gw-arnsberg-sv-bachum-bergheim-ii/-/spiel/031IK2RV40000000VS5489BUVVKNMR0J"
     },
     {
+      "d": "2026-10-14",
+      "t": "17:00",
+      "team": "E-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum/Bergheim 2",
+      "opponent": "SC Neheim II",
+      "competition": "Kreisfreundschaftsspiele",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sc-neheim-ii-sv-bachum-bergheim-2/-/spiel/0328H4GU5G000000VS5489BTVUCVBQ5B"
+    },
+    {
       "d": "2026-10-17",
       "t": "14:45",
       "team": "C-Junioren",
@@ -3505,15 +3516,17 @@
       "type": "E-Junioren",
       "squad": 2,
       "names": [
-        "SV Bachum/Bergheim II"
+        "SV Bachum/Bergheim II",
+        "SV Bachum/Bergheim 2"
       ],
       "teamIds": [
         "027IVP92OK000000VS5489B1VUA37ON8"
       ],
       "competitions": [
-        "Kreisliga B"
+        "Kreisliga B",
+        "Kreisfreundschaftsspiele"
       ],
-      "games": 14,
+      "games": 15,
       "homeGames": 7,
       "first": "2026-09-12",
       "last": "2027-06-12",
