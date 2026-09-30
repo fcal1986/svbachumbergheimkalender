@@ -187,7 +187,8 @@
   .wk-row{padding:6px 11px;margin-bottom:5px;border-radius:11px;}
   .wk-row .pt-team-name{font-size:12.5px;}
   .wk-empty{font-size:12px;color:var(--ink-soft);padding:2px 2px 4px;}
-  .wk-day .wk-empty{display:inline;font-weight:500;padding:0;}
+  .wk-none{display:flex;align-items:center;gap:9px;padding:9px 11px;margin-bottom:5px;border:1.5px dashed var(--line);border-radius:11px;font-size:12.5px;font-weight:500;color:var(--ink-soft);}
+  .wk-none-ico{flex:none;width:20px;height:20px;border-radius:50%;background:var(--green-dim);color:var(--green);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;}
   .ha-pill{flex:none;font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap;}
   .ha-pill.home{background:var(--green-dim);color:#1E5730;}
   .ha-pill.away{background:var(--bg);color:var(--ink-soft);border:1px solid var(--line);}
@@ -354,17 +355,17 @@
   .cal-zoom .cal-title{display:flex;align-items:center;gap:6px;white-space:nowrap;}
   .cal-caret{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:6px;background:var(--green-dim);color:var(--green);font-size:10px;}
   .cal-sub{font-size:11px;font-weight:600;color:var(--ink-soft);margin-top:2px;white-space:nowrap;}
-  .wk-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:0 0 8px;touch-action:pan-y;}
-  .wk-day{position:relative;display:flex;flex-direction:column;align-items:center;margin:0;padding:5px 0 4px;border-radius:10px;border:1px solid var(--line);background:var(--white);cursor:pointer;font-family:inherit;color:var(--ink);min-width:0;box-shadow:var(--card-shadow);}
-  .wk-day .wk-wd{font-size:10px;font-weight:600;color:var(--ink-soft);}
-  .wk-day .wk-num{font-size:15px;font-weight:700;line-height:1.25;}
-  .wk-day .cal-dots{margin-top:1px;}
-  .wk-day.today{border:2px solid var(--green);padding:4px 0 3px;}
-  .wk-day.sel{background:var(--black-btn);border-color:var(--black-btn);color:#fff;}
-  .wk-day.sel .wk-wd{color:rgba(255,255,255,.75);}
-  .wk-day.sel .cdot.jugend{background:#9FC0F2;}
-  .wk-day .conf-mark{top:2px;left:3px;}
-  .wk-day.sel .conf-mark{box-shadow:0 0 0 1.5px #fff;}
+  .cw-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:0 0 8px;touch-action:pan-y;}
+  .cw-day{position:relative;display:flex;flex-direction:column;align-items:center;margin:0;padding:5px 0 4px;border-radius:10px;border:1px solid var(--line);background:var(--white);cursor:pointer;font-family:inherit;color:var(--ink);min-width:0;box-shadow:var(--card-shadow);}
+  .cw-day .cw-wd{font-size:10px;font-weight:600;color:var(--ink-soft);}
+  .cw-day .cw-num{font-size:15px;font-weight:700;line-height:1.25;}
+  .cw-day .cal-dots{margin-top:1px;}
+  .cw-day.today{border:2px solid var(--green);padding:4px 0 3px;}
+  .cw-day.sel{background:var(--black-btn);border-color:var(--black-btn);color:#fff;}
+  .cw-day.sel .cw-wd{color:rgba(255,255,255,.75);}
+  .cw-day.sel .cdot.jugend{background:#9FC0F2;}
+  .cw-day .conf-mark{top:2px;left:3px;}
+  .cw-day.sel .conf-mark{box-shadow:0 0 0 1.5px #fff;}
   .wk-daygroup{margin-bottom:12px;}
 
   /* ── CALENDAR ── */
@@ -1254,7 +1255,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='30.09.2026 · 5';
+const APP_VERSION='30.09.2026 · 6';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3257,14 +3258,14 @@ function renderCalNav(){
   box.innerHTML=h;
 }
 function weekStripHTML(){
-  return '<div class="wk-strip">'+getWeekDates(selDate).map(d=>{
+  return '<div class="cw-strip">'+getWeekDates(selDate).map(d=>{
     const dt=new Date(d+'T00:00:00'), evs=eventsOn(d);
     const cats=[...new Set(evs.map(e=>cat(e.team)))];
     const conf=hasConflictOn(d);
-    const cls='wk-day'+(d===selDate?' sel':'')+(d===todayStr?' today':'');
+    const cls='cw-day'+(d===selDate?' sel':'')+(d===todayStr?' today':'');
     return '<button type="button" class="'+cls+'" onclick="pickWeekDay(\''+d+'\')" aria-label="'+DAYS[dt.getDay()]+', '+fmtDM(d)+(conf?' – Platzkonflikt':'')+'">'
       +(conf?'<span class="conf-mark">!</span>':'')
-      +'<span class="wk-wd">'+DOW[(dt.getDay()+6)%7]+'</span><span class="wk-num">'+dt.getDate()+'</span>'
+      +'<span class="cw-wd">'+DOW[(dt.getDay()+6)%7]+'</span><span class="cw-num">'+dt.getDate()+'</span>'
       +'<span class="cal-dots">'+cats.slice(0,3).map(c=>'<span class="cdot '+c+'"></span>').join('')+'</span></button>';
   }).join('')+'</div>';
 }
@@ -3726,7 +3727,9 @@ function renderMyWeek(){
   if(canPick&&weekPickerOpen) h+=weekPickerHTML(false);
   const items=weekItems(isMine);
   // "Heute" steht immer oben – ohne Termine mit dem Hinweis "Nichts für …", damit klar ist, dass heute nichts ansteht.
-  if(!items.some(e=>e.d===todayStr)) h+='<div class="wk-day">Heute · '+esc(dayCase(todayStr))+' <span class="wk-empty">– nichts für '+esc(src.label)+'</span></div>';
+  // Ab 30.09.2026 · 6: wie die anderen Tage (Überschrift + Zeile), die Zeile gedämpft mit gestricheltem Rahmen.
+  if(!items.some(e=>e.d===todayStr)) h+='<div class="wk-day">'+esc(weekDayLabel(todayStr))+'</div>'
+    +'<div class="wk-none"><span class="wk-none-ico" aria-hidden="true">✓</span>Heute kein Training und kein Spiel für '+esc(src.label)+'</div>';
   if(!items.length) h+='<div class="wk-empty">Auch in den nächsten 6 Tagen steht nichts an.</div>';
   const shown=weekShowAll?items:items.slice(0,WEEK_MAX_ROWS);
   let lastDay='';
