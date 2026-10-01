@@ -420,6 +420,10 @@
   .ibtn{width:28px;height:28px;border-radius:8px;border:1.5px solid var(--line);background:var(--white);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
   .ibtn svg{width:13px;height:13px;stroke:var(--ink-soft);}
   .ibtn.share svg{stroke:var(--ok);}
+  .share-sheet h3{margin:2px 0 10px;font-family:'Manrope','Inter',sans-serif;font-size:20px;}
+  .share-prev{white-space:pre-wrap;word-break:break-word;font-family:'Inter',sans-serif;font-size:14px;line-height:1.45;background:#F2F5F4;border-radius:12px;padding:12px;margin:0 0 12px;color:var(--ink);}
+  .share-wa{background:#25D366 !important;border-color:#25D366 !important;}
+  .share-sheet button{font-family:'Inter',sans-serif;font-weight:700;}
   .ibtn.del svg{stroke:var(--warn);}
   .empty-card{background:var(--white);border-radius:16px;padding:20px 16px;text-align:center;font-size:12px;color:var(--ink-soft);box-shadow:var(--card-shadow);margin-bottom:10px;}
   .fb-card{background:var(--white);border-radius:14px;padding:12px 14px;box-shadow:var(--card-shadow);margin-bottom:8px;display:flex;align-items:center;gap:10px;}
@@ -1424,7 +1428,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='01.10.2026 · 13';
+const APP_VERSION='01.10.2026 · 14';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2996,12 +3000,13 @@ function rowHTML(e){
   const contactHtml=e.isTraining?getTrainersContactHTML(e):(e.ownerId?getContactHTML(e.ownerId):'');
   let acts='';
   if(e.isTraining){
+    acts=shareBtnHTML(e);
     if(session&&(session.isAdmin||canBookAnyOfTeam(e.team))){
-      acts='<button class="ibtn" title="Diesen Termin absagen" onclick="cancelTrainingDay(\''+e.trainingSlotId+'\',\''+e.d+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M10 14l4 4M14 14l-4 4"/></svg></button>';
+      acts+='<button class="ibtn" title="Diesen Termin absagen" onclick="cancelTrainingDay(\''+e.trainingSlotId+'\',\''+e.d+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M10 14l4 4M14 14l-4 4"/></svg></button>';
     }
 
   }else{
-  acts='<button class="ibtn share" onclick="shareEvent(\''+e.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"/></svg></button>';
+  acts=shareBtnHTML(e);
   if(session)acts+='<button class="ibtn" onclick="duplicateEvent(\''+e.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>';
   if(canEdit(e)){
     acts+='<button class="ibtn" onclick="editEvent(\''+e.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>';
@@ -3081,7 +3086,7 @@ function externalRowHTML(e){
     +'<div class="ev-date-box"><span class="ev-dow">'+dow+'</span><span class="ev-day">'+dd+'</span></div>'
     +'<div class="ev-sep"></div>'
     +'<div class="ev-title-box">'+(planned?'<div class="plan-tag">Vorgemerkt</div>':'')+'<h4>'+esc(e.title)+'</h4><div class="ev-sub">'+e.t+'–'+bis+' · '+(e.movePending?'vorgemerkt':'fussball.de')+(e.isAway?' · belegt keinen eigenen Platz':'')+(e.foreignVenue?' · Spielort '+esc(fbVenueShort(e.venue))+', belegt keinen eigenen Platz':'')+'</div></div>'
-    +(sc?'<div class="score-pill '+sc.outcome+'">'+sc.text+'</div>':'<div class="row-acts">'+acts+'</div>')
+    +'<div class="row-acts">'+shareBtnHTML(e)+(sc?'':acts)+'</div>'+(sc?'<div class="score-pill '+sc.outcome+'">'+sc.text+'</div>':'')
     +'</div>'
     +'<div class="ev-body">'
     +'<div class="ev-times">'
@@ -3108,6 +3113,7 @@ function withdrawnRowHTML(e){
     +'<div class="ev-sep"></div>'
     +'<div class="ev-title-box"><h4 style="text-decoration:line-through;color:var(--ink-soft);">'+esc(e.title)+'</h4>'
     +'<div class="ev-sub">'+e.t+' · Gegner hat zurückgezogen – Spiel entfällt'+(e.isAway?'':', Platz frei')+'</div></div>'
+    +'<div class="row-acts">'+shareBtnHTML(e)+'</div>'
     +'</div>'
     +'<div class="ev-body">'
     +'<span class="hoff-pill">Entfällt</span>'
@@ -3226,7 +3232,7 @@ function inactiveRowHTML(e){
     +'<div class="ia-time">'+esc(e.t)+'</div>'
     +'<div class="ia-main"><div class="ia-name"><span class="wk-team">'+esc(chip)+'</span><s>'+esc(name)+'</s></div>'
     +'<div class="ia-why">'+esc(why)+'</div>'+act+'</div>'
-    +'<div class="ia-side"><span class="ia-pill">'+esc(pill)+'</span>'+(click?'<span class="ia-chev">›</span>':'')+'</div>'
+    +'<div class="ia-side">'+shareBtnHTML(e,'ibtn share ia-share')+'<span class="ia-pill">'+esc(pill)+'</span>'+(click?'<span class="ia-chev">›</span>':'')+'</div>'
     +'</div>';
 }
 /* Kurzüberblick je Tag: „5 Termine · 3 entfallen/verlegt“ (nur, wenn etwas entfällt). */
@@ -3268,16 +3274,72 @@ function movedGhostRowHTML(e){
     +'<button type="button" class="moved-jump" onclick="event.stopPropagation();jumpToGame('+e.fbIndex+')"><span>Zum '+(e.stalePlan||e.diverged?'aktuellen':'neuen')+' Termin: '+esc(to)+'</span><span>→</span></button></div>'
     +'</div>';
 }
-function shareEvent(id){
-  const e=EVENTS.find(x=>x.id===id); if(!e)return;
-  let ort=[];
-  if(e.pitch) ort.push('Großspielfeld: '+pitchShort(e.pitch));
-  ort=ort.concat(e.res||[]);
-  const txt='📅 *'+e.title+'*\n'+fmtShare(e.d)+' · '+e.t+(e.bis?'–'+e.bis:'')+' Uhr\n'+
-    'Team: '+teamLabel(e.team,e.squad)+'\n'+
-    (ort.length?'Ort: '+ort.join(', ')+'\n':'')+'Ansprechpartner: '+(e.ownerName||'–')+'\n'+
-    (e.note?'Info: '+e.note+'\n':'')+baseUrl()+'#t='+e.id;
-  window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
+/* ---------- Termin weiterleiten (ab 01.10.2026 · 14) ----------
+   Für alle (auch ohne Anmeldung) an jeder Karte im Kalender: Teilen-Symbol → kurze Nachricht (wer gegen wen,
+   wann, wo, Ansprechpartner – ohne Telefon/Mail) mit Direktlink → „Per WhatsApp“ oder „Link kopieren“.
+   Abgesagte Trainings, ausgefallene und verlegte Spiele mit Hinweis. */
+const SHARE_SVG='<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"/></svg>';
+function shareBtnHTML(e,cls){ return '<button type="button" class="'+(cls||'ibtn share')+'" title="Weiterleiten" aria-label="Weiterleiten" onclick="'+esc('event.stopPropagation();openShare(\''+jsArg(e.id)+'\',\''+e.d+'\')')+'">'+SHARE_SVG+'</button>'; }
+function shareItemsOn(d){ return EVENTS.filter(e=>e.d===d).concat(trainingInstancesOn(d),cancelledTrainingInstancesOn(d),movedGameGhostsOn(d),fussballDisplayInstancesOn(d),fussballDisplayAwayInstancesOn(d)); }
+function shareLinkFor(e){
+  if(e.isMovedGhost){ const g=FUSSBALLDE.games[e.fbIndex]; return (g&&fbDeepLinkUrl(g))||baseUrl(); }
+  if(e.isExternal) return fbDeepLinkUrl(e)||baseUrl();
+  if(e.isCancelled&&e.trainingSlotId) return baseUrl()+'#t='+encodeURIComponent('tr-'+e.trainingSlotId+'-'+e.d);
+  return baseUrl()+'#t='+encodeURIComponent(e.id);
+}
+function shareDay(d){ const dt=new Date(d+'T00:00:00'), w=DAYS_S[dt.getDay()]; return w[0]+w.slice(1).toLowerCase()+' '+dt.getDate()+'.'+(dt.getMonth()+1)+'.'; }
+function shareText(e){
+  const who=e.team===GK_TEAM?'':(e.team&&e.team!=='Alle Teams'?teamShort(e.team,e.squad):'');
+  const venue=(CFG&&CFG.venue&&CFG.venue.name)||'';
+  const L=[];
+  const contact=()=>{ const n=e.isTraining?getTrainerNames(e):((fussballTrainersFor(e.team,e.squad)||{}).trainerNames||[]);
+    const names=(n.length?n:(e.ownerName&&e.ownerName!=='fussball.de'?[e.ownerName]:[])).filter(x=>x&&x!=='Vorstand').slice(0,2); if(names.length) L.push('👤 '+names.join(', ')); }; // „Vorstand“ = Platzhalter ohne Trainer
+  if(e.isMovedGhost){
+    L.push('🔁 *'+who+' – '+(e.opponent||'Heimspiel')+'* verlegt');
+    L.push('statt '+shareDay(e.d)+' '+e.t+' jetzt '+shareDay(e.toD)+(e.toT?' · Anstoß '+e.toT:'')+(e.pending?' (bei fussball.de noch offen)':''));
+  }else if(e.withdrawn){
+    L.push('❌ *'+who+' – '+e.opponent+'* fällt aus'); L.push(shareDay(e.d)+' · Gegner hat zurückgezogen');
+  }else if(e.isCancelled){
+    const r=cancelReasonOf(e);
+    L.push('❌ *'+(kindOf(e)==='goalkeeper'?'Torwarttraining':'Training '+who)+'* fällt aus');
+    L.push(shareDay(e.d)+' · '+e.t+'–'+e.bis+(r?' · '+r:''));
+  }else if(isGameEntry(e)){
+    const away=e.isAway||e.ha==='away';
+    L.push('⚽ *'+who+' – '+(e.opponent||e.title)+'* ('+(away?'auswärts':'Heim')+')');
+    L.push(shareDay(e.d)+' · Anstoß '+(e.kickoff||e.t)+(e.movePending?' (Verlegung vorgemerkt)':''));
+    const place=away?(e.address||''):(e.foreignVenue&&e.venue?fbVenueShort(e.venue):venue);
+    if(place) L.push('📍 '+place); contact();
+  }else if(e.isTraining||['training','goalkeeper'].includes(kindOf(e))){
+    const gk=kindOf(e)==='goalkeeper';
+    L.push((gk?'🧤 *Torwarttraining':'🏃 *Training '+who)+'*'+(gk&&who?' ('+who+')':''));
+    const area=e.pitch?pitchShort(e.pitch):((e.res||[]).includes('Kleinspielfeld')?'Kleinspielfeld':'');
+    L.push(shareDay(e.d)+' · '+e.t+'–'+eventBis(e));
+    if(venue||area) L.push('📍 '+[venue,area].filter(Boolean).join(' · ')); contact();
+  }else{
+    L.push('📅 *'+e.title+'*'+(who?' ('+who+')':''));
+    L.push(shareDay(e.d)+' · '+e.t+'–'+eventBis(e));
+    const area=e.pitch?pitchShort(e.pitch):(e.res||[]).join(', ');
+    if(venue||area) L.push('📍 '+[e.pitch?venue:'',area].filter(Boolean).join(' · ')); contact();
+    if(e.note) L.push('ℹ️ '+e.note);
+  }
+  L.push('👉 '+shareLinkFor(e));
+  return L.join('\n');
+}
+let SHARE_CUR=null;
+function openShare(id,d){
+  const e=shareItemsOn(d).find(x=>x.id===id); if(!e){ showToast('Termin nicht gefunden.'); return; }
+  SHARE_CUR={text:shareText(e),link:shareLinkFor(e)};
+  openSheet('<div class="share-sheet"><h3>Termin weiterleiten</h3><pre class="share-prev">'+esc(SHARE_CUR.text)+'</pre>'
+    +'<button type="button" class="submit-btn share-wa" onclick="shareWhatsApp()">Per WhatsApp</button>'
+    +'<button type="button" class="cancel-btn" onclick="shareCopyLink()">Link kopieren</button></div>');
+  trackEvent('termin_weiterleiten');
+}
+function shareWhatsApp(){ if(!SHARE_CUR) return; window.open('https://wa.me/?text='+encodeURIComponent(SHARE_CUR.text),'_blank','noopener'); closeSheet(); }
+async function shareCopyLink(){
+  if(!SHARE_CUR) return; const t=SHARE_CUR.link;
+  try{ await navigator.clipboard.writeText(t); }
+  catch(err){ const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(e2){} ta.remove(); }
+  closeSheet(); showToast('Link kopiert.');
 }
 let trainingView = 'mannschaften';
 let trainingSelectedDate = '';  // wird in boot gesetzt
