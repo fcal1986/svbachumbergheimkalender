@@ -13,7 +13,7 @@
 // Umgebung:
 //   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS   Versand (wie die übrigen Mails, Brevo)
 //   DIGEST_MODE     send (Standard) | preview (nur HTML-Dateien, kein Versand) | test
-//   DIGEST_TEST_TO  bei test: alle Mails gehen NUR an diese Adresse (Betreff mit "[Test: Name]")
+//   DIGEST_TEST_TO  bei test: alle Mails gehen NUR an diese Adresse(n), mehrere mit Komma/Leerzeichen getrennt
 //   DIGEST_AS       bei test/preview: nur diese Zugänge (E-Mail oder Name, Komma-getrennt; leer = alle)
 //   DIGEST_DATE     Montag der Woche (JJJJ-MM-TT); leer = nächster Montag (bzw. heute, wenn Montag)
 //   DIGEST_SCHEDULE Cron-Ausdruck des Zeitplans (github.event.schedule) – Sommer-/Winterzeit-Weiche
@@ -27,7 +27,7 @@ import { randomUUID } from 'node:crypto';
 
 const ROOT = process.cwd();
 const MODE = (process.env.DIGEST_MODE || 'send').trim();
-const TEST_TO = (process.env.DIGEST_TEST_TO || '').trim();
+const TEST_TO = (process.env.DIGEST_TEST_TO || '').split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
 const AS = (process.env.DIGEST_AS || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
 const OUT = process.env.DIGEST_OUT || 'digest-preview';
 
@@ -286,7 +286,7 @@ async function main() {
   const rawDate = (process.env.DIGEST_DATE || '').trim();
   const monday = rawDate ? mondayOf(rawDate) : nextMonday();
   if (!monday) fail(`Datum „${rawDate}“ nicht lesbar – bitte als JJJJ-MM-TT (z. B. 2026-10-05) oder leer lassen.`);
-  if (MODE === 'test' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(TEST_TO)) fail(`Testmodus: Bei „test_to“ fehlt eine gültige E-Mail-Adresse (eingetragen: „${TEST_TO}“).`);
+  if (MODE === 'test' && (!TEST_TO.length || TEST_TO.some(a => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(a)))) fail('Testmodus: Bei „test_to“ steht keine gültige E-Mail-Adresse. Mehrere Adressen mit Komma trennen.');
   const cfg = await readJson('data/config.json', {});
   const dc = cfg.weeklyDigest || {};
   if (dc.enabled === false && MODE === 'send') { console.log('Wochenübersicht in config.json abgeschaltet (weeklyDigest.enabled=false).'); return; }
@@ -330,7 +330,7 @@ async function main() {
 
   let sent = 0;
   for (const m of mails) {
-    const to = MODE === 'test' ? TEST_TO : m.d.email;
+    const to = MODE === 'test' ? TEST_TO.join(', ') : m.d.email;
     const subject = MODE === 'test' ? `[Test: ${m.d.first} ${m.d.last}] ${m.subject}` : m.subject;
     try {
       await transporter.sendMail({ from: `Platzcoach <${fromAddress}>`, ...(replyTo ? { replyTo } : {}), to, subject, text: m.text, html: m.html, headers: { 'X-Entity-Ref-ID': randomUUID() } });
@@ -339,7 +339,7 @@ async function main() {
       await new Promise(r => setTimeout(r, 400)); // Brevo nicht fluten
     } catch (e) { ghMsg('warning', `Fehler bei ${to}: ${e.message}`); }
   }
-  const summary = `${sent} von ${mails.length} Wochenübersichten (Woche ab ${monday}) verschickt` + (MODE === 'test' ? ` – alle an ${TEST_TO}` : '') + '.';
+  const summary = `${sent} von ${mails.length} Wochenübersichten (Woche ab ${monday}) verschickt` + (MODE === 'test' ? ` – alle an ${TEST_TO.length === 1 ? 'die Testadresse' : 'die ' + TEST_TO.length + ' Testadressen'}` : '') + '.';
   if (!sent) fail(summary + ' Siehe Warnungen oben.');
   note(summary);
 }
