@@ -3,6 +3,8 @@
 Quelle: Wettbewerbsanalyse VereinsNeo/PlatzNeo (Testzugang, 01.10.2026, 68 Screenshots).
 Ausführliche Analyse: Projekt-Doc `claude/vereinsneo-analyse-2026-10.md`.
 
+**Grundsätze:** Jeder Punkt wird nach `docs/PRINZIPIEN.md` gebaut – nicht überladen, nichts redundant, alles mit einem Klick. Die Prüfliste dort gilt vor jedem Feature.
+
 **Pflege:** Wird ein Punkt umgesetzt, Status hier im selben Commit ändern und Datum/Commit in „Notiz“ eintragen. Nummern bleiben fest, neue Punkte bekommen die nächste freie Nummer.
 
 **Status:** ✅ umgesetzt · 🟡 teilweise · ⬜ offen · ⛔ bewusst nicht
