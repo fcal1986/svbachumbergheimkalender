@@ -1132,7 +1132,7 @@
   <!-- TERMIN FORM (NEU / BEARBEITEN) -->
   <div class="pane" data-pane="neu">
     <div class="content">
-      <button type="button" id="form-back" class="form-back" style="display:none;" onclick="formBackToStart()">‹ Zurück zum Platz</button>
+      <button type="button" id="form-back" class="form-back" onclick="formBack()">‹ Zurück</button>
       <div id="edit-banner" class="edit-banner" style="display:none;"></div>
       <div class="banner info">Ansprechpartner: <b id="owner-name">–</b></div>
       <p class="section-label">Pflichtangaben</p>
@@ -1423,7 +1423,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='01.10.2026 · 9';
+const APP_VERSION='01.10.2026 · 10';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2609,6 +2609,7 @@ function currentPaneArea(){
 }
 function goto(n){
   const prevPane=(document.querySelector('.pane.active')||{dataset:{}}).dataset.pane||'start';
+  if(n==='neu'&&prevPane!=='neu'){ const c=document.querySelector('.pane.active .content'); FORM_ORIGIN={pane:prevPane,scroll:c?c.scrollTop:0}; setTimeout(updateFormBack,0); }
   if(n==='neu') setTimeout(updateEditBanner,0);
   if(n!=='neu')formSkipFussballLink=null; // Verlassen des Formulars ohne Speichern: Ausnahme nicht stehen lassen
   document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.dataset.pane===n));
@@ -2619,8 +2620,9 @@ function goto(n){
     neu:editingId?'Termin bearbeiten':'Neuer Termin',konto:session?'Mein Konto':'Kalender & Konto'};
   document.getElementById('hd-title').textContent=titles[n]||'Termine';
   document.querySelectorAll('.pane.active .content').forEach(c=>c.scrollTop=0);
-  if(n==='start'&&FORM_FROM_START) restoreStartFromForm();
-  else if(n!=='neu'&&FORM_FROM_START){ FORM_FROM_START=null; updateFormBack(); }
+  if(prevPane==='neu'&&n!=='neu'){ // aus dem Formular zurück: dieselbe Stelle wie vorher (Startseite: auch Tag/Uhrzeit der Zeitleiste)
+    const o=FORM_ORIGIN; FORM_ORIGIN=null;
+    if(o&&o.pane===n){ if(n==='start') renderStart(); const c=document.querySelector('.pane.active .content'); if(c) c.scrollTop=o.scroll; } }
   if(n==='konto') renderKonto();
   if(n==='training') renderTraining();
   trackArea(currentPaneArea());
@@ -3713,12 +3715,13 @@ function timelineHTML(ds,isMine){
     +'<div class="tl-pad" style="width:'+((T1-T0)/TL_VIEW_MIN*100).toFixed(1)+'%"><div class="tl-body" style="height:'+H+'px">';
   groups.forEach(g=>{ for(let l=1;l<=g.n;l++) h+='<div class="tl-lane'+(g.area!=='platz'?' alt':'')+'" style="top:'+laneY(g.area,l)+'px"></div>'; });
   for(let hh=h0+1;hh<h1;hh++) h+='<span class="tl-tick" style="left:'+P(hh*60)+'%">'+hh+':00</span><div class="tl-grid" style="left:'+P(hh*60)+'%;top:'+TL_TOP+'px"></div>';
-  // Freie Zeiten (angemeldet, darf buchen): je Spur Lücken ab 30 Min (ab 01.10.2026 · 9, vorher 60) als „+ frei“ – antippen = Kurzauswahl
+  // Freie Zeiten (angemeldet, darf buchen): je Spur die ganze freie Zeit als „+ frei“, sobald sie mind. 30 Min lang ist (ab 01.10.2026 · 9, vorher 60) – antippen = Formular
   const locked=a=>activeLocksOn(ds).some(l=>l.resource===(a==='halle'?'halle':'platz'));
   if(canBook&&ds>=todayStr) groups.filter(g=>g.area!=='halle'&&!locked(g.area)).forEach(g=>{ for(let l=1;l<=g.n;l++){
     const busy=occ.filter(o=>!o.cancelled&&o.area===g.area&&o.lanes[0]<=l&&o.lanes[1]>=l).map(o=>[hmMin(o.t),hmMin(o.bis)]).sort((a,b)=>a[0]-b[0]);
-    let cur=Math.max(T0,isToday?Math.ceil(hmMin(now)/15)*15:T0);
-    busy.concat([[T1,T1]]).forEach(([a,b])=>{ if(a-cur>=30){
+    // Heute beginnt die freie Zeit an der laufenden Viertelstunde (vorher erst an der nächsten – das kürzte den Block)
+    const nowM=isToday?hmMin(now):-1; let cur=Math.max(T0,isToday?Math.floor(nowM/15)*15:T0);
+    busy.concat([[T1,T1]]).forEach(([a,b])=>{ if(a-Math.max(cur,nowM)>=30){
         h+='<button type="button" class="tl-free" style="top:'+laneY(g.area,l)+'px;left:'+P(cur)+'%;width:'+W(cur,a)+'%" onclick="'+esc('openSlotSheet(\''+ds+'\',\''+g.area+'\','+l+','+cur+','+a+',event)')+'" aria-label="'+esc('Frei '+minHM(cur)+'–'+minHM(a)+' '+(g.area==='klein'?'Kleinspielfeld':'Viertel '+l)+' – buchen')+'">+ frei</button>'; }
       cur=Math.max(cur,b); });
   } });
@@ -3786,8 +3789,8 @@ function shiftStartDay(n,pos){
    „+ frei“ im Zeitstrahl öffnet das Formular „Neuer Termin“, vorbefüllt mit allem Bekannten: Tag, Beginn
    (angetippte Stelle), Ende (übliche Trainingsdauer, höchstens bis zur nächsten Belegung), eigene Mannschaft,
    Training, Fläche (angetippte Spur; übliche Größe, wenn sie dort frei ist). Zurück (Taste, Geste oder
-   „‹ Zurück zum Platz“) und Speichern führen auf die Startseite an dieselbe Stelle der Zeitleiste. */
-let FORM_FROM_START=null; // {scroll} – Formular wurde aus der Zeitleiste geöffnet
+   „‹ Zurück“ oben im Formular, ab · 10 immer sichtbar) und Speichern führen an dieselbe Stelle zurück. */
+let FORM_ORIGIN=null; // {pane,scroll} – woher das Formular „Neuer Termin“ geöffnet wurde (ab 01.10.2026 · 10)
 function canBookSlots(){ return !!(session&&isInActiveSeason(session.id)&&(session.isAdmin||Object.keys(normalizeClasses(session.classes||{})).length)); }
 function openSlotSheet(ds,area,lane,from,to,ev){
   if(!canBookSlots()){ showToast('Buchen geht nur angemeldet für die eigene Mannschaft.',4000); return; }
@@ -3796,10 +3799,7 @@ function openSlotSheet(ds,area,lane,from,to,ev){
   if(ev&&ev.currentTarget&&ev.currentTarget.getBoundingClientRect){ const r=ev.currentTarget.getBoundingClientRect(), x=(ev.clientX||r.left)-r.left;
     start=from+Math.floor(((to-from)*Math.max(0,Math.min(1,x/Math.max(1,r.width))))/15)*15; }
   start=Math.max(from,Math.min(to-30,start));
-  const sc=document.querySelector('.pane[data-pane="start"] .content');
-  const ret={scroll:sc?sc.scrollTop:0};
   newEvent(ds); if(!document.querySelector('.pane[data-pane="neu"].active')) return; // nicht berechtigt o. Ä.
-  FORM_FROM_START=ret; updateFormBack();
   // Dauer: übliche Trainingsdauer der Mannschaft (sonst 90 Min), aber nur bis zur nächsten Belegung
   const my=myPreferredTeam(), us=my?usualSlotFor(my.team,my.squad,ds):null;
   const dur=us?Math.max(30,hmMin(us.to)-hmMin(us.from)):90, end=Math.min(to,start+dur), von=minHM(start), bis=minHM(end);
@@ -3817,14 +3817,11 @@ function openSlotSheet(ds,area,lane,from,to,ev){
   onTeamChange(); updateWeekday(); renderPitch(); renderHalle();
   formDirty=false;
 }
-function updateFormBack(){ const b=document.getElementById('form-back'); if(b) b.style.display=FORM_FROM_START?'':'none'; }
-function formBackToStart(){ FORM_FROM_START=FORM_FROM_START||{scroll:0}; formDirty=false; goto('start'); }
-// Zurück auf die Startseite: dieselbe Stelle (Scroll + Zeitleiste) wie vor dem Formular
-function restoreStartFromForm(){
-  const r=FORM_FROM_START; FORM_FROM_START=null; updateFormBack(); if(!r) return;
-  renderStart();
-  const sc=document.querySelector('.pane[data-pane="start"] .content'); if(sc) sc.scrollTop=r.scroll;
-}
+// „‹ Zurück“ steht immer oben im Formular und führt dorthin, woher man kam – an dieselbe Stelle
+function updateFormBack(){ const b=document.getElementById('form-back'); if(!b) return;
+  const p=FORM_ORIGIN&&FORM_ORIGIN.pane;
+  b.textContent='‹ Zurück'+(p==='start'?' zum Platz':(p==='termine'?' zum Kalender':(p==='training'?' zu den Trainingszeiten':''))); }
+function formBack(){ formDirty=false; goto(FORM_ORIGIN&&FORM_ORIGIN.pane||'start'); }
 function openOccDetail(ds,i){
   if(!OCC_VIEW[ds]) OCC_VIEW[ds]=occupancyOn(ds);
   const o=(OCC_VIEW[ds]||[])[i]; if(!o) return;
@@ -5257,7 +5254,7 @@ function newEvent(d){
     showToast('Dir ist noch keine Altersklasse zugeordnet. Bitte beim Vorstand melden.',5000);
     return;
   }
-  editingId=null; resetForm(); FORM_FROM_START=null; updateFormBack();
+  editingId=null; resetForm();
   filterTeamOptions(); onTeamChange();
   dateInput().value=d||todayStr;
   prefillOwnTraining(d||todayStr);
@@ -5422,7 +5419,7 @@ async function submitEvent(){
       :(wasEditing?'Termin geändert: ':'Neuer Termin: ')+title+' – '+msgTeam(team,squad,gkTeams)+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name+teamTrailer(team,squad,savedEv);
     editingId=null;formDirty=false;document.getElementById('cancel-btn').style.display='none';
     selDate=d;const dt=new Date(d+'T00:00:00');curY=dt.getFullYear();curM=dt.getMonth();yearShown=curY;
-    if(FORM_FROM_START&&!wasEditing){ render(); resetForm(); goto('start'); } // aus der Zeitleiste: zurück an dieselbe Stelle
+    if(FORM_ORIGIN&&FORM_ORIGIN.pane==='start'&&!wasEditing){ render(); resetForm(); goto('start'); } // aus der Zeitleiste: zurück an dieselbe Stelle
     else{ goto('termine');setView('woche');render();renderStart();resetForm(); }
     showToast('Gespeichert: '+title);
     saveEvents(logMsg).catch(err=>{ EVENTS=JSON.parse(backup);applyGameMoves();render();renderStart();showToast('Speichern fehlgeschlagen: '+err.message,6000); });
