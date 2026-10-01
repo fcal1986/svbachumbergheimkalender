@@ -154,7 +154,13 @@
       "note": "",
       "address": "Arnsberg im Eichholz Sportgelände SV Arnsberg 09",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "ownerName": "Fabrizio Calcagno"
+      "ownerName": "Fabrizio Calcagno",
+      "rsvp": {
+        "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
+          "s": "yes",
+          "n": "Fabrizio Calcagno"
+        }
+      }
     }
   ]
 }
