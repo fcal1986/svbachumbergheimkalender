@@ -50,7 +50,7 @@ Gezählt wird ab der Ansicht, in der man die Aufgabe bemerkt (Startseite, Wochen
 | Konflikt lösen (Vorschlag übernehmen) | Admin | 1 | ✅ 1 | „Training … absagen“ in der Live-Karte (eigener Konflikt) oder in „Zu erledigen“; andere Konflikte: „Ansehen“ | Nr. 6, 56 |
 | Training absagen | Trainer | 1 | ✅ 1 | „Training absagen“ in der Live-Karte (nächstes Training) oder „Absagen“ in Tag/Woche (Rückgängig 6 s) | Nr. 49, 53 |
 | Platz heute sperren | Admin | 2 | ✅ 2 | „Heute sperren“ unter dem Platz (Admin) → Grund | Nr. 5 |
-| Training oder Termin anlegen | Trainer/Admin | höchstens 3 | ✅ 2 | „+ frei“ im Zeitstrahl an der gewünschten Stelle antippen → „Buchen“ (Mannschaft, Beginn, Dauer, Fläche vorbefüllt); sonst + → Speichern | Nr. 2, 52 |
+| Training oder Termin anlegen | Trainer/Admin | höchstens 3 | ✅ 2 | „+ frei“ im Zeitstrahl an der gewünschten Stelle antippen → Formular mit Tag, Beginn, Ende, Mannschaft und Fläche vorbefüllt → „Termin speichern“; sonst + → Speichern | Nr. 2, 52, 66 |
 | Spielverlegung vormerken | Trainer | höchstens 3 | ⚠️ 5 | „Verlegen“ in der Spielzeile → neues Datum (2) → Grund-Chip → „Vormerken“; das Datum kennt nur der Nutzer | Nr. 50 |
 | Trainer einladen | Admin | höchstens 2 | ✅ 1 | Hinweis „Noch ohne Trainer …“ in „Zu erledigen“ (sonst Konto → Zugänge → „Per WhatsApp einladen“ = 3) | Nr. 51 |
 
