@@ -20,10 +20,10 @@ Letzte Aktualisierung: 01.10.2026
 | 2 | Schnell-Anlage durch Antippen einer freien Lücke | Pilot | ⬜ | Hängt an Nr. 1 |
 | 3 | Sonnenuntergang und „dunkel ab …“ in Tagesansicht und Start | Pilot | ⬜ | Lokal berechnen, braucht Koordinaten in config |
 | 4 | Hinweis „Tage werden kürzer“: welche Trainingszeiten ab wann im Dunkeln enden | Pilot | ⬜ | Zeitumstellung 25.10.; braucht Flutlicht-Angabe |
-| 5 | Platz schnell sperren („Heute sperren“ mit Grund, schraffiert) | Pilot | 🟡 | Ressourcen-Sperren (Platz/Halle/Eigene) mit Warnung gibt es im Konto; fehlt: Schnellaktion, Grund-Auswahl, Darstellung im Plan. Klick-Budget: heute 5 (versteckt unter Konto → Saisons), Ziel 2 |
-| 6 | Konflikte mit konkretem Lösungsvorschlag und Direkt-Aktion | Pilot | 🟡 | Konflikte werden erkannt und angezeigt; Lösungsvorschlag mit Ein-Klick-Aktion fehlt. Klick-Budget: heute 4, Ziel 1 |
+| 5 | Platz schnell sperren („Heute sperren“ mit Grund, schraffiert) | Pilot | 🟡 | ✅ 01.10.2026 · 1: „Heute sperren“ neben „Heute im Verein“ (Admin) → Grund antippen, mit Rückgängig; Banner mit „Aufheben“; Grund-Chips auch unter Konto → Saisons. Klick-Budget 2 ✅. Offen: schraffierte Darstellung im Plan |
+| 6 | Konflikte mit konkretem Lösungsvorschlag und Direkt-Aktion | Pilot | 🟡 | ✅ 01.10.2026 · 1: Training gegen Spiel/Termin → Knopf „Training … absagen“ direkt in „Zu erledigen“ (1 Klick + Rückgängig). Offen: Vorschläge für andere Konfliktarten (z. B. freie Hälfte) |
 | 7 | Dauer-Chips im Formular (60/75/90/105/120 Min) | Pilot | ⬜ | |
-| 8 | Mannschaft zuerst wählen, danach passende Fläche vorschlagen | Pilot | ⬜ | |
+| 8 | Mannschaft zuerst wählen, danach passende Fläche vorschlagen | Pilot | 🟡 | Teilweise mit Nr. 52: Formular startet mit der eigenen Mannschaft und deren üblicher Fläche; ist sie belegt, wird eine freie gleicher Größe gewählt |
 | 9 | Zeitpunkt des letzten fussball.de-Abgleichs anzeigen | Pilot | 🟡 | Stand steht bei „Automatisch von fussball.de übernommen“ und im Mannschaftsabgleich; fehlt: global sichtbar, Warnung wenn > 6 h alt |
 | 10 | Hinweis „kein Angebot des DFB, nur öffentliche Daten auf Veranlassung des Vereins“ | Pilot | ⬜ | |
 | 11 | Verein über fussball.de finden | 1.0 | ⬜ | Einrichtungsassistent |
@@ -32,10 +32,10 @@ Letzte Aktualisierung: 01.10.2026
 | 14 | Einrichtungs-Checkliste mit Fortschritt auf der Startseite | 1.0 | ⬜ | |
 | 15 | Platz-Eigenschaften: Belag, Flutlicht, Nutzung, Kürzel | 1.0 | ⬜ | |
 | 16 | DFBnet-Spielplan per Datei importieren (Plan B ohne fussball.de-Abruf) | Später | ⬜ | Exportformat klären |
-| 49 | Training absagen direkt aus der Zeile in „Meine Woche“ (1 Klick + Rückgängig statt Datums-Dialog) | Pilot | ⬜ | Klick-Budget: heute 3, Ziel 1 |
-| 50 | Verlegung schneller vormerken: Grund als Chips (Ferien, Spielermangel, Platz gesperrt, Sonstiges), Datum aus Ansetzungssuche vorschlagen | Pilot | ⬜ | Klick-Budget: heute 5 + Tippen, Ziel 3 |
-| 51 | Trainer einladen mit einem Klick: Link automatisch erzeugen, „Per WhatsApp teilen“ auch bei Mannschaften ohne Trainer | Pilot | ⬜ | Klick-Budget: heute 3–4, Ziel 2 |
-| 52 | Formular vorbefüllen: Datum aus der aktuellen Kalenderansicht, Mannschaft des Trainers, übliche Trainingszeit der Mannschaft, Anlass automatisch | Pilot | ⬜ | Klick-Budget: heute ca. 9 + Tippen, Ziel 3; ergänzt Nr. 1, 2, 7, 8 |
+| 49 | Training absagen direkt aus der Zeile in „Meine Woche“ (1 Klick + Rückgängig statt Datums-Dialog) | Pilot | ✅ | 01.10.2026 · 1: „Absagen“ in jeder Trainingszeile von „Meine Woche“, ebenso an der Kalenderkarte und im Konflikt-Hinweis; „Zurücknehmen“ bei abgesagten. Gespeichert wird erst nach 6 s (Rückgängig = keine Mail). Klick-Budget 1 ✅ |
+| 50 | Verlegung schneller vormerken: Grund als Chips (Ferien, Spielermangel, Platz gesperrt, Sonstiges), Datum aus Ansetzungssuche vorschlagen | Pilot | ✅ | 01.10.2026 · 1: „Verlegen“ direkt in der Spielzeile, Grund als Chips. Klick-Budget 5, davon 2 für das neue Datum (lässt sich nicht vorbefüllen); über die Ansetzungssuche ist es vorbefüllt |
+| 51 | Trainer einladen mit einem Klick: Link automatisch erzeugen, „Per WhatsApp teilen“ auch bei Mannschaften ohne Trainer | Pilot | ✅ | 01.10.2026 · 1: Hinweis in „Zu erledigen“ für Admins, wenn Mannschaften keinen Trainer haben → 1 Klick erzeugt Link und teilt per WhatsApp („Nicht jetzt“ blendet aus, bis sich die Liste ändert). In Konto → Zugänge „Per WhatsApp einladen“ ohne vorheriges Link-Erzeugen |
+| 52 | Formular vorbefüllen: Datum aus der aktuellen Kalenderansicht, Mannschaft des Trainers, übliche Trainingszeit der Mannschaft, Anlass automatisch | Pilot | ✅ | 01.10.2026 · 1: Datum aus dem gewählten Kalendertag, eigene Mannschaft, Terminart Training, Anlass automatisch, übliche Zeit/Fläche aus der Trainingszeit. Klick-Budget: + → Speichern = 2 (heute), aus dem Kalender 3 ✅ |
 | 43 | Mannschaften mit Lücken-Filtern („ohne Trainer“, „ohne Trainingszeit“, „ohne Platzfreigabe“) | Pilot | ⬜ | „Termine heute ohne Trainer“ gibt es als Warnzeile; Filter in der Mannschaftsliste fehlen |
 
 ## Nice to have
