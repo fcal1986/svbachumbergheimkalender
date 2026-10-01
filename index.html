@@ -1376,7 +1376,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='01.10.2026 · 2';
+const APP_VERSION='01.10.2026 · 3';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3567,7 +3567,7 @@ function todaySummaryText(){
 /* ---------- Neue Startseite (ab 01.10.2026 · 2) ----------
    Aufbau siehe docs/BACKLOG.md (Nr. 1, 3, 53–58) und das abgestimmte Mockup:
    – Trainer:  Live-Karte (läuft gerade / als Nächstes + Platz jetzt) → Zu erledigen → Woche (Tag | Woche)
-   – Admin:    Platz heute (Zeitleiste, „Heute sperren“) → Zu erledigen → Zahlen → eigene Mannschaft
+   – Admin:    gleiche Reihenfolge wie Trainer, zusätzlich Zahlen-Kacheln und „Heute sperren“ in der Tageskarte
    – Besucher: Favoriten (ohne Anmeldung, auf dem Gerät) → Live-Karte → Woche; ohne Favoriten oben die Auswahl.
    Eine Belegungs-Logik für alles: occupancyOn(ds) liefert je Termin Fläche (Platz-Viertel, Kleinspielfeld,
    Hallendrittel) und Zeit – genutzt von Live-Platz, Zeitleiste und Detailblatt. */
@@ -3759,7 +3759,7 @@ function startHeroHTML(src,isMine){
       kicker='Als Nächstes';
       const days=Math.round((new Date(it.d+'T00:00:00')-new Date(todayStr+'T00:00:00'))/86400000);
       const when=days===0?'in '+(hmMin(it.t)-n>=60?Math.floor((hmMin(it.t)-n)/60)+' Std '+((hmMin(it.t)-n)%60)+' Min':(hmMin(it.t)-n)+' Min'):(days===1?'morgen':'in '+days+' Tagen');
-      sub=startDayLabel(it.d,false).replace(/^(Heute|Morgen) · .*/,'$1')+' · '+(it.isExternal||it.kickoff?'Anstoß '+(it.kickoff||it.t):it.t+'–'+eventBis(it))+(area(it)?' · '+area(it):'')+' · '+when;
+      sub=startDayLabel(it.d,false).replace(/^(Heute|Morgen) · .*/,'$1')+' · '+(it.isExternal||it.kickoff?'Anstoß '+(it.kickoff||it.t):it.t+'–'+eventBis(it))+(area(it)?' · '+area(it):'')+(days===1?'':' · '+when);
       if(it.pitch) right='<div class="hero-mini">'+miniPitch(pitchQuarters(it.pitch),true)+'</div>';
     }
     acts=weekRowActHTML(it).replace('>Absagen<','>Training absagen<');
@@ -3792,7 +3792,7 @@ function startWeekHTML(src,isMine,admin){
   if(!startSel||startSel<todayStr||startSel>end) startSel=todayStr;
   const items=src?weekItems(isMine):[];
   const dotOf=e=>(e.isCancelled||e.isMovedGhost||e.withdrawn)?'grey':(e.isExternal||isMatchKind(kindOf(e))?'game':'tr');
-  let h='<section class="st-week"><div class="stw-head"><h2>'+esc(admin?'Platz diese Woche':(src?(src.fromSession?'Deine Woche · '+src.label:'Diese Woche'):'Platz diese Woche'))+'</h2>'
+  let h='<section class="st-week"><div class="stw-head"><h2>'+esc(src?(src.fromSession?'Deine Woche · '+src.label:'Diese Woche'):'Platz diese Woche')+'</h2>'
     +'<div class="seg-mini"><button type="button" class="'+(startView==='tag'?'on':'')+'" onclick="setStartView(\'tag\')">Tag</button>'
     +'<button type="button" class="'+(startView==='woche'?'on':'')+'" onclick="setStartView(\'woche\')"'+(src?'':' disabled')+'>Woche</button></div></div>';
   h+='<div class="stw-strip">';
@@ -4167,19 +4167,19 @@ function renderMyWeek(){
       +'</div></div>').join(''):'';
   }else todoBox.innerHTML='';
   // Oben: Admin sieht zuerst den Platz der Woche (mit „Heute sperren“), alle anderen ihre Live-Karte.
-  if(adminBox) adminBox.innerHTML=admin?startWeekHTML(src,isMine,true):'';
-  if(tilesBox&&!admin) tilesBox.innerHTML='';
+  // Gleiche Reihenfolge für alle Rollen (ab 01.10.2026 · 3): Live-Karte → Zu erledigen → (Admin: Zahlen) → Woche.
+  if(adminBox) adminBox.innerHTML='';
+  if(tilesBox) tilesBox.innerHTML=admin?startTilesHTML():'';
   let hero='';
   if(!src){
     // Erster Besuch ohne Favoriten: die Auswahl steht direkt oben; „Nicht jetzt“ zeigt den ganzen Platz.
     if(!admin&&(weekPickerOpen||!lsGet(PICK_HIDDEN_KEY,false))) hero=weekPickerHTML(true);
     else if(!admin) hero=startPlaceOnlyHTML()+'<button type="button" class="wk-pick-link" onclick="weekPickerOpen=true;renderMyWeek();">Training und Spiele deiner Mannschaft oben sehen? <b>Favoriten wählen ›</b></button>';
-    else hero='<button type="button" class="wk-pick-link" onclick="weekPickerOpen=true;renderMyWeek();">Eigene Mannschaft oben sehen? <b>Mannschaft wählen ›</b></button>'+(weekPickerOpen?weekPickerHTML(false):'');
+    else hero=startPlaceOnlyHTML()+'<button type="button" class="wk-pick-link" onclick="weekPickerOpen=!weekPickerOpen;renderMyWeek();">Eigene Mannschaft oben sehen? <b>Mannschaft wählen ›</b></button>'+(weekPickerOpen?weekPickerHTML(false):'');
   }else hero=heroHTML;
   // Admin: eigene Mannschaft nach „Zu erledigen“ und den Zahlen
-  if(admin){ heroBox.innerHTML=''; if(tilesBox) tilesBox.innerHTML=startTilesHTML()+hero; }
-  else heroBox.innerHTML=hero;
-  weekBox.innerHTML=admin?'':startWeekHTML(src,isMine,false);
+  heroBox.innerHTML=hero;
+  weekBox.innerHTML=startWeekHTML(src,isMine,admin);
   if(seasonBox) seasonBox.innerHTML=session&&!admin?startSeasonLineHTML():'';
 }
 function weekPickerHTML(intro){

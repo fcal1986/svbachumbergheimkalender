@@ -10,7 +10,7 @@ Ausführliche Analyse: Projekt-Doc `claude/vereinsneo-analyse-2026-10.md`.
 **Status:** ✅ umgesetzt · 🟡 teilweise · ⬜ offen · ⛔ bewusst nicht
 **Phase:** Pilot = aktuelle Technik · 1.0 = mit Supabase/Einrichtungsassistent · Später
 
-Letzte Aktualisierung: 01.10.2026 (Version 01.10.2026 · 2)
+Letzte Aktualisierung: 01.10.2026 (Version 01.10.2026 · 3)
 
 ## Must have
 
@@ -41,7 +41,7 @@ Letzte Aktualisierung: 01.10.2026 (Version 01.10.2026 · 2)
 | 55 | Block in der Zeitleiste antippen → Detailblatt (Mannschaft, Zeit, Fläche, Trainer-Kontakt, „Im Kalender“) | Pilot | ✅ | 01.10.2026 · 2 |
 | 56 | Eigener Konflikt in der Live-Karte mit Ein-Klick-Lösung (nicht doppelt in „Zu erledigen“) | Pilot | ✅ | 01.10.2026 · 2 |
 | 57 | Besucher: Favoriten oben (ohne Anmeldung, auf dem Gerät), erster Besuch mit Auswahl direkt oben, „Nicht jetzt“ zeigt den ganzen Platz | Pilot | ✅ | 01.10.2026 · 2 |
-| 58 | Startseite Admin: Platz der Woche mit Zeitleiste und „Heute sperren“ oben, dann Zu erledigen, Zahlen-Kacheln, eigene Mannschaft | Pilot | ✅ | 01.10.2026 · 2 |
+| 58 | Startseite Admin: gleiche Reihenfolge wie für alle (Live-Karte → Zu erledigen → Woche), zusätzlich Zahlen-Kacheln und „Heute sperren“ in der Tageskarte | Pilot | ✅ | 01.10.2026 · 2; 01.10.2026 · 3: Admin-Platz nicht mehr oben, sondern wie bei allen (Feedback: gleiche Struktur mit und ohne Anmeldung) |
 | 59 | Saison-Konflikte auf der Startseite als eine Zeile (aufklappbar) statt langer Liste | Pilot | ✅ | 01.10.2026 · 2 |
 | 60 | Besucher ohne Anmeldung: „Neu“ in der unteren Leiste ausblenden (Mockup), stattdessen „Anmelden“ oben | Pilot | ⬜ | Aus dem Startseiten-Mockup, noch nicht umgesetzt |
 | 43 | Mannschaften mit Lücken-Filtern („ohne Trainer“, „ohne Trainingszeit“, „ohne Platzfreigabe“) | Pilot | ⬜ | „Termine heute ohne Trainer“ gibt es als Warnzeile; Filter in der Mannschaftsliste fehlen |
