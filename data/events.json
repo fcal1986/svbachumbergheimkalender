@@ -157,25 +157,6 @@
       "note": "",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
       "ownerName": "Fabrizio Calcagno"
-    },
-    {
-      "id": "1e3aea6c-23ea-40dc-8169-8ac3580fa69a",
-      "d": "2026-10-01",
-      "t": "17:30",
-      "bis": "18:00",
-      "title": "Training",
-      "kind": "training",
-      "team": "E-Jugend",
-      "squad": 2,
-      "pitch": {
-        "mode": "haelfte",
-        "part": "B"
-      },
-      "halle": null,
-      "res": [],
-      "note": "",
-      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "ownerName": "Fabrizio Calcagno"
     }
   ]
 }
