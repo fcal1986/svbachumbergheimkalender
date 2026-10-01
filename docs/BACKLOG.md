@@ -10,7 +10,7 @@ Ausführliche Analyse: Projekt-Doc `claude/vereinsneo-analyse-2026-10.md`.
 **Status:** ✅ umgesetzt · 🟡 teilweise · ⬜ offen · ⛔ bewusst nicht
 **Phase:** Pilot = aktuelle Technik · 1.0 = mit Supabase/Einrichtungsassistent · Später
 
-Letzte Aktualisierung: 01.10.2026 (Version 01.10.2026 · 4)
+Letzte Aktualisierung: 01.10.2026 (Version 01.10.2026 · 5)
 
 ## Must have
 
@@ -36,15 +36,15 @@ Letzte Aktualisierung: 01.10.2026 (Version 01.10.2026 · 4)
 | 50 | Verlegung schneller vormerken: Grund als Chips (Ferien, Spielermangel, Platz gesperrt, Sonstiges), Datum aus Ansetzungssuche vorschlagen | Pilot | ✅ | 01.10.2026 · 1: „Verlegen“ direkt in der Spielzeile, Grund als Chips. Klick-Budget 5, davon 2 für das neue Datum (lässt sich nicht vorbefüllen); über die Ansetzungssuche ist es vorbefüllt |
 | 51 | Trainer einladen mit einem Klick: Link automatisch erzeugen, „Per WhatsApp teilen“ auch bei Mannschaften ohne Trainer | Pilot | ✅ | 01.10.2026 · 1: Hinweis in „Zu erledigen“ für Admins, wenn Mannschaften keinen Trainer haben → 1 Klick erzeugt Link und teilt per WhatsApp („Nicht jetzt“ blendet aus, bis sich die Liste ändert). In Konto → Zugänge „Per WhatsApp einladen“ ohne vorheriges Link-Erzeugen |
 | 52 | Formular vorbefüllen: Datum aus der aktuellen Kalenderansicht, Mannschaft des Trainers, übliche Trainingszeit der Mannschaft, Anlass automatisch | Pilot | ✅ | 01.10.2026 · 1: Datum aus dem gewählten Kalendertag, eigene Mannschaft, Terminart Training, Anlass automatisch, übliche Zeit/Fläche aus der Trainingszeit. Klick-Budget: + → Speichern = 2 (heute), aus dem Kalender 3 ✅ |
-| 53 | Live-Karte oben: „Läuft gerade“ mit Platz von oben (je Fläche eigene Endzeit + Fortschritt) bzw. „Als Nächstes“ + klein „Jetzt auf dem Platz“ | Pilot | ✅ | 01.10.2026 · 2 |
+| 53 | Live-Karte oben: „Läuft gerade“ mit Platz von oben (je Fläche eigene Endzeit + Fortschritt) bzw. „Als Nächstes“ + klein „Jetzt auf dem Platz“ | Pilot | ✅ | 01.10.2026 · 2; 01.10.2026 · 5: Platz jetzt als eigener Abschnitt unter der Karte (Karte = Termin + Absagen) |
 | 54 | Kleinspielfeld und Halle sichtbar: eigenes Feld in der Live-Karte, eigene Spuren in der Zeitleiste – nur wenn belegt | Pilot | ✅ | 01.10.2026 · 2 |
 | 55 | Block in der Zeitleiste antippen → Detailblatt (Mannschaft, Zeit, Fläche, Trainer-Kontakt, „Im Kalender“) | Pilot | ✅ | 01.10.2026 · 2 |
 | 56 | Eigener Konflikt in der Live-Karte mit Ein-Klick-Lösung (nicht doppelt in „Zu erledigen“) | Pilot | ✅ | 01.10.2026 · 2 |
 | 57 | Besucher: Favoriten oben (ohne Anmeldung, auf dem Gerät), erster Besuch mit Auswahl direkt oben, „Nicht jetzt“ zeigt den ganzen Platz | Pilot | ✅ | 01.10.2026 · 2 |
-| 58 | Startseite Admin: gleiche Reihenfolge wie für alle (Live-Karte → Zu erledigen → Woche), zusätzlich Zahlen-Kacheln und „Heute sperren“ in der Tageskarte | Pilot | ✅ | 01.10.2026 · 2; 01.10.2026 · 3: Admin-Platz nicht mehr oben, sondern wie bei allen (Feedback: gleiche Struktur mit und ohne Anmeldung) |
+| 58 | Startseite Admin: gleiche Reihenfolge wie für alle, zusätzlich „Heute sperren“ in der Tageskarte | Pilot | ✅ | 01.10.2026 · 2; 01.10.2026 · 3: Admin-Platz nicht mehr oben, sondern wie bei allen (Feedback: gleiche Struktur mit und ohne Anmeldung); 01.10.2026 · 5: Zahlen-Kacheln entfernt (überflüssig) |
 | 59 | Saison-Konflikte auf der Startseite als eine Zeile (aufklappbar) statt langer Liste | Pilot | ✅ | 01.10.2026 · 2 |
 | 60 | Besucher ohne Anmeldung: „Neu“ in der unteren Leiste ausblenden (Mockup), stattdessen „Anmelden“ oben | Pilot | ⬜ | Aus dem Startseiten-Mockup, noch nicht umgesetzt |
-| 61 | Zeitstrahl wischen: 4 Std sichtbar, Wischen scrollt durch den Tag (8–22 Uhr), am Rand weiter zum nächsten/vorigen Tag; Pfeile ‹ › am Tagestitel | Pilot | ✅ | 01.10.2026 · 4 |
+| 61 | Zeitstrahl wischen: 4 Std sichtbar, Wischen scrollt durch den Tag (8–22 Uhr), am Rand weiter zum nächsten/vorigen Tag | Pilot | ✅ | 01.10.2026 · 4; 01.10.2026 · 5: Pfeile ‹ › am Tagestitel entfernt – Tage-Kacheln und Wischen reichen |
 | 62 | „Woche“ ohne Favoriten: alle Termine des Vereins der nächsten 7 Tage (vorher nur mit Favoriten wählbar) | Pilot | ✅ | 01.10.2026 · 4 |
 | 43 | Mannschaften mit Lücken-Filtern („ohne Trainer“, „ohne Trainingszeit“, „ohne Platzfreigabe“) | Pilot | ⬜ | „Termine heute ohne Trainer“ gibt es als Warnzeile; Filter in der Mannschaftsliste fehlen |
 
@@ -52,7 +52,7 @@ Letzte Aktualisierung: 01.10.2026 (Version 01.10.2026 · 4)
 
 | Nr. | Feature | Phase | Status | Notiz |
 |---|---|---|---|---|
-| 17 | Wochenleiste mit Zahlen und Konfliktpunkten auf der Startseite (Admin) | Pilot | ✅ | 01.10.2026 · 2: Wochenleiste mit Punkten je Tag (Training/Spiel/abgesagt) für Trainer und Favoriten; für Admins Zahlen-Kacheln (Trainings, Heimspiele, Konflikte) |
+| 17 | Wochenleiste mit Zahlen und Konfliktpunkten auf der Startseite (Admin) | Pilot | ✅ | 01.10.2026 · 2: Wochenleiste mit Punkten je Tag (Training/Spiel/abgesagt) für Trainer und Favoriten; für Admins Zahlen-Kacheln (Trainings, Heimspiele, Konflikte); 01.10.2026 · 5: Zahlen-Kacheln wieder entfernt |
 | 18 | Verfügbarkeitszeile im Formular („2 von 4 Vierteln frei · Kabinen 3 von 4 frei“) | Pilot | ⬜ | |
 | 19 | Spielformat und Spielende auf Spielkarten (11v11, 9v9 …) | Pilot | ⬜ | Spieldauer je Altersklasse ist intern vorhanden |
 | 20 | Druckansicht für Woche und Tag (Aushang) | Pilot | ⬜ | |
@@ -90,6 +90,8 @@ Letzte Aktualisierung: 01.10.2026 (Version 01.10.2026 · 4)
 | 48 | Benachrichtigungen als Grobwahl E-Mail/Keine | ⛔ | Unsere Kategorien sind feiner |
 
 ## Entfernt
+
+- 01.10.2026 · 5: Zahlen-Kacheln (Trainings, Heimspiele, Konflikte) und die Pfeile ‹ › am Tagestitel auf der Startseite – doppelt bzw. überflüssig. Saison-Konflikte stehen für alle Angemeldeten als eine Zeile.
 
 - 01.10.2026 · 2: „Heute im Verein“ (Liste + Badge „Platz aktuell belegt“) auf der Startseite – ersetzt durch Live-Karte und Zeitleiste; das Datum oben steht jetzt in der Tageskarte.
 
