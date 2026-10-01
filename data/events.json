@@ -138,25 +138,6 @@
       "kickoff": "16:30",
       "ownerId": "123c8c2c-5a1a-43d6-be82-455af9f3b407",
       "ownerName": "Younes Al Musaui"
-    },
-    {
-      "id": "bb21781e-bdb8-4ba0-8a42-bcb91fb8b7ae",
-      "d": "2026-10-01",
-      "t": "17:30",
-      "bis": "18:00",
-      "title": "Training",
-      "kind": "training",
-      "team": "E-Jugend",
-      "squad": 2,
-      "pitch": {
-        "mode": "viertel",
-        "part": 2
-      },
-      "halle": null,
-      "res": [],
-      "note": "",
-      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "ownerName": "Fabrizio Calcagno"
     }
   ]
 }
