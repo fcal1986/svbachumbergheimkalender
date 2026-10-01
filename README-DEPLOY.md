@@ -57,8 +57,7 @@ Läuft seit September 2026. Die Schritte unten sind nur nötig, wenn Platzcoach 
   "clubId": "00ES8GN8LS00007LVV0AG08LVUPGND5I",
   "clubMatch": "SV Bachum",
   "bufferBeforeMin": 15,
-  "durationMinFull": 110,
-  "durationMinYouth": 75,
+  "durationByAge": {"E": 60},
   "shareCategories": ["E-Junioren", "F-Junioren", "G-Junioren", "Bambini"]
 }
 ```
@@ -75,8 +74,7 @@ Läuft seit September 2026. Die Schritte unten sind nur nötig, wenn Platzcoach 
     "clubId": "00ES8GN8LS00007LVV0AG08LVUPGND5I",
     "clubMatch": "SV Bachum",
     "bufferBeforeMin": 15,
-    "durationMinFull": 110,
-    "durationMinYouth": 75,
+    "durationByAge": {"E": 60},
     "shareCategories": ["E-Junioren", "F-Junioren", "G-Junioren", "Bambini"]
   }
 }
@@ -89,11 +87,10 @@ Erklärung der Felder:
 | `clubId` | Eure Vereins-ID von fussball.de (steht in der URL eurer Vereinsseite nach `/id/`) |
 | `clubMatch` | Text, an dem ein Heimspiel erkannt wird (muss am Anfang des Team-Namens stehen) |
 | `bufferBeforeMin` | Vorlaufzeit vor Anpfiff, die zusätzlich als belegt gilt (Minuten) |
-| `durationMinFull` | Geschätzte Spieldauer für Teams **ab D-Jugend aufwärts** (kompletter Platz) |
-| `durationMinYouth` | Geschätzte Spieldauer für Teams **bis E-Jugend** (Platz wird geteilt) |
+| `durationByAge` | Optional: Spieldauer in Minuten je Altersklasse, nur für Abweichungen vom Standard. Schlüssel: `Senioren`, `A` … `G`. Standard: Senioren/A 110, B 100, C 90, D 80, E 70, F/G 60 |
 | `shareCategories` | Welche Namens-Präfixe sich den Platz teilen dürfen |
 
-Passt `durationMinFull` / `durationMinYouth` an, falls eure tatsächlichen Spielzeiten abweichen.
+Weicht eine Spieldauer ab, tragt nur diese Altersklasse in `durationByAge` ein, z. B. `{"E": 60}`. Fehlt der Block, gelten die Standardwerte. (Die früheren Felder `durationMinFull`/`durationMinYouth` werden nicht mehr gelesen.)
 
 ## Schritt 3: GitHub Action aktivieren
 
