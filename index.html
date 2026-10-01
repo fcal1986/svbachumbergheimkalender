@@ -235,17 +235,6 @@
   .lp-third{font-size:11.5px;font-weight:700;color:#fff;text-align:center;padding:4px;border-radius:5px;background:rgba(255,255,255,.15);}
   .lp-third.mine{background:#8BCF2F;color:var(--pc-navy);}
   .st-now{display:flex;flex-direction:column;gap:10px;background:#fff;border-radius:20px;padding:14px;box-shadow:var(--card-shadow);}
-  .stn-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
-  .stn-head h2{margin:0;font-family:'Manrope','Inter',sans-serif;font-size:17px;font-weight:800;}
-  .stn-head span{font-size:12px;color:var(--ink-soft);text-align:right;}
-  .stn-time{font-size:12.5px;font-weight:700;color:var(--ink-soft);}
-  .stn-status{display:flex;align-items:center;gap:10px;border-radius:14px;padding:10px 12px;}
-  .stn-status b{font-family:'Manrope','Inter',sans-serif;font-size:18px;font-weight:800;padding:4px 12px;border-radius:999px;color:#fff;white-space:nowrap;}
-  .stn-status span{font-size:13.5px;font-weight:600;color:var(--ink);}
-  .stn-status.free{background:#E6F4D7;} .stn-status.free b{background:#3E8E1A;}
-  .stn-status.part{background:#FFF1C2;} .stn-status.part b{background:#B07800;}
-  .stn-status.full{background:#FDECEA;} .stn-status.full b{background:#B3261E;}
-  .stn-status.lock{background:#E9EEED;} .stn-status.lock b{background:#405366;}
   .lp-occ{position:absolute;box-sizing:border-box;padding:5px;display:flex;}
   .lp-occ>div{flex:1;border-radius:10px;background:rgba(1,27,50,.88);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px;box-shadow:0 2px 8px rgba(0,0,0,.25);min-width:0;}
   .lp-occ b{font-family:'Manrope','Inter',sans-serif;font-size:17px;font-weight:800;line-height:1.1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
@@ -322,7 +311,18 @@
   .tl-pad .tl-body{width:100%;}
   .tl-cursor{position:absolute;top:0;left:50%;width:2px;margin-left:-1px;background:var(--pc-navy);pointer-events:none;z-index:3;}
   .tl-cur-t{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--pc-navy);color:#fff;font-size:10.5px;font-weight:800;padding:1px 6px;border-radius:6px;white-space:nowrap;}
-  .stn-now{min-height:32px;padding:0 14px;border-radius:999px;border:none;background:var(--pc-navy);color:#fff;font:inherit;font-size:13px;font-weight:800;cursor:pointer;flex:none;}
+  .lp-status{display:flex;align-items:center;gap:8px;min-width:0;}
+  .lp-status b{font-family:'Manrope','Inter',sans-serif;font-size:14px;font-weight:800;padding:3px 10px;border-radius:999px;color:#fff;white-space:nowrap;flex:none;}
+  .lp-status span{font-size:12.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .lp-status.free b{background:#3E8E1A;box-shadow:0 0 0 2px #fff;} .lp-status.part b{background:#B07800;} .lp-status.full b{background:#B3261E;} .lp-status.lock b{background:#405366;}
+  .st-platz .stw-day{box-shadow:none;background:#F2F5F4;min-height:54px;padding:6px 0;}
+  .st-platz .stw-day.today{box-shadow:inset 0 0 0 1.5px var(--green);}
+  .st-platz .stw-day.on{background:var(--pc-navy);}
+  .st-platz .stw-strip{gap:4px;}
+  .wk-list .wk-day{display:block;width:100%;text-align:left;border:none;background:none;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;color:var(--ink-soft);margin:10px 0 5px;padding:2px;cursor:pointer;}
+  .wk-list .wk-day.sel{color:#fff;background:var(--pc-navy);border-radius:8px;padding:4px 8px;}
+  .wk-list .wk-day:first-child{margin-top:0;}
+  .wk-more{min-height:40px;border-radius:12px;border:1px solid #E3E9E8;background:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--grass);cursor:pointer;}
   .stp-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;}
   .stp-foot a{font-size:13px;font-weight:700;color:var(--grass);text-decoration:none;}
   .lp-occ[role=button],.lp-klein[role=button]{cursor:pointer;}
@@ -1432,7 +1432,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='01.10.2026 · 7';
+const APP_VERSION='01.10.2026 · 8';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3627,7 +3627,7 @@ function todaySummaryText(){
    – Besucher: Favoriten (ohne Anmeldung, auf dem Gerät) → Live-Karte → Woche; ohne Favoriten oben die Auswahl.
    Eine Belegungs-Logik für alles: occupancyOn(ds) liefert je Termin Fläche (Platz-Viertel, Kleinspielfeld,
    Hallendrittel) und Zeit – genutzt von Live-Platz, Zeitleiste und Detailblatt. */
-let startSel=null, startView='tag', startSeasonOpen=false, startHeroFix=null;
+let startSel=null, startSeasonOpen=false, startHeroFix=null;
 const OCC_VIEW={};
 function nowHMStr(){ const n=new Date(); return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'); }
 function hmMin(s){ const p=String(s||'0:0').split(':'); return (+p[0])*60+(+p[1]||0); }
@@ -3774,7 +3774,7 @@ function tlScroll(el){
   if(follow){ if(prev==null) return; delete START_CUR[ds]; }
   else{ if(prev===m||(prev==null&&ds!==todayStr&&startCurOf(ds)===m)) return; START_CUR[ds]=m; }
   cancelAnimationFrame(_tlRaf);
-  _tlRaf=requestAnimationFrame(()=>{ const box=document.getElementById('stp-live'); if(box) box.innerHTML=placeLiveHTML(ds,startCurOf(ds),START_ISMINE); });
+  _tlRaf=requestAnimationFrame(()=>{ const box=document.getElementById('stp-live'); if(box) box.innerHTML=placeLiveHTML(ds,startCurOf(ds),START_ISMINE); startTodayTile(); });
 }
 function tlRestore(){ document.querySelectorAll('.tl-scroll').forEach(el=>{ const g=tlGeom(el), ds=el.dataset.ds;
   const c=startCurOf(ds), m=Math.max(g.t0,Math.min(g.t1,c!=null?c:hmMin(nowHMStr())));
@@ -3786,7 +3786,7 @@ function tlTouchEnd(ev,el){ const t=ev.changedTouches&&ev.changedTouches[0], s=_
   if(dx<0&&s.atEnd) shiftStartDay(1,'start'); else if(dx>0&&s.atStart) shiftStartDay(-1,'end'); }
 function shiftStartDay(n,pos){
   const ds=addDays(startSel||todayStr,n); if(ds<todayStr||ds>weekEndStr()) return;
-  startSel=ds; startView='tag'; renderMyWeek();
+  startSel=ds; renderMyWeek();
   const el=document.querySelector('.tl-scroll[data-ds="'+ds+'"]'); if(el&&pos) el.scrollLeft=pos==='start'?0:el.scrollWidth;
 }
 /* ---------- Freie Zeit direkt buchen (ab 01.10.2026 · 4) ----------
@@ -3904,12 +3904,12 @@ function liveNow(ds,m){ // ds/m leer = heute jetzt; sonst Belegung am Tag ds um 
   const state=lock?'lock':(nFree===4?'free':(nFree===0?'full':'part'));
   return {ds,isNow,n,occ,live,canc,lock,covered,nextOn,nFree,state};
 }
-function livePitchHTML(isMine,compact,L){
+function livePitchHTML(isMine,compact,L,top){
   L=L||liveNow();
   const {n,live,canc,lock,covered}=L;
   const cell=q=>({c:q<=2?0:1,r:q%2===1?0:1});
   const tag=o=>occIsMine(o,isMine)?(session&&sessionWeekTeams()?' · Du':' ★'):'';
-  let h='<div class="lp'+(compact?' compact':'')+'"><div class="lp-field">';
+  let h='<div class="lp'+(compact?' compact':'')+'">'+(top||'')+'<div class="lp-field">';
   h+='<div class="lp-mid"></div><div class="lp-circle"></div><span class="lp-side l">A</span><span class="lp-side r">B</span>';
   const drawn=new Set();
   live.filter(o=>o.area==='platz').forEach(o=>{ if(drawn.has(o)) return; drawn.add(o);
@@ -3990,19 +3990,19 @@ function placeStatus(L){
   return st;
 }
 function placeLiveHTML(ds,cur,isMine){
-  const L=liveNow(ds,cur), st=placeStatus(L), dt=new Date(ds+'T00:00:00');
-  const day=ds===todayStr?'Heute':(ds===addDays(todayStr,1)?'Morgen':DOW[dowOf(ds)-1]+' '+dt.getDate()+'.'+(dt.getMonth()+1)+'.');
-  return '<div class="stn-head"><h2>'+(L.isNow?'Jetzt auf dem Platz':'Platz · '+esc(day)+' · '+minHM(L.n))+'</h2>'
-    +(L.isNow?'<span class="stn-time">'+nowHMStr()+' Uhr</span>':'<button type="button" class="stn-now" onclick="startJumpNow()">Jetzt</button>')+'</div>'
-    +'<div class="stn-status '+L.state+'"><b>'+esc(st[0])+'</b><span>'+esc(st[1])+'</span></div>'
-    +livePitchHTML(isMine,false,L);
+  // Ab 01.10.2026 · 8: keine Kopfzeile mehr – Tag steht in der Tagesleiste, Uhrzeit am Strich der Zeitleiste;
+  // Frei/Belegt als Schild oben im Feld.
+  const L=liveNow(ds,cur), st=placeStatus(L);
+  return livePitchHTML(isMine,false,L,'<div class="lp-status '+L.state+'"><b>'+esc(st[0])+'</b><span>'+esc(st[1])+'</span></div>');
 }
-function startJumpNow(){ startSel=todayStr; startView='tag'; delete START_CUR[todayStr]; renderMyWeek(); }
-function startPlaceHTML(ds,isMine,admin){
+// „Heute“-Kachel = Jetzt-Knopf: zeigt „↺ Jetzt“, sobald ein anderer Tag oder eine andere Uhrzeit gewählt ist
+function startAtNow(){ return startSel===todayStr&&START_CUR[todayStr]==null; }
+function startTodayTile(){ const t=document.querySelector('.stw-day.today span'); if(t) t.textContent=startAtNow()?'Heute':'↺ Jetzt'; }
+function startJumpNow(){ startSel=todayStr; delete START_CUR[todayStr]; renderMyWeek(); }
+function startPlaceHTML(ds,isMine,admin,strip){
   START_ISMINE=isMine;
-  const tag=startView==='tag';
-  let h='<section class="st-now st-platz"><div id="stp-live">'+placeLiveHTML(ds,tag?startCurOf(ds):null,isMine)+'</div>';
-  if(tag) h+=timelineHTML(ds,isMine);
+  let h='<section class="st-now st-platz">'+(strip||'')+'<div id="stp-live">'+placeLiveHTML(ds,startCurOf(ds),isMine)+'</div>';
+  h+=timelineHTML(ds,isMine);
   const canLock=admin&&ds===todayStr&&!activeLocksOn(todayStr).some(l=>l.resource==='platz');
   h+='<div class="stp-foot">'+(canLock?'<button type="button" class="wk-act" onclick="openQuickLock()">Heute sperren</button>':'<span></span>')
     +'<a href="#" onclick="'+esc('event.preventDefault();openDayInCalendar(\''+ds+'\')')+'">Im Kalender ›</a></div>';
@@ -4010,38 +4010,41 @@ function startPlaceHTML(ds,isMine,admin){
 }
 /* ---------- Woche: Leiste zum Tag-Wählen + Tag (Termine + Platz) oder Woche (Liste) ---------- */
 function openDayInCalendar(ds){ const dt=new Date(ds+'T00:00:00'); curY=dt.getFullYear(); curM=dt.getMonth(); yearShown=curY; selDate=ds; goto('termine'); setView('woche'); scrollToWeekDay(ds); }
-function setStartDay(ds){ startSel=ds; startView='tag'; renderMyWeek(); }
-function setStartView(v){ startView=v; renderMyWeek(); }
+function setStartDay(ds){ startSel=ds; renderMyWeek(); }
+/* Ab 01.10.2026 · 8: Tagesleiste oben im Platz-Baustein (statt Kopfzeile), darunter Feld + Zeitleiste;
+   unter dem Platz immer die Woche als Liste (kein Tag/Woche-Schalter mehr), der gewählte Tag ist markiert. */
 function startWeekHTML(src,isMine,admin){
   const end=weekEndStr();
   if(!startSel||startSel<todayStr||startSel>end) startSel=todayStr;
   const items=src?weekItems(isMine):[];
   const dotOf=e=>(e.isCancelled||e.isMovedGhost||e.withdrawn)?'grey':(e.isExternal||isMatchKind(kindOf(e))?'game':'tr');
-  let h=startPlaceHTML(startView==='tag'?startSel:todayStr,isMine,admin)+'<section class="st-week"><div class="stw-head"><h2>'+esc(src?(src.fromSession?'Deine Woche · '+src.label:'Diese Woche'):'Platz diese Woche')+'</h2>'
-    +'<div class="seg-mini"><button type="button" class="'+(startView==='tag'?'on':'')+'" onclick="setStartView(\'tag\')">Tag</button>'
-    +'<button type="button" class="'+(startView==='woche'?'on':'')+'" onclick="setStartView(\'woche\')">Woche</button></div></div>';
-  h+='<div class="stw-strip">';
-  for(let i=0;i<WEEK_DAYS;i++){ const ds=addDays(todayStr,i), dt=new Date(ds+'T00:00:00'), sel=startView==='tag'&&ds===startSel;
+  let strip='<div class="stw-strip">';
+  for(let i=0;i<WEEK_DAYS;i++){ const ds=addDays(todayStr,i), dt=new Date(ds+'T00:00:00'), sel=ds===startSel;
     const dots=items.filter(e=>e.d===ds).slice(0,3).map(e=>'<i class="'+dotOf(e)+'"></i>').join('');
-    h+='<button type="button" class="stw-day'+(sel?' on':'')+(i===0?' today':'')+'" onclick="setStartDay(\''+ds+'\')"><span>'+(i===0?'Heute':DOW[dowOf(ds)-1])+'</span><b>'+dt.getDate()+'</b><em>'+dots+'</em></button>'; }
-  h+='</div>';
-  if(startView==='woche'){
-    // Ohne Favoriten (ab 01.10.2026 · 4): alle Termine des Vereins der nächsten 7 Tage
-    const all=src?items:weekItems(()=>true);
-    h+='<div class="st-card wk-list">'+(src?'':'<div class="stc-sub" style="margin-top:0;">Alle Termine des Vereins · Favoriten wählen, um nur deine zu sehen</div>');
-    let last='';
-    all.forEach(e=>{ if(e.d!==last){ h+='<div class="wk-day">'+esc(weekDayLabel(e.d))+'</div>'; last=e.d; } h+=weekRowHTML(e); });
-    if(!all.length) h+='<div class="wk-empty">In den nächsten 7 Tagen steht nichts an.</div>';
-    const next=src?nextGamesBeyondWeek(isMine,items):[];
-    if(next.length){ h+='<div class="wk-day">Nächste Spiele</div>'; next.forEach(e=>{ h+=weekRowHTML(e,true); }); }
-    h+='</div>';
-  }else{
-    // Termine der eigenen Mannschaft(en) am gewählten Tag (mit Absagen/Verlegen); der Platz steht oben
-    const day=items.filter(e=>e.d===startSel);
-    if(src) h+='<div class="st-card"><div class="stc-head"><h3>'+esc(startDayLabel(startSel,true))+'</h3></div>'
-      +(day.length?day.map(e=>weekRowHTML(e)).join(''):'<div class="wk-empty">Kein Termin für '+esc(src.label)+' an diesem Tag.</div>')+'</div>';
+    strip+='<button type="button" class="stw-day'+(sel?' on':'')+(i===0?' today':'')+'" onclick="'+(i===0?'startJumpNow()':'setStartDay(\''+ds+'\')')+'">'
+      +'<span>'+(i===0?(startAtNow()?'Heute':'↺ Jetzt'):DOW[dowOf(ds)-1])+'</span><b>'+dt.getDate()+'</b><em>'+dots+'</em></button>'; }
+  strip+='</div>';
+  let h=startPlaceHTML(startSel,isMine,admin,strip);
+  // Woche: eigene Mannschaft(en) bzw. Favoriten; ohne Favoriten alle Termine des Vereins (gekürzt)
+  const all=src?items:weekItems(()=>true);
+  h+='<section class="st-week"><div class="stw-head"><h2>'+esc(src?(src.fromSession?'Deine Woche · '+src.label:'Woche deiner Favoriten'):'Diese Woche im Verein')+'</h2></div>';
+  h+='<div class="st-card wk-list">';
+  const limit=!src&&!weekShowAll?WEEK_MAX_ROWS:Infinity;
+  let last='', n=0, selDone=false;
+  const dayHead=ds=>'<button type="button" class="wk-day'+(ds===startSel?' sel':'')+'" onclick="'+esc(ds===todayStr?'startJumpNow()':'setStartDay(\''+ds+'\')')+'">'+esc(weekDayLabel(ds))+'</button>';
+  for(const e of all){
+    if(n>=limit) break;
+    if(src&&!selDone&&e.d>startSel){ h+=dayHead(startSel)+'<div class="wk-empty">An diesem Tag nichts für '+esc(src.label)+'.</div>'; selDone=true; }
+    if(e.d!==last){ h+=dayHead(e.d); last=e.d; if(e.d===startSel) selDone=true; }
+    h+=weekRowHTML(e); n++;
   }
-  return h+'</section>';
+  if(src&&!selDone&&all.length) h+=dayHead(startSel)+'<div class="wk-empty">An diesem Tag nichts für '+esc(src.label)+'.</div>';
+  if(!all.length) h+='<div class="wk-empty">In den nächsten 7 Tagen steht nichts an.</div>';
+  if(all.length>limit) h+='<button type="button" class="wk-more" onclick="weekShowAll=true;renderMyWeek();">Alle '+all.length+' Termine anzeigen</button>';
+  else if(!src&&weekShowAll&&all.length>WEEK_MAX_ROWS) h+='<button type="button" class="wk-more" onclick="weekShowAll=false;renderMyWeek();">Weniger anzeigen</button>';
+  const next=src?nextGamesBeyondWeek(isMine,items):[];
+  if(next.length){ h+='<div class="wk-day">Nächste Spiele</div>'; next.forEach(e=>{ h+=weekRowHTML(e,true); }); }
+  return h+'</div></section>';
 }
 /* Favoriten für Besucher (und Zugänge ohne eigene Mannschaft): auf dem Gerät gespeichert. */
 function startFavHTML(src){
