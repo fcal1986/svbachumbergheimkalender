@@ -238,6 +238,40 @@
   .stn-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
   .stn-head h2{margin:0;font-family:'Manrope','Inter',sans-serif;font-size:17px;font-weight:800;}
   .stn-head span{font-size:12px;color:var(--ink-soft);text-align:right;}
+  .stn-time{font-size:12.5px;font-weight:700;color:var(--ink-soft);}
+  .stn-status{display:flex;align-items:center;gap:10px;border-radius:14px;padding:10px 12px;}
+  .stn-status b{font-family:'Manrope','Inter',sans-serif;font-size:18px;font-weight:800;padding:4px 12px;border-radius:999px;color:#fff;white-space:nowrap;}
+  .stn-status span{font-size:13.5px;font-weight:600;color:var(--ink);}
+  .stn-status.free{background:#E6F4D7;} .stn-status.free b{background:#3E8E1A;}
+  .stn-status.part{background:#FFF1C2;} .stn-status.part b{background:#B07800;}
+  .stn-status.full{background:#FDECEA;} .stn-status.full b{background:#B3261E;}
+  .stn-status.lock{background:#E9EEED;} .stn-status.lock b{background:#405366;}
+  .lp-occ{position:absolute;box-sizing:border-box;padding:5px;display:flex;}
+  .lp-occ>div{flex:1;border-radius:10px;background:rgba(1,27,50,.88);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px;box-shadow:0 2px 8px rgba(0,0,0,.25);min-width:0;}
+  .lp-occ b{font-family:'Manrope','Inter',sans-serif;font-size:17px;font-weight:800;line-height:1.1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  .lp-occ span{font-size:11.5px;font-weight:700;opacity:.9;white-space:nowrap;}
+  .lp-occ.sm b{font-size:14px;} .lp-occ.sm span{font-size:10.5px;}
+  .lp-occ.mine>div{background:#8BCF2F;color:var(--pc-navy);box-shadow:0 0 0 3px #fff,0 2px 8px rgba(0,0,0,.25);}
+  .lp-occ.game>div{background:#FFD24A;color:var(--pc-navy);}
+  .lp-prog{display:block;width:70%;height:4px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden;}
+  .lp-occ.mine .lp-prog,.lp-occ.game .lp-prog{background:rgba(1,27,50,.2);}
+  .lp-prog em{display:block;height:4px;background:currentColor;}
+  .lp-freeq{position:absolute;width:50%;height:50%;box-sizing:border-box;padding:5px;display:flex;}
+  .lp-freeq>div{flex:1;border:2px dashed rgba(255,255,255,.7);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#fff;}
+  .lp-freeq b{font-size:16px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;}
+  .lp-freeq span{font-size:11px;font-weight:700;opacity:.9;}
+  .lp-freeq small{font-size:10.5px;font-weight:600;margin-top:2px;background:rgba(1,27,50,.35);padding:1px 6px;border-radius:6px;}
+  .lp-klein.occ{background:rgba(1,27,50,.88);border-color:rgba(1,27,50,.88);} .lp-klein.occ.mine{background:#8BCF2F;border-color:#fff;}
+  .lp-klein b{font-size:14px;font-weight:800;color:#fff;} .lp-klein.mine b,.lp-klein.mine .lp-kbis,.lp-klein.mine .lp-klein-t{color:var(--pc-navy);}
+  .lp-kbis{font-size:12px;font-weight:700;color:#fff;margin-left:auto;}
+  .lp-third.occ{background:rgba(1,27,50,.88);}
+  .stn-list{display:flex;flex-direction:column;gap:6px;}
+  .stn-row{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:8px 10px;border-radius:12px;border:1px solid #EEF2F1;background:#fff;font:inherit;text-align:left;cursor:pointer;color:var(--ink);}
+  .stn-row i{width:12px;height:12px;border-radius:4px;flex:none;background:var(--pc-navy);}
+  .stn-row i.mine{background:#8BCF2F;box-shadow:inset 0 0 0 1.5px var(--pc-navy);} .stn-row i.game{background:#FFD24A;}
+  .stn-row b{font-size:14px;font-weight:800;flex:none;}
+  .stn-row span{flex:1;min-width:0;font-size:12.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .stn-row em{font-style:normal;font-size:12.5px;font-weight:700;flex:none;}
   .st-fav{display:flex;flex-direction:column;gap:6px;}
   .fav-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
   .fav-chip{display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border-radius:17px;background:var(--pc-navy);color:#fff;font-size:13px;font-weight:700;}
@@ -1396,7 +1430,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='01.10.2026 · 5';
+const APP_VERSION='01.10.2026 · 6';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3825,6 +3859,7 @@ function slotBook(){
     ()=>{ saveEvents(msg).catch(err=>{ EVENTS=EVENTS.filter(x=>x.id!==ev.id); rer(); showToast('Speichern fehlgeschlagen: '+err.message,6000); }); });
 }
 function openOccDetail(ds,i){
+  if(!OCC_VIEW[ds]) OCC_VIEW[ds]=occupancyOn(ds);
   const o=(OCC_VIEW[ds]||[])[i]; if(!o) return;
   const e=o.src;
   let contact='';
@@ -3841,39 +3876,47 @@ function openOccDetail(ds,i){
     +'<button type="button" class="submit-btn" style="margin-top:14px;" onclick="'+esc('closeSheet();openTerminFromStart(\''+jsArg(jumpId)+'\',\''+ds+'\')')+'">Im Kalender ansehen</button></div>');
 }
 /* ---------- Live-Platz: was ist JETZT auf Großfeld, Kleinspielfeld und (falls belegt) Halle ---------- */
-function livePitchHTML(isMine,compact){
-  const now=nowHMStr(), n=hmMin(now), occ=occupancyOn(todayStr);
+/* ---------- Jetzt auf dem Platz (ab 01.10.2026 · 6: auf einen Blick frei/belegt, welche Viertel, von wem) ---------- */
+function liveNow(){
+  const n=hmMin(nowHMStr()), occ=occupancyOn(todayStr); OCC_VIEW[todayStr]=occ;
   const run=occ.filter(o=>hmMin(o.t)<=n&&hmMin(o.bis)>n);
   const live=run.filter(o=>!o.cancelled), canc=run.filter(o=>o.cancelled);
   const lock=activeLocksOn(todayStr).find(l=>l.resource==='platz');
+  const covered={}; live.filter(o=>o.area==='platz').forEach(o=>{ for(let q=o.lanes[0];q<=o.lanes[1];q++) covered[q]=o; });
+  // nächste Belegung je Viertel (für „frei bis …“)
+  const nextOn=q=>occ.filter(o=>!o.cancelled&&o.area==='platz'&&o.lanes[0]<=q&&o.lanes[1]>=q&&hmMin(o.t)>n).sort((a,b)=>a.t.localeCompare(b.t))[0]||null;
+  const nFree=[1,2,3,4].filter(q=>!covered[q]).length;
+  const state=lock?'lock':(nFree===4?'free':(nFree===0?'full':'part'));
+  return {n,occ,live,canc,lock,covered,nextOn,nFree,state};
+}
+function livePitchHTML(isMine,compact,L){
+  L=L||liveNow();
+  const {n,live,canc,lock,covered}=L;
   const cell=q=>({c:q<=2?0:1,r:q%2===1?0:1});
   const tag=o=>occIsMine(o,isMine)?(session&&sessionWeekTeams()?' · Du':' ★'):'';
-  const box=(o,rect,small)=>{
-    const mine=occIsMine(o,isMine), rest=hmMin(o.bis)-n, pct=Math.round((n-hmMin(o.t))/Math.max(1,hmMin(o.bis)-hmMin(o.t))*100);
-    return '<div class="lp-box'+(o.kind==='g'?' game':'')+'" style="left:'+rect[0]+'%;top:'+rect[1]+'%;width:'+rect[2]+'%;height:'+rect[3]+'%">'
-      +'<span class="lp-pill'+(mine?' mine':(o.kind==='g'?' game':''))+(small?' sm':'')+'">'+esc(o.label+(o.kind==='g'?' · Spiel':'')+tag(o))+'</span>'
-      +'<span class="lp-sub'+(small?' sm':'')+'">bis '+o.bis+' · noch '+rest+' Min</span>'
-      +(compact?'':'<span class="lp-bar"><i style="width:'+pct+'%"></i></span>')+'</div>';
-  };
   let h='<div class="lp'+(compact?' compact':'')+'"><div class="lp-field">';
   h+='<div class="lp-mid"></div><div class="lp-circle"></div><span class="lp-side l">A</span><span class="lp-side r">B</span>';
-  const covered={};
-  live.filter(o=>o.area==='platz').forEach(o=>{ const qs=[]; for(let q=o.lanes[0];q<=o.lanes[1];q++){ qs.push(q); covered[q]=1; }
+  const drawn=new Set();
+  live.filter(o=>o.area==='platz').forEach(o=>{ if(drawn.has(o)) return; drawn.add(o);
+    const qs=[]; for(let q=o.lanes[0];q<=o.lanes[1];q++) qs.push(q);
     const cs=qs.map(cell), c0=Math.min(...cs.map(c=>c.c)), c1=Math.max(...cs.map(c=>c.c)), r0=Math.min(...cs.map(c=>c.r)), r1=Math.max(...cs.map(c=>c.r));
-    h+=box(o,[c0*50,r0*50,(c1-c0+1)*50,(r1-r0+1)*50],qs.length===1||compact); });
+    const mine=occIsMine(o,isMine), small=qs.length===1, rest=hmMin(o.bis)-n, pct=Math.round((n-hmMin(o.t))/Math.max(1,hmMin(o.bis)-hmMin(o.t))*100);
+    h+='<div class="lp-occ'+(mine?' mine':(o.kind==='g'?' game':''))+(small?' sm':'')+'" style="left:'+c0*50+'%;top:'+r0*50+'%;width:'+(c1-c0+1)*50+'%;height:'+(r1-r0+1)*50+'%"><div>'
+      +'<b>'+esc(o.label+(o.kind==='g'?' · Spiel':'')+tag(o))+'</b><span>bis '+o.bis+' · noch '+rest+' Min</span>'
+      +'<i class="lp-prog"><em style="width:'+pct+'%"></em></i></div></div>'; });
   const cancShown=new Set();
-  if(!Object.keys(covered).length&&!canc.some(o=>o.area==='platz')) h+='<div class="lp-free all">Platz frei</div>';
-  else [1,2,3,4].filter(q=>!covered[q]).forEach(q=>{ const c=cell(q), cx=canc.find(o=>o.area==='platz'&&o.lanes[0]<=q&&o.lanes[1]>=q);
+  [1,2,3,4].filter(q=>!covered[q]).forEach(q=>{ const c=cell(q), cx=canc.find(o=>o.area==='platz'&&o.lanes[0]<=q&&o.lanes[1]>=q);
     const show=cx&&!cancShown.has(cx.id); if(show) cancShown.add(cx.id);
-    h+='<div class="lp-free" style="left:'+c.c*50+'%;top:'+c.r*50+'%">frei'+(show?'<small>'+esc(cx.label)+' abgesagt</small>':'')+'</div>'; });
+    const nx=L.nextOn(q);
+    h+='<div class="lp-freeq" style="left:'+c.c*50+'%;top:'+c.r*50+'%"><div><b>frei</b>'+(nx?'<span>bis '+nx.t+'</span>':'<span>heute</span>')+(show?'<small>'+esc(cx.label)+' abgesagt</small>':'')+'</div></div>'; });
   if(lock) h+='<div class="lp-lock"><b>Gesperrt</b>'+(lock.note?'<span>'+esc(lock.note)+'</span>':'')+'</div>';
   h+='</div>';
   const k=live.find(o=>o.area==='klein'), kc=canc.find(o=>o.area==='klein');
-  h+='<div class="lp-klein"><span class="lp-klein-t">Kleinspielfeld</span>'+(k?'<span class="lp-pill sm'+(occIsMine(k,isMine)?' mine':'')+'">'+esc(k.label+tag(k))+'</span><span class="lp-sub sm">bis '+k.bis+'</span>'
+  h+='<div class="lp-klein'+(k?(occIsMine(k,isMine)?' occ mine':' occ'):'')+'"><span class="lp-klein-t">Kleinspielfeld</span>'+(k?'<b>'+esc(k.label+tag(k))+'</b><span class="lp-kbis">bis '+k.bis+'</span>'
     :'<span class="lp-freetxt">frei'+(kc?' · '+esc(kc.label)+' abgesagt':'')+'</span>')+'</div>';
   const hall=live.filter(o=>o.area==='halle');
   if(hall.length){ h+='<div class="lp-halle"><span class="lp-klein-t">Halle</span><div class="lp-thirds">'+[1,2,3].map(t=>{ const o=hall.find(x=>x.lanes[0]===t);
-      return '<div class="lp-third'+(o&&occIsMine(o,isMine)?' mine':'')+'">'+(o?esc(o.label):'frei')+'</div>'; }).join('')+'</div></div>'; }
+      return '<div class="lp-third'+(o?(occIsMine(o,isMine)?' mine':' occ'):'')+'">'+(o?esc(o.label):'frei')+'</div>'; }).join('')+'</div></div>'; }
   return h+'</div>';
 }
 /* ---------- Live-Karte oben: „Läuft gerade“ oder „Als Nächstes“ der eigenen Mannschaft(en) ---------- */
@@ -3915,7 +3958,22 @@ function startHeroHTML(src,isMine){
   return h+'</section>'+nowPlaceHTML(isMine);
 }
 function nowPlaceHTML(isMine){
-  return '<section class="st-now"><div class="stn-head"><h2>Jetzt auf dem Platz</h2><span>'+esc(todaySummaryText())+'</span></div>'+livePitchHTML(isMine,false)+'</section>';
+  const L=liveNow();
+  const st={free:['Frei','Platz komplett frei'],full:['Belegt','alle 4 Viertel belegt'],part:['Teilweise belegt',L.nFree+' von 4 Vierteln frei'],lock:['Gesperrt',L.lock&&L.lock.note||'']}[L.state];
+  if(L.state==='full'){ const ids=new Set([1,2,3,4].map(q=>L.covered[q])); if(ids.size===1){ const o=L.covered[1]; st[1]='ganzer Platz: '+o.label+' bis '+o.bis; } }
+  if(L.state==='free'){ const nx=L.occ.filter(o=>!o.cancelled&&o.area==='platz'&&hmMin(o.t)>L.n).sort((a,b)=>a.t.localeCompare(b.t))[0];
+    st[1]=nx?'frei bis '+nx.t+' (dann '+nx.label+')':'heute keine Belegung mehr'; }
+  let h='<section class="st-now"><div class="stn-head"><h2>Jetzt auf dem Platz</h2><span class="stn-time">'+nowHMStr()+' Uhr</span></div>'
+    +'<div class="stn-status '+L.state+'"><b>'+esc(st[0])+'</b><span>'+esc(st[1])+'</span></div>'
+    +livePitchHTML(isMine,false,L);
+  // Von wem: eine Zeile je laufender Belegung (Platz, Kleinspielfeld, Halle)
+  const rows=L.live.slice().sort((a,b)=>(a.area+a.lanes[0]).localeCompare(b.area+b.lanes[0])).filter((o,i,arr)=>arr.findIndex(x=>x.id===o.id&&x.area===o.area)===i);
+  if(rows.length){
+    h+='<div class="stn-list">'+rows.map(o=>{ const mine=occIsMine(o,isMine), tr=o.src&&o.src.isTraining?getTrainerNames(o.src).join(', '):'';
+      return '<button type="button" class="stn-row" onclick="'+esc('openOccDetail(\''+todayStr+'\','+L.occ.indexOf(o)+')')+'"><i class="'+(mine?'mine':(o.kind==='g'?'game':'tr'))+'"></i>'
+        +'<b>'+esc(o.src&&o.team?teamLabel(o.team,o.squad):o.label)+'</b><span>'+esc((o.kind==='g'?'Spiel'+(o.opp?' gegen '+o.opp:''):(o.kind==='o'?(o.src.title||'Termin'):'Training'))+' · '+areaLabel(o)+(tr?' · '+tr:''))+'</span><em>bis '+o.bis+'</em></button>'; }).join('')+'</div>';
+  }
+  return h+'</section>';
 }
 function startPlaceOnlyHTML(){ // ohne eigene Mannschaft: nur der Platz jetzt
   return nowPlaceHTML(null);
