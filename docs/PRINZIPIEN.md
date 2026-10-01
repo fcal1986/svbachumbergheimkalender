@@ -43,12 +43,12 @@ Ein Feature gehört nur dann in Platzcoach, wenn es diese Frage besser beantwort
 
 Gezählt wird ab der Ansicht, in der man die Aufgabe bemerkt (Startseite, Wochenansicht oder Benachrichtigung), bis zum Speichern. Ein Feature darf ein Budget nicht verschlechtern; wenn doch, steht die Begründung im Commit und im Backlog.
 
-| Aufgabe | Rolle | Budget | Ist (01.10.2026 · 1) | Weg | Backlog |
+| Aufgabe | Rolle | Budget | Ist (01.10.2026 · 2) | Weg | Backlog |
 |---|---|---|---|---|---|
 | Plan der eigenen Mannschaft ansehen | alle | 0 | ✅ 0 | Startseite „Meine Woche“ (ohne Konto einmalig Mannschaft wählen) | – |
-| Konflikt lösen (Vorschlag übernehmen) | Admin | 1 | ✅ 1 | „Zu erledigen“ → „Training … absagen“ (bei Training gegen Spiel/Termin; andere Konflikte: „Ansehen“) | Nr. 6 |
-| Training absagen | Trainer | 1 | ✅ 1 | „Absagen“ in der Zeile von „Meine Woche“ (Rückgängig 6 s) | Nr. 49 |
-| Platz heute sperren | Admin | 2 | ✅ 2 | „Heute sperren“ neben „Heute im Verein“ → Grund | Nr. 5 |
+| Konflikt lösen (Vorschlag übernehmen) | Admin | 1 | ✅ 1 | „Training … absagen“ in der Live-Karte (eigener Konflikt) oder in „Zu erledigen“; andere Konflikte: „Ansehen“ | Nr. 6, 56 |
+| Training absagen | Trainer | 1 | ✅ 1 | „Training absagen“ in der Live-Karte (nächstes Training) oder „Absagen“ in Tag/Woche (Rückgängig 6 s) | Nr. 49, 53 |
+| Platz heute sperren | Admin | 2 | ✅ 2 | „Heute sperren“ in der Tageskarte (Admin) → Grund | Nr. 5 |
 | Training oder Termin anlegen | Trainer/Admin | höchstens 3 | ✅ 2–3 | + → Speichern (heute) bzw. Tag im Kalender → + → Speichern; Mannschaft, Zeit, Fläche, Anlass vorbefüllt | Nr. 52 |
 | Spielverlegung vormerken | Trainer | höchstens 3 | ⚠️ 5 | „Verlegen“ in der Spielzeile → neues Datum (2) → Grund-Chip → „Vormerken“; das Datum kennt nur der Nutzer | Nr. 50 |
 | Trainer einladen | Admin | höchstens 2 | ✅ 1 | Hinweis „Noch ohne Trainer …“ in „Zu erledigen“ (sonst Konto → Zugänge → „Per WhatsApp einladen“ = 3) | Nr. 51 |

@@ -29,6 +29,12 @@
     "levels": {"game": "exclusive", "training": "shared", "goalkeeper": "overlay", "other": "shared"},
     "compatible": []
   },
+  "venue": {
+    "name": "Höllenbergkampfbahn",
+    "lat": 51.44,
+    "lon": 7.97,
+    "floodlight": "ganz"
+  },
   "passwordReset": {
     "workerUrl": "https://platzcoach-passwort.silent-shape-c920.workers.dev"
   }
