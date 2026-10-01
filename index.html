@@ -434,6 +434,7 @@
   .team-filter-btn{flex:0 0 auto;white-space:nowrap;background:var(--white);border:1.5px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;}
   .team-filter-btn.active{background:var(--black-btn);color:#fff;border-color:var(--black-btn);}
   .team-filter-panel{background:var(--white);border-radius:14px;box-shadow:var(--card-shadow);padding:12px 14px;margin:8px 0;}
+  .cal-after{margin:22px 0 4px;font-family:'Manrope','Inter',sans-serif;font-size:15px;font-weight:800;color:var(--ink);}
   .team-filter-grid{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px;max-height:220px;overflow-y:auto;}
   .team-filter-opt{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink);background:var(--bg);border:1.5px solid transparent;border-radius:9px;padding:6px 10px;cursor:pointer;user-select:none;}
   .team-filter-opt.on{background:var(--black-btn);color:#fff;}
@@ -1423,7 +1424,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='01.10.2026 · 10';
+const APP_VERSION='01.10.2026 · 11';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2824,6 +2825,7 @@ function allKnownTeamKeys(){
   TRAINING.forEach(s=>add(s.team,s.squad));
   fussballDisplayAll().forEach(e=>add(e.team,e.squad));
   fussballDisplayAwayAll().forEach(e=>add(e.team,e.squad));
+  add(GK_TEAM,1); // Torwarttraining immer wählbar (kommt nie von fussball.de, ab 01.10.2026 · 11)
   return [...map.entries()].map(([key,label])=>({key,label})).sort((a,b)=>a.label.localeCompare(b.label,'de',{numeric:true}));
 }
 /* Mannschaftsfilter: Antippen filtert SOFORT (kein "Anwenden" mehr – Nutzer erwarten, dass eine
@@ -2885,7 +2887,8 @@ function passesFilter(e){
   // müssen zutreffen) – anders als die übrigen Chips (Jugend/Senioren/Verein), die weiterhin
   // exklusiv zur Mannschaftsauswahl sind, da "Jugend" + einzelne Teams auswählen redundant wäre.
   if(filter==='fussballde'&&!e.isExternal&&!e.isMovedGhost) return false;
-  if(teamMultiFilter.size) return teamMultiFilter.has((e.team)+':'+(e.squad||1));
+  if(teamMultiFilter.size) return teamMultiFilter.has((e.team)+':'+(e.squad||1))
+    ||(teamMultiFilter.has(GK_TEAM+':1')&&(e.team===GK_TEAM||kindOf(e)==='goalkeeper')); // Torwarttraining auch, wenn einer Mannschaft zugeordnet
   if(filter==='alle'||filter==='fussballde') return true;
   if(filter.includes(':')){ const[ft,fq]=filter.split(':'); return e.team===ft&&(e.squad||1)===parseInt(fq); }
   return cat(e.team)===filter;
@@ -3467,17 +3470,13 @@ function weekStripHTML(){
       +'<span class="cal-dots">'+cats.slice(0,3).map(c=>'<span class="cdot '+c+'"></span>').join('')+'</span></button>';
   }).join('')+'</div>';
 }
-/* „Ganze Woche als Liste“ ersetzt die frühere Listenansicht; Wahl pro Gerät gemerkt. */
-const WEEK_ALL_KEY='pc_week_all';
-let weekAll=(()=>{ try{ return localStorage.getItem(WEEK_ALL_KEY)==='1'; }catch(e){ return false; } })();
-function toggleWeekAll(){
-  weekAll=!weekAll; try{ localStorage.setItem(WEEK_ALL_KEY,weekAll?'1':'0'); }catch(e){}
-  trackEvent(weekAll?'woche_als_liste':'woche_nur_tag');
-  render(); scrollToWeekDay(selDate);
-}
+/* Ab 01.10.2026 · 11: statt „Ganze Woche als Liste“ stehen unter dem gewählten Tag die nächsten Termine
+   („Danach“, über Wochengrenzen hinweg, mit Filter). „Nächste 7 Termine“ verlängert die Liste jeweils um 7. */
+const CAL_MORE_STEP=7, CAL_MORE_DAYS=180; let calMore={from:null,n:CAL_MORE_STEP};
+function calMoreNext(){ calMore.n+=CAL_MORE_STEP; renderWeek(); }
 function pickWeekDay(d){
   selDate=d; syncMonthToSel(); render();
-  if(weekAll) scrollToWeekDay(d); else scrollTermineTop();
+  scrollTermineTop();
 }
 // Tag in der Wochenansicht unter die feste Leiste scrollen (sonst verdeckt die Leiste die Überschrift).
 function scrollToWeekDay(d){
@@ -3491,16 +3490,22 @@ function scrollToWeekDay(d){
 }
 function renderWeek(){
   const box=document.getElementById('view-woche'); if(!box) return;
-  const days=weekAll?getWeekDates(selDate):[selDate];
-  let h='';
-  days.forEach(d=>{
-    const evs=eventsOn(d), sum=daySummaryText(evs), isSel=d===selDate;
-    h+='<div class="wk-daygroup"><p class="section-label"'+(isSel?' id="month-day-head"':'')+' data-wkday="'+d+'">'+fmtHead(d)+(sum?'<span class="day-sum">'+esc(sum)+'</span>':'')+'</p>';
-    h+=evs.length?evs.map(rowHTML).join(''):'<div class="empty-day">Kein Termin an diesem Tag.</div>';
-    if(isSel) h+='<button class="ghost-btn" onclick="newForDay()">＋ Termin für diesen Tag eintragen</button>';
-    h+='</div>';
-  });
-  h+='<button class="ghost-btn" onclick="toggleWeekAll()">'+(weekAll?'Nur den gewählten Tag zeigen':'Ganze Woche als Liste zeigen')+'</button>';
+  if(calMore.from!==selDate) calMore={from:selDate,n:CAL_MORE_STEP};
+  const evs=eventsOn(selDate), sum=daySummaryText(evs);
+  let h='<div class="wk-daygroup"><p class="section-label" id="month-day-head" data-wkday="'+selDate+'">'+fmtHead(selDate)+(sum?'<span class="day-sum">'+esc(sum)+'</span>':'')+'</p>';
+  h+=evs.length?evs.map(rowHTML).join(''):'<div class="empty-day">Kein Termin an diesem Tag.</div>';
+  h+='<button class="ghost-btn" onclick="newForDay()">＋ Termin für diesen Tag eintragen</button></div>';
+  // Danach: die nächsten Termine ab dem Folgetag (leere Tage übersprungen)
+  let n=0, more=false, d=selDate, body='';
+  for(let i=1;i<=CAL_MORE_DAYS;i++){ d=addDays(selDate,i); const ev=eventsOn(d); if(!ev.length) continue;
+    if(n>=calMore.n){ more=true; break; }
+    const take=ev.slice(0,calMore.n-n); n+=take.length; if(take.length<ev.length) more=true;
+    const sm=daySummaryText(ev);
+    body+='<div class="wk-daygroup"><p class="section-label" data-wkday="'+d+'">'+fmtHead(d)+(sm?'<span class="day-sum">'+esc(sm)+'</span>':'')+'</p>'+take.map(rowHTML).join('')+'</div>';
+    if(more) break; }
+  if(body) h+='<p class="cal-after">Danach</p>'+body;
+  if(more) h+='<button class="ghost-btn" onclick="calMoreNext()">Nächste '+CAL_MORE_STEP+' Termine</button>';
+  else if(!body) h+='<div class="empty-day">In den nächsten Monaten steht nichts weiter an.</div>';
   box.innerHTML=h;
 }
 /* Wischen links/rechts blättert Woche, Monat oder Jahr (wie ‹ ›). Nicht in Filterleisten und Formularfeldern,
