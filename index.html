@@ -199,7 +199,6 @@
   .hero-sub{font-size:13.5px;color:#DCE3E8;margin-top:3px;}
   .hero-mini .mini-pitch{transform:scale(1.6);transform-origin:right center;}
   .st-hero .mini-pitch i{background:rgba(255,255,255,.18);} .st-hero .mini-pitch i.on{background:#8BCF2F;}
-  .hero-now{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#B8C4CF;margin-bottom:-4px;}
   .hero-acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
   .st-hero .wk-act{background:transparent;color:#fff;border-color:rgba(255,255,255,.35);min-height:40px;padding:0 14px;font-size:13px;}
   .hero-conf{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:#FDECEA;color:#8E2A1D;border-radius:12px;padding:8px 10px;font-size:12.5px;font-weight:600;}
@@ -235,6 +234,10 @@
   .lp-thirds{flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;}
   .lp-third{font-size:11.5px;font-weight:700;color:#fff;text-align:center;padding:4px;border-radius:5px;background:rgba(255,255,255,.15);}
   .lp-third.mine{background:#8BCF2F;color:var(--pc-navy);}
+  .st-now{display:flex;flex-direction:column;gap:10px;background:#fff;border-radius:20px;padding:14px;box-shadow:var(--card-shadow);}
+  .stn-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+  .stn-head h2{margin:0;font-family:'Manrope','Inter',sans-serif;font-size:17px;font-weight:800;}
+  .stn-head span{font-size:12px;color:var(--ink-soft);text-align:right;}
   .st-fav{display:flex;flex-direction:column;gap:6px;}
   .fav-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
   .fav-chip{display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border-radius:17px;background:var(--pc-navy);color:#fff;font-size:13px;font-weight:700;}
@@ -290,9 +293,6 @@
   .tl-free{position:absolute;height:24px;box-sizing:border-box;border:1.5px dashed #9CC57A;border-radius:6px;background:rgba(107,180,28,.07);color:var(--grass);font:inherit;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:flex-start;padding:0 8px;white-space:nowrap;overflow:hidden;}
   .tl-free:active{background:rgba(107,180,28,.2);}
   .lg.free{border:1.5px dashed #9CC57A;background:rgba(107,180,28,.07);}
-  .stc-nav{display:flex;align-items:center;gap:4px;min-width:0;}
-  .stc-arrow{flex:none;width:32px;height:32px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font:inherit;font-size:18px;font-weight:700;color:var(--ink);cursor:pointer;line-height:1;}
-  .stc-arrow:disabled{opacity:.3;cursor:default;}
   .slot-sheet h3{margin:2px 0 8px;font-family:'Manrope','Inter',sans-serif;font-size:20px;}
   .slot-lbl{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin:12px 0 6px;}
   .slot-row{display:flex;flex-wrap:wrap;gap:7px;align-items:center;}
@@ -1396,7 +1396,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='01.10.2026 · 4';
+const APP_VERSION='01.10.2026 · 5';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3910,15 +3910,15 @@ function startHeroHTML(src,isMine){
   const onclick=it?' onclick="'+esc(it.isMovedGhost?'jumpToGame('+it.fbIndex+')':'openTerminFromStart(\''+jsArg(it.id)+'\',\''+it.d+'\')')+'"':'';
   let h='<section class="st-hero"><div class="hero-top"><span class="hero-kicker'+(live?' live':'')+'"><i></i>'+esc(kicker)+'</span></div>'
     +'<div class="hero-main"'+onclick+'><div class="hero-txt"><div class="hero-title">'+esc(title)+'</div><div class="hero-sub">'+esc(sub)+'</div></div>'+right+'</div>';
-  if(live) h+=livePitchHTML(isMine,false);
-  else h+='<div class="hero-now">Jetzt auf dem Platz</div>'+livePitchHTML(isMine,true);
   if(acts) h+='<div class="hero-acts">'+acts+'</div>';
-  return h+'</section>';
+  // Ab 01.10.2026 · 5: Termin und Aktionen gehören zusammen; was jetzt auf dem Platz ist, steht darunter für sich.
+  return h+'</section>'+nowPlaceHTML(isMine);
+}
+function nowPlaceHTML(isMine){
+  return '<section class="st-now"><div class="stn-head"><h2>Jetzt auf dem Platz</h2><span>'+esc(todaySummaryText())+'</span></div>'+livePitchHTML(isMine,false)+'</section>';
 }
 function startPlaceOnlyHTML(){ // ohne eigene Mannschaft: nur der Platz jetzt
-  return '<section class="st-hero"><div class="hero-top"><span class="hero-kicker live"><i></i>Jetzt auf dem Platz</span></div>'
-    +'<div class="hero-main"><div class="hero-txt"><div class="hero-title">'+esc(todaySummaryText())+'</div><div class="hero-sub">'+esc(startDayLabel(todayStr,true))+'</div></div></div>'
-    +livePitchHTML(null,false)+'</section>';
+  return nowPlaceHTML(null);
 }
 /* ---------- Woche: Leiste zum Tag-Wählen + Tag (Termine + Platz) oder Woche (Liste) ---------- */
 function openDayInCalendar(ds){ const dt=new Date(ds+'T00:00:00'); curY=dt.getFullYear(); curM=dt.getMonth(); yearShown=curY; selDate=ds; goto('termine'); setView('woche'); scrollToWeekDay(ds); }
@@ -3950,8 +3950,7 @@ function startWeekHTML(src,isMine,admin){
   }else{
     const day=items.filter(e=>e.d===startSel);
     const canLock=admin&&startSel===todayStr&&!activeLocksOn(todayStr).some(l=>l.resource==='platz');
-    const prev=startSel>todayStr, nxt=startSel<end;
-    h+='<div class="st-card"><div class="stc-head"><div class="stc-nav"><button type="button" class="stc-arrow" aria-label="Vorheriger Tag" onclick="shiftStartDay(-1)"'+(prev?'':' disabled')+'>‹</button><h3>'+esc(startDayLabel(startSel,true))+'</h3><button type="button" class="stc-arrow" aria-label="Nächster Tag" onclick="shiftStartDay(1)"'+(nxt?'':' disabled')+'>›</button></div>'
+    h+='<div class="st-card"><div class="stc-head"><h3>'+esc(startDayLabel(startSel,true))+'</h3>'
       +(canLock?'<button type="button" class="wk-act" onclick="openQuickLock()">Heute sperren</button>':'<a href="#" onclick="'+esc('event.preventDefault();openDayInCalendar(\''+startSel+'\')')+'">Im Kalender</a>')+'</div>';
     if(src){ h+=day.length?day.map(e=>weekRowHTML(e)).join(''):'<div class="wk-empty">Kein Termin für '+esc(src.label)+' an diesem Tag.</div>'; }
     h+='<div class="stc-sub">Platz an diesem Tag</div>'+timelineHTML(startSel,isMine)+'</div>';
@@ -3964,17 +3963,6 @@ function startFavHTML(src){
   const chips=pickedWeekKeys().map(k=>{ const [t,q]=k.split(':'); return '<span class="fav-chip">★ '+esc(teamShort(t,parseInt(q)||1))+'</span>'; }).join('');
   return '<section class="st-fav"><div class="fav-row">'+chips+'<button type="button" class="fav-edit" onclick="toggleWeekPicker()">'+(weekPickerOpen?'Fertig':'Favoriten ändern')+'</button></div>'
     +(weekPickerOpen?weekPickerHTML(false):'<div class="fav-hint">Deine Favoriten – ohne Anmeldung, gespeichert auf diesem Handy.</div>')+'</section>';
-}
-/* ---------- Admin: Zahlen (Platz-Woche mit „Heute sperren“ steht oben, siehe renderMyWeek) ---------- */
-function startTilesHTML(){
-  let tr=0, hg=0;
-  for(let i=0;i<WEEK_DAYS;i++){ const ds=addDays(todayStr,i); tr+=trainingInstancesOn(ds).length;
-    hg+=fussballDisplayInstancesOn(ds).filter(e=>!e.isAway&&!e.withdrawn).length+EVENTS.filter(e=>e.d===ds&&isMatchKind(kindOf(e))&&e.ha==='home').length; }
-  const conf=seasonConflictScan().length;
-  return '<section class="st-tiles">'
-    +'<button type="button" class="st-tile" onclick="goto(\'termine\')"><b>'+tr+'</b><span>Trainings diese Woche</span></button>'
-    +'<button type="button" class="st-tile" onclick="goto(\'termine\')"><b>'+hg+'</b><span>Heimspiele diese Woche</span></button>'
-    +'<button type="button" class="st-tile'+(conf?' warn':'')+'" onclick="toggleSeasonStatus()"><b>'+conf+'</b><span>Konflikte in der Saison</span></button></section>';
 }
 function toggleSeasonStatus(){ startSeasonOpen=!startSeasonOpen; renderStart(); }
 function startSeasonLineHTML(){
@@ -4309,7 +4297,7 @@ function renderMyWeek(){
   // Oben: Admin sieht zuerst den Platz der Woche (mit „Heute sperren“), alle anderen ihre Live-Karte.
   // Gleiche Reihenfolge für alle Rollen (ab 01.10.2026 · 3): Live-Karte → Zu erledigen → (Admin: Zahlen) → Woche.
   if(adminBox) adminBox.innerHTML='';
-  if(tilesBox) tilesBox.innerHTML=admin?startTilesHTML():'';
+  if(tilesBox) tilesBox.innerHTML=''; // Zahlen-Kacheln entfernt ab 01.10.2026 · 5 (überflüssig auf der Startseite)
   let hero='';
   if(!src){
     // Erster Besuch ohne Favoriten: die Auswahl steht direkt oben; „Nicht jetzt“ zeigt den ganzen Platz.
@@ -4321,7 +4309,7 @@ function renderMyWeek(){
   heroBox.innerHTML=hero;
   weekBox.innerHTML=startWeekHTML(src,isMine,admin);
   tlRestore();
-  if(seasonBox) seasonBox.innerHTML=session&&!admin?startSeasonLineHTML():'';
+  if(seasonBox) seasonBox.innerHTML=session?startSeasonLineHTML():'';
 }
 function weekPickerHTML(intro){
   const picked=new Set(pickedWeekKeys());
