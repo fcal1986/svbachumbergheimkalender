@@ -420,6 +420,14 @@
   .ibtn{width:28px;height:28px;border-radius:8px;border:1.5px solid var(--line);background:var(--white);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
   .ibtn svg{width:13px;height:13px;stroke:var(--ink-soft);}
   .ibtn.share svg{stroke:var(--ok);}
+  .tt-badge{background:#E9EEF7 !important;color:var(--pc-navy) !important;}
+  .tt-block{margin-top:10px;display:flex;flex-direction:column;gap:6px;font-size:13.5px;}
+  .tt-addr a{color:var(--grass);font-weight:700;}
+  .tt-yes b{font-weight:800;} .tt-no{font-size:12.5px;color:var(--ink-soft);}
+  .tt-acts{display:flex;gap:8px;margin-top:4px;}
+  .tt-btn{flex:1;min-height:42px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;}
+  .tt-btn.yes.on{background:#3E8E1A;border-color:#3E8E1A;color:#fff;} .tt-btn.no.on{background:#405366;border-color:#405366;color:#fff;}
+  .todo-fix{display:flex;gap:6px;flex-wrap:wrap;}
   .share-sheet h3{margin:2px 0 10px;font-family:'Manrope','Inter',sans-serif;font-size:20px;}
   .share-prev{white-space:pre-wrap;word-break:break-word;font-family:'Inter',sans-serif;font-size:14px;line-height:1.45;background:#F2F5F4;border-radius:12px;padding:12px;margin:0 0 12px;color:var(--ink);}
   .share-wa{background:#25D366 !important;border-color:#25D366 !important;}
@@ -1146,12 +1154,12 @@
       <div class="field required"><label><span class="req-dot"></span>Anlass</label><input type="text" id="f-anlass" autocomplete="off" oninput="formDirty=true;this.dataset.auto='';suggestKindFromTitle()" placeholder="z. B. Sommerfest, Turnier, Testspiel"></div>
       <div class="field required"><label><span class="req-dot"></span>Terminart</label>
         <select id="f-kind" onchange="onKindChange(true)">
-          <option value="game">Freundschaftsspiel</option><option value="hallenturnier">Hallenturnier</option><option value="sommerturnier">Sommerturnier</option><option value="training">Training</option><option value="goalkeeper">Torwarttraining</option><option value="other" selected>Sonstiges</option>
+          <option value="game">Freundschaftsspiel</option><option value="hallenturnier">Hallenturnier</option><option value="sommerturnier">Sommerturnier</option><option value="training">Training</option><option value="goalkeeper">Torwarttraining</option><option value="trainer">Trainer-Termin (z. B. Fortbildung, mit Zusagen)</option><option value="other" selected>Sonstiges</option>
         </select>
         <p class="helptext" id="f-kind-help"></p>
       </div>
       <div id="f-match-fields" style="display:none;">
-        <div class="field required"><label><span class="req-dot"></span>Heim oder auswärts</label>
+        <div class="field required" id="f-ha-field"><label><span class="req-dot"></span>Heim oder auswärts</label>
           <div class="seg" id="f-ha">
             <button type="button" class="on" data-ha="home" onclick="setHomeAway('home',true)">Heim</button>
             <button type="button" data-ha="away" onclick="setHomeAway('away',true)">Auswärts</button>
@@ -1160,7 +1168,7 @@
         <div class="field required" id="f-opp-field"><label><span class="req-dot"></span>Gegner</label><input type="text" id="f-opponent" autocomplete="off" oninput="formDirty=true;autoMatchTitle()" placeholder="z. B. SV Hüsten 09 II"></div>
         <div class="field" id="f-part-field"><label>Teilnehmer (optional)</label><input type="text" id="f-participants" autocomplete="off" oninput="formDirty=true" placeholder="z. B. SC Neheim, TuS Oeventrop"></div>
         <div class="field required" id="f-kick-field"><label><span class="req-dot"></span>Anstoß</label><input type="time" id="f-kickoff" step="300" onchange="onKickoffChange(true)"><p class="helptext" id="f-kick-info" style="margin-top:6px;"></p></div>
-        <div class="field" id="f-addr-field"><label>Adresse (Spielort)</label><input type="text" id="f-address" autocomplete="off" oninput="formDirty=true" placeholder="Straße, Ort"></div>
+        <div class="field" id="f-addr-field"><label id="f-addr-label">Adresse (Spielort)</label><input type="text" id="f-address" autocomplete="off" oninput="formDirty=true" placeholder="Straße, Ort"></div>
         <p class="helptext" id="f-match-help"></p>
       </div>
       <div class="field required" id="f-gkteams-field" style="display:none;"><label><span class="req-dot"></span>Für welche Mannschaften?</label>
@@ -1428,7 +1436,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='01.10.2026 · 14';
+const APP_VERSION='01.10.2026 · 15';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -1867,9 +1875,10 @@ const KINDS=[
   {id:'sommerturnier',label:'Sommerturnier'},
   {id:'training',label:'Training'},
   {id:'goalkeeper',label:'Torwarttraining'},
+  {id:'trainer',label:'Trainer-Termin'},
   {id:'other',label:'Sonstiges'}
 ];
-const OCC_DEFAULT_LEVELS={game:'exclusive',hallenturnier:'exclusive',sommerturnier:'exclusive',training:'shared',goalkeeper:'overlay',other:'shared'};
+const OCC_DEFAULT_LEVELS={game:'exclusive',hallenturnier:'exclusive',sommerturnier:'exclusive',training:'shared',goalkeeper:'overlay',trainer:'shared',other:'shared'};
 // Spiele und Turniere mit Heim/Auswärts (ab 29.09.2026 · 6). "game" = Freundschaftsspiel (früher "Spiel").
 const MATCH_KINDS=['game','hallenturnier','sommerturnier'];
 function isMatchKind(k){ return MATCH_KINDS.includes(k); }
@@ -2306,6 +2315,7 @@ function snapStore(name){ const m={}; (STORES[name].get()||[]).forEach(x=>{ if(x
 function mergeFields(b,l,r){
   const out={...r};
   new Set([...Object.keys(b),...Object.keys(l)]).forEach(k=>{
+    if(k==='rsvp'){ out.rsvp=mergeFields(b.rsvp||{},l.rsvp||{},r.rsvp||{}); return; } // Zusagen: je Zugang, gleichzeitige Zusagen gehen nicht verloren
     if(JSON.stringify(l[k])!==JSON.stringify(b[k])){ if(l[k]===undefined) delete out[k]; else out[k]=l[k]; }
   });
   return out;
@@ -2986,7 +2996,7 @@ function rowHTML(e){
     title=e.title;
     b=kindOf(e)==='goalkeeper'
       ?gkBadge()+'<span class="badge-team verein">'+esc(gkTeamsText(gkTeamsOf(e)))+'</span>'
-      :'<span class="badge-team '+cat(e.team)+'">'+esc(teamLabel(e.team,e.squad))+'</span>';
+      :(kindOf(e)==='trainer'?'<span class="badge-res tt-badge">Trainer-Termin</span>':'<span class="badge-team '+cat(e.team)+'">'+esc(teamLabel(e.team,e.squad))+'</span>');
     if(e.pitch)b+=pitchBadge(e.pitch);
     if(e.halle&&e.halle.thirds&&e.halle.thirds.length)b+=halleBadge(e.halle);
     (e.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
@@ -3034,7 +3044,7 @@ function rowHTML(e){
     +(b?'<div class="badges" style="margin-top:10px;">'+b+'</div>':'')
     +(isMatch?matchInfoHTML(e):'')
     +(e.note&&!e.isTraining?'<div class="ev-note" style="margin-top:8px;">'+esc(e.note)+'</div>':'')
-    +gkSignupBlockHTML(e)
+    +gkSignupBlockHTML(e)+rsvpBlockHTML(e)
     +(contactHtml?'<div class="ev-contact">'+contactHtml+'</div>':'')
     +'</div>'
     +'</div>';
@@ -3274,6 +3284,53 @@ function movedGhostRowHTML(e){
     +'<button type="button" class="moved-jump" onclick="event.stopPropagation();jumpToGame('+e.fbIndex+')"><span>Zum '+(e.stalePlan||e.diverged?'aktuellen':'neuen')+' Termin: '+esc(to)+'</span><span>→</span></button></div>'
     +'</div>';
 }
+/* ---------- Trainer-Termine mit Zusagen (ab 01.10.2026 · 15) ----------
+   Terminart „trainer“ (z. B. DFB-Trainingsdialog, Fortbildung, Sitzung): belegt keinen Platz, Ort als Adresse.
+   Jeder Zugang sagt an der Karte mit einem Tipp zu oder ab (e.rsvp[userId]={s:'yes'|'no',n:Name}); die Namen
+   der Zusagen sind öffentlich (wie Trainernamen am Training, ohne Telefon/Mail). Offene Antworten stehen in
+   „Zu erledigen“ und in der Wochenmail; beim Anlegen geht über „Alle Teams“ eine Mail an alle Trainer. */
+const RSVP_TODO_DAYS=45;
+function ttPlace(e){ return e&&e.address?e.address.split(',').pop().replace(/\(.*?\)/g,'').trim():''; } // Ort kurz: „Eichholz, Arnsberg (SV 09)“ → „Arnsberg“
+function isTrainerTermin(e){ return !!e&&!e.isExternal&&!e.isTraining&&kindOf(e)==='trainer'; }
+function rsvpList(e,st){ return Object.entries(e.rsvp||{}).filter(([,v])=>v&&v.s===st).map(([id,v])=>({id,n:v.n||''})).sort((a,b)=>a.n.localeCompare(b.n,'de')); }
+function rsvpShortName(n){ const p=String(n||'').trim().split(/\s+/); return p.length>1?p[0]+' '+p[p.length-1][0]+'.':p[0]||''; }
+function rsvpOf(e){ return session&&e.rsvp&&e.rsvp[session.id]?e.rsvp[session.id].s:null; }
+function canRsvp(e){ return !!(session&&session.token&&isInActiveSeason(session.id)&&e.d>=todayStr); }
+function rsvpBlockHTML(e){
+  if(!isTrainerTermin(e)) return '';
+  const yes=rsvpList(e,'yes'), no=rsvpList(e,'no'), me=rsvpOf(e);
+  let h='<div class="tt-block">';
+  if(e.address) h+='<div class="tt-addr">📍 <a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(e.address)+'" target="_blank" rel="noopener" onclick="event.stopPropagation();">'+esc(e.address)+'</a></div>';
+  h+='<div class="tt-yes"><b>'+(yes.length?yes.length+' dabei':'Noch keine Zusage')+'</b>'+(yes.length?': '+esc(yes.map(x=>x.n).join(', ')):'')+'</div>';
+  if(no.length) h+='<div class="tt-no">'+no.length+' '+(no.length===1?'sagt':'sagen')+' ab</div>';
+  if(canRsvp(e)) h+='<div class="tt-acts"><button type="button" class="tt-btn yes'+(me==='yes'?' on':'')+'" onclick="'+esc('event.stopPropagation();rsvpSet(\''+jsArg(e.id)+'\',\'yes\')')+'">'+(me==='yes'?'✓ Ich komme':'Ich komme')+'</button>'
+    +'<button type="button" class="tt-btn no'+(me==='no'?' on':'')+'" onclick="'+esc('event.stopPropagation();rsvpSet(\''+jsArg(e.id)+'\',\'no\')')+'">'+(me==='no'?'✓ Ich komme nicht':'Ich komme nicht')+'</button></div>';
+  else if(!session&&e.d>=todayStr) h+='<div class="tt-no">Zusagen nach Anmeldung.</div>';
+  return h+'</div>';
+}
+function rsvpSet(id,st){
+  const e=EVENTS.find(x=>x.id===id); if(!e||!canRsvp(e)) return;
+  const prev=e.rsvp&&e.rsvp[session.id]?{...e.rsvp[session.id]}:null;
+  if(prev&&prev.s===st) return;
+  e.rsvp=Object.assign({},e.rsvp||{}); e.rsvp[session.id]={s:st,n:session.name};
+  render(); renderStart();
+  showToast(st==='yes'?'Zugesagt: '+e.title:'Abgesagt: '+e.title);
+  // Kein Präfix aus notify-email (Kategorien) → keine Mail an alle für jede Zusage
+  saveEvents((st==='yes'?'Zusage':'Absage')+' Trainer-Termin: '+e.title+' '+fmtShort(e.d)+' – '+session.name).catch(err=>{
+    if(prev) e.rsvp[session.id]=prev; else delete e.rsvp[session.id];
+    render(); renderStart(); showToast('Speichern fehlgeschlagen: '+err.message,6000); });
+}
+// Offene Trainer-Termine für „Zu erledigen“ (nur angemeldet)
+function rsvpTodos(){
+  if(!session||!isInActiveSeason(session.id)) return []; // ohne Token (Wochenmail) trotzdem auflisten
+  const end=addDays(todayStr,RSVP_TODO_DAYS);
+  return EVENTS.filter(e=>isTrainerTermin(e)&&e.d>=todayStr&&e.d<=end&&!rsvpOf(e)).sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t)).map(e=>({
+    click:'openTerminFromStart(\''+jsArg(e.id)+'\',\''+e.d+'\')',
+    txt:'Trainer-Termin '+shareDay(e.d)+', '+e.t+': '+e.title+(ttPlace(e)?' in '+ttPlace(e):'')+' – kommst du?',
+    act:'Ansehen',
+    fix:{label:'Ich komme',click:'rsvpSet(\''+jsArg(e.id)+'\',\'yes\')'},
+    fix2:{label:'Ich komme nicht',click:'rsvpSet(\''+jsArg(e.id)+'\',\'no\')'}}));
+}
 /* ---------- Termin weiterleiten (ab 01.10.2026 · 14) ----------
    Für alle (auch ohne Anmeldung) an jeder Karte im Kalender: Teilen-Symbol → kurze Nachricht (wer gegen wen,
    wann, wo, Ansprechpartner – ohne Telefon/Mail) mit Direktlink → „Per WhatsApp“ oder „Link kopieren“.
@@ -3303,6 +3360,12 @@ function shareText(e){
     const r=cancelReasonOf(e);
     L.push('❌ *'+(kindOf(e)==='goalkeeper'?'Torwarttraining':'Training '+who)+'* fällt aus');
     L.push(shareDay(e.d)+' · '+e.t+'–'+e.bis+(r?' · '+r:''));
+  }else if(isTrainerTermin(e)){
+    L.push('📅 *'+e.title+'*');
+    L.push(shareDay(e.d)+' · '+e.t+'–'+eventBis(e));
+    if(e.address) L.push('📍 '+e.address);
+    const y=rsvpList(e,'yes'); if(y.length) L.push('✅ Dabei: '+y.map(x=>rsvpShortName(x.n)).join(', '));
+    if(e.note) L.push('ℹ️ '+e.note);
   }else if(isGameEntry(e)){
     const away=e.isAway||e.ha==='away';
     L.push('⚽ *'+who+' – '+(e.opponent||e.title)+'* ('+(away?'auswärts':'Heim')+')');
@@ -4135,6 +4198,7 @@ function weekMatcher(src){
   const hasJugend=Object.keys(cls).some(isJugend);
   return e=>{
     if(!e||!e.team) return false;
+    if(isTrainerTermin(e)) return !!src.fromSession; // Trainer-Termine: in der Woche jedes Zugangs
     if(e.team===GK_TEAM||kindOf(e)==='goalkeeper'){
       if(cls.hasOwnProperty(GK_TEAM)) return true;
       const t=gkTeamsOf(e);
@@ -4186,6 +4250,10 @@ function weekRowParts(e){
     const sc=scoreInfo(e); tag=sc?sc.text:(e.isAway?'Auswärts':'Heim');
   }else if(kindOf(e)==='goalkeeper'){
     name='Torwarttraining'; sub=['für '+gkTeamsText(gkTeamsOf(e)),gkSignedCountText(e)].filter(Boolean).join(' · ');
+  }else if(isTrainerTermin(e)){
+    const y=rsvpList(e,'yes').length, me=rsvpOf(e);
+    name=e.title; sub=['Trainer-Termin',ttPlace(e),y?y+' dabei':''].filter(Boolean).join(' · ');
+    tag=me==='yes'?'Zugesagt':(me==='no'?'Abgesagt':'');
   }else if(!e.isTraining&&kindOf(e)==='game'&&e.ha&&e.opponent){
     name=(e.ha==='away'?'bei ':'gegen ')+e.opponent;
     sub=(isMatchPlanned(e)?'Vorgemerkt · noch nicht bei fussball.de':'Freundschaftsspiel')+(e.kickoff?' · Anstoß '+e.kickoff:'');
@@ -4267,7 +4335,7 @@ function conflictFix(A,B,ds){
   return {label:'Training '+(t.team===GK_TEAM?'TW':teamShort(t.team,t.squad))+' absagen',click:'cancelTrainingDay(\''+jsArg(t.trainingSlotId)+'\',\''+ds+'\')'};
 }
 function myTodos(isMine,hasTeams){
-  const out=[];
+  const out=rsvpTodos();
   if(regIsAdminSession()){
     const miss=teamsWithoutTrainer(), key=miss.join('|');
     if(miss.length&&lsGet(INVITE_HIDDEN_KEY,'')!==key)
@@ -4405,7 +4473,8 @@ function renderMyWeek(){
     const td=myTodos(isMine||(()=>false),!!(src&&src.fromSession)).filter(t=>!(t.fix&&startHeroFix&&t.fix.click===startHeroFix));
     todoBox.innerHTML=td.length?'<p class="section-label">Zu erledigen</p>'+td.map(t=>
       '<div class="status-row warn" style="cursor:pointer;" onclick="'+esc(t.click)+'">'+svgWarn+'<div style="flex:1;">'+esc(t.txt)+' <b>'+esc(t.act)+' ›</b>'
-      +(t.fix?'<div class="todo-fix"><button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();'+t.fix.click)+'">'+esc(t.fix.label)+'</button></div>':'')
+      +(t.fix?'<div class="todo-fix"><button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();'+t.fix.click)+'">'+esc(t.fix.label)+'</button>'
+        +(t.fix2?'<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();'+t.fix2.click)+'">'+esc(t.fix2.label)+'</button>':'')+'</div>':'')
       +'</div></div>').join(''):'';
   }else todoBox.innerHTML='';
   // Oben: Admin sieht zuerst den Platz der Woche (mit „Heute sperren“), alle anderen ihre Live-Karte.
@@ -4950,19 +5019,21 @@ function onKindChange(byUser){
     if(autoT&&(!an.value.trim()||an.dataset.auto==='1')){ an.value=autoT; an.dataset.auto='1'; }
     else if(!autoT&&an.dataset.auto==='1'){ an.value=''; an.dataset.auto=''; }
     // Ressourcen sind beim Torwarttraining optional: Vorauswahl "Großspielfeld" entfernen.
-    if(k==='goalkeeper'&&!editingId) setResChips('f-res',[]);
+    if((k==='goalkeeper'||k==='trainer')&&!editingId) setResChips('f-res',[]);
     else if(!editingId&&![...document.querySelectorAll('#f-res .res-chip.on')].length) setResChips('f-res',['Großspielfeld']);
   }
   const rl=document.getElementById('f-res-label'); if(rl) rl.textContent=k==='goalkeeper'?'Ressourcen (optional)':'Ressourcen';
   if(help) help.textContent=occLevel(k)==='overlay'
     ?'Belegt keine Platzfläche: darf parallel zu einem Training laufen, aber nicht während eines Spiels.'
     :(occLevel(k)==='exclusive'?'Während eines Spiels ist auf dem Platz kein Torwarttraining möglich.':'');
-  const gk=k==='goalkeeper';
+  const gk=k==='goalkeeper', tt=k==='trainer';
   const gf=document.getElementById('f-gkteams-field'); if(gf) gf.style.display=gk?'block':'none';
   // Torwarttraining gehört keiner einzelnen Altersklasse: statt der Dropliste gilt die
   // Mehrfachauswahl "Für welche Mannschaften?" – das Team wird intern auf "Torwarttraining" gesetzt.
   const ts=document.getElementById('f-team-section'), sel=document.getElementById('f-team');
-  if(ts) ts.style.display=gk?'none':'block';
+  if(ts) ts.style.display=gk||tt?'none':'block';
+  if(sel&&tt&&sel.value!=='Alle Teams'){ sel.dataset.prevTeam=sel.value; } // Trainer-Termin gilt für alle Trainer
+  if(sel&&!tt&&!gk&&sel.value==='Alle Teams'&&sel.dataset.prevTeam){ sel.value=sel.dataset.prevTeam; }
   if(sel){
     if(gk&&sel.value!==GK_TEAM){ sel.dataset.prevTeam=sel.value; sel.value=GK_TEAM; }
     else if(!gk&&sel.value===GK_TEAM){ sel.value=sel.dataset.prevTeam||'F-Jugend'; if(typeof filterTeamOptions==='function') filterTeamOptions(); onTeamChange(); }
@@ -4983,15 +5054,17 @@ function setHomeAway(ha,byUser){
   if(byUser){ formDirty=true; applyMatchForm(true); hideConflicts(); renderPitch(); renderHalle(); }
 }
 function applyMatchForm(byUser){
-  const k=formKind(), match=isMatchKind(k), away=match&&formHA==='away';
+  const k=formKind(), match=isMatchKind(k), away=match&&formHA==='away', tt=k==='trainer';
   const show=(id,on)=>{ const el=document.getElementById(id); if(el) el.style.display=on?'':'none'; };
-  show('f-match-fields',match);
+  show('f-match-fields',match||tt); show('f-ha-field',match);
   show('f-opp-field',k==='game'); show('f-kick-field',k==='game');
-  show('f-part-field',match&&k!=='game'); show('f-addr-field',away);
+  show('f-part-field',match&&k!=='game'); show('f-addr-field',away||tt);
+  const al=document.getElementById('f-addr-label'); if(al) al.textContent=tt?'Ort (Adresse)':'Adresse (Spielort)';
   show('f-times',k!=='game'); // Freundschaftsspiel: nur Anstoß – Von/Bis rechnet die App (kickInfo)
-  show('f-res-label',!away); show('f-res-field',!away);
+  show('f-res-label',!away&&!tt); show('f-res-field',!away&&!tt);
+  if(tt){ show('f-pitch-field',false); show('f-halle-field',false); }
   const help=document.getElementById('f-match-help');
-  if(help) help.textContent=!match?'':(away
+  if(help) help.textContent=tt?'Trainer-Termin: belegt keinen Platz. Alle Trainer bekommen eine Mail und können an der Karte zu- oder absagen.':!match?'':(away
     ?'Auswärts: belegt keinen Platz bei uns. Die Ansetzung im DFBnet macht der gastgebende Verein.'
     :'Heim: '+(k==='hallenturnier'?'die Halle':'der Platz')+' wird reserviert. Nach dem Speichern bekommst du den Text für den Jugendleiter ('+(k==='game'?'Ansetzung':'Turnier-Anmeldung')+' im DFBnet).');
   if(byUser&&match&&!fillingForm){
@@ -5049,6 +5122,7 @@ function updateKickInfo(){
   el.textContent=txt+'.';
 }
 function readMatchFields(kind){
+  if(kind==='trainer'){ const a=(document.getElementById('f-address').value||'').trim(); return {ha:undefined,opponent:undefined,participants:undefined,address:a||undefined,kickoff:undefined}; }
   if(!isMatchKind(kind)) return {ha:undefined,opponent:undefined,participants:undefined,address:undefined,kickoff:undefined};
   const v=id=>(document.getElementById(id).value||'').trim();
   const away=formHA==='away';
@@ -5443,11 +5517,11 @@ async function submitEvent(){
   const bis=snapTo15(document.getElementById('f-bis').value)||document.getElementById('f-bis').value;
   if(!von||!bis){showToast('Bitte Von- und Bis-Zeit eintragen.');return;}
   if(von>=bis){showToast('Die Bis-Zeit muss nach der Von-Zeit liegen.');return;}
-  const team=formKind()==='goalkeeper'?GK_TEAM:document.getElementById('f-team').value;
+  const team=formKind()==='goalkeeper'?GK_TEAM:(formKind()==='trainer'?'Alle Teams':document.getElementById('f-team').value);
   const sb=document.querySelector('#f-squad button.on');const squad=team===GK_TEAM?1:(sb?parseInt(sb.dataset.squad):1);
   if(team===GK_TEAM&&!readGkTeamChips('f-gkteams').length){showToast('Bitte mindestens eine Mannschaft für das Torwarttraining auswählen.');return;}
   if(team===GK_TEAM&&!canBookTeam(team,1)){showToast('Torwarttrainings können nur Torwarttrainer und Admins anlegen.',5000);return;}
-  if(!canBookTeam(team,squad)){
+  if(formKind()!=='trainer'&&!canBookTeam(team,squad)){ // Trainer-Termin: darf jeder Zugang der Saison anlegen
     const cls=normalizeClasses(session.classes||{});
     const sq=cls[team]||[];
     const msg=sq.length?'Nur Mannschaft '+sq.map(s=>jugendLetter(team)+s).join(', ')+' erlaubt.':'Diese Altersklasse ist dir nicht zugewiesen.';
@@ -5464,8 +5538,8 @@ async function submitEvent(){
   if(overlay&&pitchOn()) res.unshift('Großspielfeld');
   let pitch=(pitchOn()&&!overlay)?curPitch():null;
   let halle=halleResOn()&&halleThirds.length?{thirds:[...halleThirds].sort((a,b)=>a-b)}:null;
-  if(!away&&halleResOn()&&!halleThirds.length){showToast('Bitte mindestens ein Hallen-Drittel auswählen.');return;}
-  if(away){ res=[]; pitch=null; halle=null; } // Auswärts belegt bei uns nichts
+  if(!away&&kind!=='trainer'&&halleResOn()&&!halleThirds.length){showToast('Bitte mindestens ein Hallen-Drittel auswählen.');return;}
+  if(away||kind==='trainer'){ res=[]; pitch=null; halle=null; } // Auswärts und Trainer-Termine belegen bei uns nichts
   const note=document.getElementById('f-bem').value.trim();
   // HARTE KONFLIKTPRÜFUNG
   const ownFree=isMatchKind(kind)&&!away?{team,squad}:null;

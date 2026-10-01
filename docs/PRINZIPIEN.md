@@ -8,6 +8,8 @@ Diese Grundsätze gelten für jedes neue Feature und jede Änderung. Bei Zweifel
 
 Ein Feature gehört nur dann in Platzcoach, wenn es diese Frage besser beantwortet oder eine Aufgabe rund um diese Frage schneller erledigt. Alles andere (Vereinsverwaltung, Finanzen, Kader, Aufgaben-Boards, Postfächer) bleibt draußen.
 
+**Bewusste Ausnahme (01.10.2026):** *Trainer-Termine* außerhalb der eigenen Anlage (z. B. DFB-Trainingsdialog, Fortbildung, Sitzung) mit Zu- und Absagen. Begründung: kein eigenes Modul, sondern eine Terminart im vorhandenen Formular; Zusagen direkt an der Karte; Hinweise über die vorhandenen Wege (Zu erledigen, Änderungsmail, Wochenmail). Weitere Ausnahmen nur mit derselben Begründung (vorhandene Bausteine, keine neue Seite).
+
 ## 1. Null Klicks vor einem Klick
 
 - **Automatisch vor manuell.** Was sich aus fussball.de oder vorhandenen Daten ableiten lässt, wird nie eingetippt (Beispiele: Training an Spieltagen automatisch absagen, Änderungsmails bei Verlegungen, Mannschaftsabgleich).
