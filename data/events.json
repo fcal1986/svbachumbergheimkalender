@@ -138,6 +138,23 @@
       "kickoff": "16:30",
       "ownerId": "123c8c2c-5a1a-43d6-be82-455af9f3b407",
       "ownerName": "Younes Al Musaui"
+    },
+    {
+      "id": "633a26dd-aecf-4c9c-83b6-fe438e367411",
+      "d": "2026-10-12",
+      "t": "17:30",
+      "bis": "19:30",
+      "title": "Trainingsdialog 10",
+      "kind": "trainer",
+      "team": "Alle Teams",
+      "squad": 2,
+      "pitch": null,
+      "halle": null,
+      "res": [],
+      "note": "",
+      "address": "Arnsberg im Eichholz Sportgelände SV Arnsberg 09",
+      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
+      "ownerName": "Fabrizio Calcagno"
     }
   ]
 }
