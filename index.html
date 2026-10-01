@@ -1436,7 +1436,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='01.10.2026 · 15';
+const APP_VERSION='01.10.2026 · 16';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2426,14 +2426,24 @@ function saveStore(name,msg){
       if(r.ok){ const j=await r.json(); sha=j.sha; if(j.content){ try{ remote=JSON.parse(dec.decode(unb64(String(j.content).replace(/\s/g,'')))); }catch(e){ remote=null; } } }
       else if(r.status===401) throw new Error('Token ungültig oder abgelaufen.');
       else if(r.status!==404) throw new Error('GitHub-Lesefehler '+r.status);
-      const local=st.get()||[];
+      // Stand zum Speicherzeitpunkt als Kopie: Einträge werden teils direkt geändert (z. B. Zusagen),
+      // Änderungen während des Hochladens dürfen nicht mit hochgeladen bzw. danach überschrieben werden.
+      const local=JSON.parse(JSON.stringify(st.get()||[]));
       const canMerge=remote&&Array.isArray(remote[st.key])&&local.every(x=>x&&x.id!=null);
       const merged=canMerge?mergeStore(name,local,remote[st.key]):local;
       _shaCache[st.path]=sha;
       try{ await ghPutRaw(st.path,JSON.stringify({...(remote||{}),[st.key]:merged},null,2),msg); }
       catch(e){ if(e.status===409&&attempt<2) continue; throw e; }
       const othersChanged=JSON.stringify(merged)!==JSON.stringify(local);
-      st.set(merged); snapStore(name);
+      // Ab 01.10.2026 · 16: Wurde während des Hochladens weiter getippt (z. B. Zusage → Absage), diese
+      // neueren Änderungen auf den gespeicherten Stand legen statt sie zu überschreiben. Basis für das
+      // nächste Speichern bleibt der Stand auf GitHub, damit die nachfolgende Speicherung sie mitnimmt.
+      const cur=st.get()||[];
+      if(JSON.stringify(cur)!==JSON.stringify(local)&&cur.every(x=>x&&x.id!=null)){
+        const m={}; local.forEach(x=>{ m[x.id]=JSON.stringify(x); }); STORE_BASE[name]=m;
+        st.set(mergeStore(name,cur,merged));
+        const b={}; merged.forEach(x=>{ if(x&&x.id!=null) b[x.id]=JSON.stringify(x); }); STORE_BASE[name]=b;
+      }else{ st.set(merged); snapStore(name); }
       if(name==='users') syncClassesFromActiveSeason();
       if(othersChanged){ try{ render(); renderStart(); renderTraining(); }catch(e){} }
       return;
@@ -3302,7 +3312,8 @@ function rsvpBlockHTML(e){
   let h='<div class="tt-block">';
   if(e.address) h+='<div class="tt-addr">📍 <a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(e.address)+'" target="_blank" rel="noopener" onclick="event.stopPropagation();">'+esc(e.address)+'</a></div>';
   h+='<div class="tt-yes"><b>'+(yes.length?yes.length+' dabei':'Noch keine Zusage')+'</b>'+(yes.length?': '+esc(yes.map(x=>x.n).join(', ')):'')+'</div>';
-  if(no.length) h+='<div class="tt-no">'+no.length+' '+(no.length===1?'sagt':'sagen')+' ab</div>';
+  // Namen der Absagen nur für Angemeldete (öffentlich nur die Anzahl)
+  if(no.length) h+='<div class="tt-no">'+(session?'<b>Abgesagt</b>: '+esc(no.map(x=>x.n).join(', ')):no.length+' '+(no.length===1?'sagt':'sagen')+' ab')+'</div>';
   if(canRsvp(e)) h+='<div class="tt-acts"><button type="button" class="tt-btn yes'+(me==='yes'?' on':'')+'" onclick="'+esc('event.stopPropagation();rsvpSet(\''+jsArg(e.id)+'\',\'yes\')')+'">'+(me==='yes'?'✓ Ich komme':'Ich komme')+'</button>'
     +'<button type="button" class="tt-btn no'+(me==='no'?' on':'')+'" onclick="'+esc('event.stopPropagation();rsvpSet(\''+jsArg(e.id)+'\',\'no\')')+'">'+(me==='no'?'✓ Ich komme nicht':'Ich komme nicht')+'</button></div>';
   else if(!session&&e.d>=todayStr) h+='<div class="tt-no">Zusagen nach Anmeldung.</div>';
