@@ -185,6 +185,10 @@
   .wk-row .pt-type{white-space:normal;}
   .wk-row .move-badge{display:inline-block;margin-top:3px;}
   .wk-row{padding:6px 11px;margin-bottom:5px;border-radius:11px;}
+  .wk-act{flex:none;background:none;border:1.5px solid var(--line);color:var(--ink);font:inherit;font-size:11px;font-weight:700;padding:5px 9px;border-radius:9px;cursor:pointer;}
+  .wk-act:active{background:var(--bg);}
+  .mv-reasons{margin-top:8px;gap:6px;}
+  .mv-reasons .res-chip{padding:6px 10px;font-size:11.5px;}
   .wk-row .pt-team-name{font-size:12.5px;}
   .wk-empty{font-size:12px;color:var(--ink-soft);padding:2px 2px 4px;}
   .wk-none{display:flex;align-items:center;gap:9px;padding:9px 11px;margin-bottom:5px;border:1.5px dashed var(--line);border-radius:11px;font-size:12.5px;font-weight:500;color:var(--ink-soft);}
@@ -451,6 +455,10 @@
   .lock-banner{display:flex;align-items:center;gap:9px;background:#FEE2E2;border:1.5px solid #FCA5A5;border-radius:10px;padding:9px 11px;margin:8px 0;font-size:12px;color:#9B3227;}
   .lock-banner svg{flex:none;width:17px;height:17px;stroke:#DC2626;}
   .lock-banner b{font-size:12.5px;}
+  .todo-fix{margin-top:6px;}
+  .todo-fix .wk-act{background:#fff;}
+  .st-head-right{display:flex;align-items:center;gap:6px;}
+  .lock-banner .lock-lift{border-color:#FCA5A5;color:#9B3227;background:#fff;}
   .lock-banner-sub{font-size:10.5px;color:#B94A3A;margin-top:1px;}
   .lock-cancel-link{margin-left:auto;flex:none;font-size:11px;font-weight:800;color:#9B3227;text-decoration:underline;cursor:pointer;white-space:nowrap;}
   .pitch-today-row.pt-cancelled{opacity:.72;}
@@ -735,6 +743,8 @@
   .toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(88px + env(safe-area-inset-bottom));width:calc(100% - 36px);max-width:484px;background:var(--ink);color:#F0F3F7;padding:12px 14px;border-radius:12px;font-size:12px;display:flex;align-items:flex-start;gap:8px;opacity:0;transition:all .25s;pointer-events:none;z-index:80;line-height:1.45;}
   .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
   .toast svg{width:15px;height:15px;stroke:var(--green);flex:none;margin-top:1px;}
+  .toast.has-act{pointer-events:auto;align-items:center;}
+  .toast-act{margin-left:auto;flex:none;background:none;border:1.5px solid rgba(255,255,255,.35);color:#fff;font:inherit;font-weight:800;font-size:12px;padding:6px 12px;border-radius:9px;cursor:pointer;}
   .modal{position:fixed;inset:0;background:rgba(11,18,32,.5);display:none;align-items:center;justify-content:center;padding:24px;z-index:90;}
   .modal.show{display:flex;}
   .modal-box{background:var(--white);border-radius:16px;padding:20px;width:100%;max-width:320px;}
@@ -837,7 +847,7 @@
 
       <div class="pitch-section-head" onclick="openTodayFromStart()" style="cursor:pointer;">
         <p class="section-label" style="margin:0;">Heute im Verein <span style="color:var(--green);">›</span></p>
-        <div id="st-occupied-badge"></div>
+        <div class="st-head-right"><span id="st-lock-quick"></span><div id="st-occupied-badge"></div></div>
       </div>
       <div id="st-pitch-today"></div>
 
@@ -1146,7 +1156,7 @@
 </div>
 
 <div id="saving-pill"><span class="spinner" style="border-color:rgba(255,255,255,.3);border-top-color:#fff;width:13px;height:13px;"></span><span id="saving-msg">Wird gespeichert …</span></div>
-<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span id="toast-text"></span></div>
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span id="toast-text"></span><button type="button" class="toast-act" id="toast-act" style="display:none;"></button></div>
 <div class="modal" id="modal">
   <div class="modal-box">
     <h3 id="mo-title">Löschen?</h3>
@@ -1222,7 +1232,8 @@
       <div class="field" style="flex:2;margin-bottom:0;"><label>Anstoß</label><input type="time" id="mv-time" onchange="updateMoveTrainingHint()"></div>
     </div>
     <div class="field" style="margin:12px 0 0;"><label>Grund der Verlegung (für den DFBnet-Antrag)</label>
-      <textarea id="mv-reason" rows="2" maxlength="300" placeholder="z. B. Herbstferien, mehrere Spieler fehlen" style="width:100%;box-sizing:border-box;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;font-family:'Inter';font-size:14px;resize:vertical;"></textarea></div>
+      <textarea id="mv-reason" oninput="renderMoveReasons()" rows="2" maxlength="300" placeholder="z. B. Herbstferien, mehrere Spieler fehlen" style="width:100%;box-sizing:border-box;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;font-family:'Inter';font-size:14px;resize:vertical;"></textarea></div>
+    <div class="chip-group mv-reasons" id="mv-reasons"></div>
     <div id="mv-training"></div>
     <p class="hint" style="margin-top:10px;">Platzcoach führt das Spiel ab sofort am neuen Termin (Platzbelegung, Konflikte, Übersicht). Am alten Termin steht „verlegt auf …“. Sobald fussball.de die Verlegung übernimmt, gilt sie als bestätigt.</p>
     <div class="modal-acts" style="margin-top:16px;">
@@ -1255,7 +1266,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='30.09.2026 · 6';
+const APP_VERSION='01.10.2026 · 1';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -1944,12 +1955,37 @@ function showSaving(msg){
   p.classList.add('show');
 }
 function hideSaving(){ document.getElementById('saving-pill').classList.remove('show'); }
-function showToast(m,ms){
+function showToast(m,ms,action){
   document.getElementById('toast-text').textContent=m;
-  const t=document.getElementById('toast');
+  const t=document.getElementById('toast'), b=document.getElementById('toast-act');
+  // Optional eine Aktion im Hinweis (z. B. „Rückgängig“), ab 01.10.2026 · 1
+  if(b){
+    b.style.display=action?'':'none'; b.textContent=action?action.label:''; t.classList.toggle('has-act',!!action);
+    b.onclick=action?(ev=>{ ev.stopPropagation(); t.classList.remove('show'); action.fn(); }):null;
+  }
   t.classList.add('show'); clearTimeout(t._h);
   t._h=setTimeout(()=>t.classList.remove('show'),ms||2800);
 }
+/* ---------- Rückgängig statt Nachfragen (ab 01.10.2026 · 1) ----------
+   Siehe docs/PRINZIPIEN.md: sofort anzeigen, ein paar Sekunden „Rückgängig“ anbieten und erst danach
+   speichern. So gibt es bei einem Vertipper keine Speicherung und damit auch keine E-Mail an andere.
+   Spätestens beim Verlassen der App (Seite verdeckt/geschlossen) wird sofort gespeichert. */
+const UNDO_MS=6000;
+let _undoPending=null;
+function withUndo(msg,apply,undo,commit){
+  flushUndo();
+  apply();
+  const p={commit};
+  p.t=setTimeout(()=>{ if(_undoPending===p) flushUndo(); },UNDO_MS);
+  _undoPending=p;
+  showToast(msg,UNDO_MS,{label:'Rückgängig',fn:()=>{
+    if(_undoPending!==p){ showToast('Schon gespeichert – bitte direkt am Eintrag zurücknehmen.',4000); return; }
+    clearTimeout(p.t); _undoPending=null; undo(); showToast('Rückgängig gemacht.');
+  }});
+}
+function flushUndo(){ const p=_undoPending; if(!p) return; _undoPending=null; clearTimeout(p.t); try{ p.commit(); }catch(e){ showToast('Fehler: '+e.message,6000); } }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') flushUndo(); });
+window.addEventListener('pagehide',flushUndo);
 function closeModal(){
   document.getElementById('modal').classList.remove('show');
   // Sicherheitsnetz: falls der "Abbrechen"-Button für einen Spezialfall (z.B. Saison ohne
@@ -2175,6 +2211,7 @@ async function fetchRepoJSON(path){
 // force: vom Nutzer ausgelöst (Runterziehen / "Stand" antippen) – ohne 20-s-Sperre.
 // Rückgabe: true = aktualisiert, false = nichts erreichbar, 'form' = offenes Formular.
 async function refreshDataFromServer(force){
+  if(_undoPending) return false; // offene Änderung mit „Rückgängig“ nicht durch frische Daten überschreiben
   if(!force&&Date.now()-_lastDataRefresh<20000) return false;
   const pane=(document.querySelector('.pane.active')||{}).dataset?.pane;
   if(pane==='neu'||pane==='tform') return force?'form':false; // offenes Formular nicht unter den Füßen wegziehen
@@ -2269,7 +2306,7 @@ function lockBannerHTML(lock,item){
   const canCancel=session&&item.isTraining&&!item.isCancelled&&canBookAnyOfTeam(item.team);
   return '<div class="lock-banner">'+svgWarn
     +'<div><b>'+resTxt+' gesperrt'+(lock.note?' ('+esc(lock.note)+')':'')+'</b><div class="lock-banner-sub">'+bisTxt+'</div></div>'
-    +(canCancel?'<span class="lock-cancel-link" onclick="event.stopPropagation();openCancelModal(\''+item.trainingSlotId+'\',\''+item.d+'\')">Jetzt absagen</span>':'')
+    +(canCancel?'<span class="lock-cancel-link" onclick="event.stopPropagation();cancelTrainingDay(\''+item.trainingSlotId+'\',\''+item.d+'\')">Jetzt absagen</span>':'')
     +'</div>';
 }
 
@@ -2788,7 +2825,7 @@ function rowHTML(e){
   let acts='';
   if(e.isTraining){
     if(session&&(session.isAdmin||canBookAnyOfTeam(e.team))){
-      acts='<button class="ibtn" title="Diesen Termin absagen" onclick="openCancelModal(\''+e.trainingSlotId+'\',\''+e.d+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M10 14l4 4M14 14l-4 4"/></svg></button>';
+      acts='<button class="ibtn" title="Diesen Termin absagen" onclick="cancelTrainingDay(\''+e.trainingSlotId+'\',\''+e.d+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M10 14l4 4M14 14l-4 4"/></svg></button>';
     }
 
   }else{
@@ -3550,7 +3587,19 @@ function weekRowHTML(e,withDate){
     +(sub?'<div class="pt-type">'+esc(sub)+'</div>':'')
     +(e.isExternal&&!e.isAway&&!e.withdrawn?moveBadgeHTML(e):'')
     +(teamDayPartners(e).length?'<span class="move-badge warn">⚠ weiteres Spiel am selben Tag</span>':'')
-    +'</div>'+right+'</div>';
+    +'</div>'+weekRowActHTML(e)+right+'</div>';
+}
+/* Eine Aktion direkt in der Zeile (ab 01.10.2026 · 1): Training absagen bzw. Heimspiel verlegen,
+   ohne erst in den Kalender zu springen. Nur für Zugänge, die das auch dürfen. */
+function weekRowActHTML(e){
+  if(!session||e.isMovedGhost||e.withdrawn) return '';
+  if(e.isCancelled) return e.isTraining&&e.trainingSlotId&&canCancelSlot(TRAINING.find(x=>x.id===e.trainingSlotId))
+    ?'<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();reactivateCancelled(\''+jsArg(e.trainingSlotId)+'\',\''+e.d+'\')')+'">Zurücknehmen</button>':'';
+  if(e.isTraining&&e.trainingSlotId&&canCancelSlot(TRAINING.find(x=>x.id===e.trainingSlotId)))
+    return '<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();cancelTrainingDay(\''+jsArg(e.trainingSlotId)+'\',\''+e.d+'\')')+'">Absagen</button>';
+  if(e.isExternal&&!e.isAway&&!e.offPitch&&e.fbIndex!=null&&canMarkGameMove(e))
+    return '<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();openMoveModal('+e.fbIndex+')')+'">Verlegen</button>';
+  return '';
 }
 function dayCase(ds){ return DOW[dowOf(ds)-1]+' '+fmtShort(ds).slice(0,6); } // "Mi 30.09."
 function haPill(e){ return e.isAway?'<span class="ha-pill away">Auswärts</span>':'<span class="ha-pill home">Heim</span>'; }
@@ -3581,8 +3630,24 @@ function nextGamesBeyondWeek(isMine,items){
   return uniq.sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t)).slice(0,NEXT_MAX);
 }
 /* "Zu erledigen": nur angemeldet. Mit Mannschaften nur deren Punkte, Admins ohne Mannschaft alles. */
+/* Lösungsvorschlag für einen Platzkonflikt (ab 01.10.2026 · 1): Steht ein Training gegen ein Spiel oder
+   einen Termin, ist der naheliegende Schritt, das Training an dem Tag abzusagen – mit einem Klick und
+   „Rückgängig“. Zwei Trainings gegeneinander: kein Vorschlag, da muss man sich absprechen (Ansehen). */
+function conflictFix(A,B,ds){
+  const cancellable=x=>x&&x.isTraining&&x.trainingSlotId&&!x.isCancelled&&canCancelSlot(TRAINING.find(s=>s.id===x.trainingSlotId));
+  let t=null;
+  if(A.isTraining&&!B.isTraining) t=A; else if(B.isTraining&&!A.isTraining) t=B;
+  if(!cancellable(t)) return null;
+  return {label:'Training '+(t.team===GK_TEAM?'TW':teamShort(t.team,t.squad))+' absagen',click:'cancelTrainingDay(\''+jsArg(t.trainingSlotId)+'\',\''+ds+'\')'};
+}
 function myTodos(isMine,hasTeams){
   const out=[];
+  if(regIsAdminSession()){
+    const miss=teamsWithoutTrainer(), key=miss.join('|');
+    if(miss.length&&lsGet(INVITE_HIDDEN_KEY,'')!==key)
+      out.push({click:'inviteTrainersQuick()',txt:'Noch ohne Trainer in Platzcoach: '+miss.join(', ')+'.',act:'Per WhatsApp einladen',noDigest:true,
+        fix:{label:'Nicht jetzt',click:'hideInviteHint(\''+jsArg(key)+'\')'}});
+  }
   const tsOpen=teamSyncOpenCount();
   if(tsOpen) out.push({click:'openTeamSync()',txt:'Mannschaften: '+tsOpen+(tsOpen===1?' Abweichung':' Abweichungen')+' zwischen Platzcoach und fussball.de.',act:'Prüfen'});
   const end=weekEndStr();
@@ -3602,7 +3667,7 @@ function myTodos(isMine,hasTeams){
       if(hasTeams&&!isMine(A)&&!isMine(B)) return;
       const lbl=x=>(x.team===GK_TEAM?'Torwarttraining':teamShort(x.team,x.squad))+' '+(x.isExternal?'Spiel':x.isTraining?'Training':(x.title||'Termin'));
       const mine=hasTeams&&isMine(B)&&!isMine(A)?B:A;
-      out.push({click:'openTerminFromStart(\''+jsArg(mine.id)+'\',\''+ds+'\')',txt:'Platzkonflikt '+fmtDayShort(ds)+': '+lbl(A)+' '+A.t+' und '+lbl(B)+' '+B.t+'.',act:'Ansehen'});
+      out.push({click:'openTerminFromStart(\''+jsArg(mine.id)+'\',\''+ds+'\')',txt:'Platzkonflikt '+fmtDayShort(ds)+': '+lbl(A)+' '+A.t+' und '+lbl(B)+' '+B.t+'.',act:'Ansehen',fix:conflictFix(A,B,ds)});
     });
   }
   // Torwarttraining der eigenen Jugenden ohne angemeldeten Torhüter der eigenen Mannschaft
@@ -3687,7 +3752,7 @@ function weeklyDigestFor(userId){
       });
     }
     // Zu erledigen (ohne die Platzkonflikte, die stehen oben für 14 Tage)
-    const todos=myTodos(isMine,hasTeams).filter(t=>!/^Platzkonflikt /.test(t.txt))
+    const todos=myTodos(isMine,hasTeams).filter(t=>!t.noDigest&&!/^Platzkonflikt /.test(t.txt))
       .map(t=>({text:t.txt, action:t.act, link:digestTodoLink(t.click)}));
     // Noch nicht bei fussball.de: vorgemerkte Freundschaftsspiele/Turniere und Verlegungen nach dieser Woche
     const open=EVENTS.filter(e=>e.d>endD&&isMatchPlanned(e)&&isMine(e))
@@ -3709,7 +3774,9 @@ function renderMyWeek(){
   if(session&&(src&&src.fromSession||session.isAdmin)){
     const td=myTodos(isMine,!!(src&&src.fromSession));
     todoBox.innerHTML=td.length?'<p class="section-label">Zu erledigen</p>'+td.map(t=>
-      '<div class="status-row warn" style="cursor:pointer;" onclick="'+esc(t.click)+'">'+svgWarn+'<div>'+esc(t.txt)+' <b>'+esc(t.act)+' ›</b></div></div>').join(''):'';
+      '<div class="status-row warn" style="cursor:pointer;" onclick="'+esc(t.click)+'">'+svgWarn+'<div style="flex:1;">'+esc(t.txt)+' <b>'+esc(t.act)+' ›</b>'
+      +(t.fix?'<div class="todo-fix"><button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();'+t.fix.click)+'">'+esc(t.fix.label)+'</button></div>':'')
+      +'</div></div>').join(''):'';
   }else todoBox.innerHTML='';
   // Mannschaftswahl (ohne Saison-Zuordnung)
   const canPick=!(src&&src.fromSession);
@@ -3769,15 +3836,40 @@ function setPitchOpen(open){ lsSet(PITCH_OPEN_KEY,!!open); if(open) trackEvent('
 function renderLockStartBanner(){
   const box=document.getElementById('lock-start-banner');
   if(!box)return;
-  const active=activeLocksOn(todayStr);
+  const active=activeLocksOn(todayStr), admin=!!(session&&session.isAdmin);
+  // Schnell-Sperre für Admins neben „Heute im Verein“ (ab 01.10.2026 · 1)
+  const q=document.getElementById('st-lock-quick');
+  if(q) q.innerHTML=admin&&!active.some(l=>l.resource==='platz')
+    ?'<button type="button" class="wk-act" onclick="event.stopPropagation();openQuickLock()">Heute sperren</button>':'';
   if(!active.length){ box.innerHTML=''; return; }
   const resLabel=r=>r.resource==='platz'?'Platz':r.resource==='halle'?'Halle':r.customName;
   box.innerHTML=active.map(l=>
-    '<div class="lock-banner" onclick="goto(\'konto\')" style="cursor:pointer;">'+svgWarn
-    +'<div><b>'+esc(resLabel(l))+' gesperrt'+(l.note?' ('+esc(l.note)+')':'')+'</b>'
-    +'<div class="lock-banner-sub">'+(l.bis?'bis '+fmtShort(l.bis):'unbegrenzt')+'</div></div>'
+    '<div class="lock-banner"'+(admin?' onclick="openLockSettings()" style="cursor:pointer;"':'')+'>'+svgWarn
+    +'<div style="flex:1;"><b>'+esc(resLabel(l))+' gesperrt'+(l.note?' ('+esc(l.note)+')':'')+'</b>'
+    +'<div class="lock-banner-sub">'+(l.bis?(l.bis===todayStr?'heute':'bis '+fmtShort(l.bis)):'unbegrenzt')+'</div></div>'
+    +(admin?'<button type="button" class="wk-act lock-lift" onclick="'+esc('event.stopPropagation();liftLock(\''+jsArg(l.id)+'\')')+'">Aufheben</button>':'')
     +'</div>'
   ).join('');
+}
+function openLockSettings(){ goto('konto'); setKontoTab('saisons'); }
+/* Platz heute sperren mit zwei Klicks (ab 01.10.2026 · 1): „Heute sperren“ → Grund antippen.
+   Gilt nur für heute; längere Sperren weiter unter Konto → Saisons. Mit „Rückgängig“ statt Nachfrage. */
+const LOCK_REASONS=['Wetter','Platzpflege','Veranstaltung','Sonstiges'];
+function openQuickLock(){
+  if(!session||!session.isAdmin) return;
+  openSheet('<h3 style="margin:0 0 4px;">Platz heute sperren</h3>'
+    +'<p class="sub" style="margin:0 0 12px;">Warum? Betroffene Termine bekommen eine Warnung, abgesagt wird nichts automatisch.</p>'
+    +'<div class="chip-group">'+LOCK_REASONS.map(r=>'<span class="res-chip" onclick="'+esc('quickLockToday(\''+jsArg(r)+'\')')+'">'+esc(r)+'</span>').join('')+'</div>');
+}
+function lockRerender(){ render(); renderStart(); if((document.querySelector('.pane.active')||{dataset:{}}).dataset.pane==='konto') renderKonto(); }
+function quickLockToday(reason){
+  closeSheet();
+  const lock={id:crypto.randomUUID(),resource:'platz',customName:null,von:todayStr,bis:todayStr,note:reason,createdBy:session.name,createdAt:new Date().toISOString()};
+  withUndo('Platz heute gesperrt ('+reason+').',
+    ()=>{ LOCKS.push(lock); lockRerender(); },
+    ()=>{ LOCKS=LOCKS.filter(x=>x.id!==lock.id); lockRerender(); },
+    ()=>{ saveLocks('Sperre angelegt: Platz ab '+fmtShort(todayStr)+' bis '+fmtShort(todayStr)+' – '+reason+' – '+session.name)
+      .catch(e=>{ LOCKS=LOCKS.filter(x=>x.id!==lock.id); lockRerender(); showToast('Fehler: '+e.message,6000); }); });
 }
 
 /* ---------- Neue Start-Seite: kompaktes Tages-Dashboard ---------- */
@@ -3865,6 +3957,7 @@ function renderOccupiedBadge(){
   if(!box)return;
   const now=new Date(),nowHM=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
   const on=todaysCombinedAgenda().some(e=>!e.isCancelled&&(e.pitch||(e.halle&&e.halle.thirds&&e.halle.thirds.length)||(e.isExternal&&e.pitchIsFull)||(e.res&&e.res.length))&&e.t<=nowHM&&eventBis(e)>nowHM);
+  if(activeLocksOn(todayStr).some(l=>l.resource==='platz')){ box.innerHTML='<div class="occupied-badge"><span class="dot on"></span>Platz heute gesperrt</div>'; return; }
   box.innerHTML='<div class="occupied-badge"><span class="dot '+(on?'on':'off')+'"></span>Platz aktuell '+(on?'belegt':'frei')+'</div>';
 }
 function renderPitchToday(){
@@ -3988,7 +4081,7 @@ function conflictActionsHTML(e){
   if(!e.isExternal&&!e.isTraining&&canEdit(e))
     btns.push('<button class="cf-btn" onclick="event.stopPropagation();editEvent(\''+e.id+'\')">Termin anpassen</button>');
   if(e.isTraining&&session.isAdmin&&e.trainingSlotId){
-    btns.push('<button class="cf-btn" onclick="event.stopPropagation();openCancelModal(\''+e.trainingSlotId+'\',\''+e.d+'\')">Training an diesem Tag absagen</button>');
+    btns.push('<button class="cf-btn" onclick="event.stopPropagation();cancelTrainingDay(\''+e.trainingSlotId+'\',\''+e.d+'\')">Training an diesem Tag absagen</button>');
     btns.push('<button class="cf-btn ghost" onclick="event.stopPropagation();editTrainingSlot(\''+e.trainingSlotId+'\')">Trainingszeit bearbeiten</button>');
   }
   if(e.isExternal&&!e.isAway&&e.fbIndex!=null)
@@ -4289,14 +4382,17 @@ function onTeamChange(){
    Platzfläche – die Viertel-Auswahl wird dann ausgeblendet, "Großspielfeld" heißt nur "auf dem Platz". */
 let kindTouched=false;
 function formKind(){ const el=document.getElementById('f-kind'); return el?el.value:'other'; }
+const KIND_AUTO_TITLE={goalkeeper:'Torwarttraining',training:'Training'};
 function onKindChange(byUser){
   if(byUser) kindTouched=true;
   const k=formKind(), help=document.getElementById('f-kind-help');
   // Anlass bei Torwarttraining automatisch vorbelegen (nur wenn leer bzw. noch der Automatik-Text).
   const an=document.getElementById('f-anlass');
   if(an&&byUser){
-    if(k==='goalkeeper'&&!an.value.trim()){ an.value='Torwarttraining'; an.dataset.auto='1'; }
-    else if(k!=='goalkeeper'&&an.dataset.auto==='1'&&an.value==='Torwarttraining'){ an.value=''; an.dataset.auto=''; }
+    // Ab 01.10.2026 · 1 auch beim Training: Anlass ergibt sich aus der Terminart, solange nichts Eigenes eingetragen ist.
+    const autoT=KIND_AUTO_TITLE[k];
+    if(autoT&&(!an.value.trim()||an.dataset.auto==='1')){ an.value=autoT; an.dataset.auto='1'; }
+    else if(!autoT&&an.dataset.auto==='1'){ an.value=''; an.dataset.auto=''; }
     // Ressourcen sind beim Torwarttraining optional: Vorauswahl "Großspielfeld" entfernen.
     if(k==='goalkeeper'&&!editingId) setResChips('f-res',[]);
     else if(!editingId&&![...document.querySelectorAll('#f-res .res-chip.on')].length) setResChips('f-res',['Großspielfeld']);
@@ -4598,7 +4694,7 @@ function navToNeu(){
     goto('neu');
     showToast('Entwurf noch vorhanden – nicht gespeichert.',2500);
   }else{
-    newEvent();
+    newEvent(newEventDateFromView());
   }
 }
 // Gelber Hinweis oben im Formular, solange ein bestehender Termin bearbeitet wird.
@@ -4680,11 +4776,55 @@ function newEvent(d){
   editingId=null; resetForm();
   filterTeamOptions(); onTeamChange();
   dateInput().value=d||todayStr;
+  prefillOwnTraining(d||todayStr);
   updateWeekday(); renderPitch();
   document.getElementById('save-label').textContent='Termin speichern';
   document.getElementById('cancel-btn').style.display='none';
   document.getElementById('owner-name').textContent=session.name;
   goto('neu');
+}
+/* Neuer Termin vorbefüllt (ab 01.10.2026 · 1): Wer eine Mannschaft hat, bekommt ein Training seiner
+   Mannschaft mit deren üblicher Zeit und Fläche (aus einer Trainingszeit der Mannschaft).
+   Alles bleibt änderbar; wer im Anlass etwas anderes tippt, bekommt wie bisher die passende Terminart. */
+function myPreferredTeam(){
+  if(!session) return null;
+  const cls=normalizeClasses(session.classes||{}), sel=document.getElementById('f-team');
+  const allowed=t=>[...sel.options].some(o=>o.value===t&&!o.disabled);
+  const team=Object.keys(cls).find(t=>t!==GK_TEAM&&allowed(t));
+  return team?{team,squad:(cls[team]||[])[0]||1}:null;
+}
+function usualSlotFor(team,squad,d){
+  const valid=s=>(!s.validFrom||d>=s.validFrom)&&(!s.validUntil||d<=s.validUntil);
+  const cand=TRAINING.filter(s=>s.team===team&&(s.squad||1)===squad&&s.kind!=='goalkeeper'&&valid(s));
+  // Am selben Wochentag liegt schon das reguläre Training → übliche Zeit eines anderen Tages nehmen.
+  return cand.find(s=>s.day!==dowOf(d))||cand[0]||null;
+}
+function prefillOwnTraining(d){
+  const my=myPreferredTeam(); if(!my) return;
+  document.getElementById('f-team').value=my.team;
+  setSquadSeg('f-squad',my.team,my.squad,true);
+  onTeamChange();
+  document.getElementById('f-kind').value='training';
+  const an=document.getElementById('f-anlass'); an.value=KIND_AUTO_TITLE.training; an.dataset.auto='1';
+  onKindChange(false);
+  const s=usualSlotFor(my.team,my.squad,d);
+  if(s){
+    document.getElementById('f-von').value=s.from; document.getElementById('f-bis').value=s.to;
+    if(s.pitch){
+      setResChips('f-res',['Großspielfeld'].concat(s.res||[])); setPitchMode(s.pitch.mode); pitchPart=s.pitch.part||null;
+      // Ist die übliche Fläche an dem Tag belegt, gleich eine freie gleicher Größe nehmen.
+      const busy=usedQuartersWindow(d,s.from,s.to,null,formOwnTeamFree());
+      if(s.pitch.mode==='viertel'&&busy.has(pitchPart)){ const q=[1,2,3,4].find(q=>!busy.has(q)); if(q) pitchPart=q; }
+      if(s.pitch.mode==='haelfte'&&HALF[pitchPart]&&HALF[pitchPart].some(q=>busy.has(q))){ const h=['A','B'].find(h=>HALF[h].every(q=>!busy.has(q))); if(h) pitchPart=h; }
+    }
+    else setResChips('f-res',s.res||[]);
+  }
+  formDirty=false;
+}
+// Datum für „Neu“: der im Kalender gewählte Tag, wenn man gerade dort ist (sonst heute).
+function newEventDateFromView(){
+  const pane=(document.querySelector('.pane.active')||{dataset:{}}).dataset.pane;
+  return pane==='termine'&&selDate&&selDate>=todayStr?selDate:undefined;
 }
 function fillForm(e){
   dateInput().value=e.d;document.getElementById('f-von').value=e.t;document.getElementById('f-bis').value=e.bis||addMinutes(e.t,120);
@@ -4910,12 +5050,27 @@ function openMoveModal(fbIndex,preDate,preTime){
   document.getElementById('mv-time').value=preTime||(m&&g.movePending?m.toT:(raw.t||''));
   document.getElementById('mv-yes').textContent=(m&&g.movePending)?'Ändern':'Vormerken';
   document.getElementById('mv-reason').value=(m&&g.movePending&&m.reason)||'';
+  renderMoveReasons();
   const rm=document.getElementById('mv-remove');
   rm.style.display=(m&&(g.movePending||g.moveDiverged))?'block':'none';
   rm.textContent=(m&&g.moveDiverged)?'Vormerkung abschließen':'Vormerkung aufheben';
   document.getElementById('mv-yl').style.display=(m&&g.movePending)?'block':'none';
   updateMoveTrainingHint();
   document.getElementById('move-modal').classList.add('show');
+}
+/* Häufige Verlegungsgründe als Auswahl statt Tippen (ab 01.10.2026 · 1). Antippen setzt den Grund,
+   weitere Gründe werden angehängt; der Text bleibt frei änderbar. */
+const MOVE_REASONS=['Ferien','Spielermangel','Platz nicht verfügbar','Terminüberschneidung','Wunsch des Gegners'];
+function renderMoveReasons(){
+  const box=document.getElementById('mv-reasons'); if(!box) return;
+  const cur=(document.getElementById('mv-reason').value||'').split(',').map(x=>x.trim());
+  box.innerHTML=MOVE_REASONS.map(r=>'<span class="res-chip'+(cur.includes(r)?' on':'')+'" onclick="'+esc('pickMoveReason(\''+jsArg(r)+'\')')+'">'+esc(r)+'</span>').join('');
+}
+function pickMoveReason(r){
+  const ta=document.getElementById('mv-reason');
+  const parts=(ta.value||'').split(',').map(x=>x.trim()).filter(Boolean);
+  ta.value=(parts.includes(r)?parts.filter(x=>x!==r):parts.concat(r)).join(', ');
+  renderMoveReasons();
 }
 function closeMoveModal(){ document.getElementById('move-modal').classList.remove('show'); moveGameIdx=null; }
 // Eigene Trainings (gleiche Mannschaft + Nummer), die zum neuen Termin stattfinden würden.
@@ -5445,18 +5600,27 @@ async function doCancelSlot(){
   if(dowOf(date)!==s.day){ showToast('Das Datum fällt nicht auf einen '+WDAYS[s.day]+'.'); return; }
   if(!slotInRange(s,date)){ showToast('Datum liegt außerhalb der Gültigkeit dieser Trainingszeit.'); return; }
   if((s.cancelled||[]).includes(date)){ showToast('Ist bereits als abgesagt markiert.'); closeCancelModal(); return; }
-  const cmBtn=document.getElementById('cm-yes');
-  if(cmBtn){ cmBtn.disabled=true; cmBtn.innerHTML='<span class="spinner" style="width:13px;height:13px;border-color:rgba(255,255,255,.3);border-top-color:#fff;display:inline-block;vertical-align:middle;"></span>'; }
-  const backup=JSON.stringify(TRAINING);
-  s.cancelled=[...(s.cancelled||[]),date].sort();
-  try{
-    closeCancelModal(); renderTraining(); renderStart(); render();
-    showToast('Training am '+fmtShort(date)+' abgesagt.');
-    if(s.team===GK_TEAM||s.kind==='goalkeeper') sendGkCancel(s.gkTeams||[],'Torwarttraining',DAYS[new Date(date+'T00:00:00').getDay()]+', '+fmtShort(date)+' · '+s.from+'–'+s.to+' Uhr',s.trainerIds||[],'Das Torwarttraining fällt an diesem Tag aus.');
-    saveTraining('Training abgesagt: '+msgTeam(s.team,s.squad,s.gkTeams)+' am '+fmtShort(date)+' – '+session.name+teamTrailer(s.team,s.squad,s))
-      .catch(e=>{ TRAINING=JSON.parse(backup);renderTraining();renderStart();showToast('Fehler: '+e.message,6000); });
-  }catch(e){ TRAINING=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
-  finally{ if(cmBtn){ cmBtn.disabled=false; cmBtn.textContent='Absagen'; } }
+  closeCancelModal();
+  cancelTrainingDay(s.id,date);
+}
+/* Training an einem Tag absagen – mit einem Klick und „Rückgängig“ (ab 01.10.2026 · 1).
+   Genutzt von „Meine Woche“, der Kalenderkarte, „Zu erledigen“ und dem Konflikt-Hinweis;
+   der Dialog mit Datumswahl bleibt nur für die Trainingszeiten-Liste (dort ist kein Tag bekannt). */
+function canCancelSlot(s){ return !!(session&&s&&(session.isAdmin||canBookAnyOfTeam(s.team))); }
+function cancelTrainingDay(id,date){
+  const s=TRAINING.find(x=>x.id===id); if(!s||!date) return;
+  if(!canCancelSlot(s)){ showToast('Absagen kann nur ein Trainer der Mannschaft oder ein Admin.',4000); return; }
+  if((s.cancelled||[]).includes(date)){ showToast('Ist bereits abgesagt.'); return; }
+  const rerender=()=>{ renderTraining(); renderStart(); render(); };
+  withUndo('Training '+trainName(s)+' am '+fmtShort(date)+' abgesagt.',
+    ()=>{ s.cancelled=[...(s.cancelled||[]),date].sort(); rerender(); },
+    ()=>{ s.cancelled=(s.cancelled||[]).filter(d=>d!==date); rerender(); },
+    ()=>{
+      const backup=JSON.stringify(TRAINING.map(x=>x.id===s.id?{...x,cancelled:(x.cancelled||[]).filter(d=>d!==date)}:x));
+      if(s.team===GK_TEAM||s.kind==='goalkeeper') sendGkCancel(s.gkTeams||[],'Torwarttraining',DAYS[new Date(date+'T00:00:00').getDay()]+', '+fmtShort(date)+' · '+s.from+'–'+s.to+' Uhr',s.trainerIds||[],'Das Torwarttraining fällt an diesem Tag aus.');
+      saveTraining('Training abgesagt: '+msgTeam(s.team,s.squad,s.gkTeams)+' am '+fmtShort(date)+' – '+session.name+teamTrailer(s.team,s.squad,s))
+        .catch(e=>{ TRAINING=JSON.parse(backup); rerender(); showToast('Fehler: '+e.message,6000); });
+    });
 }
 async function reactivateCancelled(id,date){
   const s=TRAINING.find(x=>x.id===id); if(!s)return;
@@ -6721,6 +6885,7 @@ function resourceLockCard(){
     +'</div>'
     +'<p class="hint" style="margin-top:6px;">Ohne "Bis" gilt die Sperre unbegrenzt, bis sie manuell aufgehoben wird.</p>'
     +'<div class="field" style="margin:10px 0;"><label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">Notiz (kurz)</label><input type="text" id="lock-note" autocomplete="off" placeholder="z. B. Schnee"></div>'
+    +'<div class="chip-group mv-reasons" style="margin:-4px 0 12px;">'+LOCK_REASONS.map(r=>'<span class="res-chip" onclick="'+esc('document.getElementById(\'lock-note\').value=\''+jsArg(r)+'\'')+'">'+esc(r)+'</span>').join('')+'</div>'
     +'<button class="submit-btn" id="lock-save-btn" onclick="createLock()"><span>Sperre anlegen</span></button>'
     +(active.length?'<div class="selected-list-label" style="margin-top:18px;">Aktive Sperren</div>'+active.map(l=>
       '<div class="rs-result-row" style="align-items:flex-start;">'
@@ -6770,19 +6935,12 @@ async function createLock(){
 }
 function liftLock(id){
   const l=LOCKS.find(x=>x.id===id); if(!l)return;
-  askConfirm('Sperre aufheben?','Die Sperre wird sofort entfernt.','Aufheben',async()=>{
-    if(lockSaving)return;
-    const backup=JSON.stringify(LOCKS);
-    const resLabel=l.resource==='platz'?'Platz':l.resource==='halle'?'Halle':l.customName;
-    LOCKS=LOCKS.filter(x=>x.id!==id);
-    lockSaving=true;
-    showSaving('Wird aufgehoben …');
-    try{
-      await saveLocks('Sperre aufgehoben: '+resLabel+' – '+session.name);
-      showToast('Sperre aufgehoben.'); renderKonto(); render(); renderStart();
-    }catch(e){ LOCKS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); renderKonto(); }
-    finally{ lockSaving=false; hideSaving(); }
-  });
+  const resLabel=l.resource==='platz'?'Platz':l.resource==='halle'?'Halle':l.customName;
+  withUndo('Sperre aufgehoben: '+resLabel+'.',
+    ()=>{ LOCKS=LOCKS.filter(x=>x.id!==id); lockRerender(); },
+    ()=>{ if(!LOCKS.some(x=>x.id===id)) LOCKS.push(l); lockRerender(); },
+    ()=>{ saveLocks('Sperre aufgehoben: '+resLabel+' – '+session.name)
+      .catch(e=>{ if(!LOCKS.some(x=>x.id===id)) LOCKS.push(l); lockRerender(); showToast('Fehler: '+e.message,6000); }); });
 }
 let seasonClassEditorOpen=null; // Format: seasonId+'|'+userId
 let seasonExpanded=new Set(), showPastSeasons=false;
@@ -7992,7 +8150,9 @@ function renderRegAdmin(){
     h+='<p class="sub">Erzeuge einen Einladungslink und schicke ihn z. B. in die Trainer-WhatsApp-Gruppe. Neue Trainer registrieren sich selbst, du gibst sie hier frei.</p>'
       +'<span class="reg-label" style="margin-top:10px;">Gültig für</span><div class="seg" style="margin-bottom:8px;">'
       +[7,14,30].map(d=>'<button type="button"'+(REGSTATE.days===d?' class="on"':'')+' onclick="REGSTATE.days='+d+';renderRegAdmin();">'+d+' Tage</button>').join('')+'</div>'
-      +'<button class="submit-btn" onclick="createInvite()">Einladungslink erzeugen</button>';
+      +'<div class="reg-actions">'
+      +'<button class="submit-btn" style="margin:0;" onclick="inviteTrainersQuick()">Per WhatsApp einladen</button>'
+      +'<button class="cancel-btn" style="margin:0;" onclick="createInvite()">Nur Link erzeugen</button></div>';
   }
   h+='</div>';
   // Offene Anmeldungen
@@ -8073,6 +8233,27 @@ function disableInvite(){
     catch(e){ showToast('Fehler: '+e.message,6000); }
   });
 }
+/* Trainer einladen mit einem Klick (ab 01.10.2026 · 1): Gibt es noch keinen Link, wird er erzeugt
+   und gleich per WhatsApp geteilt. Das Fenster wird vorab geöffnet, damit es nicht als Pop-up blockiert wird. */
+async function inviteTrainersQuick(){
+  if(!regIsAdminSession()){ goto('konto'); setKontoTab('zugaenge'); return; }
+  if(REGSTATE.invite&&REGSTATE.invite.code){ shareInviteWhatsApp(); return; }
+  const w=window.open('about:blank','_blank');
+  try{
+    const r=await regApi('/admin/invite',{method:'POST',auth:true,body:{days:REGSTATE.days||14,by:session.name}});
+    REGSTATE.invite=r.invite; renderRegAdmin(); trackEvent('einladungslink_erzeugt');
+    const url='https://wa.me/?text='+encodeURIComponent(inviteShareText());
+    if(w) w.location.href=url; else window.open(url,'_blank','noopener');
+  }catch(e){ if(w) w.close(); showToast('Fehler: '+e.message,6000); }
+}
+/* Mannschaften der laufenden Saison ohne Trainer-Zugang – als Hinweis in „Zu erledigen“ für Admins.
+   „Nicht jetzt“ blendet ihn auf diesem Gerät aus, bis sich die Liste ändert (keine Dauer-Erinnerung). */
+const INVITE_HIDDEN_KEY='pc_invite_hint_hidden';
+function teamsWithoutTrainer(){
+  const covers=(u,t)=>{ const c=normalizeClasses(u.classes||{}), q=c[t.team]; return !!q&&(!q.length||q.includes(t.squad||1)); };
+  return seasonTeams().filter(t=>t.team!==GK_TEAM&&!USERS.some(u=>!u.locked&&covers(u,t))).map(t=>teamShort(t.team,t.squad));
+}
+function hideInviteHint(key){ lsSet(INVITE_HIDDEN_KEY,key); renderMyWeek(); }
 function inviteShareText(){
   return 'Hallo zusammen! Hier könnt ihr euch als Trainer bei Platzcoach ('+(CFG.clubName||'')+') registrieren: '+regInviteLink(REGSTATE.invite.code)+' – Nach der Freigabe bekommt ihr eure Zugangsdaten per E-Mail.';
 }
