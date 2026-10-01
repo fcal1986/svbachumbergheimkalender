@@ -1436,7 +1436,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='01.10.2026 · 16';
+const APP_VERSION='01.10.2026 · 17';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2650,6 +2650,7 @@ function goto(n){
     if(o&&o.pane===n){ if(n==='start') renderStart(); const c=document.querySelector('.pane.active .content'); if(c) c.scrollTop=o.scroll; } }
   if(n==='konto') renderKonto();
   if(n==='training') renderTraining();
+  if(n==='start') requestAnimationFrame(tlRestore); // Zeitleiste war evtl. ausgeblendet gerendert (Breite 0)
   trackArea(currentPaneArea());
   navHistoryPush(prevPane,n);
 }
@@ -3912,6 +3913,9 @@ function tlCurLabel(el,m){ const c=el.parentNode&&el.parentNode.querySelector('.
 // Uhrzeit unter dem Strich → Feld darüber neu zeichnen (auf 5 Min gerundet; nahe „jetzt“ = jetzt)
 function tlScroll(el){
   const g=tlGeom(el), ds=el.dataset.ds;
+  // Ab 01.10.2026 · 17: Ist die Startseite ausgeblendet (z. B. Kalender über einen geteilten Link geöffnet),
+  // hat die Zeitleiste die Breite 0; der Browser meldet trotzdem ein Scrollen → 0/0 = NaN. Dann nichts tun.
+  if(!(g.w>0)||!el.offsetParent) return;
   let m=Math.round((g.t0+el.scrollLeft/g.w*(g.t1-g.t0))/5)*5; m=Math.max(g.t0,Math.min(g.t1,m));
   tlCurLabel(el,m);
   const nowM=hmMin(nowHMStr()), follow=ds===todayStr&&Math.abs(m-nowM)<=5;
@@ -3922,6 +3926,8 @@ function tlScroll(el){
   _tlRaf=requestAnimationFrame(()=>{ const box=document.getElementById('stp-live'); if(box) box.innerHTML=placeLiveHTML(ds,startCurOf(ds),START_ISMINE); startTodayTile(); });
 }
 function tlRestore(){ document.querySelectorAll('.tl-scroll').forEach(el=>{ const g=tlGeom(el), ds=el.dataset.ds;
+  if(!(g.w>0)) return; // ausgeblendet: beim Zurückkehren zur Startseite (goto) erneut
+  if(START_CUR[ds]!=null&&!isFinite(START_CUR[ds])) delete START_CUR[ds];
   const c=startCurOf(ds), m=Math.max(g.t0,Math.min(g.t1,c!=null?c:hmMin(nowHMStr())));
   el.scrollLeft=Math.round((m-g.t0)/(g.t1-g.t0)*g.w); tlCurLabel(el,c!=null?c:hmMin(nowHMStr())); }); }
 function tlTouchStart(ev,el){ const t=ev.touches&&ev.touches[0]; if(!t) return;
@@ -4077,7 +4083,7 @@ function startHeroHTML(src,isMine){
    folgt das Feld der aktuellen Uhrzeit (auch beim Auffrischen alle 30 s). */
 const START_CUR={}; let START_ISMINE=null;
 function startCurOf(ds){
-  if(START_CUR[ds]!=null) return START_CUR[ds];
+  if(START_CUR[ds]!=null&&isFinite(START_CUR[ds])) return START_CUR[ds];
   if(ds===todayStr) return null;
   const occ=occupancyOn(ds).filter(o=>!o.cancelled); return occ.length?Math.min(...occ.map(o=>hmMin(o.t))):15*60;
 }
