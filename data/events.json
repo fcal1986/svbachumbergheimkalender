@@ -138,25 +138,6 @@
       "kickoff": "16:30",
       "ownerId": "123c8c2c-5a1a-43d6-be82-455af9f3b407",
       "ownerName": "Younes Al Musaui"
-    },
-    {
-      "id": "bc030b04-6b94-43c8-814d-c9b284bbfbe6",
-      "d": "2026-10-01",
-      "t": "17:30",
-      "bis": "18:00",
-      "title": "Training",
-      "kind": "training",
-      "team": "E-Jugend",
-      "squad": 2,
-      "pitch": {
-        "mode": "haelfte",
-        "part": "B"
-      },
-      "halle": null,
-      "res": [],
-      "note": "",
-      "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
-      "ownerName": "David Skwara"
     }
   ]
 }
