@@ -46,7 +46,8 @@ Letzte Aktualisierung: 01.10.2026 (Version 01.10.2026 · 5)
 | 60 | Besucher ohne Anmeldung: „Neu“ in der unteren Leiste ausblenden (Mockup), stattdessen „Anmelden“ oben | Pilot | ⬜ | Aus dem Startseiten-Mockup, noch nicht umgesetzt |
 | 61 | Zeitstrahl wischen: 4 Std sichtbar, Wischen scrollt durch den Tag (8–22 Uhr), am Rand weiter zum nächsten/vorigen Tag | Pilot | ✅ | 01.10.2026 · 4; 01.10.2026 · 5: Pfeile ‹ › am Tagestitel entfernt – Tage-Kacheln und Wischen reichen |
 | 62 | „Woche“ ohne Favoriten: alle Termine des Vereins der nächsten 7 Tage (vorher nur mit Favoriten wählbar) | Pilot | ✅ | 01.10.2026 · 4 |
-| 63 | „Jetzt auf dem Platz“ auf einen Blick: Status Frei / Teilweise belegt / Belegt / Gesperrt, belegte Viertel als volle Blöcke mit Mannschaft, Ende und Fortschritt, freie Viertel mit „frei bis“, Liste „belegt von“ (Mannschaft, Fläche, Trainer, Ende; antippen = Details) | Pilot | ✅ | 01.10.2026 · 6 |
+| 63 | „Jetzt auf dem Platz“ auf einen Blick: Status Frei / Teilweise belegt / Belegt / Gesperrt, belegte Viertel als volle Blöcke mit Mannschaft, Ende und Fortschritt, freie Viertel mit „frei bis“, Liste „belegt von“ (Mannschaft, Fläche, Trainer, Ende; antippen = Details) | Pilot | ✅ | 01.10.2026 · 6; 01.10.2026 · 7: Liste „belegt von“ entfällt – Blöcke im Feld antippen = Details, wer wann spielt zeigt die Zeitleiste (Nr. 64) |
+| 64 | Feld und Zeitleiste als ein Baustein: Zeitleiste direkt unter dem Feld, Wischen verschiebt die Uhrzeit (Strich in der Mitte), das Feld zeigt die Belegung zu dieser Uhrzeit, „Jetzt“ springt zurück; Tage und Tag/Woche darunter; „Zu erledigen“ über dem Platz | Pilot | ✅ | 01.10.2026 · 7 |
 | 43 | Mannschaften mit Lücken-Filtern („ohne Trainer“, „ohne Trainingszeit“, „ohne Platzfreigabe“) | Pilot | ⬜ | „Termine heute ohne Trainer“ gibt es als Warnzeile; Filter in der Mannschaftsliste fehlen |
 
 ## Nice to have

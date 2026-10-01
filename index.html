@@ -265,13 +265,6 @@
   .lp-klein b{font-size:14px;font-weight:800;color:#fff;} .lp-klein.mine b,.lp-klein.mine .lp-kbis,.lp-klein.mine .lp-klein-t{color:var(--pc-navy);}
   .lp-kbis{font-size:12px;font-weight:700;color:#fff;margin-left:auto;}
   .lp-third.occ{background:rgba(1,27,50,.88);}
-  .stn-list{display:flex;flex-direction:column;gap:6px;}
-  .stn-row{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:8px 10px;border-radius:12px;border:1px solid #EEF2F1;background:#fff;font:inherit;text-align:left;cursor:pointer;color:var(--ink);}
-  .stn-row i{width:12px;height:12px;border-radius:4px;flex:none;background:var(--pc-navy);}
-  .stn-row i.mine{background:#8BCF2F;box-shadow:inset 0 0 0 1.5px var(--pc-navy);} .stn-row i.game{background:#FFD24A;}
-  .stn-row b{font-size:14px;font-weight:800;flex:none;}
-  .stn-row span{flex:1;min-width:0;font-size:12.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .stn-row em{font-style:normal;font-size:12.5px;font-weight:700;flex:none;}
   .st-fav{display:flex;flex-direction:column;gap:6px;}
   .fav-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
   .fav-chip{display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border-radius:17px;background:var(--pc-navy);color:#fff;font-size:13px;font-weight:700;}
@@ -324,6 +317,15 @@
   .tl-scroll{flex:1;min-width:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain;}
   .tl-scroll::-webkit-scrollbar{display:none;}
   .tl-scroll .tl-body{flex:none;}
+  .tl-view{flex:1;min-width:0;position:relative;}
+  .tl-pad{padding:0 50%;box-sizing:content-box;}
+  .tl-pad .tl-body{width:100%;}
+  .tl-cursor{position:absolute;top:0;left:50%;width:2px;margin-left:-1px;background:var(--pc-navy);pointer-events:none;z-index:3;}
+  .tl-cur-t{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--pc-navy);color:#fff;font-size:10.5px;font-weight:800;padding:1px 6px;border-radius:6px;white-space:nowrap;}
+  .stn-now{min-height:32px;padding:0 14px;border-radius:999px;border:none;background:var(--pc-navy);color:#fff;font:inherit;font-size:13px;font-weight:800;cursor:pointer;flex:none;}
+  .stp-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .stp-foot a{font-size:13px;font-weight:700;color:var(--grass);text-decoration:none;}
+  .lp-occ[role=button],.lp-klein[role=button]{cursor:pointer;}
   .tl-free{position:absolute;height:24px;box-sizing:border-box;border:1.5px dashed #9CC57A;border-radius:6px;background:rgba(107,180,28,.07);color:var(--grass);font:inherit;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:flex-start;padding:0 8px;white-space:nowrap;overflow:hidden;}
   .tl-free:active{background:rgba(107,180,28,.2);}
   .lg.free{border:1.5px dashed #9CC57A;background:rgba(107,180,28,.07);}
@@ -1430,7 +1432,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='01.10.2026 · 6';
+const APP_VERSION='01.10.2026 · 7';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3706,17 +3708,16 @@ function timelineHTML(ds,isMine){
   const sun=sunsetHM(ds);
   const isToday=ds===todayStr, now=nowHMStr();
   // Ab 01.10.2026 · 4: immer der ganze Tag (mind. 8–22 Uhr), sichtbar sind 4 Stunden – wischen scrollt durch den Tag,
-  // am Rand weiter zum nächsten/vorigen Tag (tlTouch*). Startposition: jetzt bzw. der erste Termin.
+  // am Rand weiter zum nächsten/vorigen Tag (tlTouch*). Startposition: gewählte Uhrzeit (startCurOf) in der Mitte.
   const s0=occ.length?Math.min(...occ.map(o=>hmMin(o.t))):TL_DAY_FROM, e0=occ.length?Math.max(...occ.map(o=>hmMin(o.bis))):TL_DAY_TO;
   const h0=Math.min(TL_DAY_FROM/60,Math.floor(s0/60)), h1=Math.max(TL_DAY_TO/60,Math.ceil(e0/60));
   const T0=h0*60, T1=h1*60, P=m=>((m-T0)/(T1-T0)*100).toFixed(2), W=(a,b)=>(Math.max(0,b-a)/(T1-T0)*100).toFixed(2);
-  const focus=isToday?Math.max(T0,hmMin(now)-30):(occ.length?Math.max(T0,s0-30):Math.max(T0,15*60));
-  const init=Math.min(1,Math.max(0,(focus-T0)/(T1-T0)));
   let h='<div class="tl"><div class="tl-labels" style="height:'+H+'px">';
   groups.forEach(g=>{ if(g.area==='platz'){ h+='<span style="top:'+g.top+'px;height:'+(2*TL_LANE+TL_GAP)+'px">A</span><span style="top:'+laneY('platz',3)+'px;height:'+(2*TL_LANE+TL_GAP)+'px">B</span>'; }
     else h+='<span style="top:'+g.top+'px;height:'+(g.n*TL_LANE+(g.n-1)*TL_GAP)+'px">'+(g.area==='klein'?'K':'H')+'</span>'; });
-  h+='</div><div class="tl-scroll" data-ds="'+ds+'" data-init="'+init.toFixed(4)+'" onscroll="tlScroll(this)" ontouchstart="tlTouchStart(event,this)" ontouchend="tlTouchEnd(event,this)">'
-    +'<div class="tl-body" style="height:'+H+'px;width:'+((T1-T0)/TL_VIEW_MIN*100).toFixed(1)+'%">';
+  // Ab 01.10.2026 · 7: links und rechts je eine halbe Breite Polster, damit der Strich in der Mitte jede Uhrzeit von T0 bis T1 erreicht
+  h+='</div><div class="tl-view"><div class="tl-scroll" data-ds="'+ds+'" data-t0="'+T0+'" data-t1="'+T1+'" onscroll="tlScroll(this)" ontouchstart="tlTouchStart(event,this)" ontouchend="tlTouchEnd(event,this)">'
+    +'<div class="tl-pad" style="width:'+((T1-T0)/TL_VIEW_MIN*100).toFixed(1)+'%"><div class="tl-body" style="height:'+H+'px">';
   groups.forEach(g=>{ for(let l=1;l<=g.n;l++) h+='<div class="tl-lane'+(g.area!=='platz'?' alt':'')+'" style="top:'+laneY(g.area,l)+'px"></div>'; });
   for(let hh=h0+1;hh<h1;hh++) h+='<span class="tl-tick" style="left:'+P(hh*60)+'%">'+hh+':00</span><div class="tl-grid" style="left:'+P(hh*60)+'%;top:'+TL_TOP+'px"></div>';
   // Freie Zeiten (angemeldet, darf buchen): je Spur Lücken ab 60 Min als „+ frei“ – antippen = Kurzauswahl
@@ -3748,7 +3749,7 @@ function timelineHTML(ds,isMine){
   });
   if(sun&&hmMin(sun)>T0&&hmMin(sun)<T1) h+='<div class="tl-sun" style="left:'+P(hmMin(sun))+'%;top:'+TL_TOP+'px"></div>';
   if(isToday&&hmMin(now)>=T0&&hmMin(now)<=T1) h+='<div class="tl-now" style="left:'+P(hmMin(now))+'%"></div>';
-  h+='</div></div></div>';
+  h+='</div></div></div><div class="tl-cursor" style="height:'+H+'px"><span class="tl-cur-t"></span></div></div></div>';
   const fl=CFG&&CFG.venue&&CFG.venue.floodlight;
   h+='<div class="tl-legend">'+(isMine?'<span><i class="lg mine"></i>'+(session&&sessionWeekTeams()?'deine Mannschaft':'Favoriten')+'</span>':'')+'<span><i class="lg tr"></i>Training</span><span><i class="lg game"></i>Spiel</span>'
     +(conflictsOnDay(ds).length?'<span><i class="lg conf"></i>Konflikt</span>':'')
@@ -3760,10 +3761,24 @@ function timelineHTML(ds,isMine){
 /* ---------- Zeitstrahl wischen (ab 01.10.2026 · 4) ----------
    Innerhalb des Tages scrollt der Zeitstrahl (4 Std sichtbar). Wer am Rand weiterwischt, kommt zum
    nächsten bzw. vorigen Tag der Woche. Die Scroll-Position bleibt beim automatischen Auffrischen erhalten. */
-const TL_SCROLL={}; let _tlTouch=null;
-function tlScroll(el){ TL_SCROLL[el.dataset.ds]=el.scrollLeft; }
-function tlRestore(){ document.querySelectorAll('.tl-scroll').forEach(el=>{ const v=TL_SCROLL[el.dataset.ds];
-  el.scrollLeft=v!=null?v:Math.round((el.scrollWidth)*parseFloat(el.dataset.init||'0')); }); }
+let _tlTouch=null, _tlRaf=0;
+function tlGeom(el){ const b=el.querySelector('.tl-body'); return {t0:+el.dataset.t0,t1:+el.dataset.t1,w:b?b.offsetWidth:1}; }
+function tlCurLabel(el,m){ const c=el.parentNode&&el.parentNode.querySelector('.tl-cur-t'); if(c) c.textContent=minHM(m); }
+// Uhrzeit unter dem Strich → Feld darüber neu zeichnen (auf 5 Min gerundet; nahe „jetzt“ = jetzt)
+function tlScroll(el){
+  const g=tlGeom(el), ds=el.dataset.ds;
+  let m=Math.round((g.t0+el.scrollLeft/g.w*(g.t1-g.t0))/5)*5; m=Math.max(g.t0,Math.min(g.t1,m));
+  tlCurLabel(el,m);
+  const nowM=hmMin(nowHMStr()), follow=ds===todayStr&&Math.abs(m-nowM)<=5;
+  const prev=START_CUR[ds];
+  if(follow){ if(prev==null) return; delete START_CUR[ds]; }
+  else{ if(prev===m||(prev==null&&ds!==todayStr&&startCurOf(ds)===m)) return; START_CUR[ds]=m; }
+  cancelAnimationFrame(_tlRaf);
+  _tlRaf=requestAnimationFrame(()=>{ const box=document.getElementById('stp-live'); if(box) box.innerHTML=placeLiveHTML(ds,startCurOf(ds),START_ISMINE); });
+}
+function tlRestore(){ document.querySelectorAll('.tl-scroll').forEach(el=>{ const g=tlGeom(el), ds=el.dataset.ds;
+  const c=startCurOf(ds), m=Math.max(g.t0,Math.min(g.t1,c!=null?c:hmMin(nowHMStr())));
+  el.scrollLeft=Math.round((m-g.t0)/(g.t1-g.t0)*g.w); tlCurLabel(el,c!=null?c:hmMin(nowHMStr())); }); }
 function tlTouchStart(ev,el){ const t=ev.touches&&ev.touches[0]; if(!t) return;
   _tlTouch={x:t.clientX,y:t.clientY,atEnd:el.scrollLeft+el.clientWidth>=el.scrollWidth-2,atStart:el.scrollLeft<=2}; }
 function tlTouchEnd(ev,el){ const t=ev.changedTouches&&ev.changedTouches[0], s=_tlTouch; _tlTouch=null; if(!t||!s) return;
@@ -3771,7 +3786,6 @@ function tlTouchEnd(ev,el){ const t=ev.changedTouches&&ev.changedTouches[0], s=_
   if(dx<0&&s.atEnd) shiftStartDay(1,'start'); else if(dx>0&&s.atStart) shiftStartDay(-1,'end'); }
 function shiftStartDay(n,pos){
   const ds=addDays(startSel||todayStr,n); if(ds<todayStr||ds>weekEndStr()) return;
-  delete TL_SCROLL[ds];
   startSel=ds; startView='tag'; renderMyWeek();
   const el=document.querySelector('.tl-scroll[data-ds="'+ds+'"]'); if(el&&pos) el.scrollLeft=pos==='start'?0:el.scrollWidth;
 }
@@ -3877,17 +3891,18 @@ function openOccDetail(ds,i){
 }
 /* ---------- Live-Platz: was ist JETZT auf Großfeld, Kleinspielfeld und (falls belegt) Halle ---------- */
 /* ---------- Jetzt auf dem Platz (ab 01.10.2026 · 6: auf einen Blick frei/belegt, welche Viertel, von wem) ---------- */
-function liveNow(){
-  const n=hmMin(nowHMStr()), occ=occupancyOn(todayStr); OCC_VIEW[todayStr]=occ;
+function liveNow(ds,m){ // ds/m leer = heute jetzt; sonst Belegung am Tag ds um Minute m (Zeitleiste, ab 01.10.2026 · 7)
+  ds=ds||todayStr; const isNow=m==null;
+  const n=isNow?hmMin(nowHMStr()):m, occ=occupancyOn(ds); OCC_VIEW[ds]=occ;
   const run=occ.filter(o=>hmMin(o.t)<=n&&hmMin(o.bis)>n);
   const live=run.filter(o=>!o.cancelled), canc=run.filter(o=>o.cancelled);
-  const lock=activeLocksOn(todayStr).find(l=>l.resource==='platz');
+  const lock=activeLocksOn(ds).find(l=>l.resource==='platz');
   const covered={}; live.filter(o=>o.area==='platz').forEach(o=>{ for(let q=o.lanes[0];q<=o.lanes[1];q++) covered[q]=o; });
   // nächste Belegung je Viertel (für „frei bis …“)
   const nextOn=q=>occ.filter(o=>!o.cancelled&&o.area==='platz'&&o.lanes[0]<=q&&o.lanes[1]>=q&&hmMin(o.t)>n).sort((a,b)=>a.t.localeCompare(b.t))[0]||null;
   const nFree=[1,2,3,4].filter(q=>!covered[q]).length;
   const state=lock?'lock':(nFree===4?'free':(nFree===0?'full':'part'));
-  return {n,occ,live,canc,lock,covered,nextOn,nFree,state};
+  return {ds,isNow,n,occ,live,canc,lock,covered,nextOn,nFree,state};
 }
 function livePitchHTML(isMine,compact,L){
   L=L||liveNow();
@@ -3901,18 +3916,18 @@ function livePitchHTML(isMine,compact,L){
     const qs=[]; for(let q=o.lanes[0];q<=o.lanes[1];q++) qs.push(q);
     const cs=qs.map(cell), c0=Math.min(...cs.map(c=>c.c)), c1=Math.max(...cs.map(c=>c.c)), r0=Math.min(...cs.map(c=>c.r)), r1=Math.max(...cs.map(c=>c.r));
     const mine=occIsMine(o,isMine), small=qs.length===1, rest=hmMin(o.bis)-n, pct=Math.round((n-hmMin(o.t))/Math.max(1,hmMin(o.bis)-hmMin(o.t))*100);
-    h+='<div class="lp-occ'+(mine?' mine':(o.kind==='g'?' game':''))+(small?' sm':'')+'" style="left:'+c0*50+'%;top:'+r0*50+'%;width:'+(c1-c0+1)*50+'%;height:'+(r1-r0+1)*50+'%"><div>'
-      +'<b>'+esc(o.label+(o.kind==='g'?' · Spiel':'')+tag(o))+'</b><span>bis '+o.bis+' · noch '+rest+' Min</span>'
+    h+='<div class="lp-occ'+(mine?' mine':(o.kind==='g'?' game':''))+(small?' sm':'')+'" role="button" onclick="'+esc('openOccDetail(\''+L.ds+'\','+L.occ.indexOf(o)+')')+'" style="left:'+c0*50+'%;top:'+r0*50+'%;width:'+(c1-c0+1)*50+'%;height:'+(r1-r0+1)*50+'%"><div>'
+      +'<b>'+esc(o.label+(o.kind==='g'?' · Spiel':'')+tag(o))+'</b><span>'+(L.isNow?'bis '+o.bis+' · noch '+rest+' Min':o.t+'–'+o.bis)+'</span>'
       +'<i class="lp-prog"><em style="width:'+pct+'%"></em></i></div></div>'; });
   const cancShown=new Set();
   [1,2,3,4].filter(q=>!covered[q]).forEach(q=>{ const c=cell(q), cx=canc.find(o=>o.area==='platz'&&o.lanes[0]<=q&&o.lanes[1]>=q);
     const show=cx&&!cancShown.has(cx.id); if(show) cancShown.add(cx.id);
     const nx=L.nextOn(q);
-    h+='<div class="lp-freeq" style="left:'+c.c*50+'%;top:'+c.r*50+'%"><div><b>frei</b>'+(nx?'<span>bis '+nx.t+'</span>':'<span>heute</span>')+(show?'<small>'+esc(cx.label)+' abgesagt</small>':'')+'</div></div>'; });
+    h+='<div class="lp-freeq" style="left:'+c.c*50+'%;top:'+c.r*50+'%"><div><b>frei</b>'+(nx?'<span>bis '+nx.t+'</span>':'<span>'+(L.ds===todayStr?'heute':'bis abends')+'</span>')+(show?'<small>'+esc(cx.label)+' abgesagt</small>':'')+'</div></div>'; });
   if(lock) h+='<div class="lp-lock"><b>Gesperrt</b>'+(lock.note?'<span>'+esc(lock.note)+'</span>':'')+'</div>';
   h+='</div>';
   const k=live.find(o=>o.area==='klein'), kc=canc.find(o=>o.area==='klein');
-  h+='<div class="lp-klein'+(k?(occIsMine(k,isMine)?' occ mine':' occ'):'')+'"><span class="lp-klein-t">Kleinspielfeld</span>'+(k?'<b>'+esc(k.label+tag(k))+'</b><span class="lp-kbis">bis '+k.bis+'</span>'
+  h+='<div class="lp-klein'+(k?(occIsMine(k,isMine)?' occ mine':' occ'):'')+'"'+(k?' role="button" onclick="'+esc('openOccDetail(\''+L.ds+'\','+L.occ.indexOf(k)+')')+'"':'')+'><span class="lp-klein-t">Kleinspielfeld</span>'+(k?'<b>'+esc(k.label+tag(k))+'</b><span class="lp-kbis">bis '+k.bis+'</span>'
     :'<span class="lp-freetxt">frei'+(kc?' · '+esc(kc.label)+' abgesagt':'')+'</span>')+'</div>';
   const hall=live.filter(o=>o.area==='halle');
   if(hall.length){ h+='<div class="lp-halle"><span class="lp-klein-t">Halle</span><div class="lp-thirds">'+[1,2,3].map(t=>{ const o=hall.find(x=>x.lanes[0]===t);
@@ -3955,28 +3970,43 @@ function startHeroHTML(src,isMine){
     +'<div class="hero-main"'+onclick+'><div class="hero-txt"><div class="hero-title">'+esc(title)+'</div><div class="hero-sub">'+esc(sub)+'</div></div>'+right+'</div>';
   if(acts) h+='<div class="hero-acts">'+acts+'</div>';
   // Ab 01.10.2026 · 5: Termin und Aktionen gehören zusammen; was jetzt auf dem Platz ist, steht darunter für sich.
-  return h+'</section>'+nowPlaceHTML(isMine);
+  return h+'</section>';
 }
-function nowPlaceHTML(isMine){
-  const L=liveNow();
+/* ---------- Platz: Feld + Zeitleiste als ein Baustein (ab 01.10.2026 · 7) ----------
+   Das Feld zeigt die Belegung zu der Uhrzeit, die in der Zeitleiste unter dem Strich steht. Wischen in der
+   Zeitleiste verschiebt die Uhrzeit, „Jetzt“ springt zurück. START_CUR[ds] = gewählte Minute; fehlt sie heute,
+   folgt das Feld der aktuellen Uhrzeit (auch beim Auffrischen alle 30 s). */
+const START_CUR={}; let START_ISMINE=null;
+function startCurOf(ds){
+  if(START_CUR[ds]!=null) return START_CUR[ds];
+  if(ds===todayStr) return null;
+  const occ=occupancyOn(ds).filter(o=>!o.cancelled); return occ.length?Math.min(...occ.map(o=>hmMin(o.t))):15*60;
+}
+function placeStatus(L){
   const st={free:['Frei','Platz komplett frei'],full:['Belegt','alle 4 Viertel belegt'],part:['Teilweise belegt',L.nFree+' von 4 Vierteln frei'],lock:['Gesperrt',L.lock&&L.lock.note||'']}[L.state];
   if(L.state==='full'){ const ids=new Set([1,2,3,4].map(q=>L.covered[q])); if(ids.size===1){ const o=L.covered[1]; st[1]='ganzer Platz: '+o.label+' bis '+o.bis; } }
   if(L.state==='free'){ const nx=L.occ.filter(o=>!o.cancelled&&o.area==='platz'&&hmMin(o.t)>L.n).sort((a,b)=>a.t.localeCompare(b.t))[0];
-    st[1]=nx?'frei bis '+nx.t+' (dann '+nx.label+')':'heute keine Belegung mehr'; }
-  let h='<section class="st-now"><div class="stn-head"><h2>Jetzt auf dem Platz</h2><span class="stn-time">'+nowHMStr()+' Uhr</span></div>'
+    st[1]=nx?'frei bis '+nx.t+' (dann '+nx.label+')':(L.ds===todayStr?'heute keine Belegung mehr':'danach keine Belegung mehr'); }
+  return st;
+}
+function placeLiveHTML(ds,cur,isMine){
+  const L=liveNow(ds,cur), st=placeStatus(L), dt=new Date(ds+'T00:00:00');
+  const day=ds===todayStr?'Heute':(ds===addDays(todayStr,1)?'Morgen':DOW[dowOf(ds)-1]+' '+dt.getDate()+'.'+(dt.getMonth()+1)+'.');
+  return '<div class="stn-head"><h2>'+(L.isNow?'Jetzt auf dem Platz':'Platz · '+esc(day)+' · '+minHM(L.n))+'</h2>'
+    +(L.isNow?'<span class="stn-time">'+nowHMStr()+' Uhr</span>':'<button type="button" class="stn-now" onclick="startJumpNow()">Jetzt</button>')+'</div>'
     +'<div class="stn-status '+L.state+'"><b>'+esc(st[0])+'</b><span>'+esc(st[1])+'</span></div>'
     +livePitchHTML(isMine,false,L);
-  // Von wem: eine Zeile je laufender Belegung (Platz, Kleinspielfeld, Halle)
-  const rows=L.live.slice().sort((a,b)=>(a.area+a.lanes[0]).localeCompare(b.area+b.lanes[0])).filter((o,i,arr)=>arr.findIndex(x=>x.id===o.id&&x.area===o.area)===i);
-  if(rows.length){
-    h+='<div class="stn-list">'+rows.map(o=>{ const mine=occIsMine(o,isMine), tr=o.src&&o.src.isTraining?getTrainerNames(o.src).join(', '):'';
-      return '<button type="button" class="stn-row" onclick="'+esc('openOccDetail(\''+todayStr+'\','+L.occ.indexOf(o)+')')+'"><i class="'+(mine?'mine':(o.kind==='g'?'game':'tr'))+'"></i>'
-        +'<b>'+esc(o.src&&o.team?teamLabel(o.team,o.squad):o.label)+'</b><span>'+esc((o.kind==='g'?'Spiel'+(o.opp?' gegen '+o.opp:''):(o.kind==='o'?(o.src.title||'Termin'):'Training'))+' · '+areaLabel(o)+(tr?' · '+tr:''))+'</span><em>bis '+o.bis+'</em></button>'; }).join('')+'</div>';
-  }
-  return h+'</section>';
 }
-function startPlaceOnlyHTML(){ // ohne eigene Mannschaft: nur der Platz jetzt
-  return nowPlaceHTML(null);
+function startJumpNow(){ startSel=todayStr; startView='tag'; delete START_CUR[todayStr]; renderMyWeek(); }
+function startPlaceHTML(ds,isMine,admin){
+  START_ISMINE=isMine;
+  const tag=startView==='tag';
+  let h='<section class="st-now st-platz"><div id="stp-live">'+placeLiveHTML(ds,tag?startCurOf(ds):null,isMine)+'</div>';
+  if(tag) h+=timelineHTML(ds,isMine);
+  const canLock=admin&&ds===todayStr&&!activeLocksOn(todayStr).some(l=>l.resource==='platz');
+  h+='<div class="stp-foot">'+(canLock?'<button type="button" class="wk-act" onclick="openQuickLock()">Heute sperren</button>':'<span></span>')
+    +'<a href="#" onclick="'+esc('event.preventDefault();openDayInCalendar(\''+ds+'\')')+'">Im Kalender ›</a></div>';
+  return h+'</section>';
 }
 /* ---------- Woche: Leiste zum Tag-Wählen + Tag (Termine + Platz) oder Woche (Liste) ---------- */
 function openDayInCalendar(ds){ const dt=new Date(ds+'T00:00:00'); curY=dt.getFullYear(); curM=dt.getMonth(); yearShown=curY; selDate=ds; goto('termine'); setView('woche'); scrollToWeekDay(ds); }
@@ -3987,7 +4017,7 @@ function startWeekHTML(src,isMine,admin){
   if(!startSel||startSel<todayStr||startSel>end) startSel=todayStr;
   const items=src?weekItems(isMine):[];
   const dotOf=e=>(e.isCancelled||e.isMovedGhost||e.withdrawn)?'grey':(e.isExternal||isMatchKind(kindOf(e))?'game':'tr');
-  let h='<section class="st-week"><div class="stw-head"><h2>'+esc(src?(src.fromSession?'Deine Woche · '+src.label:'Diese Woche'):'Platz diese Woche')+'</h2>'
+  let h=startPlaceHTML(startView==='tag'?startSel:todayStr,isMine,admin)+'<section class="st-week"><div class="stw-head"><h2>'+esc(src?(src.fromSession?'Deine Woche · '+src.label:'Diese Woche'):'Platz diese Woche')+'</h2>'
     +'<div class="seg-mini"><button type="button" class="'+(startView==='tag'?'on':'')+'" onclick="setStartView(\'tag\')">Tag</button>'
     +'<button type="button" class="'+(startView==='woche'?'on':'')+'" onclick="setStartView(\'woche\')">Woche</button></div></div>';
   h+='<div class="stw-strip">';
@@ -4006,12 +4036,10 @@ function startWeekHTML(src,isMine,admin){
     if(next.length){ h+='<div class="wk-day">Nächste Spiele</div>'; next.forEach(e=>{ h+=weekRowHTML(e,true); }); }
     h+='</div>';
   }else{
+    // Termine der eigenen Mannschaft(en) am gewählten Tag (mit Absagen/Verlegen); der Platz steht oben
     const day=items.filter(e=>e.d===startSel);
-    const canLock=admin&&startSel===todayStr&&!activeLocksOn(todayStr).some(l=>l.resource==='platz');
-    h+='<div class="st-card"><div class="stc-head"><h3>'+esc(startDayLabel(startSel,true))+'</h3>'
-      +(canLock?'<button type="button" class="wk-act" onclick="openQuickLock()">Heute sperren</button>':'<a href="#" onclick="'+esc('event.preventDefault();openDayInCalendar(\''+startSel+'\')')+'">Im Kalender</a>')+'</div>';
-    if(src){ h+=day.length?day.map(e=>weekRowHTML(e)).join(''):'<div class="wk-empty">Kein Termin für '+esc(src.label)+' an diesem Tag.</div>'; }
-    h+='<div class="stc-sub">Platz an diesem Tag</div>'+timelineHTML(startSel,isMine)+'</div>';
+    if(src) h+='<div class="st-card"><div class="stc-head"><h3>'+esc(startDayLabel(startSel,true))+'</h3></div>'
+      +(day.length?day.map(e=>weekRowHTML(e)).join(''):'<div class="wk-empty">Kein Termin für '+esc(src.label)+' an diesem Tag.</div>')+'</div>';
   }
   return h+'</section>';
 }
@@ -4360,8 +4388,8 @@ function renderMyWeek(){
   if(!src){
     // Erster Besuch ohne Favoriten: die Auswahl steht direkt oben; „Nicht jetzt“ zeigt den ganzen Platz.
     if(!admin&&(weekPickerOpen||!lsGet(PICK_HIDDEN_KEY,false))) hero=weekPickerHTML(true);
-    else if(!admin) hero=startPlaceOnlyHTML()+'<button type="button" class="wk-pick-link" onclick="weekPickerOpen=true;renderMyWeek();">Training und Spiele deiner Mannschaft oben sehen? <b>Favoriten wählen ›</b></button>';
-    else hero=startPlaceOnlyHTML()+'<button type="button" class="wk-pick-link" onclick="weekPickerOpen=!weekPickerOpen;renderMyWeek();">Eigene Mannschaft oben sehen? <b>Mannschaft wählen ›</b></button>'+(weekPickerOpen?weekPickerHTML(false):'');
+    else if(!admin) hero='<button type="button" class="wk-pick-link" onclick="weekPickerOpen=true;renderMyWeek();">Training und Spiele deiner Mannschaft oben sehen? <b>Favoriten wählen ›</b></button>';
+    else hero='<button type="button" class="wk-pick-link" onclick="weekPickerOpen=!weekPickerOpen;renderMyWeek();">Eigene Mannschaft oben sehen? <b>Mannschaft wählen ›</b></button>'+(weekPickerOpen?weekPickerHTML(false):'');
   }else hero=heroHTML;
   // Admin: eigene Mannschaft nach „Zu erledigen“ und den Zahlen
   heroBox.innerHTML=hero;
