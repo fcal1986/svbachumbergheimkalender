@@ -4,3 +4,4 @@
 - **Backlog:** `docs/BACKLOG.md` ist die nummerierte Feature-Liste mit Status. Wird ein Punkt umgesetzt oder teilweise umgesetzt, Status und Notiz (Datum) im selben Commit wie den Code aktualisieren. Neue Ideen bekommen die nächste freie Nummer.
 - **Vorhandenes zuerst:** Vor dem Bauen im Code (`index.html`, `scripts/`) suchen, ob es die Funktion oder einen passenden Baustein schon gibt, und diesen erweitern.
 - **Sprache:** Oberfläche und Doku auf Deutsch, Ansprache „du“.
+- **Pull Requests:** Nach jedem Commit oder PR immer den direkten Link zum Pull Request nennen.
