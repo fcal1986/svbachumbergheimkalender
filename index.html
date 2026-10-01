@@ -1424,7 +1424,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='01.10.2026 · 11';
+const APP_VERSION='01.10.2026 · 12';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2749,17 +2749,24 @@ function restoreFilterPref(){
     const known=new Set(allKnownTeamKeys().map(t=>t.key));
     teamMultiFilter=new Set((p.teams||[]).filter(k=>known.has(k)));
     const chips=[...document.querySelectorAll('#filterbar .filter-chip')].map(c=>c.dataset.f);
-    if(p.f==='multi') filter=teamMultiFilter.size?'multi':'alle';
-    else filter=chips.includes(p.f)?p.f:'alle';
-    if(filter!=='fussballde'&&filter!=='multi'&&filter!=='alle') teamMultiFilter=new Set();
+    const pf=p.f==='fussballde'?'spiele':p.f; // früherer Chip „fussball.de“ → „Spiele“ (ab 01.10.2026 · 12)
+    if(pf==='multi') filter=teamMultiFilter.size?'multi':'alle';
+    else filter=chips.includes(pf)?pf:'alle';
+    if(!KIND_FILTERS.includes(filter)&&filter!=='multi'&&filter!=='alle') teamMultiFilter=new Set();
     if(filter==='alle'&&teamMultiFilter.size) filter='multi';
     document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f===filter));
     updateTeamFilterBtn();
   }catch(e){}
 }
+/* Ab 01.10.2026 · 12: „Training“ und „Spiele“ statt „fussball.de“ – es zählt, was ein Termin ist, nicht woher er kommt.
+   Beide sind mit der Mannschaftsauswahl kombinierbar. Spiele = Liga (fussball.de), eigene Freundschaftsspiele
+   und Turniere, Heim und auswärts. */
+const KIND_FILTERS=['training','spiele'];
+function isGameEntry(e){ return !!(e.isExternal||e.isMovedGhost||(!e.isTraining&&isMatchKind(kindOf(e)))); }
+function isTrainingEntry(e){ return !!(e.isTraining||(!e.isExternal&&['training','goalkeeper'].includes(kindOf(e)))); }
 function setFilter(f){
   filter=f;
-  if(f!=='fussballde') teamMultiFilter=new Set(); // fussball.de bleibt bewusst mit Mannschaftsauswahl kombinierbar
+  if(!KIND_FILTERS.includes(f)) teamMultiFilter=new Set(); // Training/Spiele bleiben mit der Mannschaftsauswahl kombinierbar
   typeFilter=null;
   document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f===f));
   updateTeamFilterBtn(); updateTypeFilterBanner();
@@ -2780,7 +2787,7 @@ function buildFilters(){
       }
     });
   }
-  fs.push(['fussballde','fussball.de']);
+  fs.splice(1,0,['training','Training'],['spiele','Spiele']);
   document.getElementById('filterbar').innerHTML=fs.map(([k,l])=>
     '<span class="filter-chip'+(k===filter?' on':'')+'" data-f="'+k+'" onclick="setFilter(\''+k+'\')">'+l+'</span>').join('');
   updateTeamFilterBtn();
@@ -2809,7 +2816,7 @@ function updateTypeFilterBanner(){
   const el=document.getElementById('type-filter-banner');
   if(!el)return;
   if(!typeFilter){ el.innerHTML=''; return; }
-  const label=typeFilter==='training'?'Nur Training':'Nur Spiele (fussball.de)';
+  const label=typeFilter==='training'?'Nur Training':'Nur Spiele';
   el.innerHTML='<div class="type-filter-chip">'+label+' <span onclick="clearTypeFilter()">✕</span></div>';
 }
 
@@ -2859,7 +2866,7 @@ function toggleTeamFilterOpt(ev,key){
 }
 function applyTeamFilter(close){
   teamFilterPending=new Set(teamMultiFilter);
-  if(filter!=='fussballde'){ filter=teamMultiFilter.size?'multi':'alle'; } // fussball.de-Auswahl bleibt erhalten
+  if(!KIND_FILTERS.includes(filter)){ filter=teamMultiFilter.size?'multi':'alle'; } // Training/Spiele-Auswahl bleibt erhalten
   if(close!==false) closeTeamFilterPanel(); else renderTeamFilterPanel();
   document.querySelectorAll('#filterbar .filter-chip').forEach(c=>c.classList.toggle('on',c.dataset.f===filter));
   updateTeamFilterBtn(); saveFilterPref();
@@ -2881,15 +2888,16 @@ function updateTeamFilterBtn(){
 
 /* ---------- Termine ---------- */
 function passesFilter(e){
-  if(typeFilter==='training'&&!e.isTraining)return false;
-  if(typeFilter==='spiele'&&!e.isExternal&&!e.isMovedGhost)return false;
-  // fussball.de-Filter ist bewusst MIT der Mannschafts-Mehrfachauswahl kombinierbar (beide
+  if(typeFilter==='training'&&!isTrainingEntry(e))return false;
+  if(typeFilter==='spiele'&&!isGameEntry(e))return false;
+  // Training/Spiele sind bewusst MIT der Mannschafts-Mehrfachauswahl kombinierbar (beide
   // müssen zutreffen) – anders als die übrigen Chips (Jugend/Senioren/Verein), die weiterhin
   // exklusiv zur Mannschaftsauswahl sind, da "Jugend" + einzelne Teams auswählen redundant wäre.
-  if(filter==='fussballde'&&!e.isExternal&&!e.isMovedGhost) return false;
+  if(filter==='spiele'&&!isGameEntry(e)) return false;
+  if(filter==='training'&&!isTrainingEntry(e)) return false;
   if(teamMultiFilter.size) return teamMultiFilter.has((e.team)+':'+(e.squad||1))
     ||(teamMultiFilter.has(GK_TEAM+':1')&&(e.team===GK_TEAM||kindOf(e)==='goalkeeper')); // Torwarttraining auch, wenn einer Mannschaft zugeordnet
-  if(filter==='alle'||filter==='fussballde') return true;
+  if(filter==='alle'||KIND_FILTERS.includes(filter)) return true;
   if(filter.includes(':')){ const[ft,fq]=filter.split(':'); return e.team===ft&&(e.squad||1)===parseInt(fq); }
   return cat(e.team)===filter;
 }
