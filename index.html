@@ -185,6 +185,124 @@
   .wk-row .pt-type{white-space:normal;}
   .wk-row .move-badge{display:inline-block;margin-top:3px;}
   .wk-row{padding:6px 11px;margin-bottom:5px;border-radius:11px;}
+  /* ---------- Startseite ab 01.10.2026 · 2 ---------- */
+  #st-admin,#st-hero,#st-week,#st-tiles{display:flex;flex-direction:column;gap:14px;}
+  #st-admin:not(:empty),#st-hero:not(:empty),#st-tiles:not(:empty){margin-bottom:16px;}
+  #st-week:not(:empty){margin-top:16px;}
+  .st-hero{background:var(--pc-navy);color:#fff;border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 10px 30px rgba(1,27,50,.18);}
+  .hero-kicker{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:#C9E7A6;}
+  .hero-kicker i{width:8px;height:8px;border-radius:4px;background:#8BCF2F;}
+  .hero-kicker.live i{box-shadow:0 0 0 4px rgba(139,207,47,.25);}
+  .hero-main{display:flex;align-items:center;gap:14px;cursor:pointer;}
+  .hero-txt{flex:1;min-width:0;}
+  .hero-title{font-family:'Manrope','Inter',sans-serif;font-size:23px;font-weight:800;letter-spacing:-.02em;line-height:1.15;}
+  .hero-sub{font-size:13.5px;color:#DCE3E8;margin-top:3px;}
+  .hero-mini .mini-pitch{transform:scale(1.6);transform-origin:right center;}
+  .st-hero .mini-pitch i{background:rgba(255,255,255,.18);} .st-hero .mini-pitch i.on{background:#8BCF2F;}
+  .hero-now{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#B8C4CF;margin-bottom:-4px;}
+  .hero-acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .st-hero .wk-act{background:transparent;color:#fff;border-color:rgba(255,255,255,.35);min-height:40px;padding:0 14px;font-size:13px;}
+  .hero-conf{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:#FDECEA;color:#8E2A1D;border-radius:12px;padding:8px 10px;font-size:12.5px;font-weight:600;}
+  .hero-conf svg{width:16px;height:16px;flex:none;}
+  .hero-conf span{flex:1;min-width:0;}
+  .hero-conf .wk-act{flex-basis:100%;}
+  .st-hero .hero-conf .wk-act{color:#8E2A1D;border-color:#F3B4AC;background:#fff;}
+  .lp{background:repeating-linear-gradient(90deg,#2F7A46 0,#2F7A46 30px,#34834D 30px,#34834D 60px);border-radius:14px;padding:9px;display:flex;flex-direction:column;gap:8px;}
+  .lp-field{position:relative;border:2px solid rgba(255,255,255,.75);border-radius:6px;height:150px;}
+  .lp.compact .lp-field{height:96px;}
+  .lp-mid{position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:rgba(255,255,255,.75);}
+  .lp-circle{position:absolute;left:50%;top:50%;width:40px;height:40px;margin:-20px 0 0 -20px;border:2px solid rgba(255,255,255,.5);border-radius:50%;}
+  .lp-side{position:absolute;top:5px;font-size:10px;font-weight:800;color:rgba(255,255,255,.85);}
+  .lp-side.l{left:8px;} .lp-side.r{right:8px;}
+  .lp-box{position:absolute;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:4px;}
+  .lp-box.game{background:rgba(255,210,74,.25);}
+  .lp-pill{font-size:13.5px;font-weight:800;padding:5px 11px;border-radius:9px;background:#fff;color:var(--pc-navy);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;}
+  .lp-pill.sm{font-size:12px;padding:4px 8px;}
+  .lp-pill.mine{background:#8BCF2F;box-shadow:0 0 0 3px #fff;}
+  .lp-pill.game{background:#FFD24A;}
+  .lp-sub{font-size:12px;font-weight:700;color:#fff;white-space:nowrap;}
+  .lp-sub.sm{font-size:11px;}
+  .lp-bar{width:70%;height:4px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden;}
+  .lp-bar i{display:block;height:4px;background:#fff;}
+  .lp-free{position:absolute;width:50%;height:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:rgba(255,255,255,.8);}
+  .lp-free.all{left:0;top:0;width:100%;height:42%;font-size:13px;}
+  .lp-free small{font-size:11px;font-weight:600;margin-top:2px;color:#fff;background:rgba(1,27,50,.35);padding:2px 6px;border-radius:6px;}
+  .lp-lock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:repeating-linear-gradient(135deg,rgba(1,27,50,.82) 0,rgba(1,27,50,.82) 6px,rgba(1,27,50,.68) 6px,rgba(1,27,50,.68) 12px);color:#fff;font-size:12px;border-radius:4px;z-index:3;}
+  .lp-lock b{font-size:14px;}
+  .lp-klein,.lp-halle{display:flex;align-items:center;gap:10px;min-height:40px;border:2px solid rgba(255,255,255,.6);border-radius:6px;padding:4px 8px;}
+  .lp-klein-t{font-size:10px;font-weight:800;color:rgba(255,255,255,.85);text-transform:uppercase;letter-spacing:.05em;min-width:92px;}
+  .lp-freetxt{font-size:12px;font-weight:700;color:rgba(255,255,255,.8);}
+  .lp-thirds{flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;}
+  .lp-third{font-size:11.5px;font-weight:700;color:#fff;text-align:center;padding:4px;border-radius:5px;background:rgba(255,255,255,.15);}
+  .lp-third.mine{background:#8BCF2F;color:var(--pc-navy);}
+  .st-fav{display:flex;flex-direction:column;gap:6px;}
+  .fav-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .fav-chip{display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border-radius:17px;background:var(--pc-navy);color:#fff;font-size:13px;font-weight:700;}
+  .fav-edit{min-height:44px;padding:0 12px;border-radius:17px;border:1.5px dashed #B8C4CF;background:#fff;font:inherit;font-size:13px;font-weight:700;color:var(--ink-secondary);cursor:pointer;}
+  .fav-hint{font-size:12px;color:var(--ink-soft);}
+  .st-week{display:flex;flex-direction:column;gap:12px;}
+  .stw-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .stw-head h2{margin:0;font-family:'Manrope','Inter',sans-serif;font-size:17px;font-weight:800;}
+  .seg-mini{display:flex;gap:2px;padding:3px;border-radius:12px;background:#E9EEED;flex:none;}
+  .seg-mini button{min-height:34px;padding:0 13px;border-radius:9px;border:none;background:transparent;font:inherit;font-size:13px;font-weight:700;color:var(--ink-soft);cursor:pointer;}
+  .seg-mini button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(1,27,50,.12);}
+  .seg-mini button:disabled{opacity:.4;}
+  .stw-strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;}
+  .stw-day{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;min-height:60px;border-radius:12px;border:none;background:#fff;color:var(--ink);font:inherit;cursor:pointer;box-shadow:var(--card-shadow);}
+  .stw-day span{font-size:10.5px;font-weight:700;color:var(--ink-soft);}
+  .stw-day b{font-family:'Manrope','Inter',sans-serif;font-size:16px;font-weight:800;}
+  .stw-day em{display:flex;gap:3px;min-height:6px;}
+  .stw-day em i{width:6px;height:6px;border-radius:3px;background:var(--grass);}
+  .stw-day em i.game{background:var(--yellow-deep);} .stw-day em i.grey{background:#B8C4CF;}
+  .stw-day.today{box-shadow:inset 0 0 0 1.5px var(--green),var(--card-shadow);}
+  .stw-day.on{background:var(--pc-navy);color:#fff;} .stw-day.on span{color:#fff;}
+  .st-card{background:#fff;border-radius:18px;box-shadow:var(--card-shadow);padding:14px;display:flex;flex-direction:column;gap:8px;}
+  .st-card .wk-row{box-shadow:none;border:1px solid #EEF2F1;margin-bottom:0;}
+  .stc-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .stc-head h3{margin:0;font-family:'Manrope','Inter',sans-serif;font-size:16px;font-weight:800;}
+  .stc-head a{font-size:13px;font-weight:700;color:var(--grass);text-decoration:none;flex:none;}
+  .stc-meta{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .stc-sub{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:6px;}
+  .tl{display:flex;gap:6px;}
+  .tl-labels{width:16px;position:relative;flex:none;}
+  .tl-labels span{position:absolute;left:0;display:flex;align-items:center;font-size:11.5px;font-weight:800;color:var(--ink-secondary);}
+  .tl-body{flex:1;position:relative;min-width:0;}
+  .tl-lane{position:absolute;left:0;right:0;height:24px;border-radius:6px;background:#F2F5F4;}
+  .tl-lane.alt{background:#EEF1F7;}
+  .tl-tick{position:absolute;top:0;font-size:10.5px;color:var(--ink-soft);transform:translateX(-50%);}
+  .tl-grid{position:absolute;bottom:0;width:1px;background:#E3E9E8;}
+  .tl-blk{position:absolute;box-sizing:border-box;border:1.5px solid #fff;border-radius:6px;padding:2px 5px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;overflow:hidden;background:#2F7A46;color:#fff;font:inherit;text-align:left;cursor:pointer;}
+  .tl-blk b{font-size:11px;font-weight:800;white-space:nowrap;}
+  .tl-blk i{font-style:normal;font-size:10px;white-space:nowrap;opacity:.9;}
+  .tl-blk.senior{background:#405366;} .tl-blk.other{background:#2C4A66;}
+  .tl-blk.game{background:#FFD24A;color:var(--pc-navy);}
+  .tl-blk.mine{background:#8BCF2F;color:var(--pc-navy);box-shadow:inset 0 0 0 2px var(--pc-navy);}
+  .tl-blk.canc{background:#fff;color:#7C8A97;box-shadow:inset 0 0 0 1.5px #B8C4CF;text-decoration:line-through;}
+  .tl-conf{position:absolute;border-radius:4px;pointer-events:none;background:repeating-linear-gradient(135deg,#C0392B 0,#C0392B 3px,rgba(192,57,43,.2) 3px,rgba(192,57,43,.2) 6px);}
+  .tl-lock{position:absolute;left:0;right:0;border-radius:6px;pointer-events:none;z-index:1;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,rgba(64,83,102,.35) 0,rgba(64,83,102,.35) 5px,rgba(64,83,102,.12) 5px,rgba(64,83,102,.12) 10px);}
+  .tl-lock span{font-size:11px;font-weight:800;color:var(--pc-navy);background:#fff;padding:2px 7px;border-radius:6px;}
+  .tl-now{position:absolute;top:12px;bottom:0;width:2px;margin-left:-1px;background:#C0392B;z-index:2;pointer-events:none;}
+  .tl-now:before{content:"";position:absolute;top:-4px;left:-4px;width:10px;height:10px;border-radius:5px;background:#C0392B;}
+  .tl-sun{position:absolute;bottom:0;border-left:2px dashed #E8B400;z-index:2;pointer-events:none;}
+  .tl-legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--ink-secondary);padding-left:22px;}
+  .tl-legend span{display:flex;align-items:center;gap:5px;}
+  .tl-legend .lg{display:inline-block;width:10px;height:10px;border-radius:3px;}
+  .lg.mine{background:#8BCF2F;box-shadow:inset 0 0 0 1.5px var(--pc-navy);} .lg.tr{background:#2F7A46;} .lg.game{background:#FFD24A;}
+  .lg.conf{background:repeating-linear-gradient(135deg,#C0392B 0,#C0392B 2px,rgba(192,57,43,.2) 2px,rgba(192,57,43,.2) 4px);}
+  .lg.sun{width:0;height:10px;border-left:2px dashed #E8B400;border-radius:0;}
+  .st-tiles{display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+  .st-tile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px;border-radius:16px;border:none;background:#fff;box-shadow:var(--card-shadow);font:inherit;color:var(--ink);text-align:left;cursor:pointer;}
+  .st-tile b{font-family:'Manrope','Inter',sans-serif;font-size:22px;font-weight:800;}
+  .st-tile span{font-size:11.5px;font-weight:600;color:var(--ink-secondary);}
+  .st-tile.warn{background:var(--yellow-soft);}
+  .st-season{width:100%;display:flex;align-items:center;gap:9px;margin:16px 0 8px;padding:12px 14px;border-radius:14px;border:none;background:#fff;box-shadow:var(--card-shadow);font:inherit;font-size:13px;color:var(--ink);cursor:pointer;text-align:left;}
+  .st-season svg{width:17px;height:17px;flex:none;} .st-season span{flex:1;font-weight:600;} .st-season b{font-size:12.5px;color:var(--grass);}
+  .st-season.warn{background:var(--yellow-soft);}
+  .occ-sheet h3{margin:2px 0 6px;font-family:'Manrope','Inter',sans-serif;font-size:20px;}
+  .occ-kicker{font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .occ-line{font-size:14px;color:var(--ink);margin-top:3px;}
+  .occ-canc{color:var(--warn);font-weight:700;}
+  .occ-contact{margin-top:10px;}
   .wk-act{flex:none;background:none;border:1.5px solid var(--line);color:var(--ink);font:inherit;font-size:11px;font-weight:700;padding:5px 9px;border-radius:9px;cursor:pointer;}
   .wk-act:active{background:var(--bg);}
   .mv-reasons{margin-top:8px;gap:6px;}
@@ -220,9 +338,6 @@
   .wk-pick-link{display:block;width:100%;text-align:left;background:var(--white);border:1.5px dashed var(--line);border-radius:12px;padding:10px 12px;font-family:'Inter';font-size:12.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;margin-top:2px;}
   .wk-pick-link b{color:var(--green);}
   .wk-more{display:block;width:100%;margin-top:2px;background:none;border:none;color:var(--green);font-family:'Inter';font-size:12px;font-weight:700;padding:6px;cursor:pointer;}
-  .pt-collapsed{display:flex;align-items:center;gap:8px;background:var(--white);border-radius:12px;padding:11px 12px;margin-bottom:6px;box-shadow:var(--card-shadow);font-size:12.5px;color:var(--ink);cursor:pointer;}
-  .pt-collapsed .pt-conf{color:#9B3227;font-weight:700;}
-  .pt-collapsed .pt-open{margin-left:auto;color:var(--green);font-weight:700;white-space:nowrap;}
   .status-row svg{width:15px;height:15px;flex:none;margin-top:1px;}
   .stat-card .num{font-weight:800;font-size:26px;line-height:1;color:var(--ink);}
   .stat-card .lbl{font-size:11px;color:var(--ink-soft);margin-top:4px;}
@@ -841,19 +956,14 @@
       <div id="reg-banner"></div>
       <div id="session-debug" style="display:none;font-size:10px;color:var(--ink-soft);background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:6px 10px;margin-bottom:8px;"></div>
       <div id="lock-start-banner"></div>
-      <div class="start-dayhead" id="st-date">–</div>
+      <!-- Startseite ab 01.10.2026 · 2: Admin-Platz, Live-Karte, Zu erledigen, Zahlen, Woche (siehe renderMyWeek) -->
+      <div id="st-admin"></div>
+      <div id="st-hero"></div>
       <div id="st-todo"></div>
+      <div id="st-tiles"></div>
       <div id="st-week"></div>
-
-      <div class="pitch-section-head" onclick="openTodayFromStart()" style="cursor:pointer;">
-        <p class="section-label" style="margin:0;">Heute im Verein <span style="color:var(--green);">›</span></p>
-        <div class="st-head-right"><span id="st-lock-quick"></span><div id="st-occupied-badge"></div></div>
-      </div>
-      <div id="st-pitch-today"></div>
-
-      <!-- Konfliktliste der Saison ist Verwaltungsinfo: nur für angemeldete Zugänge (ab 29.09.2026 · 3) -->
+      <div id="st-season"></div>
       <div id="st-status-wrap" style="display:none;">
-        <p class="section-label">Status · gesamte Saison</p>
         <div id="st-status"></div>
       </div>
     </div>
@@ -1266,7 +1376,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='01.10.2026 · 1';
+const APP_VERSION='01.10.2026 · 2';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3454,17 +3564,291 @@ function todaySummaryText(){
   if(counts.sonstige)parts.push(counts.sonstige+' sonstige'+(counts.sonstige===1?'r Termin':' Termine'));
   return parts.length?parts.join(' · '):'Heute nichts geplant';
 }
+/* ---------- Neue Startseite (ab 01.10.2026 · 2) ----------
+   Aufbau siehe docs/BACKLOG.md (Nr. 1, 3, 53–58) und das abgestimmte Mockup:
+   – Trainer:  Live-Karte (läuft gerade / als Nächstes + Platz jetzt) → Zu erledigen → Woche (Tag | Woche)
+   – Admin:    Platz heute (Zeitleiste, „Heute sperren“) → Zu erledigen → Zahlen → eigene Mannschaft
+   – Besucher: Favoriten (ohne Anmeldung, auf dem Gerät) → Live-Karte → Woche; ohne Favoriten oben die Auswahl.
+   Eine Belegungs-Logik für alles: occupancyOn(ds) liefert je Termin Fläche (Platz-Viertel, Kleinspielfeld,
+   Hallendrittel) und Zeit – genutzt von Live-Platz, Zeitleiste und Detailblatt. */
+let startSel=null, startView='tag', startSeasonOpen=false, startHeroFix=null;
+const OCC_VIEW={};
+function nowHMStr(){ const n=new Date(); return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'); }
+function hmMin(s){ const p=String(s||'0:0').split(':'); return (+p[0])*60+(+p[1]||0); }
+function minHM(m){ m=Math.max(0,Math.min(24*60-1,Math.round(m))); return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'); }
+function addDays(ds,n){ const d=new Date(ds+'T00:00:00'); d.setDate(d.getDate()+n); return ymd(d); }
+function startDayLabel(ds,long){
+  const dt=new Date(ds+'T00:00:00'), base=long?DAYS[dt.getDay()]+', '+dt.getDate()+'. '+MONTHS[dt.getMonth()]:dayCase(ds);
+  if(ds===todayStr) return 'Heute · '+base;
+  if(ds===addDays(todayStr,1)) return 'Morgen · '+base;
+  return base;
+}
+/* Sonnenuntergang (ab 01.10.2026 · 2, Backlog Nr. 3): berechnet aus den Koordinaten in
+   data/config.json → "venue": {"lat","lon","floodlight"} – nichts vereinsspezifisch im Code.
+   Rechenweg wie die verbreitete SunCalc-Bibliothek (Höhe −0,833°). */
+function sunsetHM(ds){
+  const v=CFG&&CFG.venue; if(!v||v.lat==null||v.lon==null) return null;
+  const rad=Math.PI/180, J0=0.0009, e=rad*23.4397;
+  const d=new Date(ds+'T12:00:00').getTime()/86400000-0.5+2440588-2451545;
+  const lw=rad*-v.lon, phi=rad*v.lat;
+  const n=Math.round(d-J0-lw/(2*Math.PI)), ds0=J0+lw/(2*Math.PI)+n;
+  const M=rad*(357.5291+0.98560028*ds0);
+  const C=rad*(1.9148*Math.sin(M)+0.02*Math.sin(2*M)+0.0003*Math.sin(3*M));
+  const L=M+C+rad*102.9372+Math.PI;
+  const dec=Math.asin(Math.sin(L)*Math.sin(e));
+  const cosw=(Math.sin(rad*-0.833)-Math.sin(phi)*Math.sin(dec))/(Math.cos(phi)*Math.cos(dec));
+  if(cosw<-1||cosw>1) return null;
+  const w=Math.acos(cosw);
+  const Jset=2451545+J0+(w+lw)/(2*Math.PI)+n+0.0053*Math.sin(M)-0.0069*Math.sin(2*L);
+  const t=new Date((Jset+0.5-2440588)*86400000);
+  return String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+}
+/* Belegung eines Tages je Fläche. Abgesagte Trainings bleiben drin (cancelled), damit Live-Platz und
+   Zeitleiste „frei · E2 abgesagt“ zeigen können. Auswärtsspiele belegen nichts. */
+function occupancyOn(ds){
+  const out=[];
+  const quarters=p=>pitchQuarters(p);
+  const push=(src,cancelled,o)=>{
+    const base={src, cancelled:!!cancelled, t:o.t||src.t, bis:o.bis||eventBis(src), team:o.team!==undefined?o.team:src.team, squad:o.squad||src.squad||1,
+      kind:o.kind, opp:o.opp||'', kickoff:o.kickoff||'', id:o.id||src.id};
+    base.label=o.label||(base.team&&base.team!=='Alle Teams'?(base.team===GK_TEAM?'TW':teamShort(base.team,base.squad)):(src.title||'Termin'));
+    if(o.pitch){ const q=quarters(o.pitch); if(q.length) out.push({...base, area:'platz', lanes:[Math.min(...q),Math.max(...q)]}); }
+    if(o.klein) out.push({...base, area:'klein', lanes:[1,1]});
+    (o.thirds||[]).forEach(t=>out.push({...base, area:'halle', lanes:[t,t]}));
+  };
+  const kindFor=e=>kindOf(e)==='goalkeeper'?'tw':(e.isTraining||kindOf(e)==='training'?'t':(isMatchKind(kindOf(e))?'g':'o'));
+  const fromEvent=(e,canc)=>{
+    if(isMatchKind(kindOf(e))&&e.ha==='away') return;
+    push(e,canc,{kind:kindFor(e), pitch:e.pitch, klein:(e.res||[]).includes('Kleinspielfeld'), thirds:(e.halle&&e.halle.thirds)||[],
+      opp:e.opponent||'', kickoff:e.kickoff||''});
+  };
+  EVENTS.filter(e=>e.d===ds).forEach(e=>fromEvent(e,false));
+  trainingInstancesOn(ds).forEach(e=>fromEvent(e,false));
+  cancelledTrainingInstancesOn(ds).forEach(e=>{ const s=TRAINING.find(x=>x.id===e.trainingSlotId)||{};
+    fromEvent({...e, pitch:s.pitch||null, res:s.res||[], halle:s.halle||null},true); });
+  fussballBookingOccupations(ds).forEach(o=>{ const g=o.game||{}, m=fussballFilterTeam(g.team,g.squad);
+    push(o,false,{kind:'g', pitch:o.pitch, team:m.team, squad:m.squad, opp:g.opponent||'', kickoff:g.t||'', id:o.id}); });
+  return out.sort((a,b)=>a.t.localeCompare(b.t));
+}
+function occIsMine(o,isMine){ return !!(isMine&&o.team&&isMine({team:o.team,squad:o.squad,isExternal:o.kind==='g',isTraining:o.kind==='t'||o.kind==='tw',kind:o.kind==='tw'?'goalkeeper':undefined,gkTeams:o.src&&o.src.gkTeams})); }
+function areaLabel(o){
+  if(o.area==='klein') return 'Kleinspielfeld';
+  if(o.area==='halle') return 'Halle';
+  const [a,b]=o.lanes; return a===1&&b===4?'ganzer Platz':(a===b?'Viertel '+a:(a===1?'Hälfte A':'Hälfte B'));
+}
+/* ---------- Zeitleiste „Platz an diesem Tag“ ----------
+   Vier Spuren für die Viertel (Hälfte A = 1+2, B = 3+4); Kleinspielfeld und Halle bekommen eigene
+   Spuren, aber nur an Tagen, an denen sie belegt sind. Blöcke antippen = Details. */
+const TL_LANE=24, TL_GAP=4, TL_TOP=18, TL_SEP=10;
+function timelineHTML(ds,isMine){
+  const occ=occupancyOn(ds); OCC_VIEW[ds]=occ;
+  const groups=[{area:'platz',n:4,label:['A','B']}];
+  if(occ.some(o=>o.area==='klein')) groups.push({area:'klein',n:1,label:['K']});
+  if(occ.some(o=>o.area==='halle')) groups.push({area:'halle',n:3,label:['Halle']});
+  let y=TL_TOP; groups.forEach((g,i)=>{ if(i) y+=TL_SEP; g.top=y; y+=g.n*TL_LANE+(g.n-1)*TL_GAP; });
+  const H=y;
+  const laneY=(area,l)=>{ const g=groups.find(x=>x.area===area); return g.top+(l-1)*(TL_LANE+TL_GAP); };
+  const sun=sunsetHM(ds);
+  const isToday=ds===todayStr, now=nowHMStr();
+  let s0=occ.length?Math.min(...occ.map(o=>hmMin(o.t))):16*60, e0=occ.length?Math.max(...occ.map(o=>hmMin(o.bis))):20*60;
+  if(isToday){ s0=Math.min(s0,Math.max(hmMin(now)-60,6*60)); }
+  let h0=Math.floor(s0/60), h1=Math.ceil(e0/60); if(h1-h0<6) h1=Math.min(24,h0+6); if(h1-h0<6) h0=h1-6;
+  const T0=h0*60, T1=h1*60, P=m=>((m-T0)/(T1-T0)*100).toFixed(2), W=(a,b)=>(Math.max(0,b-a)/(T1-T0)*100).toFixed(2);
+  let h='<div class="tl"><div class="tl-labels" style="height:'+H+'px">';
+  groups.forEach(g=>{ if(g.area==='platz'){ h+='<span style="top:'+g.top+'px;height:'+(2*TL_LANE+TL_GAP)+'px">A</span><span style="top:'+laneY('platz',3)+'px;height:'+(2*TL_LANE+TL_GAP)+'px">B</span>'; }
+    else h+='<span style="top:'+g.top+'px;height:'+(g.n*TL_LANE+(g.n-1)*TL_GAP)+'px">'+(g.area==='klein'?'K':'H')+'</span>'; });
+  h+='</div><div class="tl-body" style="height:'+H+'px">';
+  groups.forEach(g=>{ for(let l=1;l<=g.n;l++) h+='<div class="tl-lane'+(g.area!=='platz'?' alt':'')+'" style="top:'+laneY(g.area,l)+'px"></div>'; });
+  for(let hh=h0+(h0%2);hh<h1;hh+=2) h+='<span class="tl-tick" style="left:'+P(hh*60)+'%">'+hh+'</span><div class="tl-grid" style="left:'+P(hh*60)+'%;top:'+TL_TOP+'px"></div>';
+  // Sperren: ganze Fläche schraffiert
+  activeLocksOn(ds).forEach(l=>{ const area=l.resource==='platz'?'platz':(l.resource==='halle'?'halle':null); const g=groups.find(x=>x.area===area); if(!g) return;
+    h+='<div class="tl-lock" style="top:'+g.top+'px;height:'+(g.n*TL_LANE+(g.n-1)*TL_GAP)+'px"><span>gesperrt'+(l.note?' · '+esc(l.note):'')+'</span></div>'; });
+  occ.forEach((o,i)=>{
+    const g=groups.find(x=>x.area===o.area), span=o.lanes[1]-o.lanes[0]+1, ht=span*TL_LANE+(span-1)*TL_GAP, mine=occIsMine(o,isMine);
+    const cls='tl-blk'+(o.cancelled?' canc':(mine?' mine':(o.kind==='g'?' game':(o.kind==='o'?' other':(/Herren|Ü\d/.test(o.team||'')?' senior':'')))));
+    h+='<button type="button" class="'+cls+'" style="top:'+laneY(o.area,o.lanes[0])+'px;height:'+ht+'px;left:'+P(hmMin(o.t))+'%;width:'+W(hmMin(o.t),hmMin(o.bis))+'%" onclick="'+esc('openOccDetail(\''+ds+'\','+i+')')+'" aria-label="'+esc(o.label+' '+o.t+'–'+o.bis+' '+areaLabel(o)+(o.cancelled?' abgesagt':''))+'">'
+      +'<b>'+esc(o.label)+(o.kind==='g'?' · Spiel':'')+'</b>'+(ht>TL_LANE?'<i>'+o.t+'–'+o.bis+'</i>':'')+'</button>';
+  });
+  // Konflikte: Überschneidungszeit auf den gemeinsamen Vierteln schraffiert
+  conflictsOnDay(ds).forEach(([A,B])=>{
+    const qOf=x=>x.pitch?pitchQuarters(x.pitch):(x.isExternal&&x.pitchIsFull?[1,2,3,4]:null);
+    let qa=qOf(A), qb=qOf(B), q=qa&&qb?qa.filter(v=>qb.includes(v)):(qa||qb);
+    if(!q||!q.length) return;
+    const s=Math.max(hmMin(A.t),hmMin(B.t)), e=Math.min(hmMin(eventBis(A)),hmMin(eventBis(B))); if(e<=s) return;
+    const a=Math.min(...q), b=Math.max(...q), span=b-a+1;
+    h+='<div class="tl-conf" style="top:'+laneY('platz',a)+'px;height:'+(span*TL_LANE+(span-1)*TL_GAP)+'px;left:'+P(s)+'%;width:'+W(s,e)+'%"></div>';
+  });
+  if(sun&&hmMin(sun)>T0&&hmMin(sun)<T1) h+='<div class="tl-sun" style="left:'+P(hmMin(sun))+'%;top:'+TL_TOP+'px"></div>';
+  if(isToday&&hmMin(now)>=T0&&hmMin(now)<=T1) h+='<div class="tl-now" style="left:'+P(hmMin(now))+'%"></div>';
+  h+='</div></div>';
+  const fl=CFG&&CFG.venue&&CFG.venue.floodlight;
+  h+='<div class="tl-legend">'+(isMine?'<span><i class="lg mine"></i>'+(session&&sessionWeekTeams()?'deine Mannschaft':'Favoriten')+'</span>':'')+'<span><i class="lg tr"></i>Training</span><span><i class="lg game"></i>Spiel</span>'
+    +(conflictsOnDay(ds).length?'<span><i class="lg conf"></i>Konflikt</span>':'')
+    +(sun?'<span><i class="lg sun"></i>Sonnenuntergang '+sun+(fl==='ganz'?' · Flutlicht':'')+'</span>':'')+'</div>';
+  return h;
+}
+function openOccDetail(ds,i){
+  const o=(OCC_VIEW[ds]||[])[i]; if(!o) return;
+  const e=o.src;
+  let contact='';
+  if(e.isTraining) contact=getTrainersContactHTML(e);
+  else if(o.kind==='g'&&o.team){ const tr=fussballTrainersFor(o.team,o.squad); contact=tr?getTrainersContactHTML(tr):''; }
+  else if(e.ownerId) contact='<div class="trainers-block"><div class="trainer-row"><div class="trainer-lbl">'+esc(e.ownerName||'')+'</div><div class="ev-contact" style="margin-top:4px;">'+getContactHTML(e.ownerId)+'</div></div></div>';
+  const what=o.kind==='g'?('Spiel'+(o.opp?' gegen '+o.opp:'')+(o.kickoff?' · Anstoß '+o.kickoff:'')):(o.kind==='tw'?'Torwarttraining':(o.kind==='t'?'Training':(e.title||'Termin')));
+  const jumpId=o.kind==='g'?(fussballDisplayAll().find(x=>x.d===ds&&x.t===o.kickoff&&x.team===o.team&&(x.squad||1)===o.squad)||{}).id||o.id:e.id;
+  openSheet('<div class="occ-sheet"><div class="occ-kicker">'+esc(startDayLabel(ds,true))+'</div>'
+    +'<h3>'+esc(o.team?teamLabel(o.team,o.squad):o.label)+'</h3>'
+    +'<div class="occ-line"><b>'+esc(what)+'</b>'+(o.cancelled?' · <span class="occ-canc">abgesagt</span>':'')+'</div>'
+    +'<div class="occ-line">'+o.t+'–'+o.bis+' Uhr · '+esc(areaLabel(o))+'</div>'
+    +(contact?'<div class="occ-contact">'+contact+'</div>':'')
+    +'<button type="button" class="submit-btn" style="margin-top:14px;" onclick="'+esc('closeSheet();openTerminFromStart(\''+jsArg(jumpId)+'\',\''+ds+'\')')+'">Im Kalender ansehen</button></div>');
+}
+/* ---------- Live-Platz: was ist JETZT auf Großfeld, Kleinspielfeld und (falls belegt) Halle ---------- */
+function livePitchHTML(isMine,compact){
+  const now=nowHMStr(), n=hmMin(now), occ=occupancyOn(todayStr);
+  const run=occ.filter(o=>hmMin(o.t)<=n&&hmMin(o.bis)>n);
+  const live=run.filter(o=>!o.cancelled), canc=run.filter(o=>o.cancelled);
+  const lock=activeLocksOn(todayStr).find(l=>l.resource==='platz');
+  const cell=q=>({c:q<=2?0:1,r:q%2===1?0:1});
+  const tag=o=>occIsMine(o,isMine)?(session&&sessionWeekTeams()?' · Du':' ★'):'';
+  const box=(o,rect,small)=>{
+    const mine=occIsMine(o,isMine), rest=hmMin(o.bis)-n, pct=Math.round((n-hmMin(o.t))/Math.max(1,hmMin(o.bis)-hmMin(o.t))*100);
+    return '<div class="lp-box'+(o.kind==='g'?' game':'')+'" style="left:'+rect[0]+'%;top:'+rect[1]+'%;width:'+rect[2]+'%;height:'+rect[3]+'%">'
+      +'<span class="lp-pill'+(mine?' mine':(o.kind==='g'?' game':''))+(small?' sm':'')+'">'+esc(o.label+(o.kind==='g'?' · Spiel':'')+tag(o))+'</span>'
+      +'<span class="lp-sub'+(small?' sm':'')+'">bis '+o.bis+' · noch '+rest+' Min</span>'
+      +(compact?'':'<span class="lp-bar"><i style="width:'+pct+'%"></i></span>')+'</div>';
+  };
+  let h='<div class="lp'+(compact?' compact':'')+'"><div class="lp-field">';
+  h+='<div class="lp-mid"></div><div class="lp-circle"></div><span class="lp-side l">A</span><span class="lp-side r">B</span>';
+  const covered={};
+  live.filter(o=>o.area==='platz').forEach(o=>{ const qs=[]; for(let q=o.lanes[0];q<=o.lanes[1];q++){ qs.push(q); covered[q]=1; }
+    const cs=qs.map(cell), c0=Math.min(...cs.map(c=>c.c)), c1=Math.max(...cs.map(c=>c.c)), r0=Math.min(...cs.map(c=>c.r)), r1=Math.max(...cs.map(c=>c.r));
+    h+=box(o,[c0*50,r0*50,(c1-c0+1)*50,(r1-r0+1)*50],qs.length===1||compact); });
+  const cancShown=new Set();
+  if(!Object.keys(covered).length&&!canc.some(o=>o.area==='platz')) h+='<div class="lp-free all">Platz frei</div>';
+  else [1,2,3,4].filter(q=>!covered[q]).forEach(q=>{ const c=cell(q), cx=canc.find(o=>o.area==='platz'&&o.lanes[0]<=q&&o.lanes[1]>=q);
+    const show=cx&&!cancShown.has(cx.id); if(show) cancShown.add(cx.id);
+    h+='<div class="lp-free" style="left:'+c.c*50+'%;top:'+c.r*50+'%">frei'+(show?'<small>'+esc(cx.label)+' abgesagt</small>':'')+'</div>'; });
+  if(lock) h+='<div class="lp-lock"><b>Gesperrt</b>'+(lock.note?'<span>'+esc(lock.note)+'</span>':'')+'</div>';
+  h+='</div>';
+  const k=live.find(o=>o.area==='klein'), kc=canc.find(o=>o.area==='klein');
+  h+='<div class="lp-klein"><span class="lp-klein-t">Kleinspielfeld</span>'+(k?'<span class="lp-pill sm'+(occIsMine(k,isMine)?' mine':'')+'">'+esc(k.label+tag(k))+'</span><span class="lp-sub sm">bis '+k.bis+'</span>'
+    :'<span class="lp-freetxt">frei'+(kc?' · '+esc(kc.label)+' abgesagt':'')+'</span>')+'</div>';
+  const hall=live.filter(o=>o.area==='halle');
+  if(hall.length){ h+='<div class="lp-halle"><span class="lp-klein-t">Halle</span><div class="lp-thirds">'+[1,2,3].map(t=>{ const o=hall.find(x=>x.lanes[0]===t);
+      return '<div class="lp-third'+(o&&occIsMine(o,isMine)?' mine':'')+'">'+(o?esc(o.label):'frei')+'</div>'; }).join('')+'</div></div>'; }
+  return h+'</div>';
+}
+/* ---------- Live-Karte oben: „Läuft gerade“ oder „Als Nächstes“ der eigenen Mannschaft(en) ---------- */
+function startHeroHTML(src,isMine){
+  const now=nowHMStr(), n=hmMin(now);
+  const valid=e=>!e.isCancelled&&!e.isMovedGhost&&!e.withdrawn;
+  const items=weekItems(isMine).filter(valid);
+  const running=items.filter(e=>e.d===todayStr&&hmMin(e.t)<=n&&hmMin(eventBis(e))>n);
+  const next=items.find(e=>e.d>todayStr||hmMin(e.t)>n)||nextGamesBeyondWeek(isMine,items).find(valid)||null;
+  const it=running[0]||next;
+  const area=e=>e.isAway?'auswärts':(pitchLabelOf(e)||'');
+  let kicker, title, sub, right='', acts='', live=!!running.length;
+  if(it){
+    const parts=weekRowParts(it);
+    title=(running.length>1?running.map(e=>teamShort(e.team,e.squad)).join(' und '):(it.team===GK_TEAM||kindOf(it)==='goalkeeper'?'TW':teamShort(it.team,it.squad)))+' · '+parts.name;
+    if(live){ kicker='Läuft gerade';
+      sub=running.length>1?running.map(e=>teamShort(e.team,e.squad)+' bis '+eventBis(e)).join(' · ')
+        :it.t+'–'+eventBis(it)+(area(it)?' · '+area(it):'')+' · noch '+(hmMin(eventBis(it))-n)+' Min'; }
+    else{
+      kicker='Als Nächstes';
+      const days=Math.round((new Date(it.d+'T00:00:00')-new Date(todayStr+'T00:00:00'))/86400000);
+      const when=days===0?'in '+(hmMin(it.t)-n>=60?Math.floor((hmMin(it.t)-n)/60)+' Std '+((hmMin(it.t)-n)%60)+' Min':(hmMin(it.t)-n)+' Min'):(days===1?'morgen':'in '+days+' Tagen');
+      sub=startDayLabel(it.d,false).replace(/^(Heute|Morgen) · .*/,'$1')+' · '+(it.isExternal||it.kickoff?'Anstoß '+(it.kickoff||it.t):it.t+'–'+eventBis(it))+(area(it)?' · '+area(it):'')+' · '+when;
+      if(it.pitch) right='<div class="hero-mini">'+miniPitch(pitchQuarters(it.pitch),true)+'</div>';
+    }
+    acts=weekRowActHTML(it).replace('>Absagen<','>Training absagen<');
+    // Eigener Konflikt direkt in der Karte, mit Lösung (ab 01.10.2026 · 2)
+    const cp=conflictPartnersOf(it).partners;
+    if(cp.length){ const p=cp[0], fix=conflictFix(it,p,it.d);
+      if(fix){ acts=''; startHeroFix=fix.click; } // Lösung steht im Konflikt-Hinweis – nicht doppelt
+      acts+='<div class="hero-conf">'+svgWarn+'<span>Überschneidung mit '+esc(conflictItemLabel(p))+' '+p.t+'–'+eventBis(p)+'</span>'
+        +(fix?'<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();'+fix.click)+'">'+esc(fix.label)+'</button>':'<button type="button" class="wk-act" onclick="'+esc('openTerminFromStart(\''+jsArg(it.id)+'\',\''+it.d+'\')')+'">Ansehen</button>')+'</div>'; }
+  }else{ kicker='Jetzt auf dem Platz'; title='Keine Termine in Sicht'; sub='Für '+(src?src.label:'deine Mannschaft')+' steht in den nächsten Tagen nichts an.'; }
+  const onclick=it?' onclick="'+esc(it.isMovedGhost?'jumpToGame('+it.fbIndex+')':'openTerminFromStart(\''+jsArg(it.id)+'\',\''+it.d+'\')')+'"':'';
+  let h='<section class="st-hero"><div class="hero-top"><span class="hero-kicker'+(live?' live':'')+'"><i></i>'+esc(kicker)+'</span></div>'
+    +'<div class="hero-main"'+onclick+'><div class="hero-txt"><div class="hero-title">'+esc(title)+'</div><div class="hero-sub">'+esc(sub)+'</div></div>'+right+'</div>';
+  if(live) h+=livePitchHTML(isMine,false);
+  else h+='<div class="hero-now">Jetzt auf dem Platz</div>'+livePitchHTML(isMine,true);
+  if(acts) h+='<div class="hero-acts">'+acts+'</div>';
+  return h+'</section>';
+}
+function startPlaceOnlyHTML(){ // ohne eigene Mannschaft: nur der Platz jetzt
+  return '<section class="st-hero"><div class="hero-top"><span class="hero-kicker live"><i></i>Jetzt auf dem Platz</span></div>'
+    +'<div class="hero-main"><div class="hero-txt"><div class="hero-title">'+esc(todaySummaryText())+'</div><div class="hero-sub">'+esc(startDayLabel(todayStr,true))+'</div></div></div>'
+    +livePitchHTML(null,false)+'</section>';
+}
+/* ---------- Woche: Leiste zum Tag-Wählen + Tag (Termine + Platz) oder Woche (Liste) ---------- */
+function openDayInCalendar(ds){ const dt=new Date(ds+'T00:00:00'); curY=dt.getFullYear(); curM=dt.getMonth(); yearShown=curY; selDate=ds; goto('termine'); setView('woche'); scrollToWeekDay(ds); }
+function setStartDay(ds){ startSel=ds; startView='tag'; renderMyWeek(); }
+function setStartView(v){ startView=v; renderMyWeek(); }
+function startWeekHTML(src,isMine,admin){
+  const end=weekEndStr();
+  if(!startSel||startSel<todayStr||startSel>end) startSel=todayStr;
+  const items=src?weekItems(isMine):[];
+  const dotOf=e=>(e.isCancelled||e.isMovedGhost||e.withdrawn)?'grey':(e.isExternal||isMatchKind(kindOf(e))?'game':'tr');
+  let h='<section class="st-week"><div class="stw-head"><h2>'+esc(admin?'Platz diese Woche':(src?(src.fromSession?'Deine Woche · '+src.label:'Diese Woche'):'Platz diese Woche'))+'</h2>'
+    +'<div class="seg-mini"><button type="button" class="'+(startView==='tag'?'on':'')+'" onclick="setStartView(\'tag\')">Tag</button>'
+    +'<button type="button" class="'+(startView==='woche'?'on':'')+'" onclick="setStartView(\'woche\')"'+(src?'':' disabled')+'>Woche</button></div></div>';
+  h+='<div class="stw-strip">';
+  for(let i=0;i<WEEK_DAYS;i++){ const ds=addDays(todayStr,i), dt=new Date(ds+'T00:00:00'), sel=startView==='tag'&&ds===startSel;
+    const dots=items.filter(e=>e.d===ds).slice(0,3).map(e=>'<i class="'+dotOf(e)+'"></i>').join('');
+    h+='<button type="button" class="stw-day'+(sel?' on':'')+(i===0?' today':'')+'" onclick="setStartDay(\''+ds+'\')"><span>'+(i===0?'Heute':DOW[dowOf(ds)-1])+'</span><b>'+dt.getDate()+'</b><em>'+dots+'</em></button>'; }
+  h+='</div>';
+  if(startView==='woche'&&src){
+    h+='<div class="st-card wk-list">';
+    let last='';
+    items.forEach(e=>{ if(e.d!==last){ h+='<div class="wk-day">'+esc(weekDayLabel(e.d))+'</div>'; last=e.d; } h+=weekRowHTML(e); });
+    if(!items.length) h+='<div class="wk-empty">In den nächsten 7 Tagen steht nichts an.</div>';
+    const next=nextGamesBeyondWeek(isMine,items);
+    if(next.length){ h+='<div class="wk-day">Nächste Spiele</div>'; next.forEach(e=>{ h+=weekRowHTML(e,true); }); }
+    h+='</div>';
+  }else{
+    const day=items.filter(e=>e.d===startSel);
+    const canLock=admin&&startSel===todayStr&&!activeLocksOn(todayStr).some(l=>l.resource==='platz');
+    h+='<div class="st-card"><div class="stc-head"><h3>'+esc(startDayLabel(startSel,true))+'</h3>'
+      +(canLock?'<button type="button" class="wk-act" onclick="openQuickLock()">Heute sperren</button>':'<a href="#" onclick="'+esc('event.preventDefault();openDayInCalendar(\''+startSel+'\')')+'">Im Kalender</a>')+'</div>';
+    if(src){ h+=day.length?day.map(e=>weekRowHTML(e)).join(''):'<div class="wk-empty">Kein Termin für '+esc(src.label)+' an diesem Tag.</div>'; }
+    h+='<div class="stc-sub">Platz an diesem Tag</div>'+timelineHTML(startSel,isMine)+'</div>';
+  }
+  return h+'</section>';
+}
+/* Favoriten für Besucher (und Zugänge ohne eigene Mannschaft): auf dem Gerät gespeichert. */
+function startFavHTML(src){
+  if(!src||src.fromSession) return '';
+  const chips=pickedWeekKeys().map(k=>{ const [t,q]=k.split(':'); return '<span class="fav-chip">★ '+esc(teamShort(t,parseInt(q)||1))+'</span>'; }).join('');
+  return '<section class="st-fav"><div class="fav-row">'+chips+'<button type="button" class="fav-edit" onclick="toggleWeekPicker()">'+(weekPickerOpen?'Fertig':'Favoriten ändern')+'</button></div>'
+    +(weekPickerOpen?weekPickerHTML(false):'<div class="fav-hint">Deine Favoriten – ohne Anmeldung, gespeichert auf diesem Handy.</div>')+'</section>';
+}
+/* ---------- Admin: Zahlen (Platz-Woche mit „Heute sperren“ steht oben, siehe renderMyWeek) ---------- */
+function startTilesHTML(){
+  let tr=0, hg=0;
+  for(let i=0;i<WEEK_DAYS;i++){ const ds=addDays(todayStr,i); tr+=trainingInstancesOn(ds).length;
+    hg+=fussballDisplayInstancesOn(ds).filter(e=>!e.isAway&&!e.withdrawn).length+EVENTS.filter(e=>e.d===ds&&isMatchKind(kindOf(e))&&e.ha==='home').length; }
+  const conf=seasonConflictScan().length;
+  return '<section class="st-tiles">'
+    +'<button type="button" class="st-tile" onclick="goto(\'termine\')"><b>'+tr+'</b><span>Trainings diese Woche</span></button>'
+    +'<button type="button" class="st-tile" onclick="goto(\'termine\')"><b>'+hg+'</b><span>Heimspiele diese Woche</span></button>'
+    +'<button type="button" class="st-tile'+(conf?' warn':'')+'" onclick="toggleSeasonStatus()"><b>'+conf+'</b><span>Konflikte in der Saison</span></button></section>';
+}
+function toggleSeasonStatus(){ startSeasonOpen=!startSeasonOpen; renderStart(); }
+function startSeasonLineHTML(){
+  const n=seasonConflictScan().length;
+  return '<button type="button" class="st-season'+(n?' warn':'')+'" onclick="toggleSeasonStatus()">'+(n?svgWarn:svgOk)+'<span>'+(n?n+' Konflikt'+(n===1?'':'e')+' in der Saison':'Keine Konflikte in der Saison')+'</span><b>'+(startSeasonOpen?'Zuklappen ▴':'Anzeigen ›')+'</b></button>';
+}
 function renderStart(){
-  const dt=new Date(todayStr+'T00:00:00');
-  document.getElementById('st-date').textContent=DAYS[dt.getDay()]+', '+dt.getDate()+'. '+MONTHS[dt.getMonth()];
   renderInstallBanner();
   renderRegBanner();
   renderLockStartBanner();
   renderMyWeek();
-  renderPitchToday();
   const sw=document.getElementById('st-status-wrap');
-  if(sw) sw.style.display=session?'':'none';
-  if(session) renderStartStatus();
+  if(sw) sw.style.display=session&&startSeasonOpen?'':'none';
+  if(session&&startSeasonOpen) renderStartStatus();
 }
 /* ---------- Meine Woche (ab 29.09.2026 · 2) ----------
    Oben auf der Startseite: Training, Spiele, Absagen und Verlegungen der eigenen Mannschaften für
@@ -3472,7 +3856,7 @@ function renderStart(){
    Admins ohne Mannschaft): eigene Mehrfachwahl, pro Gerät gespeichert (pc_my_teams).
    Darüber "Zu erledigen" (nur angemeldet), darunter die Platzbelegung heute – zugeklappt, sobald
    "Meine Woche" Inhalt hat (Aufklappen wird pro Gerät gemerkt: pc_pitch_open). */
-const MY_TEAMS_KEY='pc_my_teams', PITCH_OPEN_KEY='pc_pitch_open', PICK_HIDDEN_KEY='pc_my_teams_hidden', WEEK_DAYS=7, WEEK_MAX_ROWS=8;
+const MY_TEAMS_KEY='pc_my_teams', PICK_HIDDEN_KEY='pc_my_teams_hidden', WEEK_DAYS=7, WEEK_MAX_ROWS=8;
 let weekPickerOpen=false, weekShowAll=false;
 function lsGet(k,def){ try{ const v=localStorage.getItem(k); return v==null?def:JSON.parse(v); }catch(e){ return def; } }
 function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
@@ -3766,48 +4150,37 @@ function weeklyDigestFor(userId){
   }finally{ session=prev; _conflictCache={}; }
 }
 function renderMyWeek(){
-  const todoBox=document.getElementById('st-todo'), box=document.getElementById('st-week');
-  if(!todoBox||!box) return;
+  const todoBox=document.getElementById('st-todo'), heroBox=document.getElementById('st-hero'), weekBox=document.getElementById('st-week');
+  const adminBox=document.getElementById('st-admin'), tilesBox=document.getElementById('st-tiles'), seasonBox=document.getElementById('st-season');
+  if(!todoBox||!heroBox||!weekBox) return;
   const src=myWeekSource();
-  const isMine=src?weekMatcher(src):()=>false;
-  // Zu erledigen
-  if(session&&(src&&src.fromSession||session.isAdmin)){
-    const td=myTodos(isMine,!!(src&&src.fromSession));
+  const isMine=src?weekMatcher(src):null;
+  const admin=!!(session&&session.isAdmin);
+  startHeroFix=null;
+  const heroHTML=src?startFavHTML(src)+startHeroHTML(src,isMine):'';
+  // Zu erledigen (ohne den Konflikt, dessen Lösung schon in der Live-Karte steht)
+  if(session&&(src&&src.fromSession||admin)){
+    const td=myTodos(isMine||(()=>false),!!(src&&src.fromSession)).filter(t=>!(t.fix&&startHeroFix&&t.fix.click===startHeroFix));
     todoBox.innerHTML=td.length?'<p class="section-label">Zu erledigen</p>'+td.map(t=>
       '<div class="status-row warn" style="cursor:pointer;" onclick="'+esc(t.click)+'">'+svgWarn+'<div style="flex:1;">'+esc(t.txt)+' <b>'+esc(t.act)+' ›</b>'
       +(t.fix?'<div class="todo-fix"><button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();'+t.fix.click)+'">'+esc(t.fix.label)+'</button></div>':'')
       +'</div></div>').join(''):'';
   }else todoBox.innerHTML='';
-  // Mannschaftswahl (ohne Saison-Zuordnung)
-  const canPick=!(src&&src.fromSession);
+  // Oben: Admin sieht zuerst den Platz der Woche (mit „Heute sperren“), alle anderen ihre Live-Karte.
+  if(adminBox) adminBox.innerHTML=admin?startWeekHTML(src,isMine,true):'';
+  if(tilesBox&&!admin) tilesBox.innerHTML='';
+  let hero='';
   if(!src){
-    // Ausgeblendet ("Nicht jetzt"): nur eine schmale Zeile, die die Wahl wieder öffnet.
-    box.innerHTML=(lsGet(PICK_HIDDEN_KEY,false)&&!weekPickerOpen)
-      ?'<button type="button" class="wk-pick-link" onclick="weekPickerOpen=true;renderMyWeek();">Training und Spiele deiner Mannschaft oben sehen? <b>Mannschaft wählen ›</b></button>'
-      :weekPickerHTML(true);
-    return;
-  }
-  const endD=weekEndStr(), nextD=(()=>{ const d=new Date(endD+'T00:00:00'); d.setDate(d.getDate()+1); return ymd(d); })();
-  let h='<div class="wk-head"><p class="section-label">Meine Woche <span class="sec-range">bis '+esc(dayCase(endD))+'</span></p>'
-    +(canPick?'<button type="button" class="wk-teams" onclick="toggleWeekPicker()">'+esc(src.label)+' ✎</button>'
-             :'<span class="wk-teams static">'+esc(src.label)+'</span>')+'</div>';
-  if(canPick&&weekPickerOpen) h+=weekPickerHTML(false);
-  const items=weekItems(isMine);
-  // "Heute" steht immer oben – ohne Termine mit dem Hinweis "Nichts für …", damit klar ist, dass heute nichts ansteht.
-  // Ab 30.09.2026 · 6: wie die anderen Tage (Überschrift + Zeile), die Zeile gedämpft mit gestricheltem Rahmen.
-  if(!items.some(e=>e.d===todayStr)) h+='<div class="wk-day">'+esc(weekDayLabel(todayStr))+'</div>'
-    +'<div class="wk-none"><span class="wk-none-ico" aria-hidden="true">✓</span>Heute kein Training und kein Spiel für '+esc(src.label)+'</div>';
-  if(!items.length) h+='<div class="wk-empty">Auch in den nächsten 6 Tagen steht nichts an.</div>';
-  const shown=weekShowAll?items:items.slice(0,WEEK_MAX_ROWS);
-  let lastDay='';
-  shown.forEach(e=>{ if(e.d!==lastDay){ h+='<div class="wk-day">'+esc(weekDayLabel(e.d))+'</div>'; lastDay=e.d; } h+=weekRowHTML(e); });
-  if(items.length>WEEK_MAX_ROWS) h+='<button type="button" class="wk-more" onclick="weekShowAll=!weekShowAll;renderMyWeek();">'+(weekShowAll?'Weniger anzeigen ▴':'Alle '+items.length+' anzeigen ▾')+'</button>';
-  const next=nextGamesBeyondWeek(isMine,items);
-  // Immer zeigen (ab · 11) – ohne Spiele mit Hinweis statt leer, damit es nicht wie ein Fehler wirkt.
-  h+='<p class="section-label" style="margin-top:16px;">Nächste Spiele <span class="sec-range">ab '+esc(dayCase(nextD))+'</span></p>';
-  if(next.length) next.forEach(e=>{ h+=weekRowHTML(e,true); });
-  else h+='<div class="wk-empty">Keine weiteren Spiele geplant.</div>';
-  box.innerHTML=h;
+    // Erster Besuch ohne Favoriten: die Auswahl steht direkt oben; „Nicht jetzt“ zeigt den ganzen Platz.
+    if(!admin&&(weekPickerOpen||!lsGet(PICK_HIDDEN_KEY,false))) hero=weekPickerHTML(true);
+    else if(!admin) hero=startPlaceOnlyHTML()+'<button type="button" class="wk-pick-link" onclick="weekPickerOpen=true;renderMyWeek();">Training und Spiele deiner Mannschaft oben sehen? <b>Favoriten wählen ›</b></button>';
+    else hero='<button type="button" class="wk-pick-link" onclick="weekPickerOpen=true;renderMyWeek();">Eigene Mannschaft oben sehen? <b>Mannschaft wählen ›</b></button>'+(weekPickerOpen?weekPickerHTML(false):'');
+  }else hero=heroHTML;
+  // Admin: eigene Mannschaft nach „Zu erledigen“ und den Zahlen
+  if(admin){ heroBox.innerHTML=''; if(tilesBox) tilesBox.innerHTML=startTilesHTML()+hero; }
+  else heroBox.innerHTML=hero;
+  weekBox.innerHTML=admin?'':startWeekHTML(src,isMine,false);
+  if(seasonBox) seasonBox.innerHTML=session&&!admin?startSeasonLineHTML():'';
 }
 function weekPickerHTML(intro){
   const picked=new Set(pickedWeekKeys());
@@ -3829,10 +4202,8 @@ function toggleWeekTeam(ev,key){
   lsSet(MY_TEAMS_KEY,next);
   if(!had) trackEvent('meine_woche_mannschaft_gewaehlt');
   if(!cur.length&&next.length) weekPickerOpen=true; // erste Wahl: Auswahl offen lassen für weitere Mannschaften
-  renderMyWeek(); renderPitchToday();
+  renderMyWeek();
 }
-function weekHasContent(){ return !!myWeekSource(); }
-function setPitchOpen(open){ lsSet(PITCH_OPEN_KEY,!!open); if(open) trackEvent('platzbelegung_aufgeklappt'); renderPitchToday(); }
 function renderLockStartBanner(){
   const box=document.getElementById('lock-start-banner');
   if(!box)return;
@@ -3947,65 +4318,7 @@ function openTerminFromStart(id,d){
   clearTimeout(window._hlTimer); window._hlTimer=setTimeout(()=>{ highlightId=null; render(); },5000);
 }
 // Überschrift "Platzbelegung heute" und Tageszusammenfassung: Tipp öffnet den heutigen Tag im Kalender.
-function openTodayFromStart(){
-  curY=today.getFullYear(); curM=today.getMonth(); yearShown=curY; selDate=todayStr;
-  goto('termine'); setView('woche');
-  scrollToWeekDay(todayStr);
-}
-function renderOccupiedBadge(){
-  const box=document.getElementById('st-occupied-badge');
-  if(!box)return;
-  const now=new Date(),nowHM=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-  const on=todaysCombinedAgenda().some(e=>!e.isCancelled&&(e.pitch||(e.halle&&e.halle.thirds&&e.halle.thirds.length)||(e.isExternal&&e.pitchIsFull)||(e.res&&e.res.length))&&e.t<=nowHM&&eventBis(e)>nowHM);
-  if(activeLocksOn(todayStr).some(l=>l.resource==='platz')){ box.innerHTML='<div class="occupied-badge"><span class="dot on"></span>Platz heute gesperrt</div>'; return; }
-  box.innerHTML='<div class="occupied-badge"><span class="dot '+(on?'on':'off')+'"></span>Platz aktuell '+(on?'belegt':'frei')+'</div>';
-}
-function renderPitchToday(){
-  renderOccupiedBadge();
-  const box=document.getElementById('st-pitch-today');
-  if(!box)return;
-  const items=todaysCombinedAgenda().filter(e=>e.isCancelled||e.pitch||(e.halle&&e.halle.thirds&&e.halle.thirds.length)||e.isExternal||e.res&&e.res.length||classifyAgendaItem(e)==='sonstige'||classifyAgendaItem(e)==='torwart');
-  if(!items.length){ box.innerHTML='<div class="empty-card">Heute keine Termine.</div>'; return; }
-  const now=new Date(),nowHM=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-  // Mit "Meine Woche" darüber startet die Liste zugeklappt (eine Zeile mit Anzahl + Konflikten).
-  const collapsible=weekHasContent();
-  if(collapsible&&!lsGet(PITCH_OPEN_KEY,false)){
-    const conf=conflictsOnDay(todayStr).length;
-    box.innerHTML='<div class="pt-collapsed" onclick="setPitchOpen(true)"><span><b>'+esc(todaySummaryText())+'</b></span>'
-      +(conf?'<span class="pt-conf">· '+conf+' Konflikt'+(conf===1?'':'e')+'</span>':'')
-      +'<span class="pt-open">Alle anzeigen ▾</span></div>';
-    return;
-  }
-  box.innerHTML=items.map(e=>{
-    if(e.isCancelled){
-      const teamTxt=teamLabel(e.team,e.squad||1);
-      return '<div class="pitch-today-row pt-cancelled" onclick="openTerminFromStart(\''+e.id+'\',\''+e.d+'\')">'
-        +'<div class="pt-time">'+e.t+'</div>'
-        +'<div class="pt-team"><div class="pt-team-name">'+esc(teamTxt)+'</div><div class="pt-type">Training</div></div>'
-        +'<span class="hoff-pill">Abgesagt</span>'
-        +'</div>';
-    }
-    const running=e.t<=nowHM&&eventBis(e)>nowHM;
-    const isGkItem=kindOf(e)==='goalkeeper';
-    const teamTxt=isGkItem?('für '+gkTeamsText(gkTeamsOf(e))):teamLabel(e.team,e.squad||1);
-    const type=classifyAgendaItem(e);
-    let typeTxt=typeLabelOf(e);
-    if(e.isExternal)typeTxt+=e.isAway?' · auswärts':' · heim';
-    const visual=pitchVisualOf(e)||'<span class="badge-pitch" style="opacity:.5;">–</span>';
-    const sc=scoreInfo(e);
-    return '<div class="pitch-today-row'+(running?' pt-running':'')+'" onclick="openTerminFromStart(\''+e.id+'\',\''+e.d+'\')">'
-      +'<div class="pt-time">'+(running?'<span class="pt-live">●</span>':'')+e.t+'</div>'
-      // Eigene Termine (Trainerstammtisch, Freundschaftsspiel …): Name als Überschrift wie in der
-      // Terminübersicht, Art + Mannschaft darunter. Trainings und fussball.de-Spiele: Mannschaft oben.
-      +(!e.isTraining&&!e.isExternal&&e.title
-        ?'<div class="pt-team"><div class="pt-team-name">'+esc(e.title)+'</div><div class="pt-type">'+esc(isGkItem?teamTxt:(typeTxt+' · '+teamTxt))+'</div></div>'
-        :(isGkItem
-          ?'<div class="pt-team"><div class="pt-team-name">Torwarttraining</div><div class="pt-type">'+esc(teamTxt)+'</div></div>'
-          :'<div class="pt-team"><div class="pt-team-name">'+esc(teamTxt)+'</div><div class="pt-type">'+esc(typeTxt)+'</div></div>'))
-      +(sc?'<div class="score-pill '+sc.outcome+'" style="font-size:12px;padding:3px 8px;">'+sc.text+'</div>':'<div class="pt-visual">'+visual+'</div>')
-      +'</div>';
-  }).join('')+(collapsible?'<button type="button" class="wk-more" onclick="setPitchOpen(false)">Zuklappen ▴</button>':'');
-}
+/* Entfernt ab 01.10.2026 · 2: „Heute im Verein“ (Liste + Badge „Platz aktuell belegt“) – ersetzt durch Live-Karte und Zeitleiste. */
 const svgOk='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="#16A34A"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>';
 const svgWarn='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="#C2410C"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>';
 // Heimspiel von fussball.de, das nur eine Platzhälfte braucht (z.B. E-Jugend und jünger).

@@ -10,18 +10,18 @@ Ausführliche Analyse: Projekt-Doc `claude/vereinsneo-analyse-2026-10.md`.
 **Status:** ✅ umgesetzt · 🟡 teilweise · ⬜ offen · ⛔ bewusst nicht
 **Phase:** Pilot = aktuelle Technik · 1.0 = mit Supabase/Einrichtungsassistent · Später
 
-Letzte Aktualisierung: 01.10.2026
+Letzte Aktualisierung: 01.10.2026 (Version 01.10.2026 · 2)
 
 ## Must have
 
 | Nr. | Feature | Phase | Status | Notiz |
 |---|---|---|---|---|
-| 1 | Tagesansicht mit Zeitleiste je Fläche (Hälfte A/B, Halle, Kabinen) | Pilot | ⬜ | Bisher Tagesliste unter dem Wochenstreifen, keine Zeitleiste je Fläche |
+| 1 | Tagesansicht mit Zeitleiste je Fläche (Hälfte A/B, Halle, Kabinen) | Pilot | 🟡 | 01.10.2026 · 2: Zeitleiste je Fläche auf der Startseite („Platz an diesem Tag“, Viertel-Spuren + Kleinspielfeld/Halle, Blöcke antippbar). Offen: dieselbe Ansicht im Kalender |
 | 2 | Schnell-Anlage durch Antippen einer freien Lücke | Pilot | ⬜ | Hängt an Nr. 1 |
-| 3 | Sonnenuntergang und „dunkel ab …“ in Tagesansicht und Start | Pilot | ⬜ | Lokal berechnen, braucht Koordinaten in config |
-| 4 | Hinweis „Tage werden kürzer“: welche Trainingszeiten ab wann im Dunkeln enden | Pilot | ⬜ | Zeitumstellung 25.10.; braucht Flutlicht-Angabe |
-| 5 | Platz schnell sperren („Heute sperren“ mit Grund, schraffiert) | Pilot | 🟡 | ✅ 01.10.2026 · 1: „Heute sperren“ neben „Heute im Verein“ (Admin) → Grund antippen, mit Rückgängig; Banner mit „Aufheben“; Grund-Chips auch unter Konto → Saisons. Klick-Budget 2 ✅. Offen: schraffierte Darstellung im Plan |
-| 6 | Konflikte mit konkretem Lösungsvorschlag und Direkt-Aktion | Pilot | 🟡 | ✅ 01.10.2026 · 1: Training gegen Spiel/Termin → Knopf „Training … absagen“ direkt in „Zu erledigen“ (1 Klick + Rückgängig). Offen: Vorschläge für andere Konfliktarten (z. B. freie Hälfte) |
+| 3 | Sonnenuntergang und „dunkel ab …“ in Tagesansicht und Start | Pilot | ✅ | 01.10.2026 · 2: Sonnenuntergang als Linie in der Zeitleiste, berechnet aus data/config.json → venue (lat/lon) |
+| 4 | Hinweis „Tage werden kürzer“: welche Trainingszeiten ab wann im Dunkeln enden | Pilot | ⛔ | Nicht nötig: Höllenbergkampfbahn hat Flutlicht auf dem ganzen Platz (Antwort 01.10.2026). Bei Vereinen ohne Flutlicht wieder aufnehmen (venue.floodlight) |
+| 5 | Platz schnell sperren („Heute sperren“ mit Grund, schraffiert) | Pilot | ✅ | 01.10.2026 · 1: „Heute sperren“ + Grund-Chips + Aufheben mit Rückgängig; 01.10.2026 · 2: Sperre schraffiert in Live-Karte und Zeitleiste, „Heute sperren“ in der Tageskarte (Admin) |
+| 6 | Konflikte mit konkretem Lösungsvorschlag und Direkt-Aktion | Pilot | 🟡 | ✅ 01.10.2026 · 1: Training gegen Spiel/Termin → Knopf „Training … absagen“ direkt in „Zu erledigen“ (1 Klick + Rückgängig). Offen: Vorschläge für andere Konfliktarten (z. B. freie Hälfte); 01.10.2026 · 2: Lösung auch direkt in der Live-Karte („Überschneidung mit …“ + Absagen) |
 | 7 | Dauer-Chips im Formular (60/75/90/105/120 Min) | Pilot | ⬜ | |
 | 8 | Mannschaft zuerst wählen, danach passende Fläche vorschlagen | Pilot | 🟡 | Teilweise mit Nr. 52: Formular startet mit der eigenen Mannschaft und deren üblicher Fläche; ist sie belegt, wird eine freie gleicher Größe gewählt |
 | 9 | Zeitpunkt des letzten fussball.de-Abgleichs anzeigen | Pilot | 🟡 | Stand steht bei „Automatisch von fussball.de übernommen“ und im Mannschaftsabgleich; fehlt: global sichtbar, Warnung wenn > 6 h alt |
@@ -30,19 +30,27 @@ Letzte Aktualisierung: 01.10.2026
 | 12 | Spielorte zuordnen: Gehört uns / Fremde Anlage / Später | 1.0 | 🟡 | Pilot: `homeVenues`/`foreignVenue`-Logik für SVBB; Auswahl im Assistenten fehlt |
 | 13 | Teilplätze aus fussball.de-Spielortnamen anlegen | 1.0 | ⬜ | |
 | 14 | Einrichtungs-Checkliste mit Fortschritt auf der Startseite | 1.0 | ⬜ | |
-| 15 | Platz-Eigenschaften: Belag, Flutlicht, Nutzung, Kürzel | 1.0 | ⬜ | |
+| 15 | Platz-Eigenschaften: Belag, Flutlicht, Nutzung, Kürzel | 1.0 | 🟡 | 01.10.2026 · 2: Standort und Flutlicht in data/config.json → venue. Offen: Belag, Nutzung, Kürzel je Platz (1.0) |
 | 16 | DFBnet-Spielplan per Datei importieren (Plan B ohne fussball.de-Abruf) | Später | ⬜ | Exportformat klären |
 | 49 | Training absagen direkt aus der Zeile in „Meine Woche“ (1 Klick + Rückgängig statt Datums-Dialog) | Pilot | ✅ | 01.10.2026 · 1: „Absagen“ in jeder Trainingszeile von „Meine Woche“, ebenso an der Kalenderkarte und im Konflikt-Hinweis; „Zurücknehmen“ bei abgesagten. Gespeichert wird erst nach 6 s (Rückgängig = keine Mail). Klick-Budget 1 ✅ |
 | 50 | Verlegung schneller vormerken: Grund als Chips (Ferien, Spielermangel, Platz gesperrt, Sonstiges), Datum aus Ansetzungssuche vorschlagen | Pilot | ✅ | 01.10.2026 · 1: „Verlegen“ direkt in der Spielzeile, Grund als Chips. Klick-Budget 5, davon 2 für das neue Datum (lässt sich nicht vorbefüllen); über die Ansetzungssuche ist es vorbefüllt |
 | 51 | Trainer einladen mit einem Klick: Link automatisch erzeugen, „Per WhatsApp teilen“ auch bei Mannschaften ohne Trainer | Pilot | ✅ | 01.10.2026 · 1: Hinweis in „Zu erledigen“ für Admins, wenn Mannschaften keinen Trainer haben → 1 Klick erzeugt Link und teilt per WhatsApp („Nicht jetzt“ blendet aus, bis sich die Liste ändert). In Konto → Zugänge „Per WhatsApp einladen“ ohne vorheriges Link-Erzeugen |
 | 52 | Formular vorbefüllen: Datum aus der aktuellen Kalenderansicht, Mannschaft des Trainers, übliche Trainingszeit der Mannschaft, Anlass automatisch | Pilot | ✅ | 01.10.2026 · 1: Datum aus dem gewählten Kalendertag, eigene Mannschaft, Terminart Training, Anlass automatisch, übliche Zeit/Fläche aus der Trainingszeit. Klick-Budget: + → Speichern = 2 (heute), aus dem Kalender 3 ✅ |
+| 53 | Live-Karte oben: „Läuft gerade“ mit Platz von oben (je Fläche eigene Endzeit + Fortschritt) bzw. „Als Nächstes“ + klein „Jetzt auf dem Platz“ | Pilot | ✅ | 01.10.2026 · 2 |
+| 54 | Kleinspielfeld und Halle sichtbar: eigenes Feld in der Live-Karte, eigene Spuren in der Zeitleiste – nur wenn belegt | Pilot | ✅ | 01.10.2026 · 2 |
+| 55 | Block in der Zeitleiste antippen → Detailblatt (Mannschaft, Zeit, Fläche, Trainer-Kontakt, „Im Kalender“) | Pilot | ✅ | 01.10.2026 · 2 |
+| 56 | Eigener Konflikt in der Live-Karte mit Ein-Klick-Lösung (nicht doppelt in „Zu erledigen“) | Pilot | ✅ | 01.10.2026 · 2 |
+| 57 | Besucher: Favoriten oben (ohne Anmeldung, auf dem Gerät), erster Besuch mit Auswahl direkt oben, „Nicht jetzt“ zeigt den ganzen Platz | Pilot | ✅ | 01.10.2026 · 2 |
+| 58 | Startseite Admin: Platz der Woche mit Zeitleiste und „Heute sperren“ oben, dann Zu erledigen, Zahlen-Kacheln, eigene Mannschaft | Pilot | ✅ | 01.10.2026 · 2 |
+| 59 | Saison-Konflikte auf der Startseite als eine Zeile (aufklappbar) statt langer Liste | Pilot | ✅ | 01.10.2026 · 2 |
+| 60 | Besucher ohne Anmeldung: „Neu“ in der unteren Leiste ausblenden (Mockup), stattdessen „Anmelden“ oben | Pilot | ⬜ | Aus dem Startseiten-Mockup, noch nicht umgesetzt |
 | 43 | Mannschaften mit Lücken-Filtern („ohne Trainer“, „ohne Trainingszeit“, „ohne Platzfreigabe“) | Pilot | ⬜ | „Termine heute ohne Trainer“ gibt es als Warnzeile; Filter in der Mannschaftsliste fehlen |
 
 ## Nice to have
 
 | Nr. | Feature | Phase | Status | Notiz |
 |---|---|---|---|---|
-| 17 | Wochenleiste mit Zahlen und Konfliktpunkten auf der Startseite (Admin) | Pilot | 🟡 | Wochenleiste (`cw-strip`) im Kalender vorhanden; Zahlen/Konfliktpunkte und Startseiten-Variante fehlen |
+| 17 | Wochenleiste mit Zahlen und Konfliktpunkten auf der Startseite (Admin) | Pilot | ✅ | 01.10.2026 · 2: Wochenleiste mit Punkten je Tag (Training/Spiel/abgesagt) für Trainer und Favoriten; für Admins Zahlen-Kacheln (Trainings, Heimspiele, Konflikte) |
 | 18 | Verfügbarkeitszeile im Formular („2 von 4 Vierteln frei · Kabinen 3 von 4 frei“) | Pilot | ⬜ | |
 | 19 | Spielformat und Spielende auf Spielkarten (11v11, 9v9 …) | Pilot | ⬜ | Spieldauer je Altersklasse ist intern vorhanden |
 | 20 | Druckansicht für Woche und Tag (Aushang) | Pilot | ⬜ | |
@@ -78,6 +86,10 @@ Letzte Aktualisierung: 01.10.2026
 | 41 | Posteingang / Postfach | ⛔ | |
 | 42 | Fehlende Kabine als Konflikt werten | ⛔ | |
 | 48 | Benachrichtigungen als Grobwahl E-Mail/Keine | ⛔ | Unsere Kategorien sind feiner |
+
+## Entfernt
+
+- 01.10.2026 · 2: „Heute im Verein“ (Liste + Badge „Platz aktuell belegt“) auf der Startseite – ersetzt durch Live-Karte und Zeitleiste; das Datum oben steht jetzt in der Tageskarte.
 
 ## Bereits vorhanden (Bestätigung durch VereinsNeo)
 
