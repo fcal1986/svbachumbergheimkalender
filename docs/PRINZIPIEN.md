@@ -20,6 +20,7 @@ Ein Feature gehört nur dann in Platzcoach, wenn es diese Frage besser beantwort
 - **Admins** bekommen Verwaltungsfunktionen zusätzlich – an Stellen, die Trainer nicht belasten.
 - **Gäste ohne Anmeldung** sehen den Plan (siehe 6).
 - Ein neues Feature legt fest, für welche Rolle es ist. Was nur Admins brauchen, erscheint bei Trainern nicht.
+- **Gleiche Struktur für alle Rollen.** Jede Seite hat für Besucher, Trainer und Admins dieselbe Reihenfolge. Rollen bekommen zusätzliche Elemente an festen Stellen, nie eine umgebaute Seite.
 
 ## 3. Nicht überladen
 
