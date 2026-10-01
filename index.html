@@ -284,6 +284,26 @@
   .tl-now{position:absolute;top:12px;bottom:0;width:2px;margin-left:-1px;background:#C0392B;z-index:2;pointer-events:none;}
   .tl-now:before{content:"";position:absolute;top:-4px;left:-4px;width:10px;height:10px;border-radius:5px;background:#C0392B;}
   .tl-sun{position:absolute;bottom:0;border-left:2px dashed #E8B400;z-index:2;pointer-events:none;}
+  .tl-scroll{flex:1;min-width:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain;}
+  .tl-scroll::-webkit-scrollbar{display:none;}
+  .tl-scroll .tl-body{flex:none;}
+  .tl-free{position:absolute;height:24px;box-sizing:border-box;border:1.5px dashed #9CC57A;border-radius:6px;background:rgba(107,180,28,.07);color:var(--grass);font:inherit;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:flex-start;padding:0 8px;white-space:nowrap;overflow:hidden;}
+  .tl-free:active{background:rgba(107,180,28,.2);}
+  .lg.free{border:1.5px dashed #9CC57A;background:rgba(107,180,28,.07);}
+  .stc-nav{display:flex;align-items:center;gap:4px;min-width:0;}
+  .stc-arrow{flex:none;width:32px;height:32px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font:inherit;font-size:18px;font-weight:700;color:var(--ink);cursor:pointer;line-height:1;}
+  .stc-arrow:disabled{opacity:.3;cursor:default;}
+  .slot-sheet h3{margin:2px 0 8px;font-family:'Manrope','Inter',sans-serif;font-size:20px;}
+  .slot-lbl{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin:12px 0 6px;}
+  .slot-row{display:flex;flex-wrap:wrap;gap:7px;align-items:center;}
+  .slot-chip{min-height:40px;padding:0 13px;border-radius:11px;border:1.5px solid var(--line);background:#fff;font:inherit;font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;}
+  .slot-chip.on{background:var(--pc-navy);border-color:var(--pc-navy);color:#fff;}
+  .slot-time b{font-family:'Manrope','Inter',sans-serif;font-size:20px;min-width:62px;text-align:center;}
+  .slot-step{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font:inherit;font-size:20px;font-weight:700;cursor:pointer;}
+  .slot-free{font-size:12px;color:var(--ink-soft);margin-left:6px;}
+  .slot-input{width:100%;box-sizing:border-box;min-height:44px;border:1.5px solid var(--line);border-radius:11px;padding:0 12px;font:inherit;font-size:15px;}
+  .slot-sum{margin:14px 0 4px;font-size:14px;font-weight:700;color:var(--ink);}
+  .slot-err{margin:6px 0;font-size:13px;color:#8E2A1D;background:#FDECEA;border-radius:10px;padding:8px 10px;}
   .tl-legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--ink-secondary);padding-left:22px;}
   .tl-legend span{display:flex;align-items:center;gap:5px;}
   .tl-legend .lg{display:inline-block;width:10px;height:10px;border-radius:3px;}
@@ -1376,7 +1396,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='01.10.2026 · 3';
+const APP_VERSION='01.10.2026 · 4';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3639,27 +3659,41 @@ function areaLabel(o){
 /* ---------- Zeitleiste „Platz an diesem Tag“ ----------
    Vier Spuren für die Viertel (Hälfte A = 1+2, B = 3+4); Kleinspielfeld und Halle bekommen eigene
    Spuren, aber nur an Tagen, an denen sie belegt sind. Blöcke antippen = Details. */
-const TL_LANE=24, TL_GAP=4, TL_TOP=18, TL_SEP=10;
+const TL_LANE=24, TL_GAP=4, TL_TOP=18, TL_SEP=10, TL_VIEW_MIN=240, TL_DAY_FROM=8*60, TL_DAY_TO=22*60;
 function timelineHTML(ds,isMine){
   const occ=occupancyOn(ds); OCC_VIEW[ds]=occ;
   const groups=[{area:'platz',n:4,label:['A','B']}];
-  if(occ.some(o=>o.area==='klein')) groups.push({area:'klein',n:1,label:['K']});
+  const canBook=canBookSlots();
+  if(canBook||occ.some(o=>o.area==='klein')) groups.push({area:'klein',n:1,label:['K']});
   if(occ.some(o=>o.area==='halle')) groups.push({area:'halle',n:3,label:['Halle']});
   let y=TL_TOP; groups.forEach((g,i)=>{ if(i) y+=TL_SEP; g.top=y; y+=g.n*TL_LANE+(g.n-1)*TL_GAP; });
   const H=y;
   const laneY=(area,l)=>{ const g=groups.find(x=>x.area===area); return g.top+(l-1)*(TL_LANE+TL_GAP); };
   const sun=sunsetHM(ds);
   const isToday=ds===todayStr, now=nowHMStr();
-  let s0=occ.length?Math.min(...occ.map(o=>hmMin(o.t))):16*60, e0=occ.length?Math.max(...occ.map(o=>hmMin(o.bis))):20*60;
-  if(isToday){ s0=Math.min(s0,Math.max(hmMin(now)-60,6*60)); }
-  let h0=Math.floor(s0/60), h1=Math.ceil(e0/60); if(h1-h0<6) h1=Math.min(24,h0+6); if(h1-h0<6) h0=h1-6;
+  // Ab 01.10.2026 · 4: immer der ganze Tag (mind. 8–22 Uhr), sichtbar sind 4 Stunden – wischen scrollt durch den Tag,
+  // am Rand weiter zum nächsten/vorigen Tag (tlTouch*). Startposition: jetzt bzw. der erste Termin.
+  const s0=occ.length?Math.min(...occ.map(o=>hmMin(o.t))):TL_DAY_FROM, e0=occ.length?Math.max(...occ.map(o=>hmMin(o.bis))):TL_DAY_TO;
+  const h0=Math.min(TL_DAY_FROM/60,Math.floor(s0/60)), h1=Math.max(TL_DAY_TO/60,Math.ceil(e0/60));
   const T0=h0*60, T1=h1*60, P=m=>((m-T0)/(T1-T0)*100).toFixed(2), W=(a,b)=>(Math.max(0,b-a)/(T1-T0)*100).toFixed(2);
+  const focus=isToday?Math.max(T0,hmMin(now)-30):(occ.length?Math.max(T0,s0-30):Math.max(T0,15*60));
+  const init=Math.min(1,Math.max(0,(focus-T0)/(T1-T0)));
   let h='<div class="tl"><div class="tl-labels" style="height:'+H+'px">';
   groups.forEach(g=>{ if(g.area==='platz'){ h+='<span style="top:'+g.top+'px;height:'+(2*TL_LANE+TL_GAP)+'px">A</span><span style="top:'+laneY('platz',3)+'px;height:'+(2*TL_LANE+TL_GAP)+'px">B</span>'; }
     else h+='<span style="top:'+g.top+'px;height:'+(g.n*TL_LANE+(g.n-1)*TL_GAP)+'px">'+(g.area==='klein'?'K':'H')+'</span>'; });
-  h+='</div><div class="tl-body" style="height:'+H+'px">';
+  h+='</div><div class="tl-scroll" data-ds="'+ds+'" data-init="'+init.toFixed(4)+'" onscroll="tlScroll(this)" ontouchstart="tlTouchStart(event,this)" ontouchend="tlTouchEnd(event,this)">'
+    +'<div class="tl-body" style="height:'+H+'px;width:'+((T1-T0)/TL_VIEW_MIN*100).toFixed(1)+'%">';
   groups.forEach(g=>{ for(let l=1;l<=g.n;l++) h+='<div class="tl-lane'+(g.area!=='platz'?' alt':'')+'" style="top:'+laneY(g.area,l)+'px"></div>'; });
-  for(let hh=h0+(h0%2);hh<h1;hh+=2) h+='<span class="tl-tick" style="left:'+P(hh*60)+'%">'+hh+'</span><div class="tl-grid" style="left:'+P(hh*60)+'%;top:'+TL_TOP+'px"></div>';
+  for(let hh=h0+1;hh<h1;hh++) h+='<span class="tl-tick" style="left:'+P(hh*60)+'%">'+hh+':00</span><div class="tl-grid" style="left:'+P(hh*60)+'%;top:'+TL_TOP+'px"></div>';
+  // Freie Zeiten (angemeldet, darf buchen): je Spur Lücken ab 60 Min als „+ frei“ – antippen = Kurzauswahl
+  const locked=a=>activeLocksOn(ds).some(l=>l.resource===(a==='halle'?'halle':'platz'));
+  if(canBook&&ds>=todayStr) groups.filter(g=>g.area!=='halle'&&!locked(g.area)).forEach(g=>{ for(let l=1;l<=g.n;l++){
+    const busy=occ.filter(o=>!o.cancelled&&o.area===g.area&&o.lanes[0]<=l&&o.lanes[1]>=l).map(o=>[hmMin(o.t),hmMin(o.bis)]).sort((a,b)=>a[0]-b[0]);
+    let cur=Math.max(T0,isToday?Math.ceil(hmMin(now)/15)*15:T0);
+    busy.concat([[T1,T1]]).forEach(([a,b])=>{ if(a-cur>=60){
+        h+='<button type="button" class="tl-free" style="top:'+laneY(g.area,l)+'px;left:'+P(cur)+'%;width:'+W(cur,a)+'%" onclick="'+esc('openSlotSheet(\''+ds+'\',\''+g.area+'\','+l+','+cur+','+a+',event)')+'" aria-label="'+esc('Frei '+minHM(cur)+'–'+minHM(a)+' '+(g.area==='klein'?'Kleinspielfeld':'Viertel '+l)+' – buchen')+'">+ frei</button>'; }
+      cur=Math.max(cur,b); });
+  } });
   // Sperren: ganze Fläche schraffiert
   activeLocksOn(ds).forEach(l=>{ const area=l.resource==='platz'?'platz':(l.resource==='halle'?'halle':null); const g=groups.find(x=>x.area===area); if(!g) return;
     h+='<div class="tl-lock" style="top:'+g.top+'px;height:'+(g.n*TL_LANE+(g.n-1)*TL_GAP)+'px"><span>gesperrt'+(l.note?' · '+esc(l.note):'')+'</span></div>'; });
@@ -3680,12 +3714,115 @@ function timelineHTML(ds,isMine){
   });
   if(sun&&hmMin(sun)>T0&&hmMin(sun)<T1) h+='<div class="tl-sun" style="left:'+P(hmMin(sun))+'%;top:'+TL_TOP+'px"></div>';
   if(isToday&&hmMin(now)>=T0&&hmMin(now)<=T1) h+='<div class="tl-now" style="left:'+P(hmMin(now))+'%"></div>';
-  h+='</div></div>';
+  h+='</div></div></div>';
   const fl=CFG&&CFG.venue&&CFG.venue.floodlight;
   h+='<div class="tl-legend">'+(isMine?'<span><i class="lg mine"></i>'+(session&&sessionWeekTeams()?'deine Mannschaft':'Favoriten')+'</span>':'')+'<span><i class="lg tr"></i>Training</span><span><i class="lg game"></i>Spiel</span>'
     +(conflictsOnDay(ds).length?'<span><i class="lg conf"></i>Konflikt</span>':'')
-    +(sun?'<span><i class="lg sun"></i>Sonnenuntergang '+sun+(fl==='ganz'?' · Flutlicht':'')+'</span>':'')+'</div>';
+    +(sun?'<span><i class="lg sun"></i>Sonnenuntergang '+sun+(fl==='ganz'?' · Flutlicht':'')+'</span>':'')
+    +(canBook&&ds>=todayStr?'<span><i class="lg free"></i>frei – antippen zum Buchen</span>':'')+'</div>';
   return h;
+}
+
+/* ---------- Zeitstrahl wischen (ab 01.10.2026 · 4) ----------
+   Innerhalb des Tages scrollt der Zeitstrahl (4 Std sichtbar). Wer am Rand weiterwischt, kommt zum
+   nächsten bzw. vorigen Tag der Woche. Die Scroll-Position bleibt beim automatischen Auffrischen erhalten. */
+const TL_SCROLL={}; let _tlTouch=null;
+function tlScroll(el){ TL_SCROLL[el.dataset.ds]=el.scrollLeft; }
+function tlRestore(){ document.querySelectorAll('.tl-scroll').forEach(el=>{ const v=TL_SCROLL[el.dataset.ds];
+  el.scrollLeft=v!=null?v:Math.round((el.scrollWidth)*parseFloat(el.dataset.init||'0')); }); }
+function tlTouchStart(ev,el){ const t=ev.touches&&ev.touches[0]; if(!t) return;
+  _tlTouch={x:t.clientX,y:t.clientY,atEnd:el.scrollLeft+el.clientWidth>=el.scrollWidth-2,atStart:el.scrollLeft<=2}; }
+function tlTouchEnd(ev,el){ const t=ev.changedTouches&&ev.changedTouches[0], s=_tlTouch; _tlTouch=null; if(!t||!s) return;
+  const dx=t.clientX-s.x, dy=t.clientY-s.y; if(Math.abs(dx)<60||Math.abs(dy)>Math.abs(dx)) return;
+  if(dx<0&&s.atEnd) shiftStartDay(1,'start'); else if(dx>0&&s.atStart) shiftStartDay(-1,'end'); }
+function shiftStartDay(n,pos){
+  const ds=addDays(startSel||todayStr,n); if(ds<todayStr||ds>weekEndStr()) return;
+  delete TL_SCROLL[ds];
+  startSel=ds; startView='tag'; renderMyWeek();
+  const el=document.querySelector('.tl-scroll[data-ds="'+ds+'"]'); if(el&&pos) el.scrollLeft=pos==='start'?0:el.scrollWidth;
+}
+/* ---------- Freie Zeit direkt buchen (ab 01.10.2026 · 4) ----------
+   „+ frei“ im Zeitstrahl → Kurzauswahl: Art (Training / Spiel / Termin), Mannschaft, Beginn, Dauer.
+   Fläche = die angetippte Spur (Spiel: passende Hälfte bzw. ganzer Platz). Trainer für eigene
+   Mannschaften, Admins für alle. Training/Termin mit „Rückgängig“; Spiel wie im Formular mit Jugendleiter-Text. */
+let SLOT=null;
+function canBookSlots(){ return !!(session&&isInActiveSeason(session.id)&&(session.isAdmin||Object.keys(normalizeClasses(session.classes||{})).length)); }
+function slotTeams(){
+  const out=[];
+  seasonTeams().forEach(t=>{ if(t.team!==GK_TEAM&&canBookTeam(t.team,t.squad||1)) out.push({team:t.team,squad:t.squad||1,label:teamShort(t.team,t.squad||1)}); });
+  const mine=session&&!session.isAdmin?[]:Object.keys(normalizeClasses(session&&session.classes||{}));
+  return out.sort((a,b)=>(mine.includes(b.team)-mine.includes(a.team)));
+}
+function openSlotSheet(ds,area,lane,from,to,ev){
+  if(!canBookSlots()){ showToast('Buchen geht nur angemeldet für die eigene Mannschaft.',4000); return; }
+  const teams=slotTeams(); if(!teams.length){ showToast('Dir ist keine Mannschaft der laufenden Saison zugeordnet.',4000); return; }
+  const own=normalizeClasses(session.classes||{});
+  const pre=teams.find(t=>own.hasOwnProperty(t.team)&&(!(own[t.team]||[]).length||own[t.team].includes(t.squad)))||teams[0];
+  // Beginn = angetippte Stelle im freien Feld (auf 15 Min gerundet)
+  let start=from;
+  if(ev&&ev.currentTarget&&ev.currentTarget.getBoundingClientRect){ const r=ev.currentTarget.getBoundingClientRect(), x=(ev.clientX||r.left)-r.left;
+    start=from+Math.round(((to-from)*Math.max(0,Math.min(1,x/Math.max(1,r.width))))/15)*15; }
+  start=Math.max(from,Math.min(to-60,start));
+  SLOT={ds,area,lane,from,to,kind:'training',team:pre.team,squad:pre.squad,start,dur:Math.min(90,to-start),opp:'',title:'',err:''};
+  renderSlotSheet();
+}
+function slotWindow(){ // belegte Zeit [von,bis] je nach Art
+  if(SLOT.kind==='game'){ const ko=SLOT.start; return [ko-fussballBufferBeforeMin(),ko+fussballDurationMin(SLOT.team)]; }
+  return [SLOT.start,SLOT.start+SLOT.dur];
+}
+function slotPitch(){
+  if(SLOT.area==='klein') return null;
+  if(SLOT.kind==='game') return /^[EFG]-Jugend$/.test(SLOT.team)?{mode:'haelfte',part:SLOT.lane<=2?'A':'B'}:{mode:'ganz'};
+  return {mode:'viertel',part:SLOT.lane};
+}
+function slotAreaText(){ const p=slotPitch(); return SLOT.area==='klein'?'Kleinspielfeld':pitchShort(p); }
+function renderSlotSheet(){
+  const S=SLOT; if(!S) return;
+  const chip=(on,label,click)=>'<button type="button" class="slot-chip'+(on?' on':'')+'" onclick="'+esc(click)+'">'+esc(label)+'</button>';
+  const [a,b]=slotWindow();
+  let h='<div class="slot-sheet"><div class="occ-kicker">'+esc(startDayLabel(S.ds,true))+' · '+esc(S.area==='klein'?'Kleinspielfeld':'Viertel '+S.lane)+'</div>'
+    +'<h3>Freie Zeit buchen</h3>'
+    +'<div class="slot-lbl">Was</div><div class="slot-row">'+chip(S.kind==='training','Training',"slotSet('kind','training')")+chip(S.kind==='game','Spiel',"slotSet('kind','game')")+chip(S.kind==='other','Termin',"slotSet('kind','other')")+'</div>'
+    +'<div class="slot-lbl">Mannschaft</div><div class="slot-row">'+slotTeams().map(t=>chip(t.team===S.team&&t.squad===S.squad,t.label,"slotTeam('"+jsArg(t.team)+"',"+t.squad+")")).join('')+'</div>'
+    +'<div class="slot-lbl">'+(S.kind==='game'?'Anstoß':'Beginn')+'</div><div class="slot-row slot-time"><button type="button" class="slot-step" aria-label="15 Minuten früher" onclick="slotStep(-15)">‹</button><b>'+minHM(S.start)+'</b><button type="button" class="slot-step" aria-label="15 Minuten später" onclick="slotStep(15)">›</button><span class="slot-free">frei '+minHM(S.from)+'–'+minHM(S.to)+'</span></div>';
+  if(S.kind!=='game') h+='<div class="slot-lbl">Dauer</div><div class="slot-row">'+[60,75,90,120].map(d=>S.start+d<=S.to?chip(S.dur===d,d+' Min',"slotSet('dur',"+d+")"):'').join('')+'</div>';
+  if(S.kind==='game') h+='<div class="slot-lbl">Gegner</div><input type="text" class="slot-input" id="slot-opp" value="'+esc(S.opp)+'" placeholder="z. B. SV Hüsten 09" oninput="SLOT.opp=this.value">';
+  if(S.kind==='other') h+='<div class="slot-lbl">Anlass</div><input type="text" class="slot-input" id="slot-title" value="'+esc(S.title)+'" placeholder="z. B. Sichtungstraining" oninput="SLOT.title=this.value">';
+  h+='<div class="slot-sum">'+esc(minHM(a)+'–'+minHM(b)+' · '+slotAreaText()+(S.kind==='game'?' · Heim':''))+'</div>'
+    +(S.err?'<div class="slot-err">'+esc(S.err)+'</div>':'')
+    +'<button type="button" class="submit-btn" onclick="slotBook()">'+(S.kind==='game'?'Spiel eintragen':'Buchen')+'</button></div>';
+  openSheet(h);
+}
+function slotSet(k,v){ SLOT[k]=v; SLOT.err='';
+  if(k==='kind'&&v==='game') SLOT.start=Math.max(SLOT.start,SLOT.from+fussballBufferBeforeMin()); // Vorlauf muss in die freie Zeit passen
+  if(k==='kind'&&v!=='game'&&SLOT.start+SLOT.dur>SLOT.to) SLOT.dur=60; renderSlotSheet(); }
+function slotTeam(t,q){ SLOT.team=t; SLOT.squad=q; SLOT.err=''; renderSlotSheet(); }
+function slotStep(d){ const S=SLOT, max=S.kind==='game'?S.to:S.to-Math.min(S.dur,60);
+  S.start=Math.max(S.from,Math.min(max,S.start+d)); if(S.kind!=='game'&&S.start+S.dur>S.to) S.dur=[120,90,75,60].find(x=>S.start+x<=S.to)||60; S.err=''; renderSlotSheet(); }
+function slotBook(){
+  const S=SLOT; if(!S) return;
+  if(!canBookTeam(S.team,S.squad)){ S.err='Für diese Mannschaft darfst du nicht buchen.'; renderSlotSheet(); return; }
+  if(S.kind==='game'&&!S.opp.trim()){ S.err='Bitte den Gegner eintragen.'; renderSlotSheet(); return; }
+  if(S.kind==='other'&&!S.title.trim()){ S.err='Bitte einen Anlass eintragen.'; renderSlotSheet(); return; }
+  const [a,b]=slotWindow(), von=minHM(Math.max(0,a)), bis=minHM(b), pitch=slotPitch(), res=S.area==='klein'?['Kleinspielfeld']:['Großspielfeld'];
+  const ownFree=S.kind==='game'?{team:S.team,squad:S.squad}:null;
+  const conf=findConflicts(S.ds,von,bis,pitch,null,res,null,S.kind).filter(c=>!isOwnTeamTraining(c.event,ownFree));
+  if(conf.length){ S.err='Belegt: '+[...new Set(conf.map(c=>occupationLabel(c.event)))].join(', ')+' – bitte andere Zeit wählen.'; renderSlotSheet(); return; }
+  const title=S.kind==='training'?'Training':(S.kind==='game'?'Freundschaftsspiel gegen '+S.opp.trim():S.title.trim());
+  const ev={id:crypto.randomUUID(),d:S.ds,t:von,bis,title,kind:S.kind,team:S.team,squad:S.squad,pitch,halle:null,res,note:'',ownerId:session.id,ownerName:session.name};
+  if(S.kind==='game') Object.assign(ev,{ha:'home',opponent:S.opp.trim(),kickoff:minHM(S.start)});
+  closeSheet(); SLOT=null;
+  const rer=()=>{ applyGameMoves(); render(); renderStart(); };
+  const msg=S.kind==='game'?matchLogMsg(ev,'angelegt'):'Neuer Termin: '+title+' – '+msgTeam(ev.team,ev.squad)+' · '+von+'–'+bis+' · '+fmtShort(ev.d)+' – '+session.name+teamTrailer(ev.team,ev.squad,ev);
+  if(S.kind==='game'){ // Spiel: sofort speichern, danach wie im Formular Training absagen? + Text für den Jugendleiter
+    EVENTS.push(ev); rer(); showToast('Eingetragen: '+title);
+    saveEvents(msg).catch(err=>{ EVENTS=EVENTS.filter(x=>x.id!==ev.id); rer(); showToast('Speichern fehlgeschlagen: '+err.message,6000); });
+    setTimeout(()=>afterHomeMatchSaved(ev,true),350); return;
+  }
+  withUndo('Gebucht: '+title+' '+teamShort(ev.team,ev.squad)+' · '+von+'–'+bis,
+    ()=>{ EVENTS.push(ev); rer(); },
+    ()=>{ EVENTS=EVENTS.filter(x=>x.id!==ev.id); rer(); },
+    ()=>{ saveEvents(msg).catch(err=>{ EVENTS=EVENTS.filter(x=>x.id!==ev.id); rer(); showToast('Speichern fehlgeschlagen: '+err.message,6000); }); });
 }
 function openOccDetail(ds,i){
   const o=(OCC_VIEW[ds]||[])[i]; if(!o) return;
@@ -3794,24 +3931,27 @@ function startWeekHTML(src,isMine,admin){
   const dotOf=e=>(e.isCancelled||e.isMovedGhost||e.withdrawn)?'grey':(e.isExternal||isMatchKind(kindOf(e))?'game':'tr');
   let h='<section class="st-week"><div class="stw-head"><h2>'+esc(src?(src.fromSession?'Deine Woche · '+src.label:'Diese Woche'):'Platz diese Woche')+'</h2>'
     +'<div class="seg-mini"><button type="button" class="'+(startView==='tag'?'on':'')+'" onclick="setStartView(\'tag\')">Tag</button>'
-    +'<button type="button" class="'+(startView==='woche'?'on':'')+'" onclick="setStartView(\'woche\')"'+(src?'':' disabled')+'>Woche</button></div></div>';
+    +'<button type="button" class="'+(startView==='woche'?'on':'')+'" onclick="setStartView(\'woche\')">Woche</button></div></div>';
   h+='<div class="stw-strip">';
   for(let i=0;i<WEEK_DAYS;i++){ const ds=addDays(todayStr,i), dt=new Date(ds+'T00:00:00'), sel=startView==='tag'&&ds===startSel;
     const dots=items.filter(e=>e.d===ds).slice(0,3).map(e=>'<i class="'+dotOf(e)+'"></i>').join('');
     h+='<button type="button" class="stw-day'+(sel?' on':'')+(i===0?' today':'')+'" onclick="setStartDay(\''+ds+'\')"><span>'+(i===0?'Heute':DOW[dowOf(ds)-1])+'</span><b>'+dt.getDate()+'</b><em>'+dots+'</em></button>'; }
   h+='</div>';
-  if(startView==='woche'&&src){
-    h+='<div class="st-card wk-list">';
+  if(startView==='woche'){
+    // Ohne Favoriten (ab 01.10.2026 · 4): alle Termine des Vereins der nächsten 7 Tage
+    const all=src?items:weekItems(()=>true);
+    h+='<div class="st-card wk-list">'+(src?'':'<div class="stc-sub" style="margin-top:0;">Alle Termine des Vereins · Favoriten wählen, um nur deine zu sehen</div>');
     let last='';
-    items.forEach(e=>{ if(e.d!==last){ h+='<div class="wk-day">'+esc(weekDayLabel(e.d))+'</div>'; last=e.d; } h+=weekRowHTML(e); });
-    if(!items.length) h+='<div class="wk-empty">In den nächsten 7 Tagen steht nichts an.</div>';
-    const next=nextGamesBeyondWeek(isMine,items);
+    all.forEach(e=>{ if(e.d!==last){ h+='<div class="wk-day">'+esc(weekDayLabel(e.d))+'</div>'; last=e.d; } h+=weekRowHTML(e); });
+    if(!all.length) h+='<div class="wk-empty">In den nächsten 7 Tagen steht nichts an.</div>';
+    const next=src?nextGamesBeyondWeek(isMine,items):[];
     if(next.length){ h+='<div class="wk-day">Nächste Spiele</div>'; next.forEach(e=>{ h+=weekRowHTML(e,true); }); }
     h+='</div>';
   }else{
     const day=items.filter(e=>e.d===startSel);
     const canLock=admin&&startSel===todayStr&&!activeLocksOn(todayStr).some(l=>l.resource==='platz');
-    h+='<div class="st-card"><div class="stc-head"><h3>'+esc(startDayLabel(startSel,true))+'</h3>'
+    const prev=startSel>todayStr, nxt=startSel<end;
+    h+='<div class="st-card"><div class="stc-head"><div class="stc-nav"><button type="button" class="stc-arrow" aria-label="Vorheriger Tag" onclick="shiftStartDay(-1)"'+(prev?'':' disabled')+'>‹</button><h3>'+esc(startDayLabel(startSel,true))+'</h3><button type="button" class="stc-arrow" aria-label="Nächster Tag" onclick="shiftStartDay(1)"'+(nxt?'':' disabled')+'>›</button></div>'
       +(canLock?'<button type="button" class="wk-act" onclick="openQuickLock()">Heute sperren</button>':'<a href="#" onclick="'+esc('event.preventDefault();openDayInCalendar(\''+startSel+'\')')+'">Im Kalender</a>')+'</div>';
     if(src){ h+=day.length?day.map(e=>weekRowHTML(e)).join(''):'<div class="wk-empty">Kein Termin für '+esc(src.label)+' an diesem Tag.</div>'; }
     h+='<div class="stc-sub">Platz an diesem Tag</div>'+timelineHTML(startSel,isMine)+'</div>';
@@ -4180,6 +4320,7 @@ function renderMyWeek(){
   // Admin: eigene Mannschaft nach „Zu erledigen“ und den Zahlen
   heroBox.innerHTML=hero;
   weekBox.innerHTML=startWeekHTML(src,isMine,admin);
+  tlRestore();
   if(seasonBox) seasonBox.innerHTML=session&&!admin?startSeasonLineHTML():'';
 }
 function weekPickerHTML(intro){
