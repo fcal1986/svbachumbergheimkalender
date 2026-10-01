@@ -307,7 +307,15 @@
   .tl-scroll::-webkit-scrollbar{display:none;}
   .tl-scroll .tl-body{flex:none;}
   .tl-view{flex:1;min-width:0;position:relative;}
-  .tl-pad{padding:0 50%;box-sizing:content-box;}
+  .tl-pad{padding:0 50%;box-sizing:content-box;position:relative;}
+  .tl-edge{position:absolute;top:0;box-sizing:border-box;border:none;margin:0;padding:0 10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;align-content:center;
+    font-family:'Inter',sans-serif;color:var(--ink-soft);cursor:pointer;background:repeating-linear-gradient(135deg,#F4F6F5 0,#F4F6F5 6px,#EEF2F1 6px,#EEF2F1 12px);border-radius:10px;}
+  .tl-edge.prev{justify-content:flex-end;text-align:right;border-right:2px dashed #C9D3D1;}
+  .tl-edge.next{justify-content:flex-start;border-left:2px dashed #C9D3D1;}
+  .tl-edge b{font-size:26px;line-height:1;font-weight:700;color:var(--ink);}
+  .tl-edge span{font-size:13px;font-weight:800;color:var(--ink);}
+  .tl-edge i{flex-basis:100%;font-style:normal;font-size:11px;font-weight:600;}
+  .tl-edge.prev i{text-align:right;} .tl-edge.next i{text-align:left;}
   .tl-pad .tl-body{width:100%;}
   .tl-cursor{position:absolute;top:0;left:50%;width:2px;margin-left:-1px;background:var(--pc-navy);pointer-events:none;z-index:3;}
   .tl-cur-t{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--pc-navy);color:#fff;font-size:10.5px;font-weight:800;padding:1px 6px;border-radius:6px;white-space:nowrap;}
@@ -1436,7 +1444,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='01.10.2026 · 17';
+const APP_VERSION='01.10.2026 · 18';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3841,6 +3849,18 @@ function areaLabel(o){
    Vier Spuren für die Viertel (Hälfte A = 1+2, B = 3+4); Kleinspielfeld und Halle bekommen eigene
    Spuren, aber nur an Tagen, an denen sie belegt sind. Blöcke antippen = Details. */
 const TL_LANE=24, TL_GAP=4, TL_TOP=18, TL_SEP=10, TL_VIEW_MIN=240, TL_DAY_FROM=8*60, TL_DAY_TO=22*60;
+/* Ab 01.10.2026 · 18: Wisch-Hinweis. Die Polster links/rechts der Zeitleiste (Tagesanfang/-ende) zeigen den
+   vorigen bzw. nächsten Tag („‹ Sa 3.10.“ / „Mo 5.10. ›“) – genau dort, wo Weiterwischen den Tag wechselt.
+   Antippen wechselt ebenfalls. Kein zusätzlicher Platz: die Fläche war vorher leer. */
+function tlEdgesHTML(ds,T0,T1,H){
+  const X=(T1-T0)/TL_VIEW_MIN*100, w=(50/(X+100)*100).toFixed(3)+'%';
+  const lbl=d=>{ const dt=new Date(d+'T00:00:00'); return (d===todayStr?'Heute':DOW[dowOf(d)-1])+' '+dt.getDate()+'.'+(dt.getMonth()+1)+'.'; };
+  const prev=addDays(ds,-1), next=addDays(ds,1);
+  let h='';
+  if(prev>=todayStr) h+='<button type="button" class="tl-edge prev" style="left:0;width:'+w+';height:'+H+'px" onclick="shiftStartDay(-1,\'end\')" aria-label="Voriger Tag"><b>‹</b><span>'+esc(lbl(prev))+'</span><i>weiterwischen</i></button>';
+  if(next<=weekEndStr()) h+='<button type="button" class="tl-edge next" style="right:0;width:'+w+';height:'+H+'px" onclick="shiftStartDay(1,\'start\')" aria-label="Nächster Tag"><span>'+esc(lbl(next))+'</span><b>›</b><i>weiterwischen</i></button>';
+  return h;
+}
 function timelineHTML(ds,isMine){
   const occ=occupancyOn(ds); OCC_VIEW[ds]=occ;
   const groups=[{area:'platz',n:4,label:['A','B']}];
@@ -3862,7 +3882,7 @@ function timelineHTML(ds,isMine){
     else h+='<span style="top:'+g.top+'px;height:'+(g.n*TL_LANE+(g.n-1)*TL_GAP)+'px">'+(g.area==='klein'?'K':'H')+'</span>'; });
   // Ab 01.10.2026 · 7: links und rechts je eine halbe Breite Polster, damit der Strich in der Mitte jede Uhrzeit von T0 bis T1 erreicht
   h+='</div><div class="tl-view"><div class="tl-scroll" data-ds="'+ds+'" data-t0="'+T0+'" data-t1="'+T1+'" onscroll="tlScroll(this)" ontouchstart="tlTouchStart(event,this)" ontouchend="tlTouchEnd(event,this)">'
-    +'<div class="tl-pad" style="width:'+((T1-T0)/TL_VIEW_MIN*100).toFixed(1)+'%"><div class="tl-body" style="height:'+H+'px">';
+    +'<div class="tl-pad" style="width:'+((T1-T0)/TL_VIEW_MIN*100).toFixed(1)+'%">'+tlEdgesHTML(ds,T0,T1,H)+'<div class="tl-body" style="height:'+H+'px">';
   groups.forEach(g=>{ for(let l=1;l<=g.n;l++) h+='<div class="tl-lane'+(g.area!=='platz'?' alt':'')+'" style="top:'+laneY(g.area,l)+'px"></div>'; });
   for(let hh=h0+1;hh<h1;hh++) h+='<span class="tl-tick" style="left:'+P(hh*60)+'%">'+hh+':00</span><div class="tl-grid" style="left:'+P(hh*60)+'%;top:'+TL_TOP+'px"></div>';
   // Freie Zeiten (angemeldet, darf buchen): je Spur die ganze freie Zeit als „+ frei“, sobald sie mind. 30 Min lang ist (ab 01.10.2026 · 9, vorher 60) – antippen = Formular
