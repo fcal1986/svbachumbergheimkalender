@@ -10,19 +10,19 @@ Ausführliche Analyse: Projekt-Doc `claude/vereinsneo-analyse-2026-10.md`.
 **Status:** ✅ umgesetzt · 🟡 teilweise · ⬜ offen · ⛔ bewusst nicht
 **Phase:** Pilot = aktuelle Technik · 1.0 = mit Supabase/Einrichtungsassistent · Später
 
-Letzte Aktualisierung: 01.10.2026 (Version 01.10.2026 · 3)
+Letzte Aktualisierung: 01.10.2026 (Version 01.10.2026 · 4)
 
 ## Must have
 
 | Nr. | Feature | Phase | Status | Notiz |
 |---|---|---|---|---|
 | 1 | Tagesansicht mit Zeitleiste je Fläche (Hälfte A/B, Halle, Kabinen) | Pilot | 🟡 | 01.10.2026 · 2: Zeitleiste je Fläche auf der Startseite („Platz an diesem Tag“, Viertel-Spuren + Kleinspielfeld/Halle, Blöcke antippbar). Offen: dieselbe Ansicht im Kalender |
-| 2 | Schnell-Anlage durch Antippen einer freien Lücke | Pilot | ⬜ | Hängt an Nr. 1 |
+| 2 | Schnell-Anlage durch Antippen einer freien Lücke | Pilot | ✅ | 01.10.2026 · 4: „+ frei“ im Zeitstrahl (je Spur, Lücken ab 60 Min) → Kurzauswahl Training/Spiel/Termin, Mannschaft, Beginn (angetippte Stelle), Dauer-Chips → Buchen. Trainer für eigene Mannschaften, Admins für alle |
 | 3 | Sonnenuntergang und „dunkel ab …“ in Tagesansicht und Start | Pilot | ✅ | 01.10.2026 · 2: Sonnenuntergang als Linie in der Zeitleiste, berechnet aus data/config.json → venue (lat/lon) |
 | 4 | Hinweis „Tage werden kürzer“: welche Trainingszeiten ab wann im Dunkeln enden | Pilot | ⛔ | Nicht nötig: Höllenbergkampfbahn hat Flutlicht auf dem ganzen Platz (Antwort 01.10.2026). Bei Vereinen ohne Flutlicht wieder aufnehmen (venue.floodlight) |
 | 5 | Platz schnell sperren („Heute sperren“ mit Grund, schraffiert) | Pilot | ✅ | 01.10.2026 · 1: „Heute sperren“ + Grund-Chips + Aufheben mit Rückgängig; 01.10.2026 · 2: Sperre schraffiert in Live-Karte und Zeitleiste, „Heute sperren“ in der Tageskarte (Admin) |
 | 6 | Konflikte mit konkretem Lösungsvorschlag und Direkt-Aktion | Pilot | 🟡 | ✅ 01.10.2026 · 1: Training gegen Spiel/Termin → Knopf „Training … absagen“ direkt in „Zu erledigen“ (1 Klick + Rückgängig). Offen: Vorschläge für andere Konfliktarten (z. B. freie Hälfte); 01.10.2026 · 2: Lösung auch direkt in der Live-Karte („Überschneidung mit …“ + Absagen) |
-| 7 | Dauer-Chips im Formular (60/75/90/105/120 Min) | Pilot | ⬜ | |
+| 7 | Dauer-Chips im Formular (60/75/90/105/120 Min) | Pilot | 🟡 | 01.10.2026 · 4: Dauer-Chips (60/75/90/120) in der Kurzbuchung aus dem Zeitstrahl. Offen: im großen Formular |
 | 8 | Mannschaft zuerst wählen, danach passende Fläche vorschlagen | Pilot | 🟡 | Teilweise mit Nr. 52: Formular startet mit der eigenen Mannschaft und deren üblicher Fläche; ist sie belegt, wird eine freie gleicher Größe gewählt |
 | 9 | Zeitpunkt des letzten fussball.de-Abgleichs anzeigen | Pilot | 🟡 | Stand steht bei „Automatisch von fussball.de übernommen“ und im Mannschaftsabgleich; fehlt: global sichtbar, Warnung wenn > 6 h alt |
 | 10 | Hinweis „kein Angebot des DFB, nur öffentliche Daten auf Veranlassung des Vereins“ | Pilot | ⬜ | |
@@ -44,6 +44,8 @@ Letzte Aktualisierung: 01.10.2026 (Version 01.10.2026 · 3)
 | 58 | Startseite Admin: gleiche Reihenfolge wie für alle (Live-Karte → Zu erledigen → Woche), zusätzlich Zahlen-Kacheln und „Heute sperren“ in der Tageskarte | Pilot | ✅ | 01.10.2026 · 2; 01.10.2026 · 3: Admin-Platz nicht mehr oben, sondern wie bei allen (Feedback: gleiche Struktur mit und ohne Anmeldung) |
 | 59 | Saison-Konflikte auf der Startseite als eine Zeile (aufklappbar) statt langer Liste | Pilot | ✅ | 01.10.2026 · 2 |
 | 60 | Besucher ohne Anmeldung: „Neu“ in der unteren Leiste ausblenden (Mockup), stattdessen „Anmelden“ oben | Pilot | ⬜ | Aus dem Startseiten-Mockup, noch nicht umgesetzt |
+| 61 | Zeitstrahl wischen: 4 Std sichtbar, Wischen scrollt durch den Tag (8–22 Uhr), am Rand weiter zum nächsten/vorigen Tag; Pfeile ‹ › am Tagestitel | Pilot | ✅ | 01.10.2026 · 4 |
+| 62 | „Woche“ ohne Favoriten: alle Termine des Vereins der nächsten 7 Tage (vorher nur mit Favoriten wählbar) | Pilot | ✅ | 01.10.2026 · 4 |
 | 43 | Mannschaften mit Lücken-Filtern („ohne Trainer“, „ohne Trainingszeit“, „ohne Platzfreigabe“) | Pilot | ⬜ | „Termine heute ohne Trainer“ gibt es als Warnzeile; Filter in der Mannschaftsliste fehlen |
 
 ## Nice to have
