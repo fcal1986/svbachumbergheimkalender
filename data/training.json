@@ -604,6 +604,9 @@
       ],
       "trainerNames": [
         "Alex Ramm"
+      ],
+      "cancelled": [
+        "2026-10-08"
       ]
     },
     {
@@ -622,7 +625,10 @@
       "trainerIds": [],
       "trainerNames": [],
       "validFrom": "2026-09-09",
-      "validUntil": null
+      "validUntil": null,
+      "cancelled": [
+        "2026-10-08"
+      ]
     },
     {
       "id": "547a1e4b-4a57-4206-9d53-8d749803ac0b",
