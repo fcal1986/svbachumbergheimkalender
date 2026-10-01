@@ -20,8 +20,8 @@ Letzte Aktualisierung: 01.10.2026
 | 2 | Schnell-Anlage durch Antippen einer freien Lücke | Pilot | ⬜ | Hängt an Nr. 1 |
 | 3 | Sonnenuntergang und „dunkel ab …“ in Tagesansicht und Start | Pilot | ⬜ | Lokal berechnen, braucht Koordinaten in config |
 | 4 | Hinweis „Tage werden kürzer“: welche Trainingszeiten ab wann im Dunkeln enden | Pilot | ⬜ | Zeitumstellung 25.10.; braucht Flutlicht-Angabe |
-| 5 | Platz schnell sperren („Heute sperren“ mit Grund, schraffiert) | Pilot | 🟡 | Ressourcen-Sperren (Platz/Halle/Eigene) mit Warnung gibt es im Konto; fehlt: Schnellaktion, Grund-Auswahl, Darstellung im Plan |
-| 6 | Konflikte mit konkretem Lösungsvorschlag und Direkt-Aktion | Pilot | 🟡 | Konflikte werden erkannt und angezeigt; Lösungsvorschlag mit Ein-Klick-Aktion fehlt |
+| 5 | Platz schnell sperren („Heute sperren“ mit Grund, schraffiert) | Pilot | 🟡 | Ressourcen-Sperren (Platz/Halle/Eigene) mit Warnung gibt es im Konto; fehlt: Schnellaktion, Grund-Auswahl, Darstellung im Plan. Klick-Budget: heute 5 (versteckt unter Konto → Saisons), Ziel 2 |
+| 6 | Konflikte mit konkretem Lösungsvorschlag und Direkt-Aktion | Pilot | 🟡 | Konflikte werden erkannt und angezeigt; Lösungsvorschlag mit Ein-Klick-Aktion fehlt. Klick-Budget: heute 4, Ziel 1 |
 | 7 | Dauer-Chips im Formular (60/75/90/105/120 Min) | Pilot | ⬜ | |
 | 8 | Mannschaft zuerst wählen, danach passende Fläche vorschlagen | Pilot | ⬜ | |
 | 9 | Zeitpunkt des letzten fussball.de-Abgleichs anzeigen | Pilot | 🟡 | Stand steht bei „Automatisch von fussball.de übernommen“ und im Mannschaftsabgleich; fehlt: global sichtbar, Warnung wenn > 6 h alt |
@@ -32,6 +32,10 @@ Letzte Aktualisierung: 01.10.2026
 | 14 | Einrichtungs-Checkliste mit Fortschritt auf der Startseite | 1.0 | ⬜ | |
 | 15 | Platz-Eigenschaften: Belag, Flutlicht, Nutzung, Kürzel | 1.0 | ⬜ | |
 | 16 | DFBnet-Spielplan per Datei importieren (Plan B ohne fussball.de-Abruf) | Später | ⬜ | Exportformat klären |
+| 49 | Training absagen direkt aus der Zeile in „Meine Woche“ (1 Klick + Rückgängig statt Datums-Dialog) | Pilot | ⬜ | Klick-Budget: heute 3, Ziel 1 |
+| 50 | Verlegung schneller vormerken: Grund als Chips (Ferien, Spielermangel, Platz gesperrt, Sonstiges), Datum aus Ansetzungssuche vorschlagen | Pilot | ⬜ | Klick-Budget: heute 5 + Tippen, Ziel 3 |
+| 51 | Trainer einladen mit einem Klick: Link automatisch erzeugen, „Per WhatsApp teilen“ auch bei Mannschaften ohne Trainer | Pilot | ⬜ | Klick-Budget: heute 3–4, Ziel 2 |
+| 52 | Formular vorbefüllen: Datum aus der aktuellen Kalenderansicht, Mannschaft des Trainers, übliche Trainingszeit der Mannschaft, Anlass automatisch | Pilot | ⬜ | Klick-Budget: heute ca. 9 + Tippen, Ziel 3; ergänzt Nr. 1, 2, 7, 8 |
 | 43 | Mannschaften mit Lücken-Filtern („ohne Trainer“, „ohne Trainingszeit“, „ohne Platzfreigabe“) | Pilot | ⬜ | „Termine heute ohne Trainer“ gibt es als Warnzeile; Filter in der Mannschaftsliste fehlen |
 
 ## Nice to have

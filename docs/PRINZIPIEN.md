@@ -43,15 +43,17 @@ Ein Feature gehört nur dann in Platzcoach, wenn es diese Frage besser beantwort
 
 Gezählt wird ab der Ansicht, in der man die Aufgabe bemerkt (Startseite, Wochenansicht oder Benachrichtigung), bis zum Speichern. Ein Feature darf ein Budget nicht verschlechtern; wenn doch, steht die Begründung im Commit und im Backlog.
 
-| Aufgabe | Rolle | Budget |
-|---|---|---|
-| Plan der eigenen Mannschaft ansehen | alle | 0 (Startansicht bzw. Link) |
-| Konflikt lösen (Vorschlag übernehmen) | Admin | 1 |
-| Training absagen | Trainer | 1 |
-| Platz heute sperren | Admin | 2 |
-| Training oder Termin anlegen | Trainer/Admin | höchstens 3 |
-| Spielverlegung vormerken | Trainer | höchstens 3 |
-| Trainer einladen | Admin | höchstens 2 |
+| Aufgabe | Rolle | Budget | Ist (01.10.2026) | Heutiger Weg | Backlog |
+|---|---|---|---|---|---|
+| Plan der eigenen Mannschaft ansehen | alle | 0 | ✅ 0 | Startseite „Meine Woche“ (ohne Konto einmalig Mannschaft wählen) | – |
+| Konflikt lösen (Vorschlag übernehmen) | Admin | 1 | ❌ 4 | Zu erledigen „Ansehen“ → Konflikt aufklappen → „Training an diesem Tag absagen“ → „Absagen“; über „Termin anpassen“ 5+. Kein Lösungsvorschlag | Nr. 6 |
+| Training absagen | Trainer | 1 | ❌ 3 | Zeile in „Meine Woche“ → Absage-Symbol an der Karte → „Absagen“ (aus dem Kalender 2) | Nr. 49 |
+| Platz heute sperren | Admin | 2 | ❌ 5 | Konto → Saisons → „Bis“-Datum setzen (2) → „Sperre anlegen“; liegt versteckt unter „Saisons“ | Nr. 5 |
+| Training oder Termin anlegen | Trainer/Admin | höchstens 3 | ❌ ca. 9 + Tippen | + → Anlass tippen → Datum (2) → Von (2) → Bis (2) → Fläche → Speichern. Standard immer heute 15–17 Uhr, Datum wird nirgends vorbefüllt | Nr. 1, 2, 7, 8, 52 |
+| Spielverlegung vormerken | Trainer | höchstens 3 | ❌ 5 + Tippen | Zeile → Verlegen-Symbol → Datum (2) → Grund tippen (Pflicht) → „Vormerken“; über die Ansetzungssuche ist das Datum vorbefüllt | Nr. 50 |
+| Trainer einladen | Admin | höchstens 2 | ⚠️ 3 | Konto → Zugänge → „Per WhatsApp teilen“ (ohne aktiven Link 4) | Nr. 51 |
+
+Gezählt am Code (`index.html`), nicht am Gerät nachgetippt. Ein Datums- oder Zeitfeld zählt als 2 (öffnen + wählen); auf manchen Android-Geräten kommt „OK“ dazu. Nach jeder Änderung an einem dieser Wege die Ist-Spalte aktualisieren.
 
 Neue häufige Aufgaben werden hier ergänzt.
 
