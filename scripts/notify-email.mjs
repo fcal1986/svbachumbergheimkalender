@@ -16,6 +16,7 @@ import fs from 'node:fs/promises';
 import { execSync } from 'node:child_process';
 import nodemailer from 'nodemailer';
 import { randomUUID } from 'node:crypto';
+import { loadPushDevices, pushToUser, appLink } from './push-lib.mjs';
 
 const CONFIG_PATH = 'data/config.json';
 const USERS_PATH = 'data/users.json';
@@ -222,10 +223,14 @@ async function main() {
   const roleCats = { ...ROLE_CATEGORIES, ...(notify.categories || {}) };
   const today = new Date().toISOString().slice(0, 10);
 
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.log('SMTP-Zugangsdaten (Secrets) fehlen – überspringe Benachrichtigung.');
+  const smtpOk = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+  // Push aufs Handy (ab 02.10.2026 · 1): gleiche Regeln wie die Mail, unabhängig vom Mail-Schalter.
+  const devices = await loadPushDevices(cfg);
+  if (!smtpOk && !devices.length) {
+    console.log('SMTP-Zugangsdaten (Secrets) fehlen und keine Push-Geräte – überspringe Benachrichtigung.');
     return;
   }
+  if (!smtpOk) console.log('SMTP-Zugangsdaten fehlen – nur Push.');
   const users = await loadUsers();
   const seasons = await loadSeasons();
 
@@ -262,7 +267,7 @@ async function main() {
     console.log(`${allMessages.length} Commit(s) im Push, davon ${platzcoachMessages.length} von Platzcoach, ${changes.length} nach Filter. Kategorien: ${JSON.stringify(changes.map(c => c.category))}`);
   }
 
-  const transporter = nodemailer.createTransport({
+  const transporter = !smtpOk ? null : nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || '587', 10),
     secure: (process.env.SMTP_PORT || '587') === '465',
@@ -275,24 +280,46 @@ async function main() {
 
   // Willkommens-Mail(s) an neu angelegte Zugänge (ohne Passwort – das kommt separat über den
   // Dispatch-Weg, siehe send-welcome-password.mjs).
-  if (!changesFile) await sendWelcomeEmails(platzcoachMessages.map(m => m.split(/\n\s*\n/)[0].trim()), users, transporter, clubName, fromAddress, cfg.siteUrl, replyTo);
+  if (!changesFile && smtpOk) await sendWelcomeEmails(platzcoachMessages.map(m => m.split(/\n\s*\n/)[0].trim()), users, transporter, clubName, fromAddress, cfg.siteUrl, replyTo);
 
   if (!changes.length) {
     console.log('Keine für die Benachrichtigung relevanten Änderungen.');
     return;
   }
 
+  // Was betrifft wen? (gleich für Mail und Push)
+  const relevantFor = (role, user) => {
+    const allowed = roleCats[role] || [];
+    const classes = user ? trainerClassesFor(user, seasons, today) : {};
+    return changes.filter(c =>
+      allowed.includes(c.category)
+      && (notifyAuthorToo(c) || !(user && c.by && c.by === user.id))
+      && (role === 'admin' || concernsTrainer(c, classes, user && user.id)));
+  };
+
+  // Push: je Zugang mit angemeldetem Gerät eine Nachricht (bei mehreren Änderungen zusammengefasst)
+  let pushed = 0;
+  for (const u of users.filter(x => !x.locked && devices.some(d => d.userId === x.id))) {
+    const mine = relevantFor(u.admin ? 'admin' : 'trainer', u);
+    if (!mine.length) continue;
+    const one = mine.length === 1;
+    const payload = {
+      title: changesFile ? (mine.some(c => c.priority !== 'info') ? 'Bitte prüfen: fussball.de' : 'fussball.de') : (one ? mine[0].text.split(':')[0] : mine.length + ' Änderungen in Platzcoach'),
+      body: one ? mine[0].text.replace(/^[^:]+:\s*/, '') : mine.slice(0, 4).map(c => '• ' + c.text).join('\n') + (mine.length > 4 ? '\n…' : ''),
+      url: appLink(cfg, one ? mine[0].link : null),
+      tag: one && mine[0].link ? 'pc-' + mine[0].link : 'pc-changes',
+    };
+    pushed += await pushToUser(cfg, devices, u.id, payload);
+  }
+  if (devices.length) console.log(`${pushed} Push-Nachricht(en) gesendet (${devices.length} Gerät(e) angemeldet).`);
+  if (!smtpOk) return;
+
   // Jede Person bekommt eine EIGENE Mail (keine offene Empfängerliste) und nur das, was sie
   // betrifft: passende Kategorie für ihre Rolle, bei Trainern nur eigene Mannschaften +
   // Vereinsweites, und nie die eigenen Änderungen.
   let sent = 0;
   for (const r of recipients.values()) {
-    const allowed = roleCats[r.role] || [];
-    const classes = r.user ? trainerClassesFor(r.user, seasons, today) : {};
-    const mine = changes.filter(c =>
-      allowed.includes(c.category)
-      && (notifyAuthorToo(c) || !(r.user && c.by && c.by === r.user.id))
-      && (r.role === 'admin' || concernsTrainer(c, classes, r.user && r.user.id)));
+    const mine = relevantFor(r.role, r.user);
     if (!mine.length) continue;
     const texts = mine.map(c => c.text);
     const siteUrl = String(cfg.siteUrl || 'https://platzcoach.de/').replace(/\/?$/, '/');

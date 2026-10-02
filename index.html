@@ -436,6 +436,7 @@
   .tt-btn{flex:1;min-height:42px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;}
   .tt-btn.yes.on{background:#3E8E1A;border-color:#3E8E1A;color:#fff;} .tt-btn.no.on{background:#405366;border-color:#405366;color:#fff;}
   .todo-fix{display:flex;gap:6px;flex-wrap:wrap;}
+  .push-steps{margin:0 0 12px;padding-left:20px;font-size:14px;line-height:1.6;}
   .share-sheet h3{margin:2px 0 10px;font-family:'Manrope','Inter',sans-serif;font-size:20px;}
   .share-prev{white-space:pre-wrap;word-break:break-word;font-family:'Inter',sans-serif;font-size:14px;line-height:1.45;background:#F2F5F4;border-radius:12px;padding:12px;margin:0 0 12px;color:var(--ink);}
   .share-wa{background:#25D366 !important;border-color:#25D366 !important;}
@@ -1444,7 +1445,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='01.10.2026 · 18';
+const APP_VERSION='02.10.2026 · 1';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2316,7 +2317,8 @@ const STORES={
   training:{path:'data/training.json',        key:'slots',   get:()=>TRAINING, set:v=>{TRAINING=v;}},
   locks:   {path:'data/resource-locks.json',  key:'locks',   get:()=>LOCKS,    set:v=>{LOCKS=v;}},
   seasons: {path:'data/seasons.json',         key:'seasons', get:()=>SEASONS,  set:v=>{SEASONS=v;}},
-  moves:   {path:'data/game-moves.json',      key:'moves',   get:()=>MOVES,    set:v=>{MOVES=v; applyGameMoves();}}
+  moves:   {path:'data/game-moves.json',      key:'moves',   get:()=>MOVES,    set:v=>{MOVES=v; applyGameMoves();}},
+  push:    {path:'data/push-subscriptions.json', key:'subs',  get:()=>PUSH_SUBS, set:v=>{PUSH_SUBS=v;}}
 };
 const STORE_BASE={};
 function snapStore(name){ const m={}; (STORES[name].get()||[]).forEach(x=>{ if(x&&x.id!=null) m[x.id]=JSON.stringify(x); }); STORE_BASE[name]=m; }
@@ -2554,6 +2556,11 @@ function afterLogin(){
   setTimeout(()=>location.reload(),1200);
 }
 function logout(){
+  // Push: dieses Gerät vorher abmelden, sonst bekäme der nächste Nutzer am Gerät die Nachrichten des alten Zugangs
+  if(lsGet(PUSH_ID_KEY,'')&&session&&session.token){ pushDisable(true).finally(logoutNow); return; }
+  logoutNow();
+}
+function logoutNow(){
   session=null; localStorage.removeItem('svbb_session'); localStorage.removeItem('pc_was_logged_in');
   if(filter==='meine') filter='alle';
   refreshHeader(); buildFilters(); renderAll(); renderKonto();
@@ -3302,6 +3309,116 @@ function movedGhostRowHTML(e){
     +(stale.length?'<div class="ev-note" style="margin-top:8px;">Das Training an diesem Tag wurde wegen der Vormerkung abgesagt. Über das Kalender-Symbol am Spiel „Vormerkung abschließen“ – dann findet es wieder statt.</div>':'')
     +'<button type="button" class="moved-jump" onclick="event.stopPropagation();jumpToGame('+e.fbIndex+')"><span>Zum '+(e.stalePlan||e.diverged?'aktuellen':'neuen')+' Termin: '+esc(to)+'</span><span>→</span></button></div>'
     +'</div>';
+}
+/* ---------- Push aufs Handy (ab 02.10.2026 · 1) ----------
+   Jeder angemeldete Zugang schaltet Push pro Gerät ein (Konto → Benachrichtigungen; einmaliger Hinweis in
+   „Zu erledigen“). Die Push-Adresse des Geräts wird mit dem öffentlichen VAPID-Schlüssel verschlüsselt in
+   data/push-subscriptions.json gespeichert (Repo ist öffentlich); nur die GitHub-Action mit dem Secret
+   VAPID_PRIVATE_KEY kann sie lesen und sendet nach denselben Regeln wie die Änderungsmail (scripts/notify-email.mjs)
+   sowie Erinnerungen an offene Zusagen (scripts/push-reminders.mjs). E-Mail und Push sind unabhängig.
+   iPhone: nur, wenn Platzcoach auf dem Home-Bildschirm installiert ist (iOS 16.4+). */
+const PUSH_ID_KEY='pc_push_id', PUSH_HINT_KEY='pc_push_hint_hidden';
+let PUSH_SUBS=[];
+function pushKey(){ return (CFG&&CFG.push&&CFG.push.vapidPublicKey)||''; }
+function pushSupported(){ return typeof window!=='undefined'&&'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window; }
+function isIOSDevice(){ return /iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1); }
+function isStandaloneApp(){ try{ return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true; }catch(e){ return false; } }
+function pushPermission(){ return typeof Notification!=='undefined'?Notification.permission:'default'; }
+function pushOnHere(){ return !!lsGet(PUSH_ID_KEY,'')&&pushSupported()&&pushPermission()==='granted'; }
+function pushDeviceLabel(){ const u=navigator.userAgent; return /iPhone/.test(u)?'iPhone':(/iPad/.test(u)?'iPad':(/Android/.test(u)?'Android':'Computer')); }
+function b64uToBytes(s){ s=String(s).replace(/-/g,'+').replace(/_/g,'/'); while(s.length%4) s+='='; return unb64(s); }
+function bytesToB64u(buf){ return b64(buf).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+// ECDH (Einmal-Schlüssel ↔ öffentlicher VAPID-Schlüssel) → HKDF-SHA256 → AES-256-GCM; Gegenstück in scripts/push-lib.mjs
+async function pushEncrypt(obj){
+  const pub=await crypto.subtle.importKey('raw',b64uToBytes(pushKey()),{name:'ECDH',namedCurve:'P-256'},false,[]);
+  const eph=await crypto.subtle.generateKey({name:'ECDH',namedCurve:'P-256'},true,['deriveBits']);
+  const bits=await crypto.subtle.deriveBits({name:'ECDH',public:pub},eph.privateKey,256);
+  const hk=await crypto.subtle.importKey('raw',bits,'HKDF',false,['deriveKey']);
+  const key=await crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:enc.encode('platzcoach-push'),info:enc.encode('subscription')},hk,{name:'AES-GCM',length:256},false,['encrypt']);
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(JSON.stringify(obj)));
+  return {epk:bytesToB64u(await crypto.subtle.exportKey('raw',eph.publicKey)),iv:bytesToB64u(iv),ct:bytesToB64u(ct)};
+}
+async function pushLoad(){ const d=await fetchRepoJSON(STORES.push.path); PUSH_SUBS=d&&Array.isArray(d.subs)?d.subs:[]; snapStore('push'); }
+function pushIosHint(){
+  openSheet('<div class="share-sheet"><h3>Push auf dem iPhone</h3><p class="sub" style="margin:0 0 10px;">Apple erlaubt Benachrichtigungen nur für Apps auf dem Home-Bildschirm:</p>'
+    +'<ol class="push-steps"><li>In Safari unten auf <b>Teilen</b> tippen</li><li><b>Zum Home-Bildschirm</b> wählen</li><li>Platzcoach über das neue Symbol öffnen und hier Push einschalten</li></ol>'
+    +'<button type="button" class="cancel-btn" onclick="closeSheet()">Verstanden</button></div>');
+}
+async function pushEnable(){
+  if(!session||!session.token){ showToast('Bitte zuerst anmelden.'); return; }
+  if(!pushKey()){ showToast('Push ist noch nicht eingerichtet – bitte beim Admin melden.',4000); return; }
+  if(isIOSDevice()&&!isStandaloneApp()){ pushIosHint(); return; }
+  if(!pushSupported()){ showToast('Dieser Browser unterstützt keine Push-Benachrichtigungen.',4000); return; }
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted'){ showToast('Benachrichtigungen wurden nicht erlaubt. Ändern kannst du das in den Einstellungen des Handys.',5000); renderKonto(); renderStart(); return; }
+    const reg=await swReady(6000);
+    let sub=await reg.pushManager.getSubscription();
+    const appKey=b64uToBytes(pushKey());
+    if(sub&&sub.options&&sub.options.applicationServerKey&&bytesToB64u(sub.options.applicationServerKey)!==pushKey()){ await sub.unsubscribe(); sub=null; } // Schlüssel neu erzeugt
+    if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:appKey});
+    const id=lsGet(PUSH_ID_KEY,'')||crypto.randomUUID();
+    await pushLoad();
+    PUSH_SUBS=PUSH_SUBS.filter(x=>x.id!==id).concat({id,userId:session.id,device:pushDeviceLabel(),created:new Date().toISOString(),enc:await pushEncrypt(sub.toJSON())});
+    await saveStore('push','Push eingeschaltet: '+pushDeviceLabel()+' – '+session.name);
+    lsSet(PUSH_ID_KEY,id); lsSet(PUSH_HINT_KEY,true);
+    showToast('Push ist an. Du bekommst Änderungen jetzt aufs Handy.');
+  }catch(err){ showToast('Push konnte nicht eingeschaltet werden: '+err.message,6000); }
+  renderKonto(); renderStart();
+}
+async function pushDisable(silent){
+  const id=lsGet(PUSH_ID_KEY,'');
+  try{ if(pushSupported()){ const reg=await swReady(2000); const sub=await reg.pushManager.getSubscription(); if(sub) await sub.unsubscribe(); } }catch(e){}
+  try{
+    if(id&&session&&session.token){ await pushLoad(); if(PUSH_SUBS.some(x=>x.id===id)){ PUSH_SUBS=PUSH_SUBS.filter(x=>x.id!==id); await saveStore('push','Push ausgeschaltet: '+pushDeviceLabel()+' – '+session.name); } }
+  }catch(err){ if(!silent) showToast('Abmelden des Geräts fehlgeschlagen: '+err.message,6000); }
+  try{ localStorage.removeItem(PUSH_ID_KEY); }catch(e){}
+  if(!silent){ showToast('Push ist aus.'); renderKonto(); renderStart(); }
+}
+// navigator.serviceWorker.ready wartet ewig, wenn kein Service Worker läuft → mit Zeitlimit
+function swReady(ms){ return Promise.race([navigator.serviceWorker.ready,new Promise((_,rej)=>setTimeout(()=>rej(new Error('Service Worker nicht bereit – bitte Seite neu laden')),ms||4000))]); }
+function pushHideHint(){ lsSet(PUSH_HINT_KEY,true); renderStart(); }
+function pushTodos(){
+  if(!session||!session.token||!pushKey()||lsGet(PUSH_HINT_KEY,false)||pushOnHere()) return [];
+  if(!(pushSupported()||(typeof navigator!=='undefined'&&isIOSDevice()))||pushPermission()==='denied') return [];
+  return [{click:'pushEnable()',txt:'Push aufs Handy: Absagen, Verlegungen, neue Termine und offene Zusagen sofort sehen.',act:'Einschalten',noDigest:true,
+    fix:{label:'Einschalten',click:'pushEnable()'},fix2:{label:'Nicht jetzt',click:'pushHideHint()'}}];
+}
+function pushRowHTML(){
+  if(!pushKey()) return '';
+  let ctl, note='Auf diesem Gerät: Absagen, Verlegungen, neue Termine, Hinweise von fussball.de und Erinnerung an offene Zusagen.';
+  if(isIOSDevice()&&!isStandaloneApp()){ ctl='<button type="button" class="wk-act" onclick="pushIosHint()">So geht’s</button>'; note='Auf dem iPhone erst Platzcoach zum Home-Bildschirm hinzufügen, dann hier einschalten.'; }
+  else if(!pushSupported()){ ctl=''; note='Dieser Browser unterstützt keine Push-Benachrichtigungen.'; }
+  else if(pushPermission()==='denied'){ ctl=''; note='Im Handy für diese Seite blockiert – in den Einstellungen des Browsers erlauben.'; }
+  else ctl='<label class="toggle-switch"><input type="checkbox" id="push-toggle"'+(pushOnHere()?' checked':'')+' onchange="this.checked?pushEnable():pushDisable()"><span class="toggle-slider"></span></label>';
+  return '<div class="notif-row" style="margin-top:12px;"><div class="notif-row-text"><b>Push aufs Handy</b><p>'+esc(note)+'</p></div>'+ctl+'</div>';
+}
+// Einmalige Einrichtung durch einen Admin: Schlüsselpaar im Browser erzeugen, öffentlichen Teil in
+// data/config.json schreiben, privaten Teil einmal anzeigen → als GitHub-Secret VAPID_PRIVATE_KEY speichern.
+function pushSetupCardHTML(){
+  return '<div class="card"><h4>Push-Benachrichtigungen einrichten</h4><p class="sub" style="margin:0 0 10px;">Einmalig für den Verein: Platzcoach erzeugt einen Schlüssel. Den geheimen Teil speicherst du danach bei GitHub als Secret – dann können alle Trainer Push einschalten.</p>'
+    +'<button type="button" class="submit-btn" onclick="pushSetup()">Schlüssel erzeugen</button></div>';
+}
+async function pushSetup(){
+  if(!session||!session.isAdmin||!session.token) return;
+  try{
+    const kp=await crypto.subtle.generateKey({name:'ECDH',namedCurve:'P-256'},true,['deriveBits']);
+    const pub=bytesToB64u(await crypto.subtle.exportKey('raw',kp.publicKey));
+    const priv=(await crypto.subtle.exportKey('jwk',kp.privateKey)).d;
+    const cfg=await fetchRepoJSON('data/config.json'); if(!cfg) throw new Error('config.json nicht lesbar');
+    cfg.push=Object.assign({},cfg.push||{},{vapidPublicKey:pub});
+    await ghPutRaw('data/config.json',JSON.stringify(cfg,null,2)+'\n','Push eingerichtet (öffentlicher Schlüssel) – '+session.name);
+    CFG.push=cfg.push;
+    const url='https://github.com/'+CFG.repo+'/settings/secrets/actions/new';
+    window._pushPriv=priv;
+    openSheet('<div class="share-sheet"><h3>Fast fertig</h3><p class="sub" style="margin:0 0 8px;">Diesen geheimen Schlüssel jetzt bei GitHub als Secret speichern. Er wird nur dieses eine Mal angezeigt.</p>'
+      +'<ol class="push-steps"><li>Schlüssel kopieren</li><li>GitHub öffnen, Name: <b>VAPID_PRIVATE_KEY</b>, Schlüssel einfügen, „Add secret“</li></ol>'
+      +'<pre class="share-prev" style="user-select:all;">'+esc(priv)+'</pre>'
+      +'<button type="button" class="submit-btn" onclick="navigator.clipboard.writeText(window._pushPriv).then(()=>showToast(\'Schlüssel kopiert.\'))">Schlüssel kopieren</button>'
+      +'<a class="cancel-btn" style="display:block;text-align:center;text-decoration:none;" href="'+esc(url)+'" target="_blank" rel="noopener">GitHub öffnen</a></div>');
+    renderKonto();
+  }catch(err){ showToast('Einrichtung fehlgeschlagen: '+err.message,6000); }
 }
 /* ---------- Trainer-Termine mit Zusagen (ab 01.10.2026 · 15) ----------
    Terminart „trainer“ (z. B. DFB-Trainingsdialog, Fortbildung, Sitzung): belegt keinen Platz, Ort als Adresse.
@@ -4372,7 +4489,7 @@ function conflictFix(A,B,ds){
   return {label:'Training '+(t.team===GK_TEAM?'TW':teamShort(t.team,t.squad))+' absagen',click:'cancelTrainingDay(\''+jsArg(t.trainingSlotId)+'\',\''+ds+'\')'};
 }
 function myTodos(isMine,hasTeams){
-  const out=rsvpTodos();
+  const out=rsvpTodos().concat(pushTodos());
   if(regIsAdminSession()){
     const miss=teamsWithoutTrainer(), key=miss.join('|');
     if(miss.length&&lsGet(INVITE_HIDDEN_KEY,'')!==key)
@@ -6728,7 +6845,7 @@ function notificationsCard(){
     '<div class="notif-row-text"><b>Wochenübersicht</b>'+
     '<p>Sonntags gegen 18 Uhr: deine Woche mit Training, Spielen und Absagen, dazu Platzkonflikte der nächsten 14 Tage.</p></div>'+
     '<label class="toggle-switch"><input type="checkbox" id="digest-toggle"'+(u.weeklyDigest!==false?' checked':'')+' onchange="toggleWeeklyDigest(this.checked)"><span class="toggle-slider"></span></label>'+
-    '</div></div>';
+    '</div>'+pushRowHTML()+'</div>';
 }
 function profileCard(){
   const u=USERS.find(x=>x.id===session.id)||{};
@@ -7167,6 +7284,7 @@ function renderKonto(){
   if(kontoTab==='profil'){
     h+=pwCard();
     if(!session.isSuper)h+=profileCard()+keeperCardHTML()+notificationsCard();
+    if(session.isAdmin&&!pushKey()) h+=pushSetupCardHTML();
     else if(session.token)h+=keeperCardHTML();
     h+=pwaCard();
   }else if(kontoTab==='saisons'){

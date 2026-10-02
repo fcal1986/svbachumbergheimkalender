@@ -168,3 +168,22 @@ Ausnahmen lassen sich ohne Code-Änderung ergänzen, z. B. zwei Torwarttrainings
 - **An-/Abmelden:** Auf der Terminkarte „Torhüter an-/abmelden“, pro einzelnem Termin. Mannschaftstrainer können ihre eigenen Torhüter an-/abmelden, Torwarttrainer und Admins alle.
 - **Datenschutz:** `data/goalkeepers.json` ist verschlüsselt (Schlüssel aus dem Schreib-Token). Namen sind nur nach Anmeldung sichtbar, weder in der öffentlichen Datei noch in Commit-Nachrichten oder E-Mails stehen Spielernamen. Anmeldungen vergangener Termine werden nach 60 Tagen automatisch gelöscht.
 - **Token erneuern:** Neuen Token als Notzugang `admin` unter Konto speichern, solange der alte noch gilt – die App verschlüsselt die Torhüter-Liste dann automatisch neu. Wird der alte Token vorher gelöscht, ist die Liste nicht mehr lesbar und muss neu eingetragen werden.
+
+## Push-Benachrichtigungen aufs Handy (optional)
+
+Platzcoach kann Änderungen (Absagen, Verlegungen, neue Termine, Hinweise aus dem fussball.de-Abgleich)
+und Erinnerungen an offene Zusagen als Push aufs Handy schicken – zusätzlich oder statt der E-Mail,
+jeder Zugang entscheidet selbst (Konto → Benachrichtigungen).
+
+Einrichtung (einmalig, als Admin):
+
+1. In Platzcoach **Konto → Profil → „Push-Benachrichtigungen einrichten“ → „Schlüssel erzeugen“**.
+   Der öffentliche Schlüssel landet automatisch in `data/config.json` unter `push.vapidPublicKey`.
+2. Den angezeigten geheimen Schlüssel kopieren und bei GitHub unter
+   **Settings → Secrets and variables → Actions → New repository secret** als **`VAPID_PRIVATE_KEY`** speichern.
+   Er wird nur einmal angezeigt; geht er verloren, einfach neu erzeugen (alle müssen Push dann neu einschalten).
+
+Technik: Die Push-Adressen der Geräte stehen verschlüsselt in `data/push-subscriptions.json`
+(nur mit dem Secret lesbar). Gesendet wird von `scripts/notify-email.mjs` (bei Änderungen) und
+`scripts/push-reminders.mjs` (täglich, Workflow `push-reminders.yml`). iPhone: nur, wenn Platzcoach
+über „Zum Home-Bildschirm“ installiert ist (iOS 16.4 oder neuer).
