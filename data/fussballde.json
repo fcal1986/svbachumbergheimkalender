@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-02T05:34:17.024Z",
+  "updated": "2026-10-02T12:31:15.791Z",
   "games": [
     {
       "d": "2026-09-12",
@@ -2958,14 +2958,19 @@
     },
     {
       "d": "2027-04-11",
-      "t": "12:45",
+      "t": "12:30",
       "team": "Herren",
       "squad": 3,
       "ownName": "SV Bachum/Bergheim III",
       "opponent": "TuS Niedereimer II",
       "competition": "Kreisliga D",
       "score": null,
-      "link": "https://www.fussball.de/spiel/tus-niedereimer-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IQLK000000VS5489BUVVKNMR0J"
+      "link": "https://www.fussball.de/spiel/tus-niedereimer-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IQLK000000VS5489BUVVKNMR0J",
+      "movedFrom": {
+        "d": "2027-04-11",
+        "t": "12:45"
+      },
+      "movedAt": "2026-10-02T12:31:15.783Z"
     },
     {
       "d": "2027-04-16",
