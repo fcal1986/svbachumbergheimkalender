@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-01T22:39:50.871Z",
+  "updated": "2026-10-02T05:34:17.024Z",
   "games": [
     {
       "d": "2026-09-12",
@@ -1966,17 +1966,6 @@
   ],
   "awayGames": [
     {
-      "d": "2026-09-10",
-      "t": "19:30",
-      "team": "Herren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "opponent": "TuS Vosswinkel",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/tus-vosswinkel-sv-bachum-bergheim/-/spiel/031I0BNCDG000000VS5489BUVVKNMR0J"
-    },
-    {
       "d": "2026-09-11",
       "t": "19:00",
       "team": "A-Junioren",
@@ -3622,9 +3611,9 @@
       "competitions": [
         "Kreisliga A"
       ],
-      "games": 28,
+      "games": 27,
       "homeGames": 14,
-      "first": "2026-09-10",
+      "first": "2026-09-20",
       "last": "2027-05-30",
       "teamId": "011MIANBCK000000VTVG0001VTR8C1K7"
     },
@@ -3665,6 +3654,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-09-10",
+  "teamsFrom": "2026-09-11",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
