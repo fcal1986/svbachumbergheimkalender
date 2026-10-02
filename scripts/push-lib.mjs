@@ -34,9 +34,23 @@ function decryptSub(enc, privB64) {
   return JSON.parse(Buffer.concat([d.update(body), d.final()]).toString('utf8'));
 }
 
+// Passt das Secret zum öffentlichen Schlüssel in config.json? (z. B. Schlüssel zweimal erzeugt)
+export function pushKeyMatches(cfg) {
+  try {
+    const e = crypto.createECDH('prime256v1');
+    e.setPrivateKey(Buffer.from(process.env.VAPID_PRIVATE_KEY, 'base64url'));
+    return e.getPublicKey().toString('base64url') === cfg.push.vapidPublicKey;
+  } catch (err) { return false; }
+}
+
 // Alle angemeldeten Geräte: [{id, userId, sub}] (nicht entschlüsselbare Einträge werden übersprungen)
 export async function loadPushDevices(cfg) {
   if (!pushConfigured(cfg)) return [];
+  if (!pushKeyMatches(cfg)) {
+    console.error('PUSH: Das Secret VAPID_PRIVATE_KEY passt nicht zum Schlüssel in data/config.json (push.vapidPublicKey). '
+      + 'Bitte in Platzcoach den Schlüssel neu erzeugen und den neuen geheimen Teil als Secret speichern.');
+    return [];
+  }
   let raw;
   try { raw = JSON.parse(await fs.readFile(SUBS_PATH, 'utf8')); } catch (e) { return []; }
   const out = [];
