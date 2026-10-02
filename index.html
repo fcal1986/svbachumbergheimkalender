@@ -1445,7 +1445,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='02.10.2026 · 1';
+const APP_VERSION='02.10.2026 · 2';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3340,12 +3340,12 @@ async function pushEncrypt(obj){
   return {epk:bytesToB64u(await crypto.subtle.exportKey('raw',eph.publicKey)),iv:bytesToB64u(iv),ct:bytesToB64u(ct)};
 }
 async function pushLoad(){ const d=await fetchRepoJSON(STORES.push.path); PUSH_SUBS=d&&Array.isArray(d.subs)?d.subs:[]; snapStore('push'); }
-function pushIosHint(){
+function pushIosHint(auto){
   openSheet('<div class="share-sheet"><h3>Push auf dem iPhone</h3><p class="sub" style="margin:0 0 10px;">Apple erlaubt Benachrichtigungen nur für Apps auf dem Home-Bildschirm:</p>'
     +'<ol class="push-steps"><li>In Safari unten auf <b>Teilen</b> tippen</li><li><b>Zum Home-Bildschirm</b> wählen</li><li>Platzcoach über das neue Symbol öffnen und hier Push einschalten</li></ol>'
     +'<button type="button" class="cancel-btn" onclick="closeSheet()">Verstanden</button></div>');
 }
-async function pushEnable(){
+async function pushEnable(quiet){
   if(!session||!session.token){ showToast('Bitte zuerst anmelden.'); return; }
   if(!pushKey()){ showToast('Push ist noch nicht eingerichtet – bitte beim Admin melden.',4000); return; }
   if(isIOSDevice()&&!isStandaloneApp()){ pushIosHint(); return; }
@@ -3362,9 +3362,9 @@ async function pushEnable(){
     await pushLoad();
     PUSH_SUBS=PUSH_SUBS.filter(x=>x.id!==id).concat({id,userId:session.id,device:pushDeviceLabel(),created:new Date().toISOString(),enc:await pushEncrypt(sub.toJSON())});
     await saveStore('push','Push eingeschaltet: '+pushDeviceLabel()+' – '+session.name);
-    lsSet(PUSH_ID_KEY,id); lsSet(PUSH_HINT_KEY,true);
-    showToast('Push ist an. Du bekommst Änderungen jetzt aufs Handy.');
-  }catch(err){ showToast('Push konnte nicht eingeschaltet werden: '+err.message,6000); }
+    lsSet(PUSH_ID_KEY,id); try{ localStorage.removeItem(PUSH_HINT_KEY); }catch(e){}
+    if(!quiet) showToast('Push ist an. Du bekommst Änderungen jetzt aufs Handy.');
+  }catch(err){ if(!quiet) showToast('Push konnte nicht eingeschaltet werden: '+err.message,6000); }
   renderKonto(); renderStart();
 }
 async function pushDisable(silent){
@@ -3374,16 +3374,32 @@ async function pushDisable(silent){
     if(id&&session&&session.token){ await pushLoad(); if(PUSH_SUBS.some(x=>x.id===id)){ PUSH_SUBS=PUSH_SUBS.filter(x=>x.id!==id); await saveStore('push','Push ausgeschaltet: '+pushDeviceLabel()+' – '+session.name); } }
   }catch(err){ if(!silent) showToast('Abmelden des Geräts fehlgeschlagen: '+err.message,6000); }
   try{ localStorage.removeItem(PUSH_ID_KEY); }catch(e){}
-  if(!silent){ showToast('Push ist aus.'); renderKonto(); renderStart(); }
+  if(!silent){ lsSet(PUSH_HINT_KEY,true); showToast('Push ist aus.'); renderKonto(); renderStart(); }
 }
 // navigator.serviceWorker.ready wartet ewig, wenn kein Service Worker läuft → mit Zeitlimit
 function swReady(ms){ return Promise.race([navigator.serviceWorker.ready,new Promise((_,rej)=>setTimeout(()=>rej(new Error('Service Worker nicht bereit – bitte Seite neu laden')),ms||4000))]); }
-function pushHideHint(){ lsSet(PUSH_HINT_KEY,true); renderStart(); }
-function pushTodos(){
-  if(!session||!session.token||!pushKey()||lsGet(PUSH_HINT_KEY,false)||pushOnHere()) return [];
-  if(!(pushSupported()||(typeof navigator!=='undefined'&&isIOSDevice()))||pushPermission()==='denied') return [];
-  return [{click:'pushEnable()',txt:'Push aufs Handy: Absagen, Verlegungen, neue Termine und offene Zusagen sofort sehen.',act:'Einschalten',noDigest:true,
-    fix:{label:'Einschalten',click:'pushEnable()'},fix2:{label:'Nicht jetzt',click:'pushHideHint()'}}];
+/* Push standardmäßig an (ab 02.10.2026 · 2): Browser erlauben Push nur mit Zustimmung pro Gerät – ganz
+   ohne Tipp geht es nicht. Deshalb: Hat das Gerät die Erlaubnis schon (z. B. nach erneuter Anmeldung), wird
+   still angemeldet. Sonst fragt Platzcoach beim Öffnen einmal mit einem Fenster („Erlauben“ = ein Tipp);
+   „Später“ fragt nach 14 Tagen erneut. Abgeschaltet im Konto = nicht mehr fragen. */
+const PUSH_ASKED_KEY='pc_push_asked', PUSH_ASK_DAYS=14;
+function pushEligible(){
+  if(!session||!session.token||session.isSuper||!pushKey()||pushOnHere()) return false;
+  if(lsGet(PUSH_HINT_KEY,false)) return false; // im Konto bewusst ausgeschaltet
+  if(isIOSDevice()&&!isStandaloneApp()) return true;   // Anleitung zum Installieren
+  return pushSupported()&&pushPermission()!=='denied';
+}
+async function pushAuto(){
+  if(!pushEligible()) return;
+  if(pushSupported()&&pushPermission()==='granted'&&!(isIOSDevice()&&!isStandaloneApp())){ await pushEnable(true); return; } // schon erlaubt: still an
+  const last=lsGet(PUSH_ASKED_KEY,0);
+  if(last&&Date.now()-last<PUSH_ASK_DAYS*86400000) return;
+  if(document.querySelector('#gksheet.show,#modal.show,#login.show')) return; // nichts anderes überdecken
+  lsSet(PUSH_ASKED_KEY,Date.now());
+  if(isIOSDevice()&&!isStandaloneApp()){ pushIosHint(true); return; }
+  openSheet('<div class="share-sheet"><h3>Push aufs Handy</h3><p class="sub" style="margin:0 0 12px;">Absagen, Verlegungen, neue Termine und offene Zusagen sofort aufs Handy – statt nachzuschauen. Abschalten jederzeit im Konto.</p>'
+    +'<button type="button" class="submit-btn" onclick="closeSheet();pushEnable()">Erlauben</button>'
+    +'<button type="button" class="cancel-btn" onclick="closeSheet()">Später</button></div>');
 }
 function pushRowHTML(){
   if(!pushKey()) return '';
@@ -4489,7 +4505,7 @@ function conflictFix(A,B,ds){
   return {label:'Training '+(t.team===GK_TEAM?'TW':teamShort(t.team,t.squad))+' absagen',click:'cancelTrainingDay(\''+jsArg(t.trainingSlotId)+'\',\''+ds+'\')'};
 }
 function myTodos(isMine,hasTeams){
-  const out=rsvpTodos().concat(pushTodos());
+  const out=rsvpTodos();
   if(regIsAdminSession()){
     const miss=teamsWithoutTrainer(), key=miss.join('|');
     if(miss.length&&lsGet(INVITE_HIDDEN_KEY,'')!==key)
@@ -9313,6 +9329,7 @@ async function boot(){
   openInviteFromHash();
   if(RESET_CODE_AT_LOAD) openResetFlow(RESET_CODE_AT_LOAD);
   else checkForcedPwChange();
+  setTimeout(pushAuto,1500); // Push möglichst „standardmäßig an“ (ab 02.10.2026 · 2)
   window.addEventListener('hashchange',()=>{ const rc=takeResetCodeFromHash(); if(rc){ openResetFlow(rc); return; } openHashEvent(); openInviteFromHash(); });
 
   // Absicherung gegen "Kopf-/Fußzeile verschwunden nach Rückkehr aus dem Hintergrund" (z.B. nach
