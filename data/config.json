@@ -9,23 +9,39 @@
     "last": "Admin"
   },
   "fussballde": {
-  "clubId": "00ES8GN8LS00007LVV0AG08LVUPGND5I",
-  "clubMatch": "SV Bachum",
-  "bufferBeforeMin": 15,
-  "durationByAge": {"E": 60},
-  "shareCategories": ["E-Junioren", "F-Junioren", "G-Junioren", "Bambini"],
-  "homeVenues": ["Höllenbergkampfbahn"]
+    "clubId": "00ES8GN8LS00007LVV0AG08LVUPGND5I",
+    "clubMatch": "SV Bachum",
+    "bufferBeforeMin": 15,
+    "durationByAge": {
+      "E": 60
+    },
+    "shareCategories": [
+      "E-Junioren",
+      "F-Junioren",
+      "G-Junioren",
+      "Bambini"
+    ],
+    "homeVenues": [
+      "Höllenbergkampfbahn"
+    ]
   },
   "registration": {
-  "workerUrl": "https://odd-pine-7cbc.silent-shape-c920.workers.dev"
+    "workerUrl": "https://odd-pine-7cbc.silent-shape-c920.workers.dev"
   },
   "notify": {
-  "emails": ["fab.calcagno@gmail.com"],
-  "fromEmail": "noreply@platzcoach.de",
-  "replyTo": "info@platzcoach.de"
+    "emails": [
+      "fab.calcagno@gmail.com"
+    ],
+    "fromEmail": "noreply@platzcoach.de",
+    "replyTo": "info@platzcoach.de"
   },
   "occupancy": {
-    "levels": {"game": "exclusive", "training": "shared", "goalkeeper": "overlay", "other": "shared"},
+    "levels": {
+      "game": "exclusive",
+      "training": "shared",
+      "goalkeeper": "overlay",
+      "other": "shared"
+    },
     "compatible": []
   },
   "venue": {
@@ -36,5 +52,8 @@
   },
   "passwordReset": {
     "workerUrl": "https://platzcoach-passwort.silent-shape-c920.workers.dev"
+  },
+  "push": {
+    "vapidPublicKey": "BOcFqk5lbWQ2I_ZRP2UqHH6xvk57_ioOfg9TJ2FqHl68lKLWknMY0otgKGhWB8I5aHRsx-ytlF1F8_DWTrLOj_A"
   }
 }
