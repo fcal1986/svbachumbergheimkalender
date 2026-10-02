@@ -305,6 +305,8 @@
   .tl-sun{position:absolute;bottom:0;border-left:2px dashed #E8B400;z-index:2;pointer-events:none;}
   .tl-scroll{flex:1;min-width:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain;}
   .tl-scroll::-webkit-scrollbar{display:none;}
+  @media (hover:hover) and (pointer:fine){ .tl-scroll{cursor:grab;} .tl-scroll .tl-blk,.tl-scroll .tl-free,.tl-scroll .tl-edge{cursor:pointer;} }
+  .tl-scroll.tl-dragging,.tl-scroll.tl-dragging *{cursor:grabbing!important;user-select:none;}
   .tl-scroll .tl-body{flex:none;}
   .tl-view{flex:1;min-width:0;position:relative;}
   .tl-pad{padding:0 50%;box-sizing:content-box;position:relative;}
@@ -1445,7 +1447,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='02.10.2026 · 3';
+const APP_VERSION='02.10.2026 · 4';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -4020,7 +4022,7 @@ function timelineHTML(ds,isMine){
   groups.forEach(g=>{ if(g.area==='platz'){ h+='<span style="top:'+g.top+'px;height:'+(2*TL_LANE+TL_GAP)+'px">A</span><span style="top:'+laneY('platz',3)+'px;height:'+(2*TL_LANE+TL_GAP)+'px">B</span>'; }
     else h+='<span style="top:'+g.top+'px;height:'+(g.n*TL_LANE+(g.n-1)*TL_GAP)+'px">'+(g.area==='klein'?'K':'H')+'</span>'; });
   // Ab 01.10.2026 · 7: links und rechts je eine halbe Breite Polster, damit der Strich in der Mitte jede Uhrzeit von T0 bis T1 erreicht
-  h+='</div><div class="tl-view"><div class="tl-scroll" data-ds="'+ds+'" data-t0="'+T0+'" data-t1="'+T1+'" onscroll="tlScroll(this)" ontouchstart="tlTouchStart(event,this)" ontouchend="tlTouchEnd(event,this)">'
+  h+='</div><div class="tl-view"><div class="tl-scroll" data-ds="'+ds+'" data-t0="'+T0+'" data-t1="'+T1+'" onscroll="tlScroll(this)" ontouchstart="tlTouchStart(event,this)" ontouchend="tlTouchEnd(event,this)" onpointerdown="tlMouseDown(event,this)">'
     +'<div class="tl-pad" style="width:'+((T1-T0)/TL_VIEW_MIN*100).toFixed(1)+'%">'+tlEdgesHTML(ds,T0,T1,H)+'<div class="tl-body" style="height:'+H+'px">';
   groups.forEach(g=>{ for(let l=1;l<=g.n;l++) h+='<div class="tl-lane'+(g.area!=='platz'?' alt':'')+'" style="top:'+laneY(g.area,l)+'px"></div>'; });
   for(let hh=h0+1;hh<h1;hh++) h+='<span class="tl-tick" style="left:'+P(hh*60)+'%">'+hh+':00</span><div class="tl-grid" style="left:'+P(hh*60)+'%;top:'+TL_TOP+'px"></div>';
@@ -4094,6 +4096,41 @@ function tlTouchStart(ev,el){ const t=ev.touches&&ev.touches[0]; if(!t) return;
 function tlTouchEnd(ev,el){ const t=ev.changedTouches&&ev.changedTouches[0], s=_tlTouch; _tlTouch=null; if(!t||!s) return;
   const dx=t.clientX-s.x, dy=t.clientY-s.y; if(Math.abs(dx)<60||Math.abs(dy)>Math.abs(dx)) return;
   if(dx<0&&s.atEnd) shiftStartDay(1,'start'); else if(dx>0&&s.atStart) shiftStartDay(-1,'end'); }
+/* Ab 02.10.2026 · 4: Mit der Maus ziehen (Desktop). Gleiches Verhalten wie Wischen am Handy:
+   Ziehen verschiebt die Zeit, wer am Rand weiterzieht, kommt zum nächsten bzw. vorigen Tag.
+   Nach einem echten Ziehen löst das Loslassen keinen Klick auf Blöcke oder „+ frei“ aus. */
+let _tlDrag=null;
+function tlMouseDown(ev,el){
+  if(ev.button!==0||(ev.pointerType&&ev.pointerType!=='mouse')) return;
+  _tlDrag={el,x:ev.clientX,sl:el.scrollLeft,moved:false,
+    atEnd:el.scrollLeft+el.clientWidth>=el.scrollWidth-2,atStart:el.scrollLeft<=2};
+  ev.preventDefault(); // keine Textauswahl und kein Bild-/Text-Ziehen des Browsers (bricht sonst ab)
+  document.addEventListener('pointermove',tlMouseMove);
+  document.addEventListener('pointerup',tlMouseUp);
+  document.addEventListener('pointercancel',tlMouseUp);
+}
+function tlMouseMove(ev){ const d=_tlDrag; if(!d) return;
+  const dx=ev.clientX-d.x;
+  if(!d.moved&&Math.abs(dx)<4) return;
+  if(!d.moved){ d.moved=true; d.el.classList.add('tl-dragging'); }
+  ev.preventDefault();
+  d.el.scrollLeft=d.sl-dx; }
+function tlMouseUp(ev){ const d=_tlDrag; _tlDrag=null;
+  document.removeEventListener('pointermove',tlMouseMove);
+  document.removeEventListener('pointerup',tlMouseUp);
+  document.removeEventListener('pointercancel',tlMouseUp);
+  if(!d) return;
+  d.el.classList.remove('tl-dragging');
+  if(!d.moved) return;
+  // Den Klick, den der Browser nach dem Loslassen schickt, einmal schlucken
+  const eat=e=>{ e.stopPropagation(); e.preventDefault(); };
+  window.addEventListener('click',eat,{capture:true,once:true});
+  setTimeout(()=>window.removeEventListener('click',eat,{capture:true}),0);
+  if(ev.type==='pointercancel') return;
+  const dx=ev.clientX-d.x;
+  if(Math.abs(dx)<60) return;
+  if(dx<0&&d.atEnd) shiftStartDay(1,'start'); else if(dx>0&&d.atStart) shiftStartDay(-1,'end');
+}
 function shiftStartDay(n,pos){
   const ds=addDays(startSel||todayStr,n); if(ds<todayStr||ds>weekEndStr()) return;
   startSel=ds; renderMyWeek();
