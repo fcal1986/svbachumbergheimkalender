@@ -1445,7 +1445,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='02.10.2026 · 2';
+const APP_VERSION='02.10.2026 · 3';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3376,6 +3376,11 @@ async function pushDisable(silent){
   try{ localStorage.removeItem(PUSH_ID_KEY); }catch(e){}
   if(!silent){ lsSet(PUSH_HINT_KEY,true); showToast('Push ist aus.'); renderKonto(); renderStart(); }
 }
+// Testnachricht über die GitHub-Action (prüft dabei auch das Secret); kommt nach ca. 30–60 Sekunden
+async function pushTest(){
+  try{ await ghDispatch('push-test',{userId:session.id}); showToast('Test-Push angefordert – kommt in etwa einer Minute.',5000); }
+  catch(err){ showToast('Test-Push fehlgeschlagen: '+err.message,6000); }
+}
 // navigator.serviceWorker.ready wartet ewig, wenn kein Service Worker läuft → mit Zeitlimit
 function swReady(ms){ return Promise.race([navigator.serviceWorker.ready,new Promise((_,rej)=>setTimeout(()=>rej(new Error('Service Worker nicht bereit – bitte Seite neu laden')),ms||4000))]); }
 /* Push standardmäßig an (ab 02.10.2026 · 2): Browser erlauben Push nur mit Zustimmung pro Gerät – ganz
@@ -3408,7 +3413,8 @@ function pushRowHTML(){
   else if(!pushSupported()){ ctl=''; note='Dieser Browser unterstützt keine Push-Benachrichtigungen.'; }
   else if(pushPermission()==='denied'){ ctl=''; note='Im Handy für diese Seite blockiert – in den Einstellungen des Browsers erlauben.'; }
   else ctl='<label class="toggle-switch"><input type="checkbox" id="push-toggle"'+(pushOnHere()?' checked':'')+' onchange="this.checked?pushEnable():pushDisable()"><span class="toggle-slider"></span></label>';
-  return '<div class="notif-row" style="margin-top:12px;"><div class="notif-row-text"><b>Push aufs Handy</b><p>'+esc(note)+'</p></div>'+ctl+'</div>';
+  const test=pushOnHere()?'<button type="button" class="wk-act" style="margin-top:8px;" onclick="pushTest()">Test-Push senden</button>':'';
+  return '<div class="notif-row" style="margin-top:12px;"><div class="notif-row-text"><b>Push aufs Handy</b><p>'+esc(note)+' Über eigene Änderungen gibt es – wie bei der E-Mail – keine Nachricht.</p>'+test+'</div>'+ctl+'</div>';
 }
 // Einmalige Einrichtung durch einen Admin: Schlüsselpaar im Browser erzeugen, öffentlichen Teil in
 // data/config.json schreiben, privaten Teil einmal anzeigen → als GitHub-Secret VAPID_PRIVATE_KEY speichern.

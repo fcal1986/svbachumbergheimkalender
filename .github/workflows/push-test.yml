@@ -1,0 +1,23 @@
+name: Push-Test
+
+# Aus der App (Konto → Benachrichtigungen → „Test-Push senden“): Testnachricht an die eigenen Geräte.
+
+on:
+  repository_dispatch:
+    types: [push-test]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Abhängigkeiten installieren
+        run: npm install --no-audit --no-fund
+      - name: Testnachricht senden
+        env:
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          PUSH_TEST_USER: ${{ github.event.client_payload.userId }}
+        run: node scripts/push-test.mjs
