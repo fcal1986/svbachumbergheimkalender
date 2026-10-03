@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-02T23:46:00.034Z",
+  "updated": "2026-10-03T05:16:08.972Z",
   "games": [
     {
       "d": "2026-09-12",
@@ -1966,17 +1966,6 @@
   ],
   "awayGames": [
     {
-      "d": "2026-09-11",
-      "t": "19:00",
-      "team": "A-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "opponent": "JSG Herdringen/Müsch. U20 I",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/jsg-herdringen-mueschede-u20-sv-bachum-bergheim/-/spiel/031JKQC7K8000000VS5489BUVVKNMR0J"
-    },
-    {
       "d": "2026-09-12",
       "t": "10:00",
       "team": "E-Junioren",
@@ -3384,9 +3373,9 @@
         "Kreisliga A",
         "Kreispokal"
       ],
-      "games": 17,
+      "games": 16,
       "homeGames": 8,
-      "first": "2026-09-11",
+      "first": "2026-09-18",
       "last": "2027-05-21",
       "teamId": "027IVI3RO8000000VS5489B1VUA37ON8"
     },
@@ -3659,6 +3648,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-09-11",
+  "teamsFrom": "2026-09-12",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
