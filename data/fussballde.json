@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-04T12:18:58.056Z",
+  "updated": "2026-10-04T18:09:21.917Z",
   "games": [
     {
       "d": "2026-09-17",
@@ -431,21 +431,6 @@
       "staffelName": "B-Junioren - Bezirksliga, Staffel 3",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
       "infoAt": "2026-09-28T12:50:46.601Z"
-    },
-    {
-      "d": "2026-10-11",
-      "t": "13:30",
-      "team": "D-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum-Bergheim",
-      "gameNo": "240283011",
-      "opponent": "SpVg. Hagen 1911",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-spvg-hagen-1911/-/spiel/031VF5RPHK000000VS5489BTVT7QHFUC",
-      "staffelId": "240283",
-      "staffelName": "Freundschaftsspiele Kreis Arnsberg",
-      "infoAt": "2026-09-28T12:50:47.338Z"
     },
     {
       "d": "2026-10-11",
@@ -3375,8 +3360,8 @@
         "Vereinsturnier",
         "Kreispokal"
       ],
-      "games": 27,
-      "homeGames": 12,
+      "games": 26,
+      "homeGames": 11,
       "first": "2026-09-18",
       "last": "2027-06-05",
       "teamId": "011MI9U4VO000000VTVG0001VTR8C1K7"
