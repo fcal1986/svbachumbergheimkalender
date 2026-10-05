@@ -25,10 +25,10 @@
         "push": {
           "club": false,
           "moves": false,
-          "reg": false
+          "reg": false,
+          "other": true
         },
         "mail": {
-          "other": false,
           "club": false,
           "moves": false,
           "admin": false,
