@@ -492,7 +492,9 @@
           "reg": false
         },
         "mail": {
-          "own": false
+          "own": false,
+          "reg": false,
+          "admin": false
         }
       }
     },
