@@ -464,6 +464,23 @@
       "pwChangeRequired": true,
       "phone": "01773077726",
       "contactPublic": "none"
+    },
+    {
+      "id": "a0878d3e-94bf-4d9f-9687-ca0bd7133ae7",
+      "first": "Robin",
+      "last": "Lienig",
+      "email": "robin.lienig@sv-bachum-bergheim.de",
+      "admin": true,
+      "classes": {},
+      "enc": {
+        "salt": "V1wswfDyRV6Z3vUYhlJGkQ==",
+        "iv": "xW7uvtsauxLz/3Sx",
+        "cipher": "87UsRsRJNeMszqULPaxJWUVJjD23qt7FDfC1+rOADL0goKhuWnBn6Sp7kjM54D9UxWU3bnIjZBye1LHZtBjnSMo/WOTxsCTrzz3uyXGSN5mcKw+o40jgiZ50JSYliYWXOl8QTliR1xk1T6hz7Q=="
+      },
+      "created": "2026-10-05T19:05:12.041Z",
+      "emailNotificationsEnabled": true,
+      "pwChangeRequired": true,
+      "role": "vorstand"
     }
   ]
 }
