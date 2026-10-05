@@ -4,12 +4,13 @@
 // Ausgelöst vom Registrierungs-Worker per repository_dispatch „registration-new“
 // (nur wenn dort das Secret GITHUB_TOKEN gesetzt ist).
 // Payload: { name, role, teams } – bewusst ohne E-Mail/Telefon (Action-Logs sind öffentlich).
-// Empfänger: nicht gesperrte Zugänge mit Admin-Recht; Mail nur, wenn E-Mails nicht abgeschaltet sind.
+// Empfänger: nicht gesperrte Zugänge mit Admin-Recht, je nach Einstellung „Neue Anmeldungen“ (notify-prefs.mjs).
 
 import fs from 'node:fs/promises';
 import nodemailer from 'nodemailer';
 import { randomUUID } from 'node:crypto';
 import { loadPushDevices, pushToUser } from './push-lib.mjs';
+import { adminWants } from './notify-prefs.mjs';
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const readJson = async (p, fb) => { try { return JSON.parse(await fs.readFile(p, 'utf8')); } catch (e) { return fb; } };
@@ -31,7 +32,7 @@ async function main() {
   // Push
   const devices = await loadPushDevices(cfg);
   let pushed = 0;
-  for (const u of admins) {
+  for (const u of admins.filter(x => adminWants(x, 'push', 'reg'))) {
     pushed += await pushToUser(cfg, devices, u.id, {
       title: 'Neue Anmeldung',
       body: line + ' wartet auf Freigabe.',
@@ -43,7 +44,7 @@ async function main() {
 
   // Mail
   if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) { console.log('SMTP-Secrets fehlen – nur Push.'); return; }
-  const recipients = admins.filter(u => u.email && u.emailNotificationsEnabled !== false);
+  const recipients = admins.filter(u => u.email && u.emailNotificationsEnabled !== false && adminWants(u, 'mail', 'reg'));
   if (!recipients.length) { console.log('Keine Admin-Empfänger für die Mail.'); return; }
   const clubName = cfg.clubName || 'Platzcoach';
   const fromAddress = (cfg.notify && cfg.notify.fromEmail) || process.env.SMTP_USER;
