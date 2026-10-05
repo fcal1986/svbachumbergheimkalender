@@ -66,10 +66,10 @@ async function main() {
     } else {
       subject = `${p.reminder ? 'Erinnerung – ' : ''}Torwarttraining: bitte Torhüter an- oder abmelden (${p.when || ''})`;
       const intro = isOrg && u.id === p.byId ? 'Kopie für dich als Organisator: Die Trainer wurden gebeten, ihre Torhüter' : `${p.byName || 'Der Torwarttrainer'} bittet dich, deine Torhüter`;
-      text = `Hallo ${u.first},\n\n${intro} für das ${p.title || 'Torwarttraining'} an- oder abzumelden:\n\n${p.when || ''}\nFür: ${teamsText}\n\nSo geht's: In Platzcoach anmelden → Termin öffnen → „Torhüter an-/abmelden“. Torhüter trägst du einmalig unter Konto → Profil → „Meine Torhüter“ ein.\n${link ? '\n' + link + '\n' : ''}\nSo weiß der Torwarttrainer, wer kommt – und kann das Training rechtzeitig absagen, wenn zu wenige dabei sind.\n\n${clubName}`;
+      text = `Hallo ${u.first},\n\n${intro} für das ${p.title || 'Torwarttraining'} an- oder abzumelden:\n\n${p.when || ''}\nFür: ${teamsText}\n\nSo geht's: In Platzcoach anmelden → Termin öffnen → „Torhüter an-/abmelden“. Torhüter trägst du einmalig unter Konto → „Torhüter“ ein.\n${link ? '\n' + link + '\n' : ''}\nSo weiß der Torwarttrainer, wer kommt – und kann das Training rechtzeitig absagen, wenn zu wenige dabei sind.\n\n${clubName}`;
       html = `<div style="font-family:Arial,sans-serif;font-size:14px;color:#0B1B32;"><p>Hallo ${esc(u.first)},</p>
         <p>${esc(intro)} für das ${esc(p.title || 'Torwarttraining')} an- oder abzumelden:</p>${box}
-        <p>So geht's: In Platzcoach anmelden → Termin öffnen → „Torhüter an-/abmelden“. Torhüter trägst du einmalig unter <b>Konto → Profil → „Meine Torhüter“</b> ein.</p>${btn}
+        <p>So geht's: In Platzcoach anmelden → Termin öffnen → „Torhüter an-/abmelden“. Torhüter trägst du einmalig unter <b>Konto → „Torhüter“</b> ein.</p>${btn}
         <p>So weiß der Torwarttrainer, wer kommt – und kann das Training rechtzeitig absagen, wenn zu wenige dabei sind.</p>${foot}</div>`;
     }
     try {
