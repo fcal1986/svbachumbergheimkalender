@@ -23,11 +23,16 @@
       "emailNotificationsEnabled": true,
       "notifyPrefs": {
         "push": {
-          "own": false
+          "own": false,
+          "club": false,
+          "moves": false
         },
         "mail": {
           "other": false,
-          "club": false
+          "club": false,
+          "moves": false,
+          "admin": false,
+          "reg": false
         }
       }
     },
