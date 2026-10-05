@@ -26,7 +26,8 @@
           "own": false
         },
         "mail": {
-          "other": false
+          "other": false,
+          "club": false
         }
       }
     },
