@@ -32,6 +32,8 @@ const REG_TTL_SEC = 60 * 24 * 3600;      // offene Anmeldungen verfallen nach 60
 const RATE_LIMIT_PER_HOUR = 30;           // pro IP; großzügig, weil beim Vereinsabend alle im selben WLAN sind
 const MAX_PENDING = 300;
 const MAX_TEAMS = 12;
+const ROLES = ['trainer', 'jugendleiter', 'vorstand']; // Rolle im Verein (nur Kennzeichnung, Rechte vergibt der Admin)
+const cleanRole = v => (ROLES.includes(v) ? v : 'trainer');
 
 const authCache = new Map(); // tokenHash -> gültig bis (ms); nur im Speicher dieser Worker-Instanz
 
@@ -129,13 +131,14 @@ async function register(request, env, cors) {
   const phone = cleanStr(body.phone, 30);
   const showPhone = body.showPhone === true;
   const classes = cleanClasses(body.classes);
+  const role = cleanRole(body.role);
 
   const errors = [];
   if (!first) errors.push('Vorname fehlt.');
   if (!last) errors.push('Nachname fehlt.');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) errors.push('E-Mail sieht nicht gültig aus.');
   if (!/^[+\d][\d\s\-/()]{5,24}$/.test(phone)) errors.push('Telefonnummer sieht nicht gültig aus.');
-  if (!Object.keys(classes).length) errors.push('Bitte mindestens eine Mannschaft auswählen.');
+  if (role === 'trainer' && !Object.keys(classes).length) errors.push('Bitte mindestens eine Mannschaft auswählen.');
   if (body.consent !== true) errors.push('Bitte die Datenschutz-Hinweise bestätigen.');
   if (errors.length) return json({ error: errors.join(' ') }, 400, cors);
 
@@ -147,7 +150,7 @@ async function register(request, env, cors) {
 
   const rec = {
     id: crypto.randomUUID(),
-    first, last, email, phone, showPhone, classes,
+    first, last, email, phone, showPhone, classes, role,
     created: new Date().toISOString(),
   };
   existing.push(rec);
@@ -169,13 +172,14 @@ async function updateRegistration(id, request, env, cors) {
   if (body.phone !== undefined) next.phone = cleanStr(body.phone, 30);
   if (body.showPhone !== undefined) next.showPhone = body.showPhone === true;
   if (body.classes !== undefined) next.classes = cleanClasses(body.classes);
+  if (body.role !== undefined) next.role = cleanRole(body.role);
 
   const errors = [];
   if (!next.first) errors.push('Vorname fehlt.');
   if (!next.last) errors.push('Nachname fehlt.');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(next.email)) errors.push('E-Mail sieht nicht gültig aus.');
   if (!/^[+\d][\d\s\-/()]{5,24}$/.test(next.phone)) errors.push('Telefonnummer sieht nicht gültig aus.');
-  if (!Object.keys(next.classes || {}).length) errors.push('Bitte mindestens eine Mannschaft auswählen.');
+  if (cleanRole(next.role) === 'trainer' && !Object.keys(next.classes || {}).length) errors.push('Bitte mindestens eine Mannschaft auswählen.');
   if (errors.length) return json({ error: errors.join(' ') }, 400, cors);
 
   if (next.email !== rec.email) {
