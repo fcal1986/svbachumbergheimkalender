@@ -36,6 +36,22 @@
       "byName": "Fabrizio Calcagno",
       "at": "2026-09-28T18:59:34.964Z",
       "cancelledTraining": []
+    },
+    {
+      "id": "0a68ca81-57b5-4661-a9b4-a3d345e62f3a",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-ssv-kuentrop/-/spiel/031IK2S3Q8000000VS5489BUVVKNMR0J",
+      "team": "Herren",
+      "squad": 2,
+      "opponent": "SSV Küntrop",
+      "fromD": "2026-11-21",
+      "fromT": "14:00",
+      "toD": "2026-10-09",
+      "toT": "14:00",
+      "reason": "Platz nicht verfügbar",
+      "byId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
+      "byName": "Fabrizio Calcagno",
+      "at": "2026-10-05T17:28:43.385Z",
+      "cancelledTraining": []
     }
   ]
 }
