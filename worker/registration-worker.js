@@ -18,9 +18,16 @@
 // Admin-Prüfung: Admin-Aufrufe schicken den GitHub-Schlüssel der App mit. Der Worker fragt
 // bei GitHub nach, ob dieser Schlüssel Schreibrechte auf REPO hat – genau das Recht, das in
 // der App ohnehin zum Anlegen von Zugängen nötig ist. Der Schlüssel wird nicht gespeichert.
+//
+// Speicherung (ab 05.10.2026): alle offenen Anmeldungen in EINEM Eintrag (REGS_KEY, Liste).
+// Vorher lag jede Anmeldung unter eigenem Schlüssel und wurde per KV.list() gesucht. list() ist im
+// Gratis-Tarif auf 1.000 Aufrufe pro Tag begrenzt; eine Admin-App in einer Fehlerschleife hat das
+// am 05.10.2026 aufgebraucht, danach lieferten Registrierung und Admin-Liste nur noch „Serverfehler.“.
+// Jetzt: nur get/put (100.000 Lesezugriffe/Tag). Alte Einzel-Einträge werden einmalig übernommen.
 
 const INVITE_KEY = 'invite:current';
-const REG_PREFIX = 'reg:';
+const REG_PREFIX = 'reg:';               // alt: ein Schlüssel je Anmeldung (nur noch für die einmalige Übernahme)
+const REGS_KEY = 'regs:all';             // neu: alle offenen Anmeldungen als Liste
 const REG_TTL_SEC = 60 * 24 * 3600;      // offene Anmeldungen verfallen nach 60 Tagen
 const RATE_LIMIT_PER_HOUR = 30;           // pro IP; großzügig, weil beim Vereinsabend alle im selben WLAN sind
 const MAX_PENDING = 300;
@@ -75,20 +82,23 @@ export default {
           return json({ ok: true }, 200, cors);
         }
         if (m === 'GET' && path === '/admin/registrations') {
-          return json({ registrations: await listRegistrations(env) }, 200, cors);
+          return json({ registrations: await loadRegs(env) }, 200, cors);
         }
         if (m === 'PATCH' && (mm = path.match(/^\/admin\/registrations\/([0-9a-f-]{36})$/))) {
           return await updateRegistration(mm[1], request, env, cors);
         }
         if (m === 'DELETE' && (mm = path.match(/^\/admin\/registrations\/([0-9a-f-]{36})$/))) {
-          await env.REG.delete(REG_PREFIX + mm[1]);
+          const regs = await loadRegs(env);
+          await saveRegs(env, regs.filter(r => r.id !== mm[1]));
           return json({ ok: true }, 200, cors);
         }
       }
       return json({ error: 'Nicht gefunden.' }, 404, cors);
     } catch (err) {
       console.error('Fehler:', err && err.message);
-      return json({ error: 'Serverfehler.' }, 500, cors);
+      // Grund mitschicken (ohne Interna), damit Admin und Logs ihn sehen; die App zeigt Nutzern bei 5xx eine eigene Meldung.
+      const limit = /limit exceeded/i.test(String(err && err.message));
+      return json({ error: limit ? 'Speicher-Tageslimit erreicht. Bitte später noch einmal versuchen.' : 'Serverfehler.' }, limit ? 503 : 500, cors);
     }
   },
 };
@@ -129,13 +139,10 @@ async function register(request, env, cors) {
   if (body.consent !== true) errors.push('Bitte die Datenschutz-Hinweise bestätigen.');
   if (errors.length) return json({ error: errors.join(' ') }, 400, cors);
 
-  const existing = await listRegistrations(env);
+  // Gleiche E-Mail nochmal angemeldet (z. B. vertippt bei der Mannschaft): alte Anmeldung ersetzen.
+  const existing = (await loadRegs(env)).filter(r => r.email !== email);
   if (existing.length >= MAX_PENDING) {
     return json({ error: 'Gerade sind zu viele Anmeldungen offen. Bitte wende dich direkt an den Vorstand.' }, 503, cors);
-  }
-  // Gleiche E-Mail nochmal angemeldet (z. B. vertippt bei der Mannschaft): alte Anmeldung ersetzen.
-  for (const r of existing) {
-    if (r.email === email) await env.REG.delete(REG_PREFIX + r.id);
   }
 
   const rec = {
@@ -143,14 +150,16 @@ async function register(request, env, cors) {
     first, last, email, phone, showPhone, classes,
     created: new Date().toISOString(),
   };
-  await env.REG.put(REG_PREFIX + rec.id, JSON.stringify(rec), { expirationTtl: REG_TTL_SEC });
+  existing.push(rec);
+  await saveRegs(env, existing);
   await env.REG.put(rlKey, String(count + 1), { expirationTtl: 3600 });
   return json({ ok: true }, 201, cors);
 }
 
 // Admin korrigiert Angaben einer offenen Anmeldung (z. B. vertippte E-Mail nach Rücksprache).
 async function updateRegistration(id, request, env, cors) {
-  const rec = await env.REG.get(REG_PREFIX + id, 'json');
+  const regs = await loadRegs(env);
+  const rec = regs.find(r => r.id === id);
   if (!rec) return json({ error: 'Diese Anmeldung gibt es nicht mehr.' }, 404, cors);
   const body = await readJson(request);
   const next = { ...rec };
@@ -170,17 +179,29 @@ async function updateRegistration(id, request, env, cors) {
   if (errors.length) return json({ error: errors.join(' ') }, 400, cors);
 
   if (next.email !== rec.email) {
-    const others = await listRegistrations(env);
-    if (others.some(r => r.id !== id && r.email === next.email)) {
+    if (regs.some(r => r.id !== id && r.email === next.email)) {
       return json({ error: 'Für diese E-Mail gibt es schon eine andere offene Anmeldung.' }, 409, cors);
     }
   }
   next.edited = new Date().toISOString();
-  await env.REG.put(REG_PREFIX + id, JSON.stringify(next), { expirationTtl: REG_TTL_SEC });
+  await saveRegs(env, regs.map(r => (r.id === id ? next : r)));
   return json({ registration: next }, 200, cors);
 }
 
-async function listRegistrations(env) {
+// Alle offenen Anmeldungen: ein get, kein list(). Abgelaufene (älter als 60 Tage) fallen raus.
+async function loadRegs(env) {
+  let regs = await env.REG.get(REGS_KEY, 'json');
+  if (!Array.isArray(regs)) regs = await migrateLegacyRegs(env);
+  const minCreated = new Date(Date.now() - REG_TTL_SEC * 1000).toISOString();
+  return regs.filter(r => r && r.id && (r.created || '') >= minCreated)
+    .sort((a, b) => (a.created < b.created ? -1 : 1));
+}
+async function saveRegs(env, regs) {
+  await env.REG.put(REGS_KEY, JSON.stringify(regs));
+}
+// Einmalig: alte Einzel-Einträge (reg:<id>) in die Liste übernehmen. Nur hier wird noch list()
+// benutzt; danach existiert REGS_KEY und dieser Weg wird nie wieder betreten.
+async function migrateLegacyRegs(env) {
   const out = [];
   let cursor;
   do {
@@ -189,7 +210,8 @@ async function listRegistrations(env) {
     recs.forEach(r => { if (r) out.push(r); });
     cursor = page.list_complete ? null : page.cursor;
   } while (cursor);
-  out.sort((a, b) => (a.created < b.created ? -1 : 1));
+  await saveRegs(env, out);
+  await Promise.all(out.map(r => env.REG.delete(REG_PREFIX + r.id)));
   return out;
 }
 
