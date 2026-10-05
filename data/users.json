@@ -22,9 +22,11 @@
       "contactEmail": "fab.calcagno@gmail.com",
       "emailNotificationsEnabled": true,
       "notifyPrefs": {
-        "push": {},
-        "mail": {
+        "push": {
           "own": false
+        },
+        "mail": {
+          "other": false
         }
       }
     },
