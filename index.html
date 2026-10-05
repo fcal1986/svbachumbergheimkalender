@@ -1448,7 +1448,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='05.10.2026 · 2';
+const APP_VERSION='05.10.2026 · 3';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -9010,7 +9010,7 @@ function renderRegister(){
       +'<button class="btn-yellow" onclick="closeRegister()">Termine ansehen</button>';
   }else{
     const busy=REGFORM.state==='sending';
-    h+='<h1>Als Trainer registrieren</h1>'
+    h+='<h1>Als '+ROLES[regRole()]+' registrieren</h1>'
       +'<p class="sub">Für Platzcoach bei '+club+'. Nach der Freigabe durch den Vorstand bekommst du deine Zugangsdaten per E-Mail.</p>'
       +'<div class="login-err'+(REGFORM.error?' show':'')+'" id="reg-err">'+esc(REGFORM.error)+'</div>'
       +'<form onsubmit="event.preventDefault();submitRegister();" novalidate>'
@@ -9019,7 +9019,9 @@ function renderRegister(){
       +'<input type="email" id="rg-mail" placeholder="E-Mail (wird dein Login)" autocomplete="email" autocapitalize="none" spellcheck="false" value="'+esc(REGFORM.email||'')+'">'
       +'<input type="tel" id="rg-phone" placeholder="Telefonnummer" autocomplete="tel" value="'+esc(REGFORM.phone||'')+'">'
       +'<input type="text" id="rg-website" class="reg-hp" tabindex="-1" autocomplete="off" aria-hidden="true">'
-      +'<span class="reg-label">Welche Mannschaft(en) trainierst du?</span>'
+      +'<span class="reg-label">Deine Rolle im Verein</span>'
+      +'<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:6px;">'+Object.entries(ROLES).map(([k,l])=>'<div class="res-chip'+(regRole()===k?' on':'')+'" onclick="regSetRole(\''+k+'\')" style="padding:6px 12px;font-size:12px;">'+l+'</div>').join('')+'</div>'
+      +'<span class="reg-label">'+(regRole()==='trainer'?'Welche Mannschaft(en) trainierst du?':'Betreust du auch Mannschaften? (optional)')+'</span>'
       +'<p class="helptext" style="margin:0 0 8px;">Erst die Altersklasse antippen, dann <b>deine</b> Mannschaft, z. B. E1. Mehrere sind möglich.</p>'
       +'<div id="cp-reg">'+cpHTML('reg')+'</div>'
       +'<label class="reg-check"><input type="checkbox" id="rg-showphone"'+(REGFORM.showPhone?' checked':'')+'><span>Meine Telefonnummer auch <b>öffentlich</b> anzeigen, also für Besucher ohne Anmeldung. <span style="color:var(--ink-soft);">Angemeldete Trainer im Verein sehen deine Kontaktdaten immer. Später im Profil änderbar.</span></span></label>'
@@ -9031,6 +9033,8 @@ function renderRegister(){
   }
   box.innerHTML=h;
 }
+function regRole(){ return ROLES[REGFORM.role]?REGFORM.role:'trainer'; }
+function regSetRole(k){ regReadForm(); REGFORM.role=ROLES[k]?k:'trainer'; renderRegister(); }
 function regReadForm(){
   const v=id=>(document.getElementById(id)||{}).value||'';
   REGFORM.first=v('rg-first').trim(); REGFORM.last=v('rg-last').trim();
@@ -9046,14 +9050,14 @@ async function submitRegister(){
   if(!f.first||!f.last) errs.push('Bitte Vor- und Nachname eintragen.');
   if(!REG_MAIL_RE.test(f.email)) errs.push('Bitte eine gültige E-Mail-Adresse eintragen.');
   if(!REG_PHONE_RE.test(f.phone)) errs.push('Bitte eine gültige Telefonnummer eintragen (z. B. 0172 1234567).');
-  if(!Object.keys(CP.reg||{}).length) errs.push('Bitte mindestens eine Mannschaft auswählen.');
+  if(!Object.keys(CP.reg||{}).length){ if(regRole()==='trainer') errs.push('Bitte mindestens eine Mannschaft auswählen.'); }
   else if(cpMissing('reg').length) errs.push(squadPickMissingMsg(cpMissing('reg')));
   if(!f.consent) errs.push('Bitte den Haken beim Einverständnis setzen.');
   if(!errs.length&&USERS.some(u=>(u.email||'').toLowerCase()===f.email)) errs.push('Für diese E-Mail gibt es schon einen Zugang. Du kannst dich direkt anmelden.');
   if(errs.length){ f.error=errs.join(' '); trackEvent('registrierung_eingabefehler'); renderRegister(); document.getElementById('register').scrollTop=0; return; }
   f.error=''; f.state='sending'; renderRegister();
   try{
-    await regApi('/register',{method:'POST',body:{code:f.code,first:f.first,last:f.last,email:f.email,phone:f.phone,showPhone:f.showPhone,classes:CP.reg,consent:true,website:f.website}});
+    await regApi('/register',{method:'POST',body:{code:f.code,first:f.first,last:f.last,email:f.email,phone:f.phone,showPhone:f.showPhone,classes:CP.reg,role:regRole(),consent:true,website:f.website}});
     f.state='done'; clearInviteHash(); trackEvent('registrierung_abgesendet');
   }catch(e){ f.state='form'; f.error=e.message; trackEvent('registrierung_serverfehler'); }
   renderRegister(); document.getElementById('register').scrollTop=0;
@@ -9150,7 +9154,7 @@ function renderRegAdmin(){
         +'<div style="font-size:12px;margin-top:3px;"><a href="mailto:'+esc(r.email)+'" style="color:var(--ink);">'+esc(r.email)+'</a>'+(r.edited?' <span style="color:var(--ink-soft);font-size:10.5px;">· vom Admin korrigiert</span>':'')+'</div>'
         +'<div style="font-size:12px;margin-top:2px;"><a href="'+telHref+'" style="color:var(--ink);">'+esc(r.phone)+'</a>'
         +' <span style="color:var(--ink-soft);font-size:10.5px;">'+(r.showPhone?'· auch öffentlich':'· nur für Angemeldete')+'</span></div>'
-        +'<div style="margin-top:7px;display:flex;flex-wrap:wrap;gap:4px;">'+classesLabelHTML(CP[pid]||r.classes)+'</div>';
+        +'<div style="margin-top:7px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">'+(r.role&&ROLES[r.role]&&r.role!=='trainer'?'<span class="badge-role" style="margin:0;">'+ROLES[r.role]+'</span>':'')+classesLabelHTML(CP[pid]||r.classes)+'</div>';
       if(dup&&!editInfo){
         h+='<div class="banner warn" style="margin:10px 0 0;"><b>E-Mail schon vergeben.</b> Für '+esc(r.email)+' gibt es bereits den Zugang von <b>'+esc(dup.first+' '+dup.last)+'</b>'
           +(dup.created?' (angelegt am '+fmtDateOnly(dup.created)+')':'')+'. Freigeben ist erst möglich, wenn die E-Mail korrigiert ist.<br>'
@@ -9165,6 +9169,7 @@ function renderRegAdmin(){
           +'<div class="field" style="margin-bottom:8px;"><input type="email" id="re-mail" value="'+esc(f.email)+'" placeholder="E-Mail" autocapitalize="none" spellcheck="false" oninput="regCheckDraftMail()"></div>'
           +'<div id="re-mail-hint" class="helptext" style="margin:-4px 0 8px;"></div>'
           +'<div class="field" style="margin-bottom:8px;"><input type="tel" id="re-phone" value="'+esc(f.phone)+'" placeholder="Telefonnummer"></div>'
+          +'<div class="field" style="margin-bottom:8px;"><select id="re-role" style="width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-family:Inter;font-size:14px;background:var(--white);">'+Object.entries(ROLES).map(([k,l])=>'<option value="'+k+'"'+(((f.role&&ROLES[f.role])?f.role:'trainer')===k?' selected':'')+'>Rolle: '+l+'</option>').join('')+'</select></div>'
           +'<div class="reg-actions"><button class="cancel-btn" style="margin:0;" onclick="cancelEditRegistration()"'+(busy?' disabled':'')+'>Abbrechen</button>'
           +'<button class="submit-btn" style="margin:0;" onclick="saveEditRegistration(\''+r.id+'\')"'+(busy?' disabled':'')+'>'+(busy?'Speichert …':'Speichern')+'</button></div></div>';
       }else if(editing){
@@ -9246,13 +9251,13 @@ function genStartPassword(){
 function startEditRegistration(id){
   const r=REGSTATE.list.find(x=>x.id===id); if(!r)return;
   REGSTATE.editInfo=id; REGSTATE.editing=null;
-  REGSTATE.editDraft={first:r.first,last:r.last,email:r.email,phone:r.phone};
+  REGSTATE.editDraft={first:r.first,last:r.last,email:r.email,phone:r.phone,role:r.role||'trainer'};
   renderRegAdmin(); regCheckDraftMail();
 }
 function cancelEditRegistration(){ REGSTATE.editInfo=null; REGSTATE.editDraft=null; renderRegAdmin(); }
 function regReadDraft(){
   const v=id=>((document.getElementById(id)||{}).value||'').trim();
-  REGSTATE.editDraft={first:v('re-first'),last:v('re-last'),email:normMail(v('re-mail')),phone:v('re-phone')};
+  REGSTATE.editDraft={first:v('re-first'),last:v('re-last'),email:normMail(v('re-mail')),phone:v('re-phone'),role:v('re-role')||'trainer'};
   return REGSTATE.editDraft;
 }
 function regCheckDraftMail(){
@@ -9284,7 +9289,8 @@ async function saveEditRegistration(id){
 function approveRegistration(id){
   const r=REGSTATE.list.find(x=>x.id===id); if(!r)return;
   const classes=JSON.parse(JSON.stringify(CP['r'+id]||r.classes||{}));
-  if(!Object.keys(classes).length){ showToast('Bitte mindestens eine Mannschaft auswählen.'); return; }
+  const role=(r.role&&ROLES[r.role])?r.role:'trainer';
+  if(!Object.keys(classes).length&&role==='trainer'){ showToast('Bitte mindestens eine Mannschaft auswählen.'); return; }
   if(cpMissing('r'+id).length){ showToast(squadPickMissingMsg(cpMissing('r'+id)),5000); return; }
   const cur=getCurrentSeason();
   askConfirm('Zugang freigeben?',r.first+' '+r.last+' bekommt eine Willkommens-Mail und eine zweite Mail mit dem Start-Passwort'+(cur?' und wird der Saison „'+cur.label+'" zugeordnet.':'.'),'Freigeben',async()=>{
@@ -9299,7 +9305,7 @@ function approveRegistration(id){
         return;
       }
       await createUserCore({first:r.first,last:r.last,mail:r.email,pass:genStartPassword(),isAdm:false,classes,targetSeason:cur,
-        phone:r.phone,contactPublic:r.showPhone?'phone':'none'});
+        phone:r.phone,contactPublic:r.showPhone?'phone':'none',role});
       try{ await regApi('/admin/registrations/'+id,{method:'DELETE',auth:true}); }
       catch(e){ showToast('Zugang angelegt, aber die Anmeldung konnte nicht aus der Liste entfernt werden: '+e.message,6000); }
       REGSTATE.list=REGSTATE.list.filter(x=>x.id!==id); delete CP['r'+id];
