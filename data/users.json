@@ -486,7 +486,15 @@
       },
       "created": "2026-10-05T19:05:12.041Z",
       "emailNotificationsEnabled": true,
-      "role": "vorstand"
+      "role": "vorstand",
+      "notifyPrefs": {
+        "push": {
+          "own": false
+        },
+        "mail": {
+          "own": false
+        }
+      }
     },
     {
       "id": "f70b025a-fb4e-4573-b0fc-2d2f4c354b98",
