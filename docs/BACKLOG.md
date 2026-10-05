@@ -10,7 +10,7 @@ Ausführliche Analyse: Projekt-Doc `claude/vereinsneo-analyse-2026-10.md`.
 **Status:** ✅ umgesetzt · 🟡 teilweise · ⬜ offen · ⛔ bewusst nicht
 **Phase:** Pilot = aktuelle Technik · 1.0 = mit Supabase/Einrichtungsassistent · Später
 
-Letzte Aktualisierung: 01.10.2026 (Version 01.10.2026 · 5)
+Letzte Aktualisierung: 05.10.2026 (Version 05.10.2026 · 2)
 
 ## Must have
 
@@ -55,6 +55,8 @@ Letzte Aktualisierung: 01.10.2026 (Version 01.10.2026 · 5)
 | 69 | Termin weiterleiten für alle (auch ohne Anmeldung): Teilen-Symbol an jeder Karte im Kalender (Spiele inkl. fussball.de und auswärts, Training, Termine, abgesagt/ausgefallen/verlegt) → kurze Nachricht (wer gegen wen, wann, wo, Ansprechpartner ohne Telefon) mit Direktlink → „Per WhatsApp“ oder „Link kopieren“ | Pilot | ✅ | 01.10.2026 · 14 |
 | 70 | Trainer-Termine mit Zusagen (z. B. DFB-Trainingsdialog): neue Terminart im Formular (Ort, kein Platz), jeder Trainer darf anlegen; an der Karte „Ich komme“ / „Ich komme nicht“; Namen der Zusagen öffentlich; offene Antworten in „Zu erledigen“ (beide Knöpfe) und Wochenmail; beim Anlegen Mail an alle Trainer; Weiterleiten mit „Dabei: …“. Bewusste Ausnahme in PRINZIPIEN.md | Pilot | ✅ | 01.10.2026 · 15; 01.10.2026 · 16: Angemeldete sehen auch die Namen der Absagen (öffentlich nur Anzahl); behoben: schnelles Umschalten Zusage/Absage konnte den letzten Tipp verlieren (Speichern übernimmt jetzt Änderungen während des Hochladens) |
 | 71 | Push-Benachrichtigungen aufs Handy für angemeldete Zugänge: Schalter pro Gerät im Konto (unabhängig von der E-Mail), einmaliger Hinweis in „Zu erledigen“; gleiche Regeln wie die Änderungsmail (Absagen, Verlegungen, neue Termine, fussball.de-Hinweise inkl. Konflikte) plus tägliche Erinnerung an offene Zusagen (2 Tage vorher). Push-Adressen verschlüsselt im Repo, Secret VAPID_PRIVATE_KEY; Einrichtung durch Admin in der App. iPhone nur installiert (iOS 16.4+) | Pilot | ✅ | 02.10.2026 · 1 – aktiv, sobald das Secret gesetzt ist; 02.10.2026 · 2: möglichst standardmäßig an – Gerät mit Erlaubnis wird still angemeldet, sonst einmal ein Fenster „Erlauben / Später“ (Später: nach 14 Tagen erneut), im Konto ausgeschaltet = nicht mehr fragen; Hinweis in „Zu erledigen“ entfällt; Versand prüft, ob das Secret zum öffentlichen Schlüssel passt; 02.10.2026 · 3: „Test-Push senden“ im Konto (prüft auch das Secret); Hinweis, dass es über eigene Änderungen keine Nachricht gibt |
+| 72 | Rollen im Verein: Trainer, Jugendleiter, Vorstand als Kennzeichnung am Zugang (Badge in Konto → Zugänge, Knopf „Rolle“, Auswahl beim Anlegen); Rechte weiter nur über „Admin“ | Pilot | ✅ | 05.10.2026 · 2 |
+| 73 | Notaus für den Notzugang: „Alle Apps neu laden“ und „Alle abmelden“ (config.control, jede App prüft beim Start, beim Zurückkehren und alle 5 min); Notzugang-Passwort nur noch als Hash (in der App änderbar). Anlass: Endlosschleife einer Admin-App am 05.10. hat das KV-Tageslimit des Registrierungs-Workers aufgebraucht | Pilot | ✅ | 05.10.2026 · 2 |
 | 43 | Mannschaften mit Lücken-Filtern („ohne Trainer“, „ohne Trainingszeit“, „ohne Platzfreigabe“) | Pilot | ⬜ | „Termine heute ohne Trainer“ gibt es als Warnzeile; Filter in der Mannschaftsliste fehlen |
 
 ## Nice to have
