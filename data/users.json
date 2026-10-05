@@ -488,9 +488,7 @@
       "emailNotificationsEnabled": true,
       "role": "vorstand",
       "notifyPrefs": {
-        "push": {
-          "own": false
-        },
+        "push": {},
         "mail": {
           "own": false
         }
