@@ -321,8 +321,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "a0878d3e-94bf-4d9f-9687-ca0bd7133ae7"
+      ],
+      "trainerNames": [
+        "Robin Lienig"
+      ],
       "cancelled": [
         "2026-10-06"
       ]
@@ -625,8 +629,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "a0878d3e-94bf-4d9f-9687-ca0bd7133ae7"
+      ],
+      "trainerNames": [
+        "Robin Lienig"
+      ],
       "validFrom": "2026-09-09",
       "validUntil": null,
       "cancelled": [
