@@ -494,7 +494,7 @@
         "cipher": "OMpXVPpsLnBiyrRb/ZBVxk0gwVP1ic7NLoWPeM8+dzdnKh8e1zcJx5PcwGAii8jdUQ6Bnxm/9jxRLayTgbKeB+PTNoaWJvjpCHtt+WWp3oXdzOMxvAliZT6ynwP2UjR5L6of64qIOorPo38jpA=="
       },
       "created": "2026-10-05T19:06:25.629Z",
-      "emailNotificationsEnabled": true,
+      "emailNotificationsEnabled": false,
       "role": "vorstand",
       "phone": "",
       "contactEmail": "fabian.honisch@sv-bachum-bergheim.de",
