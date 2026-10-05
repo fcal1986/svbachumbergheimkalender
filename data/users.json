@@ -23,13 +23,10 @@
       "emailNotificationsEnabled": true,
       "notifyPrefs": {
         "push": {
-          "reg": false,
-          "other": true
+          "other": true,
+          "admin": true
         },
-        "mail": {
-          "admin": false,
-          "reg": false
-        }
+        "mail": {}
       }
     },
     {
