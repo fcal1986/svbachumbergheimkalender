@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-05T00:54:51.436Z",
+  "updated": "2026-10-05T09:01:06.133Z",
   "games": [
     {
       "d": "2026-09-17",
@@ -368,23 +368,6 @@
       "d": "2026-10-10",
       "t": "13:45",
       "team": "E-Junioren",
-      "squad": 2,
-      "ownName": "SV Bachum/Bergheim II",
-      "gameNo": "210931013",
-      "opponent": "JSG Oeventrop/Freie./Wen. I",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-1-oeventrop-freienohl-wennemen/-/spiel/031J8LLJOS000000VS5489BUVVKNMR0J",
-      "matchday": 4,
-      "staffelId": "210931",
-      "staffelName": "KL B Gruppe 1",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-09-28T12:50:44.286Z"
-    },
-    {
-      "d": "2026-10-10",
-      "t": "13:45",
-      "team": "E-Junioren",
       "squad": 3,
       "ownName": "SV Bachum/Bergheim III",
       "gameNo": "210869014",
@@ -565,6 +548,28 @@
       "staffelName": "B.- Jugend Kreispokal",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
       "infoAt": "2026-09-28T12:50:53.111Z"
+    },
+    {
+      "d": "2026-11-06",
+      "t": "16:15",
+      "team": "E-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum/Bergheim II",
+      "gameNo": "210931013",
+      "opponent": "JSG Oeventrop/Freie./Wen. I",
+      "competition": "Kreisliga B",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-1-oeventrop-freienohl-wennemen/-/spiel/031J8LLJOS000000VS5489BUVVKNMR0J",
+      "movedFrom": {
+        "d": "2026-10-10",
+        "t": "13:45"
+      },
+      "movedAt": "2026-10-05T09:01:05.526Z",
+      "matchday": 4,
+      "staffelId": "210931",
+      "staffelName": "KL B Gruppe 1",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-10-05T09:01:05.724Z"
     },
     {
       "d": "2026-11-06",
