@@ -1448,7 +1448,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='05.10.2026 · 4';
+const APP_VERSION='05.10.2026 · 5';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -7484,9 +7484,11 @@ function renderKonto(){
 
   // ── Sub-Tabs ──
   const isAdmin=session.isAdmin;
-  if(!kontoTab||kontoTab==='protokoll'&&!isAdmin)kontoTab='profil';
+  const hasKeepers=!session.isSuper&&!!session.token&&myKeeperTeams().length>0; // ab 05.10.2026 · 5 eigener Reiter
+  if(!kontoTab||kontoTab==='protokoll'&&!isAdmin||kontoTab==='torhueter'&&!hasKeepers)kontoTab='profil';
   const tabs=[
     {id:'profil',label:'Profil'},
+    ...(hasKeepers?[{id:'torhueter',label:'Torhüter'}]:[]),
     ...(isAdmin?[{id:'saisons',label:'Saisons'},{id:'zugaenge',label:'Zugänge'+(regIsAdminSession()&&REGSTATE.list.length?' ('+REGSTATE.list.length+')':'')},{id:'protokoll',label:'Protokoll'}]:[])
   ];
   let tabsH='<div class="seg" style="margin-bottom:12px;">';
@@ -7501,10 +7503,11 @@ function renderKonto(){
   // ── Tab-Inhalt ──
   if(kontoTab==='profil'){
     h+=pwCard();
-    if(!session.isSuper)h+=profileCard()+keeperCardHTML()+notificationsCard();
+    if(!session.isSuper)h+=profileCard()+notificationsCard();
     if(session.isAdmin&&!pushKey()) h+=pushSetupCardHTML();
-    else if(session.token)h+=keeperCardHTML();
     h+=pwaCard();
+  }else if(kontoTab==='torhueter'){
+    h+=keeperCardHTML();
   }else if(kontoTab==='saisons'){
     h+=teamSyncCard()+seasonManagementCard()+resourceLockCard();
   }else if(kontoTab==='zugaenge'){
@@ -8598,7 +8601,7 @@ function openGkSignup(id,d){
   const all=gkEligibleKeepers(e);
   const trainerAll=isGkTrainerOf(e);
   let h='<h3>Torwarttraining '+fmtShort(e.d)+' · '+e.t+'</h3><p class="sub">Haken = nimmt teil. '+esc(gkTeamsText(gkTeamsOf(e)))+'.</p>';
-  if(!all.length) h+='<p class="gk-note">Für diese Mannschaften sind noch keine Torhüter eingetragen. Trainer tragen ihre Torhüter unter <b>Konto → Profil → Meine Torhüter</b> ein.</p>';
+  if(!all.length) h+='<p class="gk-note">Für diese Mannschaften sind noch keine Torhüter eingetragen. Trainer tragen ihre Torhüter unter <b>Konto → Torhüter</b> ein.</p>';
   let lastTeam='';
   all.forEach(k=>{
     const tl=keeperTeamLabel(k);
@@ -8628,7 +8631,7 @@ async function saveGkSignup(id,d){
     closeSheet(); render(); renderStart(); showToast('Anmeldung gespeichert.');
   }catch(err){ showToast('Fehler: '+err.message,6000); btn.disabled=false; btn.textContent='Speichern'; }
 }
-/* Torhüter pflegen (Konto → Profil, Admins auch über Saisons) */
+/* Torhüter pflegen (Konto → Torhüter, Admins auch über Saisons) */
 function keeperCardHTML(){
   if(!session||session.isSuper&&!session.token) return '';
   const teams=myKeeperTeams(); if(!teams.length) return '';
