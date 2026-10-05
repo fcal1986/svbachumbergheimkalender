@@ -15,7 +15,7 @@ Stand: 26.09.2026 · Version 1. Diese Anleitung beschreibt, woraus Platzcoach be
 | `scripts/send-welcome-password.mjs`, `.github/workflows/welcome-password-email.yml` | Mail mit Start-Passwort | selten |
 | `scripts/send-password-mail.mjs`, `.github/workflows/password-mails.yml` | Mails „Passwort zurücksetzen“ und „Passwort geändert“ | selten |
 | `worker/password-reset-worker.js` | Vorlage für den Passwort-Worker in Cloudflare (läuft nicht auf GitHub) | selten |
-| Cloudflare-Worker `odd-pine-7cbc` | Selbstregistrierung mit Einladungslink. Code: `worker/registration-worker.js` (im Cloudflare-Editor einfügen → Deploy) | – |
+| Cloudflare-Worker `odd-pine-7cbc` | Selbstregistrierung mit Einladungslink. Code: `worker/registration-worker.js` (im Cloudflare-Editor einfügen → Deploy); optional Secret `GITHUB_TOKEN` (App-Token) für Push/Mail an Admins bei neuer Anmeldung | – |
 | Cloudflare-Worker „platzcoach-passwort“ | „Passwort vergessen?“ (siehe Teil B) | – |
 
 ## Ein Update einspielen

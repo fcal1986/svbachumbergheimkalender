@@ -297,10 +297,15 @@ async function main() {
       && (role === 'admin' || concernsTrainer(c, classes, user && user.id)));
   };
 
-  // Push: je Zugang mit angemeldetem Gerät eine Nachricht (bei mehreren Änderungen zusammengefasst)
+  // Push: je Zugang mit angemeldetem Gerät eine Nachricht (bei mehreren Änderungen zusammengefasst).
+  // Ab 05.10.2026 enger als die Mail: keine Verwaltung (Zuordnungen, Rollen, Zugänge – steht im Protokoll
+  // und in der Mail) und auch für Admins nur eigene Mannschaften + Vereinsweites. Anlass: ein neuer Admin
+  // bekam beim Pflegen der Zuordnungen für jede Speicherung einen Push.
+  const pushRelevantFor = u => relevantFor(u.admin ? 'admin' : 'trainer', u)
+    .filter(c => c.category !== 'verwaltung' && concernsTrainer(c, trainerClassesFor(u, seasons, today), u.id));
   let pushed = 0;
   for (const u of users.filter(x => !x.locked && devices.some(d => d.userId === x.id))) {
-    const mine = relevantFor(u.admin ? 'admin' : 'trainer', u);
+    const mine = pushRelevantFor(u);
     if (!mine.length) continue;
     const one = mine.length === 1;
     const payload = {

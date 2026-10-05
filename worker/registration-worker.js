@@ -14,6 +14,8 @@
 //   REG              KV-Namespace
 //   REPO             z. B. "fcal1986/svbachumbergheimkalender"
 //   ALLOWED_ORIGINS  kommagetrennt, z. B. "https://platzcoach.de,https://fcal1986.github.io"
+//   GITHUB_TOKEN     optional (Secret): löst bei neuer Anmeldung repository_dispatch
+//                    „registration-new“ aus → Push + Mail an die Admins. Fehlt er, passiert nur das nicht.
 //
 // Admin-Prüfung: Admin-Aufrufe schicken den GitHub-Schlüssel der App mit. Der Worker fragt
 // bei GitHub nach, ob dieser Schlüssel Schreibrechte auf REPO hat – genau das Recht, das in
@@ -38,7 +40,7 @@ const cleanRole = v => (ROLES.includes(v) ? v : 'trainer');
 const authCache = new Map(); // tokenHash -> gültig bis (ms); nur im Speicher dieser Worker-Instanz
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const origin = request.headers.get('Origin') || '';
     const cors = corsHeaders(origin, env);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
@@ -57,7 +59,7 @@ export default {
         const valid = !!inv && safeEqual(inv.code, mm[1]);
         return json({ valid }, 200, cors);
       }
-      if (m === 'POST' && path === '/register') return await register(request, env, cors);
+      if (m === 'POST' && path === '/register') return await register(request, env, cors, ctx);
 
       // ── nur Admins ──
       if (path.startsWith('/admin/')) {
@@ -107,7 +109,7 @@ export default {
 
 /* ───────── Registrierung ───────── */
 
-async function register(request, env, cors) {
+async function register(request, env, cors, ctx) {
   const body = await readJson(request);
 
   // Honeypot: echte Nutzer sehen dieses Feld nicht; Bots füllen es gern aus.
@@ -156,6 +158,10 @@ async function register(request, env, cors) {
   existing.push(rec);
   await saveRegs(env, existing);
   await env.REG.put(rlKey, String(count + 1), { expirationTtl: 3600 });
+  // Admins benachrichtigen (im Hintergrund, Fehler blockieren die Anmeldung nicht).
+  // Bewusst nur Name, Rolle und Mannschaften: das Action-Log eines öffentlichen Repos ist öffentlich.
+  const note = notifyAdmins(env, { name: first + ' ' + last, role, teams: Object.keys(classes) }).catch(e => console.error('Benachrichtigung:', e && e.message));
+  if (ctx && ctx.waitUntil) ctx.waitUntil(note);
   return json({ ok: true }, 201, cors);
 }
 
@@ -228,6 +234,16 @@ async function currentInvite(env) {
   if (!inv) return null;
   if (inv.expires && new Date(inv.expires).getTime() < Date.now()) return null;
   return inv;
+}
+
+async function notifyAdmins(env, payload) {
+  if (!env.GITHUB_TOKEN || !env.REPO) return;
+  const r = await fetch('https://api.github.com/repos/' + env.REPO + '/dispatches', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + env.GITHUB_TOKEN, Accept: 'application/vnd.github+json', 'User-Agent': 'platzcoach-registration-worker' },
+    body: JSON.stringify({ event_type: 'registration-new', client_payload: payload }),
+  });
+  if (!r.ok) console.error('repository_dispatch fehlgeschlagen:', r.status);
 }
 
 /* ───────── Admin-Prüfung ───────── */
