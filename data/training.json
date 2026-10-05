@@ -322,7 +322,10 @@
       "res": [],
       "note": "",
       "trainerIds": [],
-      "trainerNames": []
+      "trainerNames": [],
+      "cancelled": [
+        "2026-10-06"
+      ]
     },
     {
       "id": "c942837f-3499-40c5-a6a3-52c977f23117",
