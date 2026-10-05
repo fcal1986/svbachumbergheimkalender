@@ -33,7 +33,8 @@
           "club": false,
           "moves": false,
           "admin": false,
-          "reg": false
+          "reg": false,
+          "own": false
         }
       }
     },
