@@ -55,5 +55,8 @@
   },
   "push": {
     "vapidPublicKey": "BGmUl2OagP1nL1Mon9JO01hiTkE4V2W1jWS3Tp7y5va1vDHchA0kHE6eCvyUQj67AY6B3OnFS8iG6vJ8XgNWFsU"
+  },
+  "control": {
+    "reloadAt": 1791227047436
   }
 }
