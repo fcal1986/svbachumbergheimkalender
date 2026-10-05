@@ -1,0 +1,28 @@
+name: Neue Selbstregistrierung – Push und E-Mail an Admins
+
+# Per repository_dispatch „registration-new“ vom Registrierungs-Worker (nur wenn dort das Secret
+# GITHUB_TOKEN gesetzt ist). Payload ohne E-Mail/Telefon, weil Action-Logs öffentlich sind.
+
+on:
+  repository_dispatch:
+    types: [registration-new]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Abhängigkeiten installieren
+        run: npm install --no-audit --no-fund
+      - name: Admins benachrichtigen
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+        run: node scripts/notify-registration.mjs

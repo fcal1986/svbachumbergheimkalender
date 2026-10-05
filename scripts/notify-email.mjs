@@ -17,6 +17,7 @@ import { execSync } from 'node:child_process';
 import nodemailer from 'nodemailer';
 import { randomUUID } from 'node:crypto';
 import { loadPushDevices, pushToUser, appLink } from './push-lib.mjs';
+import { adminWants } from './notify-prefs.mjs';
 
 const CONFIG_PATH = 'data/config.json';
 const USERS_PATH = 'data/users.json';
@@ -217,6 +218,17 @@ function concernsTrainer(c, classes, userId) {
   return !squads.length || !/Jugend/.test(c.team) || squads.includes(c.squad);
 }
 
+// Bereich einer Änderung für die Admin-Einstellungen (notify-prefs.mjs):
+// own = eigene Mannschaften, other = andere Mannschaften, club = Vereinsweites/Platzsperren,
+// moves = Spielverlegungen und fussball.de-Hinweise, admin = Verwaltung.
+function areaOf(c, classes, userId, fromSync) {
+  if (c.category === 'verwaltung') return 'admin';
+  if (fromSync || /^Spielverlegung/.test(c.text || '')) return 'moves';
+  if (c.category !== 'termine' && c.category !== 'training') return 'club';
+  if (c.team !== 'Torwarttraining' && (!c.team || !TEAM_CLASSES.includes(c.team))) return 'club';
+  return concernsTrainer(c, classes, userId) ? 'own' : 'other';
+}
+
 async function main() {
   const cfg = await loadConfig();
   const notify = cfg.notify || {};
@@ -297,10 +309,21 @@ async function main() {
       && (role === 'admin' || concernsTrainer(c, classes, user && user.id)));
   };
 
-  // Push: je Zugang mit angemeldetem Gerät eine Nachricht (bei mehreren Änderungen zusammengefasst)
+  // Push: je Zugang mit angemeldetem Gerät eine Nachricht (bei mehreren Änderungen zusammengefasst).
+  // Ab 05.10.2026 enger als die Mail: keine Verwaltung (Zuordnungen, Rollen, Zugänge – steht im Protokoll
+  // und in der Mail) und auch für Admins nur eigene Mannschaften + Vereinsweites. Anlass: ein neuer Admin
+  // bekam beim Pflegen der Zuordnungen für jede Speicherung einen Push.
+  // Admins: eigene Einstellung je Bereich (Konto → Profil, Vorgabe siehe notify-prefs.mjs).
+  const adminFilter = (u, channel, list) => {
+    const classes = trainerClassesFor(u, seasons, today);
+    return list.filter(c => adminWants(u, channel, areaOf(c, classes, u.id, !!changesFile)));
+  };
+  const pushRelevantFor = u => u.admin
+    ? adminFilter(u, 'push', relevantFor('admin', u))
+    : relevantFor('trainer', u).filter(c => c.category !== 'verwaltung');
   let pushed = 0;
   for (const u of users.filter(x => !x.locked && devices.some(d => d.userId === x.id))) {
-    const mine = relevantFor(u.admin ? 'admin' : 'trainer', u);
+    const mine = pushRelevantFor(u);
     if (!mine.length) continue;
     const one = mine.length === 1;
     const payload = {
@@ -319,7 +342,7 @@ async function main() {
   // Vereinsweites, und nie die eigenen Änderungen.
   let sent = 0;
   for (const r of recipients.values()) {
-    const mine = relevantFor(r.role, r.user);
+    const mine = (r.role === 'admin' && r.user) ? adminFilter(r.user, 'mail', relevantFor('admin', r.user)) : relevantFor(r.role, r.user);
     if (!mine.length) continue;
     const texts = mine.map(c => c.text);
     const siteUrl = String(cfg.siteUrl || 'https://platzcoach.de/').replace(/\/?$/, '/');
