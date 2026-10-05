@@ -463,8 +463,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": []
+      "trainerIds": [
+        "f70b025a-fb4e-4573-b0fc-2d2f4c354b98"
+      ],
+      "trainerNames": [
+        "Fabian Honisch"
+      ]
     },
     {
       "id": "43b94d34-c477-4108-b2b6-750164cd46ff",
@@ -730,8 +734,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": []
+      "trainerIds": [
+        "f70b025a-fb4e-4573-b0fc-2d2f4c354b98"
+      ],
+      "trainerNames": [
+        "Fabian Honisch"
+      ]
     }
   ]
 }
