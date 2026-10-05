@@ -489,13 +489,12 @@
       "admin": true,
       "classes": {},
       "enc": {
-        "salt": "p3PKkJRB5+/r9xxEQ/rT2w==",
-        "iv": "Ouq9sVRvktOts+T/",
-        "cipher": "WuvH9wCYn/mtcfRVlvHpH44CZkv4MDRWXneG8m37Uui6L3tn7qlPKtx08Cr+DDMtHKD0Ng/Hl3n/0tksR0ytXbx6KuBhRTRoFBiMeh7GMScMYdJJMY62E5gP7SsOdXBC5MTnYeTxh1r2R+VNRw=="
+        "salt": "hG5tnsS00mFgp2Q8Vb8x7A==",
+        "iv": "Y6JrQq6WCDv1A/Na",
+        "cipher": "OMpXVPpsLnBiyrRb/ZBVxk0gwVP1ic7NLoWPeM8+dzdnKh8e1zcJx5PcwGAii8jdUQ6Bnxm/9jxRLayTgbKeB+PTNoaWJvjpCHtt+WWp3oXdzOMxvAliZT6ynwP2UjR5L6of64qIOorPo38jpA=="
       },
       "created": "2026-10-05T19:06:25.629Z",
       "emailNotificationsEnabled": true,
-      "pwChangeRequired": true,
       "role": "vorstand"
     }
   ]
