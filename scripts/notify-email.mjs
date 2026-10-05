@@ -82,12 +82,12 @@ const CATEGORIES = {
                 'Training abgesagt:', 'Absage zurückgenommen:', 'Torwarttraining-Anmeldung geändert:'],
   sperren:     ['Sperre angelegt:', 'Sperre aufgehoben:'],
   verwaltung:  ['Zugang angelegt:', 'Zugang gelöscht:', 'Zugang gesperrt:', 'Zugang entsperrt:',
-                'Admin-Recht vergeben:', 'Admin-Recht entzogen:',
+                'Admin-Recht vergeben:', 'Admin-Recht entzogen:', 'Rolle geändert:', 'Notaus:',
                 'Mannschaften zugewiesen:', 'Trainer-Zuordnung aktualisiert:', 'Trainer-Zuordnung entfernt:',
                 'Trainer zur Saison', 'Trainer aus Saison', 'Trainer auto-zugewiesen (',
                 'Saison angelegt:', 'Saison gelöscht:', 'Team-Zuordnung (', 'Aus Saison(s) entfernt'],
   // Persönliches geht an NIEMANDEN per Mail (steht nur im Protokoll der App).
-  persoenlich: ['Passwort geändert:', 'Profil geändert:', 'E-Mail-Benachrichtigungen'],
+  persoenlich: ['Passwort geändert:', 'Profil geändert:', 'E-Mail-Benachrichtigungen', 'Notzugang-Passwort geändert'],
 };
 // Standard: Trainer bekommen Termine, Training und Platzsperren; Admins zusätzlich die Verwaltung.
 // Überschreibbar in config.json: "notify": {"categories": {"trainer": [...], "admin": [...]}}

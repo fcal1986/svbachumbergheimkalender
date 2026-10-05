@@ -505,6 +505,7 @@
   .log-more{font-size:11px;color:var(--ink-soft);padding:10px 2px;text-align:center;}
   .badge-res{font-size:10px;font-weight:600;padding:3px 9px;border-radius:16px;background:var(--bg);color:var(--ink-soft);}
   .badge-admin{font-size:9px;font-weight:700;padding:2px 7px;border-radius:12px;background:var(--green);color:#fff;}
+  .badge-role{font-size:9px;font-weight:700;padding:2px 7px;border-radius:12px;background:var(--pc-navy,#011B32);color:#fff;margin-left:4px;}
   .badge-locked{font-size:9px;font-weight:700;padding:2px 7px;border-radius:12px;background:#DC2626;color:#fff;}
 
   /* ── MINI PITCH + HALLE ── */
@@ -1447,7 +1448,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='05.10.2026 · 1';
+const APP_VERSION='05.10.2026 · 2';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2362,6 +2363,7 @@ async function checkForAppUpdate(){
     const m=(await r.text()).match(/const APP_VERSION='([^']+)'/);
     if(m&&m[1]!==APP_VERSION){ APP_OUTDATED=true; showUpdateBanner(m[1]); return true; }
   }catch(e){}
+  checkControl();
   return false;
 }
 function showUpdateBanner(v){
@@ -2526,7 +2528,7 @@ async function doLogin(){
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
   try{
     if(u===CFG.admin.user.toLowerCase()){
-      if(p!==CFG.admin.password) throw new Error(LOGIN_FAIL_MSG);
+      if(!(await superPasswordOk(p))) throw new Error(LOGIN_FAIL_MSG);
       session={id:'admin',name:CFG.admin.first+' '+CFG.admin.last,email:CFG.admin.user,
                isAdmin:true,isSuper:true,token:localStorage.getItem('svbb_admin_token')||''};
     }else{
@@ -2550,6 +2552,7 @@ async function doLogin(){
   finally{ btn.disabled=false; btn.textContent='Anmelden'; }
 }
 function afterLogin(){
+  lsSet(LOGOUT_SEEN_KEY,Number(CFG&&CFG.control&&CFG.control.logoutAt)||0); // frische Anmeldung gilt als „nach dem Notaus“
   clarityCall('set','rolle',session&&session.isAdmin?'admin':'trainer');
   localStorage.setItem('svbb_session',JSON.stringify(session)); localStorage.setItem('pc_was_logged_in','1');
   document.getElementById('li-pass').value='';
@@ -6960,7 +6963,10 @@ function bioCard(){
 function pwCard(){
   if(session.isSuper){
     return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Passwort ändern</h4>'+
-      '<p class="sub">Das Notzugang-Passwort steht fest in <b>data/config.json</b> und lässt sich nicht hier in der App ändern. Zum Ändern die Datei im Repo bearbeiten (Feld „password").</p></div>';
+      '<p class="sub">'+(CFG.admin&&CFG.admin.passwordHash?'Das Notzugang-Passwort ist nur noch verschlüsselt (als Hash) gespeichert.':'<b>Achtung:</b> Das Notzugang-Passwort steht noch im Klartext in der öffentlichen <b>data/config.json</b>. Hier ein neues festlegen – danach wird nur noch ein Hash gespeichert.')+'</p>'+
+      '<div class="field pw-wrap" style="margin:10px 0 8px;"><input type="password" id="sp-new" placeholder="Neues Notzugang-Passwort (min. 16 Zeichen)" autocomplete="new-password">'+PW_EYE+'</div>'+
+      '<div class="field pw-wrap" style="margin-bottom:10px;"><input type="password" id="sp-new2" placeholder="Wiederholen" autocomplete="new-password">'+PW_EYE+'</div>'+
+      '<button class="submit-btn" id="sp-btn" onclick="changeSuperPassword()">Notzugang-Passwort ändern</button></div>';
   }
   return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Passwort ändern</h4>'+
     '<p class="sub">Dein Schreib-Token hängt am Passwort. Beim Ändern wird er neu verschlüsselt.</p>'+
@@ -6968,6 +6974,119 @@ function pwCard(){
     '<div class="field pw-wrap" style="margin-bottom:8px;"><input type="password" id="pw-new" placeholder="Neues Passwort (min. 12 Zeichen)" autocomplete="new-password">'+PW_EYE+'</div>'+
     '<div class="field pw-wrap" style="margin-bottom:10px;"><input type="password" id="pw-new2" placeholder="Neues Passwort wiederholen" autocomplete="new-password">'+PW_EYE+'</div>'+
     '<button class="submit-btn" id="pw-btn" onclick="changePassword()"><span id="pw-label">Passwort ändern</span></button></div>';
+}
+/* ── Rollen im Verein (ab 05.10.2026 · 2) ──
+   Nur Kennzeichnung (Trainer, Jugendleiter, Vorstand); Rechte kommen weiter über u.admin.
+   Gespeichert als u.role, fehlend = Trainer. */
+const ROLES={trainer:'Trainer',jugendleiter:'Jugendleiter',vorstand:'Vorstand'};
+function userRole(u){ return (u&&ROLES[u.role])?u.role:'trainer'; }
+function openUserRole(id){
+  const u=USERS.find(x=>x.id===id); if(!u)return;
+  const cur=userRole(u);
+  openSheet('<div class="share-sheet"><h3>Rolle von '+esc(u.first+' '+u.last)+'</h3>'
+    +'<p class="sub" style="margin:0 0 10px;">Nur Kennzeichnung. Rechte vergibst du über „Admin“.</p>'
+    +Object.entries(ROLES).map(([k,l])=>'<button type="button" class="'+(k===cur?'submit-btn':'ghost-btn')+'" style="margin:0 0 8px;width:100%;" onclick="setUserRole(\''+u.id+'\',\''+k+'\')">'+l+(k===cur?' ✓':'')+'</button>').join('')
+    +'<button type="button" class="cancel-btn" style="width:100%;" onclick="closeSheet()">Abbrechen</button></div>');
+}
+async function setUserRole(id,role){
+  closeSheet();
+  const u=USERS.find(x=>x.id===id); if(!u||!ROLES[role])return;
+  if(userRole(u)===role) return;
+  const backup=JSON.stringify(USERS);
+  if(role==='trainer') delete u.role; else u.role=role;
+  try{ await saveUsers('Rolle geändert: '+u.first+' '+u.last+' → '+ROLES[role]+' – '+session.name);
+    showToast('Gespeichert.'); renderKonto();
+  }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
+}
+
+/* ── Notzugang-Passwort als Hash (ab 05.10.2026 · 2) ──
+   config.admin.passwordHash={salt,iter,hash} (PBKDF2-SHA256, hex). Solange nur das alte Feld
+   „password“ (Klartext) existiert, gilt es weiter; „Notzugang-Passwort ändern“ ersetzt es. */
+const SUPER_PW_ITER=310000;
+const hexOf=buf=>[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+async function superPwHash(pw,saltHex,iter){
+  const salt=new Uint8Array(saltHex.match(/../g).map(h=>parseInt(h,16)));
+  const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveBits']);
+  return hexOf(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt,iterations:iter},key,256));
+}
+async function superPasswordOk(pw){
+  const a=CFG.admin||{};
+  if(a.passwordHash&&a.passwordHash.salt&&a.passwordHash.hash)
+    return (await superPwHash(pw,a.passwordHash.salt,a.passwordHash.iter||SUPER_PW_ITER))===a.passwordHash.hash;
+  return !!a.password&&pw===a.password;
+}
+async function changeSuperPassword(){
+  if(!session||!session.isSuper) return;
+  if(!session.token){ showToast('Erst den GitHub-Token hinterlegen.'); return; }
+  const p1=(document.getElementById('sp-new')||{}).value||'', p2=(document.getElementById('sp-new2')||{}).value||'';
+  if(p1.length<16){ showToast('Das Notzugang-Passwort braucht mindestens 16 Zeichen.'); return; }
+  if(p1!==p2){ showToast('Die beiden Passwörter stimmen nicht überein.'); return; }
+  const btn=document.getElementById('sp-btn'); if(btn) btn.disabled=true;
+  try{
+    const salt=hexOf(crypto.getRandomValues(new Uint8Array(16)));
+    const hash=await superPwHash(p1,salt,SUPER_PW_ITER);
+    const cfg=await fetchRepoJSON('data/config.json'); if(!cfg) throw new Error('config.json nicht lesbar');
+    cfg.admin=Object.assign({},cfg.admin||{}); delete cfg.admin.password;
+    cfg.admin.passwordHash={salt,iter:SUPER_PW_ITER,hash};
+    await ghPutRaw('data/config.json',JSON.stringify(cfg,null,2)+'\n','Notzugang-Passwort geändert');
+    CFG.admin=cfg.admin;
+    showToast('Gespeichert. Das alte Passwort steht noch in der Git-Historie – es gilt aber nicht mehr.',6000);
+    renderKonto();
+  }catch(e){ showToast('Fehler: '+e.message,6000); }
+  finally{ if(btn) btn.disabled=false; }
+}
+
+/* ── Notaus (ab 05.10.2026 · 2, nur Notzugang) ──
+   config.control={reloadAt,logoutAt} (ms). Jede App prüft beim Start, beim Zurückkehren und
+   alle 5 min (checkForAppUpdate → checkControl):
+   - reloadAt neuer als zuletzt gesehen → Seite neu laden (stoppt z. B. Endlosschleifen alter Versionen)
+   - logoutAt neuer als zuletzt auf diesem Gerät gesehen → abmelden (Anmelden merkt den aktuellen Wert)
+   Der Notzugang selbst wird nicht abgemeldet. Anlass: 05.10.2026 Endlosschleife einer Admin-App. */
+const RELOAD_SEEN_KEY='pc_reload_seen', LOGOUT_SEEN_KEY='pc_logout_seen';
+function applyControl(ctl,atBoot){
+  if(!ctl) return;
+  const r=Number(ctl.reloadAt)||0, seen=Number(lsGet(RELOAD_SEEN_KEY,0))||0;
+  if(r>seen){ lsSet(RELOAD_SEEN_KEY,r); if(!atBoot){ location.reload(); return; } }
+  const lo=Number(ctl.logoutAt)||0, loSeen=Number(lsGet(LOGOUT_SEEN_KEY,0))||0;
+  if(lo>loSeen){
+    lsSet(LOGOUT_SEEN_KEY,lo); // pro Gerät gemerkt → unabhängig von falsch gehenden Uhren, kein zweites Abmelden
+    if(session&&!session.isSuper){
+      localStorage.removeItem('svbb_session'); session=null;
+      if(!atBoot){ logoutNow(); showToast('Du wurdest vom Vorstand abgemeldet. Bitte melde dich neu an.',6000); }
+    }
+  }
+}
+let _ctlCheckAt=0;
+async function checkControl(){
+  if(Date.now()-_ctlCheckAt<20000) return; _ctlCheckAt=Date.now();
+  try{ const cfg=await fetchRepoJSON('data/config.json'); if(cfg){ CFG.control=cfg.control; applyControl(cfg.control,false); } }catch(e){}
+}
+function notausCard(){
+  if(!session||!session.isSuper) return '';
+  const c=CFG.control||{}, t=v=>v?fmtDateTime(new Date(v).toISOString()):'noch nie';
+  return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/></svg>Notaus</h4>'
+    +'<p class="sub">Für Störungen, z. B. wenn eine App in einer Schleife hängt. Alle offenen Apps reagieren innerhalb von 5 Minuten, geschlossene beim nächsten Öffnen.</p>'
+    +'<button class="ghost-btn" style="margin-top:0;" onclick="triggerNotaus(\'reload\')">Alle Apps neu laden</button>'
+    +'<p class="hint" style="margin:4px 0 10px;">Lädt Platzcoach überall neu (neueste Version). Niemand wird abgemeldet. Zuletzt: '+t(c.reloadAt)+'</p>'
+    +'<button class="cancel-btn" style="width:100%;" onclick="triggerNotaus(\'logout\')">Alle abmelden</button>'
+    +'<p class="hint" style="margin:4px 0 0;">Alle Zugänge müssen sich neu anmelden (der Notzugang nicht). Zuletzt: '+t(c.logoutAt)+'</p></div>';
+}
+function triggerNotaus(kind){
+  if(!session||!session.isSuper) return;
+  if(!session.token){ showToast('Erst den GitHub-Token hinterlegen.'); return; }
+  const lo=kind==='logout';
+  askConfirm(lo?'Alle abmelden?':'Alle Apps neu laden?',
+    lo?'Alle Trainer und Admins werden auf ihren Geräten abgemeldet und müssen sich neu anmelden.':'Platzcoach lädt auf allen Geräten neu. Ungespeicherte Eingaben in offenen Formularen gehen verloren.',
+    lo?'Alle abmelden':'Neu laden', async()=>{
+      try{
+        const cfg=await fetchRepoJSON('data/config.json'); if(!cfg) throw new Error('config.json nicht lesbar');
+        const now=Date.now();
+        cfg.control=Object.assign({},cfg.control||{},lo?{logoutAt:now}:{reloadAt:now});
+        await ghPutRaw('data/config.json',JSON.stringify(cfg,null,2)+'\n','Notaus: '+(lo?'alle Zugänge abgemeldet':'alle Apps neu geladen')+' – Notzugang');
+        CFG.control=cfg.control; if(!lo) lsSet(RELOAD_SEEN_KEY,now);
+        showToast(lo?'Alle werden abgemeldet.':'Alle Apps laden neu.'); renderKonto();
+      }catch(e){ showToast('Fehler: '+e.message,6000); }
+    });
 }
 function tokenCard(){
   if(!session.isSuper){
@@ -7044,7 +7163,7 @@ function renderNuClassPicker(){
   }).join('');
 }
 function adminNewUserCard(){
-  let h=tokenCard();
+  let h=tokenCard()+notausCard();
   const seasonsSorted=[...SEASONS].sort((a,b)=>b.startYear-a.startYear);
   const curS=getCurrentSeason();
   h+='<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Neuen Zugang anlegen</h4>'+
@@ -7062,6 +7181,10 @@ function adminNewUserCard(){
      '<div class="field" style="margin-bottom:10px;"><label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block;">Mannschaft(en) (für Trainer) – bei Jugend optional bis auf einzelne Teams (z.B. nur D1) eingrenzbar</label>'+
      '<p class="hint" style="margin:0 0 8px;">'+(seasonsSorted.length>1?'Gilt für die oben gewählte Saison':'Gilt für die aktuelle Saison ('+esc(curS?.label||'—')+')')+' – später unter "Saisons" anpassbar.</p>'+
      '<div id="nu-classes-picker"></div></div>'+
+     '<div class="field" style="margin-bottom:10px;"><label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block;">Rolle im Verein</label>'+
+     '<select id="nu-role" style="width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-family:Inter;font-size:14px;background:var(--white);">'+
+     Object.entries(ROLES).map(([k,l])=>'<option value="'+k+'">'+l+'</option>').join('')+'</select>'+
+     '<p class="hint" style="margin:6px 0 0;">Nur Kennzeichnung – die Rechte kommen über „Admin“.</p></div>'+
     '<div class="res-chip" id="nu-admin" onclick="this.classList.toggle(\'on\')" style="margin-bottom:12px;">'+
      '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg>Darf alles verwalten (Admin)</div>'+
      '<button class="submit-btn" id="nu-btn" onclick="createUser()"><span id="nu-label">Zugang anlegen</span></button>'+
@@ -7093,7 +7216,7 @@ function userListRowsHTML(){
     let h='<div class="user-row'+(u.locked?' is-locked':'')+'">'
       +'<div class="user-identity">'
       +'<div class="avatar'+(u.admin?' adm':'')+'">'+initials(u.first+' '+u.last)+'</div>'
-      +'<div class="user-info"><div class="n">'+esc(u.first+' '+u.last)+(u.admin?'<span class="badge-admin">Admin</span>':'')+(u.locked?'<span class="badge-locked">Gesperrt</span>':'')+'</div>'
+      +'<div class="user-info"><div class="n">'+esc(u.first+' '+u.last)+(u.admin?'<span class="badge-admin">Admin</span>':'')+(u.role&&ROLES[u.role]&&u.role!=='trainer'?'<span class="badge-role">'+ROLES[u.role]+'</span>':'')+(u.locked?'<span class="badge-locked">Gesperrt</span>':'')+'</div>'
       +'<div class="e">'+esc(u.email)+'</div>'
       +(()=>{ const cls=normalizeClasses(u.classes||{});const keys=Object.keys(cls);if(!keys.length)return '';return '<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;">'+keys.map(t=>{const sq=cls[t]||[];const sqLabel=isJugend(t)&&sq.length?(' · '+sq.map(s=>jugendLetter(t)+s).join(',')):'';return '<span class="badge-res" style="font-size:8px;padding:2px 6px;">'+esc(t)+esc(sqLabel)+'</span>';}).join('')+'</div>';})()
       +'</div></div>'
@@ -7104,6 +7227,7 @@ function userListRowsHTML(){
         u.locked?
         '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0"/></svg><span>Entsperren</span>':
         '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg><span>Sperren</span>')+'</button>'
+      +'<button class="uact'+(u.role&&u.role!=='trainer'?' on':'')+'" onclick="openUserRole(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-3.9 3.1-6 7-6s7 2.1 7 6"/><path d="M17 11l2 2 4-4"/></svg><span>Rolle</span></button>'
       +'<button class="uact" onclick="adminResetPassword(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/></svg><span>Passwort</span></button>'
       +'<button class="uact danger" onclick="deleteUser(\''+u.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg><span>Löschen</span></button>'
       +'</div>';
@@ -7391,7 +7515,7 @@ async function refreshUsersFromGitHub(){
   syncClassesFromActiveSeason();
   snapStore('users');
 }
-async function createUserCore({first,last,mail,pass,isAdm,classes,targetSeason,phone,contactPublic}){
+async function createUserCore({first,last,mail,pass,isAdm,classes,targetSeason,phone,contactPublic,role}){
   mail=normMail(mail);
   // Letzte, harte Sperre für beide Wege (manuell + Freigabe): eine E-Mail = genau ein Zugang.
   const dup=findUserByEmail(mail);
@@ -7406,6 +7530,7 @@ async function createUserCore({first,last,mail,pass,isAdm,classes,targetSeason,p
     const encRec=await encryptToken(session.token,pass);
     const newU={id:crypto.randomUUID(),first,last,email:mail,admin:!!isAdm,classes:initialClasses,enc:encRec,created:new Date().toISOString(),emailNotificationsEnabled:true,pwChangeRequired:true};
     if(phone){ newU.phone=phone; newU.contactPublic=contactPublic||'none'; }
+    if(role&&role!=='trainer'&&ROLES[role]) newU.role=role;
     USERS.push(newU);
     await saveUsers('Zugang angelegt: '+first+' '+last+(isAdm?' (Admin)':'')+' – '+session.name);
     syncTrainerAssignments(newU).then(n=>{ if(n>0) saveTraining('Trainer-Zuordnung aktualisiert: '+newU.first+' '+newU.last+' – '+session.name).catch(()=>{}); }).catch(()=>{});
@@ -7433,6 +7558,7 @@ async function createUser(){
   const mail=document.getElementById('nu-mail').value.trim().toLowerCase();
   const pass=document.getElementById('nu-pass').value;
   const isAdm=document.getElementById('nu-admin').classList.contains('on');
+  const role=(document.getElementById('nu-role')||{}).value||'trainer';
   const classes=JSON.parse(JSON.stringify(nuClasses));
   if(!first||!last||!mail){showToast('Bitte Vorname, Nachname und E-Mail ausfüllen.');return;}
   const nuOpen=squadPickMissing('nu',nuClasses); if(nuOpen.length){showToast(squadPickMissingMsg(nuOpen),5000);return;}
@@ -7447,7 +7573,7 @@ async function createUser(){
     const targetSeasonId=seasonSel?seasonSel.value:getCurrentSeason()?.id;
     const targetSeason=targetSeasonId?SEASONS.find(s=>s.id===targetSeasonId):null;
     await refreshUsersFromGitHub();
-    await createUserCore({first,last,mail,pass,isAdm,classes,targetSeason});
+    await createUserCore({first,last,mail,pass,isAdm,classes,targetSeason,role});
     showToast(first+' kann sich jetzt anmelden'+(isAdm?' und darf alles verwalten.':'.')+(targetSeason?' Bereits "'+targetSeason.label+'" zugeordnet.':''));
     nuClasses={}; [...PICK_OPEN].filter(k=>k.startsWith('nu|')).forEach(k=>PICK_OPEN.delete(k));
     renderKonto();
@@ -8273,7 +8399,7 @@ function deleteUser(id){
   });
 }
 async function changePassword(){
-  if(session.isSuper){ showToast('Das Notzugang-Passwort steht in data/config.json.'); return; }
+  if(session.isSuper){ changeSuperPassword(); return; }
   const oldPw=document.getElementById('pw-old').value;
   const newPw=document.getElementById('pw-new').value;
   const newPw2=document.getElementById('pw-new2').value;
@@ -9353,6 +9479,7 @@ async function boot(){
     const dbg=document.getElementById('session-debug');
     if(dbg){dbg.style.display='block';dbg.textContent='Diagnose: Fehler beim Wiederherstellen – '+e.message;}
   }
+  applyControl(CFG.control,true); // Notaus: Abmeldung nachholen, Neu-laden-Stand merken
 
   dateInput().value=todayStr;
   dateInput().addEventListener('change',()=>{updateWeekday();renderPitch();renderHalle();hideConflicts();setTimeout(updateFreeSlotsOnConflict,150);});
