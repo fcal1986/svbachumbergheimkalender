@@ -487,7 +487,9 @@
       "last": "Honisch",
       "email": "fabian.honisch@sv-bachum-bergheim.de",
       "admin": true,
-      "classes": {},
+      "classes": {
+        "3. Herren": []
+      },
       "enc": {
         "salt": "hG5tnsS00mFgp2Q8Vb8x7A==",
         "iv": "Y6JrQq6WCDv1A/Na",
