@@ -191,7 +191,11 @@ async function updateRegistration(id, request, env, cors) {
 // Alle offenen Anmeldungen: ein get, kein list(). Abgelaufene (älter als 60 Tage) fallen raus.
 async function loadRegs(env) {
   let regs = await env.REG.get(REGS_KEY, 'json');
-  if (!Array.isArray(regs)) regs = await migrateLegacyRegs(env);
+  if (!Array.isArray(regs)) {
+    // Übernahme braucht einmal list(). Ist dessen Tageslimit erschöpft, nicht scheitern, sondern mit
+    // leerer Liste weiterarbeiten (nichts speichern) – sonst bliebe jede alte App in ihrer Fehlerschleife.
+    try { regs = await migrateLegacyRegs(env); } catch (e) { console.error('Übernahme verschoben:', e && e.message); regs = []; }
+  }
   const minCreated = new Date(Date.now() - REG_TTL_SEC * 1000).toISOString();
   return regs.filter(r => r && r.id && (r.created || '') >= minCreated)
     .sort((a, b) => (a.created < b.created ? -1 : 1));
