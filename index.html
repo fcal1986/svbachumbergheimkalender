@@ -1447,7 +1447,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='02.10.2026 · 4';
+const APP_VERSION='05.10.2026 · 1';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -8803,6 +8803,7 @@ async function regApi(path,opts){
   }catch(e){ throw new Error('Keine Verbindung zum Anmeldeserver. Bitte Internetverbindung prüfen.'); }
   let data={};
   try{ data=await r.json(); }catch(e){}
+  if(r.status>=500||r.status===429) throw new Error('Der Anmeldeserver ist gerade gestört. Deine Angaben sind nicht verloren – bitte später noch einmal versuchen (Fehler '+r.status+').');
   if(!r.ok) throw new Error(data.error||('Anmeldeserver antwortet mit Fehler '+r.status+'.'));
   return data;
 }
@@ -8943,7 +8944,7 @@ async function loadRegData(){
     REGSTATE.invite=inv.invite||null; REGSTATE.list=regs.registrations||[];
     REGSTATE.list.forEach(r=>{ if(!CP['r'+r.id]) CP['r'+r.id]=JSON.parse(JSON.stringify(r.classes||{})); });
     REGSTATE.loaded=true; REGSTATE.forToken=session.token;
-  }catch(e){ REGSTATE.error=e.message; REGSTATE.loaded=true; }
+  }catch(e){ REGSTATE.error=e.message; REGSTATE.loaded=true; REGSTATE.forToken=session&&session.token; REGSTATE.errAt=Date.now(); }
   REGSTATE.loading=false;
   renderRegAdmin(); updateRegBadges();
 }
@@ -8960,6 +8961,8 @@ function renderRegBanner(){
     el.innerHTML=''; return;
   }
   if((!REGSTATE.loaded||REGSTATE.forToken!==session.token)&&!REGSTATE.loading){ loadRegData(); return; }
+  // Nach einem Fehler höchstens alle 15 min neu versuchen (05.10.2026: Fehler → Endlosschleife → KV-Tageslimit des Workers erschöpft)
+  if(REGSTATE.error&&REGSTATE.errAt&&Date.now()-REGSTATE.errAt>15*60*1000&&!REGSTATE.loading){ loadRegData(); return; }
   const n=REGSTATE.list.length;
   el.innerHTML=n?('<div class="reg-banner" onclick="goto(\'konto\');setKontoTab(\'zugaenge\');">'
     +'<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-3.9 3.1-6 7-6s7 2.1 7 6"/><path d="M19 8v6M16 11h6"/></svg>'
