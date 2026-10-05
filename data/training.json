@@ -322,10 +322,12 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "a0878d3e-94bf-4d9f-9687-ca0bd7133ae7"
+        "a0878d3e-94bf-4d9f-9687-ca0bd7133ae7",
+        "f70b025a-fb4e-4573-b0fc-2d2f4c354b98"
       ],
       "trainerNames": [
-        "Robin Lienig"
+        "Robin Lienig",
+        "Fabian Honisch"
       ],
       "cancelled": [
         "2026-10-06"
@@ -463,12 +465,8 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [
-        "f70b025a-fb4e-4573-b0fc-2d2f4c354b98"
-      ],
-      "trainerNames": [
-        "Fabian Honisch"
-      ]
+      "trainerIds": [],
+      "trainerNames": []
     },
     {
       "id": "43b94d34-c477-4108-b2b6-750164cd46ff",
@@ -634,10 +632,12 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "a0878d3e-94bf-4d9f-9687-ca0bd7133ae7"
+        "a0878d3e-94bf-4d9f-9687-ca0bd7133ae7",
+        "f70b025a-fb4e-4573-b0fc-2d2f4c354b98"
       ],
       "trainerNames": [
-        "Robin Lienig"
+        "Robin Lienig",
+        "Fabian Honisch"
       ],
       "validFrom": "2026-09-09",
       "validUntil": null,
@@ -734,12 +734,8 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [
-        "f70b025a-fb4e-4573-b0fc-2d2f4c354b98"
-      ],
-      "trainerNames": [
-        "Fabian Honisch"
-      ]
+      "trainerIds": [],
+      "trainerNames": []
     }
   ]
 }
