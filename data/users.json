@@ -481,6 +481,23 @@
       "emailNotificationsEnabled": true,
       "pwChangeRequired": true,
       "role": "vorstand"
+    },
+    {
+      "id": "f70b025a-fb4e-4573-b0fc-2d2f4c354b98",
+      "first": "Fabian",
+      "last": "Honisch",
+      "email": "fabian.honisch@sv-bachum-bergheim.de",
+      "admin": true,
+      "classes": {},
+      "enc": {
+        "salt": "p3PKkJRB5+/r9xxEQ/rT2w==",
+        "iv": "Ouq9sVRvktOts+T/",
+        "cipher": "WuvH9wCYn/mtcfRVlvHpH44CZkv4MDRWXneG8m37Uui6L3tn7qlPKtx08Cr+DDMtHKD0Ng/Hl3n/0tksR0ytXbx6KuBhRTRoFBiMeh7GMScMYdJJMY62E5gP7SsOdXBC5MTnYeTxh1r2R+VNRw=="
+      },
+      "created": "2026-10-05T19:06:25.629Z",
+      "emailNotificationsEnabled": true,
+      "pwChangeRequired": true,
+      "role": "vorstand"
     }
   ]
 }
