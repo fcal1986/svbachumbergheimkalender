@@ -25,7 +25,8 @@
         "push": {
           "own": false,
           "club": false,
-          "moves": false
+          "moves": false,
+          "reg": false
         },
         "mail": {
           "other": false,
