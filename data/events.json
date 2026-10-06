@@ -219,8 +219,7 @@
       "team": "E-Jugend",
       "squad": 2,
       "pitch": {
-        "mode": "viertel",
-        "part": 4
+        "mode": "ganz"
       },
       "halle": null,
       "res": [
