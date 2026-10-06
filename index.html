@@ -1665,7 +1665,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 19';
+const APP_VERSION='06.10.2026 · 20';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -1748,7 +1748,7 @@ function helpCardHTML(){
     +'<button type="button" class="submit-btn" style="margin-top:4px;" onclick="openFeedback(\'Feedback\')"><span>Feedback geben</span></button>'
     +'<button type="button" class="ghost-btn" onclick="openFeedback(\'Fehler\')">Fehler melden</button></div>';
 }
-async function kontoCheckUpdate(){ showToast('Suche nach neuer Version …',1500); const f=await checkForAppUpdate(); if(!f) showToast('Du hast die neueste Version.'); }
+async function kontoCheckUpdate(){ showToast('Suche nach neuer Version …',1500); const f=await checkForAppUpdate(); if(f){ showToast('Neue Version wird geladen …',1500); setTimeout(hardReload,600); } else showToast('Du hast die neueste Version.'); }
 
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const MONTHS_S=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
@@ -2668,11 +2668,16 @@ async function checkForAppUpdate(){
   checkControl();
   return false;
 }
+/* Neu laden am HTTP-Cache vorbei (ab 06.10.2026 · 20): GitHub Pages erlaubt Zwischenspeichern bis 10 Minuten,
+   ein normales location.reload() konnte deshalb noch die alte Version liefern. Eindeutige Adresse ?u=…, die nach
+   dem Laden wieder entfernt wird. */
+function hardReload(){ try{ location.replace(location.pathname+'?u='+Date.now()+location.hash); }catch(e){ location.reload(); } }
+try{ if(/[?&]u=\d+/.test(location.search)) history.replaceState(history.state,'',location.pathname+location.search.replace(/[?&]u=\d+/,'').replace(/^&/,'?')+location.hash); }catch(e){}
 function showUpdateBanner(v){
   let el=document.getElementById('update-banner');
   if(!el){
     el=document.createElement('div'); el.id='update-banner';
-    el.innerHTML='<span>Neue Platzcoach-Version verfügbar.</span><button type="button" onclick="location.reload()">Jetzt aktualisieren</button>';
+    el.innerHTML='<span>Neue Platzcoach-Version verfügbar.</span><button type="button" onclick="hardReload()">Jetzt aktualisieren</button>';
     document.body.appendChild(el);
   }
   el.style.display='flex';
@@ -2860,7 +2865,7 @@ function afterLogin(){
   document.getElementById('li-pass').value='';
   closeLogin();
   showToast('Angemeldet als '+session.name.split(' ')[0]+'. Seite wird neu geladen …',1800);
-  setTimeout(()=>location.reload(),1200);
+  setTimeout(()=>APP_OUTDATED?hardReload():location.reload(),1200);
 }
 function logout(){
   // Push: dieses Gerät vorher abmelden, sonst bekäme der nächste Nutzer am Gerät die Nachrichten des alten Zugangs
