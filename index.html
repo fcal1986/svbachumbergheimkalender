@@ -354,6 +354,7 @@
   .nf-tl .tl-free{padding:0;justify-content:center;font-size:13px;}
   .nf-tl-add{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;padding-left:52px;}
   .nf-tl #fb-share-note{padding-left:52px;}
+  .nf-tl-addhead{flex-basis:100%;margin:0 0 2px;font-size:12px;font-weight:700;color:var(--ink);}
   .lg.free{border:1.5px dashed #9CC57A;background:rgba(107,180,28,.07);}
   .tl-legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--ink-secondary);padding-left:22px;}
   .tl-legend span{display:flex;align-items:center;gap:5px;}
@@ -1313,7 +1314,7 @@
       </div>
 
       <div id="f-tl-wrap">
-        <div class="nf-lbl-row"><p class="nf-lbl" id="f-tl-day">Wo?</p><button type="button" class="nf-link" onclick="toggleFormTlAdd()">+ Ressource</button></div>
+        <div class="nf-lbl-row"><p class="nf-lbl" id="f-tl-day">Wo?</p><button type="button" class="nf-link" id="f-tl-addbtn" onclick="toggleFormTlAdd()" aria-expanded="false">Ressourcen einblenden</button></div>
         <div class="nf-tl"><div id="f-tl"></div><div class="nf-tl-add" id="f-tl-add" style="display:none;"></div>
           <div class="nf-tl-status" id="f-tl-status"></div><div id="fb-share-note"></div></div>
       </div>
@@ -1586,7 +1587,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 3';
+const APP_VERSION='06.10.2026 · 4';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -4151,7 +4152,7 @@ function tlEdgesHTML(ds,T0,T1,H,form){
 }
 /* opts.form (ab 06.10.2026 · 2): dieselbe Zeitleiste im Terminformular. Kleinspielfeld immer, weitere
    Ressourcen (Kabinen, Vereinsheim, Theke, Halle) automatisch, wenn belegt oder gewählt, sonst über
-   „+ Ressource“ (pro Gerät gemerkt). „+ frei“ übernimmt Zeit und Fläche ins Formular, der neue Termin
+   „Ressourcen einblenden“ (pro Gerät gemerkt). „+ frei“ übernimmt Zeit und Fläche ins Formular, der neue Termin
    steht gestrichelt drin. Der Termin, der gerade bearbeitet wird, zählt nicht als Belegung. */
 function timelineHTML(ds,isMine,opts){
   const form=!!(opts&&opts.form), vkey=form?'form:'+ds:ds, TL_LANE=form?30:TL_LANE_START, sel=(form&&opts.sel)||null;
@@ -5790,7 +5791,7 @@ function openFormNote(show){
 /* ---------- Tagesansicht im Terminformular (ab 06.10.2026 · 2, Mockup B) ----------
    Dieselbe Zeitleiste wie auf der Startseite (timelineHTML mit opts.form) für den Tag aus dem Formular:
    Großspielfeld (Hälfte A/B, 4 Viertel) und Kleinspielfeld immer, weitere Ressourcen automatisch, wenn sie
-   an dem Tag belegt oder im Formular gewählt sind, sonst über „+ Ressource“ (pro Gerät gemerkt).
+   an dem Tag belegt oder im Formular gewählt sind, sonst über „Ressourcen einblenden“ (pro Gerät gemerkt).
    „+“ in einer freien Lücke übernimmt Zeit und Fläche, der neue Termin steht gestrichelt in der Leiste.
    Wischen am Rand bzw. die Polster wechseln den Tag. */
 let FORM_TL={ds:null,m:null,edge:null,touched:[]};
@@ -5898,13 +5899,17 @@ function renderFormTlStatus(cand){
 function toggleFormTlAdd(){
   const add=document.getElementById('f-tl-add'); if(!add) return;
   const open=add.style.display==='none'; add.style.display=open?'':'none';
+  const b=document.getElementById('f-tl-addbtn'); if(b){ b.textContent=open?'Fertig':'Ressourcen einblenden'; b.setAttribute('aria-expanded',open?'true':'false'); }
   if(open) renderFormTlAdd();
 }
 function renderFormTlAdd(){
   const add=document.getElementById('f-tl-add'); if(!add) return;
   const st=formTlStored();
-  add.innerHTML=formTlResAll().map(r=>'<button type="button" class="nf-chip'+(st.includes(r)?' on':'')+'" onclick="'+esc('toggleFormTlRes(\''+jsArg(r)+'\')')+'">'+esc(r)+'</button>').join('')
-    +'<p class="helptext" style="flex-basis:100%;margin:2px 0 0;">Angetippte Ressourcen stehen auf diesem Gerät immer in der Leiste. Belegte und im Termin gewählte erscheinen von selbst.</p>';
+  // Ab 06.10.2026 · 4: klar beschriftet – „+ Kabine 1“ blendet die Zeile ein, „✓ Kabine 1“ ist eingeblendet (antippen blendet aus)
+  add.innerHTML='<p class="nf-tl-addhead">Welche Ressourcen sollen als Zeile in der Leiste stehen?</p>'
+    +formTlResAll().map(r=>{ const on=st.includes(r);
+      return '<button type="button" class="nf-chip'+(on?' on':'')+'" aria-pressed="'+on+'" aria-label="'+esc(r+(on?' ausblenden':' einblenden'))+'" onclick="'+esc('toggleFormTlRes(\''+jsArg(r)+'\')')+'">'+(on?'✓ ':'+ ')+esc(r)+'</button>'; }).join('')
+    +'<p class="helptext" style="flex-basis:100%;margin:2px 0 0;">Antippen blendet ein bzw. aus (gilt auf diesem Gerät). Belegte und im Termin gebuchte Ressourcen stehen immer drin. Buchen: in der Leiste links die Zeile antippen.</p>';
 }
 function toggleFormTlRes(r){
   const st=formTlStored(), i=st.indexOf(r); if(i>=0) st.splice(i,1); else st.push(r);
