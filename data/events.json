@@ -226,6 +226,27 @@
       "note": "",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
       "ownerName": "Fabrizio Calcagno"
+    },
+    {
+      "id": "57deca7a-cef4-4235-bfd0-f90972c4e312",
+      "d": "2026-10-11",
+      "t": "12:45",
+      "bis": "14:30",
+      "title": "Freundschaftsspiel gegen DJK Grün-Weiß Menden",
+      "kind": "game",
+      "team": "D-Jugend",
+      "squad": 1,
+      "pitch": {
+        "mode": "ganz"
+      },
+      "halle": null,
+      "res": [],
+      "note": "",
+      "ha": "home",
+      "opponent": "DJK Grün-Weiß Menden",
+      "kickoff": "13:00",
+      "ownerId": "af1a6546-fdc2-4059-bef4-5a4966181701",
+      "ownerName": "Michael Raneck"
     }
   ]
 }
