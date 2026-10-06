@@ -1087,7 +1087,11 @@
   .nf-savebar{position:sticky;bottom:0;z-index:4;background:var(--bg);margin:6px -14px 0;padding:8px 14px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line);}
   .nf-savebar .submit-btn{margin-top:0;padding:15px;font-size:15px;flex:1;min-width:0;}
   .nf-btns{display:flex;gap:8px;}
-  .nf-btns .cancel-btn{margin:0;width:auto;flex:none;padding:0 16px;}
+  .nf-btns .cancel-btn{margin:0;width:auto;flex:none;padding:0 18px;min-height:50px;font-size:14px;color:var(--ink);}
+  .nf-owner-top{margin:0 0 4px;text-align:right;}
+  [data-pane="tform"] .content{padding-bottom:calc(12px + env(safe-area-inset-bottom));}
+  [data-pane="tform"] .nf-savebar{margin:6px -14px 0;}
+  [data-pane="tform"] .nf-savebar .submit-btn{margin:0;flex:1;}
   .nf-owner{margin:0 0 6px;font-size:11.5px;color:var(--ink-soft);}
   .nf-season-hint{margin:8px 0 0;padding:8px 10px;border-radius:9px;background:#FDECEA;color:#8E2A1D;font-size:12px;font-weight:600;line-height:1.4;}
   .nf-owner b{color:var(--ink);}
@@ -1262,16 +1266,18 @@
       <p class="helptext" id="tf-season-help" style="margin:-8px 0 16px;">„Gültig bis“ leer lassen = bis auf Weiteres.</p>
       <p class="section-label">Optional</p>
       <div class="field"><label>Bemerkung</label><input type="text" id="tf-note" placeholder="z. B. nur im Sommer"></div>
-      <button class="submit-btn" id="tf-save" onclick="saveTrainingSlot()"><span id="tf-label">Speichern</span></button>
-      <button class="cancel-btn" onclick="goto('training')">Abbrechen</button>
+      <div class="nf-savebar"><div class="nf-btns">
+        <button type="button" class="cancel-btn" onclick="goto('training')">Abbrechen</button>
+        <button class="submit-btn" id="tf-save" onclick="saveTrainingSlot()"><span id="tf-label">Speichern</span></button>
+      </div></div>
     </div>
   </div>
 
   <!-- TERMIN FORM (NEU / BEARBEITEN) – kompakt ab 06.10.2026 · 1: Chips statt Droplisten, Dauer-Chips, Speichern-Leiste -->
   <div class="pane" data-pane="neu">
     <div class="content nf">
-      <div class="nf-top"><button type="button" id="form-back" class="form-back" onclick="formBack()">‹ Zurück</button>
-        <p class="nf-owner">Ansprechpartner: <b id="owner-name">–</b></p></div>
+      <!-- Ab 06.10.2026 · 12: kein „‹ Zurück“ mehr oben – „Abbrechen“ unten neben „Speichern“ (gleich für Android und iPhone) -->
+      <p class="nf-owner nf-owner-top">Ansprechpartner: <b id="owner-name">–</b></p>
       <div id="edit-banner" class="edit-banner" style="display:none;"></div>
 
       <p class="nf-lbl">Was?</p>
@@ -1404,12 +1410,13 @@
       <div id="free-slots-box"></div>
       <div class="nf-savebar">
         <p class="nf-title" id="f-title-line" style="display:none;">Titel: <b id="f-title-text"></b> <button type="button" class="nf-link" onclick="showAnlassField(true)">ändern</button></p>
-        <div class="nf-btns"><button class="submit-btn" id="save-btn" onclick="submitEvent()">
+        <div class="nf-btns"><button type="button" class="cancel-btn" id="form-cancel-btn" onclick="cancelForm()">Abbrechen</button>
+        <button class="submit-btn" id="save-btn" onclick="submitEvent()">
           <svg id="save-check" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
           <span id="save-spin" class="spinner" style="display:none;border-color:rgba(255,255,255,.3);border-top-color:#fff;width:15px;height:15px;"></span>
           <span id="save-label">Termin speichern</span>
         </button>
-        <button class="cancel-btn" id="cancel-btn" style="display:none;" onclick="cancelEdit()">Abbrechen</button></div>
+        <span id="cancel-btn" hidden></span></div>
       </div>
     </div>
   </div>
@@ -1613,7 +1620,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 11';
+const APP_VERSION='06.10.2026 · 12';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2824,7 +2831,7 @@ function goto(n){
   if(n==='neu') setTimeout(updateEditBanner,0);
   if(n!=='neu')formSkipFussballLink=null; // Verlassen des Formulars ohne Speichern: Ausnahme nicht stehen lassen
   document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.dataset.pane===n));
-  document.body.classList.toggle('in-form',n==='neu'); // Formular: Speichern-Leiste statt Navigation
+  document.body.classList.toggle('in-form',n==='neu'||n==='tform'); // Formulare: Leiste „Abbrechen / Speichern“ statt Navigation
   const navKey=(n==='tform')?'training':n;
   document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.nav===navKey));
   const titles={start:'Start',termine:'Terminübersicht',training:'Trainingszeiten',
@@ -4451,6 +4458,12 @@ function updateFormBack(){ const b=document.getElementById('form-back'); if(!b) 
   const p=FORM_ORIGIN&&FORM_ORIGIN.pane;
   b.textContent='‹ Zurück'+(p==='start'?' zum Platz':(p==='termine'?' zum Kalender':(p==='training'?' zu den Trainingszeiten':''))); }
 function formBack(){ formDirty=false; goto(FORM_ORIGIN&&FORM_ORIGIN.pane||'start'); }
+// „Abbrechen“ unten im Formular: zurück dorthin, woher man kam (an dieselbe Stelle). Nur bei ungespeicherten Eingaben nachfragen.
+function cancelForm(){
+  const go=()=>{ editingId=null; formSkipFussballLink=null; formDirty=false; goto(FORM_ORIGIN&&FORM_ORIGIN.pane||'start'); };
+  if(formDirty) askConfirm('Änderungen verwerfen?','Deine Eingaben in diesem Formular gehen verloren.','Verwerfen',go);
+  else go();
+}
 function openOccDetail(ds,i,ctx){
   const key=ctx==='form'?'form:'+ds:ds;
   if(!OCC_VIEW[key]) OCC_VIEW[key]=occupancyOn(ds);
@@ -6457,7 +6470,7 @@ function duplicateEvent(id){
   goto('neu');
   showToast('Kopie erstellt – bitte das neue Datum wählen.',4000);
 }
-function cancelEdit(){ editingId=null; formSkipFussballLink=null; formDirty=false; goto('termine'); }
+function cancelEdit(){ cancelForm(); }
 async function submitEvent(){
   if(!requireLogin())return;
   const title=document.getElementById('f-anlass').value.trim();
