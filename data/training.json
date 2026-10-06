@@ -342,7 +342,7 @@
     {
       "id": "df0d5d76-b4b5-4cf6-8e20-402aa99a476b",
       "day": 2,
-      "from": "19:30",
+      "from": "19:45",
       "to": "21:15",
       "team": "3. Herren",
       "squad": 1,
@@ -363,7 +363,8 @@
       ],
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
-      "validUntil": "2027-06-30"
+      "validUntil": "2027-06-30",
+      "kind": "training"
     },
     {
       "id": "c942837f-3499-40c5-a6a3-52c977f23117",
