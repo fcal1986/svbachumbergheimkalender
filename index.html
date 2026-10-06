@@ -1589,7 +1589,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 6';
+const APP_VERSION='06.10.2026 · 7';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -5427,11 +5427,18 @@ function onKindChange(byUser){
   // Mehrfachauswahl "Für welche Mannschaften?" – das Team wird intern auf "Torwarttraining" gesetzt.
   const ts=document.getElementById('f-team-section'), sel=document.getElementById('f-team');
   if(ts) ts.style.display=gk||tt?'none':'block';
-  if(sel&&tt&&sel.value!=='Alle Teams'){ sel.dataset.prevTeam=sel.value; } // Trainer-Termin gilt für alle Trainer
-  if(sel&&!tt&&!gk&&sel.value==='Alle Teams'&&sel.dataset.prevTeam){ sel.value=sel.dataset.prevTeam; }
+  // Ab 06.10.2026 · 7: Als „vorige Mannschaft“ nur echte Mannschaften merken. Vorher wurde bei Torwart → Trainer-Termin
+  // „Torwarttraining“ gemerkt; beim Zurückstellen setzte onTeamChange die Terminart dann wieder auf Torwart → Chip hing fest.
+  const realTeam=t=>!!t&&t!==GK_TEAM&&t!=='Alle Teams';
+  const remember=t=>{ if(sel&&realTeam(t)) sel.dataset.prevTeam=t; };
+  const fallback=()=>{ const p=sel.dataset.prevTeam; if(realTeam(p)) return p; const my=myPreferredTeam(); return my?my.team:'F-Jugend'; };
+  if(sel&&tt) remember(sel.value); // Trainer-Termin gilt für alle Trainer
+  if(sel&&!tt&&!gk&&sel.value==='Alle Teams'&&realTeam(sel.dataset.prevTeam)){ sel.value=sel.dataset.prevTeam; }
   if(sel){
-    if(gk&&sel.value!==GK_TEAM){ sel.dataset.prevTeam=sel.value; sel.value=GK_TEAM; }
-    else if(!gk&&sel.value===GK_TEAM){ sel.value=sel.dataset.prevTeam||'F-Jugend'; if(typeof filterTeamOptions==='function') filterTeamOptions(); onTeamChange(); }
+    if(gk&&sel.value!==GK_TEAM){ remember(sel.value); sel.value=GK_TEAM; }
+    else if(!gk&&sel.value===GK_TEAM){ sel.value=fallback(); if(typeof filterTeamOptions==='function') filterTeamOptions();
+      if(sel.value===GK_TEAM){ const o=[...sel.options].find(x=>!x.disabled&&realTeam(x.value)); if(o) sel.value=o.value; }
+      onTeamChange(); }
   }
   applyMatchForm(byUser);
   hideConflicts(); renderPitch();
@@ -5692,7 +5699,7 @@ function resetForm(){
   ['f-opponent','f-participants','f-kickoff','f-address'].forEach(id=>{ document.getElementById(id).value=''; });
   document.getElementById('f-anlass').dataset.auto=''; setHomeAway('home',false);
   halleThirds=[];onTeamChange();onKindChange(false);renderPitch();renderHalle();hideConflicts();formDirty=false;
-  formSkipFussballLink=null; FORM_TEAMS_ALL=false; ANLASS_OPEN=false; FORM_TL={ds:null,m:null,edge:null,touched:[]}; openFormNote(false);
+  formSkipFussballLink=null; delete document.getElementById('f-team').dataset.prevTeam; FORM_TEAMS_ALL=false; ANLASS_OPEN=false; FORM_TL={ds:null,m:null,edge:null,touched:[]}; openFormNote(false);
 }
 /* ---------- Terminformular kompakt (ab 06.10.2026 · 1) ----------
    Terminart und Mannschaft als Chips statt Droplisten (die versteckten <select>/Segmente bleiben die
@@ -6285,6 +6292,7 @@ function fillForm(e){
   document.getElementById('f-anlass').dataset.auto=''; setHomeAway(e.ha==='away'?'away':'home',false);
   fillingForm=true;
   try{ onTeamChange();onKindChange(false); } finally{ fillingForm=false; }
+  delete document.getElementById('f-team').dataset.prevTeam; // gemerkte Mannschaft eines früheren Formulars nicht übernehmen
   FORM_TEAMS_ALL=false; ANLASS_OPEN=false; FORM_TL={ds:null,m:null,edge:null,touched:[]}; openFormNote(!!(e.note||'').trim()?true:false);
   updateWeekday();renderPitch();renderHalle();updateKickInfo();
 }
