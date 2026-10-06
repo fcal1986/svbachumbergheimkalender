@@ -70,7 +70,8 @@
       "emailNotificationsEnabled": true,
       "phone": "01722342821",
       "contactPublic": "both",
-      "contactEmail": "info@bcw-software.de"
+      "contactEmail": "info@bcw-software.de",
+      "role": "jugendleiter"
     },
     {
       "id": "f9f5d5e9-2907-46bb-b5a7-a04477c65b5a",
