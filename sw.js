@@ -1,4 +1,4 @@
-// sw.js – bewusst minimal.
+// sw.js – bewusst minimal (kein eigenes Caching).
 // Zweck: Chrome/Android erkennt eine Seite nur dann als "installierbar" (löst
 // beforeinstallprompt aus), wenn ein Service Worker registriert ist. Mehr soll
 // dieser hier NICHT tun – insbesondere KEIN Caching von data/*.json oder der
@@ -11,9 +11,13 @@ self.addEventListener('activate', (e) => {
   e.waitUntil(self.clients.claim());
 });
 self.addEventListener('fetch', (e) => {
-  // Bewusst kein event.respondWith(...) -> der Browser lädt ganz normal vom
-  // Netz, als gäbe es diesen Service Worker gar nicht. Nur die Registrierung
-  // selbst zählt für die Installierbarkeit.
+  // Ab 06.10.2026 · 21: Seitenaufrufe (die App selbst = index.html) immer beim Server nachfragen.
+  // GitHub Pages erlaubt dem Browser sonst, die Seite 10 Minuten zwischenzuspeichern – wer kurz vor
+  // einem Update geöffnet hat, bekam beim nächsten Start noch die alte Version. "no-cache" heißt:
+  // gespeicherte Kopie nur nach Rückfrage (unverändert = 304, kaum Datenverbrauch).
+  // Alles andere (data/*.json, Bilder) läuft weiter ganz normal am Service Worker vorbei.
+  if (e.request.mode !== 'navigate' || e.request.method !== 'GET') return;
+  e.respondWith(fetch(e.request.url, { cache: 'no-cache', credentials: 'same-origin' }).catch(() => fetch(e.request)));
 });
 
 // Push-Benachrichtigungen (ab 02.10.2026 · 1): Nachricht anzeigen; Antippen öffnet Platzcoach beim Termin.
