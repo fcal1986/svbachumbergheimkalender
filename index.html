@@ -1665,7 +1665,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 17';
+const APP_VERSION='06.10.2026 · 18';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2914,6 +2914,17 @@ async function bioSetup(){
     trackEvent('bio_eingerichtet'); showToast(bioName()+' eingeschaltet. Beim nächsten Anmelden reicht '+bioName()+'.',4000);
   }catch(e){ showToast('Einrichtung abgebrochen.'); }
   finally{ _bioBusy=false; renderKonto(); refreshBioBtn(); }
+}
+/* Vorab-Hinweis (ab 06.10.2026 · 18): Android/iOS sprechen beim Einrichten von „Passkey“ – das verwirrt.
+   Kurz erklären, dass der Passkey nur der Schlüssel ist und mit Fingerabdruck/Face ID entsperrt wird.
+   „Weiter“ im Blatt ist zugleich die Nutzeraktion, die das Einrichten auslöst. */
+function bioIntro(){
+  const nm=bioName(), ios=/iPhone|iPad|iPod/.test(navigator.userAgent||'');
+  openSheet('<div class="info-sheet"><h3 style="margin:0 0 8px;font-size:17px;font-weight:800;">'+esc(nm)+' einschalten</h3>'
+    +'<p>Dein Handy fragt gleich, ob es einen <b>Passkey</b> speichern soll. Das ist nur der Schlüssel für Platzcoach – geöffnet wird er mit '+(ios?'Face ID':'deinem Fingerabdruck')+'.</p>'
+    +'<p>Dort einfach <b>'+(ios?'„Fortfahren“':'„Weiter“')+'</b> tippen und '+(ios?'kurz ins Handy schauen':'den Finger auflegen')+'. Ein zusätzliches Passwort gibt es nicht.</p>'
+    +'<div class="fs-acts"><button type="button" class="cancel-btn" onclick="closeSheet();renderKonto()">Abbrechen</button>'
+    +'<button type="button" class="submit-btn" onclick="closeSheet();bioSetup()">Weiter</button></div></div>');
 }
 function bioRemove(){ localStorage.removeItem(BIO_KEY); showToast('Ausgeschaltet. Anmeldung wieder mit Passwort.'); renderKonto(); refreshBioBtn(); }
 async function bioLogin(){
@@ -7945,7 +7956,7 @@ function bioCard(){
   const st=bioStored(), on=!!(st&&st.uid===session.id);
   return '<div class="card"><h4>'+nm+'</h4><div class="notif-row"><div class="notif-row-text"><b>Mit '+nm+' anmelden</b>'
     +'<p>'+(on?'Auf diesem Gerät eingeschaltet':'Statt Passwort, nur auf diesem Gerät')+' '+infoBtn('Dein Zugang wird auf diesem Gerät verschlüsselt gespeichert und lässt sich nur mit '+nm+' öffnen. Andere Geräte brauchen weiter das Passwort. iPhone: in der Platzcoach-App vom Home-Bildschirm einschalten, nicht in Safari – beide speichern getrennt.')+'</p></div>'
-    +'<label class="toggle-switch"><input type="checkbox" id="bio-toggle"'+(on?' checked':'')+' onchange="this.checked?bioSetup():bioRemove()"><span class="toggle-slider"></span></label></div></div>';
+    +'<label class="toggle-switch"><input type="checkbox" id="bio-toggle"'+(on?' checked':'')+' onchange="this.checked?bioIntro():bioRemove()"><span class="toggle-slider"></span></label></div></div>';
 }
 function pwCard(){
   if(session.isSuper){
