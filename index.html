@@ -557,6 +557,11 @@
   .fs-sum-x{flex:none;width:36px;height:36px;border-radius:18px;border:1.5px solid var(--line);background:var(--white);font-size:14px;font-weight:800;color:var(--ink);cursor:pointer;}
   .fs-sum-none{font-size:12.5px;color:var(--ink-soft);}
   .fs-sheet h3{margin:0 0 4px;font-size:17px;font-weight:800;}
+  .rv-sheet h3{margin:0 0 10px;font-size:17px;font-weight:800;}
+  .rv-row{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.4;}
+  .rv-row span{flex:none;width:64px;color:var(--ink-soft);font-weight:600;}
+  .rv-row b{flex:1;min-width:0;color:var(--ink);font-weight:700;}
+  .rv-row.ok b{color:var(--grass);}
   .fs-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin:14px 0 7px;}
   .fs-sub{font-size:11.5px;color:var(--ink-soft);margin:10px 0 6px;}
   .fs-acts{display:flex;gap:8px;margin-top:14px;}
@@ -1620,7 +1625,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 12';
+const APP_VERSION='06.10.2026 · 13';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -6471,6 +6476,41 @@ function duplicateEvent(id){
   showToast('Kopie erstellt – bitte das neue Datum wählen.',4000);
 }
 function cancelEdit(){ cancelForm(); }
+/* ---------- Termin prüfen (ab 06.10.2026 · 13) ----------
+   Blatt von unten mit Was / Wer / Wann / Wo / Platz und wer eine Mail bekommt; „Weiter bearbeiten“ oder „Jetzt speichern“.
+   Gilt für neue und geänderte Termine (beide benachrichtigen andere – siehe PRINZIPIEN: Rückfrage nur dann). */
+function reviewRecipients(o){
+  const se=SEASONS.length?seasonForDate(o.d):null, out=[];
+  const name=id=>{ const u=USERS.find(x=>x.id===id); return u?((u.first||'')+' '+(u.last||'')).trim():''; };
+  const ids=se?(se.trainerIds||[]):USERS.map(u=>u.id);
+  const has=(id,t,q)=>{ const c=se?classesInSeason(id,se):normalizeClasses((USERS.find(u=>u.id===id)||{}).classes||{}); if(!c.hasOwnProperty(t)) return false; const sq=c[t]||[]; return !isJugend(t)||!sq.length||sq.includes(q||1); };
+  if(o.kind==='trainer') return {all:true,names:[]};
+  ids.forEach(id=>{ if(session&&id===session.id) return;
+    const hit=o.kind==='goalkeeper'?((o.gkTeams||[]).some(t=>{ const c=se?classesInSeason(id,se):{}; return c.hasOwnProperty(t); })||has(id,GK_TEAM,1)):has(id,o.team,o.squad);
+    if(hit){ const n=name(id); if(n) out.push(n); } });
+  return {all:false,names:out};
+}
+function openReviewSheet(o){
+  const dt=new Date(o.d+'T00:00:00');
+  const when=DAYS[dt.getDay()]+', '+fmtShort(o.d)+' · '+(o.kind==='game'&&o.mf.kickoff?'Anstoß '+o.mf.kickoff+' (Platz '+o.von+'–'+o.bis+')':o.von+'–'+o.bis+' Uhr');
+  const who=o.kind==='trainer'?'Alle Trainer':(o.kind==='goalkeeper'?'Torwarttraining für '+gkTeamsText(o.gkTeams||[]):teamLabel(o.team,o.squad));
+  const where=o.away?('Auswärts'+(o.mf.address?' · '+o.mf.address:'')):[o.pitch?pitchShort(o.pitch):'',o.halle?halleShort(o.halle):'',...(o.res||[])].filter(Boolean).join(' · ')||'keine Fläche';
+  const what=kindLabel(o.kind)+(o.title&&o.title!==kindLabel(o.kind)?' · '+o.title:'')+(o.mf.opponent?(o.away?' bei ':' gegen ')+o.mf.opponent:'');
+  const rc=reviewRecipients(o);
+  const mail=rc.all?'alle Trainer der Saison':(rc.names.length?rc.names.join(', '):'niemand außer dir');
+  const row=(l,v,cls)=>'<div class="rv-row'+(cls?' '+cls:'')+'"><span>'+l+'</span><b>'+esc(v)+'</b></div>';
+  const edit=!!editingId;
+  openSheet('<div class="rv-sheet"><h3>'+(edit?'Änderungen prüfen':'Termin prüfen')+'</h3>'
+    +row('Was',what)+row('Wer',who)+row('Wann',when)+row('Wo',where)
+    +(o.away||o.kind==='trainer'?'':row('Platz','✓ frei','ok'))
+    +row('Mail an',mail)
+    +'<div class="fs-acts"><button type="button" class="cancel-btn" onclick="closeSheet()">Weiter bearbeiten</button>'
+    +'<button type="button" class="submit-btn" onclick="confirmReviewSave()">'+(edit?'Änderungen speichern':'Jetzt speichern')+'</button></div></div>');
+}
+async function confirmReviewSave(){
+  closeSheet(); submitEvent._confirmed=true;
+  try{ await submitEvent(); } finally{ submitEvent._confirmed=false; }
+}
 async function submitEvent(){
   if(!requireLogin())return;
   const title=document.getElementById('f-anlass').value.trim();
@@ -6511,6 +6551,8 @@ async function submitEvent(){
   const conflicts=findConflicts(d,von,bis,pitch,halle,res,editingId,kind).filter(c=>!isOwnTeamTraining(c.event,ownFree));
   if(conflicts.length){showConflicts(conflicts);renderFreeSlotsBox('free-slots-box',d,von,bis,editingId);return;}
   hideConflicts();
+  // Ab 06.10.2026 · 13: vor dem Speichern „Termin prüfen“ – Speichern verschickt Mails, darum konkrete Zusammenfassung statt „Wirklich?“
+  if(!submitEvent._confirmed){ openReviewSheet({d,von,bis,title,kind,team,squad,pitch,halle,res,mf,away,gkTeams:kind==='goalkeeper'?readGkTeamChips('f-gkteams'):null}); return; }
   const btn=document.getElementById('save-btn'),lblEl=document.getElementById('save-label');
   const spinEl=document.getElementById('save-spin'),checkEl=document.getElementById('save-check');
   const lbl=lblEl.textContent;btn.disabled=true;lblEl.textContent='Speichere …';
