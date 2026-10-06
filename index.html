@@ -558,6 +558,24 @@
   .fs-sum-none{font-size:12.5px;color:var(--ink-soft);}
   .fs-sheet h3{margin:0 0 4px;font-size:17px;font-weight:800;}
   .rv-sheet h3{margin:0 0 10px;font-size:17px;font-weight:800;}
+  /* Konto als Einstellungsliste (ab 06.10.2026 · 14) */
+  .kacc-group{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin:16px 4px 7px;}
+  .kacc-list{background:var(--white);border-radius:14px;box-shadow:var(--card-shadow);overflow:hidden;}
+  .kacc+.kacc{border-top:1px solid var(--line);}
+  .kacc-head{width:100%;display:flex;align-items:center;gap:12px;min-height:58px;padding:10px 14px;background:none;border:none;text-align:left;font-family:'Inter';cursor:pointer;color:var(--ink);scroll-margin-top:12px;}
+  .kacc-ico{flex:none;width:34px;height:34px;border-radius:10px;background:var(--green-dim,#EEF7E5);display:flex;align-items:center;justify-content:center;}
+  .kacc-ico svg{width:18px;height:18px;stroke:#2F7A46;}
+  .kacc-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+  .kacc-txt b{font-size:14.5px;font-weight:700;display:flex;align-items:center;gap:6px;}
+  .kacc-txt small{font-size:12px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .kacc-badge{font-style:normal;font-size:11px;font-weight:800;background:var(--warn);color:#fff;border-radius:9px;padding:1px 7px;}
+  .kacc-chev{flex:none;font-size:22px;color:var(--ink-soft);transition:transform .15s;}
+  .kacc.open .kacc-chev{transform:rotate(90deg);}
+  .kacc.open .kacc-head{background:#F4F8F1;}
+  .kacc-body{padding:4px 12px 12px;background:#F4F8F1;}
+  .kacc-body .card{margin:8px 0 0;box-shadow:none;border:1px solid var(--line);}
+  .kacc-body.hide1>.card:first-child>h4:first-child{display:none;}
+  .kacc-logout{width:100%;min-height:52px;background:none;border:none;font-family:'Inter';font-size:15px;font-weight:700;color:var(--warn);cursor:pointer;}
   .rv-row{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.4;}
   .rv-row span{flex:none;width:64px;color:var(--ink-soft);font-weight:600;}
   .rv-row b{flex:1;min-width:0;color:var(--ink);font-weight:700;}
@@ -1625,15 +1643,25 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 13';
+const APP_VERSION='06.10.2026 · 14';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
 let MOVES=[]; // vorgemerkte Spielverlegungen (data/game-moves.json), siehe applyGameMoves()
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
 let selectedSeasonFilter='';
-let kontoTab='profil'; // 'profil'|'saisons'|'zugaenge'|'protokoll'
-function setKontoTab(tab){kontoTab=tab;if(tab==='zugaenge')userListSearch='';renderKonto();trackArea(currentPaneArea());}
+let kontoTab='profil'; // 'profil'|'saisons'|'zugaenge'|'protokoll' – ab 06.10.2026 · 14 nur noch Name des offenen Bereichs (Analytics, Sprünge)
+let kontoOpen=null, _kontoTabSeen='profil';
+const KONTO_TAB_TO_SEC={profil:null,kontakt:'kontakt',torhueter:'torhueter',saisons:'saisons',zugaenge:'zugaenge',protokoll:'protokoll',benachrichtigungen:'benachrichtigungen',sperren:'sperren',abgleich:'abgleich',passwort:'passwort',app:'app'};
+function setKontoTab(tab){kontoTab=tab;_kontoTabSeen=null;if(tab==='zugaenge')userListSearch='';renderKonto();trackArea(currentPaneArea());
+  const el=kontoOpen&&document.getElementById('kacc-'+kontoOpen); if(el) setTimeout(()=>el.scrollIntoView({block:'start',behavior:'smooth'}),30);}
+function toggleKontoSection(id){
+  const opening=kontoOpen!==id;
+  kontoOpen=opening?id:null; kontoTab=opening?id:'profil'; _kontoTabSeen=kontoTab;
+  if(id==='zugaenge'&&opening) userListSearch='';
+  renderKonto(); trackArea(currentPaneArea());
+  const el=opening&&document.getElementById('kacc-'+id); if(el) setTimeout(()=>el.scrollIntoView({block:'start',behavior:'smooth'}),30);
+}
 
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const MONTHS_S=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
@@ -8281,46 +8309,52 @@ function renderKonto(){
     '<div class="konto-info">'+
     '<div class="avatar'+(session.isAdmin?' adm':'')+'" style="width:44px;height:44px;font-size:16px;flex:none;">'+initials(session.name)+'</div>'+
     '<div><div style="font-size:15px;font-weight:800;">'+esc(session.name)+(session.isAdmin?'<span class="badge-admin">Admin</span>':'')+'</div>'+
-    '<div style="font-size:12px;color:var(--ink-soft);">'+esc(session.email)+'</div></div></div>'+
-    '<button class="cancel-btn" style="padding:6px 14px;font-size:12px;" onclick="logout()">Abmelden</button></div>';
+    '<div style="font-size:12px;color:var(--ink-soft);">'+esc(session.email)+'</div></div></div></div>';
 
-  // ── Sub-Tabs ──
+  // ── Ab 06.10.2026 · 14: eine Liste wie in den iOS-/Android-Einstellungen statt Reitern ──
+  // Je Bereich eine Zeile (Symbol, Titel, Kurzinfo); antippen klappt ihn auf, es ist immer nur einer offen.
   const isAdmin=session.isAdmin;
-  const hasKeepers=!session.isSuper&&!!session.token&&myKeeperTeams().length>0; // ab 05.10.2026 · 5 eigener Reiter
-  if(!kontoTab||kontoTab==='protokoll'&&!isAdmin||kontoTab==='torhueter'&&!hasKeepers)kontoTab='profil';
-  const tabs=[
-    {id:'profil',label:'Profil'},
-    ...(hasKeepers?[{id:'torhueter',label:'Torhüter'}]:[]),
-    ...(isAdmin?[{id:'saisons',label:'Saisons'},{id:'zugaenge',label:'Zugänge'+(regIsAdminSession()&&REGSTATE.list.length?' ('+REGSTATE.list.length+')':'')},{id:'protokoll',label:'Protokoll'}]:[])
-  ];
-  let tabsH='<div class="seg" style="margin-bottom:12px;">';
-  tabs.forEach(t=>{ const active=kontoTab===t.id; tabsH+='<button type="button"'+(active?' class="on"':'')+' onclick="setKontoTab(this.dataset.tab)" data-tab="'+t.id+'">'+t.label+'</button>'; });
-  tabsH+='</div>'; h+=tabsH;
+  const hasKeepers=!session.isSuper&&!!session.token&&myKeeperTeams().length>0;
+  if(kontoTab!==_kontoTabSeen){ _kontoTabSeen=kontoTab; kontoOpen=KONTO_TAB_TO_SEC[kontoTab]||null; }
+  const u=USERS.find(x=>x.id===session.id)||{};
+  const pushOn=(()=>{ try{ return !!localStorage.getItem(PUSH_ID_KEY); }catch(e){ return false; } })();
+  const visTxt={none:'nicht öffentlich',phone:'Telefon öffentlich',email:'E-Mail öffentlich',both:'Telefon + E-Mail öffentlich'}[u.contactPublic||'none']||'';
+  const cur=getCurrentSeason();
+  const openLocks=(LOCKS||[]).filter(l=>!l.bis||l.bis>=todayStr).length;
+  const nReg=regIsAdminSession()&&REGSTATE.list?REGSTATE.list.length:0;
+  const ico=d=>'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
+  const SEC=[];
+  if(!session.isSuper){
+    SEC.push({id:'kontakt',g:'mine',t:'Profil & Kontakt',sum:[u.phone||'kein Telefon',visTxt].filter(Boolean).join(' · '),i:ico('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>'),html:()=>profileCard(),hide1:true});
+    SEC.push({id:'benachrichtigungen',g:'mine',t:'Benachrichtigungen',sum:'Mail '+(u.emailNotificationsEnabled!==false?'an':'aus')+' · Push '+(pushOn?'an':'aus')+' · Wochenübersicht '+(u.weeklyDigest!==false?'an':'aus'),i:ico('<path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 003.4 0"/>'),html:()=>notificationsCard()+(isAdmin&&!pushKey()?pushSetupCardHTML():''),hide1:true});
+  }
+  if(hasKeepers) SEC.push({id:'torhueter',g:'mine',t:'Meine Torhüter',sum:'für Torwarttraining-Anmeldungen',i:ico('<path d="M8 13V6a1.5 1.5 0 013 0v5M11 11V4.5a1.5 1.5 0 013 0V11M14 11V6a1.5 1.5 0 013 0v7c0 4-2.5 7-6 7s-6-3-6-6v-2a1.5 1.5 0 013 0"/>'),html:()=>keeperCardHTML(),hide1:true});
+  SEC.push({id:'app',g:'mine',t:'Als App installieren',sum:'auf dem Startbildschirm',i:ico('<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>'),html:()=>pwaCard(),hide1:true});
+  SEC.push({id:'passwort',g:'mine',t:'Passwort ändern',sum:'mindestens 12 Zeichen',i:ico('<rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/>'),html:()=>pwCard(),hide1:true});
+  if(isAdmin){
+    SEC.push({id:'saisons',g:'club',t:'Saisons & Trainer',sum:cur?cur.label+' aktiv':'keine aktive Saison',i:ico('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),html:()=>seasonManagementCard(),hide1:true});
+    SEC.push({id:'abgleich',g:'club',t:'Mannschaften abgleichen',sum:'mit fussball.de',i:ico('<path d="M4 7h13l-3-3M20 17H7l3 3"/>'),html:()=>teamSyncCard(),hide1:true});
+    SEC.push({id:'sperren',g:'club',t:'Ressourcen-Sperren',sum:openLocks?openLocks+' aktiv':'keine aktiv',i:ico('<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>'),html:()=>resourceLockCard(),hide1:true});
+    SEC.push({id:'zugaenge',g:'club',t:'Zugänge',sum:USERS.length+' Zugänge'+(nReg?' · '+nReg+' neue Anmeldung'+(nReg===1?'':'en'):''),badge:nReg,i:ico('<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0112 0M16 5a3 3 0 010 6M21 20a6 6 0 00-4-5.6"/>'),html:()=>'<div id="reg-admin"></div>'+adminNewUserCard()+adminUserListCard()});
+    SEC.push({id:'protokoll',g:'club',t:'Protokoll & Regeln',sum:'Änderungen im Verein',i:ico('<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>'),html:()=>rulesInfoCard()+logCard()});
+  }
+  if(kontoOpen&&!SEC.some(x=>x.id===kontoOpen)) kontoOpen=null;
 
   // ── Saison-Warnung für Admins ohne aktive Saison ──
   if(session.isAdmin&&!session.isSuper&&SEASONS.length>0&&!isInActiveSeason(session.id)){
-    h+='<div class="banner warn" style="margin-bottom:10px;">⚠ Du bist keiner aktiven Saison zugeordnet – Termine und Trainings anlegen nicht möglich. <strong onclick="setKontoTab(\'saisons\')" style="cursor:pointer;text-decoration:underline;">Zur Saisonverwaltung →</strong></div>';
+    h+='<div class="banner warn" style="margin-bottom:10px;">⚠ Du bist keiner aktiven Saison zugeordnet. <strong onclick="setKontoTab(\'saisons\')" style="cursor:pointer;text-decoration:underline;">Zur Saisonverwaltung →</strong></div>';
   }
-
-  // ── Tab-Inhalt ──
-  if(kontoTab==='profil'){
-    h+=pwCard();
-    if(!session.isSuper)h+=profileCard()+notificationsCard();
-    if(session.isAdmin&&!pushKey()) h+=pushSetupCardHTML();
-    h+=pwaCard();
-  }else if(kontoTab==='torhueter'){
-    h+=keeperCardHTML();
-  }else if(kontoTab==='saisons'){
-    h+=teamSyncCard()+seasonManagementCard()+resourceLockCard();
-  }else if(kontoTab==='zugaenge'){
-    h+='<div id="reg-admin"></div>'+adminNewUserCard()+adminUserListCard();
-  }else if(kontoTab==='protokoll'){
-    h+=rulesInfoCard()+logCard();
-  }
+  const group=(g,label)=>{ const list=SEC.filter(x=>x.g===g); if(!list.length) return '';
+    return '<p class="kacc-group">'+label+'</p><div class="kacc-list">'+list.map(x=>{ const open=kontoOpen===x.id;
+      return '<div class="kacc'+(open?' open':'')+'" id="kacc-'+x.id+'"><button type="button" class="kacc-head" aria-expanded="'+open+'" onclick="toggleKontoSection(\''+x.id+'\')">'
+        +'<span class="kacc-ico">'+x.i+'</span><span class="kacc-txt"><b>'+esc(x.t)+(x.badge?'<i class="kacc-badge">'+x.badge+'</i>':'')+'</b><small>'+esc(x.sum)+'</small></span><span class="kacc-chev">›</span></button>'
+        +(open?'<div class="kacc-body'+(x.hide1?' hide1':'')+'">'+x.html()+'</div>':'')+'</div>'; }).join('')+'</div>'; };
+  h+=group('mine','Mein Konto')+group('club','Verein');
+  h+='<div class="kacc-list" style="margin-top:18px;"><button type="button" class="kacc-logout" onclick="logout()">Abmelden</button></div>';
 
   box.innerHTML=h;
-  if(kontoTab==='protokoll'&&logExpanded)loadLogIfNeeded();
-  if(kontoTab==='zugaenge'){ if(regIsAdminSession()&&(!REGSTATE.loaded||REGSTATE.forToken!==session.token)) loadRegData(); else renderRegAdmin(); }
+  if(kontoOpen==='protokoll'&&logExpanded)loadLogIfNeeded();
+  if(kontoOpen==='zugaenge'){ if(regIsAdminSession()&&(!REGSTATE.loaded||REGSTATE.forToken!==session.token)) loadRegData(); else renderRegAdmin(); }
 }
 function saveAdminToken(){
   const t=document.getElementById('ad-token').value.trim();
