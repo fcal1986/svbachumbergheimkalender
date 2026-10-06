@@ -84,23 +84,6 @@
       "byName": "Michael Raneck",
       "at": "2026-10-06T11:19:58.583Z",
       "cancelledTraining": []
-    },
-    {
-      "id": "2a7a0942-652c-42fd-bad8-57d9a284d664",
-      "link": "https://www.fussball.de/spiel/sc-neheim-i-sv-bachum-bergheim-2/-/spiel/031J8LLJIC000000VS5489BUVVKNMR0J",
-      "team": "E-Junioren",
-      "squad": 2,
-      "opponent": "SC Neheim I",
-      "away": true,
-      "fromD": "2026-11-14",
-      "fromT": "11:00",
-      "toD": "2026-12-24",
-      "toT": "11:00",
-      "reason": "Test Auswärtsspiel verlegen",
-      "byId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "byName": "Fabrizio Calcagno",
-      "at": "2026-10-06T12:15:11.280Z",
-      "cancelledTraining": []
     }
   ]
 }
