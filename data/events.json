@@ -207,27 +207,6 @@
       }
     },
     {
-      "id": "aeb8b548-909f-4a5b-9ef3-9aa323e93f37",
-      "d": "2027-06-20",
-      "t": "15:30",
-      "bis": "19:30",
-      "title": "Schulfest Test",
-      "kind": "other",
-      "team": "E-Jugend",
-      "squad": 2,
-      "pitch": {
-        "mode": "ganz"
-      },
-      "halle": null,
-      "res": [
-        "Vereinsheim",
-        "Theke"
-      ],
-      "note": "",
-      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "ownerName": "Fabrizio Calcagno"
-    },
-    {
       "id": "57deca7a-cef4-4235-bfd0-f90972c4e312",
       "d": "2026-10-11",
       "t": "12:45",
