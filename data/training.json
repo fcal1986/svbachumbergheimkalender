@@ -22,9 +22,11 @@
         "Fabrizio Calcagno"
       ],
       "validFrom": "2026-07-01",
-      "validUntil": "2027-06-30",
+      "validUntil": "2027-07-31",
       "trainerId": null,
-      "trainerName": ""
+      "trainerName": "",
+      "kind": "training",
+      "cancelled": []
     },
     {
       "id": "e008b81c-e045-47f1-b364-e34ca4aa9bc4",
