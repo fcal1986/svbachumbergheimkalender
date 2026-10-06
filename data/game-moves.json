@@ -36,6 +36,22 @@
       "byName": "Fabrizio Calcagno",
       "at": "2026-09-28T18:59:34.964Z",
       "cancelledTraining": []
+    },
+    {
+      "id": "6ef91cee-b455-4a97-9f99-d9259c9b3a1e",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-mueschede-herdringen-holzen-2/-/spiel/031J8LLJEO000000VS5489BUVVKNMR0J",
+      "team": "E-Junioren",
+      "squad": 2,
+      "opponent": "JSG Müschede/Herdr./Ho. II",
+      "fromD": "2026-11-21",
+      "fromT": "11:30",
+      "toD": "2026-11-21",
+      "toT": "11:15",
+      "reason": "Terminüberschneidung",
+      "byId": "af1a6546-fdc2-4059-bef4-5a4966181701",
+      "byName": "Michael Raneck",
+      "at": "2026-10-06T11:16:35.126Z",
+      "cancelledTraining": []
     }
   ]
 }
