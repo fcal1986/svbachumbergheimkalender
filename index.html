@@ -1074,6 +1074,7 @@
   .nf-btns{display:flex;gap:8px;}
   .nf-btns .cancel-btn{margin:0;width:auto;flex:none;padding:0 16px;}
   .nf-owner{margin:0 0 6px;font-size:11.5px;color:var(--ink-soft);}
+  .nf-season-hint{margin:8px 0 0;padding:8px 10px;border-radius:9px;background:#FDECEA;color:#8E2A1D;font-size:12px;font-weight:600;line-height:1.4;}
   .nf-owner b{color:var(--ink);}
   /* Freien Termin finden */
   .sf-months{display:flex;flex-wrap:wrap;gap:5px;}
@@ -1237,7 +1238,7 @@
         <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Gültig ab</label><input type="date" id="tf-validfrom"></div>
         <div class="field" style="flex:1;"><label>Gültig bis</label><input type="date" id="tf-validuntil"></div>
       </div>
-      <p class="helptext" style="margin:-8px 0 16px;">„Gültig bis" leer lassen = bis auf Weiteres. So ist immer klar, ab und bis wann eine Zeit gilt – z. B. bei einem Saisonwechsel.</p>
+      <p class="helptext" id="tf-season-help" style="margin:-8px 0 16px;">„Gültig bis“ leer lassen = bis auf Weiteres.</p>
       <p class="section-label">Optional</p>
       <div class="field"><label>Bemerkung</label><input type="text" id="tf-note" placeholder="z. B. nur im Sommer"></div>
       <button class="submit-btn" id="tf-save" onclick="saveTrainingSlot()"><span id="tf-label">Speichern</span></button>
@@ -1301,6 +1302,7 @@
           <label class="nf-datebox"><span id="f-wochentag">–</span><input type="date" id="f-datum" aria-label="Datum"></label>
           <button type="button" class="nf-step" aria-label="Einen Tag später" onclick="shiftFormDate(1)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></button>
         </div>
+        <p class="nf-season-hint" id="f-season-hint" style="display:none;"></p>
         <div id="f-kick-field" class="nf-times" style="display:none;">
           <label>Anstoß<input type="time" id="f-kickoff" step="300" onchange="onKickoffChange(true)"></label>
         </div>
@@ -1475,6 +1477,7 @@
     <h3>Zuordnungen übernehmen?</h3>
     <p id="scm-text" class="sub" style="margin-top:4px;"></p>
     <div id="scm-picker" style="display:none;margin-top:10px;"></div>
+    <label id="scm-training-row" style="display:flex;align-items:center;gap:9px;margin-top:12px;font-size:12.5px;font-weight:600;color:var(--ink);"><input type="checkbox" id="scm-training" checked style="width:18px;height:18px;flex:none;accent-color:var(--green);"><span id="scm-training-lbl">Trainingszeiten übernehmen</span></label>
     <div id="scm-acts" style="display:flex;flex-direction:column;gap:8px;margin-top:16px;">
       <button class="submit-btn" onclick="seasonCreateAll()">Alle übernehmen</button>
       <button class="ghost-btn" style="margin-top:0;" onclick="seasonCreateSelect()">Einzeln auswählen</button>
@@ -1589,7 +1592,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 7';
+const APP_VERSION='06.10.2026 · 8';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3125,8 +3128,10 @@ function canEdit(e){
   if(!session)return false;
   if(session.isAdmin)return true;
   if(e.isTraining)return false;
+  const se=SEASONS.length?seasonForDate(e.d):null;
+  if(SEASONS.length&&(!se||se.to<todayStr))return false; // abgeschlossene oder fehlende Saison: nur Admins
   if(e.ownerId===session.id)return true;
-  return canBookTeam(e.team,e.squad||1);
+  return canBookTeamOn(e.team,e.squad||1,e.d);
 }
 function cancelledRowHTML(e){
   const dt=new Date(e.d+'T00:00:00');
@@ -5711,7 +5716,9 @@ let FORM_TEAMS_ALL=false, FORM_LAST_DUR=0;
 function renderFormChips(){
   const kc=document.getElementById('f-kind-chips'); if(!kc) return;
   const k=formKind();
-  const gkOk=!!session&&canBookTeam(GK_TEAM,1);
+  const fd=dateInput().value, useSeason=SEASONS.length&&fd&&!seasonBookingProblem(fd);
+  const gkOk=!!session&&(useSeason?canBookTeamOn(GK_TEAM,1,fd):canBookTeam(GK_TEAM,1));
+  const hint=document.getElementById('f-season-hint'); if(hint){ const pr=fd&&session?seasonBookingProblem(fd):null; hint.textContent=pr||''; hint.style.display=pr?'':'none'; }
   kc.innerHTML=FORM_KIND_CHIPS.filter(([id])=>id!=='goalkeeper'||gkOk||k==='goalkeeper')
     .map(([id,l])=>'<button type="button" class="nf-chip'+(id==='goalkeeper'?' gk':'')+(id===k?' on':'')+'" onclick="pickFormKind(\''+id+'\')">'+l+'</button>').join('');
   renderFormTeamChips(); renderFormDurs(); showAnlassField();
@@ -5736,13 +5743,18 @@ function pickFormKind(k){
 function formTeamEntries(){
   const sel=document.getElementById('f-team'); if(!sel) return [];
   const out=[];
+  // Ab 06.10.2026 · 8: Mannschaften und Rechte aus der Saison des gewählten Datums (z. B. nächste Saison: andere Mannschaft)
+  const fd=dateInput().value, se=SEASONS.length&&fd&&!seasonBookingProblem(fd)?seasonForDate(fd):null;
+  const act=se?activeClasses(se):null;
+  const ok=(t,n)=>!session||(se?canBookTeamOn(t,n,fd):(session.isAdmin||canBookTeam(t,n)));
   [...sel.options].forEach(o=>{
-    if(o.disabled||o.hidden||o.value===GK_TEAM) return;
-    const t=o.value;
-    if(isJugend(t)) squadsFor(t).forEach(n=>{ if(!session||session.isAdmin||canBookTeam(t,n)) out.push({team:t,squad:n,label:jugendLetter(t)+n}); });
+    const t=o.value; if(t===GK_TEAM) return;
+    if(se){ if(ALL_CLASSES.includes(t)&&!act.includes(t)) return; if(!ok(t,1)&&!isJugend(t)) return; }
+    else if(o.disabled||o.hidden) return;
+    if(isJugend(t)) squadsFor(t,se||undefined).forEach(n=>{ if(ok(t,n)) out.push({team:t,squad:n,label:jugendLetter(t)+n}); });
     else out.push({team:t,squad:1,label:t});
   });
-  const cls=normalizeClasses((session&&session.classes)||{});
+  const cls=se&&session?classesInSeason(session.id,se):normalizeClasses((session&&session.classes)||{});
   out.forEach(e=>{ const sq=cls[e.team]; e.mine=!!sq&&(!isJugend(e.team)||!sq.length||sq.includes(e.squad)); });
   return out;
 }
@@ -5756,13 +5768,15 @@ function renderFormTeamChips(){
   const list=showAll?all:all.filter(e=>e.mine||isCur(e));
   let h=list.map(e=>'<button type="button" class="nf-chip'+(isCur(e)?' on':'')+'" onclick="pickFormTeam(\''+esc(e.team)+'\','+e.squad+')">'+esc(e.label)
     +(e.mine&&!showAll?'':'')+'</button>').join('');
+  // Neuer Termin, Datum in einer Saison mit anderer Mannschaft: gleich die eigene Mannschaft dieser Saison wählen
+  if(!editingId&&!all.some(isCur)&&mine.length&&team!==GK_TEAM&&team!=='Alle Teams'&&!['goalkeeper','trainer'].includes(formKind())&&!renderFormTeamChips._busy){ renderFormTeamChips._busy=true; try{ pickFormTeam(mine[0].team,mine[0].squad); } finally{ renderFormTeamChips._busy=false; } return; }
   if(!all.some(isCur)&&team) h='<button type="button" class="nf-chip on">'+esc(isJugend(team)?jugendLetter(team)+squad:team)+'</button>'+h;
   if(mine.length&&mine.length<all.length) h+='<button type="button" class="nf-chip more" onclick="FORM_TEAMS_ALL=!FORM_TEAMS_ALL;renderFormTeamChips()">'+(FORM_TEAMS_ALL?'Nur meine':'Andere ›')+'</button>';
   box.innerHTML=h;
 }
 function pickFormTeam(team,squad){
   const sel=document.getElementById('f-team'); if(!sel) return;
-  sel.value=team; setSquadSeg('f-squad',team,squad);
+  sel.value=team; setSquadSeg('f-squad',team,squad,true); // force: Nummer kann aus einer anderen Saison stammen
   formDirty=true; FORM_TEAMS_ALL=false;
   onTeamChange(); hideConflicts(); renderPitch();
 }
@@ -5977,8 +5991,11 @@ function formOccupation(){
 }
 function sfMonthKeys(){
   const t=new Date(todayStr+'T00:00:00'), out=[];
-  for(let i=0;i<12;i++){ const d=new Date(t.getFullYear(),t.getMonth()+i,1); out.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')); }
-  return out;
+  // Ab 06.10.2026 · 8: nur Monate, die in einer Saison liegen, in der man buchen darf
+  const ses=SEASONS.length&&session&&!session.isSuper?bookableSeasons():null;
+  for(let i=0;i<12;i++){ const d=new Date(t.getFullYear(),t.getMonth()+i,1), k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    if(!ses||ses.some(se=>se.from.slice(0,7)<=k&&se.to.slice(0,7)>=k)) out.push(k); }
+  return out.length?out:[todayStr.slice(0,7)];
 }
 function openSlotFinder(){
   const d=dateInput().value||todayStr, keys=sfMonthKeys(), mk=d.slice(0,7);
@@ -6070,6 +6087,7 @@ function renderSlotFinder(){
     for(let i=1;i<=n;i++){
       const d=k+'-'+String(i).padStart(2,'0');
       if(d<todayStr||!SF.days.has(dowOf(d))) continue;
+      if(SEASONS.length&&seasonBookingProblem(d)) continue; // außerhalb einer buchbaren Saison
       row.days.push({d,...sfCheckDay(d,o)});
     }
     res.push(row);
@@ -6178,7 +6196,9 @@ function canBookTeam(team,squad){
 }
 function applySquadRestrictions(segId,team){
   if(!session||session.isAdmin)return;
-  const cls=normalizeClasses(session.classes);
+  // Terminformular: Nummern aus der Saison des gewählten Datums (ab 06.10.2026 · 8)
+  const fd=segId==='f-squad'&&SEASONS.length?dateInput().value:null, fse=fd&&!seasonBookingProblem(fd)?seasonForDate(fd):null;
+  const cls=fse?classesInSeason(session.id,fse):normalizeClasses(session.classes);
   const sq=cls[team]||[];
   if(!sq.length)return;
   document.querySelectorAll('#'+segId+' button').forEach(b=>{
@@ -6210,15 +6230,19 @@ function filterTeamOptions(){
 function newEvent(d){
   if(!requireLogin()) return;
   // Saisonprüfung gilt für alle – Admins müssen sich selbst der Saison zuordnen
-  if(!isInActiveSeason(session.id)){
-    showToast(session.isAdmin
-      ?'Du bist in keiner aktiven Saison. Bitte im Konto → Saisons dich selbst hinzufügen.'
-      :'Du bist in keiner aktiven Saison – bitte den Vorstand kontaktieren.',5000);
-    return;
-  }
-  if(!session.isAdmin&&!Object.keys(normalizeClasses(session.classes||{})).length){
-    showToast('Dir ist noch keine Altersklasse zugeordnet. Bitte beim Vorstand melden.',5000);
-    return;
+  // Ab 06.10.2026 · 8: Admins brauchen keine Saison-Zuordnung; Trainer eine laufende oder kommende Saison mit Mannschaft.
+  if(SEASONS.length&&!session.isSuper){
+    const open=bookableSeasons().filter(se=>se.to>=todayStr);
+    if(!open.length){
+      showToast(session.isAdmin?'Es ist keine laufende oder kommende Saison angelegt – bitte unter Konto → Saisons anlegen.'
+        :'Du bist keiner laufenden oder kommenden Saison zugeordnet – bitte beim Vorstand melden.',5000);
+      return;
+    }
+    if(!session.isAdmin&&!open.some(se=>Object.keys(classesInSeason(session.id,se)).length)){
+      showToast('Dir ist noch keine Mannschaft zugeordnet. Bitte beim Vorstand melden.',5000);
+      return;
+    }
+    if(!d&&!session.isAdmin&&!seasonForDate(todayStr)) d=open.map(se=>se.from).sort()[0]; // nur für die kommende Saison eingetragen
   }
   editingId=null; resetForm();
   filterTeamOptions(); onTeamChange();
@@ -6313,25 +6337,22 @@ function duplicateEvent(id){
   if(!requireLogin()) return;
   const e=EVENTS.find(x=>x.id===id); if(!e)return;
   editingId=null; fillForm(e);
-  const d=new Date(e.d+'T00:00:00'); d.setFullYear(d.getFullYear()+1);
-  dateInput().value=ymd(d); updateWeekday(); renderPitch();
+  // Ab 06.10.2026 · 8: gleiches Datum – das neue Datum wählt man selbst (vorher +1 Jahr, auch ohne angelegte Saison)
+  updateWeekday(); renderPitch();
   document.getElementById('save-label').textContent='Als neuen Termin speichern';
   document.getElementById('cancel-btn').style.display='block';
   document.getElementById('owner-name').textContent=session.name;
   goto('neu');
-  showToast('Kopie erstellt – Datum steht auf nächstes Jahr, bitte prüfen.',4000);
+  showToast('Kopie erstellt – bitte das neue Datum wählen.',4000);
 }
 function cancelEdit(){ editingId=null; formSkipFussballLink=null; formDirty=false; goto('termine'); }
 async function submitEvent(){
   if(!requireLogin())return;
-  // Saisonprüfung als Sicherheitsnetz beim Speichern
-  if(!isInActiveSeason(session.id)){
-    showToast('Kein Saisoneintrag – Speichern nicht möglich.',4000);
-    return;
-  }
   const title=document.getElementById('f-anlass').value.trim();
   if(!title){showToast('Bitte einen Anlass eintragen.');return;}
   const d=dateInput().value;if(!d){showToast('Bitte ein Datum wählen.');return;}
+  // Saisonprüfung: Termin nur in einer angelegten Saison, Rechte aus der Saison des Termins
+  const seasonProblem=seasonBookingProblem(d); if(seasonProblem){ showToast(seasonProblem,6000); return; }
   const von=snapTo15(document.getElementById('f-von').value)||document.getElementById('f-von').value;
   const bis=snapTo15(document.getElementById('f-bis').value)||document.getElementById('f-bis').value;
   if(!von||!bis){showToast('Bitte Von- und Bis-Zeit eintragen.');return;}
@@ -6339,9 +6360,9 @@ async function submitEvent(){
   const team=formKind()==='goalkeeper'?GK_TEAM:(formKind()==='trainer'?'Alle Teams':document.getElementById('f-team').value);
   const sb=document.querySelector('#f-squad button.on');const squad=team===GK_TEAM?1:(sb?parseInt(sb.dataset.squad):1);
   if(team===GK_TEAM&&!readGkTeamChips('f-gkteams').length){showToast('Bitte mindestens eine Mannschaft für das Torwarttraining auswählen.');return;}
-  if(team===GK_TEAM&&!canBookTeam(team,1)){showToast('Torwarttrainings können nur Torwarttrainer und Admins anlegen.',5000);return;}
-  if(formKind()!=='trainer'&&!canBookTeam(team,squad)){ // Trainer-Termin: darf jeder Zugang der Saison anlegen
-    const cls=normalizeClasses(session.classes||{});
+  if(team===GK_TEAM&&!canBookTeamOn(team,1,d)){showToast('Torwarttrainings können nur Torwarttrainer und Admins anlegen.',5000);return;}
+  if(formKind()!=='trainer'&&!canBookTeamOn(team,squad,d)){ // Trainer-Termin: darf jeder Zugang der Saison anlegen
+    const cls=SEASONS.length?classesInSeason(session.id,seasonForDate(d)):normalizeClasses(session.classes||{});
     const sq=cls[team]||[];
     const msg=sq.length?'Nur Mannschaft '+sq.map(s=>jugendLetter(team)+s).join(', ')+' erlaubt.':'Diese Altersklasse ist dir nicht zugewiesen.';
     showToast(msg,5000);return;
@@ -6419,6 +6440,8 @@ function deleteEvent(id){
 function dowOf(dateStr){ const g=new Date(dateStr+'T00:00:00').getDay(); return g===0?7:g; }
 function slotInRange(s,dateStr){
   if(dowOf(dateStr)!==s.day) return false;
+  const se=SEASONS.length?seasonOfSlot(s):null; // Trainingszeit gilt höchstens in ihrer Saison (ab 06.10.2026 · 8)
+  if(se&&(dateStr<se.from||dateStr>se.to)) return false;
   if(s.validFrom && dateStr<s.validFrom) return false;
   if(s.validUntil && dateStr>s.validUntil) return false;
   return true;
@@ -7173,21 +7196,21 @@ function renderTraining(){
     '<button type="button"'+(trainingView==='mannschaften'?' class="on"':'')+' onclick="trainingView=\'mannschaften\';renderTraining()">Mannschaften</button>'+
     (admin?'<button type="button"'+(trainingView==='verwaltung'?' class="on"':'')+' onclick="trainingView=\'verwaltung\';renderTraining()">Verwaltung</button>':'')+
     '</div></div><div style="height:12px;"></div>';
+  // Ab 06.10.2026 · 8: Trainingszeiten gehören zu einer Saison – Auswahl gilt für Mannschaften und Verwaltung
+  const tSea=SEASONS.length?trainSeason():null;
+  if(tSea&&!selectedSeasonFilter) selectedSeasonFilter=tSea.id;
+  if(SEASONS.length){
+    h+='<select aria-label="Saison" onchange="selectedSeasonFilter=this.value;renderTraining()" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px;font-family:Inter;font-size:13px;background:var(--bg);margin-bottom:12px;">'+
+      [...SEASONS].sort((a,b)=>b.startYear-a.startYear).map(s=>'<option value="'+s.id+'"'+(tSea&&tSea.id===s.id?' selected':'')+'>'+esc(s.label)+(s.from<=todayStr&&s.to>=todayStr?' (aktuell)':(s.from>todayStr?' (kommend)':''))+'</option>').join('')+
+      '</select>';
+  }
+  const inSea=sl=>!tSea||((seasonOfSlot(sl)||{}).id===tSea.id);
 
   // ── Mannschaften-Tab ──
   if(trainingView==='mannschaften'){
-    const curSea=getCurrentSeason();
-    if(!selectedSeasonFilter&&curSea)selectedSeasonFilter=curSea.id;
-    const activeSeasTrs=SEASONS.length&&selectedSeasonFilter?
-      (SEASONS.find(s=>s.id===selectedSeasonFilter)?.trainerIds||null):null;
-    if(SEASONS.length){
-      h+='<select onchange="selectedSeasonFilter=this.value;renderTraining()" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px;font-family:Inter;font-size:13px;background:var(--bg);margin-bottom:12px;">'+
-        '<option value="">Alle Saisons</option>'+
-        [...SEASONS].sort((a,b)=>b.startYear-a.startYear).map(s=>'<option value="'+s.id+'"'+(selectedSeasonFilter===s.id?' selected':'')+'>'+esc(s.label)+'</option>').join('')+
-        '</select>';
-    }
+    const activeSeasTrs=tSea?(tSea.trainerIds||null):null;
     const byTeam={};
-    TRAINING.filter(s=>!s.validUntil||s.validUntil>=todayStr).forEach(s=>{
+    TRAINING.filter(s=>inSea(s)&&(!s.validUntil||s.validUntil>=todayStr||(tSea&&tSea.to<todayStr))).forEach(s=>{
       const key=trainName(s);
       if(!byTeam[key])byTeam[key]={label:key,slots:[],team:s.team,squad:s.squad||1};
       byTeam[key].slots.push(s);
@@ -7251,7 +7274,7 @@ function renderTraining(){
       '</div>';
     WDAYS.slice(1).forEach((wd,idx)=>{
       const day=idx+1;
-      const slots=TRAINING.filter(s=>s.day===day).sort((a,b)=>a.from.localeCompare(b.from));
+      const slots=TRAINING.filter(s=>s.day===day&&inSea(s)).sort((a,b)=>a.from.localeCompare(b.from));
       if(!slots.length)return;
       h+='<h4 style="font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;margin:14px 0 6px;">'+wd+'</h4>';
       slots.forEach(s=>{
@@ -7382,38 +7405,47 @@ function tfFill(s){
   tfTeamChange(); tfRenderPitch();
   renderTrainerChips(s.team,s.squad||1,getTrainerIds(s));
 }
+function trainSeason(){ return (selectedSeasonFilter&&SEASONS.find(x=>x.id===selectedSeasonFilter))||getCurrentSeason()||[...SEASONS].sort((a,b)=>a.startYear-b.startYear).find(x=>x.to>=todayStr)||null; }
+let TF_SEASON=null; // Saison der Trainingszeit im Formular
+function tfApplySeasonBounds(se){
+  TF_SEASON=se||null;
+  const f=document.getElementById('tf-validfrom'), u=document.getElementById('tf-validuntil'), h=document.getElementById('tf-season-help');
+  [f,u].forEach(x=>{ if(x){ x.min=se?se.from:''; x.max=se?se.to:''; } });
+  if(h) h.textContent=se?('Gilt in der '+se.label+' ('+fmtShort(se.from)+' – '+fmtShort(se.to)+'). Kürzer geht jederzeit, z. B. nur bis Ende Mai.'):'„Gültig bis“ leer lassen = bis auf Weiteres.';
+}
 function newTrainingSlot(day){
   if(!requireAdmin()) return;
-  if(!isInActiveSeason(session.id)){
-    showToast('Du bist in keiner aktiven Saison. Bitte im Konto → Saisons dich selbst hinzufügen.',5000);
-    return;
-  }
+  const se=trainSeason();
+  if(SEASONS.length&&!se){ showToast('Bitte zuerst unter Konto → Saisons eine Saison anlegen.',5000); return; }
   tEditId=null;
-  tfFill({day:day||1,from:'16:30',to:'18:00',team:'F-Jugend',squad:1,pitch:{mode:'ganz'},res:[],note:'',validFrom:todayStr,validUntil:'',cancelled:[]});
+  tfFill({day:day||1,from:'16:30',to:'18:00',team:'F-Jugend',squad:1,pitch:{mode:'ganz'},res:[],note:'',
+    validFrom:se?(todayStr>se.from?todayStr:se.from):todayStr,validUntil:se?se.to:'',seasonId:se?se.id:undefined,cancelled:[]});
+  tfApplySeasonBounds(se);
   document.getElementById('tf-label').textContent='Trainingszeit anlegen';
   goto('tform');
 }
 function editTrainingSlot(id){
   if(!requireAdmin()) return;
   const s=TRAINING.find(x=>x.id===id); if(!s)return;
-  tEditId=id; tfFill(s);
+  tEditId=id; tfFill(s); tfApplySeasonBounds(SEASONS.length?seasonOfSlot(s):null);
   document.getElementById('tf-label').textContent='Änderungen speichern';
   goto('tform');
 }
 async function saveTrainingSlot(){
   if(!requireAdmin()) return;
-  if(!isInActiveSeason(session.id)){
-    showToast('Kein Saisoneintrag – Trainingszeit kann nicht gespeichert werden.',4000);
-    return;
-  }
   const day=parseInt(document.getElementById('tf-day').value);
   const from=document.getElementById('tf-from').value;
   const to=document.getElementById('tf-to').value;
   if(!from||!to){ showToast('Bitte Von- und Bis-Zeit angeben.'); return; }
   if(from>=to){ showToast('Die Bis-Zeit muss nach der Von-Zeit liegen.'); return; }
   const validFrom=document.getElementById('tf-validfrom').value;
-  const validUntil=document.getElementById('tf-validuntil').value;
+  let validUntil=document.getElementById('tf-validuntil').value;
   if(!validFrom){ showToast('Bitte angeben, ab wann diese Zeit gilt.'); return; }
+  const tse=TF_SEASON;
+  if(tse){ // Trainingszeit gehört fest zu ihrer Saison: Zeitraum frei, aber innerhalb 01.07.–30.06.
+    if(!validUntil) validUntil=tse.to;
+    if(validFrom<tse.from||validUntil>tse.to){ showToast('Die Trainingszeit gilt in der '+tse.label+' – bitte ein Datum zwischen '+fmtShort(tse.from)+' und '+fmtShort(tse.to)+' wählen.',6000); return; }
+  }
   if(validUntil&&validUntil<validFrom){ showToast('„Gültig bis" muss nach „Gültig ab" liegen.'); return; }
   const team=document.getElementById('tf-team').value;
   const sb=document.querySelector('#tf-squad button.on');
@@ -7455,10 +7487,10 @@ async function saveTrainingSlot(){
   try{
     if(tEditId){
       const existing=TRAINING.find(x=>x.id===tEditId);
-      Object.assign(existing,{day,from,to,team,squad,kind,gkTeams,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,
+      Object.assign(existing,{day,from,to,team,squad,kind,gkTeams,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,seasonId:tse?tse.id:existing.seasonId,
         cancelled:[...new Set([...(existing.cancelled||[]),...newCancels])].sort()});
     }else{
-      TRAINING.push({id:crypto.randomUUID(),day,from,to,team,squad,kind,gkTeams,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[...newCancels].sort()});
+      TRAINING.push({id:crypto.randomUUID(),seasonId:tse?tse.id:undefined,day,from,to,team,squad,kind,gkTeams,trainerIds,trainerNames,pitch,res,note,validFrom,validUntil:validUntil||null,cancelled:[...newCancels].sort()});
       if(kind==='goalkeeper'){
         // Anfrage bezieht sich auf den NÄCHSTEN Termin dieser festen Zeit; der Button springt dorthin.
         const ns=TRAINING[TRAINING.length-1];
@@ -8292,6 +8324,41 @@ async function saveProfile(){
 function getSeasonDates(year){return{from:year+'-07-01',to:(year+1)+'-06-30'};}
 function getSeasonLabel(year){const y2=(year+1).toString().slice(-2);return 'Saison '+year+'/'+y2;}
 function getCurrentSeason(){return SEASONS.find(s=>s.from<=todayStr&&s.to>=todayStr)||null;}
+/* ---------- Saison des Termins (ab 06.10.2026 · 8) ----------
+   Rechte hängen an der Saison, in der der Termin liegt – nicht am heutigen Tag. Termine gibt es nur in
+   angelegten Saisons (01.07.–30.06.). Trainer brauchen eine Zuordnung in genau dieser Saison, Admins nicht.
+   Abgeschlossene Saisons ändern nur noch Admins. Trainingszeiten gehören fest zu einer Saison (seasonId). */
+function seasonForDate(d){ return d?(SEASONS.find(s=>s.from<=d&&s.to>=d)||null):null; }
+function seasonOfSlot(sl){ return (sl&&sl.seasonId&&SEASONS.find(x=>x.id===sl.seasonId))||seasonForDate(sl&&sl.validFrom)||null; }
+function seasonStartYearOf(d){ return +d.slice(0,4)-(+d.slice(5,7)<7?1:0); }
+function classesInSeason(userId,season){ return season?normalizeClasses((season.trainerClasses||{})[userId]||{}):{}; }
+function seasonBookingProblem(d){
+  if(!session) return 'Zum Eintragen bitte anmelden.';
+  if(session.isSuper||!SEASONS.length||!d) return null;
+  const se=seasonForDate(d);
+  if(!se) return 'Für den '+fmtShort(d)+' ist noch keine Saison angelegt ('+getSeasonLabel(seasonStartYearOf(d))+')'
+    +(session.isAdmin?' – unter Konto → Saisons anlegen.':' – bitte beim Vorstand melden.');
+  if(session.isAdmin) return null;
+  if(se.to<todayStr) return 'Die '+se.label+' ist abgeschlossen – Änderungen nur noch durch den Vorstand.';
+  if(!(se.trainerIds||[]).includes(session.id)) return 'Du bist der '+se.label+' noch nicht zugeordnet – bitte beim Vorstand melden.';
+  return null;
+}
+function canBookTeamOn(team,squad,d){
+  if(!session) return false;
+  if(session.isSuper||!SEASONS.length) return canBookTeam(team,squad);
+  if(seasonBookingProblem(d)) return false;
+  if(session.isAdmin) return true;
+  const cls=classesInSeason(session.id,seasonForDate(d));
+  if(!cls.hasOwnProperty(team)) return false;
+  if(!isJugend(team)) return true;
+  const sq=cls[team]||[]; return !sq.length||sq.includes(squad||1);
+}
+// Saisons, in denen der angemeldete Zugang Termine anlegen darf (Admins: alle; Trainer: laufende/kommende mit Zuordnung).
+function bookableSeasons(){
+  if(!session) return [];
+  if(session.isAdmin||session.isSuper) return SEASONS.slice();
+  return SEASONS.filter(se=>se.to>=todayStr&&(se.trainerIds||[]).includes(session.id));
+}
 /* ---------- Team-Zuordnung ist jetzt Saison-Eigentum, nicht Nutzer-Eigentum ----------
    Grund: welche Teams jemand trainiert, ändert sich von Saison zu Saison (z.B. Fabrizio
    E2 diese Saison, E1 nächste Saison). Quelle der Wahrheit: season.trainerClasses[userId].
@@ -8369,8 +8436,12 @@ function promptCreateSeason(year){
   const id=year+'-'+(year+1);
   if(SEASONS.find(s=>s.id===id)){showToast('Saison '+id+' existiert bereits.');return;}
   const prev=[...SEASONS].sort((a,b)=>b.startYear-a.startYear)[0];
-  if(!prev||!(prev.trainerIds||[]).length){ createSeason(year,null); return; }
+  const prevSlots=prev?TRAINING.filter(sl=>(seasonOfSlot(sl)||{}).id===prev.id).length:0;
+  if(!prev||(!(prev.trainerIds||[]).length&&!prevSlots)){ createSeason(year,null); return; }
   pendingSeasonYear=year; pendingSeasonPrev=prev; seasonSelectPicks=new Set();
+  const trRow=document.getElementById('scm-training-row'); if(trRow) trRow.style.display=prevSlots?'flex':'none';
+  const trCb=document.getElementById('scm-training'); if(trCb) trCb.checked=true;
+  const trLbl=document.getElementById('scm-training-lbl'); if(trLbl) trLbl.textContent=prevSlots+' Trainingszeit'+(prevSlots===1?'':'en')+' übernehmen (gelten dann 01.07.–30.06. der neuen Saison, danach einzeln änderbar)';
   document.getElementById('scm-text').textContent='Sollen die Trainer- und Team-Zuordnungen aus "'+prev.label+'" als Ausgangspunkt für "'+getSeasonLabel(year)+'" übernommen werden? Einzelne Änderungen (z. B. Wechsel der Mannschaft) kannst du danach jederzeit unter "Saisons" anpassen.';
   document.getElementById('scm-picker').style.display='none';
   document.getElementById('scm-picker').innerHTML='';
@@ -8379,8 +8450,9 @@ function promptCreateSeason(year){
   document.getElementById('season-create-modal').classList.add('show');
 }
 function closeSeasonCreateModal(){ document.getElementById('season-create-modal').classList.remove('show'); }
-function seasonCreateAll(){ closeSeasonCreateModal(); createSeason(pendingSeasonYear,pendingSeasonPrev); }
-function seasonCreateEmpty(){ closeSeasonCreateModal(); createSeason(pendingSeasonYear,null); }
+function scmCopyTraining(){ const cb=document.getElementById('scm-training'); const row=document.getElementById('scm-training-row'); return !!(cb&&cb.checked&&row&&row.style.display!=='none'); }
+function seasonCreateAll(){ const t=scmCopyTraining(); closeSeasonCreateModal(); createSeason(pendingSeasonYear,pendingSeasonPrev,t?pendingSeasonPrev:null); }
+function seasonCreateEmpty(){ const t=scmCopyTraining(); closeSeasonCreateModal(); createSeason(pendingSeasonYear,null,t?pendingSeasonPrev:null); }
 function seasonCreateSelect(){
   const prev=pendingSeasonPrev;
   const trainers=(prev.trainerIds||[]).map(id=>USERS.find(u=>u.id===id)).filter(Boolean)
@@ -8409,10 +8481,11 @@ function confirmSeasonSelectiveCreate(){
     trainerNames:keepIds.map(id=>{const u=USERS.find(x=>x.id===id);return u?(u.first+' '+u.last):'';}),
     trainerClasses:Object.fromEntries(Object.entries(prev.trainerClasses||{}).filter(([id])=>seasonSelectPicks.has(id)))
   };
+  const t=scmCopyTraining();
   closeSeasonCreateModal();
-  createSeason(pendingSeasonYear,filtered);
+  createSeason(pendingSeasonYear,filtered,t?prev:null);
 }
-async function createSeason(year,copyFrom){
+async function createSeason(year,copyFrom,trainingFrom){
   year=parseInt(year);if(!year||year<2020||year>2050){showToast('Ungültiges Jahr.');return;}
   const id=year+'-'+(year+1);
   if(SEASONS.find(s=>s.id===id)){showToast('Saison '+id+' existiert bereits.');return;}
@@ -8425,7 +8498,15 @@ async function createSeason(year,copyFrom){
     if(Array.isArray(copyFrom.teams)) newS.teams=JSON.parse(JSON.stringify(copyFrom.teams));
   }
   SEASONS.push(newS);SEASONS.sort((a,b)=>b.startYear-a.startYear);
-  kontoTab='saisons'; renderKonto(); showToast(newS.label+' angelegt'+(copyFrom?' (Zuordnungen übernommen).':'.'));  // sofort
+  // Trainingszeiten der Vorsaison als Kopie für die ganze neue Saison (ab 06.10.2026 · 8)
+  let copied=0;
+  if(trainingFrom){
+    const src=TRAINING.filter(sl=>(seasonOfSlot(sl)||{}).id===trainingFrom.id);
+    src.forEach(sl=>{ const c=JSON.parse(JSON.stringify(sl)); c.id=crypto.randomUUID(); c.seasonId=newS.id; c.validFrom=newS.from; c.validUntil=newS.to; c.cancelled=[]; TRAINING.push(c); });
+    copied=src.length;
+  }
+  kontoTab='saisons'; renderKonto(); showToast(newS.label+' angelegt'+(copyFrom?' (Zuordnungen übernommen)':'')+(copied?' – '+copied+' Trainingszeiten übernommen.':'.'));  // sofort
+  if(copied){ renderTraining(); saveTraining('Trainingszeiten in '+newS.label+' übernommen: '+copied+' aus '+trainingFrom.label+' – '+session.name).catch(e=>showToast('Trainingszeiten konnten nicht gespeichert werden: '+e.message,6000)); }
   saveSeasons('Saison angelegt: '+newS.label+(copyFrom?' (Zuordnungen aus '+copyFrom.label+' übernommen)':'')).catch(e=>{
     SEASONS=SEASONS.filter(s=>s.id!==id); renderKonto();
     showToast('Fehler beim Speichern: '+e.message,6000);
