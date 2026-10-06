@@ -1613,7 +1613,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 10';
+const APP_VERSION='06.10.2026 · 11';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -5192,14 +5192,31 @@ function conflictContactHTML(x){
   return '<div class="trainers-block"><div class="trainer-row"><div class="trainer-lbl">'+esc(x.ownerName||'–')+'</div>'
     +(ch?'<div class="ev-contact" style="margin-top:4px;">'+ch+'</div>':'')+'</div></div>';
 }
-function conflictActionsHTML(e){
+/* Ab 06.10.2026 · 11: Training gegen Spiel/Turnier → das Training direkt aus der Meldung absagen (das Spiel gewinnt,
+   es kommt meist von fussball.de). Darf der Trainer des Trainings oder ein Admin; ein Tipp + „Rückgängig“;
+   in der Absage-Mail steht, welches Spiel den Platz belegt. */
+function isMatchLike(x){ return !!x&&!x.isCancelled&&((x.isExternal&&!x.isAway)||(!x.isTraining&&!x.isExternal&&isMatchKind(kindOf(x)))); }
+function matchReasonText(g){ return 'Platz belegt durch '+conflictItemLabel(g)+', '+g.t+' Uhr'; }
+function cancelBtnFor(tr,game,label){
+  const sl=TRAINING.find(x=>x.id===tr.trainingSlotId);
+  if(!sl||tr.isCancelled||!canCancelSlot(sl)) return '';
+  return '<button class="cf-btn" onclick="'+esc('event.stopPropagation();cancelTrainingDay(\''+jsArg(tr.trainingSlotId)+'\',\''+tr.d+'\',\''+jsArg(matchReasonText(game))+'\')')+'">'+esc(label)+'</button>';
+}
+function conflictActionsHTML(e,partners){
   if(!session) return '<p class="cf-hint">Zum Lösen bitte anmelden.</p>';
   const btns=[];
+  partners=partners||[];
   if(!e.isExternal&&!e.isTraining&&canEdit(e))
     btns.push('<button class="cf-btn" onclick="event.stopPropagation();editEvent(\''+e.id+'\')">Termin anpassen</button>');
-  if(e.isTraining&&session.isAdmin&&e.trainingSlotId){
-    btns.push('<button class="cf-btn" onclick="event.stopPropagation();cancelTrainingDay(\''+e.trainingSlotId+'\',\''+e.d+'\')">Training an diesem Tag absagen</button>');
-    btns.push('<button class="cf-btn ghost" onclick="event.stopPropagation();editTrainingSlot(\''+e.trainingSlotId+'\')">Trainingszeit bearbeiten</button>');
+  // Spiel-/Turnierkarte: kollidierende Trainings absagen
+  if(isMatchLike(e)) partners.filter(p=>p.isTraining&&p.trainingSlotId).forEach(p=>{
+    const b=cancelBtnFor(p,e,'Training '+(p.team===GK_TEAM?'Torwarttraining':teamShort(p.team,p.squad))+' absagen'); if(b) btns.push(b); });
+  // Trainingskarte: gegen ein Spiel/Turnier absagen (Trainer der Mannschaft oder Admin), sonst wie bisher nur Admins
+  if(e.isTraining&&e.trainingSlotId){
+    const game=partners.find(isMatchLike);
+    if(game){ const b=cancelBtnFor(e,game,'Training an diesem Tag absagen'); if(b) btns.push(b); }
+    else if(session.isAdmin) btns.push('<button class="cf-btn" onclick="event.stopPropagation();cancelTrainingDay(\''+e.trainingSlotId+'\',\''+e.d+'\')">Training an diesem Tag absagen</button>');
+    if(session.isAdmin) btns.push('<button class="cf-btn ghost" onclick="event.stopPropagation();editTrainingSlot(\''+e.trainingSlotId+'\')">Trainingszeit bearbeiten</button>');
   }
   if(e.isExternal&&!e.isAway&&e.fbIndex!=null)
     btns.push('<button class="cf-btn" onclick="event.stopPropagation();openRescheduleFinder('+e.fbIndex+')">Neue Ansetzung suchen</button>');
@@ -5234,7 +5251,7 @@ function conflictBannerHTML(e){
       +capacity.games.map(g=>{const m=fussballFilterTeam(g.team,g.squad);return esc(teamLabel(m.team,m.squad))+' '+g.t;}).join(', ')
       +'). Der Platz hat nur zwei Hälften – das muss mit dem Staffelleiter geklärt werden.</span></div></div>';
   }
-  det+=conflictActionsHTML(e)+'</div>';
+  det+=conflictActionsHTML(e,partners)+'</div>';
   return '<button type="button" class="conflict-banner" aria-expanded="false" onclick="toggleConflictBanner(this,event)">'+svgWarn
     +'<span class="cf-head">'+head+'</span><span class="cf-chev">▾</span></button>'+det;
 }
@@ -7175,7 +7192,7 @@ async function doCancelSlot(){
    Genutzt von „Meine Woche“, der Kalenderkarte, „Zu erledigen“ und dem Konflikt-Hinweis;
    der Dialog mit Datumswahl bleibt nur für die Trainingszeiten-Liste (dort ist kein Tag bekannt). */
 function canCancelSlot(s){ return !!(session&&s&&(session.isAdmin||canBookAnyOfTeam(s.team))); }
-function cancelTrainingDay(id,date){
+function cancelTrainingDay(id,date,reason){
   const s=TRAINING.find(x=>x.id===id); if(!s||!date) return;
   if(!canCancelSlot(s)){ showToast('Absagen kann nur ein Trainer der Mannschaft oder ein Admin.',4000); return; }
   if((s.cancelled||[]).includes(date)){ showToast('Ist bereits abgesagt.'); return; }
@@ -7186,7 +7203,7 @@ function cancelTrainingDay(id,date){
     ()=>{
       const backup=JSON.stringify(TRAINING.map(x=>x.id===s.id?{...x,cancelled:(x.cancelled||[]).filter(d=>d!==date)}:x));
       if(s.team===GK_TEAM||s.kind==='goalkeeper') sendGkCancel(s.gkTeams||[],'Torwarttraining',DAYS[new Date(date+'T00:00:00').getDay()]+', '+fmtShort(date)+' · '+s.from+'–'+s.to+' Uhr',s.trainerIds||[],'Das Torwarttraining fällt an diesem Tag aus.');
-      saveTraining('Training abgesagt: '+msgTeam(s.team,s.squad,s.gkTeams)+' am '+fmtShort(date)+' – '+session.name+teamTrailer(s.team,s.squad,s))
+      saveTraining('Training abgesagt: '+msgTeam(s.team,s.squad,s.gkTeams)+' am '+fmtShort(date)+(reason?' – '+reason:'')+' – '+session.name+teamTrailer(s.team,s.squad,s))
         .catch(e=>{ TRAINING=JSON.parse(backup); rerender(); showToast('Fehler: '+e.message,6000); });
     });
 }
