@@ -1001,6 +1001,80 @@
   .spinner{width:15px;height:15px;border:2px solid rgba(0,0,0,.15);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
   @keyframes spin{to{transform:rotate(360deg);}}
 
+  /* ── Terminformular kompakt (06.10.2026 · 1) ── */
+  body.in-form .navbar{display:none;}
+  .content.nf{padding-bottom:calc(12px + env(safe-area-inset-bottom));}
+  .nf-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;}
+  .nf-top .form-back{margin:0;flex:none;}
+  .nf-top .nf-owner{margin:0;text-align:right;}
+  .nf-title{margin:0 0 6px;font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .nf-title b{color:var(--ink);}
+  .nf-title .nf-link{padding:2px 0;font-size:12px;}
+  .nf-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin:14px 0 7px;}
+  .nf-lbl-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:14px 0 7px;}
+  .nf-lbl-row .nf-lbl{margin:0;}
+  .nf > .nf-lbl:first-of-type{margin-top:4px;}
+  .nf-chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .nf-chip{min-height:40px;padding:0 12px;border-radius:11px;border:1.5px solid var(--line);background:var(--white);font-family:'Inter';font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:var(--card-shadow);}
+  .nf-chip.on{background:var(--black-btn);border-color:var(--black-btn);color:#fff;}
+  .nf-chip small{font-size:10.5px;font-weight:500;opacity:.75;}
+  .nf-chip.more{color:#3E7A0E;}
+  .nf-chip.gk.on{background:#C25E00;border-color:#C25E00;}
+  .nf-anlass{margin:10px 0 0;}
+  .nf-anlass label{font-size:11px;margin-bottom:4px;}
+  .nf-anlass input{padding:10px 12px;}
+  .nf-link{display:inline-flex;align-items:center;gap:5px;background:none;border:none;padding:6px 0;font-family:'Inter';font-size:13px;font-weight:700;color:#3E7A0E;cursor:pointer;}
+  .nf-link svg{width:15px;height:15px;stroke:currentColor;}
+  .nf-card{background:var(--white);border:1.5px solid var(--line);border-radius:14px;padding:10px;box-shadow:var(--card-shadow);}
+  .nf-date{display:flex;gap:6px;align-items:stretch;}
+  .nf-step{flex:none;width:42px;min-height:44px;border:none;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .nf-step svg{width:16px;height:16px;stroke:var(--ink);}
+  .nf-datebox{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--bg);border-radius:10px;padding:0 8px;font-weight:800;font-size:15px;color:var(--ink);}
+  .nf-datebox input{border:none;background:none;font-family:'Inter';font-size:15px;font-weight:700;color:var(--ink);min-width:0;width:auto;padding:10px 0;outline:none;}
+  .nf-times{display:flex;gap:8px;margin-top:8px;}
+  .nf-times label{flex:1;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);}
+  .nf-times input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:10px;padding:9px 8px;font-family:'Inter';font-size:15px;font-weight:700;color:var(--ink);background:var(--white);}
+  .nf-durs{display:flex;gap:5px;margin-top:8px;align-items:center;}
+  .nf-durs span{font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;margin-right:3px;}
+  .nf-durs button{flex:1;min-height:36px;border-radius:9px;border:1.5px solid var(--line);background:var(--white);font-family:'Inter';font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;}
+  .nf-durs button.on{background:var(--black-btn);border-color:var(--black-btn);color:#fff;}
+  .nf-res{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+  .nf-res .res-chip{padding:7px 11px;font-size:13px;min-height:38px;box-sizing:border-box;color:var(--ink);}
+  .nf-res .res-chip.on{color:#fff;}
+  .nf-res .nf-kab{min-width:42px;justify-content:center;padding:7px 0;}
+  .nf-res-lbl{font-size:12px;font-weight:600;color:var(--ink-soft);margin-right:2px;}
+  .nf-break{flex-basis:100%;height:0;}
+  .nf-pitch{margin:10px 0 8px;}
+  .nf-pitch .pitch-box{padding:10px;}
+  .nf-pitch-row{display:flex;gap:10px;align-items:stretch;}
+  .nf-pitch-row .pitch{flex:1.35;min-width:0;}
+  .nf-pitch-row .pitch-modes{flex:1;flex-direction:column;margin:0;}
+  .nf-pitch-row .pitch-modes button{border-right:none;border-bottom:1.5px solid var(--line);}
+  .nf-pitch-row .pitch-modes button:last-child{border-bottom:none;}
+  .nf-pitch .pitch-cap{margin-top:8px;}
+  .nf #f-halle-field{margin:10px 0 8px;}
+  .nf-savebar{position:sticky;bottom:0;z-index:4;background:var(--bg);margin:6px -14px 0;padding:8px 14px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line);}
+  .nf-savebar .submit-btn{margin-top:0;padding:15px;font-size:15px;flex:1;min-width:0;}
+  .nf-btns{display:flex;gap:8px;}
+  .nf-btns .cancel-btn{margin:0;width:auto;flex:none;padding:0 16px;}
+  .nf-owner{margin:0 0 6px;font-size:11.5px;color:var(--ink-soft);}
+  .nf-owner b{color:var(--ink);}
+  /* Freien Termin finden */
+  .sf-months{display:flex;flex-wrap:wrap;gap:5px;}
+  .sf-months .weekday-chip{padding:8px 9px;}
+  .sf-durs{display:flex;flex-wrap:wrap;gap:5px;}
+  .sf-durs .weekday-chip{padding:8px 10px;}
+  .sf-month{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;}
+  .sf-month > b{flex:none;width:52px;font-size:12px;color:var(--ink);padding-top:9px;}
+  .sf-days{display:flex;flex-wrap:wrap;gap:4px;flex:1;}
+  .sf-day{width:38px;height:40px;border-radius:9px;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Inter';font-size:13px;font-weight:800;color:var(--ink);cursor:pointer;line-height:1.1;}
+  .sf-day small{font-size:9px;font-weight:600;opacity:.8;}
+  .sf-day.free{background:#6BB41C;}
+  .sf-day.part{background:#FFD24A;}
+  .sf-day.busy{background:#E4E9E8;color:#7A8894;text-decoration:line-through;cursor:default;}
+  .sf-legend{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--ink-soft);margin:2px 0 12px;}
+  .sf-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px;margin-right:4px;}
+  .sf-hint{background:#FFF6D6;border-radius:10px;padding:9px 11px;font-size:12px;line-height:1.45;color:#4A3A00;margin:10px 0;}
 </style>
 </head>
 <body>
@@ -1154,22 +1228,21 @@
     </div>
   </div>
 
-  <!-- TERMIN FORM (NEU / BEARBEITEN) -->
+  <!-- TERMIN FORM (NEU / BEARBEITEN) – kompakt ab 06.10.2026 · 1: Chips statt Droplisten, Dauer-Chips, Speichern-Leiste -->
   <div class="pane" data-pane="neu">
-    <div class="content">
-      <button type="button" id="form-back" class="form-back" onclick="formBack()">‹ Zurück</button>
+    <div class="content nf">
+      <div class="nf-top"><button type="button" id="form-back" class="form-back" onclick="formBack()">‹ Zurück</button>
+        <p class="nf-owner">Ansprechpartner: <b id="owner-name">–</b></p></div>
       <div id="edit-banner" class="edit-banner" style="display:none;"></div>
-      <div class="banner info">Ansprechpartner: <b id="owner-name">–</b></div>
-      <p class="section-label">Pflichtangaben</p>
-      <div class="field required"><label><span class="req-dot"></span>Datum</label><input type="date" id="f-datum"></div>
-      <div class="field"><label>Wochentag</label><span class="readonly-pill" id="f-wochentag">–</span></div>
-      <div class="field required"><label><span class="req-dot"></span>Anlass</label><input type="text" id="f-anlass" autocomplete="off" oninput="formDirty=true;this.dataset.auto='';suggestKindFromTitle()" placeholder="z. B. Sommerfest, Turnier, Testspiel"></div>
-      <div class="field required"><label><span class="req-dot"></span>Terminart</label>
-        <select id="f-kind" onchange="onKindChange(true)">
-          <option value="game">Freundschaftsspiel</option><option value="hallenturnier">Hallenturnier</option><option value="sommerturnier">Sommerturnier</option><option value="training">Training</option><option value="goalkeeper">Torwarttraining</option><option value="trainer">Trainer-Termin (z. B. Fortbildung, mit Zusagen)</option><option value="other" selected>Sonstiges</option>
-        </select>
-        <p class="helptext" id="f-kind-help"></p>
-      </div>
+
+      <p class="nf-lbl">Was?</p>
+      <div class="nf-chips" id="f-kind-chips"></div>
+      <select id="f-kind" onchange="onKindChange(true)" hidden aria-hidden="true" tabindex="-1">
+        <option value="game">Freundschaftsspiel</option><option value="hallenturnier">Hallenturnier</option><option value="sommerturnier">Sommerturnier</option><option value="training">Training</option><option value="goalkeeper">Torwarttraining</option><option value="trainer">Trainer-Termin (z. B. Fortbildung, mit Zusagen)</option><option value="other" selected>Sonstiges</option>
+      </select>
+      <p class="helptext" id="f-kind-help" style="margin-top:6px;"></p>
+      <div class="field nf-anlass" id="f-anlass-field"><label for="f-anlass">Bezeichnung</label><input type="text" id="f-anlass" autocomplete="off" oninput="formDirty=true;this.dataset.auto='';suggestKindFromTitle()" placeholder="z. B. Schulfest, Kita-Cup, Sitzung"></div>
+
       <div id="f-match-fields" style="display:none;">
         <div class="field required" id="f-ha-field"><label><span class="req-dot"></span>Heim oder auswärts</label>
           <div class="seg" id="f-ha">
@@ -1179,68 +1252,86 @@
         </div>
         <div class="field required" id="f-opp-field"><label><span class="req-dot"></span>Gegner</label><input type="text" id="f-opponent" autocomplete="off" oninput="formDirty=true;autoMatchTitle()" placeholder="z. B. SV Hüsten 09 II"></div>
         <div class="field" id="f-part-field"><label>Teilnehmer (optional)</label><input type="text" id="f-participants" autocomplete="off" oninput="formDirty=true" placeholder="z. B. SC Neheim, TuS Oeventrop"></div>
-        <div class="field required" id="f-kick-field"><label><span class="req-dot"></span>Anstoß</label><input type="time" id="f-kickoff" step="300" onchange="onKickoffChange(true)"><p class="helptext" id="f-kick-info" style="margin-top:6px;"></p></div>
         <div class="field" id="f-addr-field"><label id="f-addr-label">Adresse (Spielort)</label><input type="text" id="f-address" autocomplete="off" oninput="formDirty=true" placeholder="Straße, Ort"></div>
         <p class="helptext" id="f-match-help"></p>
       </div>
-      <div class="field required" id="f-gkteams-field" style="display:none;"><label><span class="req-dot"></span>Für welche Mannschaften?</label>
-        <div class="chip-group" id="f-gkteams"></div>
-        <p class="helptext">Mehrfachauswahl. Die Trainer dieser Mannschaften bekommen beim Anlegen eine E-Mail mit der Bitte, ihre Torhüter an- oder abzumelden.</p>
-      </div>
-      <div style="display:flex;gap:10px;" id="f-times">
-        <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Von</label><input type="time" id="f-von" autocomplete="off" step="900" value="15:00" onchange="onSnapTime(this)"></div>
-        <div class="field required" style="flex:1;"><label><span class="req-dot"></span>Bis</label><input type="time" id="f-bis" autocomplete="off" step="900" value="17:00" onchange="onSnapTime(this)"></div>
-      </div>
+
       <div id="f-team-section">
-      <p class="section-label">Team</p>
-      <div class="field required"><label><span class="req-dot"></span>Altersklasse</label>
-        <select id="f-team" onchange="onTeamChange()">
-          <optgroup label="Jugend"><option>G-Jugend</option><option selected>F-Jugend</option><option>E-Jugend</option><option>D-Jugend</option><option>C-Jugend</option><option>B-Jugend</option><option>A-Jugend</option></optgroup>
-          <optgroup label="Senioren"><option>1. Herren</option><option>2. Herren</option><option>3. Herren</option></optgroup>
-          <optgroup label="Sonstige"><option>Torwarttraining</option><option>Alle Teams</option><option>Vorstand</option></optgroup>
-        </select>
-      </div>
-      <div class="field" id="f-squad-field">
-        <label>Mannschaft der Altersklasse</label>
-        <div class="seg" id="f-squad">
-          <button type="button" class="on" data-squad="1" onclick="setSquad(this)">1</button>
-          <button type="button" data-squad="2" onclick="setSquad(this)">2</button>
-          <button type="button" data-squad="3" onclick="setSquad(this)">3</button>
+        <p class="nf-lbl">Für wen?</p>
+        <div class="nf-chips" id="f-team-chips"></div>
+        <div hidden>
+          <select id="f-team" onchange="onTeamChange()" tabindex="-1">
+            <optgroup label="Jugend"><option>G-Jugend</option><option selected>F-Jugend</option><option>E-Jugend</option><option>D-Jugend</option><option>C-Jugend</option><option>B-Jugend</option><option>A-Jugend</option></optgroup>
+            <optgroup label="Senioren"><option>1. Herren</option><option>2. Herren</option><option>3. Herren</option></optgroup>
+            <optgroup label="Sonstige"><option>Torwarttraining</option><option>Alle Teams</option><option>Vorstand</option></optgroup>
+          </select>
+          <div id="f-squad-field"><div class="seg" id="f-squad">
+            <button type="button" class="on" data-squad="1" onclick="setSquad(this)">1</button>
+            <button type="button" data-squad="2" onclick="setSquad(this)">2</button>
+            <button type="button" data-squad="3" onclick="setSquad(this)">3</button>
+          </div></div>
         </div>
       </div>
+      <div id="f-gkteams-field" style="display:none;"><p class="nf-lbl">Für welche Mannschaften?</p>
+        <div class="chip-group" id="f-gkteams"></div>
+        <p class="helptext">Die Trainer dieser Mannschaften bekommen beim Anlegen eine E-Mail mit der Bitte, ihre Torhüter an- oder abzumelden.</p>
       </div>
-      <p class="section-label" id="f-res-label">Ressourcen</p>
-      <div class="field" id="f-res-field"><label>Was wird gebraucht?</label>
-        <div class="chip-group" id="f-res">
-          <div class="res-chip on" data-res="Großspielfeld" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="1.5"/><path d="M12 5v14"/><circle cx="12" cy="12" r="2.5"/></svg>Großspielfeld</div>
-          <div class="res-chip" data-res="Halle" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="1"/><path d="M2 10h20M7 6v14M17 6v14"/></svg>Halle</div>
-          <div class="res-chip" data-res="Kleinspielfeld" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/></svg>Kleinfeld</div>
-          <div class="res-chip" data-res="Vereinsheim" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Vereinsheim</div>
-          <div class="res-chip" data-res="Theke" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 3h12l-1 4H7L6 3z"/><path d="M7 7l3.5 5v7M17 7l-3.5 5v7M8 21h8"/></svg>Theke</div>
-          <div class="res-chip" data-res="Kabine 1" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 1</div>
-          <div class="res-chip" data-res="Kabine 2" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 2</div>
-          <div class="res-chip" data-res="Kabine 3" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 3</div>
-          <div class="res-chip" data-res="Kabine 4" onclick="toggleRes(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/></svg>Kabine 4</div>
+
+      <div class="nf-lbl-row"><p class="nf-lbl">Wann?</p><button type="button" class="nf-link" onclick="openSlotFinder()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Freien Termin suchen</button></div>
+      <div class="nf-card">
+        <div class="nf-date">
+          <button type="button" class="nf-step" aria-label="Einen Tag früher" onclick="shiftFormDate(-1)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <label class="nf-datebox"><span id="f-wochentag">–</span><input type="date" id="f-datum" aria-label="Datum"></label>
+          <button type="button" class="nf-step" aria-label="Einen Tag später" onclick="shiftFormDate(1)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></button>
         </div>
-      </div>
-      <div class="field" id="f-pitch-field">
-        <label>Anteil Großspielfeld</label>
-        <div class="pitch-box">
-          <div class="pitch-modes" id="pitch-modes">
-            <button type="button" data-mode="ganz" class="on" onclick="setPitchMode('ganz')">Ganzer Platz</button>
-            <button type="button" data-mode="haelfte" onclick="setPitchMode('haelfte')">Hälfte</button>
-            <button type="button" data-mode="viertel" onclick="setPitchMode('viertel')">Viertel</button>
+        <div id="f-kick-field" class="nf-times" style="display:none;">
+          <label>Anstoß<input type="time" id="f-kickoff" step="300" onchange="onKickoffChange(true)"></label>
+        </div>
+        <p class="helptext" id="f-kick-info" style="margin:6px 0 0;"></p>
+        <div id="f-times">
+          <div class="nf-times">
+            <label>Von<input type="time" id="f-von" autocomplete="off" step="900" value="15:00" onchange="onSnapTime(this)"></label>
+            <label>Bis<input type="time" id="f-bis" autocomplete="off" step="900" value="17:00" onchange="onSnapTime(this)"></label>
           </div>
-          <div class="pitch" id="pitch">
-            <div class="pq" data-q="1" onclick="pickPitch(1)">1</div>
-            <div class="pq" data-q="3" onclick="pickPitch(3)">3</div>
-            <div class="pq" data-q="2" onclick="pickPitch(2)">2</div>
-            <div class="pq" data-q="4" onclick="pickPitch(4)">4</div>
+          <div class="nf-durs" id="f-durs" role="group" aria-label="Dauer"></div>
+        </div>
+      </div>
+
+      <p class="nf-lbl" id="f-res-label">Wo?</p>
+      <div id="f-res-field">
+        <div class="nf-res" id="f-res">
+          <div class="res-chip on" data-res="Großspielfeld" onclick="toggleRes(this)">Großspielfeld</div>
+          <div class="res-chip" data-res="Halle" onclick="toggleRes(this)">Halle</div>
+          <div class="res-chip" data-res="Kleinspielfeld" onclick="toggleRes(this)">Kleinfeld</div>
+          <div class="res-chip" data-res="Vereinsheim" onclick="toggleRes(this)">Vereinsheim</div>
+          <div class="res-chip" data-res="Theke" onclick="toggleRes(this)">Theke</div>
+          <div class="nf-break"></div>
+          <span class="nf-res-lbl">Kabine</span>
+          <div class="res-chip nf-kab" data-res="Kabine 1" onclick="toggleRes(this)" aria-label="Kabine 1">1</div>
+          <div class="res-chip nf-kab" data-res="Kabine 2" onclick="toggleRes(this)" aria-label="Kabine 2">2</div>
+          <div class="res-chip nf-kab" data-res="Kabine 3" onclick="toggleRes(this)" aria-label="Kabine 3">3</div>
+          <div class="res-chip nf-kab" data-res="Kabine 4" onclick="toggleRes(this)" aria-label="Kabine 4">4</div>
+        </div>
+      </div>
+      <div class="field nf-pitch" id="f-pitch-field">
+        <div class="pitch-box">
+          <div class="nf-pitch-row">
+            <div class="pitch" id="pitch">
+              <div class="pq" data-q="1" onclick="pickPitch(1)">1</div>
+              <div class="pq" data-q="3" onclick="pickPitch(3)">3</div>
+              <div class="pq" data-q="2" onclick="pickPitch(2)">2</div>
+              <div class="pq" data-q="4" onclick="pickPitch(4)">4</div>
+            </div>
+            <div class="pitch-modes" id="pitch-modes">
+              <button type="button" data-mode="ganz" class="on" onclick="setPitchMode('ganz')">Ganzer Platz</button>
+              <button type="button" data-mode="haelfte" onclick="setPitchMode('haelfte')">Hälfte</button>
+              <button type="button" data-mode="viertel" onclick="setPitchMode('viertel')">Viertel</button>
+            </div>
           </div>
           <div class="pitch-cap" id="pitch-cap"></div>
           <div id="fb-share-note"></div>
         </div>
-        <p class="helptext">Hälfte A = Viertel 1+2 (links) · Hälfte B = Viertel 3+4 (rechts)</p>
+        <p class="helptext">Hälfte A = links (1+2), B = rechts (3+4). Viertel antippen wählt die Fläche.</p>
       </div>
       <div class="field" id="f-halle-field">
         <label>Hallenteile</label>
@@ -1254,20 +1345,24 @@
         </div>
         <p class="helptext">Mehrere Drittel antippen. Schraffiert = bereits belegt.</p>
       </div>
-      <p class="section-label">Optional</p>
-      <div class="field"><label>Bemerkung</label><textarea id="f-bem" placeholder="z. B. Getränke, Aufbau, Besonderheiten"></textarea></div>
-      <p class="helptext" style="margin:-8px 0 16px;">Bemerkungen sind öffentlich sichtbar – keine Telefonnummern.</p>
+
+      <button type="button" class="nf-link" id="f-bem-open" onclick="openFormNote()">+ Bemerkung</button>
+      <div class="field" id="f-bem-field" style="display:none;"><label for="f-bem">Bemerkung</label><textarea id="f-bem" placeholder="z. B. Getränke, Aufbau, Besonderheiten"></textarea>
+        <p class="helptext">Bemerkungen sind öffentlich sichtbar – keine Telefonnummern.</p></div>
       <div class="conflict-box" id="conflict-box">
         <h5><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Speichern nicht möglich – Überschneidung</h5>
         <div id="conflict-list"></div>
       </div>
       <div id="free-slots-box"></div>
-      <button class="submit-btn" id="save-btn" onclick="submitEvent()">
-        <svg id="save-check" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-        <span id="save-spin" class="spinner" style="display:none;border-color:rgba(255,255,255,.3);border-top-color:#fff;width:15px;height:15px;"></span>
-        <span id="save-label">Termin speichern</span>
-      </button>
-      <button class="cancel-btn" id="cancel-btn" style="display:none;" onclick="cancelEdit()">Abbrechen</button>
+      <div class="nf-savebar">
+        <p class="nf-title" id="f-title-line" style="display:none;">Titel: <b id="f-title-text"></b> <button type="button" class="nf-link" onclick="showAnlassField(true)">ändern</button></p>
+        <div class="nf-btns"><button class="submit-btn" id="save-btn" onclick="submitEvent()">
+          <svg id="save-check" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+          <span id="save-spin" class="spinner" style="display:none;border-color:rgba(255,255,255,.3);border-top-color:#fff;width:15px;height:15px;"></span>
+          <span id="save-label">Termin speichern</span>
+        </button>
+        <button class="cancel-btn" id="cancel-btn" style="display:none;" onclick="cancelEdit()">Abbrechen</button></div>
+      </div>
     </div>
   </div>
 
@@ -1379,6 +1474,26 @@
   </div>
 </div>
 
+<div class="modal" id="slot-modal">
+  <div class="modal-box" style="max-width:380px;max-height:88vh;overflow-y:auto;">
+    <h3>Freien Termin finden</h3>
+    <p id="sf-text" class="sub" style="margin-top:2px;"></p>
+    <p class="field-label" style="margin-top:12px;">In welchen Monaten?</p>
+    <div class="sf-months" id="sf-months"></div>
+    <p class="field-label" style="margin-top:12px;">An welchen Wochentagen?</p>
+    <div class="weekday-grid" id="sf-days"></div>
+    <p class="field-label" style="margin-top:12px;">Wie lange?</p>
+    <div class="sf-durs" id="sf-durs"></div>
+    <p class="field-label" style="margin-top:12px;">Wunsch-Beginn</p>
+    <div class="rs-time-row"><input type="time" id="sf-start" step="900" onchange="SF.start=snapTo15(this.value)||this.value;this.value=SF.start;renderSlotFinder()">
+      <span class="weekday-chip on" id="sf-flex" style="flex:none;" onclick="SF.flex=!SF.flex;renderSlotFinder()">andere Uhrzeit auch ok</span></div>
+    <div id="sf-results" style="margin-top:12px;"></div>
+    <div class="modal-acts" style="margin-top:12px;">
+      <button class="no" onclick="closeSlotFinder()">Schließen</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="reschedule-modal">
   <div class="modal-box" style="max-width:360px;max-height:85vh;overflow-y:auto;">
     <h3>Neue Ansetzung suchen</h3>
@@ -1448,7 +1563,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='05.10.2026 · 5';
+const APP_VERSION='06.10.2026 · 1';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2001,6 +2116,7 @@ function onSnapTime(el){
     el.style.borderColor='var(--green)';
     setTimeout(()=>el.style.borderColor='',600);
   }
+  if(el.id==='f-von') keepFormDuration();
   if(el.id==='f-von'||el.id==='f-bis')onTimeChange();
   if(el.id==='tf-from'||el.id==='tf-to'){tfRenderPitch();}
 }
@@ -2658,6 +2774,7 @@ function goto(n){
   if(n==='neu') setTimeout(updateEditBanner,0);
   if(n!=='neu')formSkipFussballLink=null; // Verlassen des Formulars ohne Speichern: Ausnahme nicht stehen lassen
   document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.dataset.pane===n));
+  document.body.classList.toggle('in-form',n==='neu'); // Formular: Speichern-Leiste statt Navigation
   const navKey=(n==='tform')?'training':n;
   document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.nav===navKey));
   const titles={start:'Start',termine:'Terminübersicht',training:'Trainingszeiten',
@@ -2692,7 +2809,7 @@ function closeTopOverlay(){
   const shown=id=>{ const el=document.getElementById(id); return !!el&&el.classList.contains('show'); };
   if(document.getElementById('month-picker-overlay')){ closeMonthPicker(); return true; }
   if(shown('modal')){ const y=document.getElementById('mo-yes'); if(!(y&&y.disabled)) closeModal(); return true; }
-  const list=[['gksheet',closeSheet],['yl-modal',closeYouthLeaderModal],['move-modal',closeMoveModal],['reschedule-modal',closeRescheduleModal],
+  const list=[['gksheet',closeSheet],['yl-modal',closeYouthLeaderModal],['move-modal',closeMoveModal],['reschedule-modal',closeRescheduleModal],['slot-modal',closeSlotFinder],
     ['cancel-modal',closeCancelModal],['season-create-modal',closeSeasonCreateModal],['register',closeRegister],['login',closeLogin]];
   for(const [id,fn] of list){ if(shown(id)){ fn(); return true; } }
   if(shown('pwflow')) return true; // Pflicht-Passwortwechsel/Zurücksetzen: nicht wegklicken
@@ -5194,7 +5311,7 @@ function newEventFromFussball(idx){
 const dateInput=()=>document.getElementById('f-datum');
 function updateWeekday(){
   const v=dateInput().value; if(!v)return;
-  document.getElementById('f-wochentag').textContent=DAYS[new Date(v+'T00:00:00').getDay()]+' · automatisch';
+  document.getElementById('f-wochentag').textContent=DOW[dowOf(v)-1]+',';
 }
 // Nummern-Knöpfe der Altersklasse aus den Saison-Mannschaften aufbauen (z. B. nur G1, dafür E1–E4).
 // force: Nummer eines bestehenden Termins, die auch dann angezeigt wird, wenn es sie in der Saison nicht mehr gibt.
@@ -5218,6 +5335,7 @@ function onTeamChange(){
   applySquadRestrictions('f-squad',team);
   if(team===GK_TEAM&&formKind()!=='goalkeeper'){ document.getElementById('f-kind').value='goalkeeper'; onKindChange(false); }
   if(!fillingForm&&formKind()==='game') onKickoffChange(false); // Spieldauer und Platzfläche hängen an der Altersklasse
+  renderFormTeamChips();
 }
 /* Terminart im Terminformular. Torwarttraining (Belegungsstufe "overlay") hat keine
    Platzfläche – die Viertel-Auswahl wird dann ausgeblendet, "Großspielfeld" heißt nur "auf dem Platz". */
@@ -5238,7 +5356,7 @@ function onKindChange(byUser){
     if((k==='goalkeeper'||k==='trainer')&&!editingId) setResChips('f-res',[]);
     else if(!editingId&&![...document.querySelectorAll('#f-res .res-chip.on')].length) setResChips('f-res',['Großspielfeld']);
   }
-  const rl=document.getElementById('f-res-label'); if(rl) rl.textContent=k==='goalkeeper'?'Ressourcen (optional)':'Ressourcen';
+  const rl=document.getElementById('f-res-label'); if(rl) rl.textContent=k==='goalkeeper'?'Wo? (optional)':'Wo?';
   if(help) help.textContent=occLevel(k)==='overlay'
     ?'Belegt keine Platzfläche: darf parallel zu einem Training laufen, aber nicht während eines Spiels.'
     :(occLevel(k)==='exclusive'?'Während eines Spiels ist auf dem Platz kein Torwarttraining möglich.':'');
@@ -5297,7 +5415,7 @@ function autoMatchTitle(){
   if(an.value.trim()&&!auto) return;
   const opp=(document.getElementById('f-opponent').value||'').trim(), away=formHA==='away';
   an.value=k==='game'?('Freundschaftsspiel'+(opp?(away?' bei ':' gegen ')+opp:'')):(kindLabel(k)+(away?' (auswärts)':''));
-  an.dataset.auto='match';
+  an.dataset.auto='match'; showAnlassField();
 }
 // Anstoß → Von/Bis (und beim Heimspiel die Platzfläche) vorbelegen; bleibt danach frei änderbar.
 function onKickoffChange(byUser){
@@ -5403,6 +5521,7 @@ function setPitchMode(m){
 function pickPitch(q){ if(pitchMode==='ganz')return; pitchPart=pitchPartForPick(pitchMode,q); renderPitch(); }
 function curPitch(){return pitchMode==='ganz'?{mode:'ganz'}:{mode:pitchMode,part:pitchPart};}
 function renderPitch(){
+  renderFormChips(); // Chips (Terminart, Mannschaft, Dauer) spiegeln den aktuellen Stand
   updateKickInfo(); // Freundschaftsspiel: Platzprüfung unter dem Anstoß mitziehen (Datum, Fläche, Mannschaft)
   const f=document.getElementById('f-pitch-field');
   const show=pitchOn()&&occLevel(formKind())!=='overlay';
@@ -5510,7 +5629,235 @@ function resetForm(){
   ['f-opponent','f-participants','f-kickoff','f-address'].forEach(id=>{ document.getElementById(id).value=''; });
   document.getElementById('f-anlass').dataset.auto=''; setHomeAway('home',false);
   halleThirds=[];onTeamChange();onKindChange(false);renderPitch();renderHalle();hideConflicts();formDirty=false;
-  formSkipFussballLink=null;
+  formSkipFussballLink=null; FORM_TEAMS_ALL=false; ANLASS_OPEN=false; openFormNote(false);
+}
+/* ---------- Terminformular kompakt (ab 06.10.2026 · 1) ----------
+   Terminart und Mannschaft als Chips statt Droplisten (die versteckten <select>/Segmente bleiben die
+   Datenquelle, damit alle vorhandenen Abläufe unverändert greifen), Datum mit ‹ ›, Dauer-Chips,
+   Speichern-Leiste unten, Navigationsleiste im Formular ausgeblendet. */
+const FORM_KIND_CHIPS=[['training','Training'],['game','Spiel'],['goalkeeper','Torwart'],['hallenturnier','Hallenturnier'],['sommerturnier','Sommerturnier'],['trainer','Trainer-Termin'],['other','Sonstiges']];
+const FORM_DURS=[60,75,90,120];
+let FORM_TEAMS_ALL=false, FORM_LAST_DUR=0;
+function renderFormChips(){
+  const kc=document.getElementById('f-kind-chips'); if(!kc) return;
+  const k=formKind();
+  const gkOk=!!session&&canBookTeam(GK_TEAM,1);
+  kc.innerHTML=FORM_KIND_CHIPS.filter(([id])=>id!=='goalkeeper'||gkOk||k==='goalkeeper')
+    .map(([id,l])=>'<button type="button" class="nf-chip'+(id==='goalkeeper'?' gk':'')+(id===k?' on':'')+'" onclick="pickFormKind(\''+id+'\')">'+l+'</button>').join('');
+  renderFormTeamChips(); renderFormDurs(); showAnlassField();
+}
+// Bezeichnung: steht sie automatisch fest (Training, Spiel gegen …), reicht eine Zeile über „Speichern“.
+let ANLASS_OPEN=false;
+function showAnlassField(open){
+  if(open){ ANLASS_OPEN=true; }
+  const an=document.getElementById('f-anlass'), f=document.getElementById('f-anlass-field'), line=document.getElementById('f-title-line');
+  if(!an||!f||!line) return;
+  const auto=(an.dataset.auto==='1'||an.dataset.auto==='match')&&an.value.trim();
+  const hide=auto&&!ANLASS_OPEN;
+  f.style.display=hide?'none':''; line.style.display=hide?'':'none';
+  if(hide) document.getElementById('f-title-text').textContent=an.value;
+  if(open) setTimeout(()=>an.focus(),50);
+}
+function pickFormKind(k){
+  const sel=document.getElementById('f-kind'); if(!sel||sel.value===k) return;
+  sel.value=k; formDirty=true; onKindChange(true);
+}
+// Alle buchbaren Mannschaften als Einträge {team,squad,label}; eigene zuerst.
+function formTeamEntries(){
+  const sel=document.getElementById('f-team'); if(!sel) return [];
+  const out=[];
+  [...sel.options].forEach(o=>{
+    if(o.disabled||o.hidden||o.value===GK_TEAM) return;
+    const t=o.value;
+    if(isJugend(t)) squadsFor(t).forEach(n=>{ if(!session||session.isAdmin||canBookTeam(t,n)) out.push({team:t,squad:n,label:jugendLetter(t)+n}); });
+    else out.push({team:t,squad:1,label:t});
+  });
+  const cls=normalizeClasses((session&&session.classes)||{});
+  out.forEach(e=>{ const sq=cls[e.team]; e.mine=!!sq&&(!isJugend(e.team)||!sq.length||sq.includes(e.squad)); });
+  return out;
+}
+function renderFormTeamChips(){
+  const box=document.getElementById('f-team-chips'); if(!box) return;
+  const team=document.getElementById('f-team').value, sb=document.querySelector('#f-squad button.on');
+  const squad=isJugend(team)?(sb?parseInt(sb.dataset.squad):1):1;
+  const all=formTeamEntries(), isCur=e=>e.team===team&&e.squad===squad;
+  const mine=all.filter(e=>e.mine);
+  const showAll=FORM_TEAMS_ALL||!mine.length||mine.length===all.length;
+  const list=showAll?all:all.filter(e=>e.mine||isCur(e));
+  let h=list.map(e=>'<button type="button" class="nf-chip'+(isCur(e)?' on':'')+'" onclick="pickFormTeam(\''+esc(e.team)+'\','+e.squad+')">'+esc(e.label)
+    +(e.mine&&!showAll?'':'')+'</button>').join('');
+  if(!all.some(isCur)&&team) h='<button type="button" class="nf-chip on">'+esc(isJugend(team)?jugendLetter(team)+squad:team)+'</button>'+h;
+  if(mine.length&&mine.length<all.length) h+='<button type="button" class="nf-chip more" onclick="FORM_TEAMS_ALL=!FORM_TEAMS_ALL;renderFormTeamChips()">'+(FORM_TEAMS_ALL?'Nur meine':'Andere ›')+'</button>';
+  box.innerHTML=h;
+}
+function pickFormTeam(team,squad){
+  const sel=document.getElementById('f-team'); if(!sel) return;
+  sel.value=team; setSquadSeg('f-squad',team,squad);
+  formDirty=true; FORM_TEAMS_ALL=false;
+  onTeamChange(); hideConflicts(); renderPitch();
+}
+function formDurMin(){
+  const v=document.getElementById('f-von').value, b=document.getElementById('f-bis').value;
+  return v&&b?timeToMin(b)-timeToMin(v):0;
+}
+function renderFormDurs(){
+  const box=document.getElementById('f-durs'); if(!box) return;
+  const dur=formDurMin(); if(dur>0) FORM_LAST_DUR=dur;
+  box.innerHTML='<span>Dauer</span>'+FORM_DURS.map(m=>'<button type="button"'+(m===dur?' class="on"':'')+' onclick="setFormDuration('+m+')">'+m+'</button>').join('');
+}
+function setFormDuration(m){
+  const v=document.getElementById('f-von').value; if(!v) return;
+  const end=timeToMin(v)+m;
+  document.getElementById('f-bis').value=end>timeToMin('23:45')?'23:45':minToTime(end);
+  formDirty=true; onTimeChange();
+}
+// Von geändert: Dauer bleibt gleich (Bis wandert mit).
+function keepFormDuration(){
+  const v=document.getElementById('f-von').value; if(!v||!(FORM_LAST_DUR>0)) return;
+  const end=timeToMin(v)+FORM_LAST_DUR;
+  document.getElementById('f-bis').value=end>timeToMin('23:45')?'23:45':minToTime(end);
+}
+function shiftFormDate(n){
+  const v=dateInput().value||todayStr, dt=new Date(v+'T00:00:00'); dt.setDate(dt.getDate()+n);
+  dateInput().value=ymd(dt); formDirty=true;
+  updateWeekday(); renderPitch(); renderHalle(); hideConflicts();
+}
+function openFormNote(show){
+  const f=document.getElementById('f-bem-field'), b=document.getElementById('f-bem-open');
+  const on=show!==false;
+  if(f) f.style.display=on?'block':'none'; if(b) b.style.display=on?'none':'';
+  if(on&&show===undefined) setTimeout(()=>{ const t=document.getElementById('f-bem'); if(t) t.focus(); },50);
+}
+
+/* ---------- Freien Termin finden (ab 06.10.2026 · 1) ----------
+   Für Schulfest, Kita-Cup & Co.: Monate + Wochentage wählen, Platzcoach prüft jeden Tag mit genau der
+   Fläche, Terminart und Dauer aus dem Formular (gleiche Regeln wie beim Speichern: findConflicts) und
+   zeigt, wo die Wunschzeit passt, wo nur eine andere Uhrzeit (08–22 Uhr) und wo nichts frei ist.
+   „Übernehmen“ trägt Tag und Zeit ins Formular ein. Spiele, die fussball.de noch nicht kennt, kann die
+   Suche nicht sehen – dafür der Hinweis; kommen sie später dazu, meldet die Änderungsmail Konflikte. */
+let SF={months:new Set(),days:new Set(),dur:90,start:'15:00',flex:true};
+const SF_MONTHS=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+const SF_WIN_FROM='08:00', SF_WIN_TO='22:00';
+function formOccupation(){
+  const kind=formKind(), overlay=occLevel(kind)==='overlay', mf=readMatchFields(kind), away=mf.ha==='away';
+  const team=kind==='goalkeeper'?GK_TEAM:(kind==='trainer'?'Alle Teams':document.getElementById('f-team').value);
+  const sb=document.querySelector('#f-squad button.on'), squad=sb?parseInt(sb.dataset.squad):1;
+  let res=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res).filter(r=>r!=='Großspielfeld'&&r!=='Halle');
+  if(overlay&&pitchOn()) res.unshift('Großspielfeld');
+  let pitch=(pitchOn()&&!overlay)?curPitch():null;
+  let halle=halleResOn()?{thirds:halleThirds.length?[...halleThirds]:[1,2,3]}:null;
+  if(away||kind==='trainer'){ res=[]; pitch=null; halle=null; }
+  return {kind,pitch,halle,res,ownFree:isMatchKind(kind)&&!away?{team,squad}:null};
+}
+function sfMonthKeys(){
+  const t=new Date(todayStr+'T00:00:00'), out=[];
+  for(let i=0;i<12;i++){ const d=new Date(t.getFullYear(),t.getMonth()+i,1); out.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')); }
+  return out;
+}
+function openSlotFinder(){
+  const d=dateInput().value||todayStr, keys=sfMonthKeys(), mk=d.slice(0,7);
+  SF.months=new Set([keys.includes(mk)?mk:keys[0]]);
+  SF.days=new Set([dowOf(d)]);
+  SF.dur=formDurMin()>0?formDurMin():90;
+  SF.start=document.getElementById('f-von').value||'15:00';
+  SF.flex=true;
+  const o=formOccupation(), parts=[];
+  if(o.pitch) parts.push(pitchShort(o.pitch));
+  if(o.halle) parts.push(halleThirds.length?halleShort(o.halle):'Halle');
+  parts.push(...o.res.filter(r=>r!=='Großspielfeld'||!o.pitch));
+  document.getElementById('sf-text').innerHTML=parts.length
+    ?'Geprüft wird: <b>'+esc(parts.join(', '))+'</b> ('+esc(kindLabel(o.kind))+'). Ändern kannst du das im Formular unter „Wo?“.'
+    :'Dieser Termin belegt bei uns keine Fläche – jeder Tag ist frei. Wähle im Formular unter „Wo?“, was gebraucht wird.';
+  document.getElementById('sf-start').value=SF.start;
+  renderSlotFinder();
+  document.getElementById('slot-modal').classList.add('show');
+  trackEvent('freier_termin_gesucht');
+}
+function closeSlotFinder(){ document.getElementById('slot-modal').classList.remove('show'); }
+function sfToggle(set,v){ if(SF[set].has(v)) SF[set].delete(v); else SF[set].add(v); renderSlotFinder(); }
+function sfSetDur(m){ SF.dur=m; renderSlotFinder(); }
+function sfDurLabel(m){ const h=Math.floor(m/60), r=m%60; return h?(h+(r?':'+String(r).padStart(2,'0'):'')+' Std'):(m+' Min'); }
+// Prüft einen Tag: Wunschzeit frei? sonst nächstgelegene freie Startzeit im Fenster.
+function sfCheckDay(d,o){
+  const occ=EVENTS.filter(e=>e.d===d&&e.id!==editingId).concat(trainingInstancesOn(d)).concat(fussballBookingOccupations(d,editingId));
+  const locked=locksForItem({d,pitch:o.pitch,halle:o.halle,res:o.res}).length>0;
+  if(locked) return {status:'busy',why:'gesperrt'};
+  const fits=s=>{
+    const e=minToTime(timeToMin(s)+SF.dur);
+    const me={id:'__candidate',d,t:s,bis:e,pitch:o.pitch,halle:o.halle,res:o.res,kind:o.kind};
+    return !occ.some(x=>timesOverlap(me,x)&&!isOwnTeamTraining(x,o.ownFree)&&occupationConflictReasons(me,x,quarterPitchReason).length);
+  };
+  const wish=SF.start, wishEnd=timeToMin(wish)+SF.dur;
+  if(wishEnd<=timeToMin('23:45')&&fits(wish)) return {status:'free',start:wish};
+  if(!SF.flex) return {status:'busy'};
+  let best=null;
+  for(let m=timeToMin(SF_WIN_FROM);m+SF.dur<=timeToMin(SF_WIN_TO);m+=15){
+    const s=minToTime(m);
+    if(fits(s)&&(!best||Math.abs(m-timeToMin(wish))<Math.abs(timeToMin(best)-timeToMin(wish)))) best=s;
+  }
+  return best?{status:'part',start:best}:{status:'busy'};
+}
+function renderSlotFinder(){
+  const keys=sfMonthKeys();
+  const y0=todayStr.slice(0,4);
+  document.getElementById('sf-months').innerHTML=keys.map(k=>{
+    const [y,m]=k.split('-');
+    return '<span class="weekday-chip'+(SF.months.has(k)?' on':'')+'" onclick="sfToggle(\'months\',\''+k+'\')">'+SF_MONTHS[parseInt(m)-1]+(y!==y0?' '+y.slice(2):'')+'</span>';
+  }).join('');
+  document.getElementById('sf-days').innerHTML=DOW.map((l,i)=>'<span class="weekday-chip'+(SF.days.has(i+1)?' on':'')+'" onclick="sfToggle(\'days\','+(i+1)+')">'+l+'</span>').join('');
+  const durs=[...new Set([SF.dur,60,90,120,180,240,300,480])].sort((a,b)=>a-b);
+  document.getElementById('sf-durs').innerHTML=durs.map(m=>'<span class="weekday-chip'+(m===SF.dur?' on':'')+'" onclick="sfSetDur('+m+')">'+sfDurLabel(m)+'</span>').join('');
+  const fl=document.getElementById('sf-flex'); if(fl){ fl.classList.toggle('on',SF.flex); fl.textContent=(SF.flex?'✓ ':'')+'andere Uhrzeit auch ok'; }
+  const out=document.getElementById('sf-results');
+  if(!SF.months.size||!SF.days.size){ out.innerHTML='<p class="rs-empty">Bitte mindestens einen Monat und einen Wochentag wählen.</p>'; return; }
+  const o=formOccupation(), res=[];
+  [...SF.months].sort().forEach(k=>{
+    const [y,m]=k.split('-').map(Number), n=new Date(y,m,0).getDate(), row={k,days:[]};
+    for(let i=1;i<=n;i++){
+      const d=k+'-'+String(i).padStart(2,'0');
+      if(d<todayStr||!SF.days.has(dowOf(d))) continue;
+      row.days.push({d,...sfCheckDay(d,o)});
+    }
+    res.push(row);
+  });
+  const days=res.flatMap(r=>r.days);
+  const nFree=days.filter(x=>x.status==='free').length, nPart=days.filter(x=>x.status==='part').length;
+  const endOf=s=>minToTime(timeToMin(s)+SF.dur);
+  let h='<p style="margin:4px 0 8px;font-size:12.5px;color:var(--ink-soft);"><b style="color:var(--ink);font-size:13px;">Ergebnis</b> · '
+    +days.length+' Tage: '+nFree+' zur Wunschzeit frei'+(nPart?', '+nPart+' zu anderer Uhrzeit':'')+'</p>';
+  // Spielpläne stehen oft erst kurz vorher fest (Jugend-Rückrunden meist im Winter) – ehrlich darauf hinweisen.
+  const far=new Date(todayStr+'T00:00:00'); far.setDate(far.getDate()+42);
+  if(days.some(x=>x.d>ymd(far)))
+    h+='<div class="sf-hint">Weiter in der Zukunft fehlen oft noch Spiele: Jugend-Rückrunden setzt fussball.de meist erst im Winter an. Kommt später ein Heimspiel auf deinen Termin, meldet Platzcoach die Überschneidung per Änderungsmail.</div>';
+  res.forEach(r=>{
+    if(!r.days.length) return;
+    const [y,m]=r.k.split('-');
+    h+='<div class="sf-month"><b>'+SF_MONTHS[parseInt(m)-1]+' '+y.slice(2)+'</b><div class="sf-days">'+r.days.map(x=>{
+      const dd=parseInt(x.d.slice(8)), wd=DOW[dowOf(x.d)-1];
+      const tip=x.status==='free'?x.start+'–'+endOf(x.start)+' frei':(x.status==='part'?'frei ab '+x.start:(x.why==='gesperrt'?'gesperrt':'nichts frei'));
+      return '<button type="button" class="sf-day '+(x.status==='free'?'free':x.status==='part'?'part':'busy')+'" title="'+esc(fmtShort(x.d)+': '+tip)+'"'
+        +(x.status==='busy'?' disabled':' onclick="applySlotFinder(\''+x.d+'\',\''+x.start+'\')"')+'>'+dd+'<small>'+wd+'</small></button>';
+    }).join('')+'</div></div>';
+  });
+  h+='<div class="sf-legend"><span><i style="background:#6BB41C"></i>Wunschzeit frei</span><span><i style="background:#FFD24A"></i>andere Uhrzeit</span><span><i style="background:#E4E9E8"></i>belegt</span></div>';
+  const best=days.filter(x=>x.status==='free').concat(days.filter(x=>x.status==='part')).slice(0,5);
+  if(best.length){
+    h+='<p class="field-label" style="margin:4px 0 6px;">Vorschläge</p>'+best.map(x=>'<div class="rs-result-row"><div><b>'+DOW[dowOf(x.d)-1]+', '+fmtShort(x.d)+'</b><br><small style="color:var(--ink-soft);">'
+      +x.start+'–'+endOf(x.start)+(x.status==='part'?' (statt '+SF.start+')':'')+'</small></div>'
+      +'<button class="fs-btn" onclick="applySlotFinder(\''+x.d+'\',\''+x.start+'\')">Übernehmen</button></div>').join('');
+  } else h+='<p class="rs-empty">Nichts frei. Andere Monate, Wochentage oder eine kürzere Dauer probieren.</p>';
+  out.innerHTML=h;
+}
+function applySlotFinder(d,start){
+  dateInput().value=d;
+  document.getElementById('f-von').value=start;
+  const end=timeToMin(start)+SF.dur;
+  document.getElementById('f-bis').value=end>timeToMin('23:45')?'23:45':minToTime(end);
+  formDirty=true; closeSlotFinder();
+  if(formKind()==='game'){ document.getElementById('f-kickoff').value=formHA==='away'?start:addMinutes(start,fussballBufferBeforeMin()); onKickoffChange(false); }
+  updateWeekday(); onTimeChange();
+  showToast('Übernommen: '+DOW[dowOf(d)-1]+', '+fmtShort(d)+', '+start+'–'+document.getElementById('f-bis').value+' Uhr',3000);
+  trackEvent('freier_termin_uebernommen');
 }
 function requireLogin(){
   if(session) return true;
@@ -5691,6 +6038,7 @@ function fillForm(e){
   document.getElementById('f-anlass').dataset.auto=''; setHomeAway(e.ha==='away'?'away':'home',false);
   fillingForm=true;
   try{ onTeamChange();onKindChange(false); } finally{ fillingForm=false; }
+  FORM_TEAMS_ALL=false; ANLASS_OPEN=false; openFormNote(!!(e.note||'').trim()?true:false);
   updateWeekday();renderPitch();renderHalle();updateKickInfo();
 }
 function editEvent(id){
