@@ -1,0 +1,36 @@
+{
+  "name": "platzcoach-video",
+  "private": true,
+  "type": "module",
+  "description": "Werbe- und Produktvideos für Platzcoach: Demo-Umgebung, Playwright-Aufnahme, Remotion-Film. Getrennt von der App – nichts hier landet in index.html.",
+  "scripts": {
+    "demo:reset": "node demo/seed.mjs",
+    "demo:serve": "node demo/server.mjs",
+    "test:safety": "node --test demo/safety.test.mjs",
+    "capture": "node capture/capture.mjs",
+    "studio": "node scripts/prepare.mjs && remotion studio src/index.ts",
+    "render": "node scripts/render.mjs",
+    "render:main": "node scripts/render.mjs main",
+    "render:hooks": "node scripts/render.mjs hooks",
+    "narration": "node scripts/narration.mjs",
+    "frames": "node scripts/frames.mjs",
+    "all": "npm run test:safety && npm run capture && npm run render && npm run narration && npm run frames"
+  },
+  "dependencies": {
+    "@fontsource/inter": "5.2.8",
+    "@fontsource/manrope": "5.2.8",
+    "@remotion/cli": "4.0.533",
+    "@remotion/renderer": "4.0.533",
+    "playwright": "1.56.1",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "remotion": "4.0.533"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.12",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22.18"
+  }
+}
