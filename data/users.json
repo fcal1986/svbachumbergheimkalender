@@ -448,7 +448,13 @@
       "emailNotificationsEnabled": true,
       "phone": "015560848519",
       "contactPublic": "phone",
-      "contactEmail": "michael.raneck@sv-bachum-bergheim.de"
+      "contactEmail": "michael.raneck@sv-bachum-bergheim.de",
+      "notifyPrefs": {
+        "push": {
+          "other": true
+        },
+        "mail": {}
+      }
     },
     {
       "id": "6085b3aa-f111-47fa-9d20-7e59a0a987e8",
