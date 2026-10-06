@@ -10,7 +10,7 @@ Ausführliche Analyse: Projekt-Doc `claude/vereinsneo-analyse-2026-10.md`.
 **Status:** ✅ umgesetzt · 🟡 teilweise · ⬜ offen · ⛔ bewusst nicht
 **Phase:** Pilot = aktuelle Technik · 1.0 = mit Supabase/Einrichtungsassistent · Später
 
-Letzte Aktualisierung: 06.10.2026 (Version 06.10.2026 · 10)
+Letzte Aktualisierung: 06.10.2026 (Version 06.10.2026 · 11)
 
 ## Must have
 
@@ -21,7 +21,7 @@ Letzte Aktualisierung: 06.10.2026 (Version 06.10.2026 · 10)
 | 3 | Sonnenuntergang und „dunkel ab …“ in Tagesansicht und Start | Pilot | ✅ | 01.10.2026 · 2: Sonnenuntergang als Linie in der Zeitleiste, berechnet aus data/config.json → venue (lat/lon) |
 | 4 | Hinweis „Tage werden kürzer“: welche Trainingszeiten ab wann im Dunkeln enden | Pilot | ⛔ | Nicht nötig: Höllenbergkampfbahn hat Flutlicht auf dem ganzen Platz (Antwort 01.10.2026). Bei Vereinen ohne Flutlicht wieder aufnehmen (venue.floodlight) |
 | 5 | Platz schnell sperren („Heute sperren“ mit Grund, schraffiert) | Pilot | ✅ | 01.10.2026 · 1: „Heute sperren“ + Grund-Chips + Aufheben mit Rückgängig; 01.10.2026 · 2: Sperre schraffiert in Live-Karte und Zeitleiste, „Heute sperren“ in der Tageskarte (Admin) |
-| 6 | Konflikte mit konkretem Lösungsvorschlag und Direkt-Aktion | Pilot | 🟡 | ✅ 01.10.2026 · 1: Training gegen Spiel/Termin → Knopf „Training … absagen“ direkt in „Zu erledigen“ (1 Klick + Rückgängig). Offen: Vorschläge für andere Konfliktarten (z. B. freie Hälfte); 01.10.2026 · 2: Lösung auch direkt in der Live-Karte („Überschneidung mit …“ + Absagen) |
+| 6 | Konflikte mit konkretem Lösungsvorschlag und Direkt-Aktion | Pilot | 🟡 | ✅ 01.10.2026 · 1: Training gegen Spiel/Termin → Knopf „Training … absagen“ direkt in „Zu erledigen“ (1 Klick + Rückgängig). Offen: Vorschläge für andere Konfliktarten (z. B. freie Hälfte); 01.10.2026 · 2: Lösung auch direkt in der Live-Karte („Überschneidung mit …“ + Absagen); 06.10.2026 · 11: in der aufklappbaren Platzkonflikt-Meldung an Spiel-/Turnierkarten „Training X absagen“ für jedes kollidierende Training, an der Trainingskarte „Training an diesem Tag absagen“ jetzt auch für Trainer der Mannschaft (vorher nur Admins); ein Tipp + Rückgängig; Absage-Mail nennt das Spiel („Platz belegt durch Heimspiel …, 19:30 Uhr“) |
 | 7 | Dauer-Chips im Formular (60/75/90/105/120 Min) | Pilot | ✅ | 01.10.2026 · 4: Dauer-Chips (60/75/90/120) in der Kurzbuchung aus dem Zeitstrahl; 06.10.2026 · 1: auch im großen Formular (Nr. 75), „Von“ ändern verschiebt „Bis“ mit gleicher Dauer |
 | 8 | Mannschaft zuerst wählen, danach passende Fläche vorschlagen | Pilot | 🟡 | Teilweise mit Nr. 52: Formular startet mit der eigenen Mannschaft und deren üblicher Fläche; ist sie belegt, wird eine freie gleicher Größe gewählt |
 | 9 | Zeitpunkt des letzten fussball.de-Abgleichs anzeigen | Pilot | 🟡 | Stand steht bei „Automatisch von fussball.de übernommen“ und im Mannschaftsabgleich; fehlt: global sichtbar, Warnung wenn > 6 h alt |
