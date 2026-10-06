@@ -339,6 +339,15 @@
   .tl-free{position:absolute;height:24px;box-sizing:border-box;border:1.5px dashed #9CC57A;border-radius:6px;background:rgba(107,180,28,.07);color:var(--grass);font:inherit;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:flex-start;padding:0 8px;white-space:nowrap;overflow:hidden;}
   .form-back{display:inline-flex;align-items:center;min-height:40px;margin:0 0 10px;padding:0 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;}
   .tl-free:active{background:rgba(107,180,28,.2);}
+  .tl-cand{position:absolute;box-sizing:border-box;border:2px dashed var(--pc-navy);border-radius:6px;background:rgba(107,180,28,.35);z-index:2;pointer-events:none;display:flex;align-items:center;padding:0 5px;overflow:hidden;}
+  .tl-cand b{font-size:11px;font-weight:800;color:var(--pc-navy);white-space:nowrap;}
+  .tl-cand.clash{border-color:#C0392B;background:rgba(192,57,43,.22);}
+  .tl-legend .lg.cand{background:rgba(107,180,28,.35);border:1.5px dashed var(--pc-navy);}
+  .nf-tl{background:var(--white);border:1.5px solid var(--line);border-radius:14px;padding:10px 8px 8px;box-shadow:var(--card-shadow);}
+  .nf-tl .tl-labels{width:22px;}
+  .nf-tl .tl-legend{padding-left:28px;margin-top:6px;font-size:11px;gap:4px 10px;}
+  .nf-tl .tl-free{padding:0;justify-content:center;font-size:13px;}
+  .nf-tl-add{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;padding-left:28px;}
   .lg.free{border:1.5px dashed #9CC57A;background:rgba(107,180,28,.07);}
   .tl-legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--ink-secondary);padding-left:22px;}
   .tl-legend span{display:flex;align-items:center;gap:5px;}
@@ -1297,6 +1306,11 @@
         </div>
       </div>
 
+      <div id="f-tl-wrap">
+        <div class="nf-lbl-row"><p class="nf-lbl" id="f-tl-day">Belegung</p><button type="button" class="nf-link" onclick="toggleFormTlAdd()">+ Ressource</button></div>
+        <div class="nf-tl"><div id="f-tl"></div><div class="nf-tl-add" id="f-tl-add" style="display:none;"></div></div>
+      </div>
+
       <p class="nf-lbl" id="f-res-label">Wo?</p>
       <div id="f-res-field">
         <div class="nf-res" id="f-res">
@@ -1563,7 +1577,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 1';
+const APP_VERSION='06.10.2026 · 2';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -4075,8 +4089,9 @@ function sunsetHM(ds){
 }
 /* Belegung eines Tages je Fläche. Abgesagte Trainings bleiben drin (cancelled), damit Live-Platz und
    Zeitleiste „frei · E2 abgesagt“ zeigen können. Auswärtsspiele belegen nichts. */
-function occupancyOn(ds){
-  const out=[];
+function occupancyOn(ds,opts){
+  const out=[], resNames=opts&&opts.res; // Formular: weitere Ressourcen (Kabinen, Vereinsheim …) als eigene Spuren
+  const skipId=opts&&opts.skipId;
   const quarters=p=>pitchQuarters(p);
   const push=(src,cancelled,o)=>{
     const base={src, cancelled:!!cancelled, t:o.t||src.t, bis:o.bis||eventBis(src), team:o.team!==undefined?o.team:src.team, squad:o.squad||src.squad||1,
@@ -4085,14 +4100,15 @@ function occupancyOn(ds){
     if(o.pitch){ const q=quarters(o.pitch); if(q.length) out.push({...base, area:'platz', lanes:[Math.min(...q),Math.max(...q)]}); }
     if(o.klein) out.push({...base, area:'klein', lanes:[1,1]});
     (o.thirds||[]).forEach(t=>out.push({...base, area:'halle', lanes:[t,t]}));
+    if(resNames) (o.res||[]).filter(r=>resNames.includes(r)).forEach(r=>out.push({...base, area:'res:'+r, lanes:[1,1]}));
   };
   const kindFor=e=>kindOf(e)==='goalkeeper'?'tw':(e.isTraining||kindOf(e)==='training'?'t':(isMatchKind(kindOf(e))?'g':'o'));
   const fromEvent=(e,canc)=>{
     if(isMatchKind(kindOf(e))&&e.ha==='away') return;
     push(e,canc,{kind:kindFor(e), pitch:e.pitch, klein:(e.res||[]).includes('Kleinspielfeld'), thirds:(e.halle&&e.halle.thirds)||[],
-      opp:e.opponent||'', kickoff:e.kickoff||''});
+      opp:e.opponent||'', kickoff:e.kickoff||'', res:e.res||[]});
   };
-  EVENTS.filter(e=>e.d===ds).forEach(e=>fromEvent(e,false));
+  EVENTS.filter(e=>e.d===ds&&(!skipId||e.id!==skipId)).forEach(e=>fromEvent(e,false));
   trainingInstancesOn(ds).forEach(e=>fromEvent(e,false));
   cancelledTrainingInstancesOn(ds).forEach(e=>{ const s=TRAINING.find(x=>x.id===e.trainingSlotId)||{};
     fromEvent({...e, pitch:s.pitch||null, res:s.res||[], halle:s.halle||null},true); });
@@ -4103,6 +4119,7 @@ function occupancyOn(ds){
 function occIsMine(o,isMine){ return !!(isMine&&o.team&&isMine({team:o.team,squad:o.squad,isExternal:o.kind==='g',isTraining:o.kind==='t'||o.kind==='tw',kind:o.kind==='tw'?'goalkeeper':undefined,gkTeams:o.src&&o.src.gkTeams})); }
 function areaLabel(o){
   if(o.area==='klein') return 'Kleinspielfeld';
+  if(String(o.area).startsWith('res:')) return o.area.slice(4);
   if(o.area==='halle') return 'Halle';
   const [a,b]=o.lanes; return a===1&&b===4?'ganzer Platz':(a===b?'Viertel '+a:(a===1?'Hälfte A':'Hälfte B'));
 }
@@ -4113,21 +4130,28 @@ const TL_LANE=24, TL_GAP=4, TL_TOP=18, TL_SEP=10, TL_VIEW_MIN=240, TL_DAY_FROM=8
 /* Ab 01.10.2026 · 18: Wisch-Hinweis. Die Polster links/rechts der Zeitleiste (Tagesanfang/-ende) zeigen den
    vorigen bzw. nächsten Tag („‹ Sa 3.10.“ / „Mo 5.10. ›“) – genau dort, wo Weiterwischen den Tag wechselt.
    Antippen wechselt ebenfalls. Kein zusätzlicher Platz: die Fläche war vorher leer. */
-function tlEdgesHTML(ds,T0,T1,H){
+function tlEdgesHTML(ds,T0,T1,H,form){
   const X=(T1-T0)/TL_VIEW_MIN*100, w=(50/(X+100)*100).toFixed(3)+'%';
   const lbl=d=>{ const dt=new Date(d+'T00:00:00'); return (d===todayStr?'Heute':DOW[dowOf(d)-1])+' '+dt.getDate()+'.'+(dt.getMonth()+1)+'.'; };
   const prev=addDays(ds,-1), next=addDays(ds,1);
   let h='';
-  if(prev>=todayStr) h+='<button type="button" class="tl-edge prev" style="left:0;width:'+w+';height:'+H+'px" onclick="shiftStartDay(-1,\'end\')" aria-label="Voriger Tag"><b>‹</b><span>'+esc(lbl(prev))+'</span><i>weiterwischen</i></button>';
-  if(next<=weekEndStr()) h+='<button type="button" class="tl-edge next" style="right:0;width:'+w+';height:'+H+'px" onclick="shiftStartDay(1,\'start\')" aria-label="Nächster Tag"><span>'+esc(lbl(next))+'</span><b>›</b><i>weiterwischen</i></button>';
+  const fn=form?'tlShiftDay':'shiftStartDay';
+  if(prev>=todayStr) h+='<button type="button" class="tl-edge prev" style="left:0;width:'+w+';height:'+H+'px" onclick="'+fn+'(-1,\'end\')" aria-label="Voriger Tag"><b>‹</b><span>'+esc(lbl(prev))+'</span><i>weiterwischen</i></button>';
+  if(form||next<=weekEndStr()) h+='<button type="button" class="tl-edge next" style="right:0;width:'+w+';height:'+H+'px" onclick="'+fn+'(1,\'start\')" aria-label="Nächster Tag"><span>'+esc(lbl(next))+'</span><b>›</b><i>weiterwischen</i></button>';
   return h;
 }
-function timelineHTML(ds,isMine){
-  const occ=occupancyOn(ds); OCC_VIEW[ds]=occ;
+/* opts.form (ab 06.10.2026 · 2): dieselbe Zeitleiste im Terminformular. Kleinspielfeld immer, weitere
+   Ressourcen (Kabinen, Vereinsheim, Theke, Halle) automatisch, wenn belegt oder gewählt, sonst über
+   „+ Ressource“ (pro Gerät gemerkt). „+ frei“ übernimmt Zeit und Fläche ins Formular, der neue Termin
+   steht gestrichelt drin. Der Termin, der gerade bearbeitet wird, zählt nicht als Belegung. */
+function timelineHTML(ds,isMine,opts){
+  const form=!!(opts&&opts.form), vkey=form?'form:'+ds:ds;
+  const occ=occupancyOn(ds,form?{res:opts.resAll,skipId:opts.skipId}:undefined); OCC_VIEW[vkey]=occ;
   const groups=[{area:'platz',n:4,label:['A','B']}];
-  const canBook=canBookSlots();
+  const canBook=form?true:canBookSlots();
   if(canBook||occ.some(o=>o.area==='klein')) groups.push({area:'klein',n:1,label:['K']});
-  if(occ.some(o=>o.area==='halle')) groups.push({area:'halle',n:3,label:['Halle']});
+  if(occ.some(o=>o.area==='halle')||(form&&opts.show.includes('Halle'))) groups.push({area:'halle',n:3,label:['Halle']});
+  if(form) opts.resAll.filter(r=>r!=='Halle'&&(opts.show.includes(r)||occ.some(o=>o.area==='res:'+r))).forEach(r=>groups.push({area:'res:'+r,n:1,res:r}));
   let y=TL_TOP; groups.forEach((g,i)=>{ if(i) y+=TL_SEP; g.top=y; y+=g.n*TL_LANE+(g.n-1)*TL_GAP; });
   const H=y;
   const laneY=(area,l)=>{ const g=groups.find(x=>x.area===area); return g.top+(l-1)*(TL_LANE+TL_GAP); };
@@ -4135,25 +4159,26 @@ function timelineHTML(ds,isMine){
   const isToday=ds===todayStr, now=nowHMStr();
   // Ab 01.10.2026 · 4: immer der ganze Tag (mind. 8–22 Uhr), sichtbar sind 4 Stunden – wischen scrollt durch den Tag,
   // am Rand weiter zum nächsten/vorigen Tag (tlTouch*). Startposition: gewählte Uhrzeit (startCurOf) in der Mitte.
-  const s0=occ.length?Math.min(...occ.map(o=>hmMin(o.t))):TL_DAY_FROM, e0=occ.length?Math.max(...occ.map(o=>hmMin(o.bis))):TL_DAY_TO;
+  const cand=form&&opts.cand, tms=occ.map(o=>[hmMin(o.t),hmMin(o.bis)]).concat(cand?[[hmMin(cand.von),hmMin(cand.bis)]]:[]);
+  const s0=tms.length?Math.min(...tms.map(x=>x[0])):TL_DAY_FROM, e0=tms.length?Math.max(...tms.map(x=>x[1])):TL_DAY_TO;
   const h0=Math.min(TL_DAY_FROM/60,Math.floor(s0/60)), h1=Math.max(TL_DAY_TO/60,Math.ceil(e0/60));
   const T0=h0*60, T1=h1*60, P=m=>((m-T0)/(T1-T0)*100).toFixed(2), W=(a,b)=>(Math.max(0,b-a)/(T1-T0)*100).toFixed(2);
   let h='<div class="tl"><div class="tl-labels" style="height:'+H+'px">';
   groups.forEach(g=>{ if(g.area==='platz'){ h+='<span style="top:'+g.top+'px;height:'+(2*TL_LANE+TL_GAP)+'px">A</span><span style="top:'+laneY('platz',3)+'px;height:'+(2*TL_LANE+TL_GAP)+'px">B</span>'; }
-    else h+='<span style="top:'+g.top+'px;height:'+(g.n*TL_LANE+(g.n-1)*TL_GAP)+'px">'+(g.area==='klein'?'K':'H')+'</span>'; });
+    else h+='<span style="top:'+g.top+'px;height:'+(g.n*TL_LANE+(g.n-1)*TL_GAP)+'px"'+(g.res?' title="'+esc(g.res)+'"':'')+'>'+(g.res?esc(resShort(g.res)):(g.area==='klein'?(form?'KF':'K'):'H'))+'</span>'; });
   // Ab 01.10.2026 · 7: links und rechts je eine halbe Breite Polster, damit der Strich in der Mitte jede Uhrzeit von T0 bis T1 erreicht
-  h+='</div><div class="tl-view"><div class="tl-scroll" data-ds="'+ds+'" data-t0="'+T0+'" data-t1="'+T1+'" onscroll="tlScroll(this)" ontouchstart="tlTouchStart(event,this)" ontouchend="tlTouchEnd(event,this)" onpointerdown="tlMouseDown(event,this)">'
-    +'<div class="tl-pad" style="width:'+((T1-T0)/TL_VIEW_MIN*100).toFixed(1)+'%">'+tlEdgesHTML(ds,T0,T1,H)+'<div class="tl-body" style="height:'+H+'px">';
+  h+='</div><div class="tl-view"><div class="tl-scroll" data-ds="'+ds+'"'+(form?' data-ctx="form"':'')+' data-t0="'+T0+'" data-t1="'+T1+'" onscroll="tlScroll(this)" ontouchstart="tlTouchStart(event,this)" ontouchend="tlTouchEnd(event,this)" onpointerdown="tlMouseDown(event,this)">'
+    +'<div class="tl-pad" style="width:'+((T1-T0)/TL_VIEW_MIN*100).toFixed(1)+'%">'+tlEdgesHTML(ds,T0,T1,H,form)+'<div class="tl-body" style="height:'+H+'px">';
   groups.forEach(g=>{ for(let l=1;l<=g.n;l++) h+='<div class="tl-lane'+(g.area!=='platz'?' alt':'')+'" style="top:'+laneY(g.area,l)+'px"></div>'; });
   for(let hh=h0+1;hh<h1;hh++) h+='<span class="tl-tick" style="left:'+P(hh*60)+'%">'+hh+':00</span><div class="tl-grid" style="left:'+P(hh*60)+'%;top:'+TL_TOP+'px"></div>';
   // Freie Zeiten (angemeldet, darf buchen): je Spur die ganze freie Zeit als „+ frei“, sobald sie mind. 30 Min lang ist (ab 01.10.2026 · 9, vorher 60) – antippen = Formular
   const locked=a=>activeLocksOn(ds).some(l=>l.resource===(a==='halle'?'halle':'platz'));
-  if(canBook&&ds>=todayStr) groups.filter(g=>g.area!=='halle'&&!locked(g.area)).forEach(g=>{ for(let l=1;l<=g.n;l++){
+  if(canBook&&ds>=todayStr) groups.filter(g=>(form||g.area!=='halle')&&!locked(g.area)).forEach(g=>{ for(let l=1;l<=g.n;l++){
     const busy=occ.filter(o=>!o.cancelled&&o.area===g.area&&o.lanes[0]<=l&&o.lanes[1]>=l).map(o=>[hmMin(o.t),hmMin(o.bis)]).sort((a,b)=>a[0]-b[0]);
     // Heute beginnt die freie Zeit an der laufenden Viertelstunde (vorher erst an der nächsten – das kürzte den Block)
     const nowM=isToday?hmMin(now):-1; let cur=Math.max(T0,isToday?Math.floor(nowM/15)*15:T0);
     busy.concat([[T1,T1]]).forEach(([a,b])=>{ if(a-Math.max(cur,nowM)>=30){
-        h+='<button type="button" class="tl-free" style="top:'+laneY(g.area,l)+'px;left:'+P(cur)+'%;width:'+W(cur,a)+'%" onclick="'+esc('openSlotSheet(\''+ds+'\',\''+g.area+'\','+l+','+cur+','+a+',event)')+'" aria-label="'+esc('Frei '+minHM(cur)+'–'+minHM(a)+' '+(g.area==='klein'?'Kleinspielfeld':'Viertel '+l)+' – buchen')+'">+ frei</button>'; }
+        h+='<button type="button" class="tl-free" style="top:'+laneY(g.area,l)+'px;left:'+P(cur)+'%;width:'+W(cur,a)+'%" onclick="'+esc((form?'formTlFree':'openSlotSheet')+'(\''+ds+'\',\''+jsArg(g.area)+'\','+l+','+cur+','+a+',event)')+'" aria-label="'+esc('Frei '+minHM(cur)+'–'+minHM(a)+' '+(g.area==='klein'?'Kleinspielfeld':(g.res||(g.area==='halle'?'Halle Drittel '+l:'Viertel '+l)))+(form?' – übernehmen':' – buchen'))+'">'+(form?'+':'+ frei')+'</button>'; }
       cur=Math.max(cur,b); });
   } });
   // Sperren: ganze Fläche schraffiert
@@ -4162,11 +4187,16 @@ function timelineHTML(ds,isMine){
   occ.forEach((o,i)=>{
     const g=groups.find(x=>x.area===o.area), span=o.lanes[1]-o.lanes[0]+1, ht=span*TL_LANE+(span-1)*TL_GAP, mine=occIsMine(o,isMine);
     const cls='tl-blk'+(o.cancelled?' canc':(mine?' mine':(o.kind==='g'?' game':(o.kind==='o'?' other':(/Herren|Ü\d/.test(o.team||'')?' senior':'')))));
-    h+='<button type="button" class="'+cls+'" style="top:'+laneY(o.area,o.lanes[0])+'px;height:'+ht+'px;left:'+P(hmMin(o.t))+'%;width:'+W(hmMin(o.t),hmMin(o.bis))+'%" onclick="'+esc('openOccDetail(\''+ds+'\','+i+')')+'" aria-label="'+esc(o.label+' '+o.t+'–'+o.bis+' '+areaLabel(o)+(o.cancelled?' abgesagt':''))+'">'
+    if(!g) return;
+    h+='<button type="button" class="'+cls+'" style="top:'+laneY(o.area,o.lanes[0])+'px;height:'+ht+'px;left:'+P(hmMin(o.t))+'%;width:'+W(hmMin(o.t),hmMin(o.bis))+'%" onclick="'+esc('openOccDetail(\''+ds+'\','+i+(form?',\'form\'':'')+')')+'" aria-label="'+esc(o.label+' '+o.t+'–'+o.bis+' '+areaLabel(o)+(o.cancelled?' abgesagt':''))+'">'
       +'<b>'+esc(o.label)+(o.kind==='g'?' · Spiel':'')+'</b>'+(ht>TL_LANE?'<i>'+o.t+'–'+o.bis+'</i>':'')+'</button>';
   });
+  // Formular: der neue (bzw. bearbeitete) Termin gestrichelt auf seinen Spuren
+  if(cand&&cand.von&&cand.bis&&cand.von<cand.bis) cand.areas.forEach(a=>{ const g=groups.find(x=>x.area===a.area); if(!g) return;
+    const span=a.lanes[1]-a.lanes[0]+1, ht=span*TL_LANE+(span-1)*TL_GAP;
+    h+='<div class="tl-cand'+(a.clash?' clash':'')+'" style="top:'+laneY(a.area,a.lanes[0])+'px;height:'+ht+'px;left:'+P(hmMin(cand.von))+'%;width:'+W(hmMin(cand.von),hmMin(cand.bis))+'%"><b>'+esc(cand.label)+'</b></div>'; });
   // Konflikte: Überschneidungszeit auf den gemeinsamen Vierteln schraffiert
-  conflictsOnDay(ds).forEach(([A,B])=>{
+  if(!form) conflictsOnDay(ds).forEach(([A,B])=>{
     const qOf=x=>x.pitch?pitchQuarters(x.pitch):(x.isExternal&&x.pitchIsFull?[1,2,3,4]:null);
     let qa=qOf(A), qb=qOf(B), q=qa&&qb?qa.filter(v=>qb.includes(v)):(qa||qb);
     if(!q||!q.length) return;
@@ -4178,6 +4208,8 @@ function timelineHTML(ds,isMine){
   if(isToday&&hmMin(now)>=T0&&hmMin(now)<=T1) h+='<div class="tl-now" style="left:'+P(hmMin(now))+'%"></div>';
   h+='</div></div></div><div class="tl-cursor" style="height:'+H+'px"><span class="tl-cur-t"></span></div></div></div>';
   const fl=CFG&&CFG.venue&&CFG.venue.floodlight;
+  if(form) return h+'<div class="tl-legend"><span><i class="lg cand"></i>dein Termin</span><span><i class="lg free"></i>„+“ übernimmt Zeit + Fläche</span>'
+    +(sun?'<span><i class="lg sun"></i>'+sun+'</span>':'')+'</div>';
   h+='<div class="tl-legend">'+(isMine?'<span><i class="lg mine"></i>'+(session&&sessionWeekTeams()?'deine Mannschaft':'Favoriten')+'</span>':'')+'<span><i class="lg tr"></i>Training</span><span><i class="lg game"></i>Spiel</span>'
     +(conflictsOnDay(ds).length?'<span><i class="lg conf"></i>Konflikt</span>':'')
     +(sun?'<span><i class="lg sun"></i>Sonnenuntergang '+sun+(fl==='ganz'?' · Flutlicht':'')+'</span>':'')
@@ -4199,6 +4231,7 @@ function tlScroll(el){
   if(!(g.w>0)||!el.offsetParent) return;
   let m=Math.round((g.t0+el.scrollLeft/g.w*(g.t1-g.t0))/5)*5; m=Math.max(g.t0,Math.min(g.t1,m));
   tlCurLabel(el,m);
+  if(el.dataset.ctx==='form'){ FORM_TL.m=m; return; } // Formular: nur die Uhrzeit am Strich
   const nowM=hmMin(nowHMStr()), follow=ds===todayStr&&Math.abs(m-nowM)<=5;
   const prev=START_CUR[ds];
   if(follow){ if(prev==null) return; delete START_CUR[ds]; }
@@ -4206,7 +4239,7 @@ function tlScroll(el){
   cancelAnimationFrame(_tlRaf);
   _tlRaf=requestAnimationFrame(()=>{ const box=document.getElementById('stp-live'); if(box) box.innerHTML=placeLiveHTML(ds,startCurOf(ds),START_ISMINE); startTodayTile(); });
 }
-function tlRestore(){ document.querySelectorAll('.tl-scroll').forEach(el=>{ const g=tlGeom(el), ds=el.dataset.ds;
+function tlRestore(){ document.querySelectorAll('.tl-scroll:not([data-ctx])').forEach(el=>{ const g=tlGeom(el), ds=el.dataset.ds;
   if(!(g.w>0)) return; // ausgeblendet: beim Zurückkehren zur Startseite (goto) erneut
   if(START_CUR[ds]!=null&&!isFinite(START_CUR[ds])) delete START_CUR[ds];
   const c=startCurOf(ds), m=Math.max(g.t0,Math.min(g.t1,c!=null?c:hmMin(nowHMStr())));
@@ -4215,7 +4248,8 @@ function tlTouchStart(ev,el){ const t=ev.touches&&ev.touches[0]; if(!t) return;
   _tlTouch={x:t.clientX,y:t.clientY,atEnd:el.scrollLeft+el.clientWidth>=el.scrollWidth-2,atStart:el.scrollLeft<=2}; }
 function tlTouchEnd(ev,el){ const t=ev.changedTouches&&ev.changedTouches[0], s=_tlTouch; _tlTouch=null; if(!t||!s) return;
   const dx=t.clientX-s.x, dy=t.clientY-s.y; if(Math.abs(dx)<60||Math.abs(dy)>Math.abs(dx)) return;
-  if(dx<0&&s.atEnd) shiftStartDay(1,'start'); else if(dx>0&&s.atStart) shiftStartDay(-1,'end'); }
+  const fn=el.dataset.ctx==='form'?tlShiftDay:shiftStartDay;
+  if(dx<0&&s.atEnd) fn(1,'start'); else if(dx>0&&s.atStart) fn(-1,'end'); }
 /* Ab 02.10.2026 · 4: Mit der Maus ziehen (Desktop). Gleiches Verhalten wie Wischen am Handy:
    Ziehen verschiebt die Zeit, wer am Rand weiterzieht, kommt zum nächsten bzw. vorigen Tag.
    Nach einem echten Ziehen löst das Loslassen keinen Klick auf Blöcke oder „+ frei“ aus. */
@@ -4249,7 +4283,8 @@ function tlMouseUp(ev){ const d=_tlDrag; _tlDrag=null;
   if(ev.type==='pointercancel') return;
   const dx=ev.clientX-d.x;
   if(Math.abs(dx)<60) return;
-  if(dx<0&&d.atEnd) shiftStartDay(1,'start'); else if(dx>0&&d.atStart) shiftStartDay(-1,'end');
+  const fn=d.el.dataset.ctx==='form'?tlShiftDay:shiftStartDay;
+  if(dx<0&&d.atEnd) fn(1,'start'); else if(dx>0&&d.atStart) fn(-1,'end');
 }
 function shiftStartDay(n,pos){
   const ds=addDays(startSel||todayStr,n); if(ds<todayStr||ds>weekEndStr()) return;
@@ -4293,9 +4328,10 @@ function updateFormBack(){ const b=document.getElementById('form-back'); if(!b) 
   const p=FORM_ORIGIN&&FORM_ORIGIN.pane;
   b.textContent='‹ Zurück'+(p==='start'?' zum Platz':(p==='termine'?' zum Kalender':(p==='training'?' zu den Trainingszeiten':''))); }
 function formBack(){ formDirty=false; goto(FORM_ORIGIN&&FORM_ORIGIN.pane||'start'); }
-function openOccDetail(ds,i){
-  if(!OCC_VIEW[ds]) OCC_VIEW[ds]=occupancyOn(ds);
-  const o=(OCC_VIEW[ds]||[])[i]; if(!o) return;
+function openOccDetail(ds,i,ctx){
+  const key=ctx==='form'?'form:'+ds:ds;
+  if(!OCC_VIEW[key]) OCC_VIEW[key]=occupancyOn(ds);
+  const o=(OCC_VIEW[key]||[])[i]; if(!o) return;
   const e=o.src;
   let contact='';
   if(e.isTraining) contact=getTrainersContactHTML(e);
@@ -5495,9 +5531,10 @@ function renderPitchGrid(ids,state,busy,capPrefixHtml){
   return clash;
 }
 function toggleRes(el){el.classList.toggle('on');hideConflicts();if(el.dataset.res==='Großspielfeld')renderPitch();
-  if(el.dataset.res==='Halle'){halleThirds=[];renderHalle();}}
+  if(el.dataset.res==='Halle'){halleThirds=[];renderHalle();}
+  if(el.dataset.res!=='Großspielfeld') renderFormTimeline();}
 function halleResOn(){return resChipOn('f-res','Halle');}
-function toggleHalleThird(n){const i=halleThirds.indexOf(n);if(i>=0)halleThirds.splice(i,1);else halleThirds.push(n);hideConflicts();renderHalle();}
+function toggleHalleThird(n){const i=halleThirds.indexOf(n);if(i>=0)halleThirds.splice(i,1);else halleThirds.push(n);hideConflicts();renderHalle();renderFormTimeline();}
 function renderHalle(){
   document.getElementById('f-halle-field').style.display=halleResOn()?'block':'none';
   if(!halleResOn())return;
@@ -5522,6 +5559,7 @@ function pickPitch(q){ if(pitchMode==='ganz')return; pitchPart=pitchPartForPick(
 function curPitch(){return pitchMode==='ganz'?{mode:'ganz'}:{mode:pitchMode,part:pitchPart};}
 function renderPitch(){
   renderFormChips(); // Chips (Terminart, Mannschaft, Dauer) spiegeln den aktuellen Stand
+  renderFormTimeline();
   updateKickInfo(); // Freundschaftsspiel: Platzprüfung unter dem Anstoß mitziehen (Datum, Fläche, Mannschaft)
   const f=document.getElementById('f-pitch-field');
   const show=pitchOn()&&occLevel(formKind())!=='overlay';
@@ -5629,7 +5667,7 @@ function resetForm(){
   ['f-opponent','f-participants','f-kickoff','f-address'].forEach(id=>{ document.getElementById(id).value=''; });
   document.getElementById('f-anlass').dataset.auto=''; setHomeAway('home',false);
   halleThirds=[];onTeamChange();onKindChange(false);renderPitch();renderHalle();hideConflicts();formDirty=false;
-  formSkipFussballLink=null; FORM_TEAMS_ALL=false; ANLASS_OPEN=false; openFormNote(false);
+  formSkipFussballLink=null; FORM_TEAMS_ALL=false; ANLASS_OPEN=false; FORM_TL={ds:null,m:null,edge:null}; openFormNote(false);
 }
 /* ---------- Terminformular kompakt (ab 06.10.2026 · 1) ----------
    Terminart und Mannschaft als Chips statt Droplisten (die versteckten <select>/Segmente bleiben die
@@ -5729,6 +5767,97 @@ function openFormNote(show){
   if(on&&show===undefined) setTimeout(()=>{ const t=document.getElementById('f-bem'); if(t) t.focus(); },50);
 }
 
+/* ---------- Tagesansicht im Terminformular (ab 06.10.2026 · 2, Mockup B) ----------
+   Dieselbe Zeitleiste wie auf der Startseite (timelineHTML mit opts.form) für den Tag aus dem Formular:
+   Großspielfeld (Hälfte A/B, 4 Viertel) und Kleinspielfeld immer, weitere Ressourcen automatisch, wenn sie
+   an dem Tag belegt oder im Formular gewählt sind, sonst über „+ Ressource“ (pro Gerät gemerkt).
+   „+“ in einer freien Lücke übernimmt Zeit und Fläche, der neue Termin steht gestrichelt in der Leiste.
+   Wischen am Rand bzw. die Polster wechseln den Tag. */
+let FORM_TL={ds:null,m:null,edge:null};
+const FORM_TL_KEY='pc_form_res';
+function formTlResAll(){ return [...document.querySelectorAll('#f-res .res-chip')].map(c=>c.dataset.res).filter(r=>r!=='Großspielfeld'&&r!=='Kleinspielfeld'); }
+function formTlStored(){ try{ const v=JSON.parse(localStorage.getItem(FORM_TL_KEY)||'[]'); return Array.isArray(v)?v:[]; }catch(e){ return []; } }
+function formTlStore(list){ try{ localStorage.setItem(FORM_TL_KEY,JSON.stringify(list)); }catch(e){} }
+function resShort(r){ const m=/^Kabine\s*(\d+)$/.exec(r); return m?'K'+m[1]:r.replace(/[^A-Za-zÄÖÜäöüß]/g,'').slice(0,2); }
+function formTlCand(){
+  const von=document.getElementById('f-von').value, bis=document.getElementById('f-bis').value;
+  const o=formOccupation(), areas=[];
+  if(o.pitch){ const q=pitchQuarters(o.pitch); if(q.length) areas.push({area:'platz',lanes:[Math.min(...q),Math.max(...q)]}); }
+  else if(o.res.includes('Großspielfeld')) areas.push({area:'platz',lanes:[1,4]}); // Torwarttraining: auf dem Platz, ohne Fläche
+  if(o.res.includes('Kleinspielfeld')) areas.push({area:'klein',lanes:[1,1]});
+  if(o.halle) o.halle.thirds.forEach(t=>areas.push({area:'halle',lanes:[t,t]}));
+  o.res.filter(r=>r!=='Großspielfeld'&&r!=='Kleinspielfeld').forEach(r=>areas.push({area:'res:'+r,lanes:[1,1]}));
+  const d=dateInput().value;
+  const clash=!!(d&&von&&bis&&von<bis)&&findConflicts(d,von,bis,o.pitch,o.halle,o.res,editingId,o.kind).filter(c=>!isOwnTeamTraining(c.event,o.ownFree)).length>0;
+  areas.forEach(a=>a.clash=clash);
+  const team=document.getElementById('f-team').value, sb=document.querySelector('#f-squad button.on');
+  const lbl=formKind()==='goalkeeper'?'TW':teamShort(team,sb?parseInt(sb.dataset.squad):1);
+  return {von,bis,areas,label:(editingId?'':'Neu ')+lbl};
+}
+function renderFormTimeline(){
+  const box=document.getElementById('f-tl'), wrap=document.getElementById('f-tl-wrap'); if(!box||!wrap) return;
+  const k=formKind(), ds=dateInput().value;
+  if(k==='trainer'||(isMatchKind(k)&&formHA==='away')||!ds){ wrap.style.display='none'; return; }
+  wrap.style.display='';
+  const head=document.getElementById('f-tl-day'); if(head) head.textContent='Belegung · '+DOW[dowOf(ds)-1]+' '+fmtDM(ds);
+  const resAll=formTlResAll(), cand=formTlCand();
+  const chosen=cand.areas.map(a=>a.area==='halle'?'Halle':(a.area.startsWith('res:')?a.area.slice(4):null)).filter(Boolean);
+  const show=[...new Set(formTlStored().filter(r=>resAll.includes(r)).concat(chosen))];
+  const sameDay=FORM_TL.ds===ds;
+  box.innerHTML=timelineHTML(ds,null,{form:true,resAll,show,skipId:editingId,cand});
+  const add=document.getElementById('f-tl-add');
+  if(add&&add.style.display!=='none') renderFormTlAdd();
+  const el=box.querySelector('.tl-scroll'), edge=FORM_TL.edge; FORM_TL.edge=null; FORM_TL.ds=ds;
+  const place=()=>{ if(!el||!el.isConnected) return; const g=tlGeom(el); if(!(g.w>0)) return;
+    if(edge){ el.scrollLeft=edge==='start'?0:el.scrollWidth; return; }
+    const m0=sameDay&&FORM_TL.m!=null?FORM_TL.m:(cand.von?hmMin(cand.von):(ds===todayStr?hmMin(nowHMStr()):15*60));
+    const m=Math.max(g.t0,Math.min(g.t1,m0)); el.scrollLeft=Math.round((m-g.t0)/(g.t1-g.t0)*g.w); tlCurLabel(el,m); FORM_TL.m=m; };
+  place(); requestAnimationFrame(place);
+}
+function toggleFormTlAdd(){
+  const add=document.getElementById('f-tl-add'); if(!add) return;
+  const open=add.style.display==='none'; add.style.display=open?'':'none';
+  if(open) renderFormTlAdd();
+}
+function renderFormTlAdd(){
+  const add=document.getElementById('f-tl-add'); if(!add) return;
+  const st=formTlStored();
+  add.innerHTML=formTlResAll().map(r=>'<button type="button" class="nf-chip'+(st.includes(r)?' on':'')+'" onclick="'+esc('toggleFormTlRes(\''+jsArg(r)+'\')')+'">'+esc(r)+'</button>').join('')
+    +'<p class="helptext" style="flex-basis:100%;margin:2px 0 0;">Angetippte Ressourcen stehen auf diesem Gerät immer in der Leiste. Belegte und im Termin gewählte erscheinen von selbst.</p>';
+}
+function toggleFormTlRes(r){
+  const st=formTlStored(), i=st.indexOf(r); if(i>=0) st.splice(i,1); else st.push(r);
+  formTlStore(st); renderFormTimeline();
+}
+function tlShiftDay(n,pos){
+  const cur=dateInput().value||todayStr, ds=addDays(cur,n); if(ds<todayStr) return;
+  FORM_TL.edge=pos||null; shiftFormDate(n);
+}
+// „+“ in einer freien Lücke: Beginn = angetippte Stelle (15 Min), Dauer wie im Formular, höchstens bis zur nächsten Belegung.
+function formTlFree(ds,area,lane,from,to,ev){
+  let start=from;
+  if(ev&&ev.currentTarget&&ev.currentTarget.getBoundingClientRect){ const r=ev.currentTarget.getBoundingClientRect(), x=(ev.clientX||r.left)-r.left;
+    start=from+Math.floor(((to-from)*Math.max(0,Math.min(1,x/Math.max(1,r.width))))/15)*15; }
+  const dur=formDurMin()>0?formDurMin():(FORM_LAST_DUR||90);
+  start=Math.max(from,Math.min(start,to-Math.min(dur,to-from)));
+  const end=Math.min(to,start+dur), von=minHM(start), bis=minHM(end);
+  if(dateInput().value!==ds) dateInput().value=ds;
+  document.getElementById('f-von').value=von; document.getElementById('f-bis').value=bis;
+  const on=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res);
+  const others=on.filter(r=>!['Großspielfeld','Kleinspielfeld','Halle'].includes(r));
+  if(area==='platz'){
+    setResChips('f-res',['Großspielfeld'].concat(others));
+    const busy=usedQuartersWindow(ds,von,bis,editingId,formOwnTeamFree()), half=lane<=2?'A':'B';
+    if(pitchMode==='ganz'&&[1,2,3,4].every(q=>!busy.has(q))) setPitchMode('ganz');
+    else if(pitchMode!=='viertel'&&HALF[half].every(q=>!busy.has(q))){ setPitchMode('haelfte'); pitchPart=half; }
+    else{ setPitchMode('viertel'); pitchPart=lane; }
+  } else if(area==='klein') setResChips('f-res',['Kleinspielfeld'].concat(others));
+  else if(area==='halle'){ setResChips('f-res',['Halle'].concat(others)); halleThirds=[lane]; }
+  else if(area.startsWith('res:')) setResChips('f-res',on.concat([area.slice(4)]));
+  formDirty=true; hideConflicts(); FORM_TL.m=start; // Leiste zeigt danach den neuen Termin
+  if(formKind()==='game'){ document.getElementById('f-kickoff').value=formHA==='away'?von:addMinutes(von,fussballBufferBeforeMin()); onKickoffChange(false); }
+  updateWeekday(); onTimeChange(); renderHalle();
+}
 /* ---------- Freien Termin finden (ab 06.10.2026 · 1) ----------
    Für Schulfest, Kita-Cup & Co.: Monate + Wochentage wählen, Platzcoach prüft jeden Tag mit genau der
    Fläche, Terminart und Dauer aus dem Formular (gleiche Regeln wie beim Speichern: findConflicts) und
@@ -6038,7 +6167,7 @@ function fillForm(e){
   document.getElementById('f-anlass').dataset.auto=''; setHomeAway(e.ha==='away'?'away':'home',false);
   fillingForm=true;
   try{ onTeamChange();onKindChange(false); } finally{ fillingForm=false; }
-  FORM_TEAMS_ALL=false; ANLASS_OPEN=false; openFormNote(!!(e.note||'').trim()?true:false);
+  FORM_TEAMS_ALL=false; ANLASS_OPEN=false; FORM_TL={ds:null,m:null,edge:null}; openFormNote(!!(e.note||'').trim()?true:false);
   updateWeekday();renderPitch();renderHalle();updateKickInfo();
 }
 function editEvent(id){
