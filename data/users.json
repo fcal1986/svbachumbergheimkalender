@@ -518,6 +518,24 @@
       "phone": "",
       "contactEmail": "fabian.honisch@sv-bachum-bergheim.de",
       "contactPublic": "email"
+    },
+    {
+      "id": "2f2f62e8-9030-48aa-80c3-a4d9b65938ee",
+      "first": "Daniel",
+      "last": "Thibaut",
+      "email": "daniel.thibaut@gmx.net",
+      "admin": false,
+      "classes": {
+        "2. Herren": []
+      },
+      "enc": {
+        "salt": "aZ1z2MLHP2Xd/nqaZTBstg==",
+        "iv": "9EO7n93R5bPMys4A",
+        "cipher": "sptWEdb+2LNyec4bFYprYvjJ7ciGkII+dDN7oyFpXMUopjC+1H+QaY/Wuww0nBGD1iWfnuql6uVsc8KbpO9OKMmwgVSqSCztbnLEgMNI/ZrPBDAWbD0GzfpHKcKNZ0WyB8B/QwokxwEbyIuMUA=="
+      },
+      "created": "2026-10-06T05:45:37.849Z",
+      "emailNotificationsEnabled": true,
+      "pwChangeRequired": true
     }
   ]
 }
