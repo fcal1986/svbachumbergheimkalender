@@ -226,26 +226,6 @@
       "kickoff": "13:00",
       "ownerId": "af1a6546-fdc2-4059-bef4-5a4966181701",
       "ownerName": "Michael Raneck"
-    },
-    {
-      "id": "83d2dc61-9a79-47ad-89be-a0cdd30e8317",
-      "d": "2027-06-18",
-      "t": "15:30",
-      "bis": "19:30",
-      "title": "Schulfest",
-      "kind": "other",
-      "team": "Vorstand",
-      "squad": 1,
-      "pitch": null,
-      "halle": null,
-      "res": [
-        "Kleinspielfeld",
-        "Vereinsheim",
-        "Theke"
-      ],
-      "note": "",
-      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "ownerName": "Fabrizio Calcagno"
     }
   ]
 }
