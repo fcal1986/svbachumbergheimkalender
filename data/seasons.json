@@ -30,7 +30,8 @@
         "af1a6546-fdc2-4059-bef4-5a4966181701",
         "6085b3aa-f111-47fa-9d20-7e59a0a987e8",
         "a0878d3e-94bf-4d9f-9687-ca0bd7133ae7",
-        "f70b025a-fb4e-4573-b0fc-2d2f4c354b98"
+        "f70b025a-fb4e-4573-b0fc-2d2f4c354b98",
+        "2f2f62e8-9030-48aa-80c3-a4d9b65938ee"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
@@ -139,6 +140,9 @@
         "a0878d3e-94bf-4d9f-9687-ca0bd7133ae7": {},
         "f70b025a-fb4e-4573-b0fc-2d2f4c354b98": {
           "3. Herren": []
+        },
+        "2f2f62e8-9030-48aa-80c3-a4d9b65938ee": {
+          "2. Herren": []
         }
       },
       "trainerNames": [
@@ -165,7 +169,8 @@
         "Michael Raneck",
         "Marc Geauf",
         "Robin Lienig",
-        "Fabian Honisch"
+        "Fabian Honisch",
+        "Daniel Thibaut"
       ],
       "teams": [
         {
