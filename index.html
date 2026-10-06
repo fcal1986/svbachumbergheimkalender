@@ -629,6 +629,12 @@
   .cw-day.sel .cw-wd{color:rgba(255,255,255,.75);}
   .cw-day.sel .cdot.jugend{background:var(--kb9FC0F2);}
   .cw-day .conf-mark{top:2px;left:3px;}
+  .lock-banner.hol-banner{background:var(--kbFFF4ED);border-color:var(--krFDBA8C);color:var(--kt9A3412);}
+  .lock-banner.hol-banner svg{stroke:var(--kt9A3412);}
+  .hol-dot{position:absolute;top:4px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--halle);}
+  .stw-day{position:relative;}
+  .hol-chip{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--halle-dim);color:var(--halle);font-size:10.5px;font-weight:700;letter-spacing:0;text-transform:none;vertical-align:1px;}
+  .hol-chip.silent{background:var(--kbF2F5F4);color:var(--ink-secondary);}
   .cw-day.sel .conf-mark{box-shadow:0 0 0 1.5px #fff;}
   .wk-daygroup{margin-bottom:12px;}
 
@@ -1665,7 +1671,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 21';
+const APP_VERSION='06.10.2026 · 22';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3502,7 +3508,7 @@ function rowHTML(e){
     +'<div class="ev-time-col"><div class="ev-t">'+bis+'</div><div class="ev-tl">Bis</div></div>'
     +(pitchVisual?'<div class="ev-time-pitch">'+pitchVisual+'</div>':'')
     +'</div>'
-    +conflictBannerHTML(e)+teamDayBannerHTML(e)+locksForItem(e).map(l=>lockBannerHTML(l,e)).join('')
+    +conflictBannerHTML(e)+holidayBannerHTML(e)+teamDayBannerHTML(e)+locksForItem(e).map(l=>lockBannerHTML(l,e)).join('')
     +(b?'<div class="badges" style="margin-top:10px;">'+b+'</div>':'')
     +(isMatch?matchInfoHTML(e):'')
     +(e.note&&!e.isTraining?'<div class="ev-note" style="margin-top:8px;">'+esc(e.note)+'</div>':'')
@@ -3567,7 +3573,7 @@ function externalRowHTML(e){
     +'<div class="ev-time-col"><div class="ev-t">'+e.t+'</div>'+(e.movedFrom&&e.movedFrom.d===e.d&&e.movedFrom.t&&e.movedFrom.t!==e.t?'<div class="ev-t-old">statt '+e.movedFrom.t+'</div>':'')+'<div class="ev-tl">Von</div></div>'
     +'<div class="ev-time-col"><div class="ev-t">'+bis+'</div><div class="ev-tl">Bis</div></div>'
     +'</div>'
-    +conflictBannerHTML(e)+teamDayBannerHTML(e)+locksForItem(e).map(l=>lockBannerHTML(l,e)).join('')
+    +conflictBannerHTML(e)+holidayBannerHTML(e)+teamDayBannerHTML(e)+locksForItem(e).map(l=>lockBannerHTML(l,e)).join('')
     +(e.foreignVenue&&e.venue?'<div class="fb-note">Heimrecht, aber Spielort: '+esc(e.venue)+'</div>':'')
     +'<div class="badges" style="margin-top:10px;align-items:center;"><span class="badge-fb">⚽ '+esc(e.competition||'fussball.de')+'</span>'
     +moveBadgeHTML(e)
@@ -4193,9 +4199,9 @@ function weekStripHTML(){
     const dt=new Date(d+'T00:00:00'), evs=eventsOn(d);
     const cats=[...new Set(evs.map(e=>cat(e.team)))];
     const conf=hasConflictOn(d);
-    const cls='cw-day'+(d===selDate?' sel':'')+(d===todayStr?' today':'');
-    return '<button type="button" class="'+cls+'" onclick="pickWeekDay(\''+d+'\')" aria-label="'+DAYS[dt.getDay()]+', '+fmtDM(d)+(conf?' – Platzkonflikt':'')+'">'
-      +(conf?'<span class="conf-mark">!</span>':'')
+    const cls='cw-day'+(d===selDate?' sel':'')+(d===todayStr?' today':''), hol=holidayOn(d);
+    return '<button type="button" class="'+cls+'" onclick="pickWeekDay(\''+d+'\')" aria-label="'+DAYS[dt.getDay()]+', '+fmtDM(d)+(conf?' – Platzkonflikt':'')+(hol?' – '+hol.name:'')+'">'
+      +(conf?'<span class="conf-mark">!</span>':'')+(hol?'<span class="hol-dot" title="'+esc(hol.name)+'"></span>':'')
       +'<span class="cw-wd">'+DOW[(dt.getDay()+6)%7]+'</span><span class="cw-num">'+dt.getDate()+'</span>'
       +'<span class="cal-dots">'+cats.slice(0,3).map(c=>'<span class="cdot '+c+'"></span>').join('')+'</span></button>';
   }).join('')+'</div>';
@@ -4222,7 +4228,7 @@ function renderWeek(){
   const box=document.getElementById('view-woche'); if(!box) return;
   if(calMore.from!==selDate) calMore={from:selDate,n:CAL_MORE_STEP};
   const evs=eventsOn(selDate), sum=daySummaryText(evs);
-  let h='<div class="wk-daygroup"><p class="section-label" id="month-day-head" data-wkday="'+selDate+'">'+fmtHead(selDate)+(sum?'<span class="day-sum">'+esc(sum)+'</span>':'')+'</p>';
+  let h='<div class="wk-daygroup"><p class="section-label" id="month-day-head" data-wkday="'+selDate+'">'+fmtHead(selDate)+holidayHeadHTML(selDate)+(sum?'<span class="day-sum">'+esc(sum)+'</span>':'')+'</p>';
   h+=evs.length?evs.map(rowHTML).join(''):'<div class="empty-day">Kein Termin an diesem Tag.</div>';
   h+='<button class="ghost-btn" onclick="newForDay()">＋ Termin für diesen Tag eintragen</button></div>';
   // Danach: die nächsten Termine ab dem Folgetag (leere Tage übersprungen)
@@ -4231,7 +4237,7 @@ function renderWeek(){
     if(n>=calMore.n){ more=true; break; }
     const take=ev.slice(0,calMore.n-n); n+=take.length; if(take.length<ev.length) more=true;
     const sm=daySummaryText(ev);
-    body+='<div class="wk-daygroup"><p class="section-label" data-wkday="'+d+'">'+fmtHead(d)+(sm?'<span class="day-sum">'+esc(sm)+'</span>':'')+'</p>'+take.map(rowHTML).join('')+'</div>';
+    body+='<div class="wk-daygroup"><p class="section-label" data-wkday="'+d+'">'+fmtHead(d)+holidayHeadHTML(d)+(sm?'<span class="day-sum">'+esc(sm)+'</span>':'')+'</p>'+take.map(rowHTML).join('')+'</div>';
     if(more) break; }
   if(body) h+='<p class="cal-after">Danach</p>'+body;
   if(more) h+='<button class="ghost-btn" onclick="calMoreNext()">Nächste '+CAL_MORE_STEP+' Termine</button>';
@@ -4797,7 +4803,8 @@ function startWeekHTML(src,isMine,admin){
   let strip='<div class="stw-strip">';
   for(let i=0;i<WEEK_DAYS;i++){ const ds=addDays(todayStr,i), dt=new Date(ds+'T00:00:00'), sel=ds===startSel;
     const dots=items.filter(e=>e.d===ds).slice(0,3).map(e=>'<i class="'+dotOf(e)+'"></i>').join('');
-    strip+='<button type="button" class="stw-day'+(sel?' on':'')+(i===0?' today':'')+'" onclick="'+(i===0?'startJumpNow()':'setStartDay(\''+ds+'\')')+'">'
+    const hol=holidayOn(ds);
+    strip+='<button type="button" class="stw-day'+(sel?' on':'')+(i===0?' today':'')+'" onclick="'+(i===0?'startJumpNow()':'setStartDay(\''+ds+'\')')+'"'+(hol?' aria-label="'+esc(hol.name)+'"':'')+'>'+(hol?'<span class="hol-dot"></span>':'')
       +'<span>'+(i===0?(startAtNow()?'Heute':'↺ Jetzt'):DOW[dowOf(ds)-1])+'</span><b>'+dt.getDate()+'</b><em>'+dots+'</em></button>'; }
   strip+='</div>';
   let h=startPlaceHTML(startSel,isMine,admin,strip);
@@ -5022,8 +5029,101 @@ function conflictFix(A,B,ds){
   if(!cancellable(t)) return null;
   return {label:'Training '+(t.team===GK_TEAM?'TW':teamShort(t.team,t.squad))+' absagen',click:'cancelTrainingDay(\''+jsArg(t.trainingSlotId)+'\',\''+ds+'\')'};
 }
+
+/* ---------- Feiertage (ab 06.10.2026 · 22) ----------
+   Gesetzliche Feiertage je Bundesland (CFG.bundesland, Vorgabe NW) werden in der App berechnet (Ostern nach
+   Gauß/Meeus) – keine externe Quelle. Stille Tage (Volkstrauertag, Totensonntag) werden mit angezeigt.
+   Sperrzeiten für Sportveranstaltungen gibt es bisher nur für NRW (§ 6 FeiertG NRW). Hinweise, keine harten Konflikte. */
+const HOL_STATES_ALL=['BW','BY','BE','BB','HB','HH','HE','MV','NI','NW','RP','SL','SN','ST','SH','TH'];
+const HOL_SPORT_BANS={NW:{karfreitag:['00:00','24:00'],allerheiligen:['05:00','18:00'],volkstrauertag:['05:00','13:00'],totensonntag:['05:00','18:00']}};
+function holState(){ const b=String((CFG&&CFG.bundesland)||'NW').toUpperCase(); return HOL_STATES_ALL.includes(b)?b:'NW'; }
+function easterSunday(y){
+  const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),
+    h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),
+    mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;
+  return y+'-'+String(mo).padStart(2,'0')+'-'+String(da).padStart(2,'0');
+}
+const _holCache={};
+function holidaysOfYear(y){
+  const st=holState(), key=y+st; if(_holCache[key]) return _holCache[key];
+  const E=easterSunday(y), f=(m,d)=>y+'-'+m+'-'+d, out=[];
+  const add=(d,name,id,states,silent)=>{ if(!states||states.includes(st)) out.push({d,name,id,silent:!!silent,legal:id!=='volkstrauertag'&&id!=='totensonntag'}); };
+  add(f('01','01'),'Neujahr','neujahr');
+  add(f('01','06'),'Heilige Drei Könige','dreikoenige',['BW','BY','ST']);
+  add(f('03','08'),'Internationaler Frauentag','frauentag',['BE','MV']);
+  add(addDays(E,-2),'Karfreitag','karfreitag',null,true);
+  add(addDays(E,1),'Ostermontag','ostermontag');
+  add(f('05','01'),'Tag der Arbeit','maifeiertag');
+  add(addDays(E,39),'Christi Himmelfahrt','himmelfahrt');
+  add(addDays(E,50),'Pfingstmontag','pfingstmontag');
+  add(addDays(E,60),'Fronleichnam','fronleichnam',['BW','BY','HE','NW','RP','SL']);
+  add(f('08','15'),'Mariä Himmelfahrt','mariae',['SL']);
+  add(f('09','20'),'Weltkindertag','weltkindertag',['TH']);
+  add(f('10','03'),'Tag der Deutschen Einheit','einheit');
+  add(f('10','31'),'Reformationstag','reformation',['BB','HB','HH','MV','NI','SN','ST','SH','TH']);
+  add(f('11','01'),'Allerheiligen','allerheiligen',['BW','BY','NW','RP','SL'],true);
+  // 1. Advent = Sonntag zwischen 27.11. und 03.12.; Totensonntag eine, Volkstrauertag zwei Wochen davor
+  let adv=f('11','27'); while(new Date(adv+'T00:00:00').getDay()!==0) adv=addDays(adv,1);
+  add(addDays(adv,-14),'Volkstrauertag','volkstrauertag',null,true);
+  add(addDays(adv,-7),'Totensonntag','totensonntag',null,true);
+  let bb=f('11','22'); while(new Date(bb+'T00:00:00').getDay()!==3) bb=addDays(bb,-1);
+  add(bb,'Buß- und Bettag','bussbettag',['SN']);
+  add(f('12','25'),'1. Weihnachtstag','weihnacht1');
+  add(f('12','26'),'2. Weihnachtstag','weihnacht2');
+  return (_holCache[key]=out);
+}
+function holidayOn(ds){ return ds?holidaysOfYear(+ds.slice(0,4)).find(h=>h.d===ds)||null:null; }
+function holidaySportBan(h){ const b=h&&(HOL_SPORT_BANS[holState()]||{})[h.id]; return b?{from:b[0],to:b[1]}:null; }
+function holidayHeadHTML(ds){ const h=holidayOn(ds); return h?'<span class="hol-chip'+(h.legal?'':' silent')+'">'+(h.legal?'Feiertag: ':'Stiller Tag: ')+esc(h.name)+'</span>':''; }
+// Spiele/Turniere (auch fussball.de, auch auswärts) im Sperrzeitraum eines stillen Feiertags
+function isHolidayRelevantItem(e){ return !!e&&!e.isCancelled&&!e.withdrawn&&!e.isMovedGhost&&!e.isTraining&&(e.isExternal||isMatchKind(kindOf(e))); }
+function holidayBanFor(e){
+  if(!isHolidayRelevantItem(e)) return null;
+  const h=holidayOn(e.d), b=holidaySportBan(h); if(!b) return null;
+  const s=e.t||'00:00', en=eventBis(e)||s;
+  return (s<b.to&&en>b.from)?{h,b}:null;
+}
+function holidayBanText(x){ return x.h.name+': Sportveranstaltungen '+(x.b.from==='00:00'&&x.b.to==='24:00'?'ganztägig':(x.b.from==='05:00'?'bis '+x.b.to+' Uhr':x.b.from+'–'+x.b.to+' Uhr'))+' nicht erlaubt (Feiertagsgesetz)'; }
+function holidayBannerHTML(e){ const x=holidayBanFor(e); return x?'<div class="lock-banner hol-banner">'+svgWarn+'<div><b>'+esc(holidayBanText(x))+'</b><div class="lock-banner-sub">Bitte Anstoß prüfen oder verlegen.</div></div></div>':''; }
+// Admins: Trainings an gesetzlichen Feiertagen in den nächsten 14 Tagen – alle absagen oder bewusst stattfinden lassen
+const HOL_KEEP_KEY='pc_hol_keep';
+function holidayTrainingTodos(){
+  if(!session||!session.isAdmin) return [];
+  const keep=String(lsGet(HOL_KEEP_KEY,'')||'').split(',');
+  const out=[];
+  for(let i=0;i<=14;i++){ const ds=addDays(todayStr,i), h=holidayOn(ds); if(!h||!h.legal||keep.includes(ds)) continue;
+    const tr=trainingInstancesOn(ds).filter(t=>t.trainingSlotId&&!t.isCancelled);
+    if(!tr.length) continue;
+    out.push({click:'cancelHolidayTrainings(\''+ds+'\')',txt:fmtDayShort(ds)+' '+h.name+': '+tr.length+' Training'+(tr.length===1?'':'s')+' geplant.',act:'Alle absagen',noDigest:true,
+      fix:{label:'Finden statt',click:'keepHolidayTrainings(\''+ds+'\')'}});
+  }
+  return out;
+}
+function keepHolidayTrainings(ds){ const k=String(lsGet(HOL_KEEP_KEY,'')||'').split(',').filter(x=>x&&x>=todayStr); k.push(ds); lsSet(HOL_KEEP_KEY,k.join(',')); renderStart(); }
+function cancelHolidayTrainings(ds){
+  const h=holidayOn(ds); if(!session||!session.isAdmin||!h) return;
+  const tr=trainingInstancesOn(ds).filter(t=>t.trainingSlotId&&!t.isCancelled);
+  const slots=[...new Set(tr.map(t=>t.trainingSlotId))].map(id=>TRAINING.find(x=>x.id===id)).filter(Boolean);
+  if(!slots.length) return;
+  const rerender=()=>{ renderTraining(); renderStart(); render(); };
+  const names=slots.map(x=>x.team===GK_TEAM||x.kind==='goalkeeper'?'Torwarttraining':teamShort(x.team,x.squad));
+  withUndo(slots.length+' Trainings am '+fmtShort(ds)+' ('+h.name+') abgesagt.',
+    ()=>{ slots.forEach(x=>{ if(!(x.cancelled||[]).includes(ds)) x.cancelled=[...(x.cancelled||[]),ds].sort(); }); rerender(); },
+    ()=>{ slots.forEach(x=>{ x.cancelled=(x.cancelled||[]).filter(d=>d!==ds); }); rerender(); },
+    ()=>{
+      const backup=JSON.stringify(TRAINING.map(x=>slots.some(y=>y.id===x.id)?{...x,cancelled:(x.cancelled||[]).filter(d=>d!==ds)}:x));
+      // Eine Mail an alle Trainer (vereinsweit) statt einer pro Mannschaft
+      saveTraining('Training abgesagt: alle Trainings am '+fmtShort(ds)+' ('+h.name+': '+names.join(', ')+') – '+session.name+teamTrailer('Alle Teams',1))
+        .catch(e=>{ TRAINING=JSON.parse(backup); rerender(); showToast('Fehler: '+e.message,6000); });
+    });
+}
 function myTodos(isMine,hasTeams){
-  const out=rsvpTodos();
+  const out=rsvpTodos().concat(holidayTrainingTodos());
+  // Spiele/Turniere im Sperrzeitraum eines stillen Feiertags (nächste 30 Tage)
+  { const seen=new Set();
+    for(let i=0;i<=30;i++){ const ds=addDays(todayStr,i); if(!holidaySportBan(holidayOn(ds))) continue;
+      EVENTS.filter(e=>e.d===ds).concat(fussballDisplayInstancesOn(ds),fussballDisplayAwayInstancesOn(ds)).forEach(e=>{ const x=holidayBanFor(e); if(!x||seen.has(e.id)) return; if(hasTeams&&!isMine(e)) return; seen.add(e.id);
+        out.push({click:'openTerminFromStart(\''+jsArg(e.id)+'\',\''+e.d+'\')',txt:fmtDayShort(ds)+', '+e.t+' '+(e.isExternal?(e.isAway?'bei ':'gegen ')+e.opponent+' ('+teamShort(e.team,e.squad)+')':(e.title||'Spiel'))+' – '+holidayBanText(x)+'.',act:'Ansehen'}); }); } }
   if(regIsAdminSession()){
     const miss=teamsWithoutTrainer(), key=miss.join('|');
     if(miss.length&&lsGet(INVITE_HIDDEN_KEY,'')!==key)
