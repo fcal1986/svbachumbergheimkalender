@@ -1080,6 +1080,7 @@
   .sf-months .weekday-chip{padding:8px 9px;}
   .sf-durs{display:flex;flex-wrap:wrap;gap:5px;}
   .sf-durs .weekday-chip{padding:8px 10px;}
+  .sf-durs .sf-more{color:#3E7A0E;border-style:dashed;}
   .sf-month{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;}
   .sf-month > b{flex:none;width:52px;font-size:12px;color:var(--ink);padding-top:9px;}
   .sf-days{display:flex;flex-wrap:wrap;gap:4px;flex:1;}
@@ -1501,7 +1502,8 @@
 <div class="modal" id="slot-modal">
   <div class="modal-box" style="max-width:380px;max-height:88vh;overflow-y:auto;">
     <h3>Freien Termin finden</h3>
-    <p id="sf-text" class="sub" style="margin-top:2px;"></p>
+    <p class="field-label" style="margin-top:12px;">Was brauchst du?</p>
+    <div class="sf-durs" id="sf-what"></div>
     <p class="field-label" style="margin-top:12px;">In welchen Monaten?</p>
     <div class="sf-months" id="sf-months"></div>
     <p class="field-label" style="margin-top:12px;">An welchen Wochentagen?</p>
@@ -1587,7 +1589,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 4';
+const APP_VERSION='06.10.2026 · 5';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -5950,7 +5952,7 @@ function formTlFree(ds,area,lane,from,to,ev){
    zeigt, wo die Wunschzeit passt, wo nur eine andere Uhrzeit (08–22 Uhr) und wo nichts frei ist.
    „Übernehmen“ trägt Tag und Zeit ins Formular ein. Spiele, die fussball.de noch nicht kennt, kann die
    Suche nicht sehen – dafür der Hinweis; kommen sie später dazu, meldet die Änderungsmail Konflikte. */
-let SF={months:new Set(),days:new Set(),dur:90,start:'15:00',flex:true};
+let SF={months:new Set(),days:new Set(),dur:90,start:'15:00',flex:true,moreRes:false};
 const SF_MONTHS=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 const SF_WIN_FROM='08:00', SF_WIN_TO='22:00';
 function formOccupation(){
@@ -5976,13 +5978,7 @@ function openSlotFinder(){
   SF.dur=formDurMin()>0?formDurMin():90;
   SF.start=document.getElementById('f-von').value||'15:00';
   SF.flex=true;
-  const o=formOccupation(), parts=[];
-  if(o.pitch) parts.push(pitchShort(o.pitch));
-  if(o.halle) parts.push(halleThirds.length?halleShort(o.halle):'Halle');
-  parts.push(...o.res.filter(r=>r!=='Großspielfeld'||!o.pitch));
-  document.getElementById('sf-text').innerHTML=parts.length
-    ?'Geprüft wird: <b>'+esc(parts.join(', '))+'</b> ('+esc(kindLabel(o.kind))+'). Ändern kannst du das im Formular unter „Wo?“.'
-    :'Dieser Termin belegt bei uns keine Fläche – jeder Tag ist frei. Wähle im Formular unter „Wo?“, was gebraucht wird.';
+  SF.moreRes=false;
   document.getElementById('sf-start').value=SF.start;
   renderSlotFinder();
   document.getElementById('slot-modal').classList.add('show');
@@ -6012,8 +6008,41 @@ function sfCheckDay(d,o){
   }
   return best?{status:'part',start:best}:{status:'busy'};
 }
+/* „Was brauchst du?“ (ab 06.10.2026 · 5): dieselbe Auswahl wie die Zeilen in „Wo?“ – direkt im Suchfenster,
+   damit klar ist, wofür gesucht wird. Antippen ändert auch das Formular. */
+function sfWhatChips(){
+  const o=formOccupation(), on=r=>o.res.includes(r), ov=occLevel(formKind())==='overlay';
+  const pq=o.pitch?pitchQuarters(o.pitch):[], same=q=>pq.length===q.length&&q.every(x=>pq.includes(x));
+  const chip=(lbl,isOn,fn)=>'<span class="weekday-chip'+(isOn?' on':'')+'" onclick="'+esc(fn)+'">'+esc(lbl)+'</span>';
+  let h='';
+  if(ov) h+=chip('Platz',on('Großspielfeld'),"sfPick('gk')");
+  else{
+    h+=chip('Ganzer Platz',same([1,2,3,4]),"sfPick('ganz')")+chip('Hälfte A',same([1,2]),"sfPick('A')")+chip('Hälfte B',same([3,4]),"sfPick('B')");
+    if(pq.length===1) h+=chip('Viertel '+pq[0],true,"sfPick('ganz')");
+  }
+  h+=chip('Kleinfeld',on('Kleinspielfeld'),"sfPick('klein')");
+  const all=formTlResAll(), vis=SF.moreRes?all:all.filter(r=>formTlStored().includes(r)||on(r)||(r==='Halle'&&o.halle));
+  vis.forEach(r=>{ h+=chip(r,r==='Halle'?!!o.halle:on(r),"sfPick('res','"+jsArg(r)+"')"); });
+  if(!SF.moreRes&&vis.length<all.length) h+='<span class="weekday-chip sf-more" onclick="SF.moreRes=true;renderSlotFinder()">Mehr ›</span>';
+  return h;
+}
+function sfPick(k,r){
+  const on=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res);
+  const set=list=>setResChips('f-res',[...new Set(list)]), without=x=>on.filter(y=>y!==x);
+  if(k==='gk'||k==='klein'){ const x=k==='gk'?'Großspielfeld':'Kleinspielfeld'; set(on.includes(x)?without(x):on.concat([x])); }
+  else if(k==='res'){
+    if(r==='Halle'){ if(on.includes('Halle')) set(without('Halle')); else{ set(on.concat(['Halle'])); halleThirds=[1,2,3]; } }
+    else set(on.includes(r)?without(r):on.concat([r]));
+  } else {
+    const want=k==='ganz'?[1,2,3,4]:HALF[k], cur=on.includes('Großspielfeld')?pitchQuarters(curPitch()):[];
+    if(cur.length===want.length&&want.every(q=>cur.includes(q))) set(without('Großspielfeld'));
+    else{ set(on.concat(['Großspielfeld'])); if(k==='ganz') setPitchMode('ganz'); else{ setPitchMode('haelfte'); pitchPart=k; } }
+  }
+  formDirty=true; hideConflicts(); renderPitch(); renderHalle(); renderSlotFinder();
+}
 function renderSlotFinder(){
   const keys=sfMonthKeys();
+  const wb=document.getElementById('sf-what'); if(wb) wb.innerHTML=sfWhatChips();
   const y0=todayStr.slice(0,4);
   document.getElementById('sf-months').innerHTML=keys.map(k=>{
     const [y,m]=k.split('-');
@@ -6026,6 +6055,7 @@ function renderSlotFinder(){
   const out=document.getElementById('sf-results');
   if(!SF.months.size||!SF.days.size){ out.innerHTML='<p class="rs-empty">Bitte mindestens einen Monat und einen Wochentag wählen.</p>'; return; }
   const o=formOccupation(), res=[];
+  if(!o.pitch&&!o.halle&&!o.res.length){ out.innerHTML='<p class="rs-empty">Oben antippen, was du brauchst.</p>'; return; }
   [...SF.months].sort().forEach(k=>{
     const [y,m]=k.split('-').map(Number), n=new Date(y,m,0).getDate(), row={k,days:[]};
     for(let i=1;i<=n;i++){
