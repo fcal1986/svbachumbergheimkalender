@@ -631,6 +631,10 @@
   .cw-day .conf-mark{top:2px;left:3px;}
   .lock-banner.hol-banner{background:var(--kbFFF4ED);border-color:var(--krFDBA8C);color:var(--kt9A3412);}
   .lock-banner.hol-banner svg{stroke:var(--kt9A3412);}
+  .cal-day.hol:not(.sel){background:var(--halle-dim);color:var(--halle);font-weight:800;}
+  .mini-day.hol{box-shadow:inset 0 0 0 2px var(--halle);}
+  .mini-day.hol.blank,.mini-day.hol:not(.multi):not(.jugend):not(.senioren):not(.verein){background:var(--halle-dim);}
+  .hol-sq{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--halle-dim);box-shadow:inset 0 0 0 1.5px var(--halle);vertical-align:-1px;}
   .hol-dot{position:absolute;top:4px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--halle);}
   .stw-day{position:relative;}
   .hol-chip{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--halle-dim);color:var(--halle);font-size:10.5px;font-weight:700;letter-spacing:0;text-transform:none;vertical-align:1px;}
@@ -1671,7 +1675,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 22';
+const APP_VERSION='06.10.2026 · 23';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -4290,13 +4294,14 @@ function renderMonth(){
     const cats=[...new Set(evs.map(e=>cat(e.team)))];
     const used=usedQuarters(ds);
     const conf=hasConflictOn(ds);
-    const cls='cal-day'+(other?' other':'')+(ds===todayStr?' today':'')+(ds===selDate?' sel':'')+(conf?' has-conflict':'');
+    const hol=holidayOn(ds);
+    const cls='cal-day'+(other?' other':'')+(ds===todayStr?' today':'')+(ds===selDate?' sel':'')+(conf?' has-conflict':'')+(hol?' hol':'');
     let load='';
     if(used.size) load='<span class="load">'+[1,3,2,4].map(q=>'<i'+(used.has(q)?' class="on"':'')+'></i>').join('')+'</span>';
-    h+='<div class="'+cls+'" onclick="selectDay(\''+ds+'\')">'+load+(conf?'<span class="conf-mark" title="Platzkonflikt">!</span>':'')+dt.getDate()+'<div class="cal-dots">'+
+    h+='<div class="'+cls+'"'+(hol?' title="'+esc(hol.name)+'"':'')+' onclick="selectDay(\''+ds+'\')">'+load+(conf?'<span class="conf-mark" title="Platzkonflikt">!</span>':'')+dt.getDate()+'<div class="cal-dots">'+
       cats.slice(0,3).map(c=>'<span class="cdot '+c+'"></span>').join('')+'</div></div>';
   }
-  h+='</div><div class="cal-legend" role="button" aria-expanded="'+legendHelpOpen+'" onclick="toggleLegendHelp()"><span><span class="cdot jugend"></span>Jugend</span><span><span class="cdot senioren"></span>Senioren</span><span><span class="cdot verein"></span>Verein</span><span>'+miniPitch([1,2])+'Platzbelegung</span><span><span class="conf-mark legend">!</span>Platzkonflikt</span><span class="legend-info">'+(legendHelpOpen?'Schließen ✕':'Was heißt das? ⓘ')+'</span></div>';
+  h+='</div><div class="cal-legend" role="button" aria-expanded="'+legendHelpOpen+'" onclick="toggleLegendHelp()"><span><span class="cdot jugend"></span>Jugend</span><span><span class="cdot senioren"></span>Senioren</span><span><span class="cdot verein"></span>Verein</span><span>'+miniPitch([1,2])+'Platzbelegung</span><span><span class="hol-sq"></span>Feiertag</span><span><span class="conf-mark legend">!</span>Platzkonflikt</span><span class="legend-info">'+(legendHelpOpen?'Schließen ✕':'Was heißt das? ⓘ')+'</span></div>';
   if(legendHelpOpen) h+=legendHelpHTML();
   box.innerHTML=h;
 }
@@ -4310,6 +4315,7 @@ function legendHelpHTML(){
     +'<p><b>Punkte unter dem Datum:</b> an dem Tag gibt es Termine – <span class="cdot jugend" style="display:inline-block;"></span> Jugend, <span class="cdot senioren" style="display:inline-block;"></span> Senioren, <span class="cdot verein" style="display:inline-block;"></span> Verein (z. B. Vereinsheim, Torwarttraining). Maximal drei Punkte, auch wenn es mehr Termine sind.</p>'
     +'<p><b>Kleiner Platz oben rechts:</b> welche Viertel des Großspielfelds an dem Tag irgendwann belegt sind (grün = belegt). Hälfte A links, Hälfte B rechts.</p>'
     +'<p><b><span class="conf-mark legend">!</span>Platzkonflikt:</b> zwei Buchungen überschneiden sich zeitlich auf derselben Fläche. Tag antippen – die Woche mit den betroffenen Terminen öffnet sich.</p>'
+    +'<p><b><span class="hol-sq"></span> Violett</b> = gesetzlicher Feiertag bzw. stiller Tag (z. B. Volkstrauertag). Tag antippen zeigt, welcher.</p>'
     +'<p><b>Grüner Rahmen</b> = heute, <b>schwarz</b> = ausgewählter Tag. Mit ‹ › oder Wischen blätterst du, „Heute“ springt zur aktuellen Woche. Überschrift antippen zeigt das ganze Jahr.</p>'
     +'</div>';
 }
@@ -4332,7 +4338,8 @@ function renderYear(){
       if(cats.length>1)cls+=' multi'; else if(cats.length===1)cls+=' '+cats[0];
       if(ds===todayStr)cls+=' today';
       if(hasConflictOn(ds))cls+=' conflict';
-      h+='<div class="'+cls+'"></div>';
+      const hol=holidayOn(ds); if(hol)cls+=' hol';
+      h+='<div class="'+cls+'"'+(hol?' title="'+esc(hol.name)+'"':'')+'></div>';
     }
     h+='</div></div>';
   }
@@ -4341,7 +4348,7 @@ function renderYear(){
   for(let m=0;m<12;m++){const c=evs.filter(e=>parseInt(e.d.slice(5,7))===m+1).length;if(c>best){best=c;bi=m;}}
   let confDaysYear=0;
   for(let dd=new Date(yearShown,0,1);dd.getFullYear()===yearShown;dd.setDate(dd.getDate()+1)) if(hasConflictOn(ymd(dd)))confDaysYear++;
-  h+='<div class="year-sum"><b>'+evs.length+' Termine</b> in '+yearShown+' · Voller Monat: <b>'+(best>0?MONTHS[bi]+' ('+best+')':'–')+'</b><br>Monat antippen für die Monatsansicht.'+(confDaysYear?'<br><span style="color:var(--kt9A3412);"><span class="conf-mark legend">!</span>'+confDaysYear+' Tag'+(confDaysYear===1?'':'e')+' mit Platzkonflikt (orange umrandet)</span>':'')+'</div>';
+  h+='<div class="year-sum"><b>'+evs.length+' Termine</b> in '+yearShown+' · Voller Monat: <b>'+(best>0?MONTHS[bi]+' ('+best+')':'–')+'</b><br>Monat antippen für die Monatsansicht. <span class="hol-sq"></span> Feiertag'+(confDaysYear?'<br><span style="color:var(--kt9A3412);"><span class="conf-mark legend">!</span>'+confDaysYear+' Tag'+(confDaysYear===1?'':'e')+' mit Platzkonflikt (orange umrandet)</span>':'')+'</div>';
   box.innerHTML=h;
 }
 // "6 Trainings · 1 Spiel" für heute im ganzen Verein (abgesagte zählen nicht).
