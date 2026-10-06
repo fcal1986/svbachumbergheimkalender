@@ -575,6 +575,19 @@
   .kacc-body{padding:4px 12px 12px;background:#F4F8F1;}
   .kacc-body .card{margin:8px 0 0;box-shadow:none;border:1px solid var(--line);}
   .kacc-body.hide1>.card:first-child>h4:first-child{display:none;}
+  .ksub-bar{margin:-6px 0 2px -6px;}
+  .ksub-back{display:inline-flex;align-items:center;gap:2px;min-height:44px;padding:0 12px 0 0;background:none;border:none;font-family:'Inter';font-size:15px;font-weight:600;color:var(--grass);cursor:pointer;}
+  .ksub-back svg{width:22px;height:22px;stroke:currentColor;}
+  .ksub-body>.card:first-child{margin-top:4px;}
+  .ksub-body.hide1>.card:first-child>h4:first-child{display:none;}
+  .info-i{position:relative;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1.5px solid currentColor;background:none;color:var(--ink-soft);font:italic 700 11px/1 Georgia,serif;vertical-align:-3px;margin-left:3px;padding:0;cursor:pointer;}
+  .info-i::after{content:'';position:absolute;inset:-13px;}
+  .info-sheet p{font-size:14.5px;line-height:1.5;margin:4px 0 16px;color:var(--ink);}
+  .help-tip{padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;line-height:1.45;color:var(--ink-secondary);}
+  .help-tip:last-child{border-bottom:none;padding-bottom:0;}
+  .help-tip b{display:block;font-size:13.5px;color:var(--ink);margin-bottom:2px;}
+  .kver{background:none;border:none;font-family:'Inter';font-size:11.5px;color:var(--ink-soft);cursor:pointer;line-height:1.5;padding:6px 10px;}
+  .kver span{font-size:10.5px;opacity:.8;}
   .kacc-logout{width:100%;min-height:52px;background:none;border:none;font-family:'Inter';font-size:15px;font-weight:700;color:var(--warn);cursor:pointer;}
   .rv-row{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.4;}
   .rv-row span{flex:none;width:64px;color:var(--ink-soft);font-weight:600;}
@@ -1643,7 +1656,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 14';
+const APP_VERSION='06.10.2026 · 15';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -1652,16 +1665,63 @@ let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiel
 let selectedSeasonFilter='';
 let kontoTab='profil'; // 'profil'|'saisons'|'zugaenge'|'protokoll' – ab 06.10.2026 · 14 nur noch Name des offenen Bereichs (Analytics, Sprünge)
 let kontoOpen=null, _kontoTabSeen='profil';
-const KONTO_TAB_TO_SEC={profil:null,kontakt:'kontakt',torhueter:'torhueter',saisons:'saisons',zugaenge:'zugaenge',protokoll:'protokoll',benachrichtigungen:'benachrichtigungen',sperren:'sperren',abgleich:'abgleich',passwort:'passwort',app:'app'};
-function setKontoTab(tab){kontoTab=tab;_kontoTabSeen=null;if(tab==='zugaenge')userListSearch='';renderKonto();trackArea(currentPaneArea());
-  const el=kontoOpen&&document.getElementById('kacc-'+kontoOpen); if(el) setTimeout(()=>el.scrollIntoView({block:'start',behavior:'smooth'}),30);}
-function toggleKontoSection(id){
-  const opening=kontoOpen!==id;
-  kontoOpen=opening?id:null; kontoTab=opening?id:'profil'; _kontoTabSeen=kontoTab;
-  if(id==='zugaenge'&&opening) userListSearch='';
-  renderKonto(); trackArea(currentPaneArea());
-  const el=opening&&document.getElementById('kacc-'+id); if(el) setTimeout(()=>el.scrollIntoView({block:'start',behavior:'smooth'}),30);
+const KONTO_TAB_TO_SEC={profil:null,kontakt:'kontakt',torhueter:'torhueter',saisons:'saisons',zugaenge:'zugaenge',protokoll:'protokoll',benachrichtigungen:'benachrichtigungen',sperren:'sperren',abgleich:'abgleich',passwort:'passwort',app:'app',hilfe:'hilfe'};
+/* Ab 06.10.2026 · 15: jeder Bereich öffnet eine eigene Seite (wie die Einstellungen von iPhone und Android).
+   „‹ Konto“, die Zurück-Taste/-Geste von Android und Wischen vom linken Rand (iPhone) führen zurück zur Liste.
+   Jede Unterseite hat einen eigenen Eintrag im Browser-Verlauf ({page:'konto',sub:id}). */
+let KONTO_LIST_SCROLL=0;
+function kontoContent(){ return document.querySelector('.pane[data-pane="konto"] .content'); }
+function openKontoSection(id,noPush){
+  const c=kontoContent(); if(!kontoOpen&&c) KONTO_LIST_SCROLL=c.scrollTop;
+  kontoOpen=id; kontoTab=id; _kontoTabSeen=id;
+  if(id==='zugaenge') userListSearch='';
+  if(!noPush){ try{ history.pushState({pc:1,page:'konto',sub:id},''); }catch(e){} }
+  renderKonto(); if(c) c.scrollTop=0; trackArea(currentPaneArea());
 }
+function closeKontoSection(){
+  kontoOpen=null; kontoTab='profil'; _kontoTabSeen='profil';
+  renderKonto(); const c=kontoContent(); if(c) c.scrollTop=KONTO_LIST_SCROLL; trackArea(currentPaneArea());
+}
+function kontoBack(){
+  if(history.state&&history.state.page==='konto'&&history.state.sub===kontoOpen){ history.back(); return; }
+  closeKontoSection();
+}
+function setKontoTab(tab){ const id=KONTO_TAB_TO_SEC[tab]||null; if(id) openKontoSection(id); else if(kontoOpen) kontoBack(); else renderKonto(); }
+function toggleKontoSection(id){ if(kontoOpen===id) kontoBack(); else openKontoSection(id); }
+// iPhone (als App ohne Zurück-Taste): vom linken Rand nach rechts wischen = zurück zur Konto-Liste
+(function(){ let sx=null,sy=0;
+  document.addEventListener('touchstart',e=>{ const t=e.touches[0]; sx=(kontoOpen&&t.clientX<28&&document.querySelector('.pane.active[data-pane="konto"]'))?t.clientX:null; sy=t.clientY; },{passive:true});
+  document.addEventListener('touchend',e=>{ if(sx===null) return; const t=e.changedTouches[0]; if(t.clientX-sx>70&&Math.abs(t.clientY-sy)<50) kontoBack(); sx=null; },{passive:true});
+})();
+/* ⓘ: kurze Zeile unter dem Titel, die ausführliche Erklärung erst auf Antippen (ab 06.10.2026 · 15) */
+function infoBtn(txt){ return '<button type="button" class="info-i" aria-label="Mehr erfahren" onclick="'+esc('event.stopPropagation();showInfo(\''+jsArg(txt)+'\')')+'">i</button>'; }
+function infoP(short,long){ return '<p class="sub">'+short+(long?' '+infoBtn(long):'')+'</p>'; }
+function showInfo(txt){ openSheet('<div class="info-sheet"><p>'+esc(txt)+'</p><button type="button" class="submit-btn" style="margin:0;" onclick="closeSheet()">Verstanden</button></div>'); }
+/* Hilfe & Feedback (ab 06.10.2026 · 15, Backlog #22) – Mail an Platzcoach mit Version und Gerät */
+const FEEDBACK_MAIL='info@platzcoach.de';
+function deviceLabel(){
+  const ua=navigator.userAgent||'';
+  const os=/iPhone|iPad|iPod/.test(ua)?'iOS '+((ua.match(/OS (\d+(?:_\d+)*)/)||[])[1]||'').replace(/_/g,'.'):/Android/.test(ua)?'Android '+((ua.match(/Android ([\d.]+)/)||[])[1]||''):/Windows/.test(ua)?'Windows':/Mac OS X/.test(ua)?'macOS':'anderes System';
+  const br=/Edg\//.test(ua)?'Edge':/CriOS|Chrome\//.test(ua)?'Chrome':/FxiOS|Firefox\//.test(ua)?'Firefox':/Safari\//.test(ua)?'Safari':'';
+  return (os.trim()+' · '+br).replace(/ · $/,'');
+}
+function feedbackMailto(kind){
+  const to=(CFG&&CFG.feedbackEmail)||FEEDBACK_MAIL, club=(CFG&&CFG.clubName)||'';
+  const body='\n\n\n---\nPlatzcoach '+APP_VERSION+(club?'\nVerein: '+club:'')+'\nGerät: '+deviceLabel()+'\nAls App installiert: '+(isStandaloneApp()?'ja':'nein');
+  return 'mailto:'+to+'?subject='+encodeURIComponent('Platzcoach '+kind+(club?' – '+club:''))+'&body='+encodeURIComponent(body);
+}
+function openFeedback(kind){ trackEvent('feedback_'+(kind==='Fehler'?'fehler':'idee')); location.href=feedbackMailto(kind); }
+function helpCardHTML(){
+  const tips=[['Termin eintragen','Unten auf „+“ tippen, Art und Mannschaft wählen, dann den Platz in der Zeitleiste antippen. Vor dem Speichern siehst du alles noch einmal.'],
+    ['Termine filtern','In „Termine“ oben auf „Filter“: Arten und Mannschaften lassen sich kombinieren.'],
+    ['Platzkonflikte','Rot markierte Termine antippen: dort kannst du den Termin anpassen oder ein Training absagen.'],
+    ['Benachrichtigungen','Hier im Konto stellst du Mail, Push und die Wochenübersicht ein.']];
+  return '<div class="card"><h4>So funktioniert’s</h4>'+tips.map(t=>'<div class="help-tip"><b>'+t[0]+'</b>'+t[1]+'</div>').join('')+'</div>'
+    +'<div class="card"><h4>Feedback</h4><p class="sub">Idee, Fehler oder Frage? Version und Gerät hängen automatisch an.</p>'
+    +'<button type="button" class="submit-btn" style="margin-top:4px;" onclick="openFeedback(\'Feedback\')"><span>Feedback geben</span></button>'
+    +'<button type="button" class="ghost-btn" onclick="openFeedback(\'Fehler\')">Fehler melden</button></div>';
+}
+async function kontoCheckUpdate(){ showToast('Suche nach neuer Version …',1500); const f=await checkForAppUpdate(); if(!f) showToast('Du hast die neueste Version.'); }
 
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const MONTHS_S=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
@@ -2863,6 +2923,7 @@ function goto(n){
   if(n==='neu'&&prevPane!=='neu'){ const c=document.querySelector('.pane.active .content'); FORM_ORIGIN={pane:prevPane,scroll:c?c.scrollTop:0}; setTimeout(updateFormBack,0); }
   if(n==='neu') setTimeout(updateEditBanner,0);
   if(n!=='neu')formSkipFussballLink=null; // Verlassen des Formulars ohne Speichern: Ausnahme nicht stehen lassen
+  if(prevPane==='konto'&&n!=='konto'&&kontoOpen){ kontoOpen=null; kontoTab='profil'; _kontoTabSeen='profil'; } // nächstes Öffnen zeigt die Liste
   document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.dataset.pane===n));
   document.body.classList.toggle('in-form',n==='neu'||n==='tform'); // Formulare: Leiste „Abbrechen / Speichern“ statt Navigation
   const navKey=(n==='tform')?'training':n;
@@ -2912,10 +2973,14 @@ function setupBackButton(){
     const cur=(document.querySelector('.pane.active')||{dataset:{}}).dataset.pane||'start';
     if(closeTopOverlay()){ try{ history.pushState({pc:1,page:cur},''); }catch(e){} return; }
     if(cur==='termine'&&view!=='woche'){ zoomIn(); try{ history.pushState({pc:1,page:cur},''); }catch(e){} return; } // Jahr → Monat → Woche
+    if(cur==='konto'){ // Konto-Unterseiten (ab 06.10.2026 · 15)
+      if(ev.state&&ev.state.page==='konto'){ const sub=ev.state.sub||null; if(sub!==kontoOpen){ if(sub) openKontoSection(sub,true); else closeKontoSection(); } return; }
+      if(kontoOpen){ kontoOpen=null; kontoTab='profil'; _kontoTabSeen='profil'; }
+    }
     const page=(ev.state&&ev.state.page)||'start';
     if(page===cur) return;
     NAV_FROM_HISTORY=true;
-    try{ goto(page); if(page==='termine') render(); }finally{ NAV_FROM_HISTORY=false; }
+    try{ goto(page); if(page==='termine') render(); if(page==='konto'&&ev.state&&ev.state.sub) openKontoSection(ev.state.sub,true); }finally{ NAV_FROM_HISTORY=false; }
   });
 }
 /* Kopfzeile zeigt auf jeder Seite, wann die Daten zuletzt vom Server geholt wurden ("Stand 22:31").
@@ -3696,13 +3761,13 @@ async function pushAuto(){
 }
 function pushRowHTML(){
   if(!pushKey()) return '';
-  let ctl, note='Auf diesem Gerät: Absagen, Verlegungen, neue Termine, Hinweise von fussball.de und Erinnerung an offene Zusagen.';
+  let ctl, note='Auf diesem Gerät', more='Auf diesem Gerät: Absagen, Verlegungen, neue Termine, Hinweise von fussball.de und Erinnerung an offene Zusagen. Über eigene Änderungen gibt es – wie bei der E-Mail – keine Nachricht.';
   if(isIOSDevice()&&!isStandaloneApp()){ ctl='<button type="button" class="wk-act" onclick="pushIosHint()">So geht’s</button>'; note='Auf dem iPhone erst Platzcoach zum Home-Bildschirm hinzufügen, dann hier einschalten.'; }
   else if(!pushSupported()){ ctl=''; note='Dieser Browser unterstützt keine Push-Benachrichtigungen.'; }
   else if(pushPermission()==='denied'){ ctl=''; note='Im Handy für diese Seite blockiert – in den Einstellungen des Browsers erlauben.'; }
   else ctl='<label class="toggle-switch"><input type="checkbox" id="push-toggle"'+(pushOnHere()?' checked':'')+' onchange="this.checked?pushEnable():pushDisable()"><span class="toggle-slider"></span></label>';
   const test=pushOnHere()?'<button type="button" class="wk-act" style="margin-top:8px;" onclick="pushTest()">Test-Push senden</button>':'';
-  return '<div class="notif-row" style="margin-top:12px;"><div class="notif-row-text"><b>Push aufs Handy</b><p>'+esc(note)+' Über eigene Änderungen gibt es – wie bei der E-Mail – keine Nachricht.</p>'+test+'</div>'+ctl+'</div>';
+  return '<div class="notif-row" style="margin-top:12px;"><div class="notif-row-text"><b>Push aufs Handy</b><p>'+esc(note)+' '+infoBtn(more)+'</p>'+test+'</div>'+ctl+'</div>';
 }
 // Einmalige Einrichtung durch einen Admin: Schlüsselpaar im Browser erzeugen, öffentlichen Teil in
 // data/config.json schreiben, privaten Teil einmal anzeigen → als GitHub-Secret VAPID_PRIVATE_KEY speichern.
@@ -5072,7 +5137,7 @@ function renderLockStartBanner(){
     +'</div>'
   ).join('');
 }
-function openLockSettings(){ goto('konto'); setKontoTab('saisons'); }
+function openLockSettings(){ goto('konto'); setKontoTab('sperren'); }
 /* Platz heute sperren mit zwei Klicks (ab 01.10.2026 · 1): „Heute sperren“ → Grund antippen.
    Gilt nur für heute; längere Sperren weiter unter Konto → Saisons. Mit „Rückgängig“ statt Nachfrage. */
 const LOCK_REASONS=['Wetter','Platzpflege','Veranstaltung','Sonstiges'];
@@ -7728,14 +7793,14 @@ function notificationsCard(){
   const enabled=u.emailNotificationsEnabled!==false;
   return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:16px;height:16px;stroke:var(--green)"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>Benachrichtigungen</h4>'+
     '<div class="notif-row">'+
-    '<div class="notif-row-text"><b>E-Mail-Benachrichtigungen</b>'+
-    '<p>Erhalte wichtige Benachrichtigungen zu Änderungen und Aktivitäten in Platzcoach per E-Mail.</p></div>'+
+    '<div class="notif-row-text"><b>E-Mail</b>'+
+    '<p>Änderungen an deinen Terminen '+infoBtn('Du bekommst eine Mail, wenn Termine oder Trainings deiner Mannschaften abgesagt, verlegt oder neu eingetragen werden. Über eigene Änderungen gibt es keine Mail.')+'</p></div>'+
     '<label class="toggle-switch"><input type="checkbox" id="notif-toggle"'+(enabled?' checked':'')+' onchange="toggleEmailNotifications(this.checked)"><span class="toggle-slider"></span></label>'+
     '</div>'+
     // Wochenübersicht (ab 30.09.2026 · 4): eigener Schalter, unabhängig von den Änderungsmails; fehlend = an.
     '<div class="notif-row" style="margin-top:12px;">'+
     '<div class="notif-row-text"><b>Wochenübersicht</b>'+
-    '<p>Sonntags gegen 18 Uhr: deine Woche mit Training, Spielen und Absagen, dazu Platzkonflikte der nächsten 14 Tage.</p></div>'+
+    '<p>Sonntags gegen 18 Uhr '+infoBtn('Deine Woche mit Training, Spielen und Absagen per Mail, dazu Platzkonflikte der nächsten 14 Tage.')+'</p></div>'+
     '<label class="toggle-switch"><input type="checkbox" id="digest-toggle"'+(u.weeklyDigest!==false?' checked':'')+' onchange="toggleWeeklyDigest(this.checked)"><span class="toggle-slider"></span></label>'+
     '</div>'+pushRowHTML()+'</div>'+adminNotifyCard();
 }
@@ -7780,21 +7845,20 @@ function profileCard(){
   const contactEmail=u.contactEmail||'';
   const vis=u.contactPublic||'none';
   const fld=(id,lbl,type,ph,val)=>'<div class="field" style="margin:10px 0 10px;">'+
-    '<label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">'+lbl+'</label>'+
-    '<input type="'+type+'" id="'+id+'" autocomplete="off" placeholder="'+ph+'" value="'+esc(val)+'">'+
+    '<label for="'+id+'" style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">'+lbl+'</label>'+
+    '<input type="'+type+'" id="'+id+'" autocomplete="off" enterkeyhint="done" placeholder="'+ph+'" value="'+esc(val)+'" onchange="saveProfileAuto()" onkeydown="if(event.key===\'Enter\')this.blur()">'+
     '<div id="'+id+'-err" style="display:none;color:var(--warn);font-size:11px;margin-top:4px;padding:2px 0;"></div></div>';
   return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:16px;height:16px;stroke:var(--green)"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Mein Profil & Kontakt</h4>'+
-    '<p class="sub">Angemeldete Trainer im Verein sehen deine Telefonnummer und E-Mail bei deinen Terminen immer. Unten legst du fest, was auch Besucher <b>ohne Anmeldung</b> sehen.</p>'+
+    infoP('Wird sofort gespeichert.','Angemeldete Trainer im Verein sehen deine Telefonnummer und E-Mail bei deinen Terminen immer. Unten legst du fest, was auch Besucher ohne Anmeldung sehen.')+
     fld('prof-phone','Telefonnummer','tel','z. B. 0172 1234567',phone)+
     fld('prof-email','Kontakt-E-Mail','email','z. B. trainer@svbb.de',contactEmail)+
     '<div class="field" style="margin-bottom:14px;"><label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:8px;">Öffentlich anzeigen (ohne Anmeldung)</label>'+
     '<div class="seg" id="prof-vis-seg">'+
-    '<button type="button" data-val="none"'+(vis==='none'?' class="on"':'')+' onclick="setContactVis(this)">Nein</button>'+
-    '<button type="button" data-val="phone"'+(vis==='phone'?' class="on"':'')+' onclick="setContactVis(this)">Telefon</button>'+
-    '<button type="button" data-val="email"'+(vis==='email'?' class="on"':'')+' onclick="setContactVis(this)">E-Mail</button>'+
-    '<button type="button" data-val="both"'+(vis==='both'?' class="on"':'')+' onclick="setContactVis(this)">Beides</button>'+
-    '</div></div>'+
-    '<button class="submit-btn" style="margin-top:0;" onclick="saveProfile()"><span>Speichern</span></button></div>';
+    '<button type="button" data-val="none"'+(vis==='none'?' class="on"':'')+' onclick="setContactVis(this);saveProfileAuto()">Nein</button>'+
+    '<button type="button" data-val="phone"'+(vis==='phone'?' class="on"':'')+' onclick="setContactVis(this);saveProfileAuto()">Telefon</button>'+
+    '<button type="button" data-val="email"'+(vis==='email'?' class="on"':'')+' onclick="setContactVis(this);saveProfileAuto()">E-Mail</button>'+
+    '<button type="button" data-val="both"'+(vis==='both'?' class="on"':'')+' onclick="setContactVis(this);saveProfileAuto()">Beides</button>'+
+    '</div></div></div>';
 }
 function pwaCard(){
   if(isStandaloneApp()){
@@ -7834,7 +7898,7 @@ function pwCard(){
       '<button class="submit-btn" id="sp-btn" onclick="changeSuperPassword()">Notzugang-Passwort ändern</button></div>';
   }
   return '<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Passwort ändern</h4>'+
-    '<p class="sub">Dein Schreib-Token hängt am Passwort. Beim Ändern wird er neu verschlüsselt.</p>'+
+    infoP('Mindestens 12 Zeichen.','Dein Zugang zum Speichern ist mit deinem Passwort verschlüsselt. Beim Ändern wird er automatisch neu verschlüsselt.')+
     '<div class="field" style="margin:10px 0 8px;"><input type="password" id="pw-old" placeholder="Aktuelles Passwort" autocomplete="current-password"></div>'+
     '<div class="field pw-wrap" style="margin-bottom:8px;"><input type="password" id="pw-new" placeholder="Neues Passwort (min. 12 Zeichen)" autocomplete="new-password">'+PW_EYE+'</div>'+
     '<div class="field pw-wrap" style="margin-bottom:10px;"><input type="password" id="pw-new2" placeholder="Neues Passwort wiederholen" autocomplete="new-password">'+PW_EYE+'</div>'+
@@ -8301,7 +8365,8 @@ function renderKonto(){
   const box=document.getElementById('konto-body');
   if(!session){
     box.innerHTML='<div class="card"><h4>Nicht angemeldet</h4><p class="sub">Termine ansehen geht ohne Anmeldung. Zum Eintragen brauchst du einen Zugang vom Vorstand.</p>'+
-      '<button class="submit-btn" onclick="openLogin()"><span>Anmelden</span></button></div>'+pwaCard();
+      '<button class="submit-btn" onclick="openLogin()"><span>Anmelden</span></button></div>'+pwaCard()+helpCardHTML();
+    const ver=document.getElementById('ver-note'); if(ver) ver.style.display='';
     return;
   }
   // ── Header (immer sichtbar) ──
@@ -8338,23 +8403,33 @@ function renderKonto(){
     SEC.push({id:'zugaenge',g:'club',t:'Zugänge',sum:USERS.length+' Zugänge'+(nReg?' · '+nReg+' neue Anmeldung'+(nReg===1?'':'en'):''),badge:nReg,i:ico('<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0112 0M16 5a3 3 0 010 6M21 20a6 6 0 00-4-5.6"/>'),html:()=>'<div id="reg-admin"></div>'+adminNewUserCard()+adminUserListCard()});
     SEC.push({id:'protokoll',g:'club',t:'Protokoll & Regeln',sum:'Änderungen im Verein',i:ico('<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>'),html:()=>rulesInfoCard()+logCard()});
   }
+  SEC.push({id:'hilfe',g:'help',t:'Hilfe & Feedback',sum:'Kurzanleitung, Idee oder Fehler melden',i:ico('<circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 014.9.6c0 1.7-2.5 2.2-2.5 3.7M12 17h.01"/>'),html:()=>helpCardHTML()});
   if(kontoOpen&&!SEC.some(x=>x.id===kontoOpen)) kontoOpen=null;
+  const inKonto=!!document.querySelector('.pane.active[data-pane="konto"]'), hdT=document.getElementById('hd-title'), ver=document.getElementById('ver-note');
+  if(ver) ver.style.display=kontoOpen?'none':'';
+  if(kontoOpen){
+    const x=SEC.find(y=>y.id===kontoOpen);
+    if(inKonto&&hdT) hdT.textContent=x.t;
+    box.innerHTML='<div class="ksub-bar"><button type="button" class="ksub-back" onclick="kontoBack()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Konto</button></div>'
+      +'<div class="ksub-body'+(x.hide1?' hide1':'')+'">'+x.html()+'</div>';
+    if(kontoOpen==='protokoll'&&logExpanded)loadLogIfNeeded();
+    if(kontoOpen==='zugaenge'){ if(regIsAdminSession()&&(!REGSTATE.loaded||REGSTATE.forToken!==session.token)) loadRegData(); else renderRegAdmin(); }
+    return;
+  }
+  if(inKonto&&hdT) hdT.textContent='Mein Konto';
 
   // ── Saison-Warnung für Admins ohne aktive Saison ──
   if(session.isAdmin&&!session.isSuper&&SEASONS.length>0&&!isInActiveSeason(session.id)){
     h+='<div class="banner warn" style="margin-bottom:10px;">⚠ Du bist keiner aktiven Saison zugeordnet. <strong onclick="setKontoTab(\'saisons\')" style="cursor:pointer;text-decoration:underline;">Zur Saisonverwaltung →</strong></div>';
   }
   const group=(g,label)=>{ const list=SEC.filter(x=>x.g===g); if(!list.length) return '';
-    return '<p class="kacc-group">'+label+'</p><div class="kacc-list">'+list.map(x=>{ const open=kontoOpen===x.id;
-      return '<div class="kacc'+(open?' open':'')+'" id="kacc-'+x.id+'"><button type="button" class="kacc-head" aria-expanded="'+open+'" onclick="toggleKontoSection(\''+x.id+'\')">'
-        +'<span class="kacc-ico">'+x.i+'</span><span class="kacc-txt"><b>'+esc(x.t)+(x.badge?'<i class="kacc-badge">'+x.badge+'</i>':'')+'</b><small>'+esc(x.sum)+'</small></span><span class="kacc-chev">›</span></button>'
-        +(open?'<div class="kacc-body'+(x.hide1?' hide1':'')+'">'+x.html()+'</div>':'')+'</div>'; }).join('')+'</div>'; };
-  h+=group('mine','Mein Konto')+group('club','Verein');
+    return (label?'<p class="kacc-group">'+label+'</p>':'<div style="height:18px;"></div>')+'<div class="kacc-list">'+list.map(x=>
+      '<div class="kacc" id="kacc-'+x.id+'"><button type="button" class="kacc-head" onclick="openKontoSection(\''+x.id+'\')">'
+        +'<span class="kacc-ico">'+x.i+'</span><span class="kacc-txt"><b>'+esc(x.t)+(x.badge?'<i class="kacc-badge">'+x.badge+'</i>':'')+'</b><small>'+esc(x.sum)+'</small></span><span class="kacc-chev">›</span></button></div>').join('')+'</div>'; };
+  h+=group('mine','Mein Konto')+group('club','Verein')+group('help','');
   h+='<div class="kacc-list" style="margin-top:18px;"><button type="button" class="kacc-logout" onclick="logout()">Abmelden</button></div>';
 
   box.innerHTML=h;
-  if(kontoOpen==='protokoll'&&logExpanded)loadLogIfNeeded();
-  if(kontoOpen==='zugaenge'){ if(regIsAdminSession()&&(!REGSTATE.loaded||REGSTATE.forToken!==session.token)) loadRegData(); else renderRegAdmin(); }
 }
 function saveAdminToken(){
   const t=document.getElementById('ad-token').value.trim();
@@ -8489,7 +8564,10 @@ async function toggleWeeklyDigest(newVal){
     showToast('Fehler beim Speichern: '+e.message,6000);
   }
 }
-async function saveProfile(){
+// Ab 06.10.2026 · 15: Profil speichert sofort (Feld verlassen bzw. Sichtbarkeit antippen), nacheinander statt gleichzeitig
+let _profChain=Promise.resolve();
+function saveProfileAuto(){ _profChain=_profChain.then(()=>saveProfile(true)).catch(()=>{}); }
+async function saveProfile(auto){
   const u=USERS.find(x=>x.id===session.id); if(!u)return;
   const phone=document.getElementById('prof-phone').value.trim();
   const contactEmail=document.getElementById('prof-email').value.trim();
@@ -8510,6 +8588,7 @@ async function saveProfile(){
   if(!valid)return;
   const vis=document.querySelector('#prof-vis-seg button.on');
   const contactPublic=vis?vis.dataset.val:'none';
+  if(auto&&(u.phone||'')===phone&&(u.contactEmail||'')===contactEmail&&(u.contactPublic||'none')===contactPublic) return;
   showSaving('Profil wird gespeichert …');
   const backup=JSON.stringify(USERS);
   u.phone=phone; u.contactEmail=contactEmail; u.contactPublic=contactPublic;
@@ -8517,8 +8596,8 @@ async function saveProfile(){
   localStorage.setItem('svbb_session',JSON.stringify(session)); localStorage.setItem('pc_was_logged_in','1');
   try{
     await saveUsers('Profil geändert: '+u.first+' '+u.last);
-    showToast('Kontaktdaten gespeichert.');
-    renderKonto();
+    if(auto) showToast('Gespeichert ✓',1500); // kein Neuaufbau – sonst verliert das nächste Feld den Fokus
+    else{ showToast('Kontaktdaten gespeichert.'); renderKonto(); }
   }catch(e){ USERS=JSON.parse(backup); showToast('Fehler: '+e.message,6000); }
   finally{ hideSaving(); }
 }
@@ -8764,7 +8843,7 @@ function resourceLockCard(){
   const active=LOCKS.filter(l=>!l.bis||l.bis>=todayStr).sort((a,b)=>a.von.localeCompare(b.von));
   const resLabel=r=>r==='platz'?'Platz':r==='halle'?'Halle':r;
   return '<div class="card"><h4>'+svgWarn+'Ressourcen-Sperren</h4>'
-    +'<p class="sub">Für Wetter (z.B. Schnee) oder andere Gründe – betroffene Termine zeigen eine Warnung, werden aber NICHT automatisch abgesagt.</p>'
+    +infoP('Betroffene Termine zeigen eine Warnung.','Für Wetter (z. B. Schnee) oder andere Gründe. Betroffene Termine werden nicht automatisch abgesagt.')
     +'<div class="seg" id="lock-res-seg" style="margin-top:12px;">'
     +'<button type="button" class="'+(lockFormResource==='platz'?'on':'')+'" onclick="setLockResource(\'platz\')">Platz</button>'
     +'<button type="button" class="'+(lockFormResource==='halle'?'on':'')+'" onclick="setLockResource(\'halle\')">Halle</button>'
@@ -9013,7 +9092,7 @@ function teamSyncManualHTML(s){
     +'<div class="ts-meta" style="margin-top:6px;">Für Mannschaften ohne Spiele bei fussball.de, z. B. eine neue Bambini-Gruppe.</div></div>';
   return h;
 }
-function openTeamSync(){ goto('konto'); setKontoTab('saisons'); setTimeout(()=>{ const el=document.getElementById('team-sync-card'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },60); }
+function openTeamSync(){ goto('konto'); setKontoTab('abgleich'); setTimeout(()=>{ const el=document.getElementById('team-sync-card'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },60); }
 function tsTargetOptions(item){
   const opts=['<option value="">Platzcoach-Mannschaft wählen …</option>'];
   ALL_CLASSES.filter(t=>t!==GK_TEAM).forEach(team=>{
@@ -9071,7 +9150,7 @@ function teamSyncCard(){
 }
 function seasonManagementCard(){
   const ico='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width:16px;height:16px;stroke:var(--green)"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>';
-  let h='<div class="card"><h4>'+ico+'Saisons</h4><p class="sub">Definiert, welche Trainer in welcher Spielzeit welche Mannschaften betreuen – ändert sich das (z.B. Wechsel von E2 auf E1), einfach hier für die jeweilige Saison anpassen.</p>';
+  let h='<div class="card"><h4>'+ico+'Saisons</h4>'+infoP('Welche Trainer welche Mannschaften betreuen.','Legt fest, welche Trainer in welcher Spielzeit welche Mannschaften betreuen. Ändert sich das (z. B. Wechsel von E2 auf E1), hier für die jeweilige Saison anpassen.');
   const sorted=[...SEASONS].sort((a,b)=>b.startYear-a.startYear);
   if(!sorted.length){h+='<div style="font-size:12px;color:var(--ink-soft);margin:8px 0 12px;">Noch keine Saisons.</div>';}
   const isActive=s=>s.from<=todayStr&&s.to>=todayStr;
@@ -9521,7 +9600,7 @@ function keeperCardHTML(){
   if(!session||session.isSuper&&!session.token) return '';
   const teams=myKeeperTeams(); if(!teams.length) return '';
   let h='<div class="card"><h4><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M8 13V6a1.5 1.5 0 013 0v5M11 11V4.5a1.5 1.5 0 013 0V11M14 11V6a1.5 1.5 0 013 0v7c0 4-2.5 7-6 7-2.5 0-4-1.5-5.5-4L4 13a1.5 1.5 0 012.5-1.5L8 13"/></svg>Meine Torhüter</h4>'
-    +'<p class="sub">Trage die Torhüter deiner Mannschaft ein, damit du sie zum Torwarttraining anmelden kannst. Die Namen sind verschlüsselt gespeichert und nur für angemeldete Trainer sichtbar.</p>';
+    +infoP('Für die Anmeldung zum Torwarttraining.','Trage die Torhüter deiner Mannschaft ein, damit du sie zum Torwarttraining anmelden kannst. Die Namen sind verschlüsselt gespeichert und nur für angemeldete Trainer sichtbar.');
   if(!GK.loaded) return h+'<p class="gk-note">'+esc(GK.error||'Wird geladen …')+'</p></div>';
   const mine=GK.keepers.filter(k=>teams.some(t=>t.team===k.team&&t.squad===(k.squad||1)));
   const byTeam={};
@@ -10048,7 +10127,7 @@ function renderRegAdmin(){
       +'<button class="cancel-btn" style="margin:0;font-size:12px;" onclick="createInvite()">Neuen Link erzeugen</button>'
       +'<button class="cancel-btn" style="margin:0;font-size:12px;color:#8E2A1D;" onclick="disableInvite()">Link deaktivieren</button></div>';
   }else{
-    h+='<p class="sub">Erzeuge einen Einladungslink und schicke ihn z. B. in die Trainer-WhatsApp-Gruppe. Neue Trainer registrieren sich selbst, du gibst sie hier frei.</p>'
+    h+=infoP('Link erzeugen und an die Trainer schicken.','Erzeuge einen Einladungslink und schicke ihn z. B. in die Trainer-WhatsApp-Gruppe. Neue Trainer registrieren sich selbst, du gibst sie hier frei.')
       +'<span class="reg-label" style="margin-top:10px;">Gültig für</span><div class="seg" style="margin-bottom:8px;">'
       +[7,14,30].map(d=>'<button type="button"'+(REGSTATE.days===d?' class="on"':'')+' onclick="REGSTATE.days='+d+';renderRegAdmin();">'+d+' Tage</button>').join('')+'</div>'
       +'<div class="reg-actions">'
@@ -10419,7 +10498,7 @@ async function boot(){
   renderTrainerChips(document.getElementById('tf-team').value,1,[]);
   // Versionsanzeige im Konto-Bereich: zeigt auf einen Blick, ob die neueste Datei geladen ist.
   // Bei jeder Änderung APP_VERSION hochzählen.
-  document.getElementById('ver-note').textContent='Platzcoach · Version '+APP_VERSION;
+  document.getElementById('ver-note').innerHTML='<button type="button" class="kver" onclick="kontoCheckUpdate()">Platzcoach · Version '+esc(APP_VERSION)+'<br><span>Antippen: nach neuer Version suchen</span></button>';
 
   refreshHeader(); refreshBioBtn(); buildFilters(); restoreFilterPref();
   setView('woche'); renderStart(); renderTraining(); setupCalSwipe();
