@@ -451,7 +451,8 @@
       "contactEmail": "michael.raneck@sv-bachum-bergheim.de",
       "notifyPrefs": {
         "push": {
-          "other": true
+          "other": true,
+          "admin": true
         },
         "mail": {}
       }
