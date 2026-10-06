@@ -3,7 +3,7 @@
 // - JEDE andere externe Anfrage (Clarity, GA, Worker, fussball.de, …) wird blockiert und protokolliert
 // - feste Uhrzeit, Zeitzone, Sprache; Service Worker blockiert
 import { chromium } from 'playwright';
-import { DEMO_ORIGIN, DEMO_NOW, DEMO_TZ } from '../demo/demo.config.mjs';
+import { DEMO_ORIGIN, DEMO_APP_URL, DEMO_NOW, DEMO_TZ } from '../demo/demo.config.mjs';
 
 export const VIEWPORT = { width: 400, height: 760 }; // CSS-Pixel, Hochkant-Handy
 export const DPR = 3; // 400 × 3 = 1200 px Breite → scharf im 1080er Film, auch bei Zoom
@@ -21,6 +21,7 @@ export async function launchDemoBrowser({ headless = true } = {}) {
     const req = route.request();
     const u = new URL(req.url());
     if (u.origin === DEMO_ORIGIN) return route.continue();
+    if (u.origin === DEMO_APP_URL) return route.fulfill({ response: await route.fetch({ url: DEMO_ORIGIN + u.pathname + u.search }) });
     if (u.hostname === 'api.github.com') {
       if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: {
         'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Authorization, Content-Type, Accept',

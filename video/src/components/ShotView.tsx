@@ -1,16 +1,19 @@
 // Ein Shot: echter App-Screenshot mit Kamerafahrt, dezenten Highlights und Cursor.
 import React from 'react';
 import { Img, interpolate, staticFile, Easing } from 'remotion';
-import { brand, card, cursor as cursorCfg, type Shot } from '../config/film';
+import { brand, card, cursor as cursorCfg } from '../config/common';
+import type { Shot } from '../config/types';
 import { boxToCard, cameraAt, toCard, type Cam } from '../lib/camera';
-import { el, scene, VIEW_W, VIEW_H } from '../lib/manifest';
+import { elOf, sceneOf, type Manifest } from '../lib/manifest';
 
 const FADE = 0.3;
 
-export const ShotView: React.FC<{ shot: Shot; t: number }> = ({ shot, t }) => {
+export const ShotView: React.FC<{ shot: Shot; t: number; manifest: Manifest; fit?: boolean }> = ({ shot, t, manifest, fit }) => {
   const rel = t - shot.from;
-  const sc = scene(shot.scene);
-  const cam = cameraAt(shot.scene, shot.camera, rel);
+  const sc = sceneOf(manifest, shot.scene);
+  const view = { w: manifest.coordinateSystem.viewport.width, h: manifest.coordinateSystem.viewport.height };
+  const VIEW_W = view.w, VIEW_H = view.h;
+  const cam = cameraAt(sc, view, shot.camera, rel, !!fit);
   const opacity = interpolate(rel, [0, FADE], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
   return (
     <div style={{ position: 'absolute', inset: 0, opacity }}>
@@ -23,10 +26,10 @@ export const ShotView: React.FC<{ shot: Shot; t: number }> = ({ shot, t }) => {
         }}
       />
       {(shot.highlights ?? []).map((h, i) => (
-        <HighlightRing key={i} cam={cam} box={el(shot.scene, h.el)} pad={h.pad ?? 4} rel={rel} from={h.from} to={h.to} dim={h.dim} />
+        <HighlightRing key={i} cam={cam} box={elOf(sc, h.el)} pad={h.pad ?? 4} rel={rel} from={h.from} to={h.to} dim={h.dim} />
       ))}
       {(shot.taps ?? []).map((tp, i) => {
-        const b = el(shot.scene, tp.el);
+        const b = elOf(sc, tp.el);
         return <Cursor key={i} cam={cam} x={b.x + b.w / 2 + (tp.dx ?? 0)} y={b.y + b.h / 2 + (tp.dy ?? 0)} rel={rel} at={tp.at} />;
       })}
     </div>

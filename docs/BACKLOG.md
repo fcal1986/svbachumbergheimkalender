@@ -94,7 +94,7 @@ Letzte Aktualisierung: 06.10.2026 (Version 06.10.2026 · 13)
 | 45 | Person anlegen ohne Zugang (Einladung optional) | 1.0 | ⬜ | |
 | 46 | Personen per CSV/Excel importieren | 1.0 | ⬜ | |
 | 47 | Co-Trainer und Betreuer bekommen automatisch ihre Mannschaften | 1.0 | ⬜ | |
-| 88 | Werbe-/Produktvideos aus echten App-Ansichten (Playwright + Remotion, Demo-Verein) | Pilot | 🟡 | 06.10.2026: Pipeline in `video/` (getrennt von der App, eigene package.json), Demo mit fiktivem Verein und GitHub-API-Mock, erster 30-s-Hochkantfilm + 2 Einstiegsvorschauen. Offen: Sprachaufnahme, Musik, Veröffentlichung |
+| 88 | Werbe-/Produktvideos aus echten App-Ansichten (Playwright + Remotion, Demo-Verein) | Pilot | 🟡 | 06.10.2026: Pipeline in `video/` (getrennt von der App, eigene package.json), Demo mit fiktivem Verein und GitHub-API-Mock, erster 30-s-Hochkantfilm + 2 Einstiegsvorschauen; 06.10.2026 (2): sechs Reels (Platzbelegung, Spielverlegung, fussball.de-Abgleich, Freier Termin, Torwarttraining, Freundschaftsspiel), je Reel Ablauf + Inhaltsdatei. Offen: Sprachaufnahme, Musik, Veröffentlichung |
 
 ## Not important
 

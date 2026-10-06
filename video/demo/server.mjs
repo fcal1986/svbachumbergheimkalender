@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import {
-  REPO_ROOT, RUNTIME_DIR, RUNTIME_DATA, APP_FILES, DEMO_REPO, DEMO_BRANCH, DEMO_TOKEN, DEMO_PORT, DEMO_ORIGIN,
+  REPO_ROOT, RUNTIME_DIR, RUNTIME_DATA, APP_FILES, DEMO_REPO, DEMO_BRANCH, DEMO_TOKEN, DEMO_PORT, DEMO_APP_URL,
 } from './demo.config.mjs';
 import { assertSafeToWrite, assertMarker, assertDemoConfig } from './safety.mjs';
 
@@ -32,8 +32,8 @@ const json = (res, status, obj) => send(res, status, JSON.stringify(obj));
 const sha = (buf) => require('node:crypto').createHash('sha1').update(buf).digest('hex');
 
 function fontCss() {
-  const face = (fam, dir, w) => `@font-face{font-family:'${fam}';font-style:normal;font-weight:${w};font-display:block;src:url(${DEMO_ORIGIN}/__fonts/${dir}/${dir}-latin-${w}-normal.woff2) format('woff2');}\n` +
-    `@font-face{font-family:'${fam}';font-style:normal;font-weight:${w};font-display:block;src:url(${DEMO_ORIGIN}/__fonts/${dir}/${dir}-latin-ext-${w}-normal.woff2) format('woff2');unicode-range:U+0100-024F,U+1E00-1EFF;}\n`;
+  const face = (fam, dir, w) => `@font-face{font-family:'${fam}';font-style:normal;font-weight:${w};font-display:block;src:url(${DEMO_APP_URL}/__fonts/${dir}/${dir}-latin-${w}-normal.woff2) format('woff2');}\n` +
+    `@font-face{font-family:'${fam}';font-style:normal;font-weight:${w};font-display:block;src:url(${DEMO_APP_URL}/__fonts/${dir}/${dir}-latin-ext-${w}-normal.woff2) format('woff2');unicode-range:U+0100-024F,U+1E00-1EFF;}\n`;
   return [400, 500, 600, 700, 800].map((w) => face('Inter', 'inter', w)).join('') +
     [600, 700, 800].map((w) => face('Manrope', 'manrope', w)).join('');
 }

@@ -1,0 +1,41 @@
+[
+  {
+    "id": "platzbelegung",
+    "nr": 1,
+    "file": "reel1-platzbelegung",
+    "previews": [
+      "werwann",
+      "aufeinenblick"
+    ]
+  },
+  {
+    "id": "spielverlegung",
+    "nr": 2,
+    "file": "reel2-spielverlegung",
+    "previews": []
+  },
+  {
+    "id": "fussballde",
+    "nr": 3,
+    "file": "reel3-fussballde",
+    "previews": []
+  },
+  {
+    "id": "freiertermin",
+    "nr": 4,
+    "file": "reel4-freier-termin",
+    "previews": []
+  },
+  {
+    "id": "torwarttraining",
+    "nr": 5,
+    "file": "reel5-torwarttraining",
+    "previews": []
+  },
+  {
+    "id": "freundschaftsspiel",
+    "nr": 6,
+    "file": "reel6-freundschaftsspiel",
+    "previews": []
+  }
+]

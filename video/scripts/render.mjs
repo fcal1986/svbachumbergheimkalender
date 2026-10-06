@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Rendert den Hauptfilm und/oder die Einstiegsvorschauen nach out/.
-//   node scripts/render.mjs            → alles
-//   node scripts/render.mjs main       → nur Hauptfilm
-//   node scripts/render.mjs hooks      → nur Einstiegsvorschauen
+//   node scripts/render.mjs                    → alle Reels + Einstiegsvorschauen
+//   node scripts/render.mjs spielverlegung …   → nur diese Reels
+//   node scripts/render.mjs previews           → nur Einstiegsvorschauen
 // Browser: REMOTION_BROWSER_EXECUTABLE, sonst das Chrome-Headless-Shell von Playwright, sonst Remotions eigener Download.
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -13,7 +13,8 @@ import { VIDEO_DIR } from '../demo/demo.config.mjs';
 import { prepare } from './prepare.mjs';
 
 const require = createRequire(import.meta.url);
-const what = process.argv[2] || 'all';
+const args = process.argv.slice(2);
+const list = JSON.parse(fs.readFileSync(path.join(VIDEO_DIR, 'src', 'reels', 'list.json'), 'utf8'));
 const OUT = path.join(VIDEO_DIR, 'out');
 const RAW = path.join(OUT, 'raw');
 fs.mkdirSync(RAW, { recursive: true });
@@ -62,8 +63,11 @@ function finalize(src, dst) {
   if (r.status !== 0) { console.error('ffmpeg-Export fehlgeschlagen – Rohdatei liegt in out/raw/.'); process.exit(1); }
 }
 
-if (what === 'all' || what === 'main') render('PlatzcoachFilm', 'platzcoach-hauptfilm-whatsapp.mp4', { hook: 'whatsapp' });
-if (what === 'all' || what === 'hooks') {
-  render('EinstiegVorschau', 'einstieg-werwann.mp4', { hook: 'werwann' });
-  render('EinstiegVorschau', 'einstieg-aufeinenblick.mp4', { hook: 'aufeinenblick' });
+const onlyPreviews = args.includes('previews');
+const ids = args.filter((a) => a !== 'previews');
+const chosen = ids.length ? list.filter((r) => ids.includes(r.id)) : list;
+if (ids.length && chosen.length !== ids.length) { console.error('Unbekanntes Reel – siehe src/reels/list.json'); process.exit(1); }
+for (const r of chosen) {
+  if (!onlyPreviews) render(`Reel-${r.id}`, `${r.file}.mp4`, { reel: r.id });
+  if (!ids.length || onlyPreviews) for (const h of r.previews || []) render(`Vorschau-${r.id}`, `${r.file}-einstieg-${h}.mp4`, { reel: r.id, hook: h });
 }

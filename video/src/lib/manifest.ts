@@ -1,25 +1,37 @@
-// Typisierter Zugriff auf das Szenenmanifest aus der Playwright-Aufnahme.
-import raw from '../../public/capture/manifest.json';
+// Szenenmanifeste aus der Playwright-Aufnahme (public/capture/<reel>/manifest.json).
+// Per require.context geladen, damit fehlende Aufnahmen erst beim Rendern des betroffenen Reels auffallen.
 
 export type Box = { x: number; y: number; w: number; h: number };
 export type Scene = { id: string; description: string; image: string; elements: Record<string, Box> };
-type Manifest = {
+export type Manifest = {
+  reel: string;
   coordinateSystem: { viewport: { width: number; height: number }; deviceScaleFactor: number };
   scenes: Scene[];
+  texts?: Record<string, string>;
 };
 
-export const manifest = raw as unknown as Manifest;
-export const VIEW_W = manifest.coordinateSystem.viewport.width; // CSS-Pixel
-export const VIEW_H = manifest.coordinateSystem.viewport.height;
+declare const require: { context: (dir: string, deep: boolean, re: RegExp) => { keys(): string[]; (k: string): unknown } };
+const ctx = require.context('../../public/capture', true, /manifest\.json$/);
+const MANIFESTS: Record<string, Manifest> = {};
+for (const k of ctx.keys()) {
+  const m = ctx(k) as Manifest;
+  if (m && m.reel) MANIFESTS[m.reel] = m;
+}
 
-export function scene(id: string): Scene {
-  const s = manifest.scenes.find((x) => x.id === id);
-  if (!s) throw new Error(`Szene „${id}“ fehlt im Manifest – zuerst „npm run capture“ ausführen.`);
+export function manifestFor(reelId: string): Manifest {
+  const m = MANIFESTS[reelId];
+  if (!m) throw new Error(`Aufnahme für „${reelId}“ fehlt – zuerst „npm run capture -- ${reelId}“ ausführen.`);
+  return m;
+}
+
+export function sceneOf(m: Manifest, id: string): Scene {
+  const s = m.scenes.find((x) => x.id === id);
+  if (!s) throw new Error(`Szene „${id}“ fehlt im Manifest von „${m.reel}“.`);
   return s;
 }
 
-export function el(sceneId: string, key: string): Box {
-  const b = scene(sceneId).elements[key];
-  if (!b) throw new Error(`Element „${key}“ fehlt in Szene „${sceneId}“ (Manifest).`);
+export function elOf(s: Scene, key: string): Box {
+  const b = s.elements[key];
+  if (!b) throw new Error(`Element „${key}“ fehlt in Szene „${s.id}“.`);
   return b;
 }
