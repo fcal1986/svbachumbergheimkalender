@@ -1675,7 +1675,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 23';
+const APP_VERSION='06.10.2026 · 24';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -6283,6 +6283,7 @@ function renderFormTimeline(){
 }
 // Zeilenkopf angetippt: Fläche/Ressource ein- oder ausschalten (gleiche Datenquelle wie die bisherigen Chips).
 function formTlPick(kind,arg){
+  formAreaFromAuto(kind==='res');
   const on=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res);
   const has=r=>on.includes(r), set=list=>setResChips('f-res',[...new Set(list)]);
   const overlay=occLevel(formKind())==='overlay';
@@ -6361,6 +6362,7 @@ function tlShiftDay(n,pos){
 }
 // „+“ in einer freien Lücke: Beginn = angetippte Stelle (15 Min), Dauer wie im Formular, höchstens bis zur nächsten Belegung.
 function formTlFree(ds,area,lane,from,to,ev){
+  if(FORM_TL) FORM_TL.areaAuto=false;
   let start=from;
   if(ev&&ev.currentTarget&&ev.currentTarget.getBoundingClientRect){ const r=ev.currentTarget.getBoundingClientRect(), x=(ev.clientX||r.left)-r.left;
     start=from+Math.floor(((to-from)*Math.max(0,Math.min(1,x/Math.max(1,r.width))))/15)*15; }
@@ -6459,7 +6461,7 @@ function sfWhatChips(){
   if(ov) h+=chip('Platz',on('Großspielfeld'),"sfPick('gk')");
   else{
     h+=chip('Ganzer Platz',same([1,2,3,4]),"sfPick('ganz')")+chip('Hälfte A',same([1,2]),"sfPick('A')")+chip('Hälfte B',same([3,4]),"sfPick('B')");
-    if(pq.length===1) h+=chip('Viertel '+pq[0],true,"sfPick('ganz')");
+    if(pq.length===1) h+=chip('Viertel '+pq[0],true,"sfPick('q')");
   }
   h+=chip('Kleinfeld',on('Kleinspielfeld'),"sfPick('klein')");
   const all=formTlResAll(), vis=SF.moreRes?all:all.filter(r=>formTlStored().includes(r)||on(r)||(r==='Halle'&&o.halle));
@@ -6468,6 +6470,8 @@ function sfWhatChips(){
   return h;
 }
 function sfPick(k,r){
+  formAreaFromAuto(k==='res');
+  if(k==='q'){ const on0=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res); setResChips('f-res',on0.filter(x=>x!=='Großspielfeld')); formDirty=true; hideConflicts(); renderPitch(); renderHalle(); renderSlotFinder(); return; }
   const on=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res);
   const set=list=>setResChips('f-res',[...new Set(list)]), without=x=>on.filter(y=>y!==x);
   if(k==='gk'||k==='klein'){ const x=k==='gk'?'Großspielfeld':'Kleinspielfeld'; set(on.includes(x)?without(x):on.concat([x])); }
@@ -6704,8 +6708,19 @@ function prefillOwnTraining(d){
       if(s.pitch.mode==='haelfte'&&HALF[pitchPart]&&HALF[pitchPart].some(q=>busy.has(q))){ const h=['A','B'].find(h=>HALF[h].every(q=>!busy.has(q))); if(h) pitchPart=h; }
     }
     else setResChips('f-res',s.res||[]);
+    FORM_TL.areaAuto=true; // Fläche stammt aus der Vorbelegung – erstes Antippen einer Fläche ersetzt sie (ab 06.10.2026 · 24)
   }
   formDirty=false;
+}
+/* Ab 06.10.2026 · 24: Die Vorbelegung „eigenes Training“ (z. B. Viertel 3) blieb beim Antippen von „KF“ oder
+   „Kleinfeld“ unsichtbar mitgebucht – gespeichert wurde dann Platz + Kleinfeld bzw. später „Ganzer Platz“.
+   Jetzt ersetzt die erste bewusst gewählte Fläche die Vorbelegung; Ressourcen wie Vereinsheim bleiben. */
+function formAreaFromAuto(isRes){
+  if(!FORM_TL||!FORM_TL.areaAuto) return;
+  FORM_TL.areaAuto=false;
+  if(isRes) return;
+  const on=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res);
+  setResChips('f-res',on.filter(r=>!['Großspielfeld','Kleinspielfeld','Halle'].includes(r))); halleThirds=[];
 }
 // Datum für „Neu“: der im Kalender gewählte Tag, wenn man gerade dort ist (sonst heute).
 function newEventDateFromView(){
