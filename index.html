@@ -1624,22 +1624,22 @@
 
 <div class="modal" id="move-modal">
   <div class="modal-box" style="max-width:360px;max-height:85vh;overflow-y:auto;">
-    <h3>Verlegung vormerken</h3>
+    <h3 id="mv-title">Verlegung vormerken</h3>
     <p id="mv-text" class="sub" style="margin-top:2px;"></p>
     <div style="display:flex;gap:10px;margin-top:14px;">
       <div class="field" style="flex:3;margin-bottom:0;"><label>Neues Datum</label><input type="date" id="mv-date" onchange="updateMoveTrainingHint()"></div>
       <div class="field" style="flex:2;margin-bottom:0;"><label>Anstoß</label><input type="time" id="mv-time" onchange="updateMoveTrainingHint()"></div>
     </div>
-    <div class="field" style="margin:12px 0 0;"><label>Grund der Verlegung (für den DFBnet-Antrag)</label>
+    <div class="field" style="margin:12px 0 0;"><label id="mv-reason-lbl">Grund der Verlegung (für den DFBnet-Antrag)</label>
       <textarea id="mv-reason" oninput="renderMoveReasons()" rows="2" maxlength="300" placeholder="z. B. Herbstferien, mehrere Spieler fehlen" style="width:100%;box-sizing:border-box;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;font-family:'Inter';font-size:14px;resize:vertical;"></textarea></div>
     <div class="chip-group mv-reasons" id="mv-reasons"></div>
     <div id="mv-training"></div>
-    <p class="hint" style="margin-top:10px;">Platzcoach führt das Spiel ab sofort am neuen Termin (Platzbelegung, Konflikte, Übersicht). Am alten Termin steht „verlegt auf …“. Sobald fussball.de die Verlegung übernimmt, gilt sie als bestätigt.</p>
+    <p class="hint" id="mv-hint" style="margin-top:10px;">Platzcoach führt das Spiel ab sofort am neuen Termin (Platzbelegung, Konflikte, Übersicht). Am alten Termin steht „verlegt auf …“. Sobald fussball.de die Verlegung übernimmt, gilt sie als bestätigt.</p>
     <div class="modal-acts" style="margin-top:16px;">
       <button class="no" onclick="closeMoveModal()">Abbrechen</button>
       <button class="yes" id="mv-yes" style="background:var(--green);" onclick="saveGameMove()">Vormerken</button>
     </div>
-    <button class="ghost-btn" id="mv-yl" style="display:none;margin-top:10px;" onclick="openYouthLeaderModal(moveOfGame(FUSSBALLDE.games[moveGameIdx]))">Nachricht an Jugendleiter (DFBnet)</button>
+    <button class="ghost-btn" id="mv-yl" style="display:none;margin-top:10px;" onclick="openYouthLeaderModal(moveOfGame(fbGame(moveGameIdx)))">Nachricht an Jugendleiter (DFBnet)</button>
     <button class="ghost-btn" id="mv-remove" style="display:none;margin-top:10px;" onclick="removeGameMove()">Vormerkung aufheben</button>
   </div>
 </div>
@@ -1665,7 +1665,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 18';
+const APP_VERSION='06.10.2026 · 19';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -1928,7 +1928,7 @@ function fbOnOwnPitch(g){ return !!g&&!g.withdrawn&&!g.foreignVenue; }
 function fbVenueShort(v){ const parts=String(v||'').split(',').map(x=>x.trim()).filter(Boolean); const last=parts[parts.length-1]||''; return last.replace(/^\d{5}\s+/,'')||parts[0]||''; }
 function applyGameMoves(){
   const raw=FUSSBALLDE_RAW||{games:[],awayGames:[]};
-  FUSSBALLDE={...raw, awayGames:(raw.awayGames||[]).map(fbNormalizeWithdrawn), games:(raw.games||[]).map(fbNormalizeWithdrawn).map(g=>fbOwnVenue(g)?g:{...g,foreignVenue:true}).map(g=>{
+  const withMove=g=>{
     const m=g.link?MOVES.find(x=>x.link===g.link):null;
     if(!m) return {...g};
     if(g.d===m.fromD&&(g.t||'')===(m.fromT||'')&&!(g.d===m.toD&&(g.t||'')===(m.toT||'')))
@@ -1938,9 +1938,16 @@ function applyGameMoves(){
     const confirmed=g.d===m.toD;
     return {...g, movedFrom:g.movedFrom||{d:m.fromD,t:m.fromT}, moveId:m.id, moveConfirmed:confirmed,
       moveDiverged:!confirmed, plannedTo:{d:m.toD,t:m.toT}};
-  })};
+  };
+  // Ab 06.10.2026 · 19 auch Auswärtsspiele (nur Info, keine Platzprüfung)
+  FUSSBALLDE={...raw, awayGames:(raw.awayGames||[]).map(fbNormalizeWithdrawn).map(withMove), games:(raw.games||[]).map(fbNormalizeWithdrawn).map(g=>fbOwnVenue(g)?g:{...g,foreignVenue:true}).map(withMove)};
   linkOwnMatches();
 }
+/* Spiel-Nummer (fbIndex): Heimspiele 0…, Auswärtsspiele ab AWAY_IDX (ab 06.10.2026 · 19). */
+const AWAY_IDX=10000;
+function fbGame(i){ i=+i; return i>=AWAY_IDX?(FUSSBALLDE.awayGames||[])[i-AWAY_IDX]:(FUSSBALLDE.games||[])[i]; }
+function fbIsAwayIdx(i){ return +i>=AWAY_IDX; }
+function fbAllIndexed(){ return (FUSSBALLDE.games||[]).map((g,i)=>[g,i]).concat((FUSSBALLDE.awayGames||[]).map((g,i)=>[g,AWAY_IDX+i])); }
 /* ---------- Eigene Freundschaftsspiele ↔ fussball.de (ab 29.09.2026 · 6) ----------
    Hat der Jugendleiter ein Freundschaftsspiel im DFBnet angesetzt, taucht es beim nächsten Sync bei
    fussball.de auf. Damit es nicht doppelt im Kalender steht (und nicht mit sich selbst kollidiert),
@@ -1987,10 +1994,10 @@ function fmtDayShort(d){ const dt=new Date(d+'T00:00:00'); return DAYS_S[dt.getD
    - bei abweichender Verlegung zusätzlich am vorgemerkten Tag: "Vormerkung überholt – fussball.de: …" */
 function movedGameGhostsOn(d){
   const out=[];
-  (FUSSBALLDE.games||[]).forEach((g,idx)=>{
-    const mapped=fussballFilterTeam(g.team,g.squad);
-    const base={opponent:g.opponent, team:mapped.team, squad:mapped.squad, pitch:null, halle:null, res:[], kind:'moved',
-      title:'Heimspiel: '+teamLabel(mapped.team,mapped.squad)+' – '+g.opponent,
+  fbAllIndexed().forEach(([g,idx])=>{
+    const mapped=fussballFilterTeam(g.team,g.squad), away=fbIsAwayIdx(idx);
+    const base={opponent:g.opponent, team:mapped.team, squad:mapped.squad, pitch:null, halle:null, res:[], kind:'moved', isAway:away,
+      title:away?'Auswärtsspiel: '+teamLabel(mapped.team,mapped.squad)+' bei '+g.opponent:'Heimspiel: '+teamLabel(mapped.team,mapped.squad)+' – '+g.opponent,
       isMovedGhost:true, toD:g.d, toT:g.t, pending:!!g.movePending, diverged:!!g.moveDiverged, plannedTo:g.plannedTo||null, fbIndex:idx};
     if(g.movedFrom&&g.movedFrom.d===d&&g.movedFrom.d!==g.d)
       out.push({...base, id:'fbmoved-'+(g.link||idx)+'-'+d, d, t:g.movedFrom.t||'00:00', bis:g.movedFrom.t?shiftTimeClamped(g.movedFrom.t,fussballDurationMin(g.team)):'23:59'});
@@ -2014,7 +2021,7 @@ function focusEventCard(e){
   clearTimeout(window._hlTimer); window._hlTimer=setTimeout(()=>{ highlightId=null; render(); },5000);
 }
 function openStaleMove(idx){ jumpToGame(idx); if(session&&canMarkGameMove({fbIndex:idx})) setTimeout(()=>openMoveModal(idx),350); }
-function jumpToGame(idx){ const e=fussballDisplayAll()[idx]; if(e) focusEventCard(e); }
+function jumpToGame(idx){ const e=fbIsAwayIdx(idx)?fussballDisplayAwayAll()[idx-AWAY_IDX]:fussballDisplayAll()[idx]; if(e) focusEventCard(e); }
 
 /* ---------- fussball.de-Heimspiele in der Terminübersicht anzeigen (Liste/Monat/Jahr) ----------
    Getrennt von fussballInstancesOn() (das für die Konfliktprüfung den Vor-/Nachlauf-Puffer
@@ -2054,7 +2061,7 @@ function fussballDisplayAll(){
 }
 function fussballDisplayInstancesOn(d){ return fussballDisplayAll().filter(e=>e.d===d); }
 function fussballDisplayAwayAll(){
-  return (FUSSBALLDE.awayGames||[]).map((g)=>{
+  return (FUSSBALLDE.awayGames||[]).map((g,idx)=>{
     const mapped=fussballFilterTeam(g.team,g.squad);
     const label=teamLabel(mapped.team,mapped.squad);
     const bis=g.t?shiftTimeClamped(g.t,fussballDurationMin(g.team)):'23:59';
@@ -2063,7 +2070,9 @@ function fussballDisplayAwayAll(){
       title:'Auswärtsspiel: '+label+' bei '+g.opponent, opponent:g.opponent,
       team:mapped.team, squad:mapped.squad, competition:g.competition||'', score:g.score||null,
       withdrawn:!!g.withdrawn, offPitch:true,
-      isExternal:true, isAway:true, ownerName:'fussball.de', link:g.link||null
+      isExternal:true, isAway:true, ownerName:'fussball.de', link:g.link||null,
+      fbIndex:AWAY_IDX+idx, movedFrom:g.movedFrom||null, movePending:!!g.movePending, moveConfirmed:!!g.moveConfirmed,
+      moveDiverged:!!g.moveDiverged, plannedTo:g.plannedTo||null
     };
   });
 }
@@ -3530,7 +3539,9 @@ function externalRowHTML(e){
   const dd=String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0');
   const bis=eventBis(e);
   if(e.withdrawn) return withdrawnRowHTML(e);
-  const acts=(session&&!e.isAway&&!e.offPitch)?(
+  const moveIco='<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M9 15h6M13 12.5l2.5 2.5-2.5 2.5"/></svg>';
+  const acts=(session&&e.isAway&&e.fbIndex!=null&&canMarkGameMove(e))?'<button class="ibtn" title="Verlegung vormerken" onclick="openMoveModal('+e.fbIndex+')">'+moveIco+'</button>'
+    :(session&&!e.isAway&&!e.offPitch)?(
     '<button class="ibtn" title="Neue Ansetzung suchen" onclick="openRescheduleFinder('+e.fbIndex+')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>'
     +(canMarkGameMove(e)?'<button class="ibtn" title="Verlegung vormerken" onclick="openMoveModal('+e.fbIndex+')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M9 15h6M13 12.5l2.5 2.5-2.5 2.5"/></svg></button>':'')
   ):'';
@@ -3644,7 +3655,7 @@ function moveBadgeHTML(e){
 }
 // Vom neuen Termin zurück zur Hinweiskarte am alten Termin.
 function jumpToOldDate(idx){
-  const g=FUSSBALLDE.games[idx]; if(!g||!g.movedFrom) return;
+  const g=fbGame(idx); if(!g||!g.movedFrom) return;
   const ghost=movedGameGhostsOn(g.movedFrom.d).find(x=>x.fbIndex===idx&&!x.stalePlan);
   if(ghost) focusEventCard(ghost);
 }
@@ -3661,10 +3672,10 @@ function inactiveRowHTML(e){
   let name, why, pill, tone='off', click='', act='';
   if(e.isMovedGhost){
     const to=fmtDayShort(e.toD)+(e.toT?', '+e.toT:'');
-    name=(e.opponent?'gegen '+e.opponent:'Heimspiel');
+    name=(e.opponent?(e.isAway?'bei ':'gegen ')+e.opponent:(e.isAway?'Auswärtsspiel':'Heimspiel'));
     if(e.stalePlan){
       tone='stale'; pill='Vormerkung überholt';
-      why='Vorgemerkt, aber fussball.de: '+to+(staleMoveCancelledTrainings(FUSSBALLDE.games[e.fbIndex]).some(c=>c.date===e.d)?' · Training hier abgesagt':'');
+      why='Vorgemerkt, aber fussball.de: '+to+(staleMoveCancelledTrainings(fbGame(e.fbIndex)).some(c=>c.date===e.d)?' · Training hier abgesagt':'');
       click='openStaleMove('+e.fbIndex+')';
     }else{
       tone=e.diverged?'stale':(e.pending?'pending':'moved');
@@ -3716,7 +3727,7 @@ function movedGhostRowHTML(e){
     sub=e.t+' Uhr · verlegt auf '+to;
     badge='<span class="move-badge'+(e.pending?' pending':'')+'">↪ '+(e.pending?'Verlegung vorgemerkt · fussball.de noch offen':'Verlegt (fussball.de)')+'</span>';
   }
-  const stale=e.stalePlan?staleMoveCancelledTrainings(FUSSBALLDE.games[e.fbIndex]).filter(c=>c.date===e.d):[];
+  const stale=e.stalePlan?staleMoveCancelledTrainings(fbGame(e.fbIndex)).filter(c=>c.date===e.d):[];
   const cls=e.stalePlan?' mv-stale':(e.diverged?' mv-stale':(e.pending?'':' mv-done'));
   const label=e.stalePlan?'⚠ Vormerkung überholt':(e.pending?'↪ Alter Termin – Verlegung vorgemerkt':'↪ Alter Termin – verlegt');
   return '<div class="event-card cancelled-card moved-card clickable'+cls+'" id="ev-'+e.id+'" role="button" tabindex="0" onclick="jumpToGame('+e.fbIndex+')" onkeydown="if(event.key===\'Enter\')jumpToGame('+e.fbIndex+')">'
@@ -3920,7 +3931,7 @@ const SHARE_SVG='<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle c
 function shareBtnHTML(e,cls){ return '<button type="button" class="'+(cls||'ibtn share')+'" title="Weiterleiten" aria-label="Weiterleiten" onclick="'+esc('event.stopPropagation();openShare(\''+jsArg(e.id)+'\',\''+e.d+'\')')+'">'+SHARE_SVG+'</button>'; }
 function shareItemsOn(d){ return EVENTS.filter(e=>e.d===d).concat(trainingInstancesOn(d),cancelledTrainingInstancesOn(d),movedGameGhostsOn(d),fussballDisplayInstancesOn(d),fussballDisplayAwayInstancesOn(d)); }
 function shareLinkFor(e){
-  if(e.isMovedGhost){ const g=FUSSBALLDE.games[e.fbIndex]; return (g&&fbDeepLinkUrl(g))||baseUrl(); }
+  if(e.isMovedGhost){ const g=fbGame(e.fbIndex); return (g&&fbDeepLinkUrl(g))||baseUrl(); }
   if(e.isExternal) return fbDeepLinkUrl(e)||baseUrl();
   if(e.isCancelled&&e.trainingSlotId) return baseUrl()+'#t='+encodeURIComponent('tr-'+e.trainingSlotId+'-'+e.d);
   return baseUrl()+'#t='+encodeURIComponent(e.id);
@@ -4951,7 +4962,7 @@ function weekRowHTML(e,withDate){
     +(withDate?'<div class="pt-time two"><b>'+esc(dayCase(e.d))+'</b>'+e.t+'</div>':'<div class="pt-time">'+e.t+'</div>')
     +'<div class="pt-team"><div class="pt-team-name">'+chip+esc(name)+'</div>'
     +(sub?'<div class="pt-type">'+esc(sub)+'</div>':'')
-    +(e.isExternal&&!e.isAway&&!e.withdrawn?moveBadgeHTML(e):'')
+    +(e.isExternal&&!e.withdrawn?moveBadgeHTML(e):'')
     +(teamDayPartners(e).length?'<span class="move-badge warn">⚠ weiteres Spiel am selben Tag</span>':'')
     +'</div>'+weekRowActHTML(e)+right+'</div>';
 }
@@ -4963,7 +4974,7 @@ function weekRowActHTML(e){
     ?'<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();reactivateCancelled(\''+jsArg(e.trainingSlotId)+'\',\''+e.d+'\')')+'">Zurücknehmen</button>':'';
   if(e.isTraining&&e.trainingSlotId&&canCancelSlot(TRAINING.find(x=>x.id===e.trainingSlotId)))
     return '<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();cancelTrainingDay(\''+jsArg(e.trainingSlotId)+'\',\''+e.d+'\')')+'">Absagen</button>';
-  if(e.isExternal&&!e.isAway&&!e.offPitch&&e.fbIndex!=null&&canMarkGameMove(e))
+  if(e.isExternal&&(e.isAway||!e.offPitch)&&e.fbIndex!=null&&canMarkGameMove(e))
     return '<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();openMoveModal('+e.fbIndex+')')+'">Verlegen</button>';
   return '';
 }
@@ -5017,7 +5028,7 @@ function myTodos(isMine,hasTeams){
   const tsOpen=teamSyncOpenCount();
   if(tsOpen) out.push({click:'openTeamSync()',txt:'Mannschaften: '+tsOpen+(tsOpen===1?' Abweichung':' Abweichungen')+' zwischen Platzcoach und fussball.de.',act:'Prüfen'});
   const end=weekEndStr();
-  (FUSSBALLDE.games||[]).forEach((g,idx)=>{
+  fbAllIndexed().forEach(([g,idx])=>{
     if(!g.moveDiverged||!g.plannedTo||g.d<todayStr) return;
     const mp=fussballFilterTeam(g.team,g.squad);
     if(hasTeams&&!isMine({team:mp.team,squad:mp.squad,isExternal:true})) return;
@@ -5062,7 +5073,7 @@ function myTodos(isMine,hasTeams){
 const DIGEST_CONFLICT_DAYS=14;
 function digestLinkId(e){
   if(!e) return '';
-  if(e.isMovedGhost){ const g=(FUSSBALLDE.games||[])[e.fbIndex]; return g?fbDeepLinkId(g):''; }
+  if(e.isMovedGhost){ const g=fbGame(e.fbIndex); return g?fbDeepLinkId(g):''; }
   if(e.isExternal) return fbDeepLinkId(e);
   if(e.isCancelled&&e.trainingSlotId) return 'tr-'+e.trainingSlotId+'-'+e.d;
   return e.id||'';
@@ -5081,7 +5092,7 @@ function digestTodoLink(click){
   let m=String(click||'').match(/^openTerminFromStart\('((?:[^'\\]|\\.)*)'/);
   if(m){ const id=m[1].replace(/\\(.)/g,'$1'); return id.replace(/^trc-/,'tr-'); }
   m=String(click||'').match(/^openStaleMove\((\d+)\)/);
-  if(m){ const g=(FUSSBALLDE.games||[])[+m[1]]; return g?fbDeepLinkId(g):''; }
+  if(m){ const g=fbGame(+m[1]); return g?fbDeepLinkId(g):''; }
   return '';
 }
 function weeklyDigestFor(userId){
@@ -5540,7 +5551,7 @@ function renderStartStatus(){
   }
 
   // Überholte Vormerkungen: fussball.de hat einen anderen Termin angesetzt als vorgemerkt.
-  (FUSSBALLDE.games||[]).forEach((g,idx)=>{
+  fbAllIndexed().forEach(([g,idx])=>{
     if(!g.moveDiverged||!g.plannedTo||g.d<todayStr) return;
     const mp=fussballFilterTeam(g.team,g.squad);
     const tr=staleMoveCancelledTrainings(g);
@@ -6828,23 +6839,30 @@ function closeCancelModal(){ document.getElementById('cancel-modal').classList.r
    Wenn der neue Termin mit dem Gegner abgestimmt ist, aber über DFBnet/fussball.de noch nicht
    übernommen wurde. Gespeichert in data/game-moves.json, angewendet in applyGameMoves(). */
 let moveGameIdx=null;
-function rawGameOf(g){ return g&&g.link?(FUSSBALLDE_RAW.games||[]).find(x=>x.link===g.link)||null:null; }
+const MV_HINT_HOME='Platzcoach führt das Spiel ab sofort am neuen Termin (Platzbelegung, Konflikte, Übersicht). Am alten Termin steht „verlegt auf …“. Sobald fussball.de die Verlegung übernimmt, gilt sie als bestätigt.';
+function rawGameOf(g){ return g&&g.link?((FUSSBALLDE_RAW.games||[]).find(x=>x.link===g.link)||(FUSSBALLDE_RAW.awayGames||[]).find(x=>x.link===g.link))||null:null; }
 function canMarkGameMove(e){
-  const g=e?FUSSBALLDE.games[e.fbIndex]:null;
+  const g=e?fbGame(e.fbIndex):null;
   if(!session||!g||!g.link) return false;
   const m=fussballFilterTeam(g.team,g.squad);
   return !!session.isAdmin||canBookTeam(m.team,m.squad);
 }
 function openMoveModal(fbIndex,preDate,preTime){
-  const g=FUSSBALLDE.games[fbIndex]; if(!g) return;
+  const g=fbGame(fbIndex); if(!g) return;
   if(!session){ showToast('Bitte zuerst anmelden.'); return; }
   const raw=rawGameOf(g);
   if(!raw){ showToast('Dieses Spiel hat keinen fussball.de-Link und kann nicht vorgemerkt werden.',5000); return; }
   if(!canMarkGameMove({fbIndex})){ showToast('Verlegungen kann nur ein Trainer der Mannschaft oder ein Admin vormerken.',5000); return; }
   moveGameIdx=fbIndex;
+  const away=fbIsAwayIdx(fbIndex);
+  document.getElementById('mv-title').textContent=away?'Auswärtsspiel verlegen':'Verlegung vormerken';
+  document.getElementById('mv-reason-lbl').textContent=away?'Grund (optional)':'Grund der Verlegung (für den DFBnet-Antrag)';
+  document.getElementById('mv-hint').textContent=away
+    ?'Nur zur Info für die Trainer: Platzcoach zeigt das Spiel ab sofort am neuen Termin, am alten steht „verlegt auf …“. Sobald fussball.de die Verlegung übernimmt, gilt automatisch fussball.de.'
+    :MV_HINT_HOME;
   const m=moveOfGame(g);
   const mapped=fussballFilterTeam(g.team,g.squad);
-  document.getElementById('mv-text').innerHTML=esc(teamLabel(mapped.team,mapped.squad)+' – '+g.opponent)
+  document.getElementById('mv-text').innerHTML=esc(teamLabel(mapped.team,mapped.squad)+(away?' bei ':' – ')+g.opponent)
     +'<br>laut fussball.de: '+esc(fmtShare(raw.d)+(raw.t?', '+raw.t+' Uhr':''))
     +(m&&g.movePending?'<br><b>vorgemerkt: '+esc(fmtShare(m.toD)+', '+m.toT+' Uhr')+'</b>':'')
     +(m&&g.moveDiverged?'<br><b style="color:var(--ktB3261E);">Vormerkung überholt:</b> vorgemerkt war '+esc(fmtShare(m.toD)+', '+m.toT+' Uhr')+', fussball.de hat '+esc(fmtShare(g.d)+(g.t?', '+g.t+' Uhr':''))+' angesetzt. Bitte Vormerkung abschließen.':'');
@@ -6856,17 +6874,18 @@ function openMoveModal(fbIndex,preDate,preTime){
   const rm=document.getElementById('mv-remove');
   rm.style.display=(m&&(g.movePending||g.moveDiverged))?'block':'none';
   rm.textContent=(m&&g.moveDiverged)?'Vormerkung abschließen':'Vormerkung aufheben';
-  document.getElementById('mv-yl').style.display=(m&&g.movePending)?'block':'none';
+  document.getElementById('mv-yl').style.display=(m&&g.movePending&&!away)?'block':'none';
   updateMoveTrainingHint();
   document.getElementById('move-modal').classList.add('show');
 }
 /* Häufige Verlegungsgründe als Auswahl statt Tippen (ab 01.10.2026 · 1). Antippen setzt den Grund,
    weitere Gründe werden angehängt; der Text bleibt frei änderbar. */
 const MOVE_REASONS=['Ferien','Spielermangel','Platz nicht verfügbar','Terminüberschneidung','Wunsch des Gegners'];
+const MOVE_REASONS_AWAY=['Wunsch des Gegners','Platz beim Gegner belegt','Ferien','Spielermangel','Terminüberschneidung'];
 function renderMoveReasons(){
   const box=document.getElementById('mv-reasons'); if(!box) return;
   const cur=(document.getElementById('mv-reason').value||'').split(',').map(x=>x.trim());
-  box.innerHTML=MOVE_REASONS.map(r=>'<span class="res-chip'+(cur.includes(r)?' on':'')+'" onclick="'+esc('pickMoveReason(\''+jsArg(r)+'\')')+'">'+esc(r)+'</span>').join('');
+  box.innerHTML=(fbIsAwayIdx(moveGameIdx)?MOVE_REASONS_AWAY:MOVE_REASONS).map(r=>'<span class="res-chip'+(cur.includes(r)?' on':'')+'" onclick="'+esc('pickMoveReason(\''+jsArg(r)+'\')')+'">'+esc(r)+'</span>').join('');
 }
 function pickMoveReason(r){
   const ta=document.getElementById('mv-reason');
@@ -6897,11 +6916,11 @@ function pitchCheckForGame(g,date,time){
 }
 function updateMoveTrainingHint(){
   const box=document.getElementById('mv-training'); if(!box) return;
-  const g=FUSSBALLDE.games[moveGameIdx];
+  const g=fbGame(moveGameIdx);
   const date=document.getElementById('mv-date').value, time=document.getElementById('mv-time').value;
   let h='';
   // Platz am neuen Termin prüfen (nur Hinweis, Speichern bleibt möglich – oft lässt sich mit den anderen Mannschaften tauschen).
-  if(g&&date&&time){
+  if(g&&date&&time&&!fbIsAwayIdx(moveGameIdx)){ // Auswärts: kein eigener Platz, keine Prüfung
     const c=pitchCheckForGame(g,date,time);
     h+=c.ok
       ?'<div class="mv-check ok">Platz frei am '+fmtDayShort(date)+', '+c.from+'–'+c.to+(c.part?' (Hälfte '+c.part+')':' (ganzer Platz)')+'.</div>'
@@ -6920,19 +6939,20 @@ function updateMoveTrainingHint(){
   box.innerHTML=h;
 }
 async function saveGameMove(){
-  const g=FUSSBALLDE.games[moveGameIdx], raw=rawGameOf(g);
+  const g=fbGame(moveGameIdx), raw=rawGameOf(g);
   if(!session||!raw) return;
   const toD=document.getElementById('mv-date').value, toT=document.getElementById('mv-time').value;
   if(!toD||!toT){ showToast('Bitte Datum und Anstoß angeben.'); return; }
   if(toD<todayStr){ showToast('Das Datum liegt in der Vergangenheit.'); return; }
   if(toD===raw.d&&toT===(raw.t||'')){ showToast('Das ist der aktuelle Termin bei fussball.de.'); return; }
   const reason=document.getElementById('mv-reason').value.replace(/\s+/g,' ').trim();
-  if(reason.length<3){ showToast('Bitte einen Grund für die Verlegung angeben – der DFBnet-Antrag braucht ihn.',5000); document.getElementById('mv-reason').focus(); return; }
-  const mapped=fussballFilterTeam(raw.team,raw.squad), label=teamLabel(mapped.team,mapped.squad);
+  const away=fbIsAwayIdx(moveGameIdx);
+  if(!away&&reason.length<3){ showToast('Bitte einen Grund für die Verlegung angeben – der DFBnet-Antrag braucht ihn.',5000); document.getElementById('mv-reason').focus(); return; }
+  const mapped=fussballFilterTeam(raw.team,raw.squad), label=teamLabel(mapped.team,mapped.squad), vs=away?' bei ':' – ';
   const slotIds=[...document.querySelectorAll('#mv-training .mv-cancel')].filter(c=>c.checked).map(c=>c.dataset.slot);
   const old=moveOfGame(raw);
   const backupM=JSON.stringify(MOVES), backupT=JSON.stringify(TRAINING);
-  const rec={id:old?old.id:crypto.randomUUID(), link:raw.link, team:raw.team, squad:raw.squad||1, opponent:raw.opponent,
+  const rec={id:old?old.id:crypto.randomUUID(), link:raw.link, team:raw.team, squad:raw.squad||1, opponent:raw.opponent, ...(away?{away:true}:{}),
     fromD:raw.d, fromT:raw.t||'', toD, toT, reason, byId:session.id, byName:session.name, at:new Date().toISOString(),
     cancelledTraining:[...((old&&old.cancelledTraining)||[]), ...slotIds.map(id=>({slotId:id,date:toD}))]};
   MOVES=MOVES.filter(x=>x.link!==raw.link).concat([rec]);
@@ -6941,12 +6961,12 @@ async function saveGameMove(){
   showSaving('Verlegung wird gespeichert …');
   try{
     // Eine Mail für alles: die Trainingsabsage steht im Text der Verlegung, der Trainings-Commit ist "(automatisch)".
-    await saveStore('moves',(old?'Spielverlegung geändert: ':'Spielverlegung vorgemerkt: ')+label+' – '+raw.opponent
+    await saveStore('moves',(old?'Spielverlegung geändert: ':'Spielverlegung vorgemerkt: ')+label+vs+raw.opponent+(away?' (Auswärtsspiel)':'')
       +(toD===raw.d?', Anstoßzeit am '+fmtShort(toD)+' von '+(raw.t||'?')+' auf '+toT+' Uhr':' von '+fmtShort(raw.d)+(raw.t?' '+raw.t:'')+' auf '+fmtShort(toD)+' '+toT+' Uhr')
-      +(slotIds.length?', Training am '+fmtShort(toD)+' abgesagt':'')+'. Grund: '+reason+' – '+session.name+teamTrailer(mapped.team,mapped.squad)+'\nPlatzcoach-Link: '+fbDeepLinkId(raw));
+      +(slotIds.length?', Training am '+fmtShort(toD)+' abgesagt':'')+'.'+(reason?' Grund: '+reason:'')+' – '+session.name+teamTrailer(mapped.team,mapped.squad)+'\nPlatzcoach-Link: '+fbDeepLinkId(raw));
     if(slotIds.length) await saveTraining('Training abgesagt: '+label+' am '+fmtShort(toD)+' wegen Spielverlegung (automatisch) – '+session.name+teamTrailer(mapped.team,mapped.squad));
-    showToast('Verlegung auf '+fmtShort(toD)+', '+toT+' Uhr vorgemerkt'+(slotIds.length?', Training abgesagt.':'.'),4500);
-    openYouthLeaderModal(rec,true);
+    showToast('Verlegung auf '+fmtShort(toD)+', '+toT+' Uhr vorgemerkt'+(slotIds.length?', Training abgesagt.':'.')+(away?' Die Trainer bekommen eine Info.':''),4500);
+    if(!away) openYouthLeaderModal(rec,true);
   }catch(e){
     MOVES=JSON.parse(backupM); TRAINING=JSON.parse(backupT); applyGameMoves(); render(); renderStart(); renderTraining();
     showToast('Fehler: '+e.message,6000);
@@ -7126,12 +7146,13 @@ async function copyYouthLeaderMessage(){
   }
 }
 async function removeGameMove(){
-  const g=FUSSBALLDE.games[moveGameIdx], m=moveOfGame(g);
+  const g=fbGame(moveGameIdx), m=moveOfGame(g);
   if(!session||!m) return;
   const react=document.getElementById('mv-reactivate');
   const diverged=!!g.moveDiverged, curD=g.d, curT=g.t;
   const ct=(react&&react.checked)?(m.cancelledTraining||[]).filter(c=>!(diverged&&c.date===curD)):[];
-  const mapped=fussballFilterTeam(m.team,m.squad), label=teamLabel(mapped.team,mapped.squad);
+  const mapped=fussballFilterTeam(m.team,m.squad), away=fbIsAwayIdx(moveGameIdx), label=teamLabel(mapped.team,mapped.squad);
+  const opp=m.opponent+(away?' (Auswärtsspiel)':'');
   const backupM=JSON.stringify(MOVES), backupT=JSON.stringify(TRAINING);
   MOVES=MOVES.filter(x=>x.id!==m.id);
   let reactivated=0;
@@ -7140,8 +7161,8 @@ async function removeGameMove(){
   showSaving('Vormerkung wird aufgehoben …');
   try{
     await saveStore('moves',(diverged
-        ?'Spielverlegung abgeschlossen: '+label+' – '+m.opponent+': fussball.de hat '+fmtShort(curD)+(curT?' '+curT:'')+' Uhr angesetzt statt vorgemerkt '+fmtShort(m.toD)+' '+m.toT+' Uhr'
-        :'Spielverlegung aufgehoben: '+label+' – '+m.opponent+' (war vorgemerkt für '+fmtShort(m.toD)+' '+m.toT+' Uhr)')
+        ?'Spielverlegung abgeschlossen: '+label+(away?' bei ':' – ')+opp+': fussball.de hat '+fmtShort(curD)+(curT?' '+curT:'')+' Uhr angesetzt statt vorgemerkt '+fmtShort(m.toD)+' '+m.toT+' Uhr'
+        :'Spielverlegung aufgehoben: '+label+(away?' bei ':' – ')+opp+' (war vorgemerkt für '+fmtShort(m.toD)+' '+m.toT+' Uhr)')
       +(reactivated?', Training am '+ct.map(c=>fmtShort(c.date)).join(', ')+' findet wieder statt':'')+' – '+session.name+teamTrailer(mapped.team,mapped.squad)+'\nPlatzcoach-Link: '+fbDeepLinkId(m));
     if(reactivated) await saveTraining('Absage zurückgenommen: '+label+' am '+ct.map(c=>fmtShort(c.date)).join(', ')+' wegen Spielverlegung (automatisch) – '+session.name+teamTrailer(mapped.team,mapped.squad));
     showToast('Vormerkung '+(diverged?'abgeschlossen':'aufgehoben')+(reactivated?', Training findet wieder statt.':'.'),4500);
