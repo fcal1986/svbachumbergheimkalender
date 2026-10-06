@@ -1589,7 +1589,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 5';
+const APP_VERSION='06.10.2026 · 6';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -5409,7 +5409,9 @@ function onKindChange(byUser){
   if(an&&byUser){
     // Ab 01.10.2026 · 1 auch beim Training: Anlass ergibt sich aus der Terminart, solange nichts Eigenes eingetragen ist.
     const autoT=KIND_AUTO_TITLE[k];
-    if(autoT&&(!an.value.trim()||an.dataset.auto==='1')){ an.value=autoT; an.dataset.auto='1'; }
+    // Ab 06.10.2026 · 6: auch ein automatischer Spiel-/Turniertitel (auto='match') wird ersetzt – vorher blieb nach
+    // Sommerturnier → Torwart die Bezeichnung leer und das Feld sichtbar, nach Training → Torwart dagegen ausgeblendet.
+    if(autoT&&(!an.value.trim()||an.dataset.auto==='1'||an.dataset.auto==='match')){ an.value=autoT; an.dataset.auto='1'; }
     else if(!autoT&&an.dataset.auto==='1'){ an.value=''; an.dataset.auto=''; }
     // Ressourcen sind beim Torwarttraining optional: Vorauswahl "Großspielfeld" entfernen.
     if((k==='goalkeeper'||k==='trainer')&&!editingId) setResChips('f-res',[]);
