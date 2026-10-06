@@ -463,8 +463,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": []
+      "trainerIds": [
+        "2f2f62e8-9030-48aa-80c3-a4d9b65938ee"
+      ],
+      "trainerNames": [
+        "Daniel Thibaut"
+      ]
     },
     {
       "id": "43b94d34-c477-4108-b2b6-750164cd46ff",
@@ -730,8 +734,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": []
+      "trainerIds": [
+        "2f2f62e8-9030-48aa-80c3-a4d9b65938ee"
+      ],
+      "trainerNames": [
+        "Daniel Thibaut"
+      ]
     }
   ]
 }
