@@ -548,6 +548,20 @@
   .filter-chip{flex:none;font-size:11.5px;font-weight:600;padding:6px 13px;border-radius:20px;border:1.5px solid var(--line);background:var(--white);color:var(--ink-soft);white-space:nowrap;cursor:pointer;box-shadow:var(--card-shadow);}
   .filter-chip.on{background:var(--black-btn);border-color:var(--black-btn);color:#fff;}
   .filter-chip.kind.on:before{content:"✓ ";}
+  .filter-row2{display:flex;align-items:center;gap:8px;min-height:40px;}
+  .filter-open-btn{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--white);font-family:'Inter';font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;box-shadow:var(--card-shadow);}
+  .filter-open-btn svg{width:16px;height:16px;stroke:currentColor;}
+  .filter-open-btn.active{background:var(--black-btn);border-color:var(--black-btn);color:#fff;}
+  .filter-summary{flex:1;min-width:0;display:flex;align-items:center;gap:4px;}
+  .fs-sum-txt{flex:1;min-width:0;text-align:left;background:none;border:none;padding:8px 0;font-family:'Inter';font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+  .fs-sum-x{flex:none;width:36px;height:36px;border-radius:18px;border:1.5px solid var(--line);background:var(--white);font-size:14px;font-weight:800;color:var(--ink);cursor:pointer;}
+  .fs-sum-none{font-size:12.5px;color:var(--ink-soft);}
+  .fs-sheet h3{margin:0 0 4px;font-size:17px;font-weight:800;}
+  .fs-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin:14px 0 7px;}
+  .fs-sub{font-size:11.5px;color:var(--ink-soft);margin:10px 0 6px;}
+  .fs-acts{display:flex;gap:8px;margin-top:14px;}
+  .fs-acts .cancel-btn{margin:0;width:auto;flex:none;padding:0 16px;}
+  .fs-acts .submit-btn{margin:0;flex:1;}
   .termine-sticky{position:sticky;top:-14px;z-index:5;background:var(--bg);margin:-14px -14px 10px;padding:14px 14px 8px;box-shadow:0 6px 10px -8px rgba(11,27,50,.18);}
   .filter-row{display:flex;align-items:center;gap:7px;}
   .filter-row .chip-scroll{flex:1 1 auto;min-width:0;flex-wrap:nowrap;overflow-x:auto;margin-bottom:0;padding-bottom:0;scrollbar-width:none;}
@@ -1140,11 +1154,17 @@
       <div class="termine-sticky" id="termine-sticky">
         <!-- Ab 30.09.2026 · 5: kein Umschalter mehr. Überschrift antippen = herauszoomen (Woche → Monat → Jahr) -->
         <div id="cal-nav"></div>
-        <div class="filter-row">
+        <!-- Ab 06.10.2026 · 10: ein Knopf „Filter“ statt wischbarer Chip-Leiste; Blatt mit „Was?“ und „Wer?“ -->
+        <div class="filter-row2">
+          <button type="button" class="filter-open-btn" id="filter-open-btn" onclick="openFilterSheet()" aria-haspopup="dialog">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filter<span id="filter-count"></span></button>
+          <div class="filter-summary" id="filter-summary"></div>
+        </div>
+        <div hidden>
           <div class="chip-scroll" id="filterbar"></div>
           <button type="button" class="team-filter-btn" id="team-filter-btn" onclick="toggleTeamFilterPanel()">Mannschaften <span id="team-filter-count"></span> ▾</button>
+          <div id="team-filter-panel" class="team-filter-panel" style="display:none;"></div>
         </div>
-        <div id="team-filter-panel" class="team-filter-panel" style="display:none;"></div>
         <div id="type-filter-banner"></div>
       </div>
       <div id="view-woche" style="display:none;"></div>
@@ -1593,7 +1613,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 9';
+const APP_VERSION='06.10.2026 · 10';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2972,7 +2992,58 @@ function kindGroupOf(e){
   if(k==='trainer') return 'trainer';
   return 'sonstiges';
 }
+/* ---------- Filter-Blatt (ab 06.10.2026 · 10) ----------
+   Ein Knopf „Filter (n)“ öffnet ein Blatt von unten: „Was?“ (Arten, mehrere) und „Wer?“ (Mannschaften, mehrere).
+   Auswahl wird erst mit „Anzeigen“ übernommen. Darunter eine Zeile mit der aktiven Auswahl und ✕. */
+let FS_KINDS=new Set(), FS_TEAMS=new Set();
+function filterTeamOptions2(){
+  const all=allKnownTeamKeys();
+  const own=session?normalizeClasses(session.classes||{}):{};
+  const mine=k=>{ const [t,q]=k.split(':'); return own.hasOwnProperty(t)&&(!isJugend(t)||!(own[t]||[]).length||own[t].includes(+q)); };
+  return {mine:all.filter(t=>mine(t.key)), rest:all.filter(t=>!mine(t.key))};
+}
+function openFilterSheet(){
+  FS_KINDS=new Set(KIND_SEL); FS_TEAMS=new Set(teamMultiFilter);
+  if(filter&&filter.includes(':')) FS_TEAMS.add(filter); // frühere Einzel-Mannschaft
+  renderFilterSheet();
+  trackEvent('filter_geoeffnet');
+}
+function renderFilterSheet(){
+  const chip=(on,lbl,fn)=>'<button type="button" class="nf-chip'+(on?' on':'')+'" aria-pressed="'+on+'" onclick="'+esc(fn)+'">'+esc(lbl)+'</button>';
+  const {mine,rest}=filterTeamOptions2();
+  const tchips=list=>list.map(t=>chip(FS_TEAMS.has(t.key),t.key===GK_TEAM+':1'?'Torwarttraining':t.label,"fsToggle('t','"+jsArg(t.key)+"')")).join('');
+  const n=FS_KINDS.size+FS_TEAMS.size;
+  openSheet('<div class="fs-sheet"><h3>Filter</h3>'
+    +'<p class="fs-lbl">Was?</p><div class="nf-chips">'+KIND_FILTERS.map(k=>chip(FS_KINDS.has(k),KIND_FILTER_LABELS[k],"fsToggle('k','"+k+"')")).join('')+'</div>'
+    +'<p class="fs-lbl">Wer?</p>'
+    +(mine.length?'<div class="nf-chips">'+tchips(mine)+'</div><p class="fs-sub">Weitere Mannschaften</p>':'')
+    +'<div class="nf-chips">'+tchips(rest)+'</div>'
+    +'<p class="helptext" style="margin-top:10px;">Nichts gewählt = alles. Mehrere Arten und Mannschaften lassen sich kombinieren.</p>'
+    +'<div class="fs-acts"><button type="button" class="cancel-btn" onclick="fsReset()"'+(n?'':' disabled')+'>Zurücksetzen</button>'
+    +'<button type="button" class="submit-btn" onclick="fsApply()">Anzeigen</button></div></div>');
+}
+function fsToggle(kind,key){ const set=kind==='k'?FS_KINDS:FS_TEAMS; if(set.has(key)) set.delete(key); else set.add(key); renderFilterSheet(); }
+function fsReset(){ FS_KINDS=new Set(); FS_TEAMS=new Set(); renderFilterSheet(); }
+function fsApply(){
+  KIND_SEL=new Set(FS_KINDS); teamMultiFilter=new Set(FS_TEAMS); teamFilterPending=new Set(FS_TEAMS);
+  filter=teamMultiFilter.size?'multi':'alle'; typeFilter=null;
+  closeSheet(); updateFilterChips(); updateTeamFilterBtn(); updateTypeFilterBanner(); saveFilterPref(); render(); renderStart();
+}
+function clearAllFilters(){ KIND_SEL=new Set(); teamMultiFilter=new Set(); teamFilterPending=new Set(); filter='alle'; typeFilter=null;
+  updateFilterChips(); updateTeamFilterBtn(); updateTypeFilterBanner(); saveFilterPref(); render(); renderStart(); }
+function updateFilterSummary(){
+  const box=document.getElementById('filter-summary'), cnt=document.getElementById('filter-count'), btn=document.getElementById('filter-open-btn');
+  if(!box) return;
+  const teams=[...teamMultiFilter].concat(filter&&filter.includes(':')&&!teamMultiFilter.has(filter)?[filter]:[]);
+  const labels=[...KIND_SEL].map(k=>KIND_FILTER_LABELS[k]).concat(teams.map(k=>{ const [t,q]=k.split(':'); return t===GK_TEAM?'Torwarttraining':filterOptionLabel(t,+q||1); }));
+  const n=KIND_SEL.size+teams.length;
+  if(cnt) cnt.textContent=n?' ('+n+')':'';
+  if(btn) btn.classList.toggle('active',n>0);
+  box.innerHTML=n?'<button type="button" class="fs-sum-txt" onclick="openFilterSheet()">'+esc(labels.join(', '))+'</button><button type="button" class="fs-sum-x" aria-label="Alle Filter aufheben" onclick="clearAllFilters()">✕</button>'
+    :'<span class="fs-sum-none">Alle Termine</span>';
+}
 function updateFilterChips(){
+  updateFilterSummary();
   document.querySelectorAll('#filterbar .filter-chip').forEach(c=>{ const f=c.dataset.f;
     c.classList.toggle('on',KIND_FILTERS.includes(f)?KIND_SEL.has(f):(f==='alle'?(!KIND_SEL.size&&filter==='alle'&&!teamMultiFilter.size):c.dataset.f===filter)); });
 }
@@ -3026,6 +3097,8 @@ function goToMonthFiltered(type){
   updateTeamFilterBtn(); updateTypeFilterBanner();
 }
 function clearTypeFilter(){ typeFilter=null; updateTypeFilterBanner(); render(); }
+// Zusammenfassung der Filter auch bei Änderungen außerhalb des Blatts (Mannschaft aus „Meine Woche“, Sprünge)
+const _updTFB=updateTeamFilterBtn; updateTeamFilterBtn=function(){ _updTFB(); updateFilterSummary(); };
 function updateTypeFilterBanner(){
   const el=document.getElementById('type-filter-banner');
   if(!el)return;
