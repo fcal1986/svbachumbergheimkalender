@@ -947,6 +947,9 @@
   .login-err{background:var(--kbFDECEA);border:1px solid var(--krF5C6C0);color:var(--kt8E2A1D);font-size:12px;padding:10px 12px;border-radius:10px;margin-bottom:10px;display:none;line-height:1.45;}
   .login-err.show{display:block;}
   .btn-yellow{width:100%;background:var(--black-btn);color:#fff;border:none;border-radius:12px;padding:14px;font-family:'Inter';font-weight:700;font-size:14px;cursor:pointer;}
+  .btn-bio{width:100%;min-height:54px;border:none;border-radius:12px;background:var(--grass);color:#fff;font-family:'Inter';font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;margin:6px 0 0;}
+  .btn-bio svg{width:24px;height:24px;stroke:#fff;flex:none;}
+  .login-or{font-size:12px;color:var(--ink-soft);text-align:center;margin:14px 0 10px;}
   .btn-ghost-light{width:100%;background:transparent;border:1.5px solid var(--line);color:var(--ink-soft);border-radius:12px;padding:13px;font-family:'Inter';font-weight:600;font-size:13px;cursor:pointer;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;}
   .btn-ghost-light svg{width:17px;height:17px;stroke:var(--green);}
   .login-foot{color:var(--ink-soft);font-size:11px;text-align:center;margin-top:20px;line-height:1.6;}
@@ -1500,6 +1503,9 @@
     <h1>Anmelden</h1>
     <p class="sub">Termine ansehen geht ohne Anmeldung.<br>Eintragen und Ändern erfordert einen Zugang.</p>
     <div class="login-err" id="login-err"></div>
+    <!-- Ab 06.10.2026 · 17: Face ID / Fingerabdruck als erste Wahl, wenn auf diesem Gerät eingerichtet -->
+    <button type="button" class="btn-bio" id="bio-btn" style="display:none;" onclick="bioLogin()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 11v3a4 4 0 0 1-1 2.5"/><path d="M8.5 8.5a5 5 0 0 1 7 4.5v1"/><path d="M5.5 6.5a9 9 0 0 1 13 6.5v2"/><path d="M15.5 19a12 12 0 0 0 1-5"/><path d="M8 20a8 8 0 0 0 1.5-6"/></svg><span id="bio-label">Mit Face ID anmelden</span></button>
+    <p class="login-or" id="bio-or" style="display:none;">oder mit Passwort</p>
     <form id="li-form" onsubmit="event.preventDefault();doLogin();">
       <input type="text" id="li-user" name="username" placeholder="E-Mail oder Benutzername" autocomplete="username" autocapitalize="none" spellcheck="false">
       <div class="pw-wrap"><input type="password" id="li-pass" name="password" placeholder="Passwort" autocomplete="current-password"><button type="button" class="pw-eye" onclick="togglePw(this)" tabindex="-1"><svg viewBox="0 0 24 24"><g class="eye-open"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></g><g class="eye-shut" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></g></svg></button></div>
@@ -1507,10 +1513,6 @@
       <button type="submit" class="btn-yellow" id="li-btn">Anmelden</button>
     </form>
     <button type="button" class="login-link" id="li-forgot" onclick="openForgotPassword()">Passwort vergessen?</button>
-    <button class="btn-ghost-light" id="bio-btn" style="display:none;" onclick="bioLogin()">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 11v3a4 4 0 0 1-1 2.5"/><path d="M8.5 8.5a5 5 0 0 1 7 4.5v1"/><path d="M5.5 6.5a9 9 0 0 1 13 6.5v2"/><path d="M15.5 19a12 12 0 0 0 1-5"/><path d="M8 20a8 8 0 0 0 1.5-6"/></svg>
-      <span id="bio-label">Mit Fingerabdruck anmelden</span>
-    </button>
     <p class="login-foot" id="login-foot">Zugang bekommst du vom Vorstand.</p>
   </div>
 </div>
@@ -1663,7 +1665,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 16';
+const APP_VERSION='06.10.2026 · 17';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -1672,7 +1674,7 @@ let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiel
 let selectedSeasonFilter='';
 let kontoTab='profil'; // 'profil'|'saisons'|'zugaenge'|'protokoll' – ab 06.10.2026 · 14 nur noch Name des offenen Bereichs (Analytics, Sprünge)
 let kontoOpen=null, _kontoTabSeen='profil';
-const KONTO_TAB_TO_SEC={darstellung:'darstellung',profil:null,kontakt:'kontakt',torhueter:'torhueter',saisons:'saisons',zugaenge:'zugaenge',protokoll:'protokoll',benachrichtigungen:'benachrichtigungen',sperren:'sperren',abgleich:'abgleich',passwort:'passwort',app:'app',hilfe:'hilfe'};
+const KONTO_TAB_TO_SEC={darstellung:'darstellung',profil:null,kontakt:'kontakt',torhueter:'torhueter',saisons:'saisons',zugaenge:'zugaenge',protokoll:'protokoll',benachrichtigungen:'benachrichtigungen',sperren:'sperren',abgleich:'abgleich',passwort:'sicherheit',sicherheit:'sicherheit',app:'app',hilfe:'hilfe'};
 /* Ab 06.10.2026 · 15: jeder Bereich öffnet eine eigene Seite (wie die Einstellungen von iPhone und Android).
    „‹ Konto“, die Zurück-Taste/-Geste von Android und Wischen vom linken Rand (iPhone) führen zurück zur Liste.
    Jede Unterseite hat einen eigenen Eintrag im Browser-Verlauf ({page:'konto',sub:id}). */
@@ -2868,47 +2870,78 @@ function refreshHeader(){
   else{ b.textContent='Anmelden'; b.classList.remove('in'); }
 }
 
-/* ---------- Fingerabdruck ---------- */
-function bioAvailable(){return !!(window.PublicKeyCredential&&navigator.credentials);}
-function bioStored(){try{return JSON.parse(localStorage.getItem('svbb_bio'));}catch(e){return null;}}
+/* ---------- Face ID / Fingerabdruck (ab 06.10.2026 · 17) ----------
+   Passkey (WebAuthn) mit PRF-Erweiterung: Face ID bzw. Fingerabdruck liefert einen geheimen Wert, aus dem der
+   Schlüssel für den gespeicherten Zugang entsteht. Auf dem Gerät liegt der Schreib-Token nur verschlüsselt –
+   ohne Face ID/Fingerabdruck lässt er sich nicht öffnen. Geräte ohne PRF (iOS < 18, alte Browser) bekommen die
+   Funktion nicht angeboten. Bis · 16 lag hier die ganze Sitzung samt Token unverschlüsselt → wird beim Start gelöscht. */
+const BIO_KEY='svbb_bio', BIO_SALT=enc.encode('platzcoach-bio-v2');
+function bioAvailable(){ return !!(window.PublicKeyCredential&&navigator.credentials&&window.isSecureContext); }
+function bioStored(){ try{ const v=JSON.parse(localStorage.getItem(BIO_KEY)); return v&&v.v===2?v:null; }catch(e){ return null; } }
+try{ const old=JSON.parse(localStorage.getItem(BIO_KEY)||'null'); if(old&&old.v!==2) localStorage.removeItem(BIO_KEY); }catch(e){ try{ localStorage.removeItem(BIO_KEY); }catch(_){} }
+function bioName(){ const ua=navigator.userAgent||''; return /iPhone|iPad|iPod|Macintosh/.test(ua)?'Face ID':/Android/.test(ua)?'Fingerabdruck':'Face ID / Fingerabdruck'; }
+async function bioKeyFrom(prfOut){
+  const base=await crypto.subtle.importKey('raw',prfOut,'HKDF',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:new Uint8Array(0),info:enc.encode('platzcoach token')},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+function prfFirst(cred){ const r=cred&&cred.getClientExtensionResults&&cred.getClientExtensionResults(); return (r&&r.prf&&r.prf.results&&r.prf.results.first)||null; }
+async function bioGetPrf(credId){
+  const a=await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),
+    allowCredentials:[{type:'public-key',id:credId}],userVerification:'required',timeout:60000,rpId:location.hostname,
+    extensions:{prf:{eval:{first:BIO_SALT}}}}});
+  return prfFirst(a);
+}
+let _bioBusy=false;
 async function bioSetup(){
-  if(!bioAvailable()){showToast('Dieses Gerät unterstützt das nicht.');return;}
+  if(!session||session.isSuper||!session.token){ showToast('Nur für Trainer-Zugänge.'); renderKonto(); return; }
+  if(!bioAvailable()){ showToast('Dieses Gerät unterstützt das nicht.'); renderKonto(); return; }
+  if(_bioBusy) return; _bioBusy=true;
   try{
     const cred=await navigator.credentials.create({publicKey:{
       challenge:crypto.getRandomValues(new Uint8Array(32)),
-      rp:{name:'SVBB Termine',id:location.hostname},
+      rp:{name:'Platzcoach',id:location.hostname},
       user:{id:enc.encode(session.id),name:session.email,displayName:session.name},
       pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
       authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'preferred'},
-      timeout:60000,attestation:'none'}});
-    localStorage.setItem('svbb_bio',JSON.stringify({credId:b64(cred.rawId),session:{...session}}));
-    showToast('Fingerabdruck eingerichtet.'); renderKonto();
+      timeout:60000,attestation:'none',extensions:{prf:{eval:{first:BIO_SALT}}}}});
+    const ext=cred.getClientExtensionResults?cred.getClientExtensionResults():{};
+    let out=prfFirst(cred);
+    if(!out&&ext.prf&&ext.prf.enabled) out=await bioGetPrf(cred.rawId); // manche Geräte liefern den Wert erst beim Anmelden
+    if(!out){ showToast('Auf diesem Gerät leider nicht möglich – braucht iOS 18 oder ein aktuelles Android.',6000); return; }
+    const key=await bioKeyFrom(out), iv=crypto.getRandomValues(new Uint8Array(12));
+    const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(session.token));
+    localStorage.setItem(BIO_KEY,JSON.stringify({v:2,credId:b64(cred.rawId),uid:session.id,first:session.name.split(' ')[0],iv:b64(iv),cipher:b64(ct),at:new Date().toISOString()}));
+    trackEvent('bio_eingerichtet'); showToast(bioName()+' eingeschaltet. Beim nächsten Anmelden reicht '+bioName()+'.',4000);
   }catch(e){ showToast('Einrichtung abgebrochen.'); }
+  finally{ _bioBusy=false; renderKonto(); refreshBioBtn(); }
 }
-function bioRemove(){ localStorage.removeItem('svbb_bio'); showToast('Entfernt.'); renderKonto(); refreshBioBtn(); }
+function bioRemove(){ localStorage.removeItem(BIO_KEY); showToast('Ausgeschaltet. Anmeldung wieder mit Passwort.'); renderKonto(); refreshBioBtn(); }
 async function bioLogin(){
-  const st=bioStored(); if(!st)return;
+  const st=bioStored(); if(!st||_bioBusy) return; _bioBusy=true;
+  const drop=msg=>{ loginErr(msg); localStorage.removeItem(BIO_KEY); refreshBioBtn(); };
   try{
-    await navigator.credentials.get({publicKey:{
-      challenge:crypto.getRandomValues(new Uint8Array(32)),
-      allowCredentials:[{type:'public-key',id:unb64(st.credId)}],
-      userVerification:'required',timeout:60000,rpId:location.hostname}});
-    // Sperr-Status erneut gegen den AKTUELLEN Stand von USERS prüfen – die zwischengespeicherte
-    // Sitzung könnte von vor einer Sperrung stammen und darf diese nicht umgehen.
-    if(st.session.id!=='admin'){
-      const rec=USERS.find(x=>x.id===st.session.id);
-      if(!rec){ loginErr('Dieser Zugang existiert nicht mehr. Bitte Passwort nutzen.'); return; }
-      if(rec.locked){ loginErr('Dieser Zugang wurde gesperrt. Bitte an den Vorstand wenden.'); return; }
-    }
-    session={...st.session}; afterLogin();
-  }catch(e){ loginErr('Fingerabdruck nicht erkannt. Bitte Passwort nutzen.'); }
+    let out;
+    try{ out=await bioGetPrf(unb64(st.credId)); }catch(e){ loginErr(bioName()+' abgebrochen. Du kannst dich auch mit Passwort anmelden.'); return; }
+    if(!out){ loginErr('Hat nicht geklappt. Bitte mit Passwort anmelden.'); return; }
+    let token;
+    try{ token=dec.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(st.iv)},await bioKeyFrom(out),unb64(st.cipher))); }
+    catch(e){ drop('Gespeicherte Anmeldung passt nicht mehr. Bitte mit Passwort anmelden.'); return; }
+    // Zugang immer gegen den aktuellen Stand prüfen (gelöscht/gesperrt)
+    const rec=USERS.find(x=>x.id===st.uid);
+    if(!rec){ drop('Dieser Zugang existiert nicht mehr.'); return; }
+    if(rec.locked){ loginErr('Dieser Zugang wurde gesperrt. Bitte an den Vorstand wenden.'); return; }
+    // Token noch gültig? (Admin kann ihn erneuert haben) – ohne Netz trotzdem anmelden
+    try{ const r=await fetch('https://api.github.com/repos/'+CFG.repo,{headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json'},cache:'no-store'});
+      if(r.status===401){ drop('Dein Zugang wurde geändert. Bitte einmal mit Passwort anmelden und '+bioName()+' im Konto neu einschalten.'); return; } }catch(e){}
+    session={id:rec.id,name:rec.first+' '+rec.last,email:rec.email,isAdmin:rec.admin===true,isSuper:false,classes:normalizeClasses(rec.classes||{}),token};
+    trackEvent('login_bio'); afterLogin();
+  }finally{ _bioBusy=false; }
 }
 function refreshBioBtn(){
-  const st=bioStored(), b=document.getElementById('bio-btn');
-  if(st&&bioAvailable()&&!session){
-    b.style.display='flex';
-    document.getElementById('bio-label').textContent='Anmelden als '+st.session.name.split(' ')[0];
-  } else b.style.display='none';
+  const st=bioStored(), b=document.getElementById('bio-btn'); if(!b) return;
+  const show=!!(st&&bioAvailable()&&!session), or=document.getElementById('bio-or');
+  b.style.display=show?'flex':'none'; if(or) or.style.display=show?'':'none';
+  if(show) document.getElementById('bio-label').textContent='Als '+st.first+' mit '+bioName()+' anmelden';
 }
 
 /* ---------- Navigation ---------- */
@@ -7906,13 +7939,13 @@ function pwaCard(){
     '<p class="sub">Android: Menü ⋮ im Browser → „App installieren". Am PC: Installations-Symbol in der Adressleiste.</p></div>';
 }
 function bioCard(){
-  if(!bioAvailable())
-    return '<div class="card"><h4>Fingerabdruck</h4><p class="sub">Dieses Gerät oder dieser Browser unterstützt das nicht.</p></div>';
-  if(bioStored())
-    return '<div class="card"><h4>Fingerabdruck aktiv</h4><p class="sub">Beim nächsten Anmelden reicht Finger oder Face-ID.</p>'+
-      '<button class="cancel-btn" onclick="bioRemove()">Entfernen</button></div>';
-  return '<div class="card"><h4>Anmeldung per Fingerabdruck</h4><p class="sub">Einmal einrichten – danach reicht Finger oder Gesicht. Nur auf dem eigenen Handy.</p>'+
-    '<button class="ghost-btn" style="margin-top:0;" onclick="bioSetup()">Jetzt einrichten</button></div>';
+  if(!session||session.isSuper) return '';
+  const nm=bioName();
+  if(!bioAvailable()) return '<div class="card"><h4>'+nm+'</h4><div class="notif-row"><div class="notif-row-text"><b>Mit '+nm+' anmelden</b><p>Auf diesem Gerät nicht verfügbar '+infoBtn('Dafür braucht es ein iPhone ab iOS 18 oder ein aktuelles Android-Handy mit Displaysperre.')+'</p></div></div></div>';
+  const st=bioStored(), on=!!(st&&st.uid===session.id);
+  return '<div class="card"><h4>'+nm+'</h4><div class="notif-row"><div class="notif-row-text"><b>Mit '+nm+' anmelden</b>'
+    +'<p>'+(on?'Auf diesem Gerät eingeschaltet':'Statt Passwort, nur auf diesem Gerät')+' '+infoBtn('Dein Zugang wird auf diesem Gerät verschlüsselt gespeichert und lässt sich nur mit '+nm+' öffnen. Andere Geräte brauchen weiter das Passwort. iPhone: in der Platzcoach-App vom Home-Bildschirm einschalten, nicht in Safari – beide speichern getrennt.')+'</p></div>'
+    +'<label class="toggle-switch"><input type="checkbox" id="bio-toggle"'+(on?' checked':'')+' onchange="this.checked?bioSetup():bioRemove()"><span class="toggle-slider"></span></label></div></div>';
 }
 function pwCard(){
   if(session.isSuper){
@@ -8421,7 +8454,8 @@ function renderKonto(){
   if(hasKeepers) SEC.push({id:'torhueter',g:'mine',t:'Meine Torhüter',sum:'für Torwarttraining-Anmeldungen',i:ico('<path d="M8 13V6a1.5 1.5 0 013 0v5M11 11V4.5a1.5 1.5 0 013 0V11M14 11V6a1.5 1.5 0 013 0v7c0 4-2.5 7-6 7s-6-3-6-6v-2a1.5 1.5 0 013 0"/>'),html:()=>keeperCardHTML(),hide1:true});
   SEC.push({id:'app',g:'mine',t:'Als App installieren',sum:'auf dem Startbildschirm',i:ico('<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>'),html:()=>pwaCard(),hide1:true});
   SEC.push({id:'darstellung',g:'mine',t:'Darstellung',sum:THEME_LABELS[themePref()]+(themePref()==='auto'?' ('+(themeIsDark()?'dunkel':'hell')+')':''),i:ico('<circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 010 18z" fill="currentColor" stroke="none"/>'),html:()=>themeCardHTML(),hide1:true});
-  SEC.push({id:'passwort',g:'mine',t:'Passwort ändern',sum:'mindestens 12 Zeichen',i:ico('<rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/>'),html:()=>pwCard(),hide1:true});
+  const bioOn=!!(bioStored()&&bioStored().uid===session.id);
+  SEC.push({id:'sicherheit',g:'mine',t:session.isSuper?'Passwort ändern':'Anmeldung & Sicherheit',sum:session.isSuper?'Notzugang':(bioOn?bioName()+' an · Passwort':'Passwort'+(bioAvailable()?' · '+bioName()+' aus':'')),i:ico('<rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/>'),html:()=>bioCard()+pwCard(),hide1:!session.isSuper});
   if(isAdmin){
     SEC.push({id:'saisons',g:'club',t:'Saisons & Trainer',sum:cur?cur.label+' aktiv':'keine aktive Saison',i:ico('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),html:()=>seasonManagementCard(),hide1:true});
     SEC.push({id:'abgleich',g:'club',t:'Mannschaften abgleichen',sum:'mit fussball.de',i:ico('<path d="M4 7h13l-3-3M20 17H7l3 3"/>'),html:()=>teamSyncCard(),hide1:true});
