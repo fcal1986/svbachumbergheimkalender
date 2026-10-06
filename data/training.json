@@ -55,7 +55,10 @@
       "validUntil": "2027-06-30",
       "trainerId": null,
       "trainerName": "",
-      "seasonId": "2026-2027"
+      "seasonId": "2026-2027",
+      "cancelled": [
+        "2026-10-12"
+      ]
     },
     {
       "id": "0b93dc4f-9902-4f11-9379-e690ff361c09",
