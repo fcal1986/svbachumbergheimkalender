@@ -10,7 +10,7 @@ Ausführliche Analyse: Projekt-Doc `claude/vereinsneo-analyse-2026-10.md`.
 **Status:** ✅ umgesetzt · 🟡 teilweise · ⬜ offen · ⛔ bewusst nicht
 **Phase:** Pilot = aktuelle Technik · 1.0 = mit Supabase/Einrichtungsassistent · Später
 
-Letzte Aktualisierung: 05.10.2026 (Version 05.10.2026 · 4)
+Letzte Aktualisierung: 06.10.2026 (Version 06.10.2026 · 1)
 
 ## Must have
 
@@ -22,7 +22,7 @@ Letzte Aktualisierung: 05.10.2026 (Version 05.10.2026 · 4)
 | 4 | Hinweis „Tage werden kürzer“: welche Trainingszeiten ab wann im Dunkeln enden | Pilot | ⛔ | Nicht nötig: Höllenbergkampfbahn hat Flutlicht auf dem ganzen Platz (Antwort 01.10.2026). Bei Vereinen ohne Flutlicht wieder aufnehmen (venue.floodlight) |
 | 5 | Platz schnell sperren („Heute sperren“ mit Grund, schraffiert) | Pilot | ✅ | 01.10.2026 · 1: „Heute sperren“ + Grund-Chips + Aufheben mit Rückgängig; 01.10.2026 · 2: Sperre schraffiert in Live-Karte und Zeitleiste, „Heute sperren“ in der Tageskarte (Admin) |
 | 6 | Konflikte mit konkretem Lösungsvorschlag und Direkt-Aktion | Pilot | 🟡 | ✅ 01.10.2026 · 1: Training gegen Spiel/Termin → Knopf „Training … absagen“ direkt in „Zu erledigen“ (1 Klick + Rückgängig). Offen: Vorschläge für andere Konfliktarten (z. B. freie Hälfte); 01.10.2026 · 2: Lösung auch direkt in der Live-Karte („Überschneidung mit …“ + Absagen) |
-| 7 | Dauer-Chips im Formular (60/75/90/105/120 Min) | Pilot | 🟡 | 01.10.2026 · 4: Dauer-Chips (60/75/90/120) in der Kurzbuchung aus dem Zeitstrahl. Offen: im großen Formular |
+| 7 | Dauer-Chips im Formular (60/75/90/105/120 Min) | Pilot | ✅ | 01.10.2026 · 4: Dauer-Chips (60/75/90/120) in der Kurzbuchung aus dem Zeitstrahl; 06.10.2026 · 1: auch im großen Formular (Nr. 75), „Von“ ändern verschiebt „Bis“ mit gleicher Dauer |
 | 8 | Mannschaft zuerst wählen, danach passende Fläche vorschlagen | Pilot | 🟡 | Teilweise mit Nr. 52: Formular startet mit der eigenen Mannschaft und deren üblicher Fläche; ist sie belegt, wird eine freie gleicher Größe gewählt |
 | 9 | Zeitpunkt des letzten fussball.de-Abgleichs anzeigen | Pilot | 🟡 | Stand steht bei „Automatisch von fussball.de übernommen“ und im Mannschaftsabgleich; fehlt: global sichtbar, Warnung wenn > 6 h alt |
 | 10 | Hinweis „kein Angebot des DFB, nur öffentliche Daten auf Veranlassung des Vereins“ | Pilot | ⬜ | |
@@ -58,6 +58,8 @@ Letzte Aktualisierung: 05.10.2026 (Version 05.10.2026 · 4)
 | 72 | Rollen im Verein: Trainer, Jugendleiter, Vorstand als Kennzeichnung am Zugang (Badge in Konto → Zugänge, Knopf „Rolle“, Auswahl beim Anlegen); Rechte weiter nur über „Admin“ | Pilot | ✅ | 05.10.2026 · 2; 05.10.2026 · 3: Rolle auch in der Selbstregistrierung (Jugendleiter/Vorstand ohne Pflicht-Mannschaft), sichtbar und änderbar bei der Freigabe, wird übernommen |
 | 73 | Notaus für den Notzugang: „Alle Apps neu laden“ und „Alle abmelden“ (config.control, jede App prüft beim Start, beim Zurückkehren und alle 5 min); Notzugang-Passwort nur noch als Hash (in der App änderbar). Anlass: Endlosschleife einer Admin-App am 05.10. hat das KV-Tageslimit des Registrierungs-Workers aufgebraucht | Pilot | ✅ | 05.10.2026 · 2 |
 | 74 | Push eingegrenzt: Verwaltung (Zuordnungen, Rollen, Zugänge) nie per Push, auch Admins nur eigene Mannschaften + Vereinsweites (Mail unverändert). Neu: Push + Mail an alle Admins bei neuer Selbstregistrierung (Worker → repository_dispatch „registration-new“, braucht Secret GITHUB_TOKEN im Worker). Anlass: neuer Admin bekam beim Pflegen der Zuordnungen für jede Speicherung einen Push | Pilot | ✅ | 05.10.2026 · 4: Admins stellen Push und Mail je Bereich selbst ein (Konto → Profil „Was bekommst du als Admin?“: meine/andere Mannschaften, Vereinsweit & Sperren, Spielverlegungen & fussball.de, Verwaltung, neue Anmeldungen); Vorgabe wie oben, gespeichert als users[].notifyPrefs (nur Abweichungen) |
+| 75 | Terminformular kompakt (Variante A aus den Mockups 06.10.2026): Terminart und Mannschaft als Chips statt Droplisten (eigene Mannschaften zuerst, „Andere ›“ zeigt alle), Datum mit ‹ ›, Von/Bis + Dauer-Chips, Flächen-Chips kompakt (Kabine 1–4 als Nummern), Platzgrafik neben der Flächenwahl, Bezeichnung nur sichtbar, wenn sie nicht automatisch feststeht (sonst „Titel: … ändern“ über Speichern), Bemerkung aufklappbar, Speichern-Leiste unten fest, Navigationsleiste im Formular ausgeblendet. Torwart-Chip nur für Torwarttrainer/Admins | Pilot | ✅ | 06.10.2026 · 1. Klick-Budget „Training oder Termin anlegen“ unverändert (+ → Speichern = 2) |
+| 76 | Freien Termin finden (Schulfest, Kita-Cup …): „Freien Termin suchen“ im Formular → Monate (12 voraus), Wochentage, Dauer, Wunsch-Beginn, „andere Uhrzeit auch ok“ (08–22 Uhr). Prüft jeden Tag mit Fläche und Terminart aus dem Formular nach denselben Regeln wie beim Speichern (findConflicts, inkl. Sperren); Tage grün/gelb/grau, bis zu 5 Vorschläge, „Übernehmen“ trägt Tag und Zeit ein. Hinweis bei Tagen > 6 Wochen voraus: Spiele fehlen bei fussball.de oft noch, die Änderungsmail meldet spätere Überschneidungen | Pilot | ✅ | 06.10.2026 · 1 (Wunsch aus dem Verein 05.10.: Schulfest/Kita-Cup im Mai/Juni planen) |
 | 43 | Mannschaften mit Lücken-Filtern („ohne Trainer“, „ohne Trainingszeit“, „ohne Platzfreigabe“) | Pilot | ⬜ | „Termine heute ohne Trainer“ gibt es als Warnzeile; Filter in der Mannschaftsliste fehlen |
 
 ## Nice to have
