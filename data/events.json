@@ -245,30 +245,6 @@
       "note": "",
       "ownerId": "871986c9-429e-4576-affb-961cf5f374f6",
       "ownerName": "Cetin Kurt"
-    },
-    {
-      "id": "4a2dabe7-a293-4d71-b852-4f62b2a86c62",
-      "d": "2026-10-08",
-      "t": "17:00",
-      "bis": "18:00",
-      "title": "Training",
-      "kind": "training",
-      "team": "B-Jugend",
-      "squad": 1,
-      "pitch": {
-        "mode": "haelfte",
-        "part": "A"
-      },
-      "halle": null,
-      "res": [],
-      "note": "",
-      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "ownerName": "Fabrizio Calcagno",
-      "movedFromSlot": {
-        "slotId": "a85e3705-d2cf-47bd-8389-d94bbe89cf4f",
-        "from": "18:00",
-        "to": "19:30"
-      }
     }
   ]
 }

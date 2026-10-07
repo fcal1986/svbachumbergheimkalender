@@ -598,12 +598,20 @@
       "trainerNames": [
         "Cetin Kurt"
       ],
-      "cancelled": [
-        "2026-10-08"
-      ],
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
-      "validUntil": "2027-06-30"
+      "validUntil": "2027-06-30",
+      "moved": {
+        "2026-10-08": {
+          "from": "17:00",
+          "to": "18:00",
+          "pitch": {
+            "mode": "haelfte",
+            "part": "A"
+          },
+          "res": []
+        }
+      }
     },
     {
       "id": "a4dbb675-3e10-40c6-afa2-40c2ca82a21c",
