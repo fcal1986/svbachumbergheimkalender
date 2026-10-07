@@ -80,7 +80,7 @@ const CATEGORIES = {
                 'Freundschaftsspiel angelegt:', 'Freundschaftsspiel geändert:', 'Freundschaftsspiel gelöscht:',
                 'Turnier angelegt:', 'Turnier geändert:', 'Turnier gelöscht:'],
   training:    ['Trainingszeit angelegt:', 'Trainingszeit geändert:', 'Trainingszeit gelöscht:',
-                'Training abgesagt:', 'Absage zurückgenommen:', 'Torwarttraining-Anmeldung geändert:'],
+                'Training abgesagt:', 'Absage zurückgenommen:', 'Training verlegt:', 'Torwarttraining-Anmeldung geändert:'],
   sperren:     ['Sperre angelegt:', 'Sperre aufgehoben:'],
   verwaltung:  ['Zugang angelegt:', 'Zugang gelöscht:', 'Zugang gesperrt:', 'Zugang entsperrt:',
                 'Admin-Recht vergeben:', 'Admin-Recht entzogen:', 'Rolle geändert:', 'Notaus:',
