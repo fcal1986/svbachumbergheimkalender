@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-07T13:19:43.097Z",
+  "updated": "2026-10-07T19:58:39.122Z",
   "games": [
     {
       "d": "2026-09-17",
@@ -2401,6 +2401,17 @@
       "link": "https://www.fussball.de/spiel/sc-neheim-sv-bachum-bergheim/-/spiel/031SAEVJ4G000000VS5489BTVTPHHFPR"
     },
     {
+      "d": "2026-10-22",
+      "t": "19:30",
+      "team": "Herren",
+      "squad": 2,
+      "ownName": "SV Bachum/Bergheim II",
+      "opponent": "SG Allendorf/Amecke II",
+      "competition": "Kreispokal",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sg-allendorf-amecke-ii-sv-bachum-bergheim-ii/-/spiel/032AODOMM4000000VS5489BTVU989P58"
+    },
+    {
       "d": "2026-10-25",
       "t": "12:30",
       "team": "Herren",
@@ -3607,9 +3618,10 @@
         "011MIBAEQC000000VTVG0001VTR8C1K7"
       ],
       "competitions": [
-        "Kreisliga B"
+        "Kreisliga B",
+        "Kreispokal"
       ],
-      "games": 26,
+      "games": 27,
       "homeGames": 13,
       "first": "2026-09-20",
       "last": "2027-05-30",
