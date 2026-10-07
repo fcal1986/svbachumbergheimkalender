@@ -602,6 +602,9 @@
   .rv-row.ok b{color:var(--grass);}
   .rv-row.rv-tr{align-items:center;cursor:pointer;background:var(--kbFFF7ED);margin:6px -8px;padding:10px 8px;border-radius:10px;border-bottom:none;}
   .rv-row.rv-tr input{width:20px;height:20px;flex:none;accent-color:var(--green);margin:0;}
+  .nf-st.rule-warn{display:block;margin-top:3px;color:var(--kt9A3412);font-weight:600;}
+  .rule-fix{margin-left:4px;border:1.5px solid var(--krFDBA8C);background:var(--white);color:var(--kt9A3412);border-radius:999px;padding:3px 10px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;}
+  .rv-row.rule b{color:var(--kt9A3412);}
   .nf-st.own-tr{display:block;margin-top:3px;color:var(--kt9A3412);font-weight:600;}
   .fs-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin:14px 0 7px;}
   .fs-sub{font-size:11.5px;color:var(--ink-soft);margin:10px 0 6px;}
@@ -1678,7 +1681,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='07.10.2026 · 26';
+const APP_VERSION='07.10.2026 · 27';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -5925,6 +5928,30 @@ function autoMatchTitle(){
   an.dataset.auto='match'; showAnlassField();
 }
 // Anstoß → Von/Bis (und beim Heimspiel die Platzfläche) vorbelegen; bleibt danach frei änderbar.
+/* Platzbedarf laut Regel (ab 07.10.2026 · 27): E/F/G (config fussballde.shareCategories) eine Hälfte, sonst ganzer Platz.
+   Eigene Mannschaften heißen „E-Jugend“, fussball.de „E-Junioren“. */
+function gamePitchRule(team){ const t=String(team||''); return fussballTeamCategory(/-Jugend$/.test(t)?t.replace(/-Jugend$/,'-Junioren'):t)==='share'?'haelfte':'ganz'; }
+const PITCH_SIZE_LABEL={ganz:'den ganzen Platz',haelfte:'eine Hälfte',viertel:'ein Viertel'};
+// Abweichung der gewählten Fläche von der Regel – nur Heimspiele (Freundschaftsspiele)
+function formPitchRuleIssue(){
+  if(formKind()!=='game'||formHA==='away') return null;
+  const team=document.getElementById('f-team').value, rule=gamePitchRule(team);
+  const have=pitchOn()?pitchMode:null;
+  if(have===rule) return null;
+  const who=teamLabel(team,1).replace(/\d+-/,'-');
+  const txt=who+'-Spiel braucht laut Regel '+PITCH_SIZE_LABEL[rule]+(have?', gewählt: '+(have==='ganz'?'ganzer Platz':pitchShort(curPitch())):', gewählt: kein Platz')+'.';
+  return {rule,have,txt};
+}
+function applyRulePitch(){
+  const x=formPitchRuleIssue(); if(!x) return;
+  const on=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res);
+  setResChips('f-res',[...new Set(on.concat(['Großspielfeld']))]);
+  setPitchMode(x.rule);
+  if(x.rule==='haelfte'){ const v=document.getElementById('f-von').value, b=document.getElementById('f-bis').value;
+    const busy=usedQuartersWindow(dateInput().value,v,b,editingId,formOwnTeamFree());
+    pitchPart=HALF.A.every(q=>!busy.has(q))?'A':(HALF.B.every(q=>!busy.has(q))?'B':'A'); }
+  formDirty=true; hideConflicts(); renderPitch(); renderHalle();
+}
 function onKickoffChange(byUser){
   if(fillingForm||formKind()!=='game') return;
   const ko=document.getElementById('f-kickoff').value; if(!ko) return;
@@ -5936,7 +5963,7 @@ function onKickoffChange(byUser){
   const bis=q15(shiftTimeClamped(ko,fussballDurationMin(team)),true);
   document.getElementById('f-von').value=von; document.getElementById('f-bis').value=bis<von?'23:45':bis;
   if(!away&&pitchOn()){
-    if(/^[EFG]-Jugend$/.test(team)){
+    if(gamePitchRule(team)==='haelfte'){
       const busy=usedQuartersWindow(dateInput().value,von,bis,editingId,formOwnTeamFree());
       const part=HALF.A.every(q=>!busy.has(q))?'A':(HALF.B.every(q=>!busy.has(q))?'B':'A');
       setPitchMode('haelfte'); pitchPart=part;
@@ -6343,7 +6370,8 @@ function renderFormTlStatus(cand){
   const el=document.getElementById('f-tl-status'); if(!el) return;
   if(!cand.areas.length){ el.innerHTML=occLevel(formKind())==='overlay'
     ?'<span class="nf-st">Ohne Fläche – optional „A“ oder „B“ antippen, wenn es auf dem Platz stattfindet.</span>'
-    :'<span class="nf-st warn">Noch keine Fläche gewählt – links eine Zeile antippen.</span>'; return; }
+    :'<span class="nf-st warn">Noch keine Fläche gewählt – links eine Zeile antippen.</span>'
+    +(formPitchRuleIssue()?'<span class="nf-st rule-warn">'+esc(formPitchRuleIssue().txt)+' <button type="button" class="rule-fix" onclick="applyRulePitch()">'+(formPitchRuleIssue().rule==='ganz'?'Ganzen Platz wählen':'Hälfte wählen')+'</button></span>':''); return; }
   const o=formOccupation(), parts=[];
   if(o.pitch) parts.push(pitchShort(o.pitch)); else if(o.res.includes('Großspielfeld')) parts.push('auf dem Platz');
   if(o.halle) parts.push(halleShort(o.halle));
@@ -6354,6 +6382,8 @@ function renderFormTlStatus(cand){
     const hits=findConflicts(d,von,bis,o.pitch,o.halle,o.res,editingId,o.kind).filter(c=>!isOwnTeamTraining(c.event,o.ownFree));
     if(hits.length) msg='<span class="nf-st warn">⚠ belegt: '+esc([...new Set(hits.map(c=>occupationLabel(c.event)))].join(', '))+'</span>';
   }
+  const ri=formPitchRuleIssue();
+  if(ri) msg+='<span class="nf-st rule-warn">⚠ '+esc(ri.txt)+' <button type="button" class="rule-fix" onclick="applyRulePitch()">'+(ri.rule==='ganz'?'Ganzen Platz wählen':'Hälfte wählen')+'</button></span>';
   const ownTr=ownTrainingsOverlapping(d,von,bis,o.ownFree);
   if(ownTr.length) msg+='<span class="nf-st own-tr">Euer Training '+esc(ownTr.map(t=>t.t+'–'+eventBis(t)).join(', '))+' – Absage beim Speichern</span>';
   el.innerHTML='<b>'+esc(parts.join(' · '))+'</b> '+msg;
@@ -6443,6 +6473,9 @@ function openSlotFinder(){
   SF.start=document.getElementById('f-von').value||'15:00';
   SF.flex=true;
   SF.moreRes=false;
+  if(formKind()==='game'&&formHA!=='away'){ const rule=gamePitchRule(document.getElementById('f-team').value);
+    const on=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res);
+    if(!on.includes('Großspielfeld')||pitchMode!==rule){ setResChips('f-res',[...new Set(on.concat(['Großspielfeld']))]); setPitchMode(rule); renderPitch(); } }
   document.getElementById('sf-start').value=SF.start;
   renderSlotFinder();
   document.getElementById('slot-modal').classList.add('show');
@@ -6457,20 +6490,24 @@ function sfCheckDay(d,o){
   const occ=EVENTS.filter(e=>e.d===d&&e.id!==editingId).concat(trainingInstancesOn(d)).concat(fussballBookingOccupations(d,editingId));
   const locked=locksForItem({d,pitch:o.pitch,halle:o.halle,res:o.res}).length>0;
   if(locked) return {status:'busy',why:'gesperrt'};
-  const fits=s=>{
+  // Ab 07.10.2026 · 27: bei „Hälfte“/„Viertel“ jede Fläche dieser Größe probieren (gewählte zuerst)
+  const cands=!o.pitch?[null]:o.pitch.mode==='haelfte'?[o.pitch.part||'A','A','B'].filter((x,i,a)=>a.indexOf(x)===i).map(p=>({mode:'haelfte',part:p}))
+    :o.pitch.mode==='viertel'?[+o.pitch.part||1,1,2,3,4].filter((x,i,a)=>a.indexOf(x)===i).map(p=>({mode:'viertel',part:p})):[o.pitch];
+  const fitsP=(s,p)=>{
     const e=minToTime(timeToMin(s)+SF.dur);
-    const me={id:'__candidate',d,t:s,bis:e,pitch:o.pitch,halle:o.halle,res:o.res,kind:o.kind};
+    const me={id:'__candidate',d,t:s,bis:e,pitch:p,halle:o.halle,res:o.res,kind:o.kind};
     return !occ.some(x=>timesOverlap(me,x)&&!isOwnTeamTraining(x,o.ownFree)&&occupationConflictReasons(me,x,quarterPitchReason).length);
   };
+  const fits=s=>cands.find(p=>fitsP(s,p));
   const wish=SF.start, wishEnd=timeToMin(wish)+SF.dur;
-  if(wishEnd<=timeToMin('23:45')&&fits(wish)) return {status:'free',start:wish};
+  if(wishEnd<=timeToMin('23:45')){ const p=fits(wish); if(p!==undefined) return {status:'free',start:wish,pitch:p}; }
   if(!SF.flex) return {status:'busy'};
-  let best=null;
+  let best=null, bp=null;
   for(let m=timeToMin(SF_WIN_FROM);m+SF.dur<=timeToMin(SF_WIN_TO);m+=15){
-    const s=minToTime(m);
-    if(fits(s)&&(!best||Math.abs(m-timeToMin(wish))<Math.abs(timeToMin(best)-timeToMin(wish)))) best=s;
+    const s=minToTime(m), p=fits(s);
+    if(p!==undefined&&(!best||Math.abs(m-timeToMin(wish))<Math.abs(timeToMin(best)-timeToMin(wish)))){ best=s; bp=p; }
   }
-  return best?{status:'part',start:best}:{status:'busy'};
+  return best?{status:'part',start:best,pitch:bp}:{status:'busy'};
 }
 /* „Was brauchst du?“ (ab 06.10.2026 · 5): dieselbe Auswahl wie die Zeilen in „Wo?“ – direkt im Suchfenster,
    damit klar ist, wofür gesucht wird. Antippen ändert auch das Formular. */
@@ -6481,8 +6518,9 @@ function sfWhatChips(){
   let h='';
   if(ov) h+=chip('Platz',on('Großspielfeld'),"sfPick('gk')");
   else{
-    h+=chip('Ganzer Platz',same([1,2,3,4]),"sfPick('ganz')")+chip('Hälfte A',same([1,2]),"sfPick('A')")+chip('Hälfte B',same([3,4]),"sfPick('B')");
-    if(pq.length===1) h+=chip('Viertel '+pq[0],true,"sfPick('q')");
+    // Ab 07.10.2026 · 27: Größe statt konkreter Fläche – die Suche findet irgendeine freie Hälfte bzw. ein freies Viertel
+    const size=o.pitch?o.pitch.mode:null;
+    h+=chip('Ganzer Platz',size==='ganz',"sfPick('size','ganz')")+chip('Hälfte',size==='haelfte',"sfPick('size','haelfte')")+chip('Viertel',size==='viertel',"sfPick('size','viertel')");
   }
   h+=chip('Kleinfeld',on('Kleinspielfeld'),"sfPick('klein')");
   const all=formTlResAll(), vis=SF.moreRes?all:all.filter(r=>formTlStored().includes(r)||on(r)||(r==='Halle'&&o.halle));
@@ -6492,6 +6530,10 @@ function sfWhatChips(){
 }
 function sfPick(k,r){
   formAreaFromAuto(k==='res');
+  if(k==='size'){ const on0=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res);
+    if(on0.includes('Großspielfeld')&&pitchMode===r) setResChips('f-res',on0.filter(x=>x!=='Großspielfeld'));
+    else{ setResChips('f-res',[...new Set(on0.concat(['Großspielfeld']))]); setPitchMode(r); }
+    formDirty=true; hideConflicts(); renderPitch(); renderHalle(); renderSlotFinder(); return; }
   if(k==='q'){ const on0=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res); setResChips('f-res',on0.filter(x=>x!=='Großspielfeld')); formDirty=true; hideConflicts(); renderPitch(); renderHalle(); renderSlotFinder(); return; }
   const on=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res);
   const set=list=>setResChips('f-res',[...new Set(list)]), without=x=>on.filter(y=>y!==x);
@@ -6546,21 +6588,22 @@ function renderSlotFinder(){
     const [y,m]=r.k.split('-');
     h+='<div class="sf-month"><b>'+SF_MONTHS[parseInt(m)-1]+' '+y.slice(2)+'</b><div class="sf-days">'+r.days.map(x=>{
       const dd=parseInt(x.d.slice(8)), wd=DOW[dowOf(x.d)-1];
-      const tip=x.status==='free'?x.start+'–'+endOf(x.start)+' frei':(x.status==='part'?'frei ab '+x.start:(x.why==='gesperrt'?'gesperrt':'nichts frei'));
+      const where=x.pitch&&x.pitch.mode!=='ganz'?' ('+pitchShort(x.pitch)+')':'';
+      const tip=x.status==='free'?x.start+'–'+endOf(x.start)+' frei'+where:(x.status==='part'?'frei ab '+x.start+where:(x.why==='gesperrt'?'gesperrt':'nichts frei'));
       return '<button type="button" class="sf-day '+(x.status==='free'?'free':x.status==='part'?'part':'busy')+'" title="'+esc(fmtShort(x.d)+': '+tip)+'"'
-        +(x.status==='busy'?' disabled':' onclick="applySlotFinder(\''+x.d+'\',\''+x.start+'\')"')+'>'+dd+'<small>'+wd+'</small></button>';
+        +(x.status==='busy'?' disabled':' onclick="applySlotFinder(\''+x.d+'\',\''+x.start+'\''+(x.pitch&&x.pitch.mode!=='ganz'?',\''+x.pitch.mode+'\',\''+x.pitch.part+'\'':'')+')"')+'>'+dd+'<small>'+wd+'</small></button>';
     }).join('')+'</div></div>';
   });
   h+='<div class="sf-legend"><span><i style="background:#6BB41C"></i>Wunschzeit frei</span><span><i style="background:#FFD24A"></i>andere Uhrzeit</span><span><i style="background:var(--kbE4E9E8)"></i>belegt</span></div>';
   const best=days.filter(x=>x.status==='free').concat(days.filter(x=>x.status==='part')).slice(0,5);
   if(best.length){
     h+='<p class="field-label" style="margin:4px 0 6px;">Vorschläge</p>'+best.map(x=>'<div class="rs-result-row"><div><b>'+DOW[dowOf(x.d)-1]+', '+fmtShort(x.d)+'</b><br><small style="color:var(--ink-soft);">'
-      +x.start+'–'+endOf(x.start)+(x.status==='part'?' (statt '+SF.start+')':'')+'</small></div>'
-      +'<button class="fs-btn" onclick="applySlotFinder(\''+x.d+'\',\''+x.start+'\')">Übernehmen</button></div>').join('');
+      +x.start+'–'+endOf(x.start)+(x.status==='part'?' (statt '+SF.start+')':'')+(x.pitch&&x.pitch.mode!=='ganz'?' · '+pitchShort(x.pitch):'')+'</small></div>'
+      +'<button class="fs-btn" onclick="applySlotFinder(\''+x.d+'\',\''+x.start+'\''+(x.pitch&&x.pitch.mode!=='ganz'?',\''+x.pitch.mode+'\',\''+x.pitch.part+'\'':'')+')">Übernehmen</button></div>').join('');
   } else h+='<p class="rs-empty">Nichts frei. Andere Monate, Wochentage oder eine kürzere Dauer probieren.</p>';
   out.innerHTML=h;
 }
-function applySlotFinder(d,start){
+function applySlotFinder(d,start,mode,part){
   dateInput().value=d;
   document.getElementById('f-von').value=start;
   const end=timeToMin(start)+SF.dur;
@@ -6568,7 +6611,9 @@ function applySlotFinder(d,start){
   formDirty=true; closeSlotFinder();
   if(formKind()==='game'){ document.getElementById('f-kickoff').value=formHA==='away'?start:addMinutes(start,fussballBufferBeforeMin()); onKickoffChange(false); }
   updateWeekday(); onTimeChange();
-  showToast('Übernommen: '+DOW[dowOf(d)-1]+', '+fmtShort(d)+', '+start+'–'+document.getElementById('f-bis').value+' Uhr',3000);
+  if(mode){ setPitchMode(mode); pitchPart=mode==='viertel'?+part:part; } // gefundene Hälfte bzw. gefundenes Viertel übernehmen (nach dem Anstoß, der sonst die Regel-Fläche setzt)
+  showToast('Übernommen: '+DOW[dowOf(d)-1]+', '+fmtShort(d)+', '+start+'–'+document.getElementById('f-bis').value+' Uhr'+(mode?' · '+pitchShort({mode,part}):''),3000);
+  renderPitch();
   trackEvent('freier_termin_uebernommen');
 }
 function requireLogin(){
@@ -6820,6 +6865,7 @@ function openReviewSheet(o){
   openSheet('<div class="rv-sheet"><h3>'+(edit?'Änderungen prüfen':'Termin prüfen')+'</h3>'
     +row('Was',what)+row('Wer',who)+row('Wann',when)+row('Wo',where)
     +(o.away||o.kind==='trainer'?'':row('Platz','✓ frei','ok'))
+    +((()=>{ const ri=!o.away&&o.kind==='game'?formPitchRuleIssue():null; return ri?row('Regel','⚠ '+ri.txt,'rule'):''; })())
     +trRows
     +row('Mail an',mail)
     +'<div class="fs-acts"><button type="button" class="cancel-btn" onclick="closeSheet()">Weiter bearbeiten</button>'
