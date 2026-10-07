@@ -306,6 +306,10 @@
   .tl-blk.senior{background:#405366;} .tl-blk.other{background:#2C4A66;}
   .tl-blk.game{background:#FFD24A;color:var(--pc-navy);}
   .tl-blk.mine{background:#8BCF2F;color:var(--pc-navy);box-shadow:inset 0 0 0 2px var(--pc-navy);}
+  /* Ab 07.10.2026 · 31: Block, der sich mit einem anderen überschneidet (z. B. Training in der Aufwärmzeit eines Spiels) */
+  .tl-blk.clash{border:2.5px solid #E5484D;z-index:1;}
+  .tl-blk.clash b:before{content:"⚠ ";}
+  .lg.clash{background:transparent;border:2.5px solid #E5484D;box-sizing:border-box;}
   .tl-blk.canc{background:var(--white);color:var(--kt7C8A97);box-shadow:inset 0 0 0 1.5px var(--krB8C4CF);text-decoration:line-through;}
   .tl-conf{position:absolute;border-radius:4px;pointer-events:none;background:repeating-linear-gradient(135deg,#C0392B 0,#C0392B 3px,rgba(192,57,43,.2) 3px,rgba(192,57,43,.2) 6px);}
   .tl-lock{position:absolute;left:0;right:0;border-radius:6px;pointer-events:none;z-index:1;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,rgba(64,83,102,.35) 0,rgba(64,83,102,.35) 5px,rgba(64,83,102,.12) 5px,rgba(64,83,102,.12) 10px);}
@@ -1685,7 +1689,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='07.10.2026 · 30';
+const APP_VERSION='07.10.2026 · 31';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -4546,11 +4550,18 @@ function timelineHTML(ds,isMine,opts){
   // Sperren: ganze Fläche schraffiert
   activeLocksOn(ds).forEach(l=>{ const area=l.resource==='platz'?'platz':(l.resource==='halle'?'halle':null); const g=groups.find(x=>x.area===area); if(!g) return;
     h+='<div class="tl-lock" style="top:'+g.top+'px;height:'+(g.n*TL_LANE+(g.n-1)*TL_GAP)+'px"><span>gesperrt'+(l.note?' · '+esc(l.note):'')+'</span></div>'; });
+  // Ab 07.10.2026 · 31: Abgesagtes nicht mehr zeigen (die Fläche ist frei); Blöcke, die sich zeitlich und auf
+  // derselben Fläche überschneiden, rot umrandet – bei Spiel gegen Training nur das Training (Spiel hat Vorrang).
+  // Zählt die Zeitleisten-Zeit, also auch die Aufwärmzeit vor dem Anstoß; ein Konflikt im Sinne von Meldungen ist das nicht.
+  const live=occ.filter(o=>!o.cancelled);
+  const hits=(a,b)=>a!==b&&a.area===b.area&&a.lanes[0]<=b.lanes[1]&&b.lanes[0]<=a.lanes[1]&&hmMin(a.t)<hmMin(b.bis)&&hmMin(b.t)<hmMin(a.bis)&&a.id!==b.id;
+  const clashSet=new Set(live.filter(o=>live.some(x=>hits(o,x)&&!(o.kind==='g'&&x.kind!=='g'))));
   occ.forEach((o,i)=>{
+    if(o.cancelled) return;
     const g=groups.find(x=>x.area===o.area), span=o.lanes[1]-o.lanes[0]+1, ht=span*TL_LANE+(span-1)*TL_GAP, mine=occIsMine(o,isMine);
-    const cls='tl-blk'+(o.cancelled?' canc':(mine?' mine':(o.kind==='g'?' game':(o.kind==='o'?' other':(/Herren|Ü\d/.test(o.team||'')?' senior':'')))));
+    const cls='tl-blk'+(clashSet.has(o)?' clash':'')+(o.cancelled?' canc':(mine?' mine':(o.kind==='g'?' game':(o.kind==='o'?' other':(/Herren|Ü\d/.test(o.team||'')?' senior':'')))));
     if(!g) return;
-    h+='<button type="button" class="'+cls+'" style="top:'+laneY(o.area,o.lanes[0])+'px;height:'+ht+'px;left:'+P(hmMin(o.t))+'%;width:'+W(hmMin(o.t),hmMin(o.bis))+'%" onclick="'+esc('openOccDetail(\''+ds+'\','+i+(form?',\'form\'':'')+')')+'" aria-label="'+esc(o.label+' '+o.t+'–'+o.bis+' '+areaLabel(o)+(o.cancelled?' abgesagt':''))+'">'
+    h+='<button type="button" class="'+cls+'" style="top:'+laneY(o.area,o.lanes[0])+'px;height:'+ht+'px;left:'+P(hmMin(o.t))+'%;width:'+W(hmMin(o.t),hmMin(o.bis))+'%" onclick="'+esc('openOccDetail(\''+ds+'\','+i+(form?',\'form\'':'')+')')+'" aria-label="'+esc(o.label+' '+o.t+'–'+o.bis+' '+areaLabel(o)+(clashSet.has(o)?' – Überschneidung':''))+'">'
       +'<b>'+esc(o.label)+(o.kind==='g'?' · Spiel':'')+'</b>'+(ht>TL_LANE?'<i>'+o.t+'–'+o.bis+'</i>':'')+'</button>';
   });
   // Formular: der neue (bzw. bearbeitete) Termin gestrichelt auf seinen Spuren
@@ -4574,6 +4585,7 @@ function timelineHTML(ds,isMine,opts){
     +(sun?'<span><i class="lg sun"></i>'+sun+'</span>':'')+'</div>';
   h+='<div class="tl-legend">'+(isMine?'<span><i class="lg mine"></i>'+(session&&sessionWeekTeams()?'deine Mannschaft':'Favoriten')+'</span>':'')+'<span><i class="lg tr"></i>Training</span><span><i class="lg game"></i>Spiel</span>'
     +(conflictsOnDay(ds).length?'<span><i class="lg conf"></i>Konflikt</span>':'')
+    +(clashSet.size?'<span><i class="lg clash"></i>Überschneidung</span>':'')
     +(sun?'<span><i class="lg sun"></i>Sonnenuntergang '+sun+(fl==='ganz'?' · Flutlicht':'')+'</span>':'')
     +(canBook&&ds>=todayStr?'<span><i class="lg free"></i>frei – antippen zum Buchen</span>':'')+'</div>';
   return h;
