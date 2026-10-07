@@ -382,6 +382,7 @@
   .occ-line{font-size:14px;color:var(--ink);margin-top:3px;}
   .occ-canc{color:var(--warn);font-weight:700;}
   .occ-contact{margin-top:10px;}
+  .wk-acts{display:flex;flex-direction:column;gap:4px;flex:none;}
   .wk-act{flex:none;background:none;border:1.5px solid var(--line);color:var(--ink);font:inherit;font-size:11px;font-weight:700;padding:5px 9px;border-radius:9px;cursor:pointer;}
   .wk-act:active{background:var(--bg);}
   .mv-reasons{margin-top:8px;gap:6px;}
@@ -1681,7 +1682,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='07.10.2026 · 27';
+const APP_VERSION='07.10.2026 · 28';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -1870,7 +1871,8 @@ function cancelledTrainingInstancesOn(d){
     id:'trc-'+s.id+'-'+d, d:d, t:s.from, bis:s.to,
     title:'Training', team:s.team, squad:s.squad||1,
     pitch:null, halle:null, res:[], note:s.note||'',
-    isTraining:true, isCancelled:true, trainingSlotId:s.id, kind:s.kind||(s.team===GK_TEAM?'goalkeeper':'training')
+    isTraining:true, isCancelled:true, trainingSlotId:s.id, kind:s.kind||(s.team===GK_TEAM?'goalkeeper':'training'),
+    movedTo:(typeof EVENTS!=='undefined'?EVENTS.find(e=>e.d===d&&e.movedFromSlot&&e.movedFromSlot.slotId===s.id):null)||null
   })).sort((a,b)=>a.t.localeCompare(b.t));
 }
 
@@ -3429,9 +3431,10 @@ function isOwnTeamTraining(t,own){ return !!own&&!!t.isTraining&&t.team===own.te
    das Training gilt als frei und wird in „Termin prüfen“ zum Absagen angeboten (bei Spielen/Turnieren vorausgewählt).
    Ausgenommen: Trainer-Termine (alle), Torwarttraining, Auswärtsspiele (belegen bei uns nichts). */
 function ownFreeFor(kind,away,team,squad){ return (kind!=='trainer'&&kind!=='goalkeeper'&&!away&&team&&team!=='Alle Teams'&&team!==GK_TEAM)?{team,squad:squad||1}:null; }
-function ownTrainingsOverlapping(d,von,bis,own){
+function ownTrainingsOverlapping(d,von,bis,own,kind){
   if(!own||!d||!von||!bis) return [];
-  return trainingInstancesOn(d).filter(t=>t.trainingSlotId&&isOwnTeamTraining(t,own)&&von<eventBis(t)&&bis>t.t);
+  const sameDay=kind==='training'||(FORM_MOVE&&FORM_MOVE.date===d); // neues Training am Trainingstag = meist Ersatz (ab · 28)
+  return trainingInstancesOn(d).filter(t=>t.trainingSlotId&&isOwnTeamTraining(t,own)&&(sameDay||(von<eventBis(t)&&bis>t.t)));
 }
 function formOwnTeamFree(){
   const k=formKind(); if(k==='trainer'||k==='goalkeeper'||(isMatchKind(k)&&formHA==='away')) return null;
@@ -3494,6 +3497,7 @@ function rowHTML(e){
     if(e.halle&&e.halle.thirds&&e.halle.thirds.length)b+=halleBadge(e.halle);
     (e.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
   }
+  if(!e.isTraining&&e.movedFromSlot) b+='<span class="move-badge">↺ statt Regeltraining '+esc(e.movedFromSlot.from+'–'+e.movedFromSlot.to)+'</span>';
   const isMatch=!e.isTraining&&isMatchKind(kindOf(e))&&!!e.ha;
   if(isMatch) b=haPill({isAway:e.ha==='away'})+'<span class="badge-res">'+esc(kindLabel(kindOf(e)))+'</span>'+b;
   const sub=e.isTraining?'':(isMatch&&e.kickoff?'Anstoß '+e.kickoff+(e.ha==='away'?'':' · Platz '+e.t+'–'+bis):(e.t+'–'+bis))+' · '+esc(e.ownerName||'–');
@@ -3505,6 +3509,7 @@ function rowHTML(e){
   if(e.isTraining){
     acts=shareBtnHTML(e);
     if(session&&(session.isAdmin||canBookAnyOfTeam(e.team))){
+      acts+='<button class="ibtn" title="Nur an diesem Tag verlegen" onclick="moveTrainingDay(\''+e.trainingSlotId+'\',\''+e.d+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></button>';
       acts+='<button class="ibtn" title="Diesen Termin absagen" onclick="cancelTrainingDay(\''+e.trainingSlotId+'\',\''+e.d+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M10 14l4 4M14 14l-4 4"/></svg></button>';
     }
 
@@ -3730,7 +3735,10 @@ function inactiveRowHTML(e){
     why='Fällt aus'+(r?' · '+r:'');
     pill='Abgesagt';
     const canManage=session&&e.trainingSlotId&&(session.isAdmin||canBookAnyOfTeam(e.team));
-    if(canManage) act='<button class="ia-undo" title="Absage zurücknehmen" onclick="event.stopPropagation();reactivateCancelled(\''+e.trainingSlotId+'\',\''+e.d+'\')">Zurücknehmen</button>';
+    if(e.movedTo){ // ab 07.10.2026 · 28: einmalig verlegt – Ersatztermin antippen
+      tone='moved'; pill='Verlegt'; why='Verlegt auf '+e.movedTo.t+'–'+eventBis(e.movedTo)+' Uhr';
+      click='jumpToEvent(\''+jsArg(e.movedTo.id)+'\')';
+    } else if(canManage) act='<button class="ia-undo" title="Absage zurücknehmen" onclick="event.stopPropagation();reactivateCancelled(\''+e.trainingSlotId+'\',\''+e.d+'\')">Zurücknehmen</button>';
   }
   const clickAttr=click?' role="button" tabindex="0" onclick="'+click+'" onkeydown="if(event.key===\'Enter\'){'+click+'}"':'';
   return '<div class="ia-row ia-'+tone+(click?' clickable':'')+(e.id===highlightId?' hl':'')+'" id="ev-'+e.id+'"'+clickAttr+'>'
@@ -5013,7 +5021,8 @@ function weekRowActHTML(e){
   if(e.isCancelled) return e.isTraining&&e.trainingSlotId&&canCancelSlot(TRAINING.find(x=>x.id===e.trainingSlotId))
     ?'<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();reactivateCancelled(\''+jsArg(e.trainingSlotId)+'\',\''+e.d+'\')')+'">Zurücknehmen</button>':'';
   if(e.isTraining&&e.trainingSlotId&&canCancelSlot(TRAINING.find(x=>x.id===e.trainingSlotId)))
-    return '<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();cancelTrainingDay(\''+jsArg(e.trainingSlotId)+'\',\''+e.d+'\')')+'">Absagen</button>';
+    return '<span class="wk-acts"><button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();moveTrainingDay(\''+jsArg(e.trainingSlotId)+'\',\''+e.d+'\')')+'">Verlegen</button>'
+      +'<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();cancelTrainingDay(\''+jsArg(e.trainingSlotId)+'\',\''+e.d+'\')')+'">Absagen</button></span>';
   if(e.isExternal&&(e.isAway||!e.offPitch)&&e.fbIndex!=null&&canMarkGameMove(e))
     return '<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();openMoveModal('+e.fbIndex+')')+'">Verlegen</button>';
   return '';
@@ -6384,8 +6393,8 @@ function renderFormTlStatus(cand){
   }
   const ri=formPitchRuleIssue();
   if(ri) msg+='<span class="nf-st rule-warn">⚠ '+esc(ri.txt)+' <button type="button" class="rule-fix" onclick="applyRulePitch()">'+(ri.rule==='ganz'?'Ganzen Platz wählen':'Hälfte wählen')+'</button></span>';
-  const ownTr=ownTrainingsOverlapping(d,von,bis,o.ownFree);
-  if(ownTr.length) msg+='<span class="nf-st own-tr">Euer Training '+esc(ownTr.map(t=>t.t+'–'+eventBis(t)).join(', '))+' – Absage beim Speichern</span>';
+  const ownTr=ownTrainingsOverlapping(d,von,bis,o.ownFree,o.kind);
+  if(ownTr.length) msg+='<span class="nf-st own-tr">'+(o.kind==='training'?'Ersetzt euer Regeltraining ':'Euer Training ')+esc(ownTr.map(t=>t.t+'–'+eventBis(t)).join(', '))+(o.kind==='training'?' (entfällt an dem Tag)':' – Absage beim Speichern')+'</span>';
   el.innerHTML='<b>'+esc(parts.join(' · '))+'</b> '+msg;
 }
 function toggleFormTlAdd(){
@@ -6729,7 +6738,7 @@ function newEvent(d){
     }
     if(!d&&!session.isAdmin&&!seasonForDate(todayStr)) d=open.map(se=>se.from).sort()[0]; // nur für die kommende Saison eingetragen
   }
-  editingId=null; resetForm();
+  editingId=null; resetForm(); FORM_MOVE=null;
   filterTeamOptions(); onTeamChange();
   dateInput().value=d||todayStr;
   setResChips('f-res',[]); halleThirds=[]; pitchMode='ganz'; pitchPart=null; // Fläche wählt man in der Zeitleiste selbst
@@ -6858,10 +6867,11 @@ function openReviewSheet(o){
   const mail=rc.all?'alle Trainer der Saison':(rc.names.length?rc.names.join(', '):'niemand außer dir');
   const row=(l,v,cls)=>'<div class="rv-row'+(cls?' '+cls:'')+'"><span>'+l+'</span><b>'+esc(v)+'</b></div>';
   const edit=!!editingId;
-  const own=ownFreeFor(o.kind,o.away,o.team,o.squad), ownTr=ownTrainingsOverlapping(o.d,o.von,o.bis,own);
+  const own=ownFreeFor(o.kind,o.away,o.team,o.squad), ownTr=ownTrainingsOverlapping(o.d,o.von,o.bis,own,o.kind);
   const clashIds=new Set(findConflicts(o.d,o.von,o.bis,o.pitch,o.halle,o.res,editingId,o.kind).map(c=>c.event.id));
-  const trRows=ownTr.map(t=>{ const pre=isMatchKind(o.kind)||clashIds.has(t.id);
-    return '<label class="rv-row rv-tr"><input type="checkbox" class="rv-cancel" data-slot="'+esc(t.trainingSlotId)+'"'+(pre?' checked':'')+'><b>Training '+esc(teamShort(t.team,t.squad))+' '+t.t+'–'+eventBis(t)+' an dem Tag absagen</b></label>'; }).join('');
+  const trRows=ownTr.map(t=>{ const repl=o.kind==='training', pre=repl||isMatchKind(o.kind)||clashIds.has(t.id);
+    return '<label class="rv-row rv-tr"><input type="checkbox" class="rv-cancel" data-slot="'+esc(t.trainingSlotId)+'"'+(pre?' checked':'')+'><b>'
+      +(repl?'Ersetzt Regeltraining '+esc(teamShort(t.team,t.squad))+' '+t.t+'–'+eventBis(t)+' (entfällt an dem Tag)':'Training '+esc(teamShort(t.team,t.squad))+' '+t.t+'–'+eventBis(t)+' an dem Tag absagen')+'</b></label>'; }).join('');
   openSheet('<div class="rv-sheet"><h3>'+(edit?'Änderungen prüfen':'Termin prüfen')+'</h3>'
     +row('Was',what)+row('Wer',who)+row('Wann',when)+row('Wo',where)
     +(o.away||o.kind==='trainer'?'':row('Platz','✓ frei','ok'))
@@ -6946,14 +6956,19 @@ async function submitEvent(){
     selDate=d;const dt=new Date(d+'T00:00:00');curY=dt.getFullYear();curM=dt.getMonth();yearShown=curY;
     if(FORM_ORIGIN&&FORM_ORIGIN.pane==='start'&&!wasEditing){ render(); resetForm(); goto('start'); } // aus der Zeitleiste: zurück an dieselbe Stelle
     else{ goto('termine');setView('woche');render();renderStart();resetForm(); }
-    if(cancelSlots.length){ // Absage steht in derselben Mail; der Trainings-Commit selbst ist „(automatisch)“
+    const movedSlot=kind==='training'&&!wasEditing?cancelSlots.find(x=>x.team===team&&(x.squad||1)===(squad||1)):null;
+    if(movedSlot){ savedEv.movedFromSlot={slotId:movedSlot.id,from:movedSlot.from,to:movedSlot.to};
+      logMsg='Neuer Termin: Training verlegt – '+teamLabel(team,squad)+' am '+fmtShort(d)+' von '+movedSlot.from+'–'+movedSlot.to+' auf '+von+'–'+bis+' – '+session.name+teamTrailer(team,squad,savedEv); }
+    FORM_MOVE=null;
+    if(cancelSlots.length&&!movedSlot){ // Absage steht in derselben Mail; der Trainings-Commit selbst ist „(automatisch)“
       const add=', Training '+teamShort(team,squad)+' am '+fmtShort(d)+' abgesagt';
       logMsg=logMsg.includes('\n\nPlatzcoach-Team')?logMsg.replace('\n\nPlatzcoach-Team',add+'\n\nPlatzcoach-Team'):logMsg+add;
       renderTraining(); render(); renderStart();
     }
-    showToast('Gespeichert: '+title+(cancelSlots.length?' · Training abgesagt':''));
+    if(movedSlot){ renderTraining(); render(); renderStart(); }
+    showToast(movedSlot?'Training verlegt auf '+von+'–'+bis+' Uhr.':'Gespeichert: '+title+(cancelSlots.length?' · Training abgesagt':''));
     saveEvents(logMsg)
-      .then(()=>cancelSlots.length?saveTraining('Training abgesagt: '+teamLabel(team,squad)+' am '+fmtShort(d)+' wegen '+title+' (automatisch) – '+session.name+teamTrailer(team,squad,savedEv)):null)
+      .then(()=>cancelSlots.length?saveTraining('Training abgesagt: '+teamLabel(team,squad)+' am '+fmtShort(d)+(movedSlot?' (verlegt auf '+von+'–'+bis+')':' wegen '+title)+' (automatisch) – '+session.name+teamTrailer(team,squad,savedEv)):null)
       .catch(err=>{ EVENTS=JSON.parse(backup); TRAINING=JSON.parse(backupT); applyGameMoves();render();renderStart();renderTraining();showToast('Speichern fehlgeschlagen: '+err.message,6000); });
     // Heimspiel/-turnier: Training der Mannschaft zur selben Zeit absagen? Danach Text für den Jugendleiter.
     if(isMatchKind(kind)&&!away){
@@ -6968,9 +6983,12 @@ function deleteEvent(id){
   if(!requireLogin()) return;
   const e=EVENTS.find(x=>x.id===id); if(!e)return;
   if(!canEdit(e)){showToast('Das ist nicht dein Termin.');return;}
-  askConfirm('Termin löschen?','„'+e.title+'" am '+fmtShort(e.d)+' wird dauerhaft entfernt.','Löschen',async()=>{
+  const ms=e.movedFromSlot?TRAINING.find(x=>x.id===e.movedFromSlot.slotId):null;
+  askConfirm('Termin löschen?','„'+e.title+'" am '+fmtShort(e.d)+' wird dauerhaft entfernt.'+(ms?' Das Regeltraining '+ms.from+'–'+ms.to+' findet dann wieder statt.':''),'Löschen',async()=>{
     const backup=JSON.stringify(EVENTS);
     EVENTS=EVENTS.filter(x=>x.id!==id); applyGameMoves();
+    if(ms&&(ms.cancelled||[]).includes(e.d)){ ms.cancelled=ms.cancelled.filter(x=>x!==e.d); renderTraining();
+      saveTraining('Absage zurückgenommen: '+teamLabel(ms.team,ms.squad)+' am '+fmtShort(e.d)+' (Ersatztermin gelöscht, automatisch) – '+session.name+teamTrailer(ms.team,ms.squad,ms)).catch(()=>{}); }
     render(); renderStart(); showToast('Termin gelöscht.');
     if(kindOf(e)==='goalkeeper') sendGkCancel(e.gkTeams||[],e.title||'Torwarttraining',DAYS[new Date(e.d+'T00:00:00').getDay()]+', '+fmtShort(e.d)+' · '+e.t+'–'+eventBis(e)+' Uhr',[e.ownerId],'Der Termin wurde gelöscht.');
     saveEvents(isMatchKind(kindOf(e))&&e.ha?matchLogMsg(e,'gelöscht'):'Termin gelöscht: '+e.title+' – '+msgTeam(e.team,e.squad,e.gkTeams)+' · '+e.t+'–'+eventBis(e)+' · '+fmtShort(e.d)+' – '+session.name+teamTrailer(e.team,e.squad,e))
@@ -7634,6 +7652,27 @@ async function doCancelSlot(){
    Genutzt von „Meine Woche“, der Kalenderkarte, „Zu erledigen“ und dem Konflikt-Hinweis;
    der Dialog mit Datumswahl bleibt nur für die Trainingszeiten-Liste (dort ist kein Tag bekannt). */
 function canCancelSlot(s){ return !!(session&&s&&(session.isAdmin||canBookAnyOfTeam(s.team))); }
+/* Regeltraining einmalig verlegen (ab 07.10.2026 · 28): öffnet „Neuer Termin“ mit Training, Mannschaft, Zeit und Fläche
+   des Regeltrainings. In „Termin prüfen“ ist „Regeltraining … ersetzen“ vorausgewählt; Speichern legt den Ersatztermin an
+   (movedFromSlot) und sagt das Regeltraining an dem Tag ab – eine Mail „Training verlegt“. Löschen des Ersatztermins
+   lässt das Regeltraining wieder stattfinden. Dauerhafte Änderungen bleiben bei den Admins (Trainingszeit bearbeiten). */
+function moveTrainingDay(id,date){
+  const s=TRAINING.find(x=>x.id===id); if(!s||!date) return;
+  if(!canCancelSlot(s)){ showToast('Verlegen kann nur ein Trainer der Mannschaft oder ein Admin.',4000); return; }
+  newEvent(date); if(!document.querySelector('.pane[data-pane="neu"].active')) return;
+  document.getElementById('f-team').value=s.team; setSquadSeg('f-squad',s.team,s.squad||1,true); onTeamChange();
+  pickFormKind(s.team===GK_TEAM||s.kind==='goalkeeper'?'goalkeeper':'training');
+  document.getElementById('f-von').value=s.from; document.getElementById('f-bis').value=s.to;
+  const res=(s.res||[]).slice(); if(s.pitch) res.unshift('Großspielfeld'); if(s.halle&&s.halle.thirds&&s.halle.thirds.length) res.push('Halle');
+  setResChips('f-res',res);
+  if(s.pitch){ setPitchMode(s.pitch.mode); pitchPart=s.pitch.part||null; }
+  halleThirds=s.halle&&s.halle.thirds?[...s.halle.thirds]:[];
+  FORM_MOVE={slotId:s.id,date};
+  formDirty=false; onTimeChange(); renderPitch(); renderHalle();
+  showToast('Neue Zeit oder Fläche wählen – das Regeltraining entfällt dann an dem Tag.',4000);
+}
+let FORM_MOVE=null;
+function jumpToEvent(id){ const e=EVENTS.find(x=>x.id===id); if(e) focusEventCard(e); }
 function cancelTrainingDay(id,date,reason){
   const s=TRAINING.find(x=>x.id===id); if(!s||!date) return;
   if(!canCancelSlot(s)){ showToast('Absagen kann nur ein Trainer der Mannschaft oder ein Admin.',4000); return; }
