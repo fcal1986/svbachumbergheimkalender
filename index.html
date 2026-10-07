@@ -1675,7 +1675,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 24';
+const APP_VERSION='07.10.2026 · 25';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -5780,6 +5780,7 @@ function newEventFromFussball(idx){
   document.getElementById('f-anlass').value='Heimspiel: '+g.team+' – '+g.opponent+(g.competition?' ('+g.competition+')':'');
   const mt=fussballFilterTeam(g.team,g.squad); document.getElementById('f-team').value=mt.team; setSquadSeg('f-squad',mt.team,mt.squad,true);
   document.getElementById('f-opponent').value=g.opponent||''; document.getElementById('f-kickoff').value=g.t||''; setHomeAway('home',false);
+  setResChips('f-res',['Großspielfeld']); setPitchMode('ganz'); // Heimspiel: Platz wie bisher vorbelegt
   document.getElementById('f-kind').value='game'; kindTouched=true; onKindChange(false);
   if(g.t){ document.getElementById('f-von').value=g.t; document.getElementById('f-bis').value=addMinutes(g.t,120); onKickoffChange(false); }
   onTimeChange();
@@ -6666,6 +6667,7 @@ function newEvent(d){
   editingId=null; resetForm();
   filterTeamOptions(); onTeamChange();
   dateInput().value=d||todayStr;
+  setResChips('f-res',[]); halleThirds=[]; pitchMode='ganz'; pitchPart=null; // Fläche wählt man in der Zeitleiste selbst
   prefillOwnTraining(d||todayStr);
   updateWeekday(); renderPitch();
   document.getElementById('save-label').textContent='Termin speichern';
@@ -6698,18 +6700,9 @@ function prefillOwnTraining(d){
   const an=document.getElementById('f-anlass'); an.value=KIND_AUTO_TITLE.training; an.dataset.auto='1';
   onKindChange(false);
   const s=usualSlotFor(my.team,my.squad,d);
-  if(s){
-    document.getElementById('f-von').value=s.from; document.getElementById('f-bis').value=s.to;
-    if(s.pitch){
-      setResChips('f-res',['Großspielfeld'].concat(s.res||[])); setPitchMode(s.pitch.mode); pitchPart=s.pitch.part||null;
-      // Ist die übliche Fläche an dem Tag belegt, gleich eine freie gleicher Größe nehmen.
-      const busy=usedQuartersWindow(d,s.from,s.to,null,formOwnTeamFree());
-      if(s.pitch.mode==='viertel'&&busy.has(pitchPart)){ const q=[1,2,3,4].find(q=>!busy.has(q)); if(q) pitchPart=q; }
-      if(s.pitch.mode==='haelfte'&&HALF[pitchPart]&&HALF[pitchPart].some(q=>busy.has(q))){ const h=['A','B'].find(h=>HALF[h].every(q=>!busy.has(q))); if(h) pitchPart=h; }
-    }
-    else setResChips('f-res',s.res||[]);
-    FORM_TL.areaAuto=true; // Fläche stammt aus der Vorbelegung – erstes Antippen einer Fläche ersetzt sie (ab 06.10.2026 · 24)
-  }
+  if(s){ document.getElementById('f-von').value=s.from; document.getElementById('f-bis').value=s.to; }
+  // Ab 07.10.2026 · 25: keine Fläche mehr vorbelegen (Wunsch Fabrizio). Die übliche Fläche eines anderen Wochentags
+  // war oft belegt (Mi: Viertel 2 vom Montagstraining, dort trainiert E3) – vorbelegt stand dann ein Konflikt da.
   formDirty=false;
 }
 /* Ab 06.10.2026 · 24: Die Vorbelegung „eigenes Training“ (z. B. Viertel 3) blieb beim Antippen von „KF“ oder
