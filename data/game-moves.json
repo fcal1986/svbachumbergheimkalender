@@ -1,27 +1,6 @@
 {
   "moves": [
     {
-      "id": "a0cd872b-e226-4204-aab5-7c49b2cd484a",
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-1-oeventrop-freienohl-wennemen/-/spiel/031J8LLJOS000000VS5489BUVVKNMR0J",
-      "team": "E-Junioren",
-      "squad": 2,
-      "opponent": "JSG Oeventrop/Freie./Wen. I",
-      "fromD": "2026-11-06",
-      "fromT": "16:15",
-      "toD": "2026-10-17",
-      "toT": "10:00",
-      "reason": "Spielermangel",
-      "byId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
-      "byName": "David Skwara",
-      "at": "2026-10-07T08:48:18.140Z",
-      "cancelledTraining": [
-        {
-          "slotId": "c48dfe28-58b5-4e17-8cfe-41926fb33bbc",
-          "date": "2026-11-06"
-        }
-      ]
-    },
-    {
       "id": "5455e65b-75d0-4265-a05c-4f4123f90862",
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-sv-affeln-28/-/spiel/031OEI7Q68000000VS5489BUVT2M8LCU",
       "team": "D-Junioren",
