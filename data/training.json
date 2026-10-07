@@ -254,7 +254,9 @@
       "trainerNames": [
         "Cetin Kurt"
       ],
-      "cancelled": [],
+      "cancelled": [
+        "2026-11-03"
+      ],
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
       "validUntil": "2027-06-30"
