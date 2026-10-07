@@ -226,25 +226,6 @@
       "kickoff": "13:00",
       "ownerId": "af1a6546-fdc2-4059-bef4-5a4966181701",
       "ownerName": "Michael Raneck"
-    },
-    {
-      "id": "e0e445f1-6442-420f-ae7a-0c2f2958dc89",
-      "d": "2026-10-08",
-      "t": "17:00",
-      "bis": "18:00",
-      "title": "Training",
-      "kind": "training",
-      "team": "B-Jugend",
-      "squad": 1,
-      "pitch": {
-        "mode": "haelfte",
-        "part": "A"
-      },
-      "halle": null,
-      "res": [],
-      "note": "",
-      "ownerId": "871986c9-429e-4576-affb-961cf5f374f6",
-      "ownerName": "Cetin Kurt"
     }
   ]
 }
