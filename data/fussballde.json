@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-08T06:00:21.953Z",
+  "updated": "2026-10-08T13:25:55.141Z",
   "games": [
     {
       "d": "2026-09-17",
@@ -840,7 +840,7 @@
     },
     {
       "d": "2026-11-21",
-      "t": "11:30",
+      "t": "11:15",
       "team": "E-Junioren",
       "squad": 2,
       "ownName": "SV Bachum/Bergheim II",
@@ -849,15 +849,20 @@
       "competition": "Kreisliga B",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-mueschede-herdringen-holzen-2/-/spiel/031J8LLJEO000000VS5489BUVVKNMR0J",
+      "movedFrom": {
+        "d": "2026-11-21",
+        "t": "11:30"
+      },
+      "movedAt": "2026-10-08T13:25:53.568Z",
       "matchday": 7,
       "staffelId": "210931",
       "staffelName": "KL B Gruppe 1",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-05T19:18:10.367Z"
+      "infoAt": "2026-10-08T13:25:53.952Z"
     },
     {
       "d": "2026-11-21",
-      "t": "11:30",
+      "t": "11:15",
       "team": "E-Junioren",
       "squad": 3,
       "ownName": "SV Bachum/Bergheim III",
@@ -866,11 +871,16 @@
       "competition": "Kreisliga C",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-3-sv-affeln-2/-/spiel/031J8T2K20000000VS5489BUVVKNMR0J",
+      "movedFrom": {
+        "d": "2026-11-21",
+        "t": "11:30"
+      },
+      "movedAt": "2026-10-08T13:25:53.568Z",
       "matchday": 7,
       "staffelId": "210869",
       "staffelName": "KL C Gruppe 2",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-05T19:18:11.253Z"
+      "infoAt": "2026-10-08T13:25:54.730Z"
     },
     {
       "d": "2026-11-21",
