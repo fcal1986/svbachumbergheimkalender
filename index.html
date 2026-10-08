@@ -482,6 +482,14 @@
   .event-card.cancelled-card{opacity:.75;box-shadow:none;border:1px solid var(--line);background:var(--bg);}
   .event-card.cancelled-card .ev-head{background:transparent;}
   .event-card.external-away{opacity:.8;}
+  .tn-games{margin-top:10px;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;}
+  .tn-games summary{cursor:pointer;font-weight:700;font-size:13.5px;padding:10px 0;list-style:none;}
+  .tn-games summary::-webkit-details-marker{display:none;}
+  .tn-games summary:after{content:" ▾";color:var(--ink-soft);} .tn-games[open] summary:after{content:" ▴";}
+  .tn-games ul{list-style:none;margin:0;padding:0 0 8px;}
+  .tn-games li{display:flex;align-items:baseline;gap:10px;padding:6px 0;border-top:1px solid var(--line);font-size:13.5px;}
+  .tn-games li b{flex:none;width:42px;font-weight:800;} .tn-games li span{flex:1;min-width:0;}
+  .tn-games li em{font-style:normal;font-weight:800;} .tn-games li a{flex:none;font-size:12px;font-weight:700;color:var(--grass);text-decoration:none;}
   .badge-fb{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--ink-soft);background:var(--bg);border-radius:8px;padding:3px 8px;}
   .fb-link-btn{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--green);text-decoration:none;margin-left:auto;}
   .fb-link-btn svg{width:13px;height:13px;stroke:var(--green);}
@@ -1689,7 +1697,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='07.10.2026 · 31';
+const APP_VERSION='08.10.2026 · 32';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -1919,6 +1927,8 @@ function fussballDurationMin(team){
   const override=cfg&&cfg.durationByAge&&cfg.durationByAge[key];
   return override||DURATION_BY_AGE[key]||110;
 }
+// Ab 08.10.2026 · 32: ein zusammengefasstes Turnier dauert vom ersten Anstoß bis zum Ende des letzten Spiels
+function fbGameDur(g){ return g&&g.tournament?g.tournament.dur:fussballDurationMin(g&&g.team); }
 function shiftTimeClamped(t,m){
   const[h,min]=t.split(':').map(Number);
   let tot=((h*60+min+m)%1440+1440)%1440; // sicher gegen Mitternachts-Über-/Unterlauf
@@ -1969,6 +1979,45 @@ function applyGameMoves(){
   // Ab 06.10.2026 · 19 auch Auswärtsspiele (nur Info, keine Platzprüfung)
   FUSSBALLDE={...raw, awayGames:(raw.awayGames||[]).map(fbNormalizeWithdrawn).map(withMove), games:(raw.games||[]).map(fbNormalizeWithdrawn).map(g=>fbOwnVenue(g)?g:{...g,foreignVenue:true}).map(withMove)};
   linkOwnMatches();
+  fbGroupTournaments();
+}
+/* ---------- Turniere (ab 08.10.2026 · 32) ----------
+   fussball.de liefert jedes Turnierspiel einzeln (Wettbewerb „Kreisturnier“, „Vereinsturnier“ …).
+   Gleicher Tag + Mannschaft + Wettbewerb mit „Turnier“ und mind. 2 Spiele → EIN Termin „Turnier“; die Spiele
+   stehen darin (tournament.games). Ende = letzter Anstoß + Spielabstand (höchstens normale Spieldauer).
+   Ist eines der Spiele ein Heimspiel, steht das Turnier bei den Heimspielen (Spielort zählt wie gewohnt). */
+function fbIsTournamentGame(g){ return /turnier/i.test((g&&g.competition)||''); }
+function fbGroupTournaments(){
+  const groups=new Map();
+  const add=(g,home)=>{ if(!g||g.tournament||g.withdrawn||!g.d||!fbIsTournamentGame(g)) return;
+    const k=[g.d,g.team,g.squad||1,g.competition].join('|'); if(!groups.has(k)) groups.set(k,[]); groups.get(k).push({g,home}); };
+  (FUSSBALLDE.games||[]).forEach(g=>add(g,true)); (FUSSBALLDE.awayGames||[]).forEach(g=>add(g,false));
+  const drop=new Set(), addHome=[], addAway=[];
+  groups.forEach(list=>{
+    if(list.length<2) return;
+    list.sort((a,b)=>(a.g.t||'').localeCompare(b.g.t||''));
+    const first=list[0].g, homeX=list.find(x=>x.home), ts=list.map(x=>x.g.t).filter(Boolean), full=fussballDurationMin(first.team);
+    const gaps=ts.slice(1).map((t,i)=>hmMin(t)-hmMin(ts[i])).filter(x=>x>0);
+    const slot=Math.min(full,gaps.length?Math.min(...gaps):full);
+    const dur=ts.length?hmMin(ts[ts.length-1])-hmMin(ts[0])+slot:full;
+    const name=((list.find(x=>x.g.staffelName)||{}).g||{}).staffelName||first.competition;
+    const base=homeX?homeX.g:first;
+    (homeX?addHome:addAway).push({...base, t:ts[0]||first.t, opponent:name, link:first.link||null, score:null,
+      movedFrom:null, movePending:false, moveConfirmed:false, moveDiverged:false, plannedTo:null, moveId:null,
+      tournament:{name, dur, games:list.map(x=>({t:x.g.t||'',opponent:x.g.opponent,home:x.home,link:x.g.link||null,score:x.g.score||null}))}});
+    list.forEach(x=>drop.add(x.g));
+  });
+  if(!drop.size) return;
+  FUSSBALLDE.games=(FUSSBALLDE.games||[]).filter(g=>!drop.has(g)).concat(addHome);
+  FUSSBALLDE.awayGames=(FUSSBALLDE.awayGames||[]).filter(g=>!drop.has(g)).concat(addAway);
+}
+function tournamentGamesHTML(e){
+  const tn=e.tournament; if(!tn) return '';
+  return '<details class="tn-games" onclick="event.stopPropagation()"><summary>'+tn.games.length+' Spiele</summary><ul>'
+    +tn.games.map(m=>{ const sc=m.score?(m.home?m.score.home+':'+m.score.away:m.score.away+':'+m.score.home):'';
+      return '<li><b>'+esc(m.t||'–')+'</b><span>'+esc(m.opponent)+'</span>'+(sc?'<em>'+esc(sc)+'</em>':'')
+        +(m.link?'<a href="'+esc(m.link)+'" target="_blank" rel="noopener" title="Spiel bei fussball.de" onclick="event.stopPropagation()">fussball.de</a>':'')+'</li>'; }).join('')
+    +'</ul></details>';
 }
 /* Spiel-Nummer (fbIndex): Heimspiele 0…, Auswärtsspiele ab AWAY_IDX (ab 06.10.2026 · 19). */
 const AWAY_IDX=10000;
@@ -2027,9 +2076,9 @@ function movedGameGhostsOn(d){
       title:away?'Auswärtsspiel: '+teamLabel(mapped.team,mapped.squad)+' bei '+g.opponent:'Heimspiel: '+teamLabel(mapped.team,mapped.squad)+' – '+g.opponent,
       isMovedGhost:true, toD:g.d, toT:g.t, pending:!!g.movePending, diverged:!!g.moveDiverged, plannedTo:g.plannedTo||null, fbIndex:idx};
     if(g.movedFrom&&g.movedFrom.d===d&&g.movedFrom.d!==g.d)
-      out.push({...base, id:'fbmoved-'+(g.link||idx)+'-'+d, d, t:g.movedFrom.t||'00:00', bis:g.movedFrom.t?shiftTimeClamped(g.movedFrom.t,fussballDurationMin(g.team)):'23:59'});
+      out.push({...base, id:'fbmoved-'+(g.link||idx)+'-'+d, d, t:g.movedFrom.t||'00:00', bis:g.movedFrom.t?shiftTimeClamped(g.movedFrom.t,fbGameDur(g)):'23:59'});
     if(g.moveDiverged&&g.plannedTo&&g.plannedTo.d===d&&g.plannedTo.d!==g.d&&!(g.movedFrom&&g.movedFrom.d===d))
-      out.push({...base, id:'fbstale-'+(g.link||idx)+'-'+d, d, t:g.plannedTo.t||'00:00', bis:g.plannedTo.t?shiftTimeClamped(g.plannedTo.t,fussballDurationMin(g.team)):'23:59', stalePlan:true});
+      out.push({...base, id:'fbstale-'+(g.link||idx)+'-'+d, d, t:g.plannedTo.t||'00:00', bis:g.plannedTo.t?shiftTimeClamped(g.plannedTo.t,fbGameDur(g)):'23:59', stalePlan:true});
   });
   return out;
 }
@@ -2070,12 +2119,12 @@ function fussballDisplayAll(){
   return (FUSSBALLDE.games||[]).map((g,idx)=>{
     const mapped=fussballFilterTeam(g.team,g.squad);
     const label=teamLabel(mapped.team,mapped.squad); // z.B. "E2-Jugend" statt nur "E-Junioren"
-    const bis=g.t?shiftTimeClamped(g.t,fussballDurationMin(g.team)):'23:59';
+    const bis=g.t?shiftTimeClamped(g.t,fbGameDur(g)):'23:59';
     const isFull=fussballTeamCategory(g.team)==='full';
     const offPitch=!fbOnOwnPitch(g);
     return {
       id:fussballGameLinkId(g), d:g.d, t:g.t||'00:00', bis,
-      title:'Heimspiel: '+label+' – '+g.opponent, opponent:g.opponent,
+      title:g.tournament?'Turnier: '+label+' · '+g.tournament.name:'Heimspiel: '+label+' – '+g.opponent, opponent:g.opponent, tournament:g.tournament||null,
       team:mapped.team, squad:mapped.squad, competition:g.competition||'', score:g.score||null,
       withdrawn:!!g.withdrawn, foreignVenue:!!g.foreignVenue, venue:g.venue||null, offPitch,
       isExternal:true, pitchIsFull:isFull&&!offPitch,
@@ -2091,10 +2140,10 @@ function fussballDisplayAwayAll(){
   return (FUSSBALLDE.awayGames||[]).map((g,idx)=>{
     const mapped=fussballFilterTeam(g.team,g.squad);
     const label=teamLabel(mapped.team,mapped.squad);
-    const bis=g.t?shiftTimeClamped(g.t,fussballDurationMin(g.team)):'23:59';
+    const bis=g.t?shiftTimeClamped(g.t,fbGameDur(g)):'23:59';
     return {
       id:'fbaway-'+(g.link||(g.d+'|'+g.t+'|'+g.opponent)), d:g.d, t:g.t||'00:00', bis,
-      title:'Auswärtsspiel: '+label+' bei '+g.opponent, opponent:g.opponent,
+      title:g.tournament?'Turnier: '+label+' · '+g.tournament.name:'Auswärtsspiel: '+label+' bei '+g.opponent, opponent:g.opponent, tournament:g.tournament||null,
       team:mapped.team, squad:mapped.squad, competition:g.competition||'', score:g.score||null,
       withdrawn:!!g.withdrawn, offPitch:true,
       isExternal:true, isAway:true, ownerName:'fussball.de', link:g.link||null,
@@ -2106,7 +2155,7 @@ function fussballDisplayAwayAll(){
 function fussballDisplayAwayInstancesOn(d){ return fussballDisplayAwayAll().filter(e=>e.d===d); }
 
 function fussballGameWindow(g){
-  return { s:shiftTimeClamped(g.t,-fussballBufferBeforeMin()), e:shiftTimeClamped(g.t,fussballDurationMin(g.team)) };
+  return { s:shiftTimeClamped(g.t,-fussballBufferBeforeMin()), e:shiftTimeClamped(g.t,fbGameDur(g)) };
 }
 /* Nur "ganzer Platz"-Kategorien (D-Jugend aufwärts) gehen in die harte Konfliktprüfung ein. */
 function fussballInstancesOn(d){
@@ -2116,7 +2165,7 @@ function fussballInstancesOn(d){
     const win=fussballGameWindow(g);
     return {
       id, d:g.d, t:win.s, bis:win.e,
-      title:'Heimspiel: '+(g.team?g.team+' – ':'')+g.opponent, pitch:{mode:'ganz'}, halle:null, res:[],
+      title:(g.tournament?'Turnier: ':'Heimspiel: ')+(g.team?g.team+' – ':'')+g.opponent, pitch:{mode:'ganz'}, halle:null, res:[],
       isExternal:true, ownerName:'fussball.de (automatisch)', note:g.competition||'', game:g
     };
   }).filter(Boolean);
@@ -2143,7 +2192,7 @@ function fussballShareInstancesOn(d,skipId,skipSlotId,extra){
     const part=!halfBusy('A')?'A':(!halfBusy('B')?'B':(!gameBusy('A')?'A':(!gameBusy('B')?'B':'A')));
     placed.push({
       id:fussballGameLinkId(g), d:g.d, t:win.s, bis:win.e,
-      title:'Heimspiel: '+(g.team?g.team+' – ':'')+g.opponent, pitch:{mode:'haelfte',part}, halle:null, res:[],
+      title:(g.tournament?'Turnier: ':'Heimspiel: ')+(g.team?g.team+' – ':'')+g.opponent, pitch:{mode:'haelfte',part}, halle:null, res:[],
       isExternal:true, isSharedGame:true, ownerName:'fussball.de (automatisch)', note:g.competition||'', game:g
     });
   });
@@ -2175,7 +2224,7 @@ function fussballShareNotesFor(d,von,bis){
    Ganzplatz-Spielen oder eigenen Terminen erkennt conflictsOnDay() paarweise. */
 function fussballCapacityWarningsOn(d){
   const shared=(FUSSBALLDE.games||[]).filter(g=>g.d===d&&g.t&&fbOnOwnPitch(g)&&fussballTeamCategory(g.team)==='share')
-    .map(g=>({g,s:g.t,e:shiftTimeClamped(g.t,fussballDurationMin(g.team))}));
+    .map(g=>({g,s:g.t,e:shiftTimeClamped(g.t,fbGameDur(g))}));
   const warnings=[], seen=new Set();
   // Belegung zu jedem Anstoßzeitpunkt prüfen: welche geteilten Spiele laufen dann gerade?
   shared.forEach(x=>{
@@ -3592,7 +3641,7 @@ function externalRowHTML(e){
   const bis=eventBis(e);
   if(e.withdrawn) return withdrawnRowHTML(e);
   const moveIco='<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M9 15h6M13 12.5l2.5 2.5-2.5 2.5"/></svg>';
-  const acts=(session&&e.isAway&&e.fbIndex!=null&&canMarkGameMove(e))?'<button class="ibtn" title="Verlegung vormerken" onclick="openMoveModal('+e.fbIndex+')">'+moveIco+'</button>'
+  const acts=e.tournament?'':(session&&e.isAway&&e.fbIndex!=null&&canMarkGameMove(e))?'<button class="ibtn" title="Verlegung vormerken" onclick="openMoveModal('+e.fbIndex+')">'+moveIco+'</button>'
     :(session&&!e.isAway&&!e.offPitch)?(
     '<button class="ibtn" title="Neue Ansetzung suchen" onclick="openRescheduleFinder('+e.fbIndex+')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>'
     +(canMarkGameMove(e)?'<button class="ibtn" title="Verlegung vormerken" onclick="openMoveModal('+e.fbIndex+')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M9 15h6M13 12.5l2.5 2.5-2.5 2.5"/></svg></button>':'')
@@ -3615,10 +3664,11 @@ function externalRowHTML(e){
     +'<div class="ev-time-col"><div class="ev-t">'+bis+'</div><div class="ev-tl">Bis</div></div>'
     +'</div>'
     +conflictBannerHTML(e)+holidayBannerHTML(e)+teamDayBannerHTML(e)+locksForItem(e).map(l=>lockBannerHTML(l,e)).join('')
-    +(e.foreignVenue&&e.venue?'<div class="fb-note">Heimrecht, aber Spielort: '+esc(e.venue)+'</div>':'')
+    +(e.foreignVenue&&e.venue?'<div class="fb-note">'+(e.tournament?'Spielort: ':'Heimrecht, aber Spielort: ')+esc(e.venue)+'</div>':'')
+    +tournamentGamesHTML(e)
     +'<div class="badges" style="margin-top:10px;align-items:center;"><span class="badge-fb">⚽ '+esc(e.competition||'fussball.de')+'</span>'
     +moveBadgeHTML(e)
-    +(e.link?'<a href="'+esc(e.link)+'" target="_blank" rel="noopener" class="fb-link-btn" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg>Zum Spiel</a>':'')
+    +(e.link&&!e.tournament?'<a href="'+esc(e.link)+'" target="_blank" rel="noopener" class="fb-link-btn" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg>Zum Spiel</a>':'')
     +'</div>'
     +(trainerHtml?'<div class="ev-contact">'+trainerHtml+'</div>':'')
     +'</div>'
@@ -3639,7 +3689,7 @@ function withdrawnRowHTML(e){
     +'<div class="ev-body">'
     +'<span class="hoff-pill">Entfällt</span>'
     +'<div class="badges" style="margin-top:10px;align-items:center;"><span class="badge-fb">⚽ '+esc(e.competition||'fussball.de')+'</span>'
-    +(e.link?'<a href="'+esc(e.link)+'" target="_blank" rel="noopener" class="fb-link-btn" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg>Zum Spiel</a>':'')
+    +(e.link&&!e.tournament?'<a href="'+esc(e.link)+'" target="_blank" rel="noopener" class="fb-link-btn" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg>Zum Spiel</a>':'')
     +'</div></div></div>';
 }
 /* ---------- Mannschaft doppelt angesetzt (ab 30.09.2026 · 1) ----------
@@ -4791,7 +4841,7 @@ function startHeroHTML(src,isMine){
       kicker='Als Nächstes';
       const days=Math.round((new Date(it.d+'T00:00:00')-new Date(todayStr+'T00:00:00'))/86400000);
       const when=days===0?'in '+(hmMin(it.t)-n>=60?Math.floor((hmMin(it.t)-n)/60)+' Std '+((hmMin(it.t)-n)%60)+' Min':(hmMin(it.t)-n)+' Min'):(days===1?'morgen':'in '+days+' Tagen');
-      sub=startDayLabel(it.d,false).replace(/^(Heute|Morgen) · .*/,'$1')+' · '+(it.isExternal||it.kickoff?'Anstoß '+(it.kickoff||it.t):it.t+'–'+eventBis(it))+(area(it)?' · '+area(it):'')+(days===1?'':' · '+when);
+      sub=startDayLabel(it.d,false).replace(/^(Heute|Morgen) · .*/,'$1')+' · '+((it.isExternal&&!it.tournament)||it.kickoff?'Anstoß '+(it.kickoff||it.t):it.t+'–'+eventBis(it))+(area(it)?' · '+area(it):'')+(days===1?'':' · '+when);
       if(it.pitch) right='<div class="hero-mini">'+miniPitch(pitchQuarters(it.pitch),true)+'</div>';
     }
     acts=weekRowActHTML(it).replace('>Absagen<','>Training absagen<');
@@ -4994,6 +5044,8 @@ function weekRowParts(e){
     name=(e.isAway?'bei ':'gegen ')+e.opponent; sub='Gegner hat zurückgezogen'; tag='Entfällt';
   }else if(e.isCancelled){
     name=kindOf(e)==='goalkeeper'?'Torwarttraining':'Training'; sub=cancelReasonOf(e); tag='Abgesagt';
+  }else if(e.isExternal&&e.tournament){
+    name='Turnier'; sub=[e.tournament.name,e.tournament.games.length+' Spiele',e.venue?fbVenueShort(e.venue):''].filter(Boolean).join(' · '); tag='Turnier';
   }else if(e.isExternal){
     name=(e.isAway?'bei ':'gegen ')+e.opponent;
     sub=[e.movePending?'Vorgemerkt':'',e.competition,e.isAway?'':e.pitchLabelText].filter(Boolean).join(' · '); // ab · 12: vorgemerkte Verlegung wie Freundschaftsspiel
@@ -7148,14 +7200,14 @@ function closeMoveModal(){ document.getElementById('move-modal').classList.remov
 function ownTrainingsForMove(g,date,time){
   if(!g||!date||!time) return [];
   const own=fussballFilterTeam(g.team,g.squad);
-  const from=shiftTimeClamped(time,-fussballBufferBeforeMin()), to=shiftTimeClamped(time,fussballDurationMin(g.team));
+  const from=shiftTimeClamped(time,-fussballBufferBeforeMin()), to=shiftTimeClamped(time,fbGameDur(g));
   return trainingInstancesOn(date).filter(t=>t.trainingSlotId&&isOwnTrainingFor(t,own)&&from<eventBis(t)&&to>t.t);
 }
 /* Platzprüfung für einen Anstoß dieses Spiels: das Spiel selbst zählt nicht mit, die eigene Trainingszeit
    gilt als frei (wie in der Ansetzungssuche). E/F/G: eine freie Hälfte genügt, sonst ganzer Platz. */
 function pitchCheckForGame(g,date,time){
   const own=fussballFilterTeam(g.team,g.squad);
-  const from=time, to=shiftTimeClamped(time,fussballDurationMin(g.team));
+  const from=time, to=shiftTimeClamped(time,fbGameDur(g));
   const prevSkip=formSkipFussballLink; formSkipFussballLink=fussballGameLinkId(g);
   let occ; try{ occ=rescheduleOccupationsOn(date,own); } finally{ formSkipFussballLink=prevSkip; }
   const opts=fussballTeamCategory(g.team)==='share'?[{part:'A',q:HALF.A},{part:'B',q:HALF.B}]:[{part:null,q:[1,2,3,4]}];
@@ -7521,7 +7573,7 @@ function runRescheduleSearch(){
   if(badDay){ box.innerHTML='<div class="rs-empty">'+WDAYS[badDay]+': "Von" muss vor "Bis" liegen.</div>'; return; }
 
   const g=rescheduleGame;
-  const durationMin=fussballDurationMin(g.team);
+  const durationMin=fbGameDur(g);
   // Benötigte Fläche nach derselben Regel wie die Platzbelegung (ab 25.09.2026 · 4):
   // E/F/G-Spiele ("share") brauchen genau eine Hälfte, ab D-Jugend den ganzen Platz.
   const isShare=fussballTeamCategory(g.team)==='share';
@@ -10727,7 +10779,7 @@ function openHashEvent(){
   }
   // fussball.de-Heimspiel: "fb-<Spiel-Code>" (bei vorgemerkter Verlegung am neuen Termin)
   const fm=!e&&hid.match(/^fb-([A-Za-z0-9]{12,})$/);
-  if(fm) e=fussballDisplayAll().concat(fussballDisplayAwayAll()).find(x=>x.link&&fbDeepLinkId(x)===hid)||null;
+  if(fm) e=fussballDisplayAll().concat(fussballDisplayAwayAll()).find(x=>(x.link&&fbDeepLinkId(x)===hid)||(x.tournament&&x.tournament.games.some(m=>m.link&&fbDeepLinkId(m)===hid)))||null;
   if(!e){ showToast('Dieser Termin existiert nicht mehr.'); return; }
   focusEventCard(e);
 }

@@ -841,7 +841,8 @@ async function detectGameChanges(home, away, previous) {
         if (g.d >= today) {
           const c = isHome ? checkPitch(g, g.d, g.t) : null;
           added.push({ text: `Neues Spiel bei fussball.de: ${who} am ${fmtGameDate(g.d, g.t)}.` + pitchText(c) + dayHint + trainingHint(slots, at, g.d),
-            team: at.team, squad: at.squad, link: fbLinkId(g.link), priority: 'action', type: 'new' });
+            team: at.team, squad: at.squad, link: fbLinkId(g.link), priority: 'action', type: 'new',
+            tn: /turnier/i.test(g.competition || '') ? { key: [g.d, g.team, g.squad || 1, g.competition].join('|'), g, c, label, slots, at } : null });
         }
         continue;
       }
@@ -882,11 +883,35 @@ async function detectGameChanges(home, away, previous) {
       }
     }
   }
+  groupTournamentMails(added);
   if (added.length > 10) console.log(`  ${added.length} neue Spiele auf einmal (Saisonimport?) – keine Einzel-Mails dafür.`);
   else out.push(...added);
   if (removed.length > 5) console.warn(`  ${removed.length} Spiele auf einmal verschwunden – vermutlich Abruffehler, keine Mails dafür.`);
   else out.push(...removed);
   return out;
+}
+
+/* Turniere (ab 08.10.2026 · 32): mehrere neue Turnierspiele einer Mannschaft am selben Tag (gleicher Wettbewerb
+   mit „Turnier“) → EINE Zeile „Neues Turnier …“ statt einer Zeile je Spiel. Platzkonflikte bleiben erwähnt. */
+function groupTournamentMails(added) {
+  const groups = new Map();
+  added.forEach(a => { if (a.tn) { if (!groups.has(a.tn.key)) groups.set(a.tn.key, []); groups.get(a.tn.key).push(a); } });
+  for (const list of groups.values()) {
+    if (list.length < 2) continue;
+    list.sort((a, b) => (a.tn.g.t || '').localeCompare(b.tn.g.t || ''));
+    const gs = list.map(a => a.tn.g), first = gs[0], last = gs[gs.length - 1];
+    const name = (gs.find(g => g.staffelName) || {}).staffelName || first.competition;
+    const venue = (gs.find(g => g.venue) || {}).venue;
+    const place = venue ? String(venue).split(',').pop().trim().replace(/^\d{5}\s+/, '') : '';
+    const conflicts = list.map(a => a.tn.c).filter(c => c && !c.ok);
+    const text = `Neues Turnier bei fussball.de: ${list[0].tn.label} – ${name} (${first.competition}) am ${fmtGameDate(first.d)}, `
+      + `${list.length} Spiele, Anstöße ${first.t || '?'}–${last.t || '?'} Uhr` + (place ? `, Spielort ${place}` : '') + '.'
+      + (conflicts.length ? pitchText(conflicts[0]) : '') + trainingHint(list[0].tn.slots, list[0].tn.at, first.d);
+    const idx = added.indexOf(list[0]);
+    added[idx] = { ...list[0], text };
+    list.slice(1).forEach(a => added.splice(added.indexOf(a), 1));
+  }
+  added.forEach(a => { delete a.tn; });
 }
 
 function markMovedGames(games, prevGames) {
