@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-08T13:25:55.141Z",
+  "updated": "2026-10-08T19:56:27.942Z",
   "games": [
     {
       "d": "2026-09-17",
@@ -289,7 +289,7 @@
       "staffelId": "210697",
       "staffelName": "Kreisliga A Arnsberg",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-01T17:01:36.004Z"
+      "infoAt": "2026-10-08T19:56:26.880Z"
     },
     {
       "d": "2026-10-10",
@@ -884,7 +884,7 @@
     },
     {
       "d": "2026-11-21",
-      "t": "13:00",
+      "t": "12:15",
       "team": "D-Junioren",
       "squad": 2,
       "ownName": "SV Bachum-Bergheim II",
@@ -893,10 +893,16 @@
       "competition": "Kreisliga B",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-vosswinkel-echth-ii/-/spiel/031OEI7POG000000VS5489BUVT2M8LCU",
+      "movedFrom": {
+        "d": "2026-11-21",
+        "t": "13:00"
+      },
+      "movedAt": "2026-10-08T19:56:26.676Z",
       "matchday": 7,
       "staffelId": "210420",
       "staffelName": "KL B Gruppe 2",
-      "infoAt": "2026-10-05T19:18:12.029Z"
+      "infoAt": "2026-10-08T19:56:27.533Z",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg"
     },
     {
       "d": "2026-11-21",
