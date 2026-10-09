@@ -517,6 +517,12 @@
   .share-prev{white-space:pre-wrap;word-break:break-word;font-family:'Inter',sans-serif;font-size:14px;line-height:1.45;background:var(--kbF2F5F4);border-radius:12px;padding:12px;margin:0 0 12px;color:var(--ink);}
   .share-wa{background:#25D366 !important;border-color:#25D366 !important;}
   .share-sheet button{font-family:'Inter',sans-serif;font-weight:700;}
+  .share-seg{display:flex;gap:4px;padding:4px;margin:0 0 12px;background:var(--kbF2F5F4);border-radius:12px;}
+  .share-seg button{flex:1;min-height:40px;border:none;border-radius:9px;background:none;color:var(--ink-soft);font-size:14px;cursor:pointer;}
+  .share-seg button.on{background:var(--white);color:var(--ink);box-shadow:0 1px 4px rgba(1,27,50,.12);}
+  .share-imgbox{display:flex;align-items:center;justify-content:center;height:min(52dvh,440px);margin:0 0 12px;border-radius:12px;background:var(--kbF2F5F4);color:var(--ink-soft);font-size:13px;}
+  .share-imgbox img{height:100%;width:auto;border-radius:10px;box-shadow:0 6px 18px rgba(1,27,50,.18);}
+  .share-hint{margin:8px 2px 0;font-size:12px;color:var(--ink-soft);text-align:center;}
   .ibtn.del svg{stroke:var(--warn);}
   .empty-card{background:var(--white);border-radius:16px;padding:20px 16px;text-align:center;font-size:12px;color:var(--ink-soft);box-shadow:var(--card-shadow);margin-bottom:10px;}
   .fb-card{background:var(--white);border-radius:14px;padding:12px 14px;box-shadow:var(--card-shadow);margin-bottom:8px;display:flex;align-items:center;gap:10px;}
@@ -1743,7 +1749,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='09.10.2026 · 3';
+const APP_VERSION='09.10.2026 · 4';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -4162,11 +4168,152 @@ function shareText(e){
 let SHARE_CUR=null;
 function openShare(id,d){
   const e=shareItemsOn(d).find(x=>x.id===id); if(!e){ showToast('Termin nicht gefunden.'); return; }
-  SHARE_CUR={text:shareText(e),link:shareLinkFor(e)};
-  openSheet('<div class="share-sheet"><h3>Termin weiterleiten</h3><pre class="share-prev">'+esc(SHARE_CUR.text)+'</pre>'
+  SHARE_CUR={text:shareText(e),link:shareLinkFor(e),e,blob:null};
+  openSheet('<div class="share-sheet"><h3>Termin weiterleiten</h3>'
+    +'<div class="share-seg" role="tablist"><button type="button" class="on" data-mode="text" onclick="shareMode(\'text\')">Text</button><button type="button" data-mode="img" onclick="shareMode(\'img\')">Bild</button></div>'
+    +'<div id="share-text"><pre class="share-prev">'+esc(SHARE_CUR.text)+'</pre>'
     +'<button type="button" class="submit-btn share-wa" onclick="shareWhatsApp()">Per WhatsApp</button>'
-    +'<button type="button" class="cancel-btn" onclick="shareCopyLink()">Link kopieren</button></div>');
+    +'<button type="button" class="cancel-btn" onclick="shareCopyLink()">Link kopieren</button></div>'
+    +'<div id="share-img" style="display:none;"><div class="share-imgbox"><span>Bild wird erstellt …</span></div>'
+    +'<button type="button" class="submit-btn" id="share-img-go" onclick="shareImage()" disabled>Bild teilen</button>'
+    +'<button type="button" class="cancel-btn" onclick="shareImageSave()">Bild speichern</button>'
+    +'<p class="share-hint">Für WhatsApp-Status und Instagram-Story (9:16). Das Bild entsteht auf deinem Handy.</p></div></div>');
   trackEvent('termin_weiterleiten');
+}
+/* ---------- Termin als Bild teilen (ab 09.10.2026 · 4) ----------
+   Story-Bild 1080 × 1920 im Matchday-Look, gezeichnet im Browser (Canvas) aus einer festen Vorlage – keine KI,
+   kein Server, keine Kosten. Teilen über das Teilen-Menü des Handys (Web Share mit Datei), sonst Herunterladen.
+   QR-Code zum Termin über qrcode-generator (cdnjs, wird erst beim ersten Bild geladen); offline ohne QR. */
+function shareMode(m){
+  document.querySelectorAll('.share-seg button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  document.getElementById('share-text').style.display=m==='text'?'':'none';
+  document.getElementById('share-img').style.display=m==='img'?'':'none';
+  if(m==='img'&&SHARE_CUR&&!SHARE_CUR.blob) buildShareImage();
+}
+function shareCardData(e){
+  const who=e.team===GK_TEAM||kindOf(e)==='goalkeeper'?'TW':(e.team&&e.team!=='Alle Teams'?teamShort(e.team,e.squad):'');
+  const venue=(CFG&&CFG.venue&&CFG.venue.name)||'';
+  const day=d=>{ const dt=new Date(d+'T00:00:00'); return {wd:DAYS[dt.getDay()],dm:String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0')+'.'}; };
+  const D={kicker:'TERMIN',team:who,vs:'',head:e.title||'Termin',date:day(e.d),time:e.t+'–'+eventBis(e),place:'',state:'',stateTxt:''};
+  const away=e.isAway||e.ha==='away';
+  if(isGameEntry(e)||e.isMovedGhost||e.withdrawn){
+    D.kicker=e.tournament?'TURNIER':'SPIELTAG'; D.vs=away?'bei':'gegen'; D.head=e.tournament?e.tournament.name:(e.opponent||e.title||'');
+    D.time='Anstoß '+(e.kickoff||e.t);
+    D.place=(away?'Auswärts':'Heimspiel')+' · '+(away?(e.address||(e.venue?fbVenueShort(e.venue):'')):(e.foreignVenue&&e.venue?fbVenueShort(e.venue):venue));
+  }else if(e.isTraining||['training','goalkeeper'].includes(kindOf(e))){
+    const gk=kindOf(e)==='goalkeeper'; D.kicker=gk?'TORWARTTRAINING':'TRAINING'; D.head=gk?'Torwarttraining':'Training';
+    if(gk&&gkTeamsOf(e).length) D.head+=' · '+gkTeamsText(gkTeamsOf(e));
+    D.place=[venue,e.pitch?pitchShort(e.pitch):''].filter(Boolean).join(' · ');
+  }else if(isTrainerTermin(e)){
+    D.kicker='TRAINER-TERMIN'; D.team=''; D.place=e.address||''; D.stateTxt='Für '+(ttForAll(e)?'alle Trainer':ttForText(e));
+  }else{
+    D.place=[e.pitch?venue:'',e.pitch?pitchShort(e.pitch):(e.res||[]).join(', ')].filter(Boolean).join(' · ');
+  }
+  if(e.isMovedGhost){ D.state='moved'; D.stateTxt='Verlegt auf '+shareDay(e.toD)+(e.toT?' · '+e.toT:''); }
+  else if(e.withdrawn){ D.state='off'; D.stateTxt='Fällt aus – Gegner hat zurückgezogen'; }
+  else if(e.isCancelled){ D.state='off'; D.stateTxt='Fällt aus'+(cancelReasonOf(e)?' – '+cancelReasonOf(e):''); }
+  D.place=D.place.replace(/^(Heimspiel|Auswärts) · $/,'$1');
+  return D;
+}
+let QR_LIB=null;
+function loadQrLib(){
+  if(window.qrcode) return Promise.resolve(window.qrcode);
+  if(QR_LIB) return QR_LIB;
+  QR_LIB=new Promise(res=>{ const sc=document.createElement('script'); sc.src='https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
+    sc.onload=()=>res(window.qrcode||null); sc.onerror=()=>{ QR_LIB=null; res(null); }; document.head.appendChild(sc); setTimeout(()=>res(window.qrcode||null),4000); });
+  return QR_LIB;
+}
+function scFit(ctx,txt,maxW,size,min,weight,family){
+  let s=size; ctx.font=weight+' '+s+'px '+family;
+  while(s>min&&ctx.measureText(txt).width>maxW){ s-=4; ctx.font=weight+' '+s+'px '+family; }
+  return s;
+}
+function scWrap(ctx,txt,maxW,maxLines){
+  // Umbruch an Leerzeichen und nach „/“ (lange Spielgemeinschaften wie „JSG Oeventrop/Freie./Wen. I“)
+  const toks=[]; String(txt).split(/\s+/).forEach((w,i)=>{ w.split(/(?<=\/)/).forEach((p,j)=>toks.push({t:p,sp:i>0&&j===0})); });
+  const lines=[]; let cur='';
+  toks.forEach(k=>{ const t=cur?cur+(k.sp?' ':'')+k.t:k.t; if(ctx.measureText(t).width<=maxW||!cur) cur=t; else { lines.push(cur); cur=k.t; } });
+  if(cur) lines.push(cur);
+  // einzelnes Zeichen am Ende (z. B. „I“) an die vorige Zeile hängen
+  if(lines.length>1&&lines[lines.length-1].length<=2){ const last=lines.pop(); lines[lines.length-1]+=' '+last; }
+  if(lines.length>maxLines){ const keep=lines.slice(0,maxLines); let last=keep[maxLines-1]+' '+lines.slice(maxLines).join(' ');
+    while(ctx.measureText(last+'…').width>maxW&&last.length>1) last=last.slice(0,-1); keep[maxLines-1]=last.trim()+'…'; return keep; }
+  return lines;
+}
+async function drawShareCard(e){
+  const D=shareCardData(e), W=1080, H=1920, M=96, F="Manrope, Inter, sans-serif";
+  try{ await Promise.all([document.fonts.load('800 100px Manrope'),document.fonts.load('600 40px Inter')]); }catch(err){}
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const c=cv.getContext('2d');
+  const NAVY='#011B32', LIME='#8BCF2F', GREEN='#6BB41C', WHITE='#FFFFFF', SOFT='rgba(255,255,255,.72)';
+  // Grund: Navy, unten Rasen mit Mähstreifen und Mittelkreis
+  c.fillStyle=NAVY; c.fillRect(0,0,W,H);
+  const gy=1180; const g=c.createLinearGradient(0,gy-260,0,H); g.addColorStop(0,'rgba(47,122,70,0)'); g.addColorStop(.35,'rgba(47,122,70,.55)'); g.addColorStop(1,'#1F5A34'); c.fillStyle=g; c.fillRect(0,gy-260,W,H-gy+260);
+  c.save(); c.globalAlpha=.07; c.fillStyle=WHITE; for(let x=-H;x<W;x+=180){ c.beginPath(); c.moveTo(x,H); c.lineTo(x+90,H); c.lineTo(x+90+700,gy-260); c.lineTo(x+700,gy-260); c.closePath(); c.fill(); } c.restore();
+  c.save(); c.strokeStyle='rgba(255,255,255,.16)'; c.lineWidth=6; c.beginPath(); c.arc(W/2,H+40,330,Math.PI,2*Math.PI); c.stroke(); c.beginPath(); c.moveTo(0,H-290); c.lineTo(W,H-290); c.stroke(); c.restore();
+  // Kopf: Verein + Kicker
+  let y=150;
+  c.fillStyle=SOFT; c.font='600 38px Inter, sans-serif'; c.textBaseline='alphabetic';
+  c.fillText(String((CFG&&CFG.clubName)||'').toUpperCase(),M,y);
+  const SCOL=D.state==='off'?'#FF6B6B':(D.state==='moved'?'#F7B23B':LIME);
+  const kick=D.state==='off'?'FÄLLT AUS':(D.state==='moved'?'VERLEGT':D.kicker);
+  y+=110; c.font='800 46px '+F; const kw=c.measureText(kick).width+64;
+  c.fillStyle=SCOL; c.beginPath(); c.roundRect(M,y-62,kw,84,42); c.fill(); c.fillStyle=NAVY; c.fillText(kick,M+32,y-4);
+  // Oben: Mannschaft groß, darunter Gegner bzw. Titel (schrumpft, bis jede Zeile passt)
+  y+=230;
+  if(D.team){ const ts=scFit(c,D.team,W-2*M,250,120,'800',F); c.fillStyle=LIME; c.font='800 '+ts+'px '+F; c.fillText(D.team,M-6,y); y+=70; }
+  else y-=120;
+  if(D.vs){ y+=70; c.fillStyle=SOFT; c.font='700 56px '+F; c.fillText(D.vs,M,y); y+=24; }
+  let hs=124, lines;
+  const fits=()=>{ c.font='800 '+hs+'px '+F; lines=scWrap(c,D.head,W-2*M,3); return lines.length<=3&&lines.every(l=>c.measureText(l).width<=W-2*M); };
+  while(!fits()&&hs>56) hs-=6;
+  if(lines.length>2&&hs>84){ while(hs>84&&lines.length>2){ hs-=6; fits(); } }
+  c.fillStyle=WHITE; y+=Math.round(hs*0.95); lines.forEach((l,i)=>{ c.fillText(l,M,y); if(i<lines.length-1) y+=Math.round(hs*1.06); });
+  const topEnd=y;
+  // Unten (über dem Fuß verankert): Wochentag, Datum, Uhrzeit, Ort
+  c.font='600 42px Inter, sans-serif'; const pl=D.place?scWrap(c,D.place,W-2*M,2):[];
+  const extra=D.stateTxt?62:0;
+  let by=H-M-330-pl.length*58-extra;
+  const dateTop=by-96-120-150;
+  let yy=dateTop; c.fillStyle=LIME; c.font='800 54px '+F; c.fillText(D.date.wd.toUpperCase(),M,yy);
+  const strike=(txt,x,yb,size)=>{ if(!D.state) return; const w=c.measureText(txt).width; c.save(); c.strokeStyle=SCOL; c.lineWidth=Math.max(6,size/14); c.beginPath(); c.moveTo(x-6,yb-size*0.33); c.lineTo(x+w+6,yb-size*0.33); c.stroke(); c.restore(); };
+  yy+=190; c.fillStyle=D.state?SOFT:WHITE; c.font='800 200px '+F; c.fillText(D.date.dm,M-8,yy); strike(D.date.dm,M-8,yy,200);
+  yy+=110; c.font='700 70px '+F; c.fillText(D.time,M,yy); strike(D.time,M,yy,70);
+  yy+=34; c.fillStyle=SOFT; c.font='600 42px Inter, sans-serif'; pl.forEach(l=>{ yy+=58; c.fillText(l,M,yy); });
+  if(extra){ yy+=66; c.fillStyle=SCOL; c.font='700 46px Inter, sans-serif'; scWrap(c,D.stateTxt,W-2*M-300,1).forEach(l=>c.fillText(l,M,yy)); }
+  // Fuß: QR + Link
+  const link=shareLinkFor(e), qrS=250, qx=W-M-qrS, qy=H-M-qrS-40;
+  const qrlib=await loadQrLib();
+  if(qrlib){ try{ const q=qrlib(0,'M'); q.addData(link); q.make(); const n=q.getModuleCount(), pad=22, cell=(qrS-2*pad)/n;
+      c.fillStyle=WHITE; c.beginPath(); c.roundRect(qx,qy,qrS,qrS,24); c.fill(); c.fillStyle=NAVY;
+      for(let r=0;r<n;r++) for(let k=0;k<n;k++) if(q.isDark(r,k)) c.fillRect(Math.floor(qx+pad+k*cell),Math.floor(qy+pad+r*cell),Math.ceil(cell),Math.ceil(cell)); }catch(err){} }
+  c.fillStyle=WHITE; c.font='800 48px '+F; c.fillText('Alle Infos',M,H-M-150);
+  c.fillStyle=SOFT; c.font='600 36px Inter, sans-serif'; c.fillText(qrlib?'QR-Code scannen oder':'Link im Text',M,H-M-96);
+  c.fillText(location.host||'platzcoach.de',M,H-M-48);
+  c.fillStyle=LIME; c.font='800 34px '+F; c.fillText('PLATZCOACH',M,H-M+6);
+  return cv;
+}
+async function buildShareImage(){
+  const box=document.querySelector('.share-imgbox'), go=document.getElementById('share-img-go');
+  try{
+    const cv=await drawShareCard(SHARE_CUR.e);
+    SHARE_CUR.blob=await new Promise(r=>cv.toBlob(r,'image/png'));
+    if(box) box.innerHTML='<img alt="Vorschau des Bildes" src="'+cv.toDataURL('image/jpeg',.8)+'">';
+    if(go) go.disabled=false;
+  }catch(err){ if(box) box.innerHTML='<span>Bild konnte nicht erstellt werden.</span>'; }
+}
+function shareImageFile(){ return new File([SHARE_CUR.blob],'platzcoach-'+(SHARE_CUR.e.d||'termin')+'.png',{type:'image/png'}); }
+async function shareImage(){
+  if(!SHARE_CUR||!SHARE_CUR.blob) return;
+  const f=shareImageFile();
+  if(navigator.canShare&&navigator.canShare({files:[f]})){
+    try{ await navigator.share({files:[f]}); trackEvent('termin_bild_geteilt'); closeSheet(); }
+    catch(err){ if(err&&err.name!=='AbortError') shareImageSave(); }
+  }else shareImageSave();
+}
+function shareImageSave(){
+  if(!SHARE_CUR||!SHARE_CUR.blob) return;
+  const a=document.createElement('a'); a.href=URL.createObjectURL(SHARE_CUR.blob); a.download=shareImageFile().name; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1500); showToast('Bild gespeichert.'); trackEvent('termin_bild_gespeichert');
 }
 function shareWhatsApp(){ if(!SHARE_CUR) return; window.open('https://wa.me/?text='+encodeURIComponent(SHARE_CUR.text),'_blank','noopener'); closeSheet(); }
 async function shareCopyLink(){
