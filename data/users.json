@@ -570,7 +570,7 @@
       "created": "2026-10-09T15:36:45.248Z",
       "emailNotificationsEnabled": true,
       "phone": "015147775747",
-      "contactPublic": "none",
+      "contactPublic": "phone",
       "contactEmail": ""
     }
   ]
