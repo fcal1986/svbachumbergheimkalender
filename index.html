@@ -1749,7 +1749,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='09.10.2026 · 6';
+const APP_VERSION='09.10.2026 · 7';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -4193,6 +4193,15 @@ function shareMode(m){
   document.getElementById('share-img').style.display=m==='img'?'':'none';
   if(m==='img'&&SHARE_CUR&&!SHARE_CUR.blob) buildShareImage();
 }
+/* Adresse für das Bild (ab 09.10.2026 · 7): fussball.de-Spielort „Platz, Anlage, Straße, PLZ Ort“ → „Straße, PLZ Ort“;
+   eigener Platz aus config venue.address, sonst aus einem fussball.de-Heimspiel abgeleitet. */
+function addrFromVenue(v){ const parts=String(v||'').split(',').map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean); return parts.length>=2?parts.slice(-2).join(', '):(parts[0]||''); }
+function homeAddress(){
+  if(CFG&&CFG.venue&&CFG.venue.address) return CFG.venue.address;
+  const hv=(CFG&&CFG.fussballde&&CFG.fussballde.homeVenues)||[];
+  const g=fussballDisplayAll().find(x=>x.venue&&hv.some(h=>h&&x.venue.includes(h)));
+  return g?addrFromVenue(g.venue):'';
+}
 function shareCardData(e){
   const who=e.team===GK_TEAM||kindOf(e)==='goalkeeper'?'TW':(e.team&&e.team!=='Alle Teams'?teamShort(e.team,e.squad):'');
   const venue=(CFG&&CFG.venue&&CFG.venue.name)||'';
@@ -4222,6 +4231,16 @@ function shareCardData(e){
   else if(e.withdrawn){ D.state='off'; D.stateTxt='Fällt aus – Gegner hat zurückgezogen'; }
   else if(e.isCancelled){ D.state='off'; D.stateTxt='Fällt aus'+(cancelReasonOf(e)?' – '+cancelReasonOf(e):''); }
   D.place=D.place.replace(/^(Heimspiel|Auswärts) · $/,'$1');
+  // Adresse, wenn bekannt
+  const away2=e.isAway||e.ha==='away';
+  let addr='';
+  if(isTrainerTermin(e)) addr='';                                   // Ort ist dort schon die Adresse
+  else if(e.isExternal||e.isMovedGhost) addr=e.venue&&(away2||e.foreignVenue||e.tournament)?addrFromVenue(e.venue):(away2?(e.address||''):homeAddress());
+  else if(away2) addr=e.address||'';
+  else if(e.pitch||e.isTraining||(e.res||[]).length) addr=homeAddress();
+  else addr=e.address||'';
+  if(addr&&D.place&&D.place.includes(addr)) addr='';
+  D.addr=addr;
   return D;
 }
 let QR_LIB=null;
@@ -4248,6 +4267,11 @@ function scWrap(ctx,txt,maxW,maxLines){
   if(lines.length>maxLines){ const keep=lines.slice(0,maxLines); let last=keep[maxLines-1]+' '+lines.slice(maxLines).join(' ');
     while(ctx.measureText(last+'…').width>maxW&&last.length>1) last=last.slice(0,-1); keep[maxLines-1]=last.trim()+'…'; return keep; }
   return lines;
+}
+function drawPin(c,x,y,s,col){ // Ortsmarke, Spitze unten bei (x+s/2, y+s)
+  c.save(); c.fillStyle=col; c.beginPath(); const r=s*0.36, cx=x+s/2, cy=y+r+2;
+  c.arc(cx,cy,r,Math.PI*0.85,Math.PI*0.15); c.lineTo(cx,y+s); c.closePath(); c.fill();
+  c.fillStyle='#011B32'; c.beginPath(); c.arc(cx,cy,r*0.42,0,2*Math.PI); c.fill(); c.restore();
 }
 function drawTrophy(c,x,y,s,col,fill){
   // Pokal in einem Quadrat der Kantenlänge s (links oben x,y): Schale, Henkel, Stiel, Sockel
@@ -4309,6 +4333,7 @@ async function drawShareCard(e){
     // Datum, Zeit, Ort zwischen Titel und Spielplan
     const strike=(txt,x,yb,size)=>{ if(!D.state) return; const w=c.measureText(txt).width; c.save(); c.strokeStyle=SCOL; c.lineWidth=Math.max(6,size/14); c.beginPath(); c.moveTo(x-6,yb-size*0.33); c.lineTo(x+w+6,yb-size*0.33); c.stroke(); c.restore(); };
     let py=boxTop-46; if(D.stateTxt){ c.fillStyle=SCOL; c.font='700 44px Inter, sans-serif'; c.fillText(scWrap(c,D.stateTxt,W-2*M,1)[0],M,py); py-=60; }
+    if(D.addr){ c.fillStyle=SOFT; c.font='600 38px Inter, sans-serif'; drawPin(c,M,py-34,36,AC); c.fillText(scWrap(c,D.addr,W-2*M-52,1)[0],M+52,py); py-=56; }
     c.fillStyle=SOFT; c.font='600 42px Inter, sans-serif'; const pl=scWrap(c,D.place,W-2*M,1)[0]||''; c.fillText(pl,M,py);
     const tyy=py-66; c.fillStyle=D.state?SOFT:WHITE; c.font='700 62px '+F; c.fillText(D.time,M,tyy); strike(D.time,M,tyy,62);
     let ds=150; const dyy=tyy-86; if(dyy-ds*0.75-70<topEnd+40) ds=120;
@@ -4329,13 +4354,15 @@ async function drawShareCard(e){
     // Unten (über dem Fuß verankert): Wochentag, Datum, Uhrzeit, Ort
     c.font='600 42px Inter, sans-serif'; const pl=D.place?scWrap(c,D.place,W-2*M,2):[];
     const extra=D.stateTxt?62:0;
-    let by=H-M-330-pl.length*58-extra;
+    c.font='600 38px Inter, sans-serif'; const al=D.addr?scWrap(c,D.addr,W-2*M-52,2):[];
+    let by=H-M-330-pl.length*58-al.length*52-(al.length?6:0)-extra;
     const dateTop=by-96-120-150;
     let yy=dateTop; c.fillStyle=LIME; c.font='800 54px '+F; c.fillText(D.date.wd.toUpperCase(),M,yy);
     const strike=(txt,x,yb,size)=>{ if(!D.state) return; const w=c.measureText(txt).width; c.save(); c.strokeStyle=SCOL; c.lineWidth=Math.max(6,size/14); c.beginPath(); c.moveTo(x-6,yb-size*0.33); c.lineTo(x+w+6,yb-size*0.33); c.stroke(); c.restore(); };
     yy+=190; c.fillStyle=D.state?SOFT:WHITE; c.font='800 200px '+F; c.fillText(D.date.dm,M-8,yy); strike(D.date.dm,M-8,yy,200);
     yy+=110; c.font='700 70px '+F; c.fillText(D.time,M,yy); strike(D.time,M,yy,70);
     yy+=34; c.fillStyle=SOFT; c.font='600 42px Inter, sans-serif'; pl.forEach(l=>{ yy+=58; c.fillText(l,M,yy); });
+    if(al.length){ yy+=6; c.font='600 38px Inter, sans-serif'; al.forEach((l,i)=>{ yy+=52; if(i===0) drawPin(c,M,yy-33,34,SCOL); c.fillText(l,M+52,yy); }); }
     if(extra){ yy+=66; c.fillStyle=SCOL; c.font='700 46px Inter, sans-serif'; scWrap(c,D.stateTxt,W-2*M-300,1).forEach(l=>c.fillText(l,M,yy)); }
   }
   // Fuß: QR + Link
