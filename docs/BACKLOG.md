@@ -10,7 +10,7 @@ Ausführliche Analyse: Projekt-Doc `claude/vereinsneo-analyse-2026-10.md`.
 **Status:** ✅ umgesetzt · 🟡 teilweise · ⬜ offen · ⛔ bewusst nicht
 **Phase:** Pilot = aktuelle Technik · 1.0 = mit Supabase/Einrichtungsassistent · Später
 
-Letzte Aktualisierung: 09.10.2026 (Version 09.10.2026 · 1)
+Letzte Aktualisierung: 09.10.2026 (Version 09.10.2026 · 2)
 
 ## Must have
 
@@ -80,6 +80,7 @@ Letzte Aktualisierung: 09.10.2026 (Version 09.10.2026 · 1)
 | 94 | Zeitleiste aufgeräumt (Feedback Fabrizio 07.10.: abgesagte Trainings überlagerten das Spiel der 1. Herren): abgesagte Termine stehen nicht mehr in der Zeitleiste (Startseite und Terminformular) – die Fläche ist ja frei. Überschneidet sich ein Block zeitlich auf derselben Fläche mit einem anderen (z. B. D1-Training bis 19:30 mit der Aufwärmzeit ab 19:15 vor dem Anstoß), ist er rot umrandet mit ⚠, Legende „Überschneidung“; bei Spiel gegen Training nur das Training. Bleibt eine Markierung – Aufwärmzeit zählt nicht als Konflikt (keine Meldung/Mail) | Pilot | ✅ | 07.10.2026 · 31 |
 | 95 | Turniere zusammenfassen (Fall E1 17.10.: Lothar-Hiller-CUP kam als 5 Einzelspiele): fussball.de-Spiele mit Wettbewerb „…turnier“ (Kreisturnier, Vereinsturnier) derselben Mannschaft am selben Tag werden zu EINEM Termin „Turnier: E1-Jugend · <Turniername>“ (erster Anstoß bis letzter Anstoß + Spielabstand). Karte mit aufklappbarer Liste „5 Spiele“ (Uhrzeit, Gegner, Ergebnis, Link zu fussball.de); gilt überall (Termine, Startseite, Zeitleiste, Platzprüfung). Mail: eine Zeile „Neues Turnier bei fussball.de: … 5 Spiele, Anstöße 09:00–10:28 Uhr, Spielort Hagen“. Alte Links auf Einzelspiele öffnen das Turnier | Pilot | ✅ | 08.10.2026 · 32 |
 | 96 | „Deine Woche“ auf der Startseite als Zeitleiste nach Tagen (Feedback Fabrizio 09.10.: Bereich wirkte unaufgeräumt, Variante B): links Datumsspalte (Wochentag + Tageszahl, antippen wählt den Tag für den Platz darüber), rechts ruhige Kacheln mit Farbstreifen (grün Training, dunkel Spiel, blau Trainer-Termin, orange verlegt/vorgemerkt, rot abgesagt); keine Knöpfe und Etiketten mehr in der Zeile, Status als farbige Textzeile, Titel nicht mehr abgeschnitten, Mannschafts-Kürzel nur bei mehreren Mannschaften, Tage ohne Termine in einer Zeile. Antippen: wer ändern darf, bekommt ein Blatt mit Verlegen/Absagen/Zurücknehmen + „Details öffnen“, alle anderen direkt die Details. Oberer Bereich (Live-Karte, Platz, Zeitleiste) unverändert | Pilot | ✅ | 09.10.2026 · 1. Klick-Budget „Training absagen“ bleibt 1 über die Live-Karte; aus der Woche jetzt 2 (Kachel → Absagen) |
+| 97 | Favoriten ohne Anmeldung vollständig (Feedback Fabrizio 09.10.): in der Mannschaftswahl auf der Startseite fehlten die Einträge, die das Terminformular unter „Sonstige“ kennt. Jetzt am Ende der Liste immer Torwarttraining, Alle Teams und Vorstand; wer sie wählt, sieht deren Termine in der Woche (Torwarttraining: alle Torwarttrainings). Trainer-Termine bleiben angemeldeten Zugängen vorbehalten | Pilot | ✅ | 09.10.2026 · 2 |
 | 43 | Mannschaften mit Lücken-Filtern („ohne Trainer“, „ohne Trainingszeit“, „ohne Platzfreigabe“) | Pilot | ⬜ | „Termine heute ohne Trainer“ gibt es als Warnzeile; Filter in der Mannschaftsliste fehlen |
 
 ## Nice to have

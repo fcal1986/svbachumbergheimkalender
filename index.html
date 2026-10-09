@@ -1740,7 +1740,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='09.10.2026 · 1';
+const APP_VERSION='09.10.2026 · 2';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -5076,9 +5076,12 @@ function lsGet(k,def){ try{ const v=localStorage.getItem(k); return v==null?def:
 function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
 function weekEndStr(){ const d=new Date(todayStr+'T00:00:00'); d.setDate(d.getDate()+WEEK_DAYS-1); return ymd(d); }
 function teamShort(team,squad){ return isJugend(team)?jugendLetter(team)+(squad||1):team; }
-// Wählbare Mannschaften für die eigene Wahl (ohne Torwarttraining und Vereins-Sammelposten).
+// Wählbare Mannschaften für die eigene Wahl. Ab 09.10.2026 · 2 (Feedback Fabrizio) zusätzlich wie im Terminformular
+// unter „Sonstige“: Torwarttraining, Alle Teams und Vorstand – immer am Ende, auch wenn gerade nichts eingetragen ist.
+const PICK_EXTRA_TEAMS=[GK_TEAM,'Alle Teams','Vorstand'];
 function pickableTeams(){
-  return allKnownTeamKeys().filter(t=>{ const team=t.key.split(':')[0]; return ALL_CLASSES.includes(team)&&team!==GK_TEAM; });
+  const base=allKnownTeamKeys().filter(t=>{ const team=t.key.split(':')[0]; return ALL_CLASSES.includes(team)&&!PICK_EXTRA_TEAMS.includes(team); });
+  return base.concat(PICK_EXTRA_TEAMS.map(t=>({key:t+':1',label:t})));
 }
 // Mannschaften aus der Saison-Zuordnung des angemeldeten Zugangs. Jugend ohne Nummern = alle Nummern.
 function sessionWeekTeams(){
