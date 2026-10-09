@@ -550,28 +550,6 @@
       "created": "2026-10-06T05:45:37.849Z",
       "emailNotificationsEnabled": true,
       "pwChangeRequired": true
-    },
-    {
-      "id": "16359306-61c1-403b-899a-d277aea3763c",
-      "first": "Viktor",
-      "last": "Kutz",
-      "email": "adrian2502@gmx.de",
-      "admin": false,
-      "classes": {
-        "E-Jugend": [
-          1
-        ]
-      },
-      "enc": {
-        "salt": "STpoR2pdnlgbzUFO+A8FoQ==",
-        "iv": "22hNJ4lkNcEYkakg",
-        "cipher": "KuA6yxyeMj5ZiGjBoxKaF/V9WpW8QcvswrTdhn6qRRmivpuP3eU7I/cV7/SaMixURzpi2TE+O75sOTim0/STKeb6iIkA7n+iy8SPzZ9/pVmLqi6LJ42eTj9b53BOghYzamY8i32zK0c3ym8w3A=="
-      },
-      "created": "2026-10-09T15:36:45.248Z",
-      "emailNotificationsEnabled": true,
-      "phone": "015147775747",
-      "contactPublic": "phone",
-      "contactEmail": ""
     }
   ]
 }
