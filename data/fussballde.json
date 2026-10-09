@@ -1,18 +1,6 @@
 {
-  "updated": "2026-10-08T19:56:27.942Z",
+  "updated": "2026-10-09T00:21:53.030Z",
   "games": [
-    {
-      "d": "2026-09-17",
-      "t": "19:30",
-      "team": "Herren Ü32",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "gameNo": "191234001",
-      "opponent": "SG Herdringen/Müschede",
-      "competition": "Kreisturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sg-herdringen-mueschede/-/spiel/031SAEVJ1G000000VS5489BTVTPHHFPR"
-    },
     {
       "d": "2026-09-18",
       "t": "19:30",
@@ -901,8 +889,8 @@
       "matchday": 7,
       "staffelId": "210420",
       "staffelName": "KL B Gruppe 2",
-      "infoAt": "2026-10-08T19:56:27.533Z",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg"
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-10-08T19:56:27.533Z"
     },
     {
       "d": "2026-11-21",
@@ -1972,50 +1960,6 @@
   ],
   "awayGames": [
     {
-      "d": "2026-09-17",
-      "t": "17:00",
-      "team": "G-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "opponent": "SC Neheim",
-      "competition": "Kinderfußball",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sc-neheim-sv-bachum-bergheim/-/spiel/031IKDRR58000000VS5489BUVVKNMR0J"
-    },
-    {
-      "d": "2026-09-17",
-      "t": "17:30",
-      "team": "E-Junioren",
-      "squad": 3,
-      "ownName": "SV Bachum/Bergheim III",
-      "opponent": "JSG Hachen/Langsch-Enkh. II",
-      "competition": "Kreisliga C",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/jsg-hachen-langscheid-enkhausen-2-sv-bachum-bergheim-3/-/spiel/031J8T2KNC000000VS5489BUVVKNMR0J"
-    },
-    {
-      "d": "2026-09-17",
-      "t": "18:30",
-      "team": "C-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum-Bergh. I",
-      "opponent": "1 (PH)",
-      "competition": "Kreispokal",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim/-/spiel/031JV1IKQO000000VS5489BUVVKNMR0J"
-    },
-    {
-      "d": "2026-09-17",
-      "t": "19:30",
-      "team": "Herren",
-      "squad": 3,
-      "ownName": "SV Bachum/Bergheim III",
-      "opponent": "TuS Bruchhausen 02 II",
-      "competition": "Kreisliga D",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/tus-bruchhausen-02-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IQ00000000VS5489BUVVKNMR0J"
-    },
-    {
       "d": "2026-09-18",
       "t": "16:30",
       "team": "D-Junioren",
@@ -2036,6 +1980,22 @@
       "competition": "Kreisfreundschaftsspiele",
       "score": null,
       "link": "https://www.fussball.de/spiel/tus-germania-lohauserholz-sv-bachum-bergheim/-/spiel/0323KH2N1K000000VS5489BUVSORQI22"
+    },
+    {
+      "d": "2026-09-19",
+      "t": "10:00",
+      "team": "G-Junioren",
+      "squad": 1,
+      "ownName": "SV Bachum/Bergheim",
+      "opponent": "SC Neheim",
+      "competition": "Kinderfußball",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sc-neheim-sv-bachum-bergheim/-/spiel/031IKDRR58000000VS5489BUVVKNMR0J",
+      "movedFrom": {
+        "d": "2026-09-17",
+        "t": "17:00"
+      },
+      "movedAt": "2026-10-09T00:21:53.021Z"
     },
     {
       "d": "2026-09-19",
@@ -3420,13 +3380,13 @@
         "011MIB6N6S000000VTVG0001VTR8C1K7"
       ],
       "competitions": [
-        "Kreispokal",
         "Kreisliga A",
+        "Kreispokal",
         "Kreisfreundschaftsspiele"
       ],
-      "games": 18,
+      "games": 17,
       "homeGames": 7,
-      "first": "2026-09-17",
+      "first": "2026-09-19",
       "last": "2027-06-05",
       "teamId": "011MIB6N6S000000VTVG0001VTR8C1K7"
     },
@@ -3545,9 +3505,9 @@
       "competitions": [
         "Kreisliga C"
       ],
-      "games": 14,
+      "games": 13,
       "homeGames": 7,
-      "first": "2026-09-17",
+      "first": "2026-09-23",
       "last": "2027-06-12",
       "teamId": "031BFRLD74000000VS5489BRVTPI24NQ"
     },
@@ -3583,7 +3543,7 @@
       ],
       "games": 3,
       "homeGames": 2,
-      "first": "2026-09-17",
+      "first": "2026-09-19",
       "last": "2026-10-10",
       "teamId": "023VO81ADC000000VS548985VVRPGK5E"
     },
@@ -3597,12 +3557,12 @@
         "01OR4F5HES000000VV0AG811VS8BP574"
       ],
       "competitions": [
-        "Kreisturnier",
-        "Kreispokal"
+        "Kreispokal",
+        "Kreisturnier"
       ],
-      "games": 5,
-      "homeGames": 1,
-      "first": "2026-09-17",
+      "games": 4,
+      "homeGames": 0,
+      "first": "2026-09-21",
       "last": "2026-11-16",
       "teamId": "01OR4F5HES000000VV0AG811VS8BP574"
     },
@@ -3655,13 +3615,13 @@
       "competitions": [
         "Kreisliga D"
       ],
-      "games": 18,
+      "games": 17,
       "homeGames": 9,
-      "first": "2026-09-17",
+      "first": "2026-09-27",
       "last": "2027-05-30",
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-09-17",
+  "teamsFrom": "2026-09-18",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
