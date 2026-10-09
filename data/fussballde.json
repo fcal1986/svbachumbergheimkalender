@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-09T09:08:04.628Z",
+  "updated": "2026-10-09T16:59:23.679Z",
   "games": [
     {
       "d": "2026-09-18",
@@ -615,6 +615,22 @@
       "staffelName": "Kreisliga B Arnsberg",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
       "infoAt": "2026-10-09T09:05:32.572Z"
+    },
+    {
+      "d": "2026-10-29",
+      "t": "18:30",
+      "team": "C-Junioren",
+      "squad": 1,
+      "ownName": "SV Bachum-Bergh. I",
+      "gameNo": "200226013",
+      "opponent": "JSG Balve/Garb./La/Be/Aff I",
+      "competition": "Kreispokal",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-balve-garbeck-la-be-aff-i/-/spiel/031JUVN2GK000000VS5489BUVVKNMR0J",
+      "staffelId": "200226",
+      "staffelName": "Kreispokal 2026/27",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-10-09T16:59:23.268Z"
     },
     {
       "d": "2026-10-31",
@@ -4150,8 +4166,8 @@
         "Kreispokal",
         "Kreisfreundschaftsspiele"
       ],
-      "games": 17,
-      "homeGames": 7,
+      "games": 18,
+      "homeGames": 8,
       "first": "2026-09-19",
       "last": "2027-06-05",
       "teamId": "011MIB6N6S000000VTVG0001VTR8C1K7"
