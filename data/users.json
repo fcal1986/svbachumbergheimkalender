@@ -550,6 +550,28 @@
       "created": "2026-10-06T05:45:37.849Z",
       "emailNotificationsEnabled": true,
       "pwChangeRequired": true
+    },
+    {
+      "id": "58d96de0-05f7-47cd-9330-1832ab2c12b2",
+      "first": "Viktor",
+      "last": "Kurz",
+      "email": "adrian2502@gmx.de",
+      "admin": false,
+      "classes": {
+        "E-Jugend": [
+          1
+        ]
+      },
+      "enc": {
+        "salt": "vNACYAzEQ7uCtt7u3kuAzQ==",
+        "iv": "PQCbDa41Kh4RboMo",
+        "cipher": "y22uQ6EQxeV6pw6C55/0L6eGuVaRlTp6alJoLtfUCduCTRz45sZ8zmGkxRSuRmgKGg2fzVUBhnEK3HdCkoUB3CMGjE52MDpuIexExv4qFShXvltwqmdn+JIu7kQlMm2pvp8X0x4ybBs8LbQqag=="
+      },
+      "created": "2026-10-09T17:22:39.820Z",
+      "emailNotificationsEnabled": true,
+      "pwChangeRequired": true,
+      "phone": "015147775747",
+      "contactPublic": "phone"
     }
   ]
 }
