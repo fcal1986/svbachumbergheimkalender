@@ -11,6 +11,10 @@ on:
         description: 'Ausführliches Debug-Log ausgeben (bei Problemen aktivieren)'
         type: boolean
         default: true
+      vollstaendig:
+        description: 'Alle bekannten Spiele neu lesen (Spielort, Spielnummer, Staffel) – ohne Abruf-Budget'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -31,6 +35,7 @@ jobs:
       - name: fussball.de Heimspiele abrufen
         env:
           FUSSBALLDE_DEBUG: ${{ (github.event.inputs.debug || 'false') == 'true' && '1' || '0' }}
+          FUSSBALLDE_FULL: ${{ (github.event.inputs.vollstaendig || 'false') == 'true' && '1' || '0' }}
         run: node scripts/fussballde-sync.mjs
 
       - name: Änderungen committen (falls vorhanden)

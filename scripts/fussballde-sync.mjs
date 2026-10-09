@@ -263,7 +263,8 @@ const GAME_INFO_FIELDS = ['gameNo', 'matchday', 'staffelId', 'staffelName', 'ven
 // Ab 09.10.2026 · 8 auch für Auswärtsspiele (Spielort/Adresse für Bild, Text und Karte): opts.until begrenzt
 // auf die nächsten Wochen, opts.maxFetch ist ein eigenes Abruf-Budget.
 async function enrichGameInfo(games, prevGames, debug, opts = {}) {
-  const maxFetch = opts.maxFetch || 40, until = opts.until || null, label = opts.label || 'Spielinfos';
+  const maxFetch = opts.full ? Infinity : (opts.maxFetch || 40), until = opts.full ? null : (opts.until || null), label = opts.label || 'Spielinfos';
+  // opts.full (Workflow-Eingabe „vollständig“): alle bekannten Spiele neu lesen, auch die der letzten 3 Wochen, ohne Budget
   const prevByLink = new Map((prevGames || []).filter(g => g && g.link).map(g => [g.link, g]));
   const today = new Date().toISOString().slice(0, 10);
   const staleBefore = new Date(Date.now() - 7 * 86400000).toISOString();
@@ -274,7 +275,7 @@ async function enrichGameInfo(games, prevGames, debug, opts = {}) {
     if (prev) for (const f of GAME_INFO_FIELDS) if (prev[f] !== undefined && g[f] === undefined) g[f] = prev[f];
     const sameSlot = prev && prev.d === g.d && (prev.t || '') === (g.t || '');
     const fresh = g.infoAt && g.infoAt > staleBefore && g.gameNo;
-    if (g.d < today || (until && g.d > until) || (sameSlot && fresh) || fetched >= maxFetch || g.withdrawn) continue; // zurückgezogen: Spielseite ohne Angaben
+    if ((!opts.full && g.d < today) || (until && g.d > until) || (!opts.full && sameSlot && fresh) || fetched >= maxFetch || g.withdrawn) continue; // zurückgezogen: Spielseite ohne Angaben
     fetched++;
     try {
       const res = await fetch(g.link, { headers: FD_HEADERS });
@@ -597,10 +598,12 @@ async function main() {
   markMovedGames(awayGames, previous && previous.awayGames);
 
   // Spielnummer, Staffel und Spielort von den Spielseiten der Heimspiele (für den DFBnet-Verlegungsantrag).
-  await enrichGameInfo(allGames, previous && previous.games, debug);
-  // Spielort der Auswärtsspiele der nächsten 6 Wochen (ab 09.10.2026 · 8), eigenes Budget von 30 Abrufen pro Lauf.
-  await enrichGameInfo(awayGames, previous && previous.awayGames, debug,
-    { maxFetch: 30, until: new Date(Date.now() + 42 * 86400000).toISOString().slice(0, 10), label: 'Spielorte Auswärtsspiele' });
+  const full = process.env.FUSSBALLDE_FULL === '1' || process.argv.includes('--full');
+  if (full) console.log('Vollständiger Abgleich: alle Spielseiten (Heim + Auswärts) werden neu gelesen.');
+  await enrichGameInfo(allGames, previous && previous.games, debug, { full });
+  // Spielort aller künftigen Auswärtsspiele (ab 09.10.2026 · 8/9), eigenes Budget von 30 Abrufen pro Lauf;
+  // einmal gelesen, wird er nur nach 7 Tagen oder bei Terminänderung neu geprüft.
+  await enrichGameInfo(awayGames, previous && previous.awayGames, debug, { full, maxFetch: 30, label: 'Spielorte Auswärtsspiele' });
 
   // Änderungen gegenüber dem letzten Lauf für die E-Mail an die Trainer (verschickt der Workflow
   // danach mit scripts/notify-email.mjs, siehe .github/workflows/fussballde-sync.yml).
