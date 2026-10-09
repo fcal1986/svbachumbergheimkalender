@@ -199,10 +199,12 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "6085b3aa-f111-47fa-9d20-7e59a0a987e8"
+        "6085b3aa-f111-47fa-9d20-7e59a0a987e8",
+        "58d96de0-05f7-47cd-9330-1832ab2c12b2"
       ],
       "trainerNames": [
-        "Marc Geauf"
+        "Marc Geauf",
+        "Viktor Kurz"
       ],
       "validFrom": "2026-07-19",
       "validUntil": "2027-06-30",
@@ -541,10 +543,12 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "6085b3aa-f111-47fa-9d20-7e59a0a987e8"
+        "6085b3aa-f111-47fa-9d20-7e59a0a987e8",
+        "58d96de0-05f7-47cd-9330-1832ab2c12b2"
       ],
       "trainerNames": [
-        "Marc Geauf"
+        "Marc Geauf",
+        "Viktor Kurz"
       ],
       "validFrom": "2026-07-19",
       "validUntil": "2027-06-30",
