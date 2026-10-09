@@ -343,6 +343,49 @@
   .st-platz .stw-day.today{box-shadow:inset 0 0 0 1.5px var(--green);}
   .st-platz .stw-day.on{background:var(--pc-navy);}
   .st-platz .stw-strip{gap:4px;}
+  /* Deine Woche als Zeitleiste (ab 09.10.2026 · 1) */
+  .stw-kw{font-size:12px;font-weight:600;color:var(--ink-soft);}
+  .st-card.wtl{padding:6px 12px;gap:0;}
+  .wtl-day{display:grid;grid-template-columns:44px minmax(0,1fr);column-gap:10px;padding:10px 0;}
+  .wtl-day+.wtl-day{border-top:1px solid var(--krEEF2F1);}
+  .wtl-day.sel{background:var(--green-dim);border-radius:14px;margin:4px -6px;padding:10px 6px;border-top-color:transparent;}
+  .wtl-day.sel+.wtl-day{border-top-color:transparent;}
+  .wtl-date{display:flex;flex-direction:column;align-items:center;gap:1px;align-self:start;min-height:44px;border:none;background:none;padding:2px 0;cursor:pointer;font-family:'Inter',sans-serif;color:var(--ink);}
+  .wtl-date span{font-size:11px;font-weight:700;color:var(--ink-soft);}
+  .wtl-day.sel .wtl-date span{color:var(--kt3E7A0E);font-weight:800;}
+  .wtl-date b{font-family:'Manrope','Inter',sans-serif;font-size:21px;font-weight:800;line-height:1.05;}
+  .wtl-hol{font-style:normal;font-size:9px;font-weight:700;color:var(--ktA35B00);text-align:center;line-height:1.15;margin-top:2px;}
+  .wtl-items{display:flex;flex-direction:column;gap:6px;min-width:0;}
+  .wtl-it{display:flex;align-items:center;gap:8px;padding:9px 10px 9px 12px;border-radius:12px;background:var(--bg);position:relative;cursor:pointer;}
+  .wtl-it::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:4px;border-radius:0 3px 3px 0;background:var(--green);}
+  .wtl-day.sel .wtl-it{background:var(--white);box-shadow:0 2px 8px rgba(1,27,50,.06);}
+  .wtl-it:active{filter:brightness(.97);}
+  .wtl-it.k-game::before{background:var(--ink);}
+  .wtl-it.k-tt::before{background:var(--blue-bright);}
+  .wtl-it.k-moved::before{background:var(--ktD97706);}
+  .wtl-it.k-off::before{background:var(--ktC0392B);}
+  .wtl-it.k-moved{background:var(--kbFFF8EE);}
+  .wtl-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+  .wtl-name{font-size:14px;font-weight:700;line-height:1.3;color:var(--ink);}
+  .wtl-name.x{color:var(--ink-soft);font-weight:600;}
+  .wtl-t{font-variant-numeric:tabular-nums;margin-right:6px;}
+  .wtl-t.x{text-decoration:line-through;}
+  .wtl-sub{font-size:12.5px;color:var(--ink-secondary);line-height:1.3;}
+  .wtl-st{font-size:12.5px;font-weight:600;line-height:1.3;}
+  .wtl-st.off{color:var(--ktB42318);}
+  .wtl-st.moved{color:var(--kt9A3412);}
+  .wtl-txt .move-badge{align-self:flex-start;margin-top:3px;}
+  .wtl-chev{flex:none;width:18px;height:18px;fill:none;stroke:var(--ink-soft);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+  .wtl-empty{font-size:12.5px;color:var(--ink-soft);padding:12px 2px;}
+  .wtl-free{font-size:12px;color:var(--ink-soft);padding:10px 2px 6px;border-top:1px solid var(--krEEF2F1);}
+  .wtl-free button{border:none;background:none;padding:6px 0;font:inherit;color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
+  .wtl-nexthead{margin-top:4px;}
+  .st-card.wtl-next{padding:8px 12px 12px;}
+  .wtl-nd{font-size:11px;font-weight:700;color:var(--ink-soft);margin:8px 2px 4px;}
+  .wtl-sheet .wtl-sk{margin:0 0 2px;font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--kt3E7A0E);text-transform:uppercase;}
+  .wtl-sacts,.wtl-sacts .wk-acts{display:flex;flex-direction:column;gap:8px;}
+  .wtl-sacts .wk-act{width:100%;min-height:48px;font-size:15px;border-radius:12px;}
+  .wtl-sdet{display:block;width:100%;min-height:46px;margin-top:6px;border:none;background:none;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:var(--ink-soft);cursor:pointer;}
   .wk-list .wk-day{display:block;width:100%;text-align:left;border:none;background:none;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;color:var(--ink-soft);margin:10px 0 5px;padding:2px;cursor:pointer;}
   .wk-list .wk-day.sel{color:#fff;background:var(--pc-navy);border-radius:8px;padding:4px 8px;}
   .wk-list .wk-day:first-child{margin-top:0;}
@@ -1697,7 +1740,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='08.10.2026 · 32';
+const APP_VERSION='09.10.2026 · 1';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -4915,24 +4958,90 @@ function startWeekHTML(src,isMine,admin){
   let h=startPlaceHTML(startSel,isMine,admin,strip);
   // Woche: eigene Mannschaft(en) bzw. Favoriten; ohne Favoriten alle Termine des Vereins (gekürzt)
   const all=src?items:weekItems(()=>true);
-  h+='<section class="st-week"><div class="stw-head"><h2>'+esc(src?(src.fromSession?'Deine Woche · '+src.label:'Woche deiner Favoriten'):'Diese Woche im Verein')+'</h2></div>';
-  h+='<div class="st-card wk-list">';
+  return h+startWeekTimelineHTML(src,isMine,items,all);
+}
+/* ---------- „Deine Woche“ als Zeitleiste nach Tagen (ab 09.10.2026 · 1) ----------
+   Links eine schmale Datumsspalte (Wochentag + Tageszahl, antippen wählt den Tag für den Platz oben),
+   rechts die Termine als ruhige Kacheln mit Farbstreifen: grün Training, dunkelblau Spiel, blau Trainer-Termin,
+   orange verlegt/vorgemerkt, rot abgesagt/entfällt. Keine Knöpfe mehr in der Zeile: Antippen öffnet für
+   Berechtigte ein Blatt mit den Aktionen (Verlegen, Absagen, Zurücknehmen, Details), sonst direkt die Details.
+   Mannschafts-Kürzel nur, wenn die Woche mehrere Mannschaften zeigt. Tage ohne Termin stehen in einer Zeile. */
+let WTL_ITEMS=[];
+function wtlKind(e){
+  if(e.isCancelled||e.withdrawn) return 'off';
+  if(e.isMovedGhost||e.movePending||isMatchPlanned(e)) return 'moved';
+  if(isTrainerTermin(e)) return 'tt';
+  if(e.isExternal||isMatchKind(kindOf(e))) return 'game';
+  return 'tr';
+}
+function wtlTileHTML(e,multi,withDate){
+  const i=WTL_ITEMS.push(e)-1;
+  const {name, sub, tag}=weekRowParts(e);
+  const k=wtlKind(e), struck=e.isCancelled||e.withdrawn||e.isMovedGhost;
+  const chip=multi?'<span class="wk-team">'+esc(e.team===GK_TEAM||kindOf(e)==='goalkeeper'?'TW':teamShort(e.team,e.squad))+'</span>':'';
+  let line=sub, status='';
+  if(e.isMovedGhost){ status=sub; line=''; }
+  else if(e.isCancelled||e.withdrawn){ status=tag+(sub?' · '+sub:''); line=''; }
+  else if(isTrainerTermin(e)){ if(tag) line=[sub,tag==='Zugesagt'?'Du bist dabei':'Du hast abgesagt'].filter(Boolean).join(' · '); }
+  else if(e.isExternal||(kindOf(e)==='game'&&e.ha)){ if(tag&&!(sub||'').includes(tag)) line=[sub,tag].filter(Boolean).join(' · '); }
+  if(line&&e.t) line=line.replace(' · Anstoß '+e.t,''); // Uhrzeit steht schon vorn
+  if(!line&&!struck&&(e.isTraining||kindOf(e)==='goalkeeper')) line=pitchLabelOf(e);
+  const when=withDate?'':'<span class="wtl-t'+(struck?' x':'')+'">'+esc(e.t||'')+'</span>';
+  return '<div class="wtl-it k-'+k+'" role="button" tabindex="0" onclick="startWeekTap('+i+')" onkeydown="if(event.key===\'Enter\')startWeekTap('+i+')">'
+    +'<div class="wtl-txt"><div class="wtl-name'+(struck?' x':'')+'">'+when+chip+'<span>'+esc(name)+'</span></div>'
+    +(line?'<div class="wtl-sub">'+esc(line)+'</div>':'')
+    +(status?'<div class="wtl-st '+(e.isMovedGhost?'moved':'off')+'">'+esc(status)+'</div>':'')
+    +(e.isExternal&&!e.withdrawn?moveBadgeHTML(e):'')
+    +(teamDayPartners(e).length?'<span class="move-badge warn">⚠ weiteres Spiel am selben Tag</span>':'')
+    +'</div><svg class="wtl-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>';
+}
+function startWeekTimelineHTML(src,isMine,items,all){
+  WTL_ITEMS=[];
+  const end=weekEndStr();
+  const teamKeys=new Set(all.filter(e=>!isTrainerTermin(e)).map(e=>e.team===GK_TEAM||kindOf(e)==='goalkeeper'?'TW':e.team+':'+(e.squad||1)));
+  const multi=!src||teamKeys.size>1;
+  let h='<section class="st-week"><div class="stw-head"><h2>'+esc(src?(src.fromSession?'Deine Woche · '+src.label:'Woche deiner Favoriten'):'Diese Woche im Verein')+'</h2>'
+    +'<span class="stw-kw">KW '+isoWeekNo(todayStr)+(isoWeekNo(end)!==isoWeekNo(todayStr)?'/'+isoWeekNo(end):'')+'</span></div>';
+  h+='<div class="st-card wtl">';
   const limit=!src&&!weekShowAll?WEEK_MAX_ROWS:Infinity;
-  let last='', n=0, selDone=false;
-  const dayHead=ds=>'<button type="button" class="wk-day'+(ds===startSel?' sel':'')+'" onclick="'+esc(ds===todayStr?'startJumpNow()':'setStartDay(\''+ds+'\')')+'">'+esc(weekDayLabel(ds))+'</button>';
-  for(const e of all){
-    if(n>=limit) break;
-    if(src&&!selDone&&e.d>startSel){ h+=dayHead(startSel)+'<div class="wk-empty">An diesem Tag nichts für '+esc(src.label)+'.</div>'; selDone=true; }
-    if(e.d!==last){ h+=dayHead(e.d); last=e.d; if(e.d===startSel) selDone=true; }
-    h+=weekRowHTML(e); n++;
+  const byDay={}; let n=0;
+  for(const e of all){ if(n>=limit) break; (byDay[e.d]=byDay[e.d]||[]).push(e); n++; }
+  const free=[];
+  for(let i=0;i<WEEK_DAYS;i++){
+    const ds=addDays(todayStr,i), list=byDay[ds]||[], sel=ds===startSel, today=i===0;
+    if(!list.length&&!sel&&!today){ free.push(ds); continue; }
+    const dt=new Date(ds+'T00:00:00'), hol=holidayOn(ds);
+    h+='<div class="wtl-day'+(sel?' sel':'')+'">'
+      +'<button type="button" class="wtl-date" onclick="'+esc(today?'startJumpNow()':'setStartDay(\''+ds+'\')')+'" aria-label="'+esc(weekDayLabel(ds)+(hol?' · '+hol.name:''))+'">'
+      +'<span>'+(today?'Heute':DOW[dowOf(ds)-1])+'</span><b>'+dt.getDate()+'</b>'+(hol?'<i class="wtl-hol">'+esc(hol.name)+'</i>':'')+'</button>'
+      +'<div class="wtl-items">'+(list.length?list.map(e=>wtlTileHTML(e,multi,false)).join('')
+        :'<div class="wtl-empty">'+esc(src?'Nichts für '+src.label+'.':'Keine Termine.')+'</div>')+'</div></div>';
   }
-  if(src&&!selDone&&all.length) h+=dayHead(startSel)+'<div class="wk-empty">An diesem Tag nichts für '+esc(src.label)+'.</div>';
   if(!all.length) h+='<div class="wk-empty">In den nächsten 7 Tagen steht nichts an.</div>';
+  else if(free.length&&limit===Infinity) h+='<div class="wtl-free">Ohne Termine: '+free.map(ds=>'<button type="button" onclick="setStartDay(\''+ds+'\')">'+DOW[dowOf(ds)-1]+' '+new Date(ds+'T00:00:00').getDate()+'.</button>').join(', ')+'</div>';
   if(all.length>limit) h+='<button type="button" class="wk-more" onclick="weekShowAll=true;renderMyWeek();">Alle '+all.length+' Termine anzeigen</button>';
   else if(!src&&weekShowAll&&all.length>WEEK_MAX_ROWS) h+='<button type="button" class="wk-more" onclick="weekShowAll=false;renderMyWeek();">Weniger anzeigen</button>';
+  h+='</div>';
   const next=src?nextGamesBeyondWeek(isMine,items):[];
-  if(next.length){ h+='<div class="wk-day">Nächste Spiele</div>'; next.forEach(e=>{ h+=weekRowHTML(e,true); }); }
-  return h+'</div></section>';
+  if(next.length){
+    h+='<div class="stw-head wtl-nexthead"><h2>Nächste Spiele</h2></div><div class="st-card wtl wtl-next">';
+    next.forEach(e=>{ h+='<div class="wtl-nd">'+esc(dayCase(e.d))+(e.t?' · '+esc(e.kickoff||e.t):'')+'</div>'+wtlTileHTML(e,multi,true); });
+    h+='</div>';
+  }
+  return h+'</section>';
+}
+// Antippen einer Kachel: Wer etwas ändern darf, bekommt die Aktionen im Blatt, alle anderen direkt die Details.
+function startWeekTap(i){
+  const e=WTL_ITEMS[i]; if(!e) return;
+  const details=e.isMovedGhost?'jumpToGame('+e.fbIndex+')':'openTerminFromStart(\''+jsArg(e.id)+'\',\''+e.d+'\')';
+  const acts=weekRowActHTML(e);
+  if(!acts){ if(e.isMovedGhost) jumpToGame(e.fbIndex); else openTerminFromStart(e.id,e.d); return; }
+  const {name, sub}=weekRowParts(e);
+  const who=e.team===GK_TEAM||kindOf(e)==='goalkeeper'?'':' '+teamShort(e.team,e.squad);
+  openSheet('<div class="wtl-sheet"><p class="wtl-sk">'+esc(weekDayLabel(e.d)+(e.t?' · '+e.t:''))+'</p>'
+    +'<h3>'+esc(name+(e.isTraining?who:''))+'</h3>'+(sub||pitchLabelOf(e)?'<p class="sub">'+esc(sub||pitchLabelOf(e))+'</p>':'')
+    +'<div class="wtl-sacts">'+acts.replace(/event\.stopPropagation\(\);/g,'closeSheet();')+'</div>'
+    +'<button type="button" class="wtl-sdet" onclick="'+esc('closeSheet();'+details)+'">Details öffnen</button></div>');
 }
 /* Favoriten für Besucher (und Zugänge ohne eigene Mannschaft): auf dem Gerät gespeichert. */
 function startFavHTML(src){

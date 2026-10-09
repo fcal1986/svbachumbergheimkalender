@@ -50,10 +50,10 @@ Gezählt wird ab der Ansicht, in der man die Aufgabe bemerkt (Startseite, Wochen
 |---|---|---|---|---|---|
 | Plan der eigenen Mannschaft ansehen | alle | 0 | ✅ 0 | Startseite „Meine Woche“ (ohne Konto einmalig Mannschaft wählen) | – |
 | Konflikt lösen (Vorschlag übernehmen) | Admin | 1 | ✅ 1 | „Training … absagen“ in der Live-Karte (eigener Konflikt) oder in „Zu erledigen“; andere Konflikte: „Ansehen“ | Nr. 6, 56 |
-| Training absagen | Trainer | 1 | ✅ 1 | „Training absagen“ in der Live-Karte (nächstes Training) oder „Absagen“ in Tag/Woche (Rückgängig 6 s) | Nr. 49, 53 |
+| Training absagen | Trainer | 1 | ✅ 1 | „Training absagen“ in der Live-Karte (nächstes Training); in „Deine Woche“ ab 09.10.2026 · 1 Kachel → „Absagen“ = 2 (Rückgängig 6 s) | Nr. 49, 53 |
 | Platz heute sperren | Admin | 2 | ✅ 2 | „Heute sperren“ unter dem Platz (Admin) → Grund | Nr. 5 |
 | Training oder Termin anlegen | Trainer/Admin | höchstens 3 | ✅ 3 | „+ frei“ im Zeitstrahl an der gewünschten Stelle antippen → Formular mit Tag, Beginn, Ende, Mannschaft und Fläche vorbefüllt → „Termin speichern“ → „Jetzt speichern“ im Blatt „Termin prüfen“ (ab 06.10.2026 · 13, weil Speichern Mails verschickt); sonst + → Speichern → Jetzt speichern | Nr. 2, 52, 66 |
-| Spielverlegung vormerken | Trainer | höchstens 3 | ⚠️ 5 | „Verlegen“ in der Spielzeile → neues Datum (2) → Grund-Chip → „Vormerken“; das Datum kennt nur der Nutzer | Nr. 50 |
+| Spielverlegung vormerken | Trainer | höchstens 3 | ⚠️ 5 | „Verlegen“ in der Live-Karte bzw. Spielkarte im Kalender (in „Deine Woche“ ab 09.10.2026 · 1 erst Kachel antippen, +1) → neues Datum (2) → Grund-Chip → „Vormerken“; das Datum kennt nur der Nutzer | Nr. 50 |
 | Trainer einladen | Admin | höchstens 2 | ✅ 1 | Hinweis „Noch ohne Trainer …“ in „Zu erledigen“ (sonst Konto → Zugänge → „Per WhatsApp einladen“ = 3) | Nr. 51 |
 
 Gezählt am Code (`index.html`) und im lokalen Browser-Test, nicht am echten Handy. Ein Datums- oder Zeitfeld zählt als 2 (öffnen + wählen); auf manchen Android-Geräten kommt „OK“ dazu. Nach jeder Änderung an einem dieser Wege die Ist-Spalte aktualisieren.
