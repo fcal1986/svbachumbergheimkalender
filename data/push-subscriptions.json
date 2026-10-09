@@ -100,17 +100,6 @@
       }
     },
     {
-      "id": "4cf75847-042f-4641-8f7c-1bf44b9c68d4",
-      "userId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "device": "Android",
-      "created": "2026-10-08T12:55:55.527Z",
-      "enc": {
-        "epk": "BLwcLL7bA25H-LDhOucztNLHaMYgz4fBKJZ6axr3Y2zCZvz6OFf98Prn4zQugOX158xey-BFSw5Xl5DehJBqY7k",
-        "iv": "oSaWlgNe0O4tLC-z",
-        "ct": "dIdzgv1BCRXA1x8TQbLDETcPuVwpYdTsF_h2GV1AkNtsTQJpsGpBF1pcCnvmAVGTPbdwuNZf0IWnH_0GtVoZn7MfwJba9FfOg18PKe5oSC09s6qDctnkDISorQ0LYF12T_Ly6jCxcWQKteawuWKVVhniEivS1Z_rIaFajV-VFtqGCq4gh_LeFe1j1KQwVyo_OBHDNzrDY4LdHLi63-EQ-9ho3q2LBEsG4dWkLHkIYuzC8mRYfhts9OrCiZE0SD7QID9-mtiNNWG4J8Ph1ohsa_gFpVSM0080sMwJBDOKr4kbaKYuebyG7utAkYEPuOS3RMreZS56c5zrxvu26OgYE71nZCFYur9jVx-IkG-3QU_7OA3oq_fOdK10Tz-VkQ85ogQZALKS2AktJciX86qD8ICG1nND8sg6E5e0SC6djG5-uoU4BxKGnB8uCK3zkXFEtIefsOGPSe9afVsWMnayEjoWy1mLmRYVUl2-qcEhNGmGqYjwcR9UGGDwkdpS"
-      }
-    },
-    {
       "id": "eb832fbb-8bc7-472c-917a-908bcb5a6938",
       "userId": "35b36d62-9cf2-40c1-8eee-9940273a6353",
       "device": "Android",
