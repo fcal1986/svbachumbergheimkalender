@@ -1749,7 +1749,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='09.10.2026 · 5';
+const APP_VERSION='09.10.2026 · 6';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -4203,6 +4203,12 @@ function shareCardData(e){
     D.kicker=e.tournament?'TURNIER':'SPIELTAG'; D.vs=away?'bei':'gegen'; D.head=e.tournament?e.tournament.name:(e.opponent||e.title||'');
     D.time='Anstoß '+(e.kickoff||e.t);
     D.place=(away?'Auswärts':'Heimspiel')+' · '+(away?(e.address||(e.venue?fbVenueShort(e.venue):'')):(e.foreignVenue&&e.venue?fbVenueShort(e.venue):venue));
+    if(e.tournament){ // ab 09.10.2026 · 6: eigene Turnier-Vorlage mit Spielplan
+      const homeV=((CFG&&CFG.fussballde&&CFG.fussballde.homeVenues)||[]).some(h=>h&&String(e.venue||'').includes(h));
+      D.tour=true; D.vs=''; D.time=e.t+'–'+eventBis(e)+' Uhr';
+      D.place=homeV?'Heimturnier · '+venue:'Turnier in '+(e.venue?fbVenueShort(e.venue):(e.address||''));
+      D.games=e.tournament.games.map(g=>({t:g.t||'',opp:g.opponent||''}));
+    }
   }else if(e.isTraining||['training','goalkeeper'].includes(kindOf(e))){
     const gk=kindOf(e)==='goalkeeper'; D.kicker=gk?'TORWARTTRAINING':'TRAINING'; D.head=gk?'Torwarttraining':'Training';
     if(gk&&gkTeamsOf(e).length) D.head+=' · '+gkTeamsText(gkTeamsOf(e));
@@ -4243,6 +4249,19 @@ function scWrap(ctx,txt,maxW,maxLines){
     while(ctx.measureText(last+'…').width>maxW&&last.length>1) last=last.slice(0,-1); keep[maxLines-1]=last.trim()+'…'; return keep; }
   return lines;
 }
+function drawTrophy(c,x,y,s,col,fill){
+  // Pokal in einem Quadrat der Kantenlänge s (links oben x,y): Schale, Henkel, Stiel, Sockel
+  c.save(); c.translate(x,y); c.scale(s/100,s/100); c.lineJoin='round'; c.lineCap='round';
+  c.beginPath(); c.moveTo(26,10); c.lineTo(74,10); c.lineTo(72,40); c.quadraticCurveTo(68,62,50,64); c.quadraticCurveTo(32,62,28,40); c.closePath();
+  c.moveTo(46,64); c.lineTo(54,64); c.lineTo(56,80); c.lineTo(44,80); c.closePath();
+  c.moveTo(32,80); c.lineTo(68,80); c.lineTo(70,92); c.lineTo(30,92); c.closePath();
+  if(fill){ c.fillStyle=col; c.fill(); }
+  else { c.strokeStyle=col; c.lineWidth=6; c.stroke(); }
+  c.beginPath(); c.moveTo(27,18); c.quadraticCurveTo(8,18,12,32); c.quadraticCurveTo(16,44,30,46);
+  c.moveTo(73,18); c.quadraticCurveTo(92,18,88,32); c.quadraticCurveTo(84,44,70,46);
+  c.strokeStyle=col; c.lineWidth=fill?7:6; c.stroke();
+  c.restore();
+}
 async function drawShareCard(e){
   const D=shareCardData(e), W=1080, H=1920, M=96, F="Manrope, Inter, sans-serif";
   try{ await Promise.all([document.fonts.load('800 100px Manrope'),document.fonts.load('600 40px Inter')]); }catch(err){}
@@ -4259,30 +4278,66 @@ async function drawShareCard(e){
   c.fillText(String((CFG&&CFG.clubName)||'').toUpperCase(),M,y);
   const SCOL=D.state==='off'?'#FF6B6B':(D.state==='moved'?'#F7B23B':LIME);
   const kick=D.state==='off'?'FÄLLT AUS':(D.state==='moved'?'VERLEGT':D.kicker);
-  y+=110; c.font='800 46px '+F; const kw=c.measureText(kick).width+64;
-  c.fillStyle=SCOL; c.beginPath(); c.roundRect(M,y-62,kw,84,42); c.fill(); c.fillStyle=NAVY; c.fillText(kick,M+32,y-4);
-  // Oben: Mannschaft groß, darunter Gegner bzw. Titel (schrumpft, bis jede Zeile passt)
-  y+=230;
-  if(D.team){ const ts=scFit(c,D.team,W-2*M,250,120,'800',F); c.fillStyle=LIME; c.font='800 '+ts+'px '+F; c.fillText(D.team,M-6,y); y+=70; }
-  else y-=120;
-  if(D.vs){ y+=70; c.fillStyle=SOFT; c.font='700 56px '+F; c.fillText(D.vs,M,y); y+=24; }
-  let hs=124, lines;
-  const fits=()=>{ c.font='800 '+hs+'px '+F; lines=scWrap(c,D.head,W-2*M,3); return lines.length<=3&&lines.every(l=>c.measureText(l).width<=W-2*M); };
-  while(!fits()&&hs>56) hs-=6;
-  if(lines.length>2&&hs>84){ while(hs>84&&lines.length>2){ hs-=6; fits(); } }
-  c.fillStyle=WHITE; y+=Math.round(hs*0.95); lines.forEach((l,i)=>{ c.fillText(l,M,y); if(i<lines.length-1) y+=Math.round(hs*1.06); });
-  const topEnd=y;
-  // Unten (über dem Fuß verankert): Wochentag, Datum, Uhrzeit, Ort
-  c.font='600 42px Inter, sans-serif'; const pl=D.place?scWrap(c,D.place,W-2*M,2):[];
-  const extra=D.stateTxt?62:0;
-  let by=H-M-330-pl.length*58-extra;
-  const dateTop=by-96-120-150;
-  let yy=dateTop; c.fillStyle=LIME; c.font='800 54px '+F; c.fillText(D.date.wd.toUpperCase(),M,yy);
-  const strike=(txt,x,yb,size)=>{ if(!D.state) return; const w=c.measureText(txt).width; c.save(); c.strokeStyle=SCOL; c.lineWidth=Math.max(6,size/14); c.beginPath(); c.moveTo(x-6,yb-size*0.33); c.lineTo(x+w+6,yb-size*0.33); c.stroke(); c.restore(); };
-  yy+=190; c.fillStyle=D.state?SOFT:WHITE; c.font='800 200px '+F; c.fillText(D.date.dm,M-8,yy); strike(D.date.dm,M-8,yy,200);
-  yy+=110; c.font='700 70px '+F; c.fillText(D.time,M,yy); strike(D.time,M,yy,70);
-  yy+=34; c.fillStyle=SOFT; c.font='600 42px Inter, sans-serif'; pl.forEach(l=>{ yy+=58; c.fillText(l,M,yy); });
-  if(extra){ yy+=66; c.fillStyle=SCOL; c.font='700 46px Inter, sans-serif'; scWrap(c,D.stateTxt,W-2*M-300,1).forEach(l=>c.fillText(l,M,yy)); }
+  const GOLD='#F2C94C', tour=!!D.tour, PCOL=tour&&!D.state?GOLD:SCOL, ic=tour?52:0;
+  y+=110; c.font='800 46px '+F; const kw=c.measureText(kick).width+64+ic;
+  c.fillStyle=PCOL; c.beginPath(); c.roundRect(M,y-62,kw,84,42); c.fill(); c.fillStyle=NAVY;
+  if(tour) drawTrophy(c,M+22,y-48,52,NAVY,true);
+  c.fillText(kick,M+32+ic,y-4);
+  if(tour){
+    // Turnier: großer Pokal rechts oben, Mannschaft + Turniername, Datum kompakt, Spielplan als Liste
+    const AC=D.state?SCOL:GOLD;
+    c.save(); c.globalAlpha=.9; drawTrophy(c,W-M-200,y+28,200,AC,false); c.restore();
+    y+=190; const ts=scFit(c,D.team||'',W-2*M-280,200,110,'800',F); c.fillStyle=AC; c.font='800 '+ts+'px '+F; if(D.team) c.fillText(D.team,M-6,y);
+    y+=50; let hs=100, lines;
+    const fits=()=>{ c.font='800 '+hs+'px '+F; lines=scWrap(c,D.head,W-2*M,9); return lines.length<=2&&lines.every(l=>c.measureText(l).width<=W-2*M); };
+    while(!fits()&&hs>64) hs-=4;
+    if(lines.length>2){ c.font='800 '+hs+'px '+F; lines=scWrap(c,D.head,W-2*M,2); }
+    c.fillStyle=WHITE; y+=Math.round(hs*0.95); lines.forEach((l,i)=>{ c.fillText(l,M,y); if(i<lines.length-1) y+=Math.round(hs*1.06); });
+    const topEnd=y;
+    // Spielplan-Kasten über dem Fuß verankert
+    const G=D.games||[], maxRows=5, rowsArr=G.length>maxRows?G.slice(0,maxRows-1):G, more=G.length-rowsArr.length;
+    const rowH=56, nRows=rowsArr.length+(more?1:0), boxH=88+nRows*rowH+18, boxBot=H-M-330, boxTop=boxBot-boxH;
+    c.fillStyle='rgba(1,27,50,.55)'; c.beginPath(); c.roundRect(M-24,boxTop,W-2*M+48,boxH,28); c.fill();
+    c.strokeStyle='rgba(242,201,76,.45)'; c.lineWidth=3; c.stroke();
+    c.fillStyle=AC; c.font='800 34px '+F; c.fillText('SPIELPLAN · '+G.length+' SPIELE',M+8,boxTop+62);
+    let ry=boxTop+62+rowH;
+    rowsArr.forEach(g=>{ c.fillStyle=AC; c.font='800 40px '+F; c.fillText(g.t,M+8,ry);
+      c.fillStyle=WHITE; c.font='600 40px Inter, sans-serif'; let o=g.opp; const mw=W-2*M-170;
+      while(c.measureText(o).width>mw&&o.length>3) o=o.slice(0,-2).trim()+'…', o=o.replace(/…(?=.*…)/g,'');
+      c.fillText(o,M+160,ry); ry+=rowH; });
+    if(more){ c.fillStyle=SOFT; c.font='600 38px Inter, sans-serif'; c.fillText('+ '+more+' weitere Spiele',M+160,ry); }
+    // Datum, Zeit, Ort zwischen Titel und Spielplan
+    const strike=(txt,x,yb,size)=>{ if(!D.state) return; const w=c.measureText(txt).width; c.save(); c.strokeStyle=SCOL; c.lineWidth=Math.max(6,size/14); c.beginPath(); c.moveTo(x-6,yb-size*0.33); c.lineTo(x+w+6,yb-size*0.33); c.stroke(); c.restore(); };
+    let py=boxTop-46; if(D.stateTxt){ c.fillStyle=SCOL; c.font='700 44px Inter, sans-serif'; c.fillText(scWrap(c,D.stateTxt,W-2*M,1)[0],M,py); py-=60; }
+    c.fillStyle=SOFT; c.font='600 42px Inter, sans-serif'; const pl=scWrap(c,D.place,W-2*M,1)[0]||''; c.fillText(pl,M,py);
+    const tyy=py-66; c.fillStyle=D.state?SOFT:WHITE; c.font='700 62px '+F; c.fillText(D.time,M,tyy); strike(D.time,M,tyy,62);
+    let ds=150; const dyy=tyy-86; if(dyy-ds*0.75-70<topEnd+40) ds=120;
+    c.font='800 '+ds+'px '+F; c.fillText(D.date.dm,M-6,dyy); strike(D.date.dm,M-6,dyy,ds);
+    const dw=c.measureText(D.date.dm).width; c.fillStyle=AC; c.font='800 52px '+F; c.fillText(D.date.wd.toUpperCase(),M+dw+30,dyy);
+  }else{
+    // Oben: Mannschaft groß, darunter Gegner bzw. Titel (schrumpft, bis jede Zeile passt)
+    y+=230;
+    if(D.team){ const ts=scFit(c,D.team,W-2*M,250,120,'800',F); c.fillStyle=LIME; c.font='800 '+ts+'px '+F; c.fillText(D.team,M-6,y); y+=70; }
+    else y-=120;
+    if(D.vs){ y+=70; c.fillStyle=SOFT; c.font='700 56px '+F; c.fillText(D.vs,M,y); y+=24; }
+    let hs=124, lines;
+    const fits=()=>{ c.font='800 '+hs+'px '+F; lines=scWrap(c,D.head,W-2*M,3); return lines.length<=3&&lines.every(l=>c.measureText(l).width<=W-2*M); };
+    while(!fits()&&hs>56) hs-=6;
+    if(lines.length>2&&hs>84){ while(hs>84&&lines.length>2){ hs-=6; fits(); } }
+    c.fillStyle=WHITE; y+=Math.round(hs*0.95); lines.forEach((l,i)=>{ c.fillText(l,M,y); if(i<lines.length-1) y+=Math.round(hs*1.06); });
+    const topEnd=y;
+    // Unten (über dem Fuß verankert): Wochentag, Datum, Uhrzeit, Ort
+    c.font='600 42px Inter, sans-serif'; const pl=D.place?scWrap(c,D.place,W-2*M,2):[];
+    const extra=D.stateTxt?62:0;
+    let by=H-M-330-pl.length*58-extra;
+    const dateTop=by-96-120-150;
+    let yy=dateTop; c.fillStyle=LIME; c.font='800 54px '+F; c.fillText(D.date.wd.toUpperCase(),M,yy);
+    const strike=(txt,x,yb,size)=>{ if(!D.state) return; const w=c.measureText(txt).width; c.save(); c.strokeStyle=SCOL; c.lineWidth=Math.max(6,size/14); c.beginPath(); c.moveTo(x-6,yb-size*0.33); c.lineTo(x+w+6,yb-size*0.33); c.stroke(); c.restore(); };
+    yy+=190; c.fillStyle=D.state?SOFT:WHITE; c.font='800 200px '+F; c.fillText(D.date.dm,M-8,yy); strike(D.date.dm,M-8,yy,200);
+    yy+=110; c.font='700 70px '+F; c.fillText(D.time,M,yy); strike(D.time,M,yy,70);
+    yy+=34; c.fillStyle=SOFT; c.font='600 42px Inter, sans-serif'; pl.forEach(l=>{ yy+=58; c.fillText(l,M,yy); });
+    if(extra){ yy+=66; c.fillStyle=SCOL; c.font='700 46px Inter, sans-serif'; scWrap(c,D.stateTxt,W-2*M-300,1).forEach(l=>c.fillText(l,M,yy)); }
+  }
   // Fuß: QR + Link
   const link=shareLinkFor(e), qrS=250, qx=W-M-qrS, qy=H-M-qrS-40;
   const qrlib=await loadQrLib();
