@@ -260,7 +260,10 @@ function parseGameInfo(html, date) {
 const GAME_INFO_FIELDS = ['gameNo', 'matchday', 'staffelId', 'staffelName', 'venue', 'infoAt'];
 // Holt die Angaben nur, wo sie fehlen, sich der Termin geändert hat oder sie älter als 7 Tage sind –
 // sonst werden sie aus dem letzten Lauf übernommen. Höchstens 40 Seitenabrufe pro Lauf, mit Pause.
-async function enrichGameInfo(games, prevGames, debug) {
+// Ab 09.10.2026 · 8 auch für Auswärtsspiele (Spielort/Adresse für Bild, Text und Karte): opts.until begrenzt
+// auf die nächsten Wochen, opts.maxFetch ist ein eigenes Abruf-Budget.
+async function enrichGameInfo(games, prevGames, debug, opts = {}) {
+  const maxFetch = opts.maxFetch || 40, until = opts.until || null, label = opts.label || 'Spielinfos';
   const prevByLink = new Map((prevGames || []).filter(g => g && g.link).map(g => [g.link, g]));
   const today = new Date().toISOString().slice(0, 10);
   const staleBefore = new Date(Date.now() - 7 * 86400000).toISOString();
@@ -271,7 +274,7 @@ async function enrichGameInfo(games, prevGames, debug) {
     if (prev) for (const f of GAME_INFO_FIELDS) if (prev[f] !== undefined && g[f] === undefined) g[f] = prev[f];
     const sameSlot = prev && prev.d === g.d && (prev.t || '') === (g.t || '');
     const fresh = g.infoAt && g.infoAt > staleBefore && g.gameNo;
-    if (g.d < today || (sameSlot && fresh) || fetched >= 40 || g.withdrawn) continue; // zurückgezogen: Spielseite ohne Angaben
+    if (g.d < today || (until && g.d > until) || (sameSlot && fresh) || fetched >= maxFetch || g.withdrawn) continue; // zurückgezogen: Spielseite ohne Angaben
     fetched++;
     try {
       const res = await fetch(g.link, { headers: FD_HEADERS });
@@ -297,7 +300,7 @@ async function enrichGameInfo(games, prevGames, debug) {
     }
     await new Promise(r => setTimeout(r, 400)); // fussball.de nicht mit schnellen Folgeanfragen belasten
   }
-  console.log(`Spielinfos: ${ok} von ${fetched} Spielseiten gelesen (Rest aus dem letzten Lauf übernommen).`);
+  console.log(`${label}: ${ok} von ${fetched} Spielseiten gelesen (Rest aus dem letzten Lauf übernommen).`);
 }
 
 // Doppelt gelistete Spiele (Spielverlegungen) anhand der Spielseite auflösen.
@@ -595,6 +598,9 @@ async function main() {
 
   // Spielnummer, Staffel und Spielort von den Spielseiten der Heimspiele (für den DFBnet-Verlegungsantrag).
   await enrichGameInfo(allGames, previous && previous.games, debug);
+  // Spielort der Auswärtsspiele der nächsten 6 Wochen (ab 09.10.2026 · 8), eigenes Budget von 30 Abrufen pro Lauf.
+  await enrichGameInfo(awayGames, previous && previous.awayGames, debug,
+    { maxFetch: 30, until: new Date(Date.now() + 42 * 86400000).toISOString().slice(0, 10), label: 'Spielorte Auswärtsspiele' });
 
   // Änderungen gegenüber dem letzten Lauf für die E-Mail an die Trainer (verschickt der Workflow
   // danach mit scripts/notify-email.mjs, siehe .github/workflows/fussballde-sync.yml).
@@ -847,6 +853,14 @@ async function detectGameChanges(home, away, previous) {
         continue;
       }
       const moved = p.d !== g.d || (p.t || '') !== (g.t || '');
+      // Spielstätte geändert (ab 09.10.2026 · 8): nur wenn beide Läufe einen Spielort kennen und das Spiel noch kommt
+      const normV = v => String(v || '').replace(/\s+/g, ' ').replace(/\s*,\s*/g, ', ').trim().toLowerCase();
+      const venueChanged = p.venue && g.venue && normV(p.venue) !== normV(g.venue) && g.d >= today;
+      if (venueChanged && !moved) {
+        out.push({ text: `Spielort geändert: ${who} am ${fmtGameDate(g.d, g.t)} jetzt ${String(g.venue).replace(/\s+,/g, ',')} (bisher ${String(p.venue).replace(/\s+,/g, ',')}).`,
+          team: at.team, squad: at.squad, link: fbLinkId(g.link), priority: 'action', type: 'venue' });
+        continue;
+      }
       if (!moved || (g.d < today && p.d < today)) continue;
       const sameDay = p.d === g.d;
       const change = sameDay ? `am ${fmtGameDate(g.d)}: ${p.t || '?'} → ${g.t || '?'} Uhr` : `von ${fmtGameDate(p.d, p.t)} auf ${fmtGameDate(g.d, g.t)}`;
@@ -871,6 +885,7 @@ async function detectGameChanges(home, away, previous) {
           + pitchText(isHome ? checkPitch(g, g.d, g.t) : null);
       }
       if (dayHint) { text += dayHint; priority = 'action'; }
+      if (venueChanged) text += ` Neuer Spielort: ${String(g.venue).replace(/\s+,/g, ',')}.`;
       text += trainingHint(slots, at, g.d);
       out.push({ text, team: at.team, squad: at.squad, link: fbLinkId(g.link), priority, type });
     }
