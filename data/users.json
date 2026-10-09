@@ -563,13 +563,12 @@
         ]
       },
       "enc": {
-        "salt": "vNACYAzEQ7uCtt7u3kuAzQ==",
-        "iv": "PQCbDa41Kh4RboMo",
-        "cipher": "y22uQ6EQxeV6pw6C55/0L6eGuVaRlTp6alJoLtfUCduCTRz45sZ8zmGkxRSuRmgKGg2fzVUBhnEK3HdCkoUB3CMGjE52MDpuIexExv4qFShXvltwqmdn+JIu7kQlMm2pvp8X0x4ybBs8LbQqag=="
+        "salt": "opHhj0ttEvZSCFZLPkLgOg==",
+        "iv": "w0n7fj3Ht0w8kPnz",
+        "cipher": "nlg0EaUOcGe+HlcYEaY+/dqm8tfmkZexuJFfuMyd0xwiTs9bMlMQ0emUltxuDXZLsXPFPfkuPRfXzPITGZ9q5u6A89ofGUjpKwBWCN1whov7JaKNSS3z/thosODDEPTu5Jx+sAdW9C0Hx6ZJqw=="
       },
       "created": "2026-10-09T17:22:39.820Z",
       "emailNotificationsEnabled": true,
-      "pwChangeRequired": true,
       "phone": "015147775747",
       "contactPublic": "phone"
     }
