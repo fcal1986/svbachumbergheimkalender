@@ -110,11 +110,14 @@ function parseCommit(raw) {
   // Torwarttraining: betroffene Mannschaften und Organisator(en)
   const gk = raw.match(/^Platzcoach-GK: (.+)$/m);
   const orga = raw.match(/^Platzcoach-Orga: (.+)$/m);
+  // Trainer-Termin mit Zielgruppe (ab 09.10.2026 · 3): "E-Jugend:2,D-Jugend:1,Vorstand"; fehlt = alle Trainer
+  const fuer = raw.match(/^Platzcoach-Fuer: (.+)$/m);
   const link = raw.match(/^Platzcoach-Link: (\S+)\s*$/m); // Direktlink-ID in der App ("fb-…", Termin-ID)
   return {
     text,
     gkTeams: gk ? gk[1].split(',').map(s => s.trim()).filter(Boolean) : [],
     orga: orga ? orga[1].split(',').map(s => s.trim()).filter(Boolean) : [],
+    fuer: fuer ? fuer[1].split(',').map(s => s.trim()).filter(Boolean) : [],
     team: team ? team[1].trim() : null,
     squad: team ? parseInt(team[2], 10) : null,
     by: by ? by[1] : null,
@@ -203,8 +206,19 @@ function trainerClassesFor(user, seasons, today) {
   if (cur && cur.trainerClasses && cur.trainerClasses[user.id]) return cur.trainerClasses[user.id];
   return user.classes || {};
 }
-function concernsTrainer(c, classes, userId) {
+function concernsTrainer(c, classes, userId, user) {
   if (c.category !== 'termine' && c.category !== 'training') return true; // z. B. Platzsperren: vereinsweit
+  // Trainer-Termin für bestimmte Mannschaften/Vorstand: nur deren Trainer + Organisator
+  if (c.fuer && c.fuer.length) {
+    if (userId && c.orga.includes(userId)) return true;
+    return c.fuer.some(k => {
+      const [t, q] = k.split(':');
+      if (t === 'Vorstand') return !!(user && user.role === 'vorstand');
+      const squads = classes[t];
+      if (!squads) return false;
+      return !squads.length || !/Jugend/.test(t) || squads.includes(parseInt(q, 10) || 1);
+    });
+  }
   // Torwarttraining: Organisator, Torwarttrainer und Trainer der gewählten Mannschaften
   if (c.team === 'Torwarttraining') {
     if (userId && c.orga.includes(userId)) return true;
@@ -306,7 +320,7 @@ async function main() {
     return changes.filter(c =>
       allowed.includes(c.category)
       && (notifyAuthorToo(c) || !(user && c.by && c.by === user.id))
-      && (role === 'admin' || concernsTrainer(c, classes, user && user.id)));
+      && (role === 'admin' || concernsTrainer(c, classes, user && user.id, user)));
   };
 
   // Push: je Zugang mit angemeldetem Gerät eine Nachricht (bei mehreren Änderungen zusammengefasst).
