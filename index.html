@@ -507,6 +507,7 @@
   .tt-badge{background:var(--kbE9EEF7) !important;color:var(--pc-navy) !important;}
   .tt-block{margin-top:10px;display:flex;flex-direction:column;gap:6px;font-size:13.5px;}
   .tt-addr a{color:var(--grass);font-weight:700;}
+  .fb-addr{margin-top:10px;font-size:13.5px;} .fb-note a{color:var(--grass);font-weight:700;}
   .tt-yes b{font-weight:800;} .tt-no{font-size:12.5px;color:var(--ink-soft);}
   .tt-acts{display:flex;gap:8px;margin-top:4px;}
   .tt-btn{flex:1;min-height:42px;border-radius:12px;border:1.5px solid var(--line);background:var(--white);font-family:'Inter',sans-serif;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;}
@@ -1749,7 +1750,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='09.10.2026 · 7';
+const APP_VERSION='09.10.2026 · 8';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2197,7 +2198,7 @@ function fussballDisplayAwayAll(){
       id:'fbaway-'+(g.link||(g.d+'|'+g.t+'|'+g.opponent)), d:g.d, t:g.t||'00:00', bis,
       title:g.tournament?'Turnier: '+label+' · '+g.tournament.name:'Auswärtsspiel: '+label+' bei '+g.opponent, opponent:g.opponent, tournament:g.tournament||null,
       team:mapped.team, squad:mapped.squad, competition:g.competition||'', score:g.score||null,
-      withdrawn:!!g.withdrawn, offPitch:true,
+      withdrawn:!!g.withdrawn, offPitch:true, venue:g.venue||null, // Spielort ab 09.10.2026 · 8 auch für Auswärtsspiele
       isExternal:true, isAway:true, ownerName:'fussball.de', link:g.link||null,
       fbIndex:AWAY_IDX+idx, movedFrom:g.movedFrom||null, movePending:!!g.movePending, moveConfirmed:!!g.moveConfirmed,
       moveDiverged:!!g.moveDiverged, plannedTo:g.plannedTo||null
@@ -3727,7 +3728,8 @@ function externalRowHTML(e){
     +'<div class="ev-time-col"><div class="ev-t">'+bis+'</div><div class="ev-tl">Bis</div></div>'
     +'</div>'
     +conflictBannerHTML(e)+holidayBannerHTML(e)+teamDayBannerHTML(e)+locksForItem(e).map(l=>lockBannerHTML(l,e)).join('')
-    +(e.foreignVenue&&e.venue?'<div class="fb-note">'+(e.tournament?'Spielort: ':'Heimrecht, aber Spielort: ')+esc(e.venue)+'</div>':'')
+    +(e.foreignVenue&&e.venue?'<div class="fb-note">'+(e.tournament?'Spielort: ':'Heimrecht, aber Spielort: ')+mapsLinkHTML(String(e.venue).replace(/\s+,/g,','))+'</div>'
+      :(eventAddress(e)?'<div class="tt-addr fb-addr">📍 '+mapsLinkHTML((e.venue&&e.isAway?String(e.venue).replace(/\s+,/g,','):((!e.isAway&&CFG&&CFG.venue&&CFG.venue.name?CFG.venue.name+', ':'')+eventAddress(e))),e.venue||eventAddress(e))+'</div>':''))
     +tournamentGamesHTML(e)
     +'<div class="badges" style="margin-top:10px;align-items:center;"><span class="badge-fb">⚽ '+esc(e.competition||'fussball.de')+'</span>'
     +moveBadgeHTML(e)
@@ -4150,19 +4152,21 @@ function shareText(e){
     const away=e.isAway||e.ha==='away';
     L.push('⚽ *'+who+' – '+(e.opponent||e.title)+'* ('+(away?'auswärts':'Heim')+')');
     L.push(shareDay(e.d)+' · Anstoß '+(e.kickoff||e.t)+(e.movePending?' (Verlegung vorgemerkt)':''));
-    const place=away?(e.address||''):(e.foreignVenue&&e.venue?fbVenueShort(e.venue):venue);
-    if(place) L.push('📍 '+place); contact();
+    const place=away?(e.venue?fbVenueShort(e.venue):(e.address||'')):(e.foreignVenue&&e.venue?fbVenueShort(e.venue):venue);
+    const adr=eventAddress(e); // ab 09.10.2026 · 8 mit Adresse
+    if(place||adr) L.push('📍 '+(away&&adr?adr:[place,adr&&!String(place).includes(adr)?adr:''].filter(Boolean).join(' – '))); contact(); // auswärts: Adresse enthält den Ort schon
   }else if(e.isTraining||['training','goalkeeper'].includes(kindOf(e))){
     const gk=kindOf(e)==='goalkeeper';
     L.push((gk?'🧤 *Torwarttraining':'🏃 *Training '+who)+'*'+(gk&&who?' ('+who+')':''));
     const area=e.pitch?pitchShort(e.pitch):((e.res||[]).includes('Kleinspielfeld')?'Kleinspielfeld':'');
     L.push(shareDay(e.d)+' · '+e.t+'–'+eventBis(e));
-    if(venue||area) L.push('📍 '+[venue,area].filter(Boolean).join(' · ')); contact();
+    if(venue||area) L.push('📍 '+[venue,area].filter(Boolean).join(' · ')+(homeAddress()?' – '+homeAddress():'')); contact();
   }else{
     L.push('📅 *'+e.title+'*'+(who?' ('+who+')':''));
     L.push(shareDay(e.d)+' · '+e.t+'–'+eventBis(e));
     const area=e.pitch?pitchShort(e.pitch):(e.res||[]).join(', ');
-    if(venue||area) L.push('📍 '+[e.pitch?venue:'',area].filter(Boolean).join(' · ')); contact();
+    const adr2=eventAddress(e);
+    if(venue||area||adr2) L.push('📍 '+[[e.pitch?venue:'',area].filter(Boolean).join(' · '),adr2].filter(Boolean).join(' – ')); contact();
     if(e.note) L.push('ℹ️ '+e.note);
   }
   L.push('👉 '+shareLinkFor(e));
@@ -4202,6 +4206,15 @@ function homeAddress(){
   const g=fussballDisplayAll().find(x=>x.venue&&hv.some(h=>h&&x.venue.includes(h)));
   return g?addrFromVenue(g.venue):'';
 }
+// Adresse eines Termins (ab 09.10.2026 · 8 gemeinsam für Bild, Text und Karte)
+function eventAddress(e){
+  const away=e.isAway||e.ha==='away';
+  if(e.isExternal||e.isMovedGhost) return e.venue&&(away||e.foreignVenue||e.tournament)?addrFromVenue(e.venue):(away?(e.address||''):homeAddress());
+  if(away) return e.address||'';
+  if(e.pitch||e.isTraining||(e.res||[]).length) return homeAddress();
+  return e.address||'';
+}
+function mapsLinkHTML(text,query){ return '<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(query||text)+'" target="_blank" rel="noopener" onclick="event.stopPropagation();">'+esc(text)+'</a>'; }
 function shareCardData(e){
   const who=e.team===GK_TEAM||kindOf(e)==='goalkeeper'?'TW':(e.team&&e.team!=='Alle Teams'?teamShort(e.team,e.squad):'');
   const venue=(CFG&&CFG.venue&&CFG.venue.name)||'';
@@ -4232,13 +4245,7 @@ function shareCardData(e){
   else if(e.isCancelled){ D.state='off'; D.stateTxt='Fällt aus'+(cancelReasonOf(e)?' – '+cancelReasonOf(e):''); }
   D.place=D.place.replace(/^(Heimspiel|Auswärts) · $/,'$1');
   // Adresse, wenn bekannt
-  const away2=e.isAway||e.ha==='away';
-  let addr='';
-  if(isTrainerTermin(e)) addr='';                                   // Ort ist dort schon die Adresse
-  else if(e.isExternal||e.isMovedGhost) addr=e.venue&&(away2||e.foreignVenue||e.tournament)?addrFromVenue(e.venue):(away2?(e.address||''):homeAddress());
-  else if(away2) addr=e.address||'';
-  else if(e.pitch||e.isTraining||(e.res||[]).length) addr=homeAddress();
-  else addr=e.address||'';
+  let addr=isTrainerTermin(e)?'':eventAddress(e); // Trainer-Termin: Ort ist schon die Adresse
   if(addr&&D.place&&D.place.includes(addr)) addr='';
   D.addr=addr;
   return D;
