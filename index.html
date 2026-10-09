@@ -1750,7 +1750,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='09.10.2026 · 8';
+const APP_VERSION='09.10.2026 · 9';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3312,10 +3312,10 @@ const KIND_FILTERS=['training','torwart','spiele','turniere','trainer','sonstige
 const KIND_FILTER_LABELS={training:'Training',torwart:'Torwart',spiele:'Spiele',turniere:'Turniere',trainer:'Trainer',sonstiges:'Sonstiges'};
 let KIND_SEL=new Set();
 function kindGroupOf(e){
-  // Ab 09.10.2026 · 5: nur echte Turniere (zusammengefasst oder Wettbewerb „…turnier“) zählen als Turnier. Einzelspiele
+  // Ab 09.10.2026 · 5: nur echte Turniere zählen als Turnier; ab · 9 nur noch zusammengefasste (≥ 2 Spiele am Tag). Einzelspiele
   // aus „Kinderfußball“/„Spielfest“ mit festem Gegner sind Spiele – vorher fielen G-Jugend-Spiele aus dem Filter „Spiele“.
   // (isTournamentGame bleibt für die Doppel-Spiel-Prüfung weiter, dort sollen Spielfest-Runden nicht als Konflikt zählen.)
-  if(e.isExternal||e.isMovedGhost) return (e.tournament||/turnier/i.test(e.competition||''))?'turniere':'spiele';
+  if(e.isExternal||e.isMovedGhost) return e.tournament?'turniere':'spiele'; // ab 09.10.2026 · 9: einzelnes Spiel im „Kreisturnier“ (Ü32-Runde) = Spiel
   const k=kindOf(e);
   if(k==='goalkeeper'||e.team===GK_TEAM) return 'torwart';
   if(e.isTraining||k==='training') return 'training';
