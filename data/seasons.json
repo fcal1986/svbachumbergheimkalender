@@ -31,7 +31,8 @@
         "6085b3aa-f111-47fa-9d20-7e59a0a987e8",
         "a0878d3e-94bf-4d9f-9687-ca0bd7133ae7",
         "f70b025a-fb4e-4573-b0fc-2d2f4c354b98",
-        "2f2f62e8-9030-48aa-80c3-a4d9b65938ee"
+        "2f2f62e8-9030-48aa-80c3-a4d9b65938ee",
+        "58d96de0-05f7-47cd-9330-1832ab2c12b2"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
@@ -143,6 +144,11 @@
         },
         "2f2f62e8-9030-48aa-80c3-a4d9b65938ee": {
           "2. Herren": []
+        },
+        "58d96de0-05f7-47cd-9330-1832ab2c12b2": {
+          "E-Jugend": [
+            1
+          ]
         }
       },
       "trainerNames": [
@@ -170,7 +176,8 @@
         "Marc Geauf",
         "Robin Lienig",
         "Fabian Honisch",
-        "Daniel Thibaut"
+        "Daniel Thibaut",
+        "Viktor Kurz"
       ],
       "teams": [
         {
