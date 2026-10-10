@@ -244,8 +244,8 @@
     {
       "id": "89485bc0-5f67-4a6d-b1a5-f83aa909f1f7",
       "day": 2,
-      "from": "18:00",
-      "to": "19:30",
+      "from": "17:30",
+      "to": "19:00",
       "team": "B-Jugend",
       "squad": 1,
       "pitch": {
@@ -265,7 +265,8 @@
       ],
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
-      "validUntil": "2027-06-30"
+      "validUntil": "2027-06-30",
+      "kind": "training"
     },
     {
       "id": "c9f4e22e-daeb-43b8-914b-eae6f1db049e",
