@@ -212,9 +212,7 @@
       "trainerName": "",
       "seasonId": "2026-2027",
       "kind": "training",
-      "cancelled": [
-        "2026-11-03"
-      ]
+      "cancelled": []
     },
     {
       "id": "ca2dc0b4-a484-4593-98eb-4b55d8a60d93",
