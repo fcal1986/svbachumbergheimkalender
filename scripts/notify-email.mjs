@@ -63,6 +63,14 @@ function getCommitMessages() {
   }
 }
 
+// Betreff-Zusatz für Trainingszeiten mit Ausfällen: " – fällt am 03.11. aus" bzw. " – fällt an 3 Tagen aus"
+function ausfallHint(text) {
+  const line = String(text).split('\n').find(l => l.startsWith('Fällt aus:'));
+  if (!line) return '';
+  const days = line.match(/\d{2}\.\d{2}\.(?=\d{4})/g) || [];
+  return days.length === 1 ? ` – fällt am ${days[0]} aus` : ` – fällt an ${days.length} Tagen aus`;
+}
+
 function escapeHtml(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -342,7 +350,7 @@ async function main() {
     const one = mine.length === 1;
     const payload = {
       title: changesFile ? (mine.some(c => c.priority !== 'info') ? 'Bitte prüfen: fussball.de' : 'fussball.de') : (one ? mine[0].text.split(':')[0] : mine.length + ' Änderungen in Platzcoach'),
-      body: one ? mine[0].text.replace(/^[^:]+:\s*/, '') : mine.slice(0, 4).map(c => '• ' + c.text).join('\n') + (mine.length > 4 ? '\n…' : ''),
+      body: one ? mine[0].text.replace(/^[^:]+:\s*/, '') : mine.slice(0, 4).map(c => '• ' + c.text.split('\n')[0]).join('\n') + (mine.length > 4 ? '\n…' : ''),
       url: appLink(cfg, one ? mine[0].link : null),
       tag: one && mine[0].link ? 'pc-' + mine[0].link : 'pc-changes',
     };
@@ -361,8 +369,10 @@ async function main() {
     const texts = mine.map(c => c.text);
     const siteUrl = String(cfg.siteUrl || 'https://platzcoach.de/').replace(/\/?$/, '/');
     const linkOf = c => (c.link ? siteUrl + '#t=' + encodeURIComponent(c.link) : '');
-    const li = c => `<li style="margin-bottom:6px;">${escapeHtml(c.text)}${c.link ? `<br><a href="${escapeHtml(linkOf(c))}" style="color:#16A34A;">In Platzcoach öffnen</a>` : ''}</li>`;
-    const txt = c => `- ${c.text}` + (c.link ? `\n  ${linkOf(c)}` : '');
+    // Mehrzeilige Einträge (z. B. Trainingszeit: Kopfzeile, „Geändert: …“, Ausfälle, Autor): erste Zeile fett
+    const liText = t => { const [head, ...rest] = String(t).split('\n'); return rest.length ? `<strong>${escapeHtml(head)}</strong><br>${rest.map(escapeHtml).join('<br>')}` : escapeHtml(head); };
+    const li = c => `<li style="margin-bottom:6px;">${liText(c.text)}${c.link ? `<br><a href="${escapeHtml(linkOf(c))}" style="color:#16A34A;">In Platzcoach öffnen</a>` : ''}</li>`;
+    const txt = c => `- ${c.text.replace(/\n/g, '\n  ')}` + (c.link ? `\n  ${linkOf(c)}` : '');
     // fussball.de-Abgleich: "Bitte prüfen" (Handlungsbedarf) zuerst, "Zur Info" (Bestätigungen) danach.
     const act = changesFile ? mine.filter(c => c.priority !== 'info') : mine;
     const inf = changesFile ? mine.filter(c => c.priority === 'info') : [];
@@ -394,6 +404,9 @@ async function main() {
         to: r.email,
         subject: changesFile ? subjectFb : (texts.length === 1 && /^(Freundschaftsspiel|Turnier) /.test(texts[0])
           ? 'Platzcoach: ' + texts[0].split(' · ')[0].replace(/: /, ' – ')   // z. B. "Freundschaftsspiel angelegt – E2-Jugend bei SC Neheim"
+          : texts.length === 1 && /^Trainingszeit (angelegt|geändert): /.test(texts[0])
+          ? 'Platzcoach: ' + texts[0].split('\n')[0].split(' · ')[0].replace(/: /, ' – ')   // z. B. "Trainingszeit geändert – E1-Jugend"
+            + ausfallHint(texts[0])
           : `Platzcoach: ${texts.length} Änderung${texts.length === 1 ? '' : 'en'}`),
         text,
         html,

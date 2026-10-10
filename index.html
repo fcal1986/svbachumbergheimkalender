@@ -585,7 +585,7 @@
   .log-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:none;}
   .log-icon svg{width:15px;height:15px;}
   .log-body{flex:1;min-width:0;}
-  .log-msg{font-size:12px;font-weight:600;color:var(--ink);line-height:1.4;}
+  .log-msg{font-size:12px;font-weight:600;color:var(--ink);line-height:1.4;white-space:pre-line;}
   .log-time{font-size:10.5px;color:var(--ink-soft);margin-top:3px;display:flex;align-items:center;gap:6px;}
   .log-cat{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:1px 7px;font-size:9.5px;font-weight:700;color:var(--ink-soft);}
   .squad-sq-chip{font-size:10px;font-weight:700;padding:4px 8px;border-radius:6px;background:var(--bg);border:1.5px solid var(--line);color:var(--ink-soft);cursor:pointer;user-select:none;}
@@ -1750,7 +1750,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='09.10.2026 · 9';
+const APP_VERSION='10.10.2026 · 1';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -8507,6 +8507,54 @@ function editTrainingSlot(id){
   document.getElementById('tf-label').textContent='Änderungen speichern';
   goto('tform');
 }
+/* ---------- Änderungsmail Trainingszeit (ab 10.10.2026 · 1, Backlog 105) ----------
+   Anlass (Fabrizio 10.10.): Bei der E1 wurde nur die Platzhälfte geändert, die Mail sagte aber
+   „Trainingszeit geändert: Dienstag 16:30 … (ab 10.10.2026) – wegen Heimspielen abgesagt am 03.11.2026“.
+   Jetzt: Kopfzeile mit Mannschaft + Regelzeit, eine Zeile „Geändert: …“ mit genau den geänderten
+   Angaben (neu + bisher), Ausfälle mit Datum und belegendem Spiel, Autor in eigener Zeile.
+   Die Zeilen bilden den ersten Absatz der Commit-Nachricht; notify-email.mjs bricht sie um. */
+function slotPlaceText(s){
+  if(s.pitch) return pitchShort(s.pitch);
+  return (s.res||[]).filter(r=>FIELD_RES.includes(r)).join(', ');
+}
+function slotExtraResText(s){ return (s.res||[]).filter(r=>!FIELD_RES.includes(r)).slice().sort().join(', '); }
+function slotTrainersText(s){ return (s.trainerNames||[]).filter(Boolean).slice().sort().join(', '); }
+function slotValidText(s){ return (s.validFrom?fmtShort(s.validFrom):'')+(s.validUntil?' – '+fmtShort(s.validUntil):' – offen'); }
+function slotWeekdayAdv(day){ return (WDAYS[day]||'').toLowerCase()+'s'; } // "dienstags"
+function slotHead(s){ return msgTeam(s.team,s.squad,s.gkTeams)+' · '+slotWeekdayAdv(s.day)+' '+s.from+'–'+s.to; }
+function shortDate(d){ return DAYS[new Date(d+'T00:00:00').getDay()].slice(0,2)+' '+fmtShort(d); } // "Di 03.11.2026"
+function trainingSlotChanges(o,n){
+  const ch=[], was=v=>v?v:'keine';
+  const kindName=x=>(x.kind||(x.team===GK_TEAM?'goalkeeper':'training'))==='goalkeeper'?'Torwarttraining':'Training';
+  if(kindName(o)!==kindName(n)) ch.push('Art '+kindName(n)+' (bisher '+kindName(o)+')');
+  const tO=msgTeam(o.team,o.squad,o.gkTeams), tN=msgTeam(n.team,n.squad,n.gkTeams);
+  if(tO!==tN) ch.push('Mannschaft '+tN+' (bisher '+tO+')');
+  if(o.day!==n.day) ch.push('Tag '+slotWeekdayAdv(n.day)+' (bisher '+slotWeekdayAdv(o.day)+')');
+  if(o.from!==n.from||o.to!==n.to) ch.push('Uhrzeit '+n.from+'–'+n.to+' (bisher '+o.from+'–'+o.to+')');
+  if(slotPlaceText(o)!==slotPlaceText(n)) ch.push('Platz '+was(slotPlaceText(n))+' (bisher '+was(slotPlaceText(o))+')');
+  if(slotExtraResText(o)!==slotExtraResText(n)) ch.push('Ressourcen '+was(slotExtraResText(n))+' (bisher '+was(slotExtraResText(o))+')');
+  if(slotTrainersText(o)!==slotTrainersText(n)) ch.push('Trainer '+was(slotTrainersText(n))+' (bisher '+was(slotTrainersText(o))+')');
+  if((o.validFrom||'')!==(n.validFrom||'')||(o.validUntil||'')!==(n.validUntil||'')) ch.push('gültig '+slotValidText(n)+' (bisher '+slotValidText(o)+')');
+  if((o.note||'')!==(n.note||'')) ch.push(n.note?'Bemerkung „'+n.note+'“':'Bemerkung entfernt');
+  return ch;
+}
+// before = Stand vor dem Speichern (null bei Neuanlage), after = gespeicherte Zeit, cancels = [{d,labels}] neu abgesagt
+function trainingSlotMessage(before,after,cancels){
+  const lines=[];
+  if(before){
+    const ch=trainingSlotChanges(before,after);
+    if(!ch.length&&!cancels.length) return 'Trainingszeit gespeichert (unverändert): '+slotHead(after)+' – '+session.name; // keine Mail (kein Mail-Präfix)
+    lines.push('Trainingszeit geändert: '+slotHead(after));
+    if(ch.length) lines.push('Geändert: '+ch.join(' · '));
+  }else{
+    lines.push('Trainingszeit angelegt: '+slotHead(after));
+    lines.push([slotPlaceText(after)?'Platz '+slotPlaceText(after):'',slotExtraResText(after)?'Ressourcen '+slotExtraResText(after):'',
+      'gültig '+slotValidText(after),slotTrainersText(after)?'Trainer '+slotTrainersText(after):''].filter(Boolean).join(' · '));
+  }
+  if(cancels.length) lines.push('Fällt aus: '+cancels.map(c=>shortDate(c.d)+' – Platz belegt durch '+c.labels.join(', ')).join('; '));
+  lines.push((before?'Geändert':'Angelegt')+' von '+session.name);
+  return lines.join('\n');
+}
 async function saveTrainingSlot(){
   if(!requireAdmin()) return;
   const day=parseInt(document.getElementById('tf-day').value);
@@ -8560,6 +8608,7 @@ async function saveTrainingSlot(){
   const old=lbl.textContent; btn.disabled=true;
   lbl.innerHTML='<span class="spinner" style="width:13px;height:13px;border-color:rgba(0,0,0,.15);border-top-color:var(--ink);display:inline-block;vertical-align:middle;margin-right:5px;"></span>Speichere …';
   const backup=JSON.stringify(TRAINING);
+  const before=tEditId?JSON.parse(JSON.stringify(TRAINING.find(x=>x.id===tEditId)||{})):null; // für die Änderungsmail
   try{
     if(tEditId){
       const existing=TRAINING.find(x=>x.id===tEditId);
@@ -8576,8 +8625,9 @@ async function saveTrainingSlot(){
           location.origin+location.pathname+(nd?'#t='+encodeURIComponent('tr-'+ns.id+'-'+nd):''),trainerIds),4000);
       }
     }
-    const tMsg=(tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+msgTeam(team,squad,gkTeams)+' (ab '+fmtShort(validFrom)+')'
-      +(newCancels.length?' – wegen Heimspielen abgesagt am '+newCancels.map(fmtShort).join(', '):'')+' – '+session.name+teamTrailer(team,squad,{gkTeams,trainerIds});
+    const saved=tEditId?TRAINING.find(x=>x.id===tEditId):TRAINING[TRAINING.length-1];
+    const tMsg=trainingSlotMessage(before,saved,gameCol.filter(c=>newCancels.includes(c.d)))+teamTrailer(team,squad,{gkTeams,trainerIds})
+      +((newCancels[0]||nextGkOccurrence(saved))?'\nPlatzcoach-Link: tr-'+saved.id+'-'+(newCancels[0]||nextGkOccurrence(saved)):'');
     tEditId=null; renderTraining(); renderStart(); goto('training');
     if(warn.length) showToast('⚠ Gespeichert – Achtung: '+warn[0],5000);
     else if(newCancels.length) showToast('Trainingszeit gespeichert – an '+newCancels.length+' Spieltag'+(newCancels.length===1?'':'en')+' abgesagt.',5000);
