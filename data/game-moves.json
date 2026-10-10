@@ -95,6 +95,24 @@
       "byName": "Fabian Honisch",
       "at": "2026-10-06T18:21:47.694Z",
       "cancelledTraining": []
+    },
+    {
+      "id": "29a85a18-bc5c-41ce-8e4b-078be17c85f0",
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-3-3-jsg-tus-rumbeck-djk-gw-arnsberg-sv-arnsberg-09-fc-bw-gierskaempen-3/-/spiel/031J8T2KC0000000VS5489BUVVKNMR0J",
+      "team": "E-Junioren",
+      "squad": 3,
+      "opponent": "JSG Rumbeck/GW Arnsb/Arnsb 09/Giersk. III",
+      "swap": true,
+      "venue": "Noch nicht bekannt",
+      "fromD": "2026-10-10",
+      "fromT": "13:45",
+      "toD": "2026-10-12",
+      "toT": "17:30",
+      "reason": "Absprache der beiden Trainer",
+      "byId": "af1a6546-fdc2-4059-bef4-5a4966181701",
+      "byName": "Michael Raneck",
+      "at": "2026-10-10T18:38:52.476Z",
+      "cancelledTraining": []
     }
   ]
 }
