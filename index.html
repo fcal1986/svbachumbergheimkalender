@@ -1715,6 +1715,10 @@
       <div class="field" style="flex:3;margin-bottom:0;"><label>Neues Datum</label><input type="date" id="mv-date" onchange="updateMoveTrainingHint()"></div>
       <div class="field" style="flex:2;margin-bottom:0;"><label>Anstoß</label><input type="time" id="mv-time" onchange="updateMoveTrainingHint()"></div>
     </div>
+    <label class="rs-result-row rs-selectable" id="mv-swap-row" style="margin-top:12px;"><input type="checkbox" id="mv-swap" onchange="onMoveSwapChange()">
+      <b style="font-weight:600;" id="mv-swap-lbl">Heimrecht getauscht</b></label>
+    <div class="field" id="mv-venue-field" style="display:none;margin:10px 0 0;"><label>Spielort beim Gegner (optional)</label>
+      <input type="text" id="mv-venue" maxlength="200" placeholder="z. B. Sportplatz, Straße, Ort"></div>
     <div class="field" style="margin:12px 0 0;"><label id="mv-reason-lbl">Grund der Verlegung (für den DFBnet-Antrag)</label>
       <textarea id="mv-reason" oninput="renderMoveReasons()" rows="2" maxlength="300" placeholder="z. B. Herbstferien, mehrere Spieler fehlen" style="width:100%;box-sizing:border-box;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;font-family:'Inter';font-size:14px;resize:vertical;"></textarea></div>
     <div class="chip-group mv-reasons" id="mv-reasons"></div>
@@ -1750,7 +1754,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='10.10.2026 · 1';
+const APP_VERSION='10.10.2026 · 2';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2018,19 +2022,31 @@ function fbOnOwnPitch(g){ return !!g&&!g.withdrawn&&!g.foreignVenue; }
 function fbVenueShort(v){ const parts=String(v||'').split(',').map(x=>x.trim()).filter(Boolean); const last=parts[parts.length-1]||''; return last.replace(/^\d{5}\s+/,'')||parts[0]||''; }
 function applyGameMoves(){
   const raw=FUSSBALLDE_RAW||{games:[],awayGames:[]};
-  const withMove=g=>{
+  // isAway = Liste, in der fussball.de das Spiel gerade führt. Heimrecht getauscht (m.swap, ab 10.10.2026 · 2):
+  // m.away = Seite beim Vormerken; offen, solange fussball.de Tag, Anstoß UND Seite noch nicht geändert hat.
+  const withMove=(g,isAway)=>{
     const m=g.link?MOVES.find(x=>x.link===g.link):null;
     if(!m) return {...g};
-    if(g.d===m.fromD&&(g.t||'')===(m.fromT||'')&&!(g.d===m.toD&&(g.t||'')===(m.toT||'')))
-      return {...g, d:m.toD, t:m.toT, movedFrom:{d:g.d,t:g.t}, movePending:true, moveId:m.id};
+    const fromAway=!!m.away, sideChanged=isAway!==fromAway;
+    const atOld=g.d===m.fromD&&(g.t||'')===(m.fromT||'');
+    if(m.swap?(atOld&&!sideChanged):(atOld&&!(g.d===m.toD&&(g.t||'')===(m.toT||''))))
+      return {...g, d:m.toD, t:m.toT, movedFrom:{d:g.d,t:g.t}, movePending:true, moveId:m.id,
+        ...(m.swap?{swapPending:true, swapFrom:fromAway?'away':'home'}:{})};
     // fussball.de hat geändert: auf den vorgemerkten Tag (bestätigt) oder auf einen ANDEREN Tag
     // (abweichend) – dann gilt fussball.de, die Vormerkung ist überholt und wird gemeldet.
-    const confirmed=g.d===m.toD;
+    const confirmed=g.d===m.toD&&(!m.swap||sideChanged);
     return {...g, movedFrom:g.movedFrom||{d:m.fromD,t:m.fromT}, moveId:m.id, moveConfirmed:confirmed,
-      moveDiverged:!confirmed, plannedTo:{d:m.toD,t:m.toT}};
+      moveDiverged:!confirmed, plannedTo:{d:m.toD,t:m.toT}, ...(sideChanged?{swapFrom:fromAway?'away':'home'}:{})};
   };
   // Ab 06.10.2026 · 19 auch Auswärtsspiele (nur Info, keine Platzprüfung)
-  FUSSBALLDE={...raw, awayGames:(raw.awayGames||[]).map(fbNormalizeWithdrawn).map(withMove), games:(raw.games||[]).map(fbNormalizeWithdrawn).map(g=>fbOwnVenue(g)?g:{...g,foreignVenue:true}).map(withMove)};
+  const home=(raw.games||[]).map(fbNormalizeWithdrawn).map(g=>fbOwnVenue(g)?g:{...g,foreignVenue:true}).map(g=>withMove(g,false));
+  const away=(raw.awayGames||[]).map(fbNormalizeWithdrawn).map(g=>withMove(g,true));
+  // Vorgemerkter Heimrechttausch: bis fussball.de nachzieht, steht das Spiel schon auf der neuen Seite –
+  // als Auswärtsspiel belegt es keinen Platz mehr, als Heimspiel belegt es den eigenen Platz.
+  const venueOf=g=>{ const m=MOVES.find(x=>x.link===g.link); return (m&&m.venue)||null; };
+  FUSSBALLDE={...raw,
+    games:home.filter(g=>!g.swapPending).concat(away.filter(g=>g.swapPending).map(g=>({...g, venue:null, foreignVenue:false}))),
+    awayGames:away.filter(g=>!g.swapPending).concat(home.filter(g=>g.swapPending).map(g=>({...g, venue:venueOf(g), foreignVenue:false})))};
   linkOwnMatches();
   fbGroupTournaments();
 }
@@ -2124,7 +2140,7 @@ function fmtDayShort(d){ const dt=new Date(d+'T00:00:00'); return DAYS_S[dt.getD
 function movedGameGhostsOn(d){
   const out=[];
   fbAllIndexed().forEach(([g,idx])=>{
-    const mapped=fussballFilterTeam(g.team,g.squad), away=fbIsAwayIdx(idx);
+    const mapped=fussballFilterTeam(g.team,g.squad), away=g.swapFrom?g.swapFrom==='away':fbIsAwayIdx(idx); // alter Termin: alte Seite
     const base={opponent:g.opponent, team:mapped.team, squad:mapped.squad, pitch:null, halle:null, res:[], kind:'moved', isAway:away,
       title:away?'Auswärtsspiel: '+teamLabel(mapped.team,mapped.squad)+' bei '+g.opponent:'Heimspiel: '+teamLabel(mapped.team,mapped.squad)+' – '+g.opponent,
       isMovedGhost:true, toD:g.d, toT:g.t, pending:!!g.movePending, diverged:!!g.moveDiverged, plannedTo:g.plannedTo||null, fbIndex:idx};
@@ -7540,6 +7556,28 @@ function canMarkGameMove(e){
   const m=fussballFilterTeam(g.team,g.squad);
   return !!session.isAdmin||canBookTeam(m.team,m.squad);
 }
+/* Heimrecht getauscht (ab 10.10.2026 · 2, Backlog 106): Anlass E3 gegen Rumbeck III – DFBnet hat das Heimspiel
+   als Auswärtsspiel neu angesetzt. moveOrigAway = Seite laut fussball.de (vor dem Tausch), moveEffAway = Seite am neuen Termin. */
+function moveOrigAway(idx){ const g=fbGame(idx); return g&&g.swapPending?g.swapFrom==='away':fbIsAwayIdx(idx); }
+function moveEffAway(){ const sw=document.getElementById('mv-swap'); return moveOrigAway(moveGameIdx)!==!!(sw&&sw.checked); }
+// Spielort des Gegners aus einem anderen Spiel bei ihm (z. B. Rückspiel) – Vorschlag fürs Feld „Spielort“
+function opponentVenueGuess(g){
+  const x=(FUSSBALLDE_RAW.awayGames||[]).find(a=>a.venue&&a.link!==g.link&&a.team===g.team&&(a.squad||1)===(g.squad||1)&&a.opponent===g.opponent)
+    ||(FUSSBALLDE_RAW.awayGames||[]).find(a=>a.venue&&a.link!==g.link&&a.opponent===g.opponent);
+  return x?String(x.venue).replace(/\s+,/g,','):'';
+}
+function onMoveSwapChange(){
+  const eff=moveEffAway(), orig=moveOrigAway(moveGameIdx), sw=document.getElementById('mv-swap').checked;
+  document.getElementById('mv-swap-row').classList.toggle('on',sw);
+  const vf=document.getElementById('mv-venue-field');
+  vf.style.display=sw&&eff?'block':'none';
+  const vi=document.getElementById('mv-venue'); if(sw&&eff&&!vi.value) vi.value=opponentVenueGuess(fbGame(moveGameIdx)||{});
+  document.getElementById('mv-hint').textContent=sw
+    ?(eff?'Platzcoach führt das Spiel ab sofort als Auswärtsspiel am neuen Termin – unser Platz ist dafür nicht mehr belegt. Am alten Termin steht „verlegt auf …“. Sobald fussball.de den Tausch übernimmt, gilt er als bestätigt.'
+         :'Platzcoach führt das Spiel ab sofort als Heimspiel am neuen Termin und belegt unseren Platz (Prüfung oben). Sobald fussball.de den Tausch übernimmt, gilt er als bestätigt.')
+    :(orig?'Nur zur Info für die Trainer: Platzcoach zeigt das Spiel ab sofort am neuen Termin, am alten steht „verlegt auf …“. Sobald fussball.de die Verlegung übernimmt, gilt automatisch fussball.de.':MV_HINT_HOME);
+  updateMoveTrainingHint();
+}
 function openMoveModal(fbIndex,preDate,preTime){
   const g=fbGame(fbIndex); if(!g) return;
   if(!session){ showToast('Bitte zuerst anmelden.'); return; }
@@ -7547,7 +7585,7 @@ function openMoveModal(fbIndex,preDate,preTime){
   if(!raw){ showToast('Dieses Spiel hat keinen fussball.de-Link und kann nicht vorgemerkt werden.',5000); return; }
   if(!canMarkGameMove({fbIndex})){ showToast('Verlegungen kann nur ein Trainer der Mannschaft oder ein Admin vormerken.',5000); return; }
   moveGameIdx=fbIndex;
-  const away=fbIsAwayIdx(fbIndex);
+  const away=moveOrigAway(fbIndex);
   document.getElementById('mv-title').textContent=away?'Auswärtsspiel verlegen':'Verlegung vormerken';
   document.getElementById('mv-reason-lbl').textContent=away?'Grund (optional)':'Grund der Verlegung (für den DFBnet-Antrag)';
   document.getElementById('mv-hint').textContent=away
@@ -7568,7 +7606,10 @@ function openMoveModal(fbIndex,preDate,preTime){
   rm.style.display=(m&&(g.movePending||g.moveDiverged))?'block':'none';
   rm.textContent=(m&&g.moveDiverged)?'Vormerkung abschließen':'Vormerkung aufheben';
   document.getElementById('mv-yl').style.display=(m&&g.movePending&&!away)?'block':'none';
-  updateMoveTrainingHint();
+  document.getElementById('mv-swap-lbl').textContent=away?'Heimrecht getauscht – neu als Heimspiel bei uns':'Heimrecht getauscht – neu als Auswärtsspiel bei '+g.opponent;
+  document.getElementById('mv-swap').checked=!!(m&&g.movePending&&m.swap);
+  document.getElementById('mv-venue').value=(m&&g.movePending&&m.venue)||'';
+  onMoveSwapChange();
   document.getElementById('move-modal').classList.add('show');
 }
 /* Häufige Verlegungsgründe als Auswahl statt Tippen (ab 01.10.2026 · 1). Antippen setzt den Grund,
@@ -7578,7 +7619,7 @@ const MOVE_REASONS_AWAY=['Wunsch des Gegners','Platz beim Gegner belegt','Ferien
 function renderMoveReasons(){
   const box=document.getElementById('mv-reasons'); if(!box) return;
   const cur=(document.getElementById('mv-reason').value||'').split(',').map(x=>x.trim());
-  box.innerHTML=(fbIsAwayIdx(moveGameIdx)?MOVE_REASONS_AWAY:MOVE_REASONS).map(r=>'<span class="res-chip'+(cur.includes(r)?' on':'')+'" onclick="'+esc('pickMoveReason(\''+jsArg(r)+'\')')+'">'+esc(r)+'</span>').join('');
+  box.innerHTML=(moveOrigAway(moveGameIdx)?MOVE_REASONS_AWAY:MOVE_REASONS).map(r=>'<span class="res-chip'+(cur.includes(r)?' on':'')+'" onclick="'+esc('pickMoveReason(\''+jsArg(r)+'\')')+'">'+esc(r)+'</span>').join('');
 }
 function pickMoveReason(r){
   const ta=document.getElementById('mv-reason');
@@ -7613,7 +7654,7 @@ function updateMoveTrainingHint(){
   const date=document.getElementById('mv-date').value, time=document.getElementById('mv-time').value;
   let h='';
   // Platz am neuen Termin prüfen (nur Hinweis, Speichern bleibt möglich – oft lässt sich mit den anderen Mannschaften tauschen).
-  if(g&&date&&time&&!fbIsAwayIdx(moveGameIdx)){ // Auswärts: kein eigener Platz, keine Prüfung
+  if(g&&date&&time&&!moveEffAway()){ // Auswärts (auch nach Heimrechttausch): kein eigener Platz, keine Prüfung
     const c=pitchCheckForGame(g,date,time);
     h+=c.ok
       ?'<div class="mv-check ok">Platz frei am '+fmtDayShort(date)+', '+c.from+'–'+c.to+(c.part?' (Hälfte '+c.part+')':' (ganzer Platz)')+'.</div>'
@@ -7637,15 +7678,18 @@ async function saveGameMove(){
   const toD=document.getElementById('mv-date').value, toT=document.getElementById('mv-time').value;
   if(!toD||!toT){ showToast('Bitte Datum und Anstoß angeben.'); return; }
   if(toD<todayStr){ showToast('Das Datum liegt in der Vergangenheit.'); return; }
-  if(toD===raw.d&&toT===(raw.t||'')){ showToast('Das ist der aktuelle Termin bei fussball.de.'); return; }
+  const swap=!!document.getElementById('mv-swap').checked, effAway=moveEffAway();
+  if(toD===raw.d&&toT===(raw.t||'')&&!swap){ showToast('Das ist der aktuelle Termin bei fussball.de.'); return; }
   const reason=document.getElementById('mv-reason').value.replace(/\s+/g,' ').trim();
-  const away=fbIsAwayIdx(moveGameIdx);
+  const away=moveOrigAway(moveGameIdx);
+  const venue=swap&&effAway?document.getElementById('mv-venue').value.replace(/\s+/g,' ').trim():'';
   if(!away&&reason.length<3){ showToast('Bitte einen Grund für die Verlegung angeben – der DFBnet-Antrag braucht ihn.',5000); document.getElementById('mv-reason').focus(); return; }
   const mapped=fussballFilterTeam(raw.team,raw.squad), label=teamLabel(mapped.team,mapped.squad), vs=away?' bei ':' – ';
   const slotIds=[...document.querySelectorAll('#mv-training .mv-cancel')].filter(c=>c.checked).map(c=>c.dataset.slot);
   const old=moveOfGame(raw);
   const backupM=JSON.stringify(MOVES), backupT=JSON.stringify(TRAINING);
   const rec={id:old?old.id:crypto.randomUUID(), link:raw.link, team:raw.team, squad:raw.squad||1, opponent:raw.opponent, ...(away?{away:true}:{}),
+    ...(swap?{swap:true}:{}), ...(venue?{venue}:{}),
     fromD:raw.d, fromT:raw.t||'', toD, toT, reason, byId:session.id, byName:session.name, at:new Date().toISOString(),
     cancelledTraining:[...((old&&old.cancelledTraining)||[]), ...slotIds.map(id=>({slotId:id,date:toD}))]};
   MOVES=MOVES.filter(x=>x.link!==raw.link).concat([rec]);
@@ -7655,10 +7699,12 @@ async function saveGameMove(){
   try{
     // Eine Mail für alles: die Trainingsabsage steht im Text der Verlegung, der Trainings-Commit ist "(automatisch)".
     await saveStore('moves',(old?'Spielverlegung geändert: ':'Spielverlegung vorgemerkt: ')+label+vs+raw.opponent+(away?' (Auswärtsspiel)':'')
-      +(toD===raw.d?', Anstoßzeit am '+fmtShort(toD)+' von '+(raw.t||'?')+' auf '+toT+' Uhr':' von '+fmtShort(raw.d)+(raw.t?' '+raw.t:'')+' auf '+fmtShort(toD)+' '+toT+' Uhr')
+      +(toD===raw.d&&toT===(raw.t||'')?' am '+fmtShort(toD)+' '+toT+' Uhr'
+        :toD===raw.d?', Anstoßzeit am '+fmtShort(toD)+' von '+(raw.t||'?')+' auf '+toT+' Uhr':' von '+fmtShort(raw.d)+(raw.t?' '+raw.t:'')+' auf '+fmtShort(toD)+' '+toT+' Uhr')
+      +(swap?(effAway?', Heimrecht getauscht: jetzt Auswärtsspiel bei '+raw.opponent+(venue?' ('+venue+')':'')+', unser Platz ist frei':', Heimrecht getauscht: jetzt Heimspiel bei uns'):'')
       +(slotIds.length?', Training am '+fmtShort(toD)+' abgesagt':'')+'.'+(reason?' Grund: '+reason:'')+' – '+session.name+teamTrailer(mapped.team,mapped.squad)+'\nPlatzcoach-Link: '+fbDeepLinkId(raw));
     if(slotIds.length) await saveTraining('Training abgesagt: '+label+' am '+fmtShort(toD)+' wegen Spielverlegung (automatisch) – '+session.name+teamTrailer(mapped.team,mapped.squad));
-    showToast('Verlegung auf '+fmtShort(toD)+', '+toT+' Uhr vorgemerkt'+(slotIds.length?', Training abgesagt.':'.')+(away?' Die Trainer bekommen eine Info.':''),4500);
+    showToast('Verlegung auf '+fmtShort(toD)+', '+toT+' Uhr vorgemerkt'+(swap?(effAway?' (jetzt auswärts)':' (jetzt Heimspiel)'):'')+(slotIds.length?', Training abgesagt.':'.')+(away?' Die Trainer bekommen eine Info.':''),4500);
     if(!away) openYouthLeaderModal(rec,true);
   }catch(e){
     MOVES=JSON.parse(backupM); TRAINING=JSON.parse(backupT); applyGameMoves(); render(); renderStart(); renderTraining();
@@ -7669,8 +7715,9 @@ async function saveGameMove(){
    (fussball.de-Spiel + Vormerkung). */
 let ylText='';
 function youthLeaderMessage(m){
-  const raw=(FUSSBALLDE_RAW.games||[]).find(x=>x.link===m.link)||{};
+  const raw=(FUSSBALLDE_RAW.games||[]).find(x=>x.link===m.link)||(FUSSBALLDE_RAW.awayGames||[]).find(x=>x.link===m.link)||{};
   const team=raw.team||m.team, squad=raw.squad||m.squad||1;
+  const swapAway=!!m.swap&&!m.away; // Heimrecht getauscht: wir sind am neuen Termin Gast
   const mapped=fussballFilterTeam(team,squad);
   const fromD=raw.movedFrom&&raw.d!==m.fromD?raw.movedFrom.d:m.fromD; // falls fussball.de schon geändert hat
   const fromT=raw.movedFrom&&raw.d!==m.fromD?raw.movedFrom.t:m.fromT;
@@ -7684,16 +7731,22 @@ function youthLeaderMessage(m){
     +(raw.gameNo?'Spielnummer: '+raw.gameNo+(raw.matchday?' · '+raw.matchday+'. Spieltag':'')+'\n':'')
     +team+(raw.competition?' · '+raw.competition:'')+'\n'
     +(raw.staffelName||raw.staffelId?'Staffel: '+[raw.staffelName,raw.staffelId?'ID '+raw.staffelId:''].filter(Boolean).join(' · ')+'\n':'')
-    +'Heim: '+fussballOwnTeamName({...raw,squad})+' ('+teamLabel(mapped.team,mapped.squad)+')\n'
-    +'Gast: '+(raw.opponent||m.opponent)+'\n\n'
-    +'❌ *Bisher:* '+fmtShare(fromD)+(fromT?', '+fromT+' Uhr':'')+'\n\n'
+    +(swapAway
+      ?'Bisher Heim: '+fussballOwnTeamName({...raw,squad})+' ('+teamLabel(mapped.team,mapped.squad)+')\n'+'Bisher Gast: '+(raw.opponent||m.opponent)+'\n'
+        +'🔁 *Heimrecht tauschen:* neu Heim '+(raw.opponent||m.opponent)+', Gast '+fussballOwnTeamName({...raw,squad})+'\n\n'
+      :'Heim: '+fussballOwnTeamName({...raw,squad})+' ('+teamLabel(mapped.team,mapped.squad)+')\n'+'Gast: '+(raw.opponent||m.opponent)+'\n\n')
+    +'❌ *Bisher:* '+fmtShare(fromD)+(fromT?', '+fromT+' Uhr':'')+(swapAway?' (Heimspiel bei uns)':'')+'\n\n'
     +'✅ *Neu*\n'
-    +(m.toD===fromD
+    +(m.toD===fromD&&m.toT===fromT
+      ?'Spieldatum: unverändert ('+fmtShare(m.toD)+')\n'+'Anstoßzeit: unverändert ('+m.toT+' Uhr)\n'
+      :m.toD===fromD
       ?'Spieldatum: unverändert ('+fmtShare(m.toD)+')\n'+'Anstoßzeit: '+m.toT+' Uhr (statt '+(fromT||'?')+' Uhr)\n'
       :'Spieldatum: '+fmtShare(m.toD)+'\n'+'Anstoßzeit: '+m.toT+' Uhr\n')
-    +'Spielstätte: unverändert'+(raw.venue?' – '+raw.venue:'')+'\n'
+    +(swapAway
+      ?'Spielstätte: '+(m.venue||'beim Gegner – bitte ergänzen')+'\n'
+      :'Spielstätte: unverändert'+(raw.venue?' – '+raw.venue:'')+'\n')
     +'Begründung: '+(m.reason||'bitte ergänzen')+'\n\n'
-    +'Der Platz ist am neuen Termin frei und in Platzcoach vorgemerkt.\n'
+    +(swapAway?'Das Spiel ist in Platzcoach als Auswärtsspiel vorgemerkt, unser Platz wird dafür nicht gebraucht.\n':'Der Platz ist am neuen Termin frei und in Platzcoach vorgemerkt.\n')
     +(m.link?'\nSpiel bei fussball.de: '+m.link+'\n':'')
     +(m.link?'In Platzcoach: '+fbDeepLinkUrl(m)+'\n':'')
     +'\nDanke!'+(first?'\n'+first:'');
@@ -7845,7 +7898,7 @@ async function removeGameMove(){
   const react=document.getElementById('mv-reactivate');
   const diverged=!!g.moveDiverged, curD=g.d, curT=g.t;
   const ct=(react&&react.checked)?(m.cancelledTraining||[]).filter(c=>!(diverged&&c.date===curD)):[];
-  const mapped=fussballFilterTeam(m.team,m.squad), away=fbIsAwayIdx(moveGameIdx), label=teamLabel(mapped.team,mapped.squad);
+  const mapped=fussballFilterTeam(m.team,m.squad), away=!!m.away, label=teamLabel(mapped.team,mapped.squad);
   const opp=m.opponent+(away?' (Auswärtsspiel)':'');
   const backupM=JSON.stringify(MOVES), backupT=JSON.stringify(TRAINING);
   MOVES=MOVES.filter(x=>x.id!==m.id);
