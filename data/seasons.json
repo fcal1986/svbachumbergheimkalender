@@ -32,7 +32,8 @@
         "a0878d3e-94bf-4d9f-9687-ca0bd7133ae7",
         "f70b025a-fb4e-4573-b0fc-2d2f4c354b98",
         "2f2f62e8-9030-48aa-80c3-a4d9b65938ee",
-        "58d96de0-05f7-47cd-9330-1832ab2c12b2"
+        "58d96de0-05f7-47cd-9330-1832ab2c12b2",
+        "4263cd5a-6ebb-40e1-a7fc-f1f857db7fb6"
       ],
       "trainerClasses": {
         "935d13de-b21e-43c5-a35f-405bfaf4cc6c": {
@@ -149,6 +150,9 @@
           "E-Jugend": [
             1
           ]
+        },
+        "4263cd5a-6ebb-40e1-a7fc-f1f857db7fb6": {
+          "Ü32 / Ü50": []
         }
       },
       "trainerNames": [
@@ -177,7 +181,8 @@
         "Robin Lienig",
         "Fabian Honisch",
         "Daniel Thibaut",
-        "Viktor Kurz"
+        "Viktor Kurz",
+        "Marco Dohle"
       ],
       "teams": [
         {
