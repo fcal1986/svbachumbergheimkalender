@@ -179,8 +179,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "4263cd5a-6ebb-40e1-a7fc-f1f857db7fb6"
+      ],
+      "trainerNames": [
+        "Marco Dohle"
+      ],
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
       "validUntil": "2027-06-30"
@@ -746,8 +750,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "4263cd5a-6ebb-40e1-a7fc-f1f857db7fb6"
+      ],
+      "trainerNames": [
+        "Marco Dohle"
+      ],
       "validFrom": "2026-09-09",
       "validUntil": "2027-06-30",
       "cancelled": [
