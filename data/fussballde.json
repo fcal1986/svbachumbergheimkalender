@@ -1,57 +1,6 @@
 {
-  "updated": "2026-10-10T23:32:12.225Z",
+  "updated": "2026-10-11T05:43:38.953Z",
   "games": [
-    {
-      "d": "2026-09-19",
-      "t": "10:00",
-      "team": "E-Junioren",
-      "squad": 2,
-      "ownName": "SV Bachum/Bergheim II",
-      "gameNo": "210931005",
-      "opponent": "SV Hüsten 09 II",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-sv-huesten-09-2/-/spiel/031J8LLJVC000000VS5489BUVVKNMR0J",
-      "matchday": 2,
-      "staffelId": "210931",
-      "staffelName": "KL B Gruppe 1",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:09.021Z"
-    },
-    {
-      "d": "2026-09-19",
-      "t": "11:30",
-      "team": "D-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum-Bergh. I",
-      "gameNo": "211396004",
-      "opponent": "JSG Balve/Garb./La/Kü/Me I",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-balve-garb-la-kue-me-1/-/spiel/031OEC8PJ8000000VS5489BUVT2M8LCU",
-      "matchday": 2,
-      "staffelId": "211396",
-      "staffelName": "KL A Meisterrunde",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:09.909Z"
-    },
-    {
-      "d": "2026-09-19",
-      "t": "13:00",
-      "team": "D-Junioren",
-      "squad": 2,
-      "ownName": "SV Bachum-Bergheim II",
-      "gameNo": "210420005",
-      "opponent": "JSG Hachen/Langsch.-Enkh. I",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-hachen-langscheid-enkhausen/-/spiel/031OEI7QG8000000VS5489BUVT2M8LCU",
-      "matchday": 2,
-      "staffelId": "210420",
-      "staffelName": "KL B Gruppe 2",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:10.791Z"
-    },
     {
       "d": "2026-09-20",
       "t": "11:00",
@@ -2021,62 +1970,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-09-19",
-      "t": "10:00",
-      "team": "G-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "opponent": "SC Neheim",
-      "competition": "Kinderfußball",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sc-neheim-sv-bachum-bergheim/-/spiel/031IKDRR58000000VS5489BUVVKNMR0J",
-      "movedFrom": {
-        "d": "2026-09-17",
-        "t": "17:00"
-      },
-      "movedAt": "2026-10-09T00:21:53.021Z",
-      "gameNo": "211715006",
-      "matchday": 2,
-      "staffelId": "211715",
-      "staffelName": "KiFu G Junioren Herbstrunde GR.1",
-      "venue": "Kunstrasenplatz, Binnerfeldstadion Neheim, Binnerfeld 51, 59755 Arnsberg",
-      "infoAt": "2026-10-09T09:06:37.562Z"
-    },
-    {
-      "d": "2026-09-19",
-      "t": "10:00",
-      "team": "F-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim I",
-      "opponent": "SV Hüsten 09 I",
-      "competition": "Kinderfußball",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-huesten-09-1-sv-bachum-bergheim-1/-/spiel/031J6SGOCS000000VS5489BUVVKNMR0J",
-      "gameNo": "211754006",
-      "matchday": 2,
-      "staffelId": "211754",
-      "staffelName": "Herbstrunde Gruppe 2",
-      "venue": "Kunstrasenplatz, Nebenplatz Stadion Kunstrasen Hüsten, Am Solepark 11, 59759 Arnsberg",
-      "infoAt": "2026-10-09T09:06:38.349Z"
-    },
-    {
-      "d": "2026-09-19",
-      "t": "12:30",
-      "team": "C-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum-Bergh. I",
-      "opponent": "JSG Freienohl/Oev./Wen. I",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/jsg-freienohl-oeventrop-wennemen-sv-bachum-bergheim/-/spiel/031I1BDP1K000000VS5489BUVVKNMR0J",
-      "gameNo": "210825010",
-      "matchday": 2,
-      "staffelId": "210825",
-      "staffelName": "KL A",
-      "venue": "Kunstrasenplatz, Küppelkampfbahn Meschede-Freienohl (Kunstrasen), Im Ohl, 59872 Meschede",
-      "infoAt": "2026-10-09T09:06:39.066Z"
-    },
     {
       "d": "2026-09-21",
       "t": "18:30",
@@ -4134,9 +4027,9 @@
         "Kreispokal",
         "Kreisfreundschaftsspiele"
       ],
-      "games": 18,
+      "games": 17,
       "homeGames": 8,
-      "first": "2026-09-19",
+      "first": "2026-09-26",
       "last": "2027-06-05",
       "teamId": "011MIB6N6S000000VTVG0001VTR8C1K7"
     },
@@ -4177,9 +4070,9 @@
         "Vereinsturnier",
         "Kreispokal"
       ],
-      "games": 26,
-      "homeGames": 12,
-      "first": "2026-09-19",
+      "games": 25,
+      "homeGames": 11,
+      "first": "2026-09-26",
       "last": "2027-06-05",
       "teamId": "011MI9U4VO000000VTVG0001VTR8C1K7"
     },
@@ -4187,19 +4080,19 @@
       "type": "D-Junioren",
       "squad": 2,
       "names": [
-        "SV Bachum-Bergheim II",
-        "SV Bachum-Bergheim 2"
+        "SV Bachum-Bergheim 2",
+        "SV Bachum-Bergheim II"
       ],
       "teamIds": [
         "02PU7K56SO000000VS5489B2VSE05932"
       ],
       "competitions": [
-        "Kreisliga B",
-        "Kreisfreundschaftsspiele"
+        "Kreisfreundschaftsspiele",
+        "Kreisliga B"
       ],
-      "games": 14,
-      "homeGames": 7,
-      "first": "2026-09-19",
+      "games": 13,
+      "homeGames": 6,
+      "first": "2026-09-26",
       "last": "2027-06-05",
       "teamId": "02PU7K56SO000000VS5489B2VSE05932"
     },
@@ -4237,9 +4130,9 @@
         "Kreisliga B",
         "Kreisfreundschaftsspiele"
       ],
-      "games": 14,
-      "homeGames": 7,
-      "first": "2026-09-19",
+      "games": 13,
+      "homeGames": 6,
+      "first": "2026-09-26",
       "last": "2027-06-12",
       "teamId": "027IVP92OK000000VS5489B1VUA37ON8"
     },
@@ -4273,9 +4166,9 @@
       "competitions": [
         "Kinderfußball"
       ],
-      "games": 6,
+      "games": 5,
       "homeGames": 3,
-      "first": "2026-09-19",
+      "first": "2026-09-26",
       "last": "2026-11-21",
       "teamId": "011MIAKB1G000000VTVG0001VTR8C1K7"
     },
@@ -4291,9 +4184,9 @@
       "competitions": [
         "Kinderfußball"
       ],
-      "games": 3,
+      "games": 2,
       "homeGames": 2,
-      "first": "2026-09-19",
+      "first": "2026-09-26",
       "last": "2026-10-10",
       "teamId": "023VO81ADC000000VS548985VVRPGK5E"
     },
@@ -4372,6 +4265,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-09-19",
+  "teamsFrom": "2026-09-20",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
