@@ -571,6 +571,26 @@
       "emailNotificationsEnabled": true,
       "phone": "015147775747",
       "contactPublic": "phone"
+    },
+    {
+      "id": "4263cd5a-6ebb-40e1-a7fc-f1f857db7fb6",
+      "first": "Marco",
+      "last": "Dohle",
+      "email": "mdohle@freenet.de",
+      "admin": false,
+      "classes": {
+        "Ü32 / Ü50": []
+      },
+      "enc": {
+        "salt": "WcTIIco9VYyEigvts4oEOg==",
+        "iv": "PcVrdEhTfvK5S9dF",
+        "cipher": "rbNM9n3NEnTBS/q3+CR65p+k8pGABQ1MmfXviaIZ+RAK7W9O5hk7cke74J86cyVsyL4me0MnsHd2QN0Qk9Qs4dN5yznE+oy597rvZmS3a+KyFt+/T2EVF8uiD4Z4F3uFzSeFNXDBrnx0bKsEtw=="
+      },
+      "created": "2026-10-11T18:51:04.510Z",
+      "emailNotificationsEnabled": true,
+      "pwChangeRequired": true,
+      "phone": "+491711263121",
+      "contactPublic": "none"
     }
   ]
 }
