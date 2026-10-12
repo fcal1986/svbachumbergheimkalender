@@ -50,6 +50,32 @@ jobs:
             git push
           fi
 
+      # Noch nicht abgestimmte Freundschaftsspiele/Turniere (ab 12.10.2026 · 1): Erinnerung 2 Tage vor Fristende,
+      # danach entfernen. Erst speichern, dann benachrichtigen (scripts/tentative-expiry.mjs).
+      - name: Unbestätigte Spiele prüfen
+        run: |
+          git config user.name "platzcoach-bot"
+          git config user.email "actions@users.noreply.github.com"
+          node scripts/tentative-expiry.mjs
+          if git diff --quiet -- data/events.json data/training.json; then
+            echo "Keine unbestätigten Termine zu ändern."
+          else
+            git add data/events.json data/training.json
+            git commit -m "Unbestätigte Termine geprüft (automatisch)"
+            git pull --rebase
+            git push
+          fi
+
+      - name: Über unbestätigte Spiele informieren
+        if: hashFiles('tentative-mails.json') != ''
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+        run: node scripts/tentative-expiry.mjs --send
+
       # Verlegungen, Abweichungen von Vormerkungen, neue und entfallene Spiele per Mail an die
       # betroffenen Trainer (und Admins). Die Datei schreibt scripts/fussballde-sync.mjs nur bei Änderungen.
       - name: Trainer über Änderungen bei fussball.de informieren

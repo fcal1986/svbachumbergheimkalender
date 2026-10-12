@@ -86,7 +86,8 @@ const CATEGORIES = {
                 'Spielverlegung vorgemerkt:', 'Spielverlegung geändert:', 'Spielverlegung aufgehoben:',
                 'Spielverlegung abgeschlossen:',
                 'Freundschaftsspiel angelegt:', 'Freundschaftsspiel geändert:', 'Freundschaftsspiel gelöscht:',
-                'Turnier angelegt:', 'Turnier geändert:', 'Turnier gelöscht:'],
+                'Turnier angelegt:', 'Turnier geändert:', 'Turnier gelöscht:',
+                'Freundschaftsspiel bestätigt:', 'Turnier bestätigt:'],
   training:    ['Trainingszeit angelegt:', 'Trainingszeit geändert:', 'Trainingszeit gelöscht:',
                 'Training abgesagt:', 'Absage zurückgenommen:', 'Training verlegt:', 'Torwarttraining-Anmeldung geändert:'],
   sperren:     ['Sperre angelegt:', 'Sperre aufgehoben:'],
@@ -146,7 +147,8 @@ function isFromPlatzcoach(msg) {
 // (Bestätigung + Info für den Mit-Trainer). Sonst gilt: keine Mail über eigene Änderungen.
 // Freundschaftsspiele/Turniere ebenso: der Organisator bekommt die Mail als Bestätigung mit Link.
 const NOTIFY_AUTHOR_TOO = ['Spielverlegung vorgemerkt:', 'Spielverlegung geändert:', 'Spielverlegung aufgehoben:', 'Spielverlegung abgeschlossen:',
-  'Freundschaftsspiel angelegt:', 'Freundschaftsspiel geändert:', 'Freundschaftsspiel gelöscht:', 'Turnier angelegt:', 'Turnier geändert:', 'Turnier gelöscht:'];
+  'Freundschaftsspiel angelegt:', 'Freundschaftsspiel geändert:', 'Freundschaftsspiel gelöscht:', 'Turnier angelegt:', 'Turnier geändert:', 'Turnier gelöscht:',
+  'Freundschaftsspiel bestätigt:', 'Turnier bestätigt:'];
 function notifyAuthorToo(c) { return NOTIFY_AUTHOR_TOO.some(p => c.text.startsWith(p)); }
 // Automatische Bot-Läufe und Aufräumarbeiten der App gehen nie per Mail raus.
 function isNoisyCommit(text) {
