@@ -455,6 +455,11 @@
   .event-card.match-planned .ev-head{background:var(--kbFFF7ED);}
   .event-card.external-card.match-planned{border:1.5px dashed #F59E0B;}
   .wk-row.wk-planned{background:var(--kbFFF7ED);border:1.5px dashed #F59E0B;}
+  .tent-check{display:flex;align-items:center;gap:9px;margin:4px 0 2px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;}
+  .tent-check input{width:18px;height:18px;flex:none;accent-color:var(--green);}
+  .tent-box{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+  .tent-ok{border:1.5px solid var(--green);background:var(--white);color:var(--grass);border-radius:999px;padding:4px 12px;font:inherit;font-size:12.5px;font-weight:800;cursor:pointer;}
+  .tent-note{flex-basis:100%;font-size:11.5px;color:var(--ink-soft);}
   .plan-tag{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--kt9A3412);background:var(--kbFFEDD5);border-radius:6px;padding:2px 7px;margin-bottom:3px;}
   .wk-row .pt-time.two{line-height:1.25;font-size:11px;min-width:52px;}
   .wk-row .pt-time.two b{display:block;font-size:12px;}
@@ -1426,6 +1431,8 @@
         <div class="field required" id="f-opp-field"><label><span class="req-dot"></span>Gegner</label><input type="text" id="f-opponent" autocomplete="off" oninput="formDirty=true;autoMatchTitle()" placeholder="z. B. SV Hüsten 09 II"></div>
         <div class="field" id="f-part-field"><label>Teilnehmer (optional)</label><input type="text" id="f-participants" autocomplete="off" oninput="formDirty=true" placeholder="z. B. SC Neheim, TuS Oeventrop"></div>
         <div class="field" id="f-addr-field"><label id="f-addr-label">Adresse (Spielort)</label><input type="text" id="f-address" autocomplete="off" oninput="formDirty=true" placeholder="Straße, Ort"></div>
+        <label class="tent-check" id="f-tent-field"><input type="checkbox" id="f-tentative" onchange="formDirty=true;updateTentHelp()"><span>Noch nicht abgestimmt – Platz nur vorläufig reservieren</span></label>
+        <p class="helptext" id="f-tent-help" style="display:none;"></p>
         <p class="helptext" id="f-match-help"></p>
       </div>
 
@@ -1754,7 +1761,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='10.10.2026 · 2';
+const APP_VERSION='12.10.2026 · 1';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3669,7 +3676,7 @@ function rowHTML(e){
     +'<div class="ev-head">'
     +'<div class="ev-date-box"><span class="ev-dow">'+dow+'</span><span class="ev-day">'+dd+'</span></div>'
     +'<div class="ev-sep"></div>'
-    +'<div class="ev-title-box">'+(planned?'<div class="plan-tag">Vorgemerkt</div>':'')+'<h4>'+esc(title)+'</h4>'+(sub?'<div class="ev-sub">'+sub+'</div>':'')+'</div>'
+    +'<div class="ev-title-box">'+(isTentative(e)?'<div class="plan-tag">Vorläufig</div>':planned?'<div class="plan-tag">Vorgemerkt</div>':'')+'<h4>'+esc(title)+'</h4>'+(sub?'<div class="ev-sub">'+sub+'</div>':'')+'</div>'
     +'<div class="row-acts">'+acts+'</div>'
     +'</div>'
     +'<div class="ev-body">'
@@ -5456,7 +5463,7 @@ function weekRowParts(e){
     tag=me==='yes'?'Zugesagt':(me==='no'?'Abgesagt':'');
   }else if(!e.isTraining&&kindOf(e)==='game'&&e.ha&&e.opponent){
     name=(e.ha==='away'?'bei ':'gegen ')+e.opponent;
-    sub=(isMatchPlanned(e)?'Vorgemerkt · noch nicht bei fussball.de':'Freundschaftsspiel')+(e.kickoff?' · Anstoß '+e.kickoff:'');
+    sub=(isTentative(e)?'Vorläufig · nicht abgestimmt':isMatchPlanned(e)?'Vorgemerkt · noch nicht bei fussball.de':'Freundschaftsspiel')+(e.kickoff?' · Anstoß '+e.kickoff:'');
     tag=e.ha==='away'?'Auswärts':'Heim';
   }else{
     name=e.isTraining?'Training':(e.title||'Termin'); sub=e.isTraining?'':typeLabelOf(e);
@@ -5636,6 +5643,10 @@ function myTodos(isMine,hasTeams){
       out.push({click:'inviteTrainersQuick()',txt:'Noch ohne Trainer in Platzcoach: '+miss.join(', ')+'.',act:'Per WhatsApp einladen',noDigest:true,
         fix:{label:'Nicht jetzt',click:'hideInviteHint(\''+jsArg(key)+'\')'}});
   }
+  EVENTS.filter(e=>isTentative(e)&&e.d>=todayStr&&canEdit(e)&&(!hasTeams||isMine(e))).forEach(e=>{
+    out.push({click:'confirmTentative(\''+jsArg(e.id)+'\')',txt:'Vorläufig: '+tentLabel(e)+' ('+tentDay(e.d)+') – noch nicht abgestimmt, wird am '+tentDay(e.tentative.until)+' gelöscht.',act:'Abgestimmt',
+      fix:{label:'Ansehen',click:'openTerminFromStart(\''+jsArg(e.id)+'\',\''+e.d+'\')'}});
+  });
   const tsOpen=teamSyncOpenCount();
   if(tsOpen) out.push({click:'openTeamSync()',txt:'Mannschaften: '+tsOpen+(tsOpen===1?' Abweichung':' Abweichungen')+' zwischen Platzcoach und fussball.de.',act:'Prüfen'});
   const end=weekEndStr();
@@ -6382,7 +6393,7 @@ function applyMatchForm(byUser){
   const show=(id,on)=>{ const el=document.getElementById(id); if(el) el.style.display=on?'':'none'; };
   show('f-match-fields',match||tt); show('f-ha-field',match);
   show('f-opp-field',k==='game'); show('f-kick-field',k==='game');
-  show('f-part-field',match&&k!=='game'); show('f-addr-field',away||tt);
+  show('f-part-field',match&&k!=='game'); show('f-addr-field',away||tt); show('f-tent-field',match);
   const al=document.getElementById('f-addr-label'); if(al) al.textContent=tt?'Ort (Adresse)':'Adresse (Spielort)';
   show('f-times',k!=='game'); // Freundschaftsspiel: nur Anstoß – Von/Bis rechnet die App (kickInfo)
   show('f-res-label',!away&&!tt); show('f-res-field',!away&&!tt);
@@ -6396,6 +6407,8 @@ function applyMatchForm(byUser){
     else if(!editingId||!document.querySelector('#f-res .res-chip.on')) setResChips('f-res',[k==='hallenturnier'?'Halle':'Großspielfeld']);
     if(k==='game') onKickoffChange(false);
   }
+  if(help) help.dataset.base=help.textContent;
+  updateTentHelp();
   autoMatchTitle();
 }
 function autoMatchTitle(){
@@ -6469,13 +6482,58 @@ function updateKickInfo(){
   } else el.style.color='';
   el.textContent=txt+'.';
 }
+/* ---------- Vorläufige Spiele/Turniere (ab 12.10.2026 · 1) ----------
+   „Noch nicht abgestimmt“: der Platz ist nur vorläufig reserviert, der Jugendleiter setzt noch nichts im DFBnet an.
+   Reserviert bis min(Anlage + 14 Tage, Spieltag − 3 Tage). Zwei Tage vorher kommt eine Löschankündigung
+   (scripts/tentative-expiry.mjs, täglich), am Stichtag wird der Termin gelöscht – außer jemand tippt „Abgestimmt“. */
+const TENT_HOLD_DAYS=14, TENT_BEFORE_GAME=3, TENT_WARN_DAYS=2;
+function tentUntil(since,d){ const a=addDays(since,TENT_HOLD_DAYS), b=addDays(d,-TENT_BEFORE_GAME); return a<b?a:b; }
+function tentDay(ds){ const w=DAYS_S[new Date(ds+'T00:00:00').getDay()]; return w.charAt(0)+w.slice(1).toLowerCase()+' '+fmtShort(ds).slice(0,6); }
+function isTentative(e){ return !!(e&&e.tentative&&!e.isExternal); }
+function tentFormValue(d){
+  const cb=document.getElementById('f-tentative'); if(!cb||!cb.checked||!isMatchKind(formKind())) return undefined;
+  const prev=editingId?(EVENTS.find(x=>x.id===editingId)||{}).tentative:null;
+  const since=prev&&prev.since||todayStr;
+  return {since, until:tentUntil(since,d)};
+}
+function updateTentHelp(){
+  const cb=document.getElementById('f-tentative'), h=document.getElementById('f-tent-help'); if(!cb||!h) return;
+  const d=dateInput().value, mh=document.getElementById('f-match-help');
+  if(mh&&mh.dataset.base!=null) mh.textContent=cb.checked&&formHA!=='away'&&isMatchKind(formKind())
+    ?'Heim: der Platz wird vorläufig reserviert. Den Text für den Jugendleiter (DFBnet) bekommst du, sobald du an der Karte „Abgestimmt“ tippst.':mh.dataset.base;
+  if(!cb.checked||!d){ h.style.display='none'; return; }
+  const t=tentFormValue(d), ok=t&&t.until>todayStr;
+  h.style.display='';
+  h.textContent=ok?'Reserviert bis '+tentDay(addDays(t.until,-1))+' – tippe vorher „Abgestimmt“, sonst wird der Termin am '+tentDay(t.until)+' automatisch gelöscht (Ankündigung 2 Tage vorher). Der Jugendleiter setzt so lange nichts im DFBnet an.'
+    :'Zu kurzfristig für eine vorläufige Reservierung (spätestens '+TENT_BEFORE_GAME+' Tage vor dem Termin) – bitte direkt abstimmen und ohne Haken speichern.';
+  h.style.color=ok?'':'var(--kt9A3412)';
+}
+function tentLabel(e){ return kindOf(e)==='game'?teamLabel(e.team,e.squad)+(e.ha==='away'?' bei ':' gegen ')+(e.opponent||''):kindLabel(kindOf(e))+' '+teamLabel(e.team,e.squad); }
+function confirmTentative(id){
+  const e=EVENTS.find(x=>x.id===id); if(!e||!e.tentative) return;
+  if(!canEdit(e)){ showToast('Nur Trainer der Mannschaft oder Admins.',4000); return; }
+  const backup=JSON.stringify(EVENTS), prev=e.tentative;
+  delete e.tentative; render(); renderStart();
+  showToast('Abgestimmt – der Termin ist jetzt fest.');
+  saveEvents(matchLogMsg(e,'abgestimmt'))
+    .then(()=>{ if(e.ha!=='away') setTimeout(()=>openMatchYouthLeader(e.id,'Abgestimmt – jetzt an den Jugendleiter'),300); })
+    .catch(err=>{ EVENTS=JSON.parse(backup); render(); renderStart(); showToast('Fehler: '+err.message,6000); });
+}
+function tentBadgeHTML(e){
+  if(!isTentative(e)) return '';
+  const can=canEdit(e);
+  return '<div class="tent-box"><span class="dfb-badge warn">Vorläufig · noch nicht abgestimmt · reserviert bis '+esc(tentDay(addDays(e.tentative.until,-1)))+'</span>'
+    +(can?'<button type="button" class="tent-ok" onclick="event.stopPropagation();confirmTentative(\''+jsArg(e.id)+'\')">✓ Abgestimmt</button>':'')
+    +'<div class="tent-note">Ohne Bestätigung wird der Termin am '+esc(tentDay(e.tentative.until))+' gelöscht und der Platz freigegeben.</div></div>';
+}
 function readMatchFields(kind){
-  if(kind==='trainer'){ const a=(document.getElementById('f-address').value||'').trim(); return {ha:undefined,opponent:undefined,participants:undefined,address:a||undefined,kickoff:undefined}; }
-  if(!isMatchKind(kind)) return {ha:undefined,opponent:undefined,participants:undefined,address:undefined,kickoff:undefined};
+  if(kind==='trainer'){ const a=(document.getElementById('f-address').value||'').trim(); return {ha:undefined,opponent:undefined,participants:undefined,address:a||undefined,kickoff:undefined,tentative:undefined}; }
+  if(!isMatchKind(kind)) return {ha:undefined,opponent:undefined,participants:undefined,address:undefined,kickoff:undefined,tentative:undefined};
   const v=id=>(document.getElementById(id).value||'').trim();
   const away=formHA==='away';
   return {ha:formHA, opponent:kind==='game'?v('f-opponent'):undefined, participants:kind!=='game'&&v('f-participants')?v('f-participants'):undefined,
-    address:away&&v('f-address')?v('f-address'):undefined, kickoff:kind==='game'&&v('f-kickoff')?v('f-kickoff'):undefined};
+    address:away&&v('f-address')?v('f-address'):undefined, kickoff:kind==='game'&&v('f-kickoff')?v('f-kickoff'):undefined,
+    tentative:tentFormValue(dateInput().value)};
 }
 // Neuer Termin: Terminart aus dem Anlass vorschlagen, solange sie nicht bewusst gewählt wurde.
 function suggestKindFromTitle(){
@@ -6643,6 +6701,7 @@ function resetForm(){
   pitchMode='ganz';pitchPart=null;document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode==='ganz'));
   document.getElementById('f-kind').value='other'; kindTouched=false; renderGkTeamChips('f-gkteams',[]); renderTtForChips([]);
   ['f-opponent','f-participants','f-kickoff','f-address'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('f-tentative').checked=false;
   document.getElementById('f-anlass').dataset.auto=''; setHomeAway('home',false);
   halleThirds=[];onTeamChange();onKindChange(false);renderPitch();renderHalle();hideConflicts();formDirty=false;
   formSkipFussballLink=null; delete document.getElementById('f-team').dataset.prevTeam; FORM_TEAMS_ALL=false; ANLASS_OPEN=false; FORM_TL={ds:null,m:null,edge:null,touched:[]}; openFormNote(false);
@@ -7281,6 +7340,7 @@ function fillForm(e){
   document.getElementById('f-kind').value=kindOf(e); kindTouched=true; renderGkTeamChips('f-gkteams',e.gkTeams||[]); renderTtForChips(ttForList(e));
   document.getElementById('f-opponent').value=e.opponent||''; document.getElementById('f-participants').value=e.participants||'';
   document.getElementById('f-kickoff').value=e.kickoff||''; document.getElementById('f-address').value=e.address||'';
+  document.getElementById('f-tentative').checked=!!e.tentative;
   document.getElementById('f-anlass').dataset.auto=''; setHomeAway(e.ha==='away'?'away':'home',false);
   fillingForm=true;
   try{ onTeamChange();onKindChange(false); } finally{ fillingForm=false; }
@@ -7356,6 +7416,7 @@ function openReviewSheet(o){
     +trRows
     +((()=>{ if(o.kind!=='training'||!own) return ''; const dup=EVENTS.filter(x=>x.d===o.d&&x.id!==editingId&&kindOf(x)==='training'&&x.team===own.team&&(x.squad||1)===(own.squad||1));
         return dup.length?row('Achtung','Am selben Tag gibt es schon: '+dup.map(x=>'Training '+x.t+'–'+eventBis(x)+' ('+(x.ownerName||'–')+')').join(', ')+' – ggf. dort ändern statt neu anlegen.','rule'):''; })())
+    +(o.mf&&o.mf.tentative?row('Status','Vorläufig, noch nicht abgestimmt – reserviert bis '+tentDay(addDays(o.mf.tentative.until,-1))+', danach automatisch gelöscht','rule'):'')
     +row('Mail an',mail)
     +'<div class="fs-acts"><button type="button" class="cancel-btn" onclick="closeSheet()">Weiter bearbeiten</button>'
     +'<button type="button" class="submit-btn" onclick="confirmReviewSave()">'+(edit?'Änderungen speichern':'Jetzt speichern')+'</button></div></div>');
@@ -7392,6 +7453,7 @@ async function submitEvent(){
   if(kind==='game'&&!mf.opponent){showToast('Bitte den Gegner eintragen.');return;}
   if(kind==='game'&&!mf.kickoff){showToast('Bitte die Anstoßzeit eintragen.');return;}
   if(kind==='game'&&(mf.kickoff<von||mf.kickoff>=bis)){showToast('Der Anstoß muss zwischen Von und Bis liegen.');return;}
+  if(mf.tentative&&mf.tentative.until<=todayStr){showToast('Zu kurzfristig für „noch nicht abgestimmt“ – bitte direkt abstimmen und ohne Haken speichern.',5000);return;}
   let res=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res).filter(r=>r!=='Großspielfeld'&&r!=='Halle');
   // Überlagerung (Torwarttraining): keine Platzfläche, nur "auf dem Großspielfeld".
   if(overlay&&pitchOn()) res.unshift('Großspielfeld');
@@ -7785,7 +7847,8 @@ function matchInfoHTML(e){
     st='<span class="dfb-badge open">DFBnet-Anmeldung über den Jugendleiter</span>';
   }
   const yl=(session&&e.ha==='home')?'<button class="ghost-btn" style="margin-top:8px;border-style:solid;" onclick="event.stopPropagation();openMatchYouthLeader(\''+e.id+'\')">💬 Nachricht an den Jugendleiter</button>':'';
-  return '<div class="match-info">'+lines.join('<br>')+(st?'<div style="margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'+st+'</div>':'')+yl+'</div>';
+  if(isTentative(e)) st='';
+  return '<div class="match-info">'+lines.join('<br>')+tentBadgeHTML(e)+(st?'<div style="margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'+st+'</div>':'')+yl+'</div>';
 }
 // Spielstätte: aus den Heimspielen von fussball.de (häufigster Spielort), sonst leer.
 function homeVenue(){
@@ -7851,7 +7914,9 @@ function matchLogMsg(e,action){
   const when=k==='game'&&e.kickoff?day+', Anstoß '+e.kickoff:day+', '+e.t+'–'+eventBis(e);
   const place=away?(e.address?'Spielort: '+e.address:'auswärts')
     :(e.pitch?'Platz '+(e.pitch.mode==='ganz'?'ganz':(e.pitch.mode==='haelfte'?'Hälfte '+e.pitch.part:'Viertel '+e.pitch.part))+' '+e.t+'–'+eventBis(e):(e.halle&&e.halle.thirds&&e.halle.thirds.length?halleShort(e.halle):''));
-  const status=action==='gelöscht'?'':(k==='game'&&!OWN_MATCH_FB[e.id]?(away?'vorgemerkt, noch nicht bei fussball.de':'vorgemerkt, Ansetzung im DFBnet über den Jugendleiter'):'');
+  const status=action==='gelöscht'?'':action==='abgestimmt'?(away?'jetzt fest abgestimmt':'jetzt fest abgestimmt – bitte im DFBnet '+(k==='game'?'ansetzen':'anmelden'))
+    :e.tentative?'VORLÄUFIG, noch nicht abgestimmt – bitte noch NICHT im DFBnet '+(k==='game'?'ansetzen':'anmelden')+' (reserviert bis '+tentDay(addDays(e.tentative.until,-1))+', sonst automatisch gelöscht)'
+    :(k==='game'&&!OWN_MATCH_FB[e.id]?(away?'vorgemerkt, noch nicht bei fussball.de':'vorgemerkt, Ansetzung im DFBnet über den Jugendleiter'):'');
   return [head,when,place,status].filter(Boolean).join(' · ')+' – '+session.name+teamTrailer(e.team,e.squad,e)+(action!=='gelöscht'?'\nPlatzcoach-Link: '+e.id:'');
 }
 function openMatchYouthLeader(id,title){
@@ -7863,6 +7928,7 @@ function openMatchYouthLeader(id,title){
 // Nach dem Speichern eines Heimspiels/-turniers: überlappendes Training der Mannschaft absagen (Rückfrage), dann Jugendleiter-Text.
 function afterHomeMatchSaved(e,isNew,trainingDecided){
   const title=isNew?'Gespeichert – jetzt an den Jugendleiter':'Geändert – Jugendleiter informieren?';
+  if(e.tentative){ if(isNew) showToast('Vorläufig reserviert – sobald abgestimmt, an der Karte „Abgestimmt“ tippen.',5000); return; }
   if(trainingDecided){ openMatchYouthLeader(e.id,title); return; } // in „Termin prüfen“ schon entschieden
   const slots=TRAINING.filter(s=>s.team===e.team&&(!isJugend(e.team)||(s.squad||1)===(e.squad||1))&&slotActiveOn(s,e.d)&&s.from<eventBis(e)&&s.to>e.t);
   if(!slots.length){ openMatchYouthLeader(e.id,title); return; }
@@ -11428,7 +11494,7 @@ async function boot(){
   applyControl(CFG.control,true); // Notaus: Abmeldung nachholen, Neu-laden-Stand merken
 
   dateInput().value=todayStr;
-  dateInput().addEventListener('change',()=>{updateWeekday();renderPitch();renderHalle();hideConflicts();setTimeout(updateFreeSlotsOnConflict,150);});
+  dateInput().addEventListener('change',()=>{updateWeekday();updateTentHelp();renderPitch();renderHalle();hideConflicts();setTimeout(updateFreeSlotsOnConflict,150);});
   ['tf-day','tf-from','tf-to','tf-validfrom','tf-validuntil'].forEach(id=>document.getElementById(id).addEventListener('change',tfRenderPitch));
   updateWeekday(); onTeamChange(); setPitchMode('ganz');
   trainingSelectedDate=todayStr;

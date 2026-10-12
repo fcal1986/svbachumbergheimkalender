@@ -1,0 +1,61 @@
+name: Vorläufige Spiele – Ankündigung und Ablauf
+
+# Täglich gegen 7 Uhr (Berlin): vorläufig reservierte Spiele/Turniere („Noch nicht abgestimmt“)
+# zwei Tage vor Ablauf ankündigen und am Stichtag löschen (scripts/tentative-expiry.mjs).
+# Danach Mail + Push für genau diese Änderungen (Commits dieses Laufs lösen keinen weiteren Workflow aus).
+
+on:
+  schedule:
+    - cron: '7 5 * * *'
+  workflow_dispatch:
+    inputs:
+      dry:
+        description: 'Nur anzeigen, nichts ändern'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  expire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Abhängigkeiten installieren
+        run: npm install --no-audit --no-fund
+
+      - name: Vorläufige Termine prüfen
+        id: run
+        env:
+          TENTATIVE_DRY: ${{ (github.event.inputs.dry || 'false') == 'true' && '1' || '0' }}
+        run: |
+          git config user.name "platzcoach-bot"
+          git config user.email "actions@users.noreply.github.com"
+          start=$(git rev-parse HEAD)
+          node scripts/tentative-expiry.mjs
+          n=$(git rev-list --count "$start"..HEAD)
+          if [ "$n" -gt 0 ]; then
+            git pull --rebase -q && git push
+            # nur die eigenen Commits dieses Laufs melden (nicht, was zwischendurch von der App kam)
+            echo "before=$(git rev-parse HEAD~$n)" >> "$GITHUB_OUTPUT"
+            echo "changed=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Trainer und Admins informieren
+        if: steps.run.outputs.changed == '1'
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          GITHUB_EVENT_BEFORE: ${{ steps.run.outputs.before }}
+        run: GITHUB_SHA=$(git rev-parse HEAD) node scripts/notify-email.mjs

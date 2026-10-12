@@ -86,7 +86,8 @@ const CATEGORIES = {
                 'Spielverlegung vorgemerkt:', 'Spielverlegung geändert:', 'Spielverlegung aufgehoben:',
                 'Spielverlegung abgeschlossen:',
                 'Freundschaftsspiel angelegt:', 'Freundschaftsspiel geändert:', 'Freundschaftsspiel gelöscht:',
-                'Turnier angelegt:', 'Turnier geändert:', 'Turnier gelöscht:'],
+                'Turnier angelegt:', 'Turnier geändert:', 'Turnier gelöscht:',
+                'Freundschaftsspiel abgestimmt:', 'Turnier abgestimmt:', 'Reservierung läuft ab:'],
   training:    ['Trainingszeit angelegt:', 'Trainingszeit geändert:', 'Trainingszeit gelöscht:',
                 'Training abgesagt:', 'Absage zurückgenommen:', 'Training verlegt:', 'Torwarttraining-Anmeldung geändert:'],
   sperren:     ['Sperre angelegt:', 'Sperre aufgehoben:'],
@@ -121,6 +122,8 @@ function parseCommit(raw) {
   // Trainer-Termin mit Zielgruppe (ab 09.10.2026 · 3): "E-Jugend:2,D-Jugend:1,Vorstand"; fehlt = alle Trainer
   const fuer = raw.match(/^Platzcoach-Fuer: (.+)$/m);
   const link = raw.match(/^Platzcoach-Link: (\S+)\s*$/m); // Direktlink-ID in der App ("fb-…", Termin-ID)
+  // Ab 12.10.2026: Ersteller eines Termins (vorläufige Reservierung) – bekommt Ankündigung/Löschung immer
+  const owner = raw.match(/^Platzcoach-Owner: (\S+)\s*$/m);
   return {
     text,
     gkTeams: gk ? gk[1].split(',').map(s => s.trim()).filter(Boolean) : [],
@@ -130,6 +133,7 @@ function parseCommit(raw) {
     squad: team ? parseInt(team[2], 10) : null,
     by: by ? by[1] : null,
     link: link ? link[1] : null,
+    owner: owner ? owner[1] : null,
     category: categoryOf(text),
   };
 }
@@ -146,7 +150,8 @@ function isFromPlatzcoach(msg) {
 // (Bestätigung + Info für den Mit-Trainer). Sonst gilt: keine Mail über eigene Änderungen.
 // Freundschaftsspiele/Turniere ebenso: der Organisator bekommt die Mail als Bestätigung mit Link.
 const NOTIFY_AUTHOR_TOO = ['Spielverlegung vorgemerkt:', 'Spielverlegung geändert:', 'Spielverlegung aufgehoben:', 'Spielverlegung abgeschlossen:',
-  'Freundschaftsspiel angelegt:', 'Freundschaftsspiel geändert:', 'Freundschaftsspiel gelöscht:', 'Turnier angelegt:', 'Turnier geändert:', 'Turnier gelöscht:'];
+  'Freundschaftsspiel angelegt:', 'Freundschaftsspiel geändert:', 'Freundschaftsspiel gelöscht:', 'Turnier angelegt:', 'Turnier geändert:', 'Turnier gelöscht:',
+  'Freundschaftsspiel abgestimmt:', 'Turnier abgestimmt:', 'Reservierung läuft ab:'];
 function notifyAuthorToo(c) { return NOTIFY_AUTHOR_TOO.some(p => c.text.startsWith(p)); }
 // Automatische Bot-Läufe und Aufräumarbeiten der App gehen nie per Mail raus.
 function isNoisyCommit(text) {
@@ -328,7 +333,7 @@ async function main() {
     return changes.filter(c =>
       allowed.includes(c.category)
       && (notifyAuthorToo(c) || !(user && c.by && c.by === user.id))
-      && (role === 'admin' || concernsTrainer(c, classes, user && user.id, user)));
+      && (role === 'admin' || concernsTrainer(c, classes, user && user.id, user) || (user && c.owner === user.id)));
   };
 
   // Push: je Zugang mit angemeldetem Gerät eine Nachricht (bei mehreren Änderungen zusammengefasst).
@@ -338,7 +343,7 @@ async function main() {
   // Admins: eigene Einstellung je Bereich (Konto → Profil, Vorgabe siehe notify-prefs.mjs).
   const adminFilter = (u, channel, list) => {
     const classes = trainerClassesFor(u, seasons, today);
-    return list.filter(c => adminWants(u, channel, areaOf(c, classes, u.id, !!changesFile)));
+    return list.filter(c => c.owner === u.id || adminWants(u, channel, areaOf(c, classes, u.id, !!changesFile)));
   };
   const pushRelevantFor = u => u.admin
     ? adminFilter(u, 'push', relevantFor('admin', u))
@@ -402,7 +407,7 @@ async function main() {
         from: `Platzcoach <${fromAddress}>`, // Absendername bewusst immer "Platzcoach" (SaaS); der Verein steht im Text
         ...(replyTo ? { replyTo } : {}),
         to: r.email,
-        subject: changesFile ? subjectFb : (texts.length === 1 && /^(Freundschaftsspiel|Turnier) /.test(texts[0])
+        subject: changesFile ? subjectFb : (texts.length === 1 && /^(Freundschaftsspiel |Turnier |Reservierung läuft ab:)/.test(texts[0])
           ? 'Platzcoach: ' + texts[0].split(' · ')[0].replace(/: /, ' – ')   // z. B. "Freundschaftsspiel angelegt – E2-Jugend bei SC Neheim"
           : texts.length === 1 && /^Trainingszeit (angelegt|geändert): /.test(texts[0])
           ? 'Platzcoach: ' + texts[0].split('\n')[0].split(' · ')[0].replace(/: /, ' – ')   // z. B. "Trainingszeit geändert – E1-Jugend"
