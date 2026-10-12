@@ -1761,7 +1761,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='12.10.2026 · 2';
+const APP_VERSION='12.10.2026 · 3';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -6817,8 +6817,10 @@ function renderFormTimeline(){
   const el=box.querySelector('.tl-scroll'), edge=FORM_TL.edge; FORM_TL.edge=null; FORM_TL.ds=ds;
   const place=()=>{ if(!el||!el.isConnected) return; const g=tlGeom(el); if(!(g.w>0)) return;
     if(edge){ el.scrollLeft=edge==='start'?0:el.scrollWidth; return; }
-    const m0=sameDay&&FORM_TL.m!=null?FORM_TL.m:(cand.von?hmMin(cand.von):(ds===todayStr?hmMin(nowHMStr()):15*60));
-    const m=Math.max(g.t0,Math.min(g.t1,m0)); el.scrollLeft=Math.round((m-g.t0)/(g.t1-g.t0)*g.w); tlCurLabel(el,m); FORM_TL.m=m; };
+    // Ab 12.10.2026 · 3: geänderte Uhrzeit (z. B. Anstoß) → Zeitleiste springt mit; sonst bleibt die eigene Scroll-Position
+    const timeMoved=!!cand.von&&FORM_TL.von!==cand.von;
+    const m0=sameDay&&FORM_TL.m!=null&&!timeMoved?FORM_TL.m:(cand.von?hmMin(cand.von):(ds===todayStr?hmMin(nowHMStr()):15*60));
+    const m=Math.max(g.t0,Math.min(g.t1,m0)); el.scrollLeft=Math.round((m-g.t0)/(g.t1-g.t0)*g.w); tlCurLabel(el,m); FORM_TL.m=m; FORM_TL.von=cand.von; };
   place(); requestAnimationFrame(place);
 }
 // Zeilenkopf angetippt: Fläche/Ressource ein- oder ausschalten (gleiche Datenquelle wie die bisherigen Chips).
