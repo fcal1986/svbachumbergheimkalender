@@ -1096,6 +1096,12 @@
   .modal-box h3{margin:0 0 8px;font-size:16px;font-weight:800;}
   .modal-box p{margin:0 0 16px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;}
   .modal-acts{display:flex;gap:8px;}
+  .req-card{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin:10px 0;}
+  .req-head b{display:block;font-size:14px;} .req-head small{color:var(--ink-soft);font-size:12px;}
+  .req-opt{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg);border-radius:10px;padding:8px 10px;margin-top:6px;font-size:13px;}
+  .req-st{font-size:11.5px;font-weight:700;} .req-st.ok{color:var(--kt1E5730);} .req-st.busy{color:var(--kt8E2A1D);}
+  .req-acts{display:flex;gap:8px;margin-top:8px;} .req-acts .ghost-btn{flex:1;margin:0;} .req-acts .ghost-btn.danger{color:var(--kt8E2A1D);}
+  .req-search{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:13px;margin:8px 0 4px;background:var(--bg);outline:none;box-sizing:border-box;}
   .rs-result-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;}
   .rs-result-row.rs-selectable{cursor:pointer;border:1.5px solid transparent;transition:.12s;}
   .rs-result-row.rs-selectable.on{background:var(--green-dim);border-color:var(--green);}
@@ -1754,10 +1760,11 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='12.10.2026 · 4';
+const APP_VERSION='12.10.2026 · 5';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
+let REQUESTS=[]; // offene Terminanfragen (data/requests.json, ab 12.10.2026 · 5) – blockieren keinen Platz
 let MOVES=[]; // vorgemerkte Spielverlegungen (data/game-moves.json), siehe applyGameMoves()
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
 let selectedSeasonFilter='';
@@ -2780,6 +2787,7 @@ const STORES={
   locks:   {path:'data/resource-locks.json',  key:'locks',   get:()=>LOCKS,    set:v=>{LOCKS=v;}},
   seasons: {path:'data/seasons.json',         key:'seasons', get:()=>SEASONS,  set:v=>{SEASONS=v;}},
   moves:   {path:'data/game-moves.json',      key:'moves',   get:()=>MOVES,    set:v=>{MOVES=v; applyGameMoves();}},
+  requests:{path:'data/requests.json',        key:'requests',get:()=>REQUESTS, set:v=>{REQUESTS=v;}},
   push:    {path:'data/push-subscriptions.json', key:'subs',  get:()=>PUSH_SUBS, set:v=>{PUSH_SUBS=v;}}
 };
 const STORE_BASE={};
@@ -6635,6 +6643,7 @@ function renderTrainingGameNote(){
     +'<br>Beim Speichern wird das Training an diesen Tagen automatisch abgesagt.</div>';
 }
 function resetForm(){
+  FORM_REQUEST=null;
   document.getElementById('f-anlass').value='';document.getElementById('f-bem').value='';
   document.getElementById('f-von').value='15:00';document.getElementById('f-bis').value='17:00';
   document.getElementById('f-team').value='F-Jugend';
@@ -6983,10 +6992,12 @@ function sfCheckDay(d,o){
   };
   const fits=s=>cands.find(p=>fitsP(s,p));
   const wish=SF.start, wishEnd=timeToMin(wish)+SF.dur;
-  if(wishEnd<=timeToMin('23:45')){ const p=fits(wish); if(p!==undefined) return {status:'free',start:wish,pitch:p}; }
+  // Ab 12.10.2026 · 5: heute nur, was noch nicht angefangen hat
+  const minStart=d===todayStr?Math.ceil(hmMin(nowHMStr())/15)*15:0;
+  if(wishEnd<=timeToMin('23:45')&&timeToMin(wish)>=minStart){ const p=fits(wish); if(p!==undefined) return {status:'free',start:wish,pitch:p}; }
   if(!SF.flex) return {status:'busy'};
   let best=null, bp=null;
-  for(let m=timeToMin(SF_WIN_FROM);m+SF.dur<=timeToMin(SF_WIN_TO);m+=15){
+  for(let m=Math.max(timeToMin(SF_WIN_FROM),minStart);m+SF.dur<=timeToMin(SF_WIN_TO);m+=15){
     const s=minToTime(m), p=fits(s);
     if(p!==undefined&&(!best||Math.abs(m-timeToMin(wish))<Math.abs(timeToMin(best)-timeToMin(wish)))){ best=s; bp=p; }
   }
@@ -7096,6 +7107,7 @@ function renderSlotFinder(){
       h+='<button type="button" class="submit-btn" style="margin-top:10px;background:#25D366;" onclick="sfShare()">'
         +'<svg viewBox="0 0 24 24" fill="currentColor" style="width:17px;height:17px;"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.26 4.81L2.05 22l5.4-1.42a9.87 9.87 0 004.59 1.17h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2zm0 18.06a8.2 8.2 0 01-4.17-1.14l-.3-.18-3.1.82.83-3.02-.2-.31a8.15 8.15 0 01-1.26-4.32c0-4.51 3.68-8.19 8.2-8.19a8.15 8.15 0 015.8 2.4 8.15 8.15 0 012.4 5.8c0 4.52-3.68 8.14-8.2 8.14z"/></svg>'
         +(SF.sel.size===1?'1 Vorschlag':SF.sel.size+' Vorschläge')+' per WhatsApp teilen</button>'
+        +(sfCanSaveRequest()?'<p class="sf-hint" style="margin-top:6px;">Wird als offene Anfrage gemerkt (Konto → Terminanfragen). Kommt die Zusage, dort den Termin antippen – alles ist vorbefüllt.</p>':'')
         +(SF.sel.size===1?'<button type="button" class="ghost-btn" style="margin-top:8px;" onclick="'+esc(apply(one))+'">Zugesagt? Übernehmen</button>':'');
     } else h+='<p class="sf-hint" style="margin-top:8px;">Noch nicht abgesprochen? Termine anhaken und per WhatsApp vorschlagen – der Platz wird dabei nicht blockiert. Nach der Zusage „Übernehmen“ und speichern.</p>';
   } else h+='<p class="rs-empty">Nichts frei. Andere Monate, Wochentage oder eine kürzere Dauer probieren.</p>';
@@ -7122,8 +7134,109 @@ function sfShareText(list){
 }
 function sfShare(){
   if(!SF.sel.size) return;
-  window.open('https://wa.me/?text='+encodeURIComponent(sfShareText([...SF.sel.values()])),'_blank','noopener');
+  const list=[...SF.sel.values()];
+  window.open('https://wa.me/?text='+encodeURIComponent(sfShareText(list)),'_blank','noopener');
   trackEvent('freier_termin_vorgeschlagen');
+  if(sfCanSaveRequest()) saveRequestFromForm(list);
+}
+/* ---------- Terminanfragen (ab 12.10.2026 · 5) ----------
+   Vorgeschlagene freie Termine werden mit allen Formular-Angaben gemerkt (data/requests.json) – sie blockieren
+   keinen Platz. Sehen und bearbeiten dürfen die Trainer der Mannschaft und Admins (alle Mannschaften).
+   Zusage → Termin antippen → Formular vorbefüllt → normal speichern; danach ist die Anfrage erledigt.
+   Vergangene Vorschläge fallen weg, ohne Vorschlag verschwindet die Anfrage. */
+let FORM_REQUEST=null, REQ_Q='', REQ_TEAM='';
+function sfCanSaveRequest(){ if(!session||!session.token||editingId) return false; const k=formKind(); if(k==='goalkeeper') return false;
+  const team=k==='trainer'?'Alle Teams':document.getElementById('f-team').value, sb=document.querySelector('#f-squad button.on');
+  return k==='trainer'||canBookTeam(team,sb?parseInt(sb.dataset.squad):1); }
+function saveRequestFromForm(list){
+  const k=formKind(), team=k==='trainer'?'Alle Teams':document.getElementById('f-team').value, sb=document.querySelector('#f-squad button.on'), squad=sb?parseInt(sb.dataset.squad):1;
+  const mf=readMatchFields(k), o=formOccupation();
+  const r={id:crypto.randomUUID(), created:todayStr, ownerId:session.id, ownerName:session.name, kind:k, team, squad,
+    title:document.getElementById('f-anlass').value.trim()||kindLabel(k), note:document.getElementById('f-bem').value.trim()||undefined, dur:SF.dur,
+    ha:mf.ha, opponent:mf.opponent, participants:mf.participants, address:mf.address,
+    res:o.res.filter(x=>x!=='Großspielfeld'&&x!=='Halle'), halle:o.halle||null, ttFor:k==='trainer'?readTtForChips():undefined,
+    options:list.slice().sort((a,b)=>a.d.localeCompare(b.d)).map(x=>({d:x.d,start:x.start,pitch:x.pitch||o.pitch||null}))};
+  REQUESTS.push(r);
+  closeSlotFinder(); formDirty=false; resetForm(); goto('start');
+  showToast('Anfrage gemerkt – unter Konto → Terminanfragen. Kommt die Zusage, dort den Termin antippen.',5000);
+  saveStore('requests','Terminanfrage gespeichert: '+requestLabel(r)+' – '+r.options.map(x=>shareDay(x.d)+' '+x.start).join(', ')+' – '+session.name)
+    .catch(err=>{ REQUESTS=REQUESTS.filter(x=>x.id!==r.id); showToast('Anfrage nicht gespeichert: '+err.message,6000); });
+}
+function requestLabel(r){ const who=r.team&&r.team!=='Alle Teams'?teamShort(r.team,r.squad)+' ':'';
+  return r.kind==='game'?'Freundschaftsspiel '+who+(r.ha==='away'?'bei ':'gegen ')+(r.opponent||'?'):(isMatchKind(r.kind)?kindLabel(r.kind)+' '+who:(r.title||kindLabel(r.kind))+(who?' ('+who.trim()+')':'')); }
+function reqOptEnd(r,x){ return minToTime(Math.min(timeToMin(x.start)+(r.dur||90),timeToMin('23:45'))); }
+function reqOptLive(r,x){ return x.d>todayStr||(x.d===todayStr&&x.start>nowHMStr()); }
+function canSeeRequest(r){ if(!session) return false; if(session.isAdmin||r.ownerId===session.id) return true; return r.team!=='Alle Teams'&&canBookTeam(r.team,r.squad||1); }
+function openRequests(){ return REQUESTS.filter(r=>canSeeRequest(r)&&(r.options||[]).some(x=>reqOptLive(r,x))); }
+// Noch frei? (live, ohne die eigene Trainingszeit – wie die Terminsuche)
+function reqOptStatus(r,x){
+  if(r.ha==='away'||r.kind==='trainer') return '';
+  const own=ownFreeFor(r.kind,r.ha==='away',r.team,r.squad);
+  const hits=findConflicts(x.d,x.start,reqOptEnd(r,x),x.pitch,r.halle,r.res||[],null,r.kind).filter(c=>!isOwnTeamTraining(c.event,own));
+  return hits.length?'<span class="req-st busy">⚠ inzwischen belegt: '+esc([...new Set(hits.map(c=>occupationLabel(c.event)))].join(', '))+'</span>':'<span class="req-st ok">✓ frei</span>';
+}
+function requestsCardHTML(){
+  pruneRequests();
+  const list=openRequests(), teams=[...new Set(list.map(r=>r.team==='Alle Teams'?'':teamShort(r.team,r.squad)).filter(Boolean))].sort();
+  return '<div class="card"><h4>Offene Terminanfragen</h4><p class="sub">Vorschläge, die ihr dem Gegner geschickt habt. Sie blockieren keinen Platz – „✓ frei“ zeigt den aktuellen Stand. Kommt die Zusage, den Termin antippen.</p>'
+    +(list.length>3?'<input type="search" placeholder="Suche nach Gegner, Mannschaft, Name …" value="'+esc(REQ_Q)+'" oninput="REQ_Q=this.value;renderRequestList()" class="req-search">':'')
+    +(teams.length>1?'<div class="nf-chips" style="margin:6px 0 4px;">'+['',...teams].map(t=>'<span class="weekday-chip'+(REQ_TEAM===t?' on':'')+'" onclick="REQ_TEAM=\''+jsArg(t)+'\';renderKonto()">'+(t||'Alle')+'</span>').join('')+'</div>':'')
+    +'<div id="req-list">'+requestListHTML()+'</div></div>';
+}
+function renderRequestList(){ const b=document.getElementById('req-list'); if(b) b.innerHTML=requestListHTML(); }
+function requestListHTML(){
+  const q=REQ_Q.trim().toLowerCase();
+  const list=openRequests().filter(r=>(!REQ_TEAM||teamShort(r.team,r.squad)===REQ_TEAM)&&(!q||[requestLabel(r),r.title,r.ownerName,r.opponent,r.participants,teamLabel(r.team,r.squad)].join(' ').toLowerCase().includes(q)))
+    .sort((a,b)=>(a.options.find(x=>reqOptLive(a,x))||{}).d.localeCompare((b.options.find(x=>reqOptLive(b,x))||{}).d));
+  if(!list.length) return '<p class="rs-empty">'+(REQUESTS.some(canSeeRequest)&&(q||REQ_TEAM)?'Keine Anfrage passt zur Suche.':'Keine offenen Anfragen. Neue entstehen in „Freien Termin suchen“ → Termine anhaken → per WhatsApp teilen.')+'</p>';
+  return list.map(r=>'<div class="req-card"><div class="req-head"><b>'+esc(requestLabel(r))+'</b><small>angefragt von '+esc(r.ownerName||'–')+' am '+esc(shareDay(r.created))+(r.options[0]&&r.options[0].pitch&&r.options[0].pitch.mode!=='ganz'?' · '+esc(pitchShort(r.options[0].pitch).replace(/ [AB1-4]$/,'')):'')+'</small></div>'
+    +r.options.filter(x=>reqOptLive(r,x)).map(x=>{ const i=r.options.indexOf(x);
+      return '<div class="req-opt"><div><b>'+esc(shareDay(x.d))+'</b> · '+(r.kind==='game'&&r.ha!=='away'?'Anstoß '+addMinutes(x.start,fussballBufferBeforeMin()):x.start+'–'+reqOptEnd(r,x))+(x.pitch&&x.pitch.mode!=='ganz'?' · '+esc(pitchShort(x.pitch)):'')+'<br>'+reqOptStatus(r,x)+'</div>'
+        +'<button type="button" class="fs-btn" onclick="acceptRequest(\''+jsArg(r.id)+'\','+i+')">Zugesagt</button></div>'; }).join('')
+    +'<div class="req-acts"><button type="button" class="ghost-btn" onclick="reshareRequest(\''+jsArg(r.id)+'\')">Erneut teilen</button><button type="button" class="ghost-btn danger" onclick="dropRequest(\''+jsArg(r.id)+'\')">Absage – löschen</button></div></div>').join('');
+}
+function reqTextOf(r){
+  const one=r.options.filter(x=>reqOptLive(r,x)), who=r.team&&r.team!=='Alle Teams'&&r.team!==GK_TEAM?teamLabel(r.team,r.squad):'';
+  const own=fussballOwnTeamName({squad:isJugend(r.team)?r.squad:1});
+  const head=r.kind==='game'?'📅 *Freundschaftsspiel gesucht*\n*'+own+(who?' ('+who+')':'')+(r.opponent?' – '+r.opponent:'')+'*'
+    :isMatchKind(r.kind)?'📅 *'+kindLabel(r.kind)+' – Termin gesucht*\n*'+own+(who?' ('+who+')':'')+'*':'📅 *'+(r.title||kindLabel(r.kind))+' – Termin gesucht*'+(who?'\n'+who:'');
+  const lines=one.map(x=>'• '+shareDay(x.d)+', '+(r.kind==='game'?'Anstoß um '+(r.ha==='away'?x.start:addMinutes(x.start,fussballBufferBeforeMin()))+' Uhr':x.start+'–'+reqOptEnd(r,x)+' Uhr')).join('\n');
+  return head+'\n\n'+(one.length===1?'Folgender Termin wäre bei uns frei – würde der passen?':'Folgende Termine wären bei uns frei – passt einer davon?')+'\n\n'+lines+'\n\n'
+    +(one.length===1?'Bitte kurz Rückmeldung, ob der Termin passt 🙏':'Bitte kurz Rückmeldung, welcher Termin passt 🙏');
+}
+function reshareRequest(id){ const r=REQUESTS.find(x=>x.id===id); if(r) window.open('https://wa.me/?text='+encodeURIComponent(reqTextOf(r)),'_blank','noopener'); }
+function dropRequest(id){
+  const r=REQUESTS.find(x=>x.id===id); if(!r) return;
+  askConfirm('Anfrage löschen?','„'+requestLabel(r)+'“ – der Gegner hat abgesagt oder es hat sich erledigt.','Löschen',()=>closeRequest(id,'gelöscht'));
+}
+function closeRequest(id,why){
+  const r=REQUESTS.find(x=>x.id===id); if(!r) return Promise.resolve();
+  const backup=JSON.stringify(REQUESTS);
+  REQUESTS=REQUESTS.filter(x=>x.id!==id); renderKonto();
+  if(why==='gelöscht') showToast('Anfrage gelöscht.');
+  return saveStore('requests','Terminanfrage '+why+': '+requestLabel(r)+' (automatisch) – '+session.name)
+    .catch(err=>{ REQUESTS=JSON.parse(backup); renderKonto(); showToast('Fehler: '+err.message,6000); });
+}
+// Vergangene Vorschläge entfernen; ohne Vorschlag ist die Anfrage weg (nur wer sie bearbeiten darf, speichert)
+function pruneRequests(){
+  if(!session||!session.token) return;
+  let changed=false;
+  REQUESTS=REQUESTS.map(r=>{ const live=(r.options||[]).filter(x=>reqOptLive(r,x)); if(live.length===r.options.length||!canSeeRequest(r)) return r; changed=true; return live.length?{...r,options:live}:null; }).filter(Boolean);
+  if(changed) saveStore('requests','Terminanfragen aufgeräumt (automatisch)').catch(()=>{});
+}
+function acceptRequest(id,i){
+  if(!requireLogin()) return;
+  const r=REQUESTS.find(x=>x.id===id), x=r&&r.options[i]; if(!x) return;
+  const kick=r.kind==='game'?(r.ha==='away'?x.start:addMinutes(x.start,fussballBufferBeforeMin())):'';
+  editingId=null;
+  fillForm({d:x.d,t:x.start,bis:reqOptEnd(r,x),title:r.title,kind:r.kind,team:r.team,squad:r.squad,pitch:x.pitch,halle:r.halle,res:r.res||[],note:r.note,
+    ha:r.ha,opponent:r.opponent,participants:r.participants,address:r.address,kickoff:kick,ttFor:r.ttFor});
+  FORM_REQUEST=id;
+  document.getElementById('save-label').textContent='Termin speichern';
+  document.getElementById('cancel-btn').style.display='block';
+  document.getElementById('owner-name').textContent=session.name;
+  goto('neu');
+  showToast('Aus der Anfrage übernommen – prüfen und speichern.',3500);
 }
 function applySlotFinder(d,start,mode,part){
   dateInput().value=d;
@@ -7308,6 +7421,7 @@ function newEventDateFromView(){
   return pane==='termine'&&selDate&&selDate>=todayStr?selDate:undefined;
 }
 function fillForm(e){
+  FORM_REQUEST=null;
   dateInput().value=e.d;document.getElementById('f-von').value=e.t;document.getElementById('f-bis').value=e.bis||addMinutes(e.t,120);
   document.getElementById('f-anlass').value=e.title;document.getElementById('f-bem').value=e.note||'';
   document.getElementById('f-team').value=e.team;
@@ -7459,6 +7573,7 @@ async function submitEvent(){
     const gkTeams=kind==='goalkeeper'?readGkTeamChips('f-gkteams'):undefined;
     const ttFor=kind==='trainer'?readTtForChips():undefined;
     let newId=null;
+    const doneReq=editingId?null:FORM_REQUEST;
     const before=editingId?JSON.stringify(EVENTS.find(x=>x.id===editingId)||{}):null;
     if(editingId)Object.assign(EVENTS.find(x=>x.id===editingId),{d,t:von,bis,title,kind,team,squad,pitch,halle,res,note,gkTeams,ttFor,...mf});
     else{ newId=crypto.randomUUID(); EVENTS.push({id:newId,d,t:von,bis,title,kind,team,squad,pitch,halle,res,note,gkTeams,ttFor,...mf,ownerId:session.id,ownerName:session.name}); }
@@ -7498,6 +7613,7 @@ async function submitEvent(){
     showToast(movedSlot?'Training verlegt auf '+von+'–'+bis+' Uhr.':'Gespeichert: '+title+(cancelSlots.length?' · Training abgesagt':''));
     if(movedSlot) saveTraining(moveMsg).catch(err=>{ EVENTS=JSON.parse(backup); TRAINING=JSON.parse(backupT); applyGameMoves();render();renderStart();renderTraining();showToast('Speichern fehlgeschlagen: '+err.message,6000); });
     else saveEvents(logMsg)
+      .then(()=>doneReq?closeRequest(doneReq,'erledigt'):null)
       .then(()=>cancelSlots.length?saveTraining('Training abgesagt: '+teamLabel(team,squad)+' am '+fmtShort(d)+' wegen '+title+' (automatisch) – '+session.name+teamTrailer(team,squad,savedEv)):null)
       .catch(err=>{ EVENTS=JSON.parse(backup); TRAINING=JSON.parse(backupT); applyGameMoves();render();renderStart();renderTraining();showToast('Speichern fehlgeschlagen: '+err.message,6000); });
     // Heimspiel/-turnier: Training der Mannschaft zur selben Zeit absagen? Danach Text für den Jugendleiter.
@@ -9354,6 +9470,8 @@ function renderKonto(){
     SEC.push({id:'kontakt',g:'mine',t:'Profil & Kontakt',sum:[u.phone||'kein Telefon',visTxt].filter(Boolean).join(' · '),i:ico('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>'),html:()=>profileCard(),hide1:true});
     SEC.push({id:'benachrichtigungen',g:'mine',t:'Benachrichtigungen',sum:'Mail '+(u.emailNotificationsEnabled!==false?'an':'aus')+' · Push '+(pushOn?'an':'aus')+' · Wochenübersicht '+(u.weeklyDigest!==false?'an':'aus'),i:ico('<path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 003.4 0"/>'),html:()=>notificationsCard()+(isAdmin&&!pushKey()?pushSetupCardHTML():''),hide1:true});
   }
+  if(!session.isSuper){ const nReq=openRequests().length;
+    SEC.push({id:'anfragen',g:'mine',t:'Terminanfragen',sum:nReq?nReq+' offen':'keine offen',badge:nReq,i:ico('<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M8 9h8M8 13h5"/>'),html:()=>requestsCardHTML(),hide1:true}); }
   if(hasKeepers) SEC.push({id:'torhueter',g:'mine',t:'Meine Torhüter',sum:'für Torwarttraining-Anmeldungen',i:ico('<path d="M8 13V6a1.5 1.5 0 013 0v5M11 11V4.5a1.5 1.5 0 013 0V11M14 11V6a1.5 1.5 0 013 0v7c0 4-2.5 7-6 7s-6-3-6-6v-2a1.5 1.5 0 013 0"/>'),html:()=>keeperCardHTML(),hide1:true});
   SEC.push({id:'app',g:'mine',t:'Als App installieren',sum:'auf dem Startbildschirm',i:ico('<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>'),html:()=>pwaCard(),hide1:true});
   SEC.push({id:'darstellung',g:'mine',t:'Darstellung',sum:THEME_LABELS[themePref()]+(themePref()==='auto'?' ('+(themeIsDark()?'dunkel':'hell')+')':''),i:ico('<circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 010 18z" fill="currentColor" stroke="none"/>'),html:()=>themeCardHTML(),hide1:true});
@@ -11437,6 +11555,9 @@ async function boot(){
   catch(e){ FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; }
   try{ const mv=await loadJSON('data/game-moves.json'); MOVES=Array.isArray(mv.moves)?mv.moves:[]; }
   catch(e){ MOVES=[]; }
+  try{ const rq=await loadJSON('data/requests.json'); REQUESTS=Array.isArray(rq.requests)?rq.requests:[]; }
+  catch(e){ REQUESTS=[]; }
+  snapStore('requests');
   snapStore('moves');
   applyGameMoves();
   try{ const lk=await loadJSON('data/resource-locks.json'); LOCKS=Array.isArray(lk.locks)?lk.locks:[]; }
