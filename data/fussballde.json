@@ -1,57 +1,6 @@
 {
-  "updated": "2026-10-11T23:38:39.689Z",
+  "updated": "2026-10-12T05:53:51.451Z",
   "games": [
-    {
-      "d": "2026-09-20",
-      "t": "11:00",
-      "team": "B-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "gameNo": "211049011",
-      "opponent": "Delbrücker SC II",
-      "competition": "Bezirksliga",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-delbruecker-sc-ii/-/spiel/031GM5IABK000000VS5489BTVVG7L386",
-      "matchday": 2,
-      "staffelId": "211049",
-      "staffelName": "B-Junioren - Bezirksliga, Staffel 3",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:11.664Z"
-    },
-    {
-      "d": "2026-09-20",
-      "t": "13:15",
-      "team": "Herren",
-      "squad": 2,
-      "ownName": "SV Bachum/Bergheim II",
-      "gameNo": "211386055",
-      "opponent": "SKV Balkan",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-skv-balkan/-/spiel/031IK2S11G000000VS5489BUVVKNMR0J",
-      "matchday": 7,
-      "staffelId": "211386",
-      "staffelName": "Kreisliga B Arnsberg",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:12.398Z"
-    },
-    {
-      "d": "2026-09-20",
-      "t": "15:30",
-      "team": "Herren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "gameNo": "210697056",
-      "opponent": "FSG Ruhrtal I",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fsg-ruhrtal-i/-/spiel/031I0BNC80000000VS5489BUVVKNMR0J",
-      "matchday": 7,
-      "staffelId": "210697",
-      "staffelName": "Kreisliga A Arnsberg",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:13.286Z"
-    },
     {
       "d": "2026-09-22",
       "t": "17:00",
@@ -4019,12 +3968,12 @@
         "02B9BQVPIG000000VS5489B1VU20GQ5T"
       ],
       "competitions": [
-        "Bezirksliga",
-        "Kreispokal"
+        "Kreispokal",
+        "Bezirksliga"
       ],
-      "games": 25,
-      "homeGames": 14,
-      "first": "2026-09-20",
+      "games": 24,
+      "homeGames": 13,
+      "first": "2026-09-23",
       "last": "2027-06-13",
       "teamId": "02B9BQVPIG000000VS5489B1VU20GQ5T"
     },
@@ -4237,9 +4186,9 @@
       "competitions": [
         "Kreisliga A"
       ],
-      "games": 27,
-      "homeGames": 14,
-      "first": "2026-09-20",
+      "games": 26,
+      "homeGames": 13,
+      "first": "2026-09-27",
       "last": "2027-05-30",
       "teamId": "011MIANBCK000000VTVG0001VTR8C1K7"
     },
@@ -4256,9 +4205,9 @@
         "Kreisliga B",
         "Kreispokal"
       ],
-      "games": 27,
-      "homeGames": 13,
-      "first": "2026-09-20",
+      "games": 26,
+      "homeGames": 12,
+      "first": "2026-09-23",
       "last": "2027-05-30",
       "teamId": "011MIBAEQC000000VTVG0001VTR8C1K7"
     },
@@ -4281,6 +4230,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-09-20",
+  "teamsFrom": "2026-09-21",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
