@@ -1761,7 +1761,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='12.10.2026 · 4';
+const APP_VERSION='12.10.2026 · 5';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -4191,6 +4191,11 @@ function shareText(e){
     const adr2=eventAddress(e);
     if(venue||area||adr2) L.push('📍 '+[[e.pitch?venue:'',area].filter(Boolean).join(' · '),adr2].filter(Boolean).join(' – ')); contact();
     if(e.note) L.push('ℹ️ '+e.note);
+  }
+  // Ab 12.10.2026 · 5: noch nicht mit dem Gegner abgestimmt – im geteilten Text klar als „angefragt“
+  if(e.tentative&&!e.isCancelled&&L.length){
+    L[0]=L[0].replace(/^\S+ /,'❔ ')+' · angefragt';
+    L.splice(2,0,'⏳ Noch nicht fest – '+(kindOf(e)==='game'?'der Gegner hat':'die Teilnahme ist')+' noch nicht zugesagt. Bitte schon mal vormerken, Bestätigung folgt.');
   }
   L.push('👉 '+shareLinkFor(e));
   return L.join('\n');
