@@ -1754,7 +1754,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='12.10.2026 · 3';
+const APP_VERSION='12.10.2026 · 4';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -6925,7 +6925,7 @@ function formTlFree(ds,area,lane,from,to,ev){
    zeigt, wo die Wunschzeit passt, wo nur eine andere Uhrzeit (08–22 Uhr) und wo nichts frei ist.
    „Übernehmen“ trägt Tag und Zeit ins Formular ein. Spiele, die fussball.de noch nicht kennt, kann die
    Suche nicht sehen – dafür der Hinweis; kommen sie später dazu, meldet die Änderungsmail Konflikte. */
-let SF={months:new Set(),days:new Set(),dur:90,start:'15:00',flex:true,moreRes:false};
+let SF={months:new Set(),days:new Set(),dur:90,start:'15:00',flex:true,moreRes:false,sel:new Map(),showAll:false};
 const SF_MONTHS=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 const SF_WIN_FROM='08:00', SF_WIN_TO='22:00';
 function formOccupation(){
@@ -6955,6 +6955,7 @@ function openSlotFinder(){
   SF.start=document.getElementById('f-von').value||'15:00';
   SF.flex=true;
   SF.moreRes=false;
+  SF.sel=new Map(); SF.showAll=false; // Ab 12.10.2026 · 4: freie Termine zum Vorschlagen auswählen
   if(formKind()==='game'&&formHA!=='away'){ const rule=gamePitchRule(document.getElementById('f-team').value);
     const on=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res);
     if(!on.includes('Großspielfeld')||pitchMode!==rule){ setResChips('f-res',[...new Set(on.concat(['Großspielfeld']))]); setPitchMode(rule); renderPitch(); } }
@@ -7077,13 +7078,52 @@ function renderSlotFinder(){
     }).join('')+'</div></div>';
   });
   h+='<div class="sf-legend"><span><i style="background:#6BB41C"></i>Wunschzeit frei</span><span><i style="background:#FFD24A"></i>andere Uhrzeit</span><span><i style="background:var(--kbE4E9E8)"></i>belegt</span></div>';
-  const best=days.filter(x=>x.status==='free').concat(days.filter(x=>x.status==='part')).slice(0,5);
-  if(best.length){
-    h+='<p class="field-label" style="margin:4px 0 6px;">Vorschläge</p>'+best.map(x=>'<div class="rs-result-row"><div><b>'+DOW[dowOf(x.d)-1]+', '+fmtShort(x.d)+'</b><br><small style="color:var(--ink-soft);">'
+  // Ab 12.10.2026 · 4: freie Termine anhaken und per WhatsApp vorschlagen (wie bei der Spielverlegung) – blockiert nichts.
+  // Nach der Zusage „Übernehmen“ → Formular wie gewohnt speichern.
+  const all=days.filter(x=>x.status==='free').concat(days.filter(x=>x.status==='part'));
+  [...SF.sel.keys()].forEach(d=>{ const x=all.find(y=>y.d===d); if(x) SF.sel.set(d,x); else SF.sel.delete(d); });
+  const shown=SF.showAll?all:all.filter((x,i)=>i<5||SF.sel.has(x.d));
+  const apply=x=>'applySlotFinder(\''+x.d+'\',\''+x.start+'\''+(x.pitch&&x.pitch.mode!=='ganz'?',\''+x.pitch.mode+'\',\''+x.pitch.part+'\'':'')+')';
+  if(shown.length){
+    h+='<p class="field-label" style="margin:4px 0 6px;">Freie Termine – zum Vorschlagen anhaken</p>'+shown.map(x=>'<label class="rs-result-row rs-selectable'+(SF.sel.has(x.d)?' on':'')+'">'
+      +'<input type="checkbox"'+(SF.sel.has(x.d)?' checked':'')+' onchange="sfSel(\''+x.d+'\')">'
+      +'<div style="flex:1;"><b>'+DOW[dowOf(x.d)-1]+', '+fmtShort(x.d)+'</b><br><small style="color:var(--ink-soft);">'
       +x.start+'–'+endOf(x.start)+(x.status==='part'?' (statt '+SF.start+')':'')+(x.pitch&&x.pitch.mode!=='ganz'?' · '+pitchShort(x.pitch):'')+'</small></div>'
-      +'<button class="fs-btn" onclick="applySlotFinder(\''+x.d+'\',\''+x.start+'\''+(x.pitch&&x.pitch.mode!=='ganz'?',\''+x.pitch.mode+'\',\''+x.pitch.part+'\'':'')+')">Übernehmen</button></div>').join('');
+      +'<button type="button" class="fs-btn" onclick="'+esc('event.preventDefault();event.stopPropagation();'+apply(x))+'">Übernehmen</button></label>').join('')
+      +(all.length>shown.length?'<div class="rs-empty rs-showmore" onclick="SF.showAll=true;renderSlotFinder()">+ '+(all.length-shown.length)+' weitere anzeigen ▾</div>':'');
+    if(SF.sel.size){
+      const one=[...SF.sel.values()][0];
+      h+='<button type="button" class="submit-btn" style="margin-top:10px;background:#25D366;" onclick="sfShare()">'
+        +'<svg viewBox="0 0 24 24" fill="currentColor" style="width:17px;height:17px;"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.26 4.81L2.05 22l5.4-1.42a9.87 9.87 0 004.59 1.17h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2zm0 18.06a8.2 8.2 0 01-4.17-1.14l-.3-.18-3.1.82.83-3.02-.2-.31a8.15 8.15 0 01-1.26-4.32c0-4.51 3.68-8.19 8.2-8.19a8.15 8.15 0 015.8 2.4 8.15 8.15 0 012.4 5.8c0 4.52-3.68 8.14-8.2 8.14z"/></svg>'
+        +(SF.sel.size===1?'1 Vorschlag':SF.sel.size+' Vorschläge')+' per WhatsApp teilen</button>'
+        +(SF.sel.size===1?'<button type="button" class="ghost-btn" style="margin-top:8px;" onclick="'+esc(apply(one))+'">Zugesagt? Übernehmen</button>':'');
+    } else h+='<p class="sf-hint" style="margin-top:8px;">Noch nicht abgesprochen? Termine anhaken und per WhatsApp vorschlagen – der Platz wird dabei nicht blockiert. Nach der Zusage „Übernehmen“ und speichern.</p>';
   } else h+='<p class="rs-empty">Nichts frei. Andere Monate, Wochentage oder eine kürzere Dauer probieren.</p>';
   out.innerHTML=h;
+}
+function sfSel(d){ if(SF.sel.has(d)) SF.sel.delete(d); else SF.sel.set(d,{d}); renderSlotFinder(); }
+// WhatsApp-Text wie bei der Spielverlegung (shareRescheduleProposal)
+function sfShareText(list){
+  const k=formKind(), team=document.getElementById('f-team').value, sb=document.querySelector('#f-squad button.on'), squad=sb?parseInt(sb.dataset.squad):1;
+  const one=list.length===1, opp=(document.getElementById('f-opponent').value||'').trim(), title=(document.getElementById('f-anlass').value||'').trim();
+  const who=team&&team!=='Alle Teams'&&team!==GK_TEAM&&team!=='Vorstand'?teamLabel(team,squad):'';
+  const own=fussballOwnTeamName({squad:isJugend(team)?squad:1});
+  const away=isMatchKind(k)&&formHA==='away';
+  const head=k==='game'?'📅 *Freundschaftsspiel gesucht*\n*'+own+(who?' ('+who+')':'')+(opp?' – '+opp:'')+'*'
+    :isMatchKind(k)?'📅 *'+kindLabel(k)+' – Termin gesucht*\n*'+own+(who?' ('+who+')':'')+'*'
+    :'📅 *'+(title||kindLabel(k))+' – Termin gesucht*'+(who?'\n'+who:'');
+  const endOf=t=>minToTime(Math.min(timeToMin(t)+SF.dur,timeToMin('23:45')));
+  const lines=list.sort((a,b)=>a.d.localeCompare(b.d)).map(x=>'• '+shareDay(x.d)+', '
+    +(k==='game'?'Anstoß um '+(away?x.start:addMinutes(x.start,fussballBufferBeforeMin()))+' Uhr':x.start+'–'+endOf(x.start)+' Uhr')).join('\n');
+  return head+'\n\n'
+    +(one?'Folgender Termin wäre bei uns frei – würde der passen?\n\n':'Folgende Termine wären bei uns frei – passt einer davon?\n\n')
+    +lines+'\n\n'
+    +(one?'Bitte kurz Rückmeldung, ob der Termin passt 🙏':'Bitte kurz Rückmeldung, welcher Termin passt 🙏');
+}
+function sfShare(){
+  if(!SF.sel.size) return;
+  window.open('https://wa.me/?text='+encodeURIComponent(sfShareText([...SF.sel.values()])),'_blank','noopener');
+  trackEvent('freier_termin_vorgeschlagen');
 }
 function applySlotFinder(d,start,mode,part){
   dateInput().value=d;
