@@ -73,47 +73,6 @@
           }
         }
       ]
-    },
-    {
-      "id": "9579bbb6-7367-485f-b893-30c2cb02887a",
-      "created": "2026-10-12",
-      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "ownerName": "Fabrizio Calcagno",
-      "kind": "game",
-      "team": "E-Jugend",
-      "squad": 2,
-      "title": "Freundschaftsspiel gegen Test 2",
-      "dur": 90,
-      "ha": "home",
-      "opponent": "Test 2",
-      "res": [],
-      "halle": null,
-      "options": [
-        {
-          "d": "2027-01-18",
-          "start": "15:00",
-          "pitch": {
-            "mode": "haelfte",
-            "part": "A"
-          }
-        },
-        {
-          "d": "2027-01-25",
-          "start": "15:00",
-          "pitch": {
-            "mode": "haelfte",
-            "part": "A"
-          }
-        },
-        {
-          "d": "2027-02-01",
-          "start": "15:00",
-          "pitch": {
-            "mode": "haelfte",
-            "part": "A"
-          }
-        }
-      ]
     }
   ]
 }
