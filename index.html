@@ -1432,7 +1432,7 @@
         <div class="field" id="f-part-field"><label>Teilnehmer (optional)</label><input type="text" id="f-participants" autocomplete="off" oninput="formDirty=true" placeholder="z. B. SC Neheim, TuS Oeventrop"></div>
         <div class="field" id="f-addr-field"><label id="f-addr-label">Adresse (Spielort)</label><input type="text" id="f-address" autocomplete="off" oninput="formDirty=true" placeholder="Straße, Ort"></div>
         <label class="tent-field" for="f-tentative"><input type="checkbox" id="f-tentative" onchange="formDirty=true;renderFormTimeline()">
-          <span><b>Noch nicht mit dem Gegner abgestimmt</b><small>Platz wird höchstens 14 Tage reserviert, spätestens bis zum Vortag. Ohne „Bestätigt“ wird der Termin dann entfernt – 2 Tage vorher kommt eine Erinnerung. Der Jugendleiter setzt erst nach der Bestätigung im DFBnet an.</small></span></label>
+          <span><b>Noch nicht mit dem Gegner abgestimmt</b><small>Der Platz wird höchstens 14 Tage reserviert, spätestens bis zum Vortag. Ist das Spiel bis dahin nicht bestätigt, wird der Termin gelöscht – 2 Tage vorher kommt eine Erinnerung. Der Jugendleiter setzt erst nach der Bestätigung im DFBnet an.</small></span></label>
         <p class="helptext" id="f-match-help"></p>
       </div>
 
@@ -1761,7 +1761,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='12.10.2026 · 3';
+const APP_VERSION='12.10.2026 · 4';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -5646,7 +5646,7 @@ function myTodos(isMine,hasTeams){
   }
   // Unbestätigte Spiele/Turniere kurz vor dem Entfernen (ab 12.10.2026 · 1)
   EVENTS.filter(e=>e.tentative&&e.d>=todayStr&&tentativeWarnOn(e)&&canEdit(e)&&(!hasTeams||isMine(e)||e.ownerId===session.id)).forEach(e=>{
-    out.push({click:'openTerminFromStart(\''+jsArg(e.id)+'\',\''+e.d+'\')',txt:tentativeLabel(e)+' ist noch nicht mit dem Gegner abgestimmt – wird am '+tentDay(tentativeUntil(e))+' entfernt.',act:'Ansehen',
+    out.push({click:'openTerminFromStart(\''+jsArg(e.id)+'\',\''+e.d+'\')',txt:tentativeLabel(e)+' ist noch nicht mit dem Gegner abgestimmt. Bitte bis '+tentDay(tentativeUntil(e))+' bestätigen, sonst wird der Termin an dem Tag gelöscht.',act:'Ansehen',
       fix:{label:'Bestätigt',click:'confirmTentative(\''+jsArg(e.id)+'\')'},fix2:{label:'Löschen',click:'deleteEvent(\''+jsArg(e.id)+'\')'}});
   });
   const tsOpen=teamSyncOpenCount();
@@ -5966,6 +5966,7 @@ function conflictsOnDay(ds){
     for(let j=i+1;j<items.length;j++){
       const A=items[i],B=items[j];
       if(!timesOverlap(A,B)) continue;
+      if(tentativeOwnTraining(A,B)) continue;
       if(occupationConflictReasons(A,B,pitchReason).length) found.push([A,B]);
     }
   }
@@ -7799,7 +7800,7 @@ function matchInfoHTML(e){
   if(e.ha==='away'&&e.address) lines.push('📍 <a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(e.address)+'" target="_blank" rel="noopener" onclick="event.stopPropagation();">'+esc(e.address)+'</a>');
   let st='';
   if(e.tentative&&e.d>=todayStr){
-    st='<span class="dfb-badge warn">Noch nicht abgestimmt · ohne Bestätigung entfernt am '+esc(tentDay(tentativeUntil(e)))+'</span>'
+    st='<span class="dfb-badge warn">Noch nicht abgestimmt · bitte bis '+esc(tentDay(tentativeUntil(e)))+' bestätigen, sonst wird der Termin an dem Tag gelöscht</span>'
       +(canEdit(e)?'<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();confirmTentative(\''+jsArg(e.id)+'\')')+'">Bestätigt</button>':'');
   }else if(k==='game'&&fb){
     const diff=fb.t&&e.kickoff&&fb.t!==e.kickoff;
@@ -7878,7 +7879,7 @@ function matchLogMsg(e,action){
   const place=away?(e.address?'Spielort: '+e.address:'auswärts')
     :(e.pitch?'Platz '+(e.pitch.mode==='ganz'?'ganz':(e.pitch.mode==='haelfte'?'Hälfte '+e.pitch.part:'Viertel '+e.pitch.part))+' '+e.t+'–'+eventBis(e):(e.halle&&e.halle.thirds&&e.halle.thirds.length?halleShort(e.halle):''));
   const status=action==='gelöscht'?'':action==='bestätigt'?(away?'mit dem Gegner abgestimmt':'mit dem Gegner abgestimmt – jetzt im DFBnet ansetzen')
-    :e.tentative?'noch NICHT mit dem Gegner abgestimmt'+(away?'':' – bitte noch nicht im DFBnet ansetzen')+' · ohne Bestätigung entfernt am '+fmtShort(tentativeUntil(e))
+    :e.tentative?'noch NICHT mit dem Gegner abgestimmt'+(away?'':' – bitte noch nicht im DFBnet ansetzen')+' · wird am '+fmtShort(tentativeUntil(e))+' gelöscht, wenn es bis dahin nicht bestätigt ist'
     :(k==='game'&&!OWN_MATCH_FB[e.id]?(away?'vorgemerkt, noch nicht bei fussball.de':'vorgemerkt, Ansetzung im DFBnet über den Jugendleiter'):'');
   return [head,when,place,status].filter(Boolean).join(' · ')+' – '+session.name+teamTrailer(e.team,e.squad,e)+(action!=='gelöscht'?'\nPlatzcoach-Link: '+e.id:'');
 }
@@ -7895,6 +7896,11 @@ function tentativeUntil(e){
 function tentDay(d){ const x=fmtDayShort(d); return x.charAt(0)+x.slice(1,2).toLowerCase()+x.slice(2); }
 // Formular: Haken „noch nicht abgestimmt“ gesetzt (nur Spiele/Turniere)
 function formTentOn(){ const c=document.getElementById('f-tentative'); return !!c&&c.checked&&isMatchKind(formKind()); }
+// Unbestätigtes Spiel + Training derselben Mannschaft: kein Konflikt – das Training wird erst bei „Bestätigt“ abgesagt (ab 12.10.2026 · 4)
+function tentativeOwnTraining(A,B){
+  const t=A.tentative&&!A.isTraining?A:(B.tentative&&!B.isTraining?B:null), tr=t===A?B:A;
+  return !!t&&!!tr.isTraining&&tr.team===t.team&&(tr.squad||1)===(t.squad||1);
+}
 function tentativeWarnOn(e){ const u=tentativeUntil(e); return !!u&&todayStr>=addDays(u,-TENT_WARN_DAYS); }
 function tentativeLabel(e){ const k=kindOf(e), ts=teamShort(e.team,e.squad);
   return (k==='game'?'Freundschaftsspiel '+ts+(e.ha==='away'?' bei ':' gegen ')+(e.opponent||''):kindLabel(k)+' '+ts)+' ('+tentDay(e.d)+')'; }

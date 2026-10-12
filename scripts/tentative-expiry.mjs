@@ -83,8 +83,8 @@ async function plan() {
       const admins = active.filter(u => u.admin && !close.some(c => c.id === u.id) && adminWants(u, 'mail', trainsTeam(u, e, seasons, today) ? 'own' : 'other'));
       mails.push({
         type: 'removed', link: null, team: e.team, squad: e.squad || 1,
-        subject: `Platzcoach: ${label(e)} entfernt – nicht bestätigt`,
-        text: `${label(e)} am ${when} wurde entfernt: Es war nicht mit dem Gegner abgestimmt und wurde bis ${fmtDay(until)} nicht bestätigt. Der Platz ist wieder frei.${backTxt}`
+        subject: `Platzcoach: ${label(e)} gelöscht – nicht bestätigt`,
+        text: `${label(e)} am ${when} wurde gelöscht: Es war nicht mit dem Gegner abgestimmt und wurde bis ${fmtDay(until)} nicht bestätigt. Der Platz ist wieder frei.${backTxt}`
           + (e.ha === 'away' ? '' : ' Bitte nicht im DFBnet ansetzen.'),
         mailTo: [...close, ...admins].map(u => u.id), extraEmails: notifyEmails, pushTo: close.map(u => u.id),
       });
@@ -95,8 +95,8 @@ async function plan() {
       e.tentative.warnedAt = today;
       mails.push({
         type: 'warn', link: e.id, team: e.team, squad: e.squad || 1,
-        subject: `Platzcoach: ${label(e)} noch nicht bestätigt – wird am ${fmtDay(until)} entfernt`,
-        text: `${label(e)} am ${when} ist noch nicht mit dem Gegner abgestimmt. Ohne Bestätigung wird der Termin am ${fmtDay(until)} entfernt und der Platz freigegeben. `
+        subject: `Platzcoach: ${label(e)} – bitte bis ${fmtDay(until)} bestätigen, sonst wird es gelöscht`,
+        text: `${label(e)} am ${when} ist noch nicht mit dem Gegner abgestimmt. Bitte bis ${fmtDay(until)} bestätigen – sonst wird der Termin an dem Tag gelöscht und der Platz freigegeben. `
           + `Steht das Spiel, in Platzcoach „Bestätigt“ tippen – sonst „Löschen“.`,
         mailTo: close.map(u => u.id), extraEmails: [], pushTo: close.map(u => u.id),
       });
