@@ -238,8 +238,8 @@
     {
       "id": "ded884c6-d083-43cb-afc0-061c1fd1dc92",
       "d": "2026-11-02",
-      "t": "16:15",
-      "bis": "17:30",
+      "t": "16:30",
+      "bis": "17:45",
       "title": "Freundschaftsspiel gegen SSV Meschede",
       "kind": "game",
       "team": "E-Jugend",
@@ -253,7 +253,7 @@
       "note": "",
       "ha": "home",
       "opponent": "SSV Meschede",
-      "kickoff": "16:30",
+      "kickoff": "16:45",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
       "ownerName": "Fabrizio Calcagno",
       "tentative": {
