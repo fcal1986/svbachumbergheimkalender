@@ -259,6 +259,27 @@
       "tentative": {
         "since": "2026-10-12"
       }
+    },
+    {
+      "id": "fbb33abb-527a-48b5-8bcd-f3bee0a53677",
+      "d": "2026-11-07",
+      "t": "15:15",
+      "bis": "17:15",
+      "title": "Freundschaftsspiel gegen RW Ahlen U17",
+      "kind": "game",
+      "team": "B-Jugend",
+      "squad": 1,
+      "pitch": {
+        "mode": "ganz"
+      },
+      "halle": null,
+      "res": [],
+      "note": "",
+      "ha": "home",
+      "opponent": "RW Ahlen U17",
+      "kickoff": "15:30",
+      "ownerId": "af1a6546-fdc2-4059-bef4-5a4966181701",
+      "ownerName": "Michael Raneck"
     }
   ]
 }
