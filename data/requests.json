@@ -114,47 +114,6 @@
           }
         }
       ]
-    },
-    {
-      "id": "918d82f9-3cd0-4511-b464-11e0ef446fe1",
-      "created": "2026-10-12",
-      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "ownerName": "Fabrizio Calcagno",
-      "kind": "game",
-      "team": "E-Jugend",
-      "squad": 2,
-      "title": "Freundschaftsspiel gegen Test 3",
-      "dur": 90,
-      "ha": "home",
-      "opponent": "Test 3",
-      "res": [],
-      "halle": null,
-      "options": [
-        {
-          "d": "2027-05-03",
-          "start": "15:00",
-          "pitch": {
-            "mode": "haelfte",
-            "part": "A"
-          }
-        },
-        {
-          "d": "2027-05-10",
-          "start": "15:00",
-          "pitch": {
-            "mode": "haelfte",
-            "part": "A"
-          }
-        },
-        {
-          "d": "2027-05-17",
-          "start": "15:00",
-          "pitch": {
-            "mode": "haelfte",
-            "part": "A"
-          }
-        }
-      ]
     }
   ]
 }
