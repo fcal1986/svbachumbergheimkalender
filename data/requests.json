@@ -32,39 +32,6 @@
           }
         }
       ]
-    },
-    {
-      "id": "7a8562ed-5b38-49e2-bf4c-29b3c8f7a026",
-      "created": "2026-10-12",
-      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "ownerName": "Fabrizio Calcagno",
-      "kind": "game",
-      "team": "E-Jugend",
-      "squad": 2,
-      "title": "Freundschaftsspiel gegen SSV Meschede",
-      "dur": 90,
-      "ha": "home",
-      "opponent": "SSV Meschede",
-      "res": [],
-      "halle": null,
-      "options": [
-        {
-          "d": "2026-11-02",
-          "start": "16:15",
-          "pitch": {
-            "mode": "viertel",
-            "part": 2
-          }
-        },
-        {
-          "d": "2026-11-09",
-          "start": "16:15",
-          "pitch": {
-            "mode": "viertel",
-            "part": 2
-          }
-        }
-      ]
     }
   ]
 }
