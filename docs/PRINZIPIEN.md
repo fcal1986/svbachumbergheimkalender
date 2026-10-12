@@ -79,6 +79,22 @@ Neue häufige Aufgaben werden hier ergänzt.
 - **Klare Sprache.** Kurze deutsche Sätze, „du“, keine Fachbegriffe aus dem Code.
 - **Ruhige Oberfläche.** Wenige Farben mit Bedeutung (grün = frei/ok, gelb = Hinweis, rot = Konflikt).
 
+## 8. Technik und Betrieb (ab der Supabase-Migration)
+
+> Beschlossen am 12.10.2026 als Planung. Gilt ab dem Start der Migration für jede Änderung. Umsetzung und Abläufe: `docs/BETRIEB.md`.
+
+- **Rechte nur auf dem Server.** RLS ist auf jeder Tabelle an, geschrieben wird nur über `api.*`. Die Oberfläche blendet aus, sie schützt nicht. Jede Rechteänderung bekommt einen Test im selben Commit.
+- **Drei getrennte Umgebungen: Dev, Pre, Pro.** Jeder Stand läuft erst auf Pre (pre.platzcoach.de), dann auf Pro. Kein Release ohne grüne Tests auf Pre.
+- **Claude bekommt nie Zugang zu Pro.** Claude arbeitet auf Branches; Zugangsdaten zu Pro kennt nur die Release-Pipeline. Auch Menschen ändern Pro nicht von Hand.
+- **Schema nur über Migrationen im Repo.** Nur vorwärts und abwärtskompatibel: erst hinzufügen, im nächsten Release entfernen. Nie per Klick im Dashboard.
+- **Keine echten Personendaten außerhalb von Pro.** Pre und Dev arbeiten mit erfundenen Testvereinen.
+- **Geheimnisse nie im Client und nie im Repo.** Der Client bekommt nur URL und `anon`-Schlüssel.
+- **Europäische Dienste zuerst.** Daten in der EU (Supabase Frankfurt, Scaleway). Ein Dienst außerhalb der EU nur mit AVV und Begründung im Projektstand.
+- **Keine Werbung, kein Tracking im eingeloggten Bereich.** Analyse höchstens anonym und mit Einwilligung.
+- **Was nicht überwacht wird, läuft nicht.** Jeder Hintergrundjob meldet einen Heartbeat; Fehler lösen einen Alarm aus, kein Nachschauen.
+- **Ein Backup zählt erst, wenn es einmal zurückgespielt wurde.**
+- **Verstehen vor Übernehmen.** Kritische Teile (Rechte, Outbox, Belegungskonflikte) werden erst gemergt, wenn wir sie erklären können.
+
 ## Prüfliste vor jedem neuen Feature
 
 Jede Frage muss mit Ja beantwortet sein, sonst wird das Feature angepasst oder nicht gebaut:
@@ -92,3 +108,4 @@ Jede Frage muss mit Ja beantwortet sein, sonst wird das Feature angepasst oder n
 7. Bleibt Lesen ohne Anmeldung möglich, und ist nichts SVBB-spezifisch fest eingebaut?
 8. Funktioniert es am Handy?
 9. Ist es im Backlog (`docs/BACKLOG.md`) eingetragen, und wird der Status im selben Commit aktualisiert?
+10. Ab der Migration: Sind Rechte auf dem Server geprüft und durch Tests abgesichert, und läuft die Änderung als Migration über Pre nach Pro?
