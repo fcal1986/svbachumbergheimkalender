@@ -447,10 +447,6 @@
   .match-info{margin-top:10px;font-size:12px;color:var(--ink-secondary);line-height:1.5;}
   .match-info b{color:var(--ink);}
   .match-info a{color:var(--grass);font-weight:600;}
-  .tent-field{display:flex;gap:10px;align-items:flex-start;margin:4px 0 10px;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;cursor:pointer;}
-  .tent-field input{width:20px;height:20px;flex:none;margin-top:1px;accent-color:var(--grass);}
-  .tent-field b{display:block;font-size:14px;} .tent-field small{display:block;font-size:12px;color:var(--ink-soft);margin-top:2px;line-height:1.35;}
-  .match-info .wk-act{font-size:12px;}
   .dfb-badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;}
   .dfb-badge.ok{background:var(--green-dim);color:var(--kt1E5730);}
   .dfb-badge.open{background:var(--kbFFF7ED);color:var(--kt9A3412);}
@@ -459,7 +455,6 @@
   .event-card.match-planned .ev-head{background:var(--kbFFF7ED);}
   .event-card.external-card.match-planned{border:1.5px dashed #F59E0B;}
   .wk-row.wk-planned{background:var(--kbFFF7ED);border:1.5px dashed #F59E0B;}
-  .plan-tag.tent{color:var(--kt8E2A1D);background:var(--kbFFF5F5);}
   .plan-tag{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--kt9A3412);background:var(--kbFFEDD5);border-radius:6px;padding:2px 7px;margin-bottom:3px;}
   .wk-row .pt-time.two{line-height:1.25;font-size:11px;min-width:52px;}
   .wk-row .pt-time.two b{display:block;font-size:12px;}
@@ -1431,8 +1426,6 @@
         <div class="field required" id="f-opp-field"><label><span class="req-dot"></span>Gegner</label><input type="text" id="f-opponent" autocomplete="off" oninput="formDirty=true;autoMatchTitle()" placeholder="z. B. SV Hüsten 09 II"></div>
         <div class="field" id="f-part-field"><label>Teilnehmer (optional)</label><input type="text" id="f-participants" autocomplete="off" oninput="formDirty=true" placeholder="z. B. SC Neheim, TuS Oeventrop"></div>
         <div class="field" id="f-addr-field"><label id="f-addr-label">Adresse (Spielort)</label><input type="text" id="f-address" autocomplete="off" oninput="formDirty=true" placeholder="Straße, Ort"></div>
-        <label class="tent-field" for="f-tentative"><input type="checkbox" id="f-tentative" onchange="formDirty=true;renderFormTimeline()">
-          <span><b>Noch nicht mit dem Gegner abgestimmt</b><small>Der Platz wird höchstens 14 Tage reserviert, spätestens bis zum Vortag. Ist das Spiel bis dahin nicht bestätigt, wird der Termin gelöscht – 2 Tage vorher kommt eine Erinnerung. Der Jugendleiter setzt erst nach der Bestätigung im DFBnet an.</small></span></label>
         <p class="helptext" id="f-match-help"></p>
       </div>
 
@@ -1761,7 +1754,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='12.10.2026 · 5';
+const APP_VERSION='12.10.2026 · 4';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -3676,7 +3669,7 @@ function rowHTML(e){
     +'<div class="ev-head">'
     +'<div class="ev-date-box"><span class="ev-dow">'+dow+'</span><span class="ev-day">'+dd+'</span></div>'
     +'<div class="ev-sep"></div>'
-    +'<div class="ev-title-box">'+(e.tentative&&e.d>=todayStr?'<div class="plan-tag tent">Unbestätigt</div>':planned?'<div class="plan-tag">Vorgemerkt</div>':'')+'<h4>'+esc(title)+'</h4>'+(sub?'<div class="ev-sub">'+sub+'</div>':'')+'</div>'
+    +'<div class="ev-title-box">'+(planned?'<div class="plan-tag">Vorgemerkt</div>':'')+'<h4>'+esc(title)+'</h4>'+(sub?'<div class="ev-sub">'+sub+'</div>':'')+'</div>'
     +'<div class="row-acts">'+acts+'</div>'
     +'</div>'
     +'<div class="ev-body">'
@@ -4191,11 +4184,6 @@ function shareText(e){
     const adr2=eventAddress(e);
     if(venue||area||adr2) L.push('📍 '+[[e.pitch?venue:'',area].filter(Boolean).join(' · '),adr2].filter(Boolean).join(' – ')); contact();
     if(e.note) L.push('ℹ️ '+e.note);
-  }
-  // Ab 12.10.2026 · 5: noch nicht mit dem Gegner abgestimmt – im geteilten Text klar als „angefragt“
-  if(e.tentative&&!e.isCancelled&&L.length){
-    L[0]=L[0].replace(/^\S+ /,'❔ ')+' · angefragt';
-    L.splice(2,0,'⏳ Noch nicht fest – '+(kindOf(e)==='game'?'der Gegner hat':'die Teilnahme ist')+' noch nicht zugesagt. Bitte schon mal vormerken, Bestätigung folgt.');
   }
   L.push('👉 '+shareLinkFor(e));
   return L.join('\n');
@@ -5473,7 +5461,6 @@ function weekRowParts(e){
   }else{
     name=e.isTraining?'Training':(e.title||'Termin'); sub=e.isTraining?'':typeLabelOf(e);
   }
-  if(e.tentative&&!e.isExternal&&!e.isTraining){ sub='Noch nicht abgestimmt'+(e.kickoff?' · Anstoß '+e.kickoff:''); tag='Unbestätigt'; }
   return {name, sub, tag};
 }
 function weekRowHTML(e,withDate){
@@ -5649,11 +5636,6 @@ function myTodos(isMine,hasTeams){
       out.push({click:'inviteTrainersQuick()',txt:'Noch ohne Trainer in Platzcoach: '+miss.join(', ')+'.',act:'Per WhatsApp einladen',noDigest:true,
         fix:{label:'Nicht jetzt',click:'hideInviteHint(\''+jsArg(key)+'\')'}});
   }
-  // Unbestätigte Spiele/Turniere kurz vor dem Entfernen (ab 12.10.2026 · 1)
-  EVENTS.filter(e=>e.tentative&&e.d>=todayStr&&tentativeWarnOn(e)&&canEdit(e)&&(!hasTeams||isMine(e)||e.ownerId===session.id)).forEach(e=>{
-    out.push({click:'openTerminFromStart(\''+jsArg(e.id)+'\',\''+e.d+'\')',txt:tentativeLabel(e)+' ist noch nicht mit dem Gegner abgestimmt. Bitte bis '+tentDay(tentativeUntil(e))+' bestätigen, sonst wird der Termin an dem Tag gelöscht.',act:'Ansehen',
-      fix:{label:'Bestätigt',click:'confirmTentative(\''+jsArg(e.id)+'\')'},fix2:{label:'Löschen',click:'deleteEvent(\''+jsArg(e.id)+'\')'}});
-  });
   const tsOpen=teamSyncOpenCount();
   if(tsOpen) out.push({click:'openTeamSync()',txt:'Mannschaften: '+tsOpen+(tsOpen===1?' Abweichung':' Abweichungen')+' zwischen Platzcoach und fussball.de.',act:'Prüfen'});
   const end=weekEndStr();
@@ -5971,7 +5953,6 @@ function conflictsOnDay(ds){
     for(let j=i+1;j<items.length;j++){
       const A=items[i],B=items[j];
       if(!timesOverlap(A,B)) continue;
-      if(tentativeOwnTraining(A,B)) continue;
       if(occupationConflictReasons(A,B,pitchReason).length) found.push([A,B]);
     }
   }
@@ -6662,7 +6643,6 @@ function resetForm(){
   pitchMode='ganz';pitchPart=null;document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode==='ganz'));
   document.getElementById('f-kind').value='other'; kindTouched=false; renderGkTeamChips('f-gkteams',[]); renderTtForChips([]);
   ['f-opponent','f-participants','f-kickoff','f-address'].forEach(id=>{ document.getElementById(id).value=''; });
-  document.getElementById('f-tentative').checked=false;
   document.getElementById('f-anlass').dataset.auto=''; setHomeAway('home',false);
   halleThirds=[];onTeamChange();onKindChange(false);renderPitch();renderHalle();hideConflicts();formDirty=false;
   formSkipFussballLink=null; delete document.getElementById('f-team').dataset.prevTeam; FORM_TEAMS_ALL=false; ANLASS_OPEN=false; FORM_TL={ds:null,m:null,edge:null,touched:[]}; openFormNote(false);
@@ -6887,7 +6867,7 @@ function renderFormTlStatus(cand){
   const ri=formPitchRuleIssue();
   if(ri) msg+='<span class="nf-st rule-warn">⚠ '+esc(ri.txt)+' <button type="button" class="rule-fix" onclick="applyRulePitch()">'+(ri.rule==='ganz'?'Ganzen Platz wählen':'Hälfte wählen')+'</button></span>';
   const ownTr=ownTrainingsOverlapping(d,von,bis,o.ownFree,o.kind);
-  if(ownTr.length) msg+='<span class="nf-st own-tr">'+(o.kind==='training'?'Verlegt euer Regeltraining ':'Euer Training ')+esc(ownTr.map(t=>t.t+'–'+eventBis(t)).join(', '))+(o.kind==='training'?' an dem Tag hierher':formTentOn()?' – wird erst bei „Bestätigt“ abgesagt':' – Absage beim Speichern')+'</span>';
+  if(ownTr.length) msg+='<span class="nf-st own-tr">'+(o.kind==='training'?'Verlegt euer Regeltraining ':'Euer Training ')+esc(ownTr.map(t=>t.t+'–'+eventBis(t)).join(', '))+(o.kind==='training'?' an dem Tag hierher':' – Absage beim Speichern')+'</span>';
   el.innerHTML='<b>'+esc(parts.join(' · '))+'</b> '+msg;
 }
 function toggleFormTlAdd(){
@@ -6945,7 +6925,7 @@ function formTlFree(ds,area,lane,from,to,ev){
    zeigt, wo die Wunschzeit passt, wo nur eine andere Uhrzeit (08–22 Uhr) und wo nichts frei ist.
    „Übernehmen“ trägt Tag und Zeit ins Formular ein. Spiele, die fussball.de noch nicht kennt, kann die
    Suche nicht sehen – dafür der Hinweis; kommen sie später dazu, meldet die Änderungsmail Konflikte. */
-let SF={months:new Set(),days:new Set(),dur:90,start:'15:00',flex:true,moreRes:false};
+let SF={months:new Set(),days:new Set(),dur:90,start:'15:00',flex:true,moreRes:false,sel:new Map(),showAll:false};
 const SF_MONTHS=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 const SF_WIN_FROM='08:00', SF_WIN_TO='22:00';
 function formOccupation(){
@@ -6975,6 +6955,7 @@ function openSlotFinder(){
   SF.start=document.getElementById('f-von').value||'15:00';
   SF.flex=true;
   SF.moreRes=false;
+  SF.sel=new Map(); SF.showAll=false; // Ab 12.10.2026 · 4: freie Termine zum Vorschlagen auswählen
   if(formKind()==='game'&&formHA!=='away'){ const rule=gamePitchRule(document.getElementById('f-team').value);
     const on=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res);
     if(!on.includes('Großspielfeld')||pitchMode!==rule){ setResChips('f-res',[...new Set(on.concat(['Großspielfeld']))]); setPitchMode(rule); renderPitch(); } }
@@ -7097,13 +7078,52 @@ function renderSlotFinder(){
     }).join('')+'</div></div>';
   });
   h+='<div class="sf-legend"><span><i style="background:#6BB41C"></i>Wunschzeit frei</span><span><i style="background:#FFD24A"></i>andere Uhrzeit</span><span><i style="background:var(--kbE4E9E8)"></i>belegt</span></div>';
-  const best=days.filter(x=>x.status==='free').concat(days.filter(x=>x.status==='part')).slice(0,5);
-  if(best.length){
-    h+='<p class="field-label" style="margin:4px 0 6px;">Vorschläge</p>'+best.map(x=>'<div class="rs-result-row"><div><b>'+DOW[dowOf(x.d)-1]+', '+fmtShort(x.d)+'</b><br><small style="color:var(--ink-soft);">'
+  // Ab 12.10.2026 · 4: freie Termine anhaken und per WhatsApp vorschlagen (wie bei der Spielverlegung) – blockiert nichts.
+  // Nach der Zusage „Übernehmen“ → Formular wie gewohnt speichern.
+  const all=days.filter(x=>x.status==='free').concat(days.filter(x=>x.status==='part'));
+  [...SF.sel.keys()].forEach(d=>{ const x=all.find(y=>y.d===d); if(x) SF.sel.set(d,x); else SF.sel.delete(d); });
+  const shown=SF.showAll?all:all.filter((x,i)=>i<5||SF.sel.has(x.d));
+  const apply=x=>'applySlotFinder(\''+x.d+'\',\''+x.start+'\''+(x.pitch&&x.pitch.mode!=='ganz'?',\''+x.pitch.mode+'\',\''+x.pitch.part+'\'':'')+')';
+  if(shown.length){
+    h+='<p class="field-label" style="margin:4px 0 6px;">Freie Termine – zum Vorschlagen anhaken</p>'+shown.map(x=>'<label class="rs-result-row rs-selectable'+(SF.sel.has(x.d)?' on':'')+'">'
+      +'<input type="checkbox"'+(SF.sel.has(x.d)?' checked':'')+' onchange="sfSel(\''+x.d+'\')">'
+      +'<div style="flex:1;"><b>'+DOW[dowOf(x.d)-1]+', '+fmtShort(x.d)+'</b><br><small style="color:var(--ink-soft);">'
       +x.start+'–'+endOf(x.start)+(x.status==='part'?' (statt '+SF.start+')':'')+(x.pitch&&x.pitch.mode!=='ganz'?' · '+pitchShort(x.pitch):'')+'</small></div>'
-      +'<button class="fs-btn" onclick="applySlotFinder(\''+x.d+'\',\''+x.start+'\''+(x.pitch&&x.pitch.mode!=='ganz'?',\''+x.pitch.mode+'\',\''+x.pitch.part+'\'':'')+')">Übernehmen</button></div>').join('');
+      +'<button type="button" class="fs-btn" onclick="'+esc('event.preventDefault();event.stopPropagation();'+apply(x))+'">Übernehmen</button></label>').join('')
+      +(all.length>shown.length?'<div class="rs-empty rs-showmore" onclick="SF.showAll=true;renderSlotFinder()">+ '+(all.length-shown.length)+' weitere anzeigen ▾</div>':'');
+    if(SF.sel.size){
+      const one=[...SF.sel.values()][0];
+      h+='<button type="button" class="submit-btn" style="margin-top:10px;background:#25D366;" onclick="sfShare()">'
+        +'<svg viewBox="0 0 24 24" fill="currentColor" style="width:17px;height:17px;"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.26 4.81L2.05 22l5.4-1.42a9.87 9.87 0 004.59 1.17h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2zm0 18.06a8.2 8.2 0 01-4.17-1.14l-.3-.18-3.1.82.83-3.02-.2-.31a8.15 8.15 0 01-1.26-4.32c0-4.51 3.68-8.19 8.2-8.19a8.15 8.15 0 015.8 2.4 8.15 8.15 0 012.4 5.8c0 4.52-3.68 8.14-8.2 8.14z"/></svg>'
+        +(SF.sel.size===1?'1 Vorschlag':SF.sel.size+' Vorschläge')+' per WhatsApp teilen</button>'
+        +(SF.sel.size===1?'<button type="button" class="ghost-btn" style="margin-top:8px;" onclick="'+esc(apply(one))+'">Zugesagt? Übernehmen</button>':'');
+    } else h+='<p class="sf-hint" style="margin-top:8px;">Noch nicht abgesprochen? Termine anhaken und per WhatsApp vorschlagen – der Platz wird dabei nicht blockiert. Nach der Zusage „Übernehmen“ und speichern.</p>';
   } else h+='<p class="rs-empty">Nichts frei. Andere Monate, Wochentage oder eine kürzere Dauer probieren.</p>';
   out.innerHTML=h;
+}
+function sfSel(d){ if(SF.sel.has(d)) SF.sel.delete(d); else SF.sel.set(d,{d}); renderSlotFinder(); }
+// WhatsApp-Text wie bei der Spielverlegung (shareRescheduleProposal)
+function sfShareText(list){
+  const k=formKind(), team=document.getElementById('f-team').value, sb=document.querySelector('#f-squad button.on'), squad=sb?parseInt(sb.dataset.squad):1;
+  const one=list.length===1, opp=(document.getElementById('f-opponent').value||'').trim(), title=(document.getElementById('f-anlass').value||'').trim();
+  const who=team&&team!=='Alle Teams'&&team!==GK_TEAM&&team!=='Vorstand'?teamLabel(team,squad):'';
+  const own=fussballOwnTeamName({squad:isJugend(team)?squad:1});
+  const away=isMatchKind(k)&&formHA==='away';
+  const head=k==='game'?'📅 *Freundschaftsspiel gesucht*\n*'+own+(who?' ('+who+')':'')+(opp?' – '+opp:'')+'*'
+    :isMatchKind(k)?'📅 *'+kindLabel(k)+' – Termin gesucht*\n*'+own+(who?' ('+who+')':'')+'*'
+    :'📅 *'+(title||kindLabel(k))+' – Termin gesucht*'+(who?'\n'+who:'');
+  const endOf=t=>minToTime(Math.min(timeToMin(t)+SF.dur,timeToMin('23:45')));
+  const lines=list.sort((a,b)=>a.d.localeCompare(b.d)).map(x=>'• '+shareDay(x.d)+', '
+    +(k==='game'?'Anstoß um '+(away?x.start:addMinutes(x.start,fussballBufferBeforeMin()))+' Uhr':x.start+'–'+endOf(x.start)+' Uhr')).join('\n');
+  return head+'\n\n'
+    +(one?'Folgender Termin wäre bei uns frei – würde der passen?\n\n':'Folgende Termine wären bei uns frei – passt einer davon?\n\n')
+    +lines+'\n\n'
+    +(one?'Bitte kurz Rückmeldung, ob der Termin passt 🙏':'Bitte kurz Rückmeldung, welcher Termin passt 🙏');
+}
+function sfShare(){
+  if(!SF.sel.size) return;
+  window.open('https://wa.me/?text='+encodeURIComponent(sfShareText([...SF.sel.values()])),'_blank','noopener');
+  trackEvent('freier_termin_vorgeschlagen');
 }
 function applySlotFinder(d,start,mode,part){
   dateInput().value=d;
@@ -7302,7 +7322,6 @@ function fillForm(e){
   halleThirds=e.halle&&e.halle.thirds?[...e.halle.thirds]:[];
   document.getElementById('f-kind').value=kindOf(e); kindTouched=true; renderGkTeamChips('f-gkteams',e.gkTeams||[]); renderTtForChips(ttForList(e));
   document.getElementById('f-opponent').value=e.opponent||''; document.getElementById('f-participants').value=e.participants||'';
-  document.getElementById('f-tentative').checked=!!e.tentative;
   document.getElementById('f-kickoff').value=e.kickoff||''; document.getElementById('f-address').value=e.address||'';
   document.getElementById('f-anlass').dataset.auto=''; setHomeAway(e.ha==='away'?'away':'home',false);
   fillingForm=true;
@@ -7369,8 +7388,7 @@ function openReviewSheet(o){
   const edit=!!editingId;
   const own=ownFreeFor(o.kind,o.away,o.team,o.squad), ownTr=ownTrainingsOverlapping(o.d,o.von,o.bis,own,o.kind);
   const clashIds=new Set(findConflicts(o.d,o.von,o.bis,o.pitch,o.halle,o.res,editingId,o.kind).map(c=>c.event.id));
-  // Ab 12.10.2026 · 2: noch nicht abgestimmt → Training bleibt, abgesagt wird erst bei „Bestätigt“
-  const trRows=o.tentative?(ownTr.length?row('Training',teamShort(ownTr[0].team,ownTr[0].squad)+' '+ownTr.map(t=>t.t+'–'+eventBis(t)).join(', ')+' bleibt – wird erst bei „Bestätigt“ abgesagt'):''):ownTr.map(t=>{ const repl=o.kind==='training', pre=repl||isMatchKind(o.kind)||clashIds.has(t.id);
+  const trRows=ownTr.map(t=>{ const repl=o.kind==='training', pre=repl||isMatchKind(o.kind)||clashIds.has(t.id);
     return '<label class="rv-row rv-tr"><input type="checkbox" class="rv-cancel" data-slot="'+esc(t.trainingSlotId)+'"'+(pre?' checked':'')+'><b>'
       +(repl?'Regeltraining '+esc(teamShort(t.team,t.squad))+' '+t.t+'–'+eventBis(t)+' an dem Tag auf diese Zeit verlegen':'Training '+esc(teamShort(t.team,t.squad))+' '+t.t+'–'+eventBis(t)+' an dem Tag absagen')+'</b></label>'; }).join('');
   openSheet('<div class="rv-sheet"><h3>'+(edit?'Änderungen prüfen':'Termin prüfen')+'</h3>'
@@ -7430,7 +7448,7 @@ async function submitEvent(){
   if(conflicts.length){showConflicts(conflicts);renderFreeSlotsBox('free-slots-box',d,von,bis,editingId);return;}
   hideConflicts();
   // Ab 06.10.2026 · 13: vor dem Speichern „Termin prüfen“ – Speichern verschickt Mails, darum konkrete Zusammenfassung statt „Wirklich?“
-  if(!submitEvent._confirmed){ openReviewSheet({d,von,bis,title,kind,team,squad,pitch,halle,res,mf,away,tentative:formTentOn(),gkTeams:kind==='goalkeeper'?readGkTeamChips('f-gkteams'):null,ttFor:kind==='trainer'?readTtForChips():null}); return; }
+  if(!submitEvent._confirmed){ openReviewSheet({d,von,bis,title,kind,team,squad,pitch,halle,res,mf,away,gkTeams:kind==='goalkeeper'?readGkTeamChips('f-gkteams'):null,ttFor:kind==='trainer'?readTtForChips():null}); return; }
   const btn=document.getElementById('save-btn'),lblEl=document.getElementById('save-label');
   const spinEl=document.getElementById('save-spin'),checkEl=document.getElementById('save-check');
   const lbl=lblEl.textContent;btn.disabled=true;lblEl.textContent='Speichere …';
@@ -7442,22 +7460,17 @@ async function submitEvent(){
     const ttFor=kind==='trainer'?readTtForChips():undefined;
     let newId=null;
     const before=editingId?JSON.stringify(EVENTS.find(x=>x.id===editingId)||{}):null;
-    // Ab 12.10.2026 · 1: „Noch nicht mit dem Gegner abgestimmt“ – Startdatum der 14-Tage-Frist bleibt beim Bearbeiten erhalten
-    const prevTent=editingId?(EVENTS.find(x=>x.id===editingId)||{}).tentative:null;
-    const tentative=isMatchKind(kind)&&document.getElementById('f-tentative').checked?(prevTent||{since:todayStr}):undefined;
-    if(editingId)Object.assign(EVENTS.find(x=>x.id===editingId),{d,t:von,bis,title,kind,team,squad,pitch,halle,res,note,gkTeams,ttFor,...mf,tentative});
-    else{ newId=crypto.randomUUID(); EVENTS.push({id:newId,d,t:von,bis,title,kind,team,squad,pitch,halle,res,note,gkTeams,ttFor,...mf,tentative,ownerId:session.id,ownerName:session.name}); }
+    if(editingId)Object.assign(EVENTS.find(x=>x.id===editingId),{d,t:von,bis,title,kind,team,squad,pitch,halle,res,note,gkTeams,ttFor,...mf});
+    else{ newId=crypto.randomUUID(); EVENTS.push({id:newId,d,t:von,bis,title,kind,team,squad,pitch,halle,res,note,gkTeams,ttFor,...mf,ownerId:session.id,ownerName:session.name}); }
     applyGameMoves(); // Verknüpfung mit fussball.de neu berechnen
     // Neues Torwarttraining: Trainer der gewählten Jugenden per Mail bitten, Torhüter an-/abzumelden.
     if(newId&&kind==='goalkeeper') setTimeout(()=>sendGkRequest(gkTeams,title,DAYS[new Date(d+'T00:00:00').getDay()]+', '+fmtShort(d)+' · '+von+'–'+bis+' Uhr',location.origin+location.pathname+'#t='+newId,[session.id]),4000);
     const wasEditing=!!editingId;
     const savedEv=EVENTS.find(x=>x.id===(newId||editingId))||{};
-    const cancelSlots=savedEv.tentative?[]:Array.isArray(submitEvent._cancelSlots)?submitEvent._cancelSlots.map(id=>TRAINING.find(x=>x.id===id)).filter(x=>x&&!(x.cancelled||[]).includes(d)):[];
+    const cancelSlots=Array.isArray(submitEvent._cancelSlots)?submitEvent._cancelSlots.map(id=>TRAINING.find(x=>x.id===id)).filter(x=>x&&!(x.cancelled||[]).includes(d)):[];
     const reviewed=Array.isArray(submitEvent._cancelSlots);
     const backupT=JSON.stringify(TRAINING);
     cancelSlots.forEach(x=>{ x.cancelled=[...new Set([...(x.cancelled||[]),d])].sort(); });
-    // Unbestätigt: dafür abgesagte Trainings merken – wird der Termin automatisch entfernt, finden sie wieder statt
-    if(savedEv.tentative&&cancelSlots.length) savedEv.tentative.cancelled=[...new Set([...(savedEv.tentative.cancelled||[]),...cancelSlots.map(x=>x.id)])];
     let logMsg=isMatchKind(kind)&&mf.ha
       ?matchLogMsg(savedEv,wasEditing?'geändert':'angelegt')
       :(wasEditing?'Termin geändert: ':'Neuer Termin: ')+title+' – '+(kind==='trainer'?'Trainer-Termin für '+(ttFor&&ttFor.length?ttForText({ttFor}):'alle Trainer'):msgTeam(team,squad,gkTeams))+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name+teamTrailer(team,squad,savedEv);
@@ -7804,10 +7817,7 @@ function matchInfoHTML(e){
   if(e.participants) lines.push('Teilnehmer: '+esc(e.participants));
   if(e.ha==='away'&&e.address) lines.push('📍 <a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(e.address)+'" target="_blank" rel="noopener" onclick="event.stopPropagation();">'+esc(e.address)+'</a>');
   let st='';
-  if(e.tentative&&e.d>=todayStr){
-    st='<span class="dfb-badge warn">Noch nicht abgestimmt · bitte bis '+esc(tentDay(tentativeUntil(e)))+' bestätigen, sonst wird der Termin an dem Tag gelöscht</span>'
-      +(canEdit(e)?'<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();confirmTentative(\''+jsArg(e.id)+'\')')+'">Bestätigt</button>':'');
-  }else if(k==='game'&&fb){
+  if(k==='game'&&fb){
     const diff=fb.t&&e.kickoff&&fb.t!==e.kickoff;
     st='<span class="dfb-badge '+(diff?'warn':'ok')+'">'+(diff?'⚠ fussball.de: Anstoß '+esc(fb.t)+' statt '+esc(e.kickoff):'✓ bei fussball.de angesetzt')+'</span>'
       +(fb.link?' <a href="'+esc(fb.link)+'" target="_blank" rel="noopener" class="fb-link-btn" onclick="event.stopPropagation();">Zum Spiel</a>':'');
@@ -7816,7 +7826,7 @@ function matchInfoHTML(e){
   }else if(e.ha==='home'&&e.d>=todayStr){
     st='<span class="dfb-badge open">DFBnet-Anmeldung über den Jugendleiter</span>';
   }
-  const yl=(session&&e.ha==='home'&&!e.tentative)?'<button class="ghost-btn" style="margin-top:8px;border-style:solid;" onclick="event.stopPropagation();openMatchYouthLeader(\''+e.id+'\')">💬 Nachricht an den Jugendleiter</button>':'';
+  const yl=(session&&e.ha==='home')?'<button class="ghost-btn" style="margin-top:8px;border-style:solid;" onclick="event.stopPropagation();openMatchYouthLeader(\''+e.id+'\')">💬 Nachricht an den Jugendleiter</button>':'';
   return '<div class="match-info">'+lines.join('<br>')+(st?'<div style="margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'+st+'</div>':'')+yl+'</div>';
 }
 // Spielstätte: aus den Heimspielen von fussball.de (häufigster Spielort), sonst leer.
@@ -7883,53 +7893,11 @@ function matchLogMsg(e,action){
   const when=k==='game'&&e.kickoff?day+', Anstoß '+e.kickoff:day+', '+e.t+'–'+eventBis(e);
   const place=away?(e.address?'Spielort: '+e.address:'auswärts')
     :(e.pitch?'Platz '+(e.pitch.mode==='ganz'?'ganz':(e.pitch.mode==='haelfte'?'Hälfte '+e.pitch.part:'Viertel '+e.pitch.part))+' '+e.t+'–'+eventBis(e):(e.halle&&e.halle.thirds&&e.halle.thirds.length?halleShort(e.halle):''));
-  const status=action==='gelöscht'?'':action==='bestätigt'?(away?'mit dem Gegner abgestimmt':'mit dem Gegner abgestimmt – jetzt im DFBnet ansetzen')
-    :e.tentative?'noch NICHT mit dem Gegner abgestimmt'+(away?'':' – bitte noch nicht im DFBnet ansetzen')+' · wird am '+fmtShort(tentativeUntil(e))+' gelöscht, wenn es bis dahin nicht bestätigt ist'
-    :(k==='game'&&!OWN_MATCH_FB[e.id]?(away?'vorgemerkt, noch nicht bei fussball.de':'vorgemerkt, Ansetzung im DFBnet über den Jugendleiter'):'');
+  const status=action==='gelöscht'?'':(k==='game'&&!OWN_MATCH_FB[e.id]?(away?'vorgemerkt, noch nicht bei fussball.de':'vorgemerkt, Ansetzung im DFBnet über den Jugendleiter'):'');
   return [head,when,place,status].filter(Boolean).join(' · ')+' – '+session.name+teamTrailer(e.team,e.squad,e)+(action!=='gelöscht'?'\nPlatzcoach-Link: '+e.id:'');
-}
-/* ---------- Noch nicht abgestimmt (ab 12.10.2026 · 1) ----------
-   Freundschaftsspiel/Turnier mit e.tentative={since,cancelled?}: Platz ist reserviert, aber der Gegner hat noch nicht
-   zugesagt. Frist: 14 Tage ab Anlegen, spätestens Vortag (mind. 1 Tag). 2 Tage vorher Erinnerung (Zu erledigen,
-   Mail + Push über scripts/tentative-expiry.mjs), danach entfernt das Skript den Termin. */
-const TENT_DAYS=14, TENT_WARN_DAYS=2;
-function tentativeUntil(e){
-  if(!e||!e.tentative) return null; const s=e.tentative.since||todayStr;
-  const a=[addDays(s,TENT_DAYS),addDays(e.d,-1)].sort()[0], b=[addDays(s,1),e.d].sort()[0];
-  return a>b?a:b;
-}
-function tentDay(d){ const x=fmtDayShort(d); return x.charAt(0)+x.slice(1,2).toLowerCase()+x.slice(2); }
-// Formular: Haken „noch nicht abgestimmt“ gesetzt (nur Spiele/Turniere)
-function formTentOn(){ const c=document.getElementById('f-tentative'); return !!c&&c.checked&&isMatchKind(formKind()); }
-// Unbestätigtes Spiel + Training derselben Mannschaft: kein Konflikt – das Training wird erst bei „Bestätigt“ abgesagt (ab 12.10.2026 · 4)
-function tentativeOwnTraining(A,B){
-  const t=A.tentative&&!A.isTraining?A:(B.tentative&&!B.isTraining?B:null), tr=t===A?B:A;
-  return !!t&&!!tr.isTraining&&tr.team===t.team&&(tr.squad||1)===(t.squad||1);
-}
-function tentativeWarnOn(e){ const u=tentativeUntil(e); return !!u&&todayStr>=addDays(u,-TENT_WARN_DAYS); }
-function tentativeLabel(e){ const k=kindOf(e), ts=teamShort(e.team,e.squad);
-  return (k==='game'?'Freundschaftsspiel '+ts+(e.ha==='away'?' bei ':' gegen ')+(e.opponent||''):kindLabel(k)+' '+ts)+' ('+tentDay(e.d)+')'; }
-function confirmTentative(id){
-  if(!requireLogin()) return;
-  const e=EVENTS.find(x=>x.id===id); if(!e||!e.tentative) return;
-  if(!canEdit(e)){ showToast('Nur der Ersteller, ein Trainer der Mannschaft oder ein Admin.',4000); return; }
-  const backup=JSON.stringify(EVENTS), backupT=JSON.stringify(TRAINING);
-  delete e.tentative;
-  // Ab 12.10.2026 · 2: erst jetzt das eigene Training zur Spielzeit absagen (Heimspiel/-turnier)
-  const own=e.ha==='home'?{team:e.team,squad:e.squad||1}:null;
-  const slots=[...new Set(ownTrainingsOverlapping(e.d,e.t,eventBis(e),own,kindOf(e)).map(t=>t.trainingSlotId))].map(id=>TRAINING.find(x=>x.id===id)).filter(Boolean);
-  slots.forEach(x=>{ x.cancelled=[...new Set([...(x.cancelled||[]),e.d])].sort(); });
-  let msg=matchLogMsg(e,'bestätigt');
-  if(slots.length){ const add=', Training '+teamShort(e.team,e.squad)+' am '+fmtShort(e.d)+' abgesagt'; msg=msg.includes('\n\nPlatzcoach-Team')?msg.replace('\n\nPlatzcoach-Team',add+'\n\nPlatzcoach-Team'):msg.replace(/ – [^–\n]*(\n|$)/,add+'$&'); renderTraining(); }
-  render(); renderStart(); showToast('Bestätigt – der Termin bleibt.'+(slots.length?' Training '+slots.map(x=>x.from+'–'+x.to).join(', ')+' abgesagt.':''),4500);
-  saveEvents(msg)
-    .then(()=>slots.length?saveTraining('Training abgesagt: '+teamLabel(e.team,e.squad)+' am '+fmtShort(e.d)+' wegen '+(e.title||'Heimspiel')+' (automatisch) – '+session.name+teamTrailer(e.team,e.squad,e)):null)
-    .then(()=>{ if(e.ha==='home') setTimeout(()=>openMatchYouthLeader(e.id,'Bestätigt – jetzt an den Jugendleiter'),300); })
-    .catch(err=>{ EVENTS=JSON.parse(backup); TRAINING=JSON.parse(backupT); render(); renderStart(); renderTraining(); showToast('Fehler: '+err.message,6000); });
 }
 function openMatchYouthLeader(id,title){
   const e=EVENTS.find(x=>x.id===id); if(!e) return;
-  if(e.tentative){ showToast('Noch nicht mit dem Gegner abgestimmt – der Jugendleiter setzt erst nach „Bestätigt“ an.',4500); return; }
   openYouthLeaderText(title||'Nachricht an den Jugendleiter',
     kindOf(e)==='game'?'Für die Ansetzung des Freundschaftsspiels im DFBnet. Mit WhatsApp senden oder kopieren und weiterleiten.':'Für die Turnier-Anmeldung im DFBnet. Mit WhatsApp senden oder kopieren und weiterleiten.',
     matchYouthLeaderMessage(e));
@@ -7937,7 +7905,6 @@ function openMatchYouthLeader(id,title){
 // Nach dem Speichern eines Heimspiels/-turniers: überlappendes Training der Mannschaft absagen (Rückfrage), dann Jugendleiter-Text.
 function afterHomeMatchSaved(e,isNew,trainingDecided){
   const title=isNew?'Gespeichert – jetzt an den Jugendleiter':'Geändert – Jugendleiter informieren?';
-  if(e.tentative){ showToast('Gespeichert als „noch nicht abgestimmt“ – euer Training wird erst bei „Bestätigt“ abgesagt.',5000); return; }
   if(trainingDecided){ openMatchYouthLeader(e.id,title); return; } // in „Termin prüfen“ schon entschieden
   const slots=TRAINING.filter(s=>s.team===e.team&&(!isJugend(e.team)||(s.squad||1)===(e.squad||1))&&slotActiveOn(s,e.d)&&s.from<eventBis(e)&&s.to>e.t);
   if(!slots.length){ openMatchYouthLeader(e.id,title); return; }
