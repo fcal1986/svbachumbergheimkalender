@@ -255,7 +255,10 @@
       "opponent": "SSV Meschede",
       "kickoff": "10:00",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "ownerName": "Fabrizio Calcagno"
+      "ownerName": "Fabrizio Calcagno",
+      "tentative": {
+        "since": "2026-10-12"
+      }
     }
   ]
 }
