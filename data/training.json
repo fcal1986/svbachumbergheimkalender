@@ -492,7 +492,9 @@
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
       "validUntil": "2027-06-30",
-      "cancelled": []
+      "cancelled": [
+        "2026-11-04"
+      ]
     },
     {
       "id": "4607193e-c5e6-40a3-b78e-ab9d668bc2f2",
