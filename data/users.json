@@ -582,13 +582,12 @@
         "Ü32 / Ü50": []
       },
       "enc": {
-        "salt": "WcTIIco9VYyEigvts4oEOg==",
-        "iv": "PcVrdEhTfvK5S9dF",
-        "cipher": "rbNM9n3NEnTBS/q3+CR65p+k8pGABQ1MmfXviaIZ+RAK7W9O5hk7cke74J86cyVsyL4me0MnsHd2QN0Qk9Qs4dN5yznE+oy597rvZmS3a+KyFt+/T2EVF8uiD4Z4F3uFzSeFNXDBrnx0bKsEtw=="
+        "salt": "TOFeypwMfktV4FYY2a/ZwQ==",
+        "iv": "gRJNWNbsa874FV18",
+        "cipher": "3kPatRQHhEJDkAUUMcUUMl8L+29swNCL73htcjJasR4BYpShT+lRt4Se+w7R2R3eXEFb3eHhNipuAdVUwNVcLZwB0v46SXDZbPzo5QU+N43Q6iGDNHjLGy+oRqJQHlWtiYRY1VwFPNcI9ukevQ=="
       },
       "created": "2026-10-11T18:51:04.510Z",
       "emailNotificationsEnabled": true,
-      "pwChangeRequired": true,
       "phone": "+491711263121",
       "contactPublic": "none"
     }
