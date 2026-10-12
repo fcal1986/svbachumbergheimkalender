@@ -2,7 +2,7 @@
 
 > **Status: Planung, Stand 12.10.2026.** Nichts davon ist eingerichtet. Das Dokument beschreibt die Zielarchitektur, nach der wir mit dem Start der Supabase-Migration bauen. Bis dahin gilt für den laufenden Pilot `README-DEPLOY.md`. Sobald die Migration live ist, ersetzt dieses Dokument `README-DEPLOY.md`.
 >
-> Regeln stehen in `docs/PRINZIPIEN.md` (Abschnitt 8), Begründungen der Entscheidungen im Projektstand („Entscheidungen“). Hier stehen nur Fakten und Abläufe.
+> Regeln stehen in `docs/PRINZIPIEN.md` (Abschnitt 8), Begründungen im Entscheidungsprotokoll (Projekt-Doc `claude/entscheidungen.md`). Hier stehen nur Fakten und Abläufe.
 
 ## 1. Zielarchitektur
 

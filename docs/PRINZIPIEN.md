@@ -89,7 +89,7 @@ Neue häufige Aufgaben werden hier ergänzt.
 - **Schema nur über Migrationen im Repo.** Nur vorwärts und abwärtskompatibel: erst hinzufügen, im nächsten Release entfernen. Nie per Klick im Dashboard.
 - **Keine echten Personendaten außerhalb von Pro.** Pre und Dev arbeiten mit erfundenen Testvereinen.
 - **Geheimnisse nie im Client und nie im Repo.** Der Client bekommt nur URL und `anon`-Schlüssel.
-- **Europäische Dienste zuerst.** Daten in der EU (Supabase Frankfurt, Scaleway). Ein Dienst außerhalb der EU nur mit AVV und Begründung im Projektstand.
+- **Europäische Dienste zuerst.** Daten in der EU (Supabase Frankfurt, Scaleway). Ein Dienst außerhalb der EU nur mit AVV und Begründung im Entscheidungsprotokoll (Projekt-Doc `claude/entscheidungen.md`).
 - **Keine Werbung, kein Tracking im eingeloggten Bereich.** Analyse höchstens anonym und mit Einwilligung.
 - **Was nicht überwacht wird, läuft nicht.** Jeder Hintergrundjob meldet einen Heartbeat; Fehler lösen einen Alarm aus, kein Nachschauen.
 - **Ein Backup zählt erst, wenn es einmal zurückgespielt wurde.**
