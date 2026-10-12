@@ -32,6 +32,39 @@
           }
         }
       ]
+    },
+    {
+      "id": "2e4fb87f-1a7d-46d4-98be-e1a644831ee4",
+      "created": "2026-10-12",
+      "ownerId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
+      "ownerName": "David Skwara",
+      "kind": "game",
+      "team": "E-Jugend",
+      "squad": 2,
+      "title": "Freundschaftsspiel gegen Test 1 David",
+      "dur": 90,
+      "ha": "home",
+      "opponent": "Test 1 David",
+      "res": [],
+      "halle": null,
+      "options": [
+        {
+          "d": "2027-05-07",
+          "start": "16:00",
+          "pitch": {
+            "mode": "haelfte",
+            "part": "A"
+          }
+        },
+        {
+          "d": "2027-05-14",
+          "start": "16:00",
+          "pitch": {
+            "mode": "haelfte",
+            "part": "A"
+          }
+        }
+      ]
     }
   ]
 }
