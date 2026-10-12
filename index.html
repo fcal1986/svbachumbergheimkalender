@@ -1760,7 +1760,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='12.10.2026 · 5';
+const APP_VERSION='12.10.2026 · 6';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -9470,7 +9470,7 @@ function renderKonto(){
     SEC.push({id:'kontakt',g:'mine',t:'Profil & Kontakt',sum:[u.phone||'kein Telefon',visTxt].filter(Boolean).join(' · '),i:ico('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>'),html:()=>profileCard(),hide1:true});
     SEC.push({id:'benachrichtigungen',g:'mine',t:'Benachrichtigungen',sum:'Mail '+(u.emailNotificationsEnabled!==false?'an':'aus')+' · Push '+(pushOn?'an':'aus')+' · Wochenübersicht '+(u.weeklyDigest!==false?'an':'aus'),i:ico('<path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 003.4 0"/>'),html:()=>notificationsCard()+(isAdmin&&!pushKey()?pushSetupCardHTML():''),hide1:true});
   }
-  if(!session.isSuper){ const nReq=openRequests().length;
+  { const nReq=openRequests().length; // ab 12.10.2026 · 6 auch für den Notzugang (Vorstand Admin)
     SEC.push({id:'anfragen',g:'mine',t:'Terminanfragen',sum:nReq?nReq+' offen':'keine offen',badge:nReq,i:ico('<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M8 9h8M8 13h5"/>'),html:()=>requestsCardHTML(),hide1:true}); }
   if(hasKeepers) SEC.push({id:'torhueter',g:'mine',t:'Meine Torhüter',sum:'für Torwarttraining-Anmeldungen',i:ico('<path d="M8 13V6a1.5 1.5 0 013 0v5M11 11V4.5a1.5 1.5 0 013 0V11M14 11V6a1.5 1.5 0 013 0v7c0 4-2.5 7-6 7s-6-3-6-6v-2a1.5 1.5 0 013 0"/>'),html:()=>keeperCardHTML(),hide1:true});
   SEC.push({id:'app',g:'mine',t:'Als App installieren',sum:'auf dem Startbildschirm',i:ico('<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>'),html:()=>pwaCard(),hide1:true});
