@@ -7,8 +7,10 @@ import freiertermin from './freiertermin';
 import torwarttraining from './torwarttraining';
 import freundschaftsspiel from './freundschaftsspiel';
 import anleitungSpielverlegung from './anleitung-spielverlegung';
+import anleitungFreundschaftsspiel from './anleitung-freundschaftsspiel';
 
-export const REELS: Record<string, Reel> = { platzbelegung, spielverlegung, fussballde, freiertermin, torwarttraining, freundschaftsspiel, 'anleitung-spielverlegung': anleitungSpielverlegung };
+export const REELS: Record<string, Reel> = { platzbelegung, spielverlegung, fussballde, freiertermin, torwarttraining, freundschaftsspiel, 'anleitung-spielverlegung': anleitungSpielverlegung,
+  'anleitung-freundschaftsspiel': anleitungFreundschaftsspiel };
 
 export function reelById(id: string): Reel {
   const r = REELS[id];

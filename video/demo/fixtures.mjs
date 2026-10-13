@@ -180,7 +180,7 @@ export async function buildDemoData() {
   }];
 
   const config = {
-    repo: DEMO_REPO, branch: DEMO_BRANCH, clubName: 'SV Musterstadt 1920 e.V.',
+    repo: DEMO_REPO, branch: DEMO_BRANCH, clubName: 'SV Musterstadt e.V.',
     // Super-Zugang in der Demo absichtlich ohne Passwort → nicht nutzbar.
     admin: { user: 'admin', password: '', first: 'Demo', last: 'Admin' },
     fussballde: { clubId: 'DEMO', clubMatch: 'SV Musterstadt', bufferBeforeMin: 15, durationByAge: { E: 60 },

@@ -43,5 +43,11 @@
     "nr": 7,
     "file": "anleitung-spielverlegung",
     "previews": []
+  },
+  {
+    "id": "anleitung-freundschaftsspiel",
+    "nr": 8,
+    "file": "anleitung-freundschaftsspiel",
+    "previews": []
   }
 ]
