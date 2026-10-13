@@ -180,10 +180,12 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "4263cd5a-6ebb-40e1-a7fc-f1f857db7fb6"
+        "4263cd5a-6ebb-40e1-a7fc-f1f857db7fb6",
+        "7ede557d-96ff-4e26-812a-cff339443471"
       ],
       "trainerNames": [
-        "Marco Dohle"
+        "Marco Dohle",
+        "Thomas Stellpflug"
       ],
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
@@ -763,10 +765,12 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "4263cd5a-6ebb-40e1-a7fc-f1f857db7fb6"
+        "4263cd5a-6ebb-40e1-a7fc-f1f857db7fb6",
+        "7ede557d-96ff-4e26-812a-cff339443471"
       ],
       "trainerNames": [
-        "Marco Dohle"
+        "Marco Dohle",
+        "Thomas Stellpflug"
       ],
       "validFrom": "2026-09-09",
       "validUntil": "2027-06-30",
