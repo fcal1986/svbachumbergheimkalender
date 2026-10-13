@@ -75,6 +75,13 @@ Alle Reels sind **stumm** (mit stummer Tonspur). `npm run narration` erzeugt `ou
 
 Später: Aufnahme nach `public/audio/<reel>.mp3`, in `src/reels/<reel>.ts` `audio: { voiceover: { src: 'audio/<reel>.mp3', volume: 1 } }`, Zeiten in `narration` aus echten Zeitmarken übernehmen und `subtitles.burnIn` in `config/common.ts` einschalten. Musik optional (`audio.music`, wird unter Sprache abgesenkt), nur lizenzierte Titel. Keine API-Schlüssel ins Repo.
 
+### Eigene Sprachaufnahme einbauen (z. B. aus CapCut)
+
+1. Text aus `out/sprechertexte.md` in einem Stück vertonen, Video oder Audio exportieren.
+2. Ton herausziehen und lautheitsnormalisieren: `ffmpeg -i aufnahme.mp4 -vn -af loudnorm=I=-16:TP=-1.5:LRA=11 -ar 48000 public/audio/<reel>-stimme.wav` (`public/audio/` ist gitignored).
+3. Abschnittsanfänge bestimmen (Pausen: `ffmpeg -i … -af silencedetect=noise=-38dB:d=0.25 -f null -`).
+4. In `src/reels/<reel>.ts`: `audio.voiceover`, `warp` (Ankerpunkte [Zeit in der Konfiguration, Zeit im Film], Szene ≈ 0,3 s vor dem Satz) und die echten Sprechzeiten in `narration` (Filmzeit) eintragen. Bilder und Überschriften werden zwischen den Ankern gedehnt/gestaucht, der Ton läuft unverändert.
+
 ## Hinweise
 
 - Remotion ist für Einzelpersonen und kleine Firmen kostenlos; ab einer bestimmten Firmengröße braucht es eine Firmenlizenz (remotion.dev/license).

@@ -42,5 +42,8 @@ export type Reel = {
   claims: string[]; // Belegte Aussagen (Doku/Prüfung)
   // Kamera: Zoom so begrenzen, dass ein fokussiertes Element immer ganz in die Breite passt (Reel 1: aus, Bestand).
   cameraFit?: boolean;
+  // Zeitanpassung an eine echte Sprachaufnahme: Ankerpunkte [Zeit in der Konfiguration, Zeit im fertigen Film] (Sekunden).
+  // Dazwischen wird linear gedehnt/gestaucht. Letzter Anker = Länge des Films. Ohne warp gilt durationS.
+  warp?: [number, number][];
   audio?: { voiceover?: { src: string; volume: number }; music?: { src: string; volume: number; duckedVolume: number } };
 };

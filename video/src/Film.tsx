@@ -26,6 +26,18 @@ function useFonts() {
 
 export type FilmProps = { reel: string; hook?: string };
 
+// Filmzeit → Zeit der Konfiguration (stückweise linear über reel.warp).
+export function warpToConfig(reel: Reel, tFilm: number): number {
+  const w = reel.warp;
+  if (!w || w.length < 2) return tFilm;
+  for (let i = 0; i < w.length - 1; i++) {
+    const [c0, f0] = w[i], [c1, f1] = w[i + 1];
+    if (tFilm <= f1 || i === w.length - 2) return c0 + ((tFilm - f0) / (f1 - f0)) * (c1 - c0);
+  }
+  return tFilm;
+}
+export const filmDurationS = (reel: Reel) => (reel.warp && reel.warp.length ? reel.warp[reel.warp.length - 1][1] : reel.durationS);
+
 export const cuesFor = (reel: Reel, hook: string): SubtitleCue[] =>
   reel.narration.map((c) => (c.text === '__HOOK__' ? { ...c, text: reel.hooks[hook].label } : c));
 
@@ -36,7 +48,8 @@ export const Film: React.FC<FilmProps> = ({ reel: reelId, hook: hookProp }) => {
   const hook = hookProp && reel.hooks[hookProp] ? hookProp : reel.mainHook;
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const t = frame / fps;
+  const tFilm = frame / fps; // echte Filmzeit (Ton, Untertitel)
+  const t = warpToConfig(reel, tFilm); // Zeit der Konfiguration (Bilder, Überschriften)
   const endFrom = reel.durationS - endCardLen;
 
   const cardStart = reel.shots[0].from;
@@ -75,7 +88,7 @@ export const Film: React.FC<FilmProps> = ({ reel: reelId, hook: hookProp }) => {
       <Captions t={t} captions={reel.captions} />
       {reel.summary && <SummaryCard t={t} s={reel.summary} until={endFrom} />}
       {t >= endFrom && <EndCard t={t} from={endFrom} />}
-      <Subtitles t={t} cues={cuesFor(reel, hook)} />
+      <Subtitles t={tFilm} cues={cuesFor(reel, hook)} />
       {voice && <Audio src={staticFile(voice.src)} volume={voice.volume} />}
       {music && <Audio src={staticFile(music.src)} volume={musicVolume} />}
     </AbsoluteFill>

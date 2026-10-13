@@ -7,6 +7,9 @@ const reel: Reel = {
   audience: 'Trainer (Erklärvideo)',
   durationS: 100,
   cameraFit: true,
+  // An die Stimme angepasst: Szene erscheint 0,3 s vor dem Satz. [Konfiguration, Film]
+  warp: [[0,0],[3,4.54],[9,9.3],[19,17.93],[27,26.41],[39,35.44],[50,45.23],[61,57.28],[73,70.2],[87.2,83.84],[95,93.14],[100,98.6]],
+  audio: { voiceover: { src: 'audio/anleitung-spielverlegung-stimme.wav', volume: 1 } },
   hooks: {
     anleitung: { label: 'Spiel verlegen – so geht’s in Platzcoach.', lines: ['Spiel verlegen?', 'So geht’s in', '8 Schritten.'], accent: '8 Schritten.' },
   },
@@ -162,19 +165,21 @@ const reel: Reel = {
       'Fertig – alle sehen den neuen Termin',
     ],
   },
+  // Zeiten = echte Sprechzeiten der CapCut-Aufnahme vom 13.10.2026 (Filmzeit, aus den Pausen ermittelt).
   narration: [
-    { from: 0.3, to: 2.8, text: 'Spiel verlegen? So geht’s in Platzcoach – in acht Schritten.' },
-    { from: 3.1, to: 8.8, text: 'Schritt eins: Im Kalender das Heimspiel öffnen und auf die Lupe tippen.' },
-    { from: 9.2, to: 18.8, text: 'Schritt zwei: Platzcoach wählt den Spieltag und eure Trainingstage schon vor. Passe bei Bedarf die Uhrzeit pro Tag an und tipp auf Suchen.' },
-    { from: 19.2, to: 26.8, text: 'Schritt drei: Du siehst alle freien Termine mit Platzhälfte und Anstoßzeit – auch in eurer eigenen Trainingszeit.' },
-    { from: 27.2, to: 38.6, text: 'Schritt vier: Hake die Termine an, die für euch passen, und schick sie per WhatsApp an den Gegner. Platzcoach merkt sich die Anfrage.' },
-    { from: 39.2, to: 49.6, text: 'Schritt fünf: Unter Konto, Terminanfragen, siehst du alle offenen Anfragen. Sagt der Gegner zu, tippst du beim passenden Termin auf Zugesagt.' },
-    { from: 50.2, to: 60.8, text: 'Schritt sechs: Datum und Anstoß sind schon eingetragen. Heimrecht getauscht? Dann hier anhaken. Grund wählen – Platzcoach prüft den Platz und sagt euer Training gleich mit ab.' },
-    { from: 61.2, to: 72.8, text: 'Schritt sieben: Jetzt liegt der fertige Text für den Jugendleiter bereit – mit allen Angaben für den Verlegungsantrag im DFBnet. Per WhatsApp senden oder kopieren.' },
-    { from: 73.2, to: 86.8, text: 'Schritt acht: Die Anfrage ist damit erledigt. Im Kalender steht das Spiel am neuen Tag als vorgemerkt, am alten Termin: verlegt auf. Den Text kannst du über das Kalender-Symbol jederzeit erneut senden.' },
-    { from: 87.4, to: 94.6, text: 'Kurz gesagt: suchen, Gegner fragen, Zusage übernehmen, vormerken, Jugendleiter informieren – fertig.' },
-    { from: 95.4, to: 99.2, text: 'Platzcoach. Jetzt ansehen auf platzcoach.de.' },
+    { from: 0.36, to: 4.14, text: 'Spiel verlegen? So geht’s in Platzcoach – in acht Schritten.' },
+    { from: 4.84, to: 9.02, text: 'Schritt eins: Im Kalender das Heimspiel öffnen und auf die Lupe tippen.' },
+    { from: 9.6, to: 17.64, text: 'Schritt zwei: Platzcoach wählt den Spieltag und eure Trainingstage schon vor. Passe bei Bedarf die Uhrzeit pro Tag an und tipp auf Suchen.' },
+    { from: 18.23, to: 26.02, text: 'Schritt drei: Du siehst alle freien Termine mit Platzhälfte und Anstoßzeit – auch in eurer eigenen Trainingszeit.' },
+    { from: 26.71, to: 34.98, text: 'Schritt vier: Hake die Termine an, die für euch passen, und schick sie per WhatsApp an den Gegner. Platzcoach merkt sich die Anfrage.' },
+    { from: 35.74, to: 44.84, text: 'Schritt fünf: Unter Konto, Terminanfragen, siehst du alle offenen Anfragen. Sagt der Gegner zu, tippst du beim passenden Termin auf Zugesagt.' },
+    { from: 45.53, to: 56.65, text: 'Schritt sechs: Datum und Anstoß sind schon eingetragen. Heimrecht getauscht? Dann hier anhaken. Grund wählen – Platzcoach prüft den Platz und sagt euer Training gleich mit ab.' },
+    { from: 57.58, to: 69.87, text: 'Schritt sieben: Jetzt liegt der fertige Text für den Jugendleiter bereit – mit allen Angaben für den Verlegungsantrag im DFBnet. Per WhatsApp senden oder kopieren.' },
+    { from: 70.5, to: 83.52, text: 'Schritt acht: Die Anfrage ist damit erledigt. Im Kalender steht das Spiel am neuen Tag als vorgemerkt, am alten Termin: verlegt auf. Den Text kannst du über das Kalender-Symbol jederzeit erneut senden.' },
+    { from: 84.14, to: 92.79, text: 'Kurz gesagt: suchen, Gegner fragen, Zusage übernehmen, vormerken, Jugendleiter informieren – fertig.' },
+    { from: 93.44, to: 97.02, text: 'Platzcoach. Jetzt ansehen auf platzcoach.de.' },
   ],
+
 
   claims: [
     'Lupe „Neue Ansetzung suchen“ am Heimspiel (openRescheduleFinder), Spieltag + Trainingstage vorausgewählt, Uhrzeit je Wochentag',
