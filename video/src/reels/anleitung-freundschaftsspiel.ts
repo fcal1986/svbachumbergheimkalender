@@ -1,5 +1,5 @@
 // Anleitung: Freundschaftsspiel anlegen – vom freien Termin bis zur Nachricht an den Jugendleiter (≈ 96 s, 7 Schritte).
-// Noch ohne Stimme: Zeiten geschätzt (≈ 2,4 Wörter/s). Nach der CapCut-Aufnahme `warp`, `audio` und `narration` anpassen.
+// Stimme: CapCut-Aufnahme vom 13.10.2026, Bilder per `warp` an die Sprechzeiten angepasst.
 import type { Reel } from '../config/types';
 
 const reel: Reel = {
@@ -8,6 +8,9 @@ const reel: Reel = {
   audience: 'Trainer (Erklärvideo)',
   durationS: 96,
   cameraFit: true,
+  // An die Stimme angepasst: Abschnitt beginnt 0,3 s vor dem Satz. [Konfiguration, Film]
+  warp: [[0,0],[3,6.23],[13,15.14],[19.5,25.7],[26,30.55],[37,41.4],[40.6,46.6],[47,53.26],[53.5,62.6],[59,66.47],[71,78.15],[77,84.45],[83.2,90.23],[91,100.7],[96,105.07]],
+  audio: { voiceover: { src: 'audio/anleitung-freundschaftsspiel-stimme.wav', volume: 1 } },
   hooks: {
     anleitung: { label: 'Freundschaftsspiel anlegen – so geht’s in Platzcoach.', lines: ['Freundschaftsspiel', 'anlegen? So geht’s', 'in 7 Schritten.'], accent: 'in 7 Schritten.' },
   },
@@ -157,18 +160,18 @@ const reel: Reel = {
       'Fertig – im Kalender „Vorgemerkt“',
     ],
   },
-  // Geschätzte Zeiten (noch keine Aufnahme). Ein Absatz je Abschnitt = ein Abschnitt im Film.
+  // Zeiten = echte Sprechzeiten der CapCut-Aufnahme vom 13.10.2026 (Filmzeit, aus den Pausen ermittelt).
   narration: [
-    { from: 0.3, to: 2.9, text: 'Freundschaftsspiel anlegen? So geht’s in Platzcoach – in sieben Schritten.' },
-    { from: 3.2, to: 12.6, text: 'Schritt eins: Tippe auf Neu und wähle Spiel. Heim ist schon ausgewählt. Trag den Gegner ein, wähle deine Mannschaft und tippe auf Freien Termin suchen.' },
-    { from: 13.2, to: 25.6, text: 'Schritt zwei: Was du brauchst, ist schon vorgewählt – für die E-Jugend eine Platzhälfte. Wähle Monate, Wochentage, Dauer und Wunsch-Beginn. Grün heißt: zur Wunschzeit frei, gelb: zu einer anderen Uhrzeit.' },
-    { from: 26.2, to: 36.6, text: 'Schritt drei: Hake die Termine an, die für euch passen, und schick sie per WhatsApp an den Gegner. Das blockiert noch keinen Platz – Platzcoach merkt sich die Anfrage.' },
-    { from: 37.2, to: 46.6, text: 'Schritt vier: Sagt der Gegner zu, öffnest du Konto, Terminanfragen. Dort steht jeder Termin mit aktuellem Platzstatus. Tippe beim passenden Termin auf Zugesagt.' },
-    { from: 47.2, to: 58.6, text: 'Schritt fünf: Datum und Anstoß sind schon eingetragen, der Platz ist geprüft. Auf Wunsch sagt Platzcoach euer Training an dem Tag gleich mit ab. Termin speichern, kurz prüfen, fertig.' },
-    { from: 59.2, to: 70.6, text: 'Schritt sechs: Jetzt liegt der fertige Text für den Jugendleiter bereit – mit allen Angaben, um das Spiel im DFBnet anzusetzen. Per WhatsApp senden oder kopieren.' },
-    { from: 71.2, to: 82.8, text: 'Schritt sieben: Im Kalender steht das Spiel als vorgemerkt, bis es bei fussball.de auftaucht. Und auswärts? Dann belegt das Spiel bei euch keinen Platz – die Ansetzung macht der Gastgeber.' },
-    { from: 83.4, to: 90.6, text: 'Kurz gesagt: Spiel anlegen, freien Termin suchen, Gegner fragen, Zusage übernehmen, speichern, Jugendleiter informieren – fertig.' },
-    { from: 91.2, to: 94.4, text: 'Platzcoach. Jetzt ansehen auf platzcoach.de.' },
+    { from: 0.42, to: 6.14, text: 'Freundschaftsspiel anlegen? So geht’s in Platzcoach – in sieben Schritten.' },
+    { from: 6.53, to: 14.67, text: 'Schritt eins: Tippe auf Neu und wähle Spiel. Heim ist schon ausgewählt. Trag den Gegner ein, wähle deine Mannschaft und tippe auf Freien Termin suchen.' },
+    { from: 15.44, to: 30.14, text: 'Schritt zwei: Was du brauchst, ist schon vorgewählt – für die E-Jugend eine Platzhälfte. Wähle Monate, Wochentage, Dauer und Wunsch-Beginn. Grün heißt: zur Wunschzeit frei, gelb: zu einer anderen Uhrzeit.' },
+    { from: 30.85, to: 41.07, text: 'Schritt drei: Hake die Termine an, die für euch passen, und schick sie per WhatsApp an den Gegner. Das blockiert noch keinen Platz – Platzcoach merkt sich die Anfrage.' },
+    { from: 41.7, to: 52.78, text: 'Schritt vier: Sagt der Gegner zu, öffnest du Konto, Terminanfragen. Dort steht jeder Termin mit aktuellem Platzstatus. Tippe beim passenden Termin auf Zugesagt.' },
+    { from: 53.56, to: 66.09, text: 'Schritt fünf: Datum und Anstoß sind schon eingetragen, der Platz ist geprüft. Auf Wunsch sagt Platzcoach euer Training an dem Tag gleich mit ab. Termin speichern, kurz prüfen, fertig.' },
+    { from: 66.77, to: 77.91, text: 'Schritt sechs: Jetzt liegt der fertige Text für den Jugendleiter bereit – mit allen Angaben, um das Spiel im DFBnet anzusetzen. Per WhatsApp senden oder kopieren.' },
+    { from: 78.45, to: 89.85, text: 'Schritt sieben: Im Kalender steht das Spiel als vorgemerkt, bis es bei fussball.de auftaucht. Und auswärts? Dann belegt das Spiel bei euch keinen Platz – die Ansetzung macht der Gastgeber.' },
+    { from: 90.53, to: 100.39, text: 'Kurz gesagt: Spiel anlegen, freien Termin suchen, Gegner fragen, Zusage übernehmen, speichern, Jugendleiter informieren – fertig.' },
+    { from: 101.0, to: 104.77, text: 'Platzcoach. Jetzt ansehen auf platzcoach.de.' },
   ],
   claims: [
     'Neu → Art „Spiel“, Heim/Auswärts (Heim vorausgewählt), Gegner, Mannschaft (eigene vorausgewählt), „Freien Termin suchen“',
