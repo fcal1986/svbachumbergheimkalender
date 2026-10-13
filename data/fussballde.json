@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-12T22:57:24.681Z",
+  "updated": "2026-10-13T06:45:49.825Z",
   "games": [
     {
       "d": "2026-09-22",
@@ -1935,38 +1935,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-09-21",
-      "t": "18:30",
-      "team": "C-Junioren",
-      "squad": 2,
-      "ownName": "SV Bachum-Bergheim 2",
-      "opponent": "JSG Möhnesee/Günne",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/jsg-moehnesee-guenne-sv-bachum-bergheim-2/-/spiel/0323983KPG000000VS5489BTVT7QHFUC",
-      "gameNo": "240158035",
-      "staffelId": "240158",
-      "staffelName": "Freundschaftsspiele Kreis Soest",
-      "venue": "Kunstrasenplatz, Sportplatz Möhnetalsperre, Brüningser Str. 8, 59519 Möhnesee",
-      "infoAt": "2026-10-09T09:06:39.898Z"
-    },
-    {
-      "d": "2026-09-21",
-      "t": "19:30",
-      "team": "Herren Ü32",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "opponent": "SG Beckum/Hövel/Mellen",
-      "competition": "Kreispokal",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sg-beckum-hoevel-mellen-sv-bachum-bergheim/-/spiel/031GJD03OC000000VS5489BTVVG7L386",
-      "gameNo": "200208006",
-      "staffelId": "200208",
-      "staffelName": "Krombacher Kreispokal Ü32",
-      "venue": "Rasenplatz, Sportplatz Beckum Zur Hinsel, Zur Hinsel, 58802 Balve",
-      "infoAt": "2026-10-09T09:06:40.608Z"
-    },
     {
       "d": "2026-09-23",
       "t": "19:00",
@@ -4002,19 +3970,17 @@
       "type": "C-Junioren",
       "squad": 2,
       "names": [
-        "SV Bachum-Bergheim 2",
         "SV Bachum-Bergh. II"
       ],
       "teamIds": [
         "031A86T3J0000000VS5489BSVU0ORN69"
       ],
       "competitions": [
-        "Kreisfreundschaftsspiele",
         "Kreisliga B"
       ],
-      "games": 12,
+      "games": 11,
       "homeGames": 6,
-      "first": "2026-09-21",
+      "first": "2026-09-26",
       "last": "2027-06-05",
       "teamId": "031A86T3J0000000VS5489BSVU0ORN69"
     },
@@ -4165,12 +4131,12 @@
         "01OR4F5HES000000VV0AG811VS8BP574"
       ],
       "competitions": [
-        "Kreispokal",
-        "Kreisturnier"
+        "Kreisturnier",
+        "Kreispokal"
       ],
-      "games": 4,
+      "games": 3,
       "homeGames": 0,
-      "first": "2026-09-21",
+      "first": "2026-10-19",
       "last": "2026-11-16",
       "teamId": "01OR4F5HES000000VV0AG811VS8BP574"
     },
@@ -4230,6 +4196,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-09-21",
+  "teamsFrom": "2026-09-22",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
