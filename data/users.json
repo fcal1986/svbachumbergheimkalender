@@ -590,6 +590,27 @@
       "emailNotificationsEnabled": true,
       "phone": "+491711263121",
       "contactPublic": "none"
+    },
+    {
+      "id": "7ede557d-96ff-4e26-812a-cff339443471",
+      "first": "Thomas",
+      "last": "Stellpflug",
+      "email": "stellpflug0207@gmail.com",
+      "admin": false,
+      "classes": {
+        "Ü32 / Ü50": []
+      },
+      "enc": {
+        "salt": "LSU5sscuqkp8GsdfzjAB9w==",
+        "iv": "EbSiTag6hOl8LQfu",
+        "cipher": "Oxtyr5VyO3nPE/yzdjMFI+hH7wprTRmpFlkyaqhUyOverBjvJw+9K43x/qV8gQBj6jxoA/L3RJqbCtTzJtiggyqWtfJgZW7KCHTKOCTBWRjMbnD4N6QZOKULbLh7caW/cntA/qCy9SXEguA8rA=="
+      },
+      "created": "2026-10-13T15:19:40.230Z",
+      "emailNotificationsEnabled": true,
+      "pwChangeRequired": true,
+      "phone": "015159150404",
+      "contactPublic": "phone",
+      "role": "vorstand"
     }
   ]
 }
