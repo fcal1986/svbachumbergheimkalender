@@ -1,5 +1,5 @@
 // Anleitung Spielverlegung (lang): Heimspiel → Neue Ansetzung suchen → Ergebnisse → 2 Vorschläge an den Gegner
-// → Zusage: einen Termin anhaken → Verlegung vormerken (Anstoß, Heimrecht, Grund, Platz, Training) → Jugendleiter-Text
+// (als offene Terminanfrage gemerkt) → Konto → Terminanfragen → „Zugesagt“ → Verlegung vormerken (Anstoß, Heimrecht, Grund, Platz, Training) → Jugendleiter-Text
 // → Kalender (neuer Termin „Vorgemerkt“, alter Termin „Verlegt auf …“) → Nachricht später erneut aufrufen.
 export default {
   id: 'anleitung-spielverlegung',
@@ -52,21 +52,20 @@ export default {
     await page.click('#reschedule-modal button.yes');
     await page.waitForSelector('.rs-result-row');
     await scrollBox(modal, '#rs-results', 14);
-    check('resultHeadline', await page.locator('#rs-results .field-label').first().innerText());
-    await shot('04-results', 'Freie Termine: in eurer Trainingszeit (Hälfte B), gleicher Tag mit anderer Anstoßzeit', {
+    await shot('04-results', 'Freie Termine: Anstoß, Hälfte, in eurer Trainingszeit / gleicher Tag – je Zeile „Übernehmen“', {
       box: modal,
       headline: '#rs-results .field-label',
       rowMi: '.rs-result-row >> nth=0',
       rowFr: '.rs-result-row >> nth=1',
       rowSa: '.rs-result-row >> nth=2',
-      ownHint: '.rs-result-row >> nth=1 >> .rs-own',
-      sameDay: '.rs-result-row >> nth=2 >> .rs-own',
-      kick: '.rs-result-row >> nth=1 >> span',
+      infoFr: '.rs-result-row >> nth=1 >> small',
+      infoSa: '.rs-result-row >> nth=2 >> small',
+      takeFr: '.rs-result-row >> nth=1 >> button:has-text("Übernehmen")',
     });
 
-    // 4 Zwei Vorschläge anhaken → per WhatsApp an den Gegner
-    await page.locator('.rs-result-row').nth(0).click();
-    await page.locator('.rs-result-row').nth(1).click();
+    // 4 Zwei Vorschläge anhaken → per WhatsApp an den Gegner (wird als offene Anfrage gemerkt)
+    await page.locator('.rs-result-row').nth(0).locator('input[type=checkbox]').check();
+    await page.locator('.rs-result-row').nth(1).locator('input[type=checkbox]').check();
     await page.waitForSelector('button:has-text("2 Vorschläge per WhatsApp teilen")');
     await scrollBox(modal, '.rs-result-row >> nth=0', 40);
     await shot('05-two', 'Zwei Termine angehakt', {
@@ -74,33 +73,49 @@ export default {
       rowMi: '.rs-result-row >> nth=0',
       rowFr: '.rs-result-row >> nth=1',
     });
-    await scrollBox(modal, 'button:has-text("2 Vorschläge per WhatsApp teilen")', 420);
-    await shot('06-share', '„2 Vorschläge per WhatsApp teilen“', {
+    await page.locator('button:has-text("2 Vorschläge per WhatsApp teilen")').evaluate((el) => { const box = el.closest('.modal-box'); box.scrollTop += el.getBoundingClientRect().bottom - box.getBoundingClientRect().bottom + 90; });
+    await page.waitForTimeout(250);
+    await shot('06-share', '„2 Vorschläge per WhatsApp teilen“ – wird als offene Anfrage gemerkt', {
       box: modal,
       waBtn: 'button:has-text("2 Vorschläge per WhatsApp teilen")',
-      more: '#rs-results >> text=/weitere anzeigen/',
+      hint: '#reschedule-modal .sf-hint',
     });
     await page.click('button:has-text("2 Vorschläge per WhatsApp teilen")');
     text('anfrageGegner', await lastOpenedText(page));
+    await page.waitForFunction(() => !document.querySelector('#reschedule-modal.show'));
+    await waitSaved();
 
-    // 5 Zusage: nur den zugesagten Termin anhaken → „Zugesagt? Als Verlegung vormerken“
-    await page.locator('.rs-result-row').nth(0).click();
-    await page.waitForSelector('button:has-text("Als Verlegung vormerken")');
-    await page.locator('button:has-text("Als Verlegung vormerken")').evaluate((el) => { const box = el.closest('.modal-box'); box.scrollTop += el.getBoundingClientRect().bottom - box.getBoundingClientRect().bottom + 24; });
-    await page.waitForTimeout(250);
-    await shot('07-one', 'Zusage für Freitag: nur diesen Termin angehakt – jetzt erscheint „Als Verlegung vormerken“', {
-      box: modal,
-      waBtn: 'button:has-text("1 Vorschlag per WhatsApp teilen")',
-      markBtn: 'button:has-text("Als Verlegung vormerken")',
+    // 5 Offene Anfrage im Konto → Terminanfragen
+    await page.click('button.navbtn[data-nav="konto"]');
+    await page.waitForSelector('#kacc-anfragen');
+    await page.waitForTimeout(400);
+    await shot('07-konto', 'Konto: „Terminanfragen · 1 offen“', {
+      section: '#kacc-anfragen',
+      navKonto: 'button.navbtn[data-nav="konto"]',
     });
+    await page.click('#kacc-anfragen .kacc-head');
+    await page.waitForSelector('.req-card');
+    await page.waitForTimeout(500);
+    await scrollToEl(page, '.req-card', 250);
+    const req = await page.locator('.req-card').first().innerText();
+    check('requestCard', req);
+    await shot('08-request', 'Offene Anfrage: beide Termine mit „✓ frei“, Zugesagt / Erneut teilen / Absage', {
+      card: '.req-card',
+      head: '.req-card .req-head',
+      optMi: '.req-card .req-opt >> nth=0',
+      optFr: '.req-card .req-opt >> nth=1',
+      okFr: '.req-card .req-opt >> nth=1 >> .req-st',
+      yesFr: '.req-card .req-opt >> nth=1 >> button:has-text("Zugesagt")',
+      acts: '.req-card .req-acts',
+    });
+    await page.locator('.req-card .req-opt').nth(1).locator('button:has-text("Zugesagt")').click();
 
-    // 6 Verlegung vormerken
-    await page.click('button:has-text("Als Verlegung vormerken")');
+    // 6 Verlegung vormerken (Datum und Anstoß sind aus der Anfrage vorbefüllt)
     await page.waitForSelector('#move-modal.show #mv-date');
     await page.locator('#mv-time').fill('16:15');
     await page.locator('#mv-time').dispatchEvent('change');
     await page.waitForTimeout(300);
-    await shot('08-move', 'Verlegung vormerken: Datum + Anstoß, Heimrecht getauscht (optional), Grund', {
+    await shot('09-move', 'Verlegung vormerken: Datum + Anstoß, Heimrecht getauscht (optional), Grund', {
       box: '#move-modal .modal-box',
       text: '#mv-text',
       dateTime: '#mv-date >> xpath=ancestor::div[contains(@style,"display:flex")][1]',
@@ -111,7 +126,7 @@ export default {
     await page.locator('#mv-reasons >> text=Ferien').click();
     await page.waitForTimeout(300);
     await scrollBox('#move-modal .modal-box', '#mv-reasons', 40);
-    await shot('09-move-bottom', 'Grund „Ferien“, Platz am neuen Termin frei, Training am neuen Tag absagen', {
+    await shot('10-move-bottom', 'Grund „Ferien“, Platz am neuen Termin frei, Training am neuen Tag absagen', {
       box: '#move-modal .modal-box',
       reason: '#mv-reason',
       reasons: '#mv-reasons',
@@ -125,7 +140,7 @@ export default {
     await page.waitForSelector('#yl-modal.show');
     await page.waitForTimeout(500);
     text('jugendleiter', await page.evaluate(() => ylText));
-    await shot('10-youthleader', 'Vorgemerkt – fertiger Text für den DFBnet-Verlegungsantrag', {
+    await shot('11-youthleader', 'Vorgemerkt – fertiger Text für den DFBnet-Verlegungsantrag', {
       box: '#yl-modal .modal-box',
       title: '#yl-title',
       sub: '#yl-sub',
@@ -136,14 +151,26 @@ export default {
     await waitSaved();
     check('demoCommitsAfterMove', true);
 
-    // 8 Danach im Kalender: neuer Termin „Vorgemerkt“, alter Termin „Verlegt auf …“
+    // 9 Danach im Kalender: neuer Termin „Vorgemerkt“, alter Termin „Verlegt auf …“
     await page.click('#yl-modal button:has-text("Schließen")');
     await page.waitForFunction(() => !document.querySelector('.modal.show'));
+
+    // 8 Anfrage hat sich erledigt
+    await page.click('button.navbtn[data-nav="konto"]');
+    if (await page.locator('.ksub-back').count()) await page.click('.ksub-back');
+    await page.waitForSelector('#kacc-anfragen');
+    await page.waitForTimeout(400);
+    await shot('12a-konto-done', 'Konto: Terminanfragen „keine offen“ – erledigt sich mit dem Vormerken', {
+      section: '#kacc-anfragen',
+    });
+    await page.click('button.navbtn[data-nav="termine"]');
+    await page.waitForSelector('.cw-day');
+
     await pickDay('16');
     const moved = '.event-card:has-text("SC Beispielhausen")';
     await page.locator(moved).first().waitFor();
     await scrollToEl(page, moved, 250);
-    await shot('11-planned', 'Fr 16.10.: Spiel „Vorgemerkt · fussball.de noch offen“', {
+    await shot('12-planned', 'Fr 16.10.: Spiel „Vorgemerkt · fussball.de noch offen“', {
       weekStrip: '.cw-strip',
       card: moved,
       label: `${moved} >> text=Vorgemerkt`,
@@ -153,7 +180,7 @@ export default {
     await pickDay('17');
     await page.locator('.ia-row:has-text("Verlegt auf")').first().waitFor();
     await scrollToEl(page, '.ia-row:has-text("Verlegt auf")', 330);
-    await shot('12-ghost', 'Sa 17.10.: alter Termin „Verlegt auf Fr 16.10.“', {
+    await shot('13-ghost', 'Sa 17.10.: alter Termin „Verlegt auf Fr 16.10.“', {
       weekStrip: '.cw-strip',
       ghost: '.ia-row:has-text("Verlegt auf")',
     });
@@ -165,7 +192,7 @@ export default {
     await page.waitForSelector('#move-modal.show #mv-yl');
     await page.waitForTimeout(400);
     await scrollBox('#move-modal .modal-box', '#mv-yl', 330);
-    await shot('13-reopen', 'Vormerkung öffnen: Nachricht an Jugendleiter erneut senden oder Vormerkung aufheben', {
+    await shot('14-reopen', 'Vormerkung öffnen: Nachricht an Jugendleiter erneut senden oder Vormerkung aufheben', {
       box: '#move-modal .modal-box',
       ylBtn: '#mv-yl',
       removeBtn: '#mv-remove',

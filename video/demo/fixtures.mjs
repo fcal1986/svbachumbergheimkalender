@@ -200,6 +200,7 @@ export async function buildDemoData() {
     'fussballde.json': fussballde,
     'game-moves.json': { moves: [] },
     'resource-locks.json': { locks: [] },
+    'requests.json': { requests: [] },
     'push-subscriptions.json': { subs: [] },
     'goalkeepers.json': await encryptGk({ keepers: KEEPERS, signups: {} }),
   };
