@@ -63,8 +63,14 @@ function finalize(src, dst) {
   if (r.status !== 0) { console.error('ffmpeg-Export fehlgeschlagen – Rohdatei liegt in out/raw/.'); process.exit(1); }
 }
 
+// Vorstellungsfilm 16:9 (braucht die lokalen, anonymisierten Bilder in public/pitch/ – nicht im Repo).
+if (args.includes('pitch-dfb')) {
+  if (!fs.existsSync(path.join(VIDEO_DIR, 'public', 'pitch', 'chat-freitag.jpg'))) { console.error('public/pitch/ fehlt (anonymisierte WhatsApp-Bilder).'); process.exit(1); }
+  render('Pitch-dfb', 'platzcoach-vorstellung-dfb.mp4', {});
+}
 const onlyPreviews = args.includes('previews');
-const ids = args.filter((a) => a !== 'previews');
+const ids = args.filter((a) => a !== 'previews' && a !== 'pitch-dfb');
+if (args.includes('pitch-dfb') && !ids.length && !onlyPreviews) process.exit(0);
 const chosen = ids.length ? list.filter((r) => ids.includes(r.id)) : list;
 if (ids.length && chosen.length !== ids.length) { console.error('Unbekanntes Reel – siehe src/reels/list.json'); process.exit(1); }
 for (const r of chosen) {

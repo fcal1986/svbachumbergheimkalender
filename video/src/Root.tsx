@@ -5,6 +5,7 @@ import { Composition } from 'remotion';
 import { Film, filmDurationS, type FilmProps } from './Film';
 import { FPS, HEIGHT, PREVIEW_S, WIDTH } from './config/common';
 import { REELS } from './reels';
+import { DfbPitch, PH, PW, pitchDurationS } from './pitch/DfbPitch';
 
 export const RemotionRoot: React.FC = () => (
   <>
@@ -16,5 +17,6 @@ export const RemotionRoot: React.FC = () => (
           width={WIDTH} height={HEIGHT} defaultProps={{ reel: r.id, hook: r.mainHook }} />
       </React.Fragment>
     ))}
+    <Composition id="Pitch-dfb" component={DfbPitch} durationInFrames={Math.round(pitchDurationS() * FPS)} fps={FPS} width={PW} height={PH} />
   </>
 );

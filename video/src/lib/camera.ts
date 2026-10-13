@@ -7,6 +7,7 @@ import { elOf, type Box, type Scene } from './manifest';
 
 export type Cam = { cx: number; cy: number; k: number };
 export type View = { w: number; h: number };
+export type Area = { w: number; h: number }; // Ausschnitt in Film-Pixeln (Standard: Handy-Karte der Reels)
 
 function focusOf(scene: Scene, view: View, key: CameraKey, fit: boolean) {
   if (key.el) {
@@ -22,9 +23,9 @@ function focusOf(scene: Scene, view: View, key: CameraKey, fit: boolean) {
   return { x: key.x ?? view.w / 2, y: (key.y ?? view.h / 2) + (key.dy ?? 0), zoom: key.zoom };
 }
 
-function clampCam(view: View, cx: number, cy: number, k: number): Cam {
-  const halfW = card.w / 2 / k;
-  const halfH = card.h / 2 / k;
+function clampCam(view: View, cx: number, cy: number, k: number, area: Area): Cam {
+  const halfW = area.w / 2 / k;
+  const halfH = area.h / 2 / k;
   return {
     k,
     cx: view.w <= 2 * halfW ? view.w / 2 : Math.min(Math.max(cx, halfW), view.w - halfW),
@@ -32,8 +33,8 @@ function clampCam(view: View, cx: number, cy: number, k: number): Cam {
   };
 }
 
-export function cameraAt(scene: Scene, view: View, keys: CameraKey[], tRel: number, fit = false): Cam {
-  const base = card.w / view.w;
+export function cameraAt(scene: Scene, view: View, keys: CameraKey[], tRel: number, fit = false, area: Area = card): Cam {
+  const base = area.w / view.w;
   const pts = keys.map((k) => ({ at: k.at, ...focusOf(scene, view, k, fit) }));
   let a = pts[0], b = pts[0];
   for (let i = 0; i < pts.length; i++) {
@@ -42,14 +43,14 @@ export function cameraAt(scene: Scene, view: View, keys: CameraKey[], tRel: numb
   if (tRel < pts[0].at) { a = b = pts[0]; }
   const p = a === b ? 0 : interpolate(tRel, [a.at, b.at], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.inOut(Easing.cubic) });
   const zoom = a.zoom + (b.zoom - a.zoom) * p;
-  return clampCam(view, a.x + (b.x - a.x) * p, a.y + (b.y - a.y) * p, base * zoom);
+  return clampCam(view, a.x + (b.x - a.x) * p, a.y + (b.y - a.y) * p, base * zoom, area);
 }
 
 // CSS-Pixel des Screenshots → Pixel innerhalb der Karte.
-export function toCard(cam: Cam, x: number, y: number) {
-  return { x: card.w / 2 + (x - cam.cx) * cam.k, y: card.h / 2 + (y - cam.cy) * cam.k };
+export function toCard(cam: Cam, x: number, y: number, area: Area = card) {
+  return { x: area.w / 2 + (x - cam.cx) * cam.k, y: area.h / 2 + (y - cam.cy) * cam.k };
 }
-export function boxToCard(cam: Cam, b: Box, pad = 0) {
-  const p = toCard(cam, b.x - pad, b.y - pad);
+export function boxToCard(cam: Cam, b: Box, pad = 0, area: Area = card) {
+  const p = toCard(cam, b.x - pad, b.y - pad, area);
   return { x: p.x, y: p.y, w: (b.w + 2 * pad) * cam.k, h: (b.h + 2 * pad) * cam.k };
 }

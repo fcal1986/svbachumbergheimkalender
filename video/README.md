@@ -15,6 +15,10 @@ Kurze Hochkant-Reels (1080 × 1920, 30 fps, 30 s) aus **echten App-Ansichten**. 
 | 7 | `anleitung-spielverlegung` (100 s, Erklärvideo) | Trainer | 8 Schritte mit Schrittanzeige: Lupe am Heimspiel → Tage/Uhrzeiten → Ergebnisse → 2 Vorschläge per WhatsApp (als offene Terminanfrage gemerkt) → Konto → Terminanfragen → „Zugesagt“ → vormerken (Anstoß, Heimrecht getauscht, Grund, Training absagen) → Jugendleiter-Text (2 Teile) → Anfrage erledigt, Kalender „Vorgemerkt“/„Verlegt auf …“, erneut senden → Zusammenfassung |
 | 8 | `anleitung-freundschaftsspiel` (96 s, Erklärvideo) | Trainer | 7 Schritte: Neu → Spiel, Gegner → Freien Termin suchen (Bedarf vorgewählt, grün/gelb) → Termine anhaken, per WhatsApp an den Gegner (offene Terminanfrage) → Konto → Terminanfragen → „Zugesagt“ → Formular vorbefüllt, Platz frei, Training absagen, speichern → Jugendleiter-Text (2 Teile) → Kalender „Vorgemerkt“, Tipp Auswärts → Zusammenfassung |
 
+### Vorstellungsfilm für den DFB (16:9)
+
+`Pitch-dfb` → `out/platzcoach-vorstellung-dfb.mp4` (1920 × 1080, ≈ 111 s): echte WhatsApp-Nachrichten aus dem Pilotverein (Namen durch Rollen ersetzt, Profilbilder neutralisiert) → neue Spielformen im Kinderfußball (Quelle dfb.de) → Platzcoach in der echten App (Live-Platz, Konflikt mit Vorschlag, fussball.de automatisch, Verlegung/Jugendleiter-Text) → Gesprächsangebot. Inhalt in `src/pitch/dfb.ts`, Gestaltung in `src/pitch/DfbPitch.tsx`. Die anonymisierten Bilder liegen nur lokal in `public/pitch/` (gitignored); Rendern mit `node scripts/render.mjs pitch-dfb`.
+
 Anleitungen nutzen zusätzlich `steps` (Schrittanzeige) und `summary` (Zusammenfassung vor der Endkarte); lange Texte lassen sich mit `messages[].range` in Teile aufteilen.
 
 Belegte Aussagen je Reel stehen in `src/reels/<id>.ts` → `claims` und in `out/sprechertexte.md`.

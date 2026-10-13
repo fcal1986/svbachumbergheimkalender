@@ -3,17 +3,17 @@ import React from 'react';
 import { Img, interpolate, staticFile, Easing } from 'remotion';
 import { brand, card, cursor as cursorCfg } from '../config/common';
 import type { Shot } from '../config/types';
-import { boxToCard, cameraAt, toCard, type Cam } from '../lib/camera';
+import { boxToCard, cameraAt, toCard, type Area, type Cam } from '../lib/camera';
 import { elOf, sceneOf, type Manifest } from '../lib/manifest';
 
 const FADE = 0.3;
 
-export const ShotView: React.FC<{ shot: Shot; t: number; manifest: Manifest; fit?: boolean }> = ({ shot, t, manifest, fit }) => {
+export const ShotView: React.FC<{ shot: Shot; t: number; manifest: Manifest; fit?: boolean; area?: Area }> = ({ shot, t, manifest, fit, area = card }) => {
   const rel = t - shot.from;
   const sc = sceneOf(manifest, shot.scene);
   const view = { w: manifest.coordinateSystem.viewport.width, h: manifest.coordinateSystem.viewport.height };
   const VIEW_W = view.w, VIEW_H = view.h;
-  const cam = cameraAt(sc, view, shot.camera, rel, !!fit);
+  const cam = cameraAt(sc, view, shot.camera, rel, !!fit, area);
   const opacity = interpolate(rel, [0, FADE], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
   return (
     <div style={{ position: 'absolute', inset: 0, opacity }}>
@@ -21,25 +21,25 @@ export const ShotView: React.FC<{ shot: Shot; t: number; manifest: Manifest; fit
         src={staticFile(sc.image)}
         style={{
           // Breite direkt in Film-Pixeln (kein scale()), damit Chrome aus dem 3×-Screenshot scharf skaliert.
-          position: 'absolute', left: card.w / 2 - cam.cx * cam.k, top: card.h / 2 - cam.cy * cam.k,
+          position: 'absolute', left: area.w / 2 - cam.cx * cam.k, top: area.h / 2 - cam.cy * cam.k,
           width: VIEW_W * cam.k, height: VIEW_H * cam.k, maxWidth: 'none',
         }}
       />
       {(shot.highlights ?? []).map((h, i) => (
-        <HighlightRing key={i} cam={cam} box={elOf(sc, h.el)} pad={h.pad ?? 4} rel={rel} from={h.from} to={h.to} dim={h.dim} />
+        <HighlightRing key={i} cam={cam} area={area} box={elOf(sc, h.el)} pad={h.pad ?? 4} rel={rel} from={h.from} to={h.to} dim={h.dim} />
       ))}
       {(shot.taps ?? []).map((tp, i) => {
         const b = elOf(sc, tp.el);
-        return <Cursor key={i} cam={cam} x={b.x + b.w / 2 + (tp.dx ?? 0)} y={b.y + b.h / 2 + (tp.dy ?? 0)} rel={rel} at={tp.at} />;
+        return <Cursor key={i} cam={cam} area={area} x={b.x + b.w / 2 + (tp.dx ?? 0)} y={b.y + b.h / 2 + (tp.dy ?? 0)} rel={rel} at={tp.at} />;
       })}
     </div>
   );
 };
 
-const HighlightRing: React.FC<{ cam: Cam; box: { x: number; y: number; w: number; h: number }; pad: number; rel: number; from: number; to: number; dim?: boolean }> = ({ cam, box, pad, rel, from, to, dim }) => {
+const HighlightRing: React.FC<{ cam: Cam; area: Area; box: { x: number; y: number; w: number; h: number }; pad: number; rel: number; from: number; to: number; dim?: boolean }> = ({ cam, area, box, pad, rel, from, to, dim }) => {
   const o = interpolate(rel, [from, from + 0.25, to - 0.25, to], [0, 1, 1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
   if (o <= 0) return null;
-  const r = boxToCard(cam, box, pad);
+  const r = boxToCard(cam, box, pad, area);
   const grow = interpolate(rel, [from, from + 0.35], [1.06, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
   return (
     <div style={{
@@ -50,12 +50,12 @@ const HighlightRing: React.FC<{ cam: Cam; box: { x: number; y: number; w: number
   );
 };
 
-const Cursor: React.FC<{ cam: Cam; x: number; y: number; rel: number; at: number }> = ({ cam, x, y, rel, at }) => {
+const Cursor: React.FC<{ cam: Cam; area: Area; x: number; y: number; rel: number; at: number }> = ({ cam, area, x, y, rel, at }) => {
   const { moveS, pressS, size } = cursorCfg;
   const start = at - moveS - 0.25;
   const end = at + 0.55;
   if (rel < start || rel > end) return null;
-  const target = toCard(cam, x, y);
+  const target = toCard(cam, x, y, area);
   const from = { x: target.x + 240, y: target.y + 300 };
   const p = interpolate(rel, [start + 0.15, at - 0.05], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.inOut(Easing.cubic) });
   // leicht gebogene Bahn

@@ -16,7 +16,7 @@ const FONTS: [string, number, string][] = [
   ['Inter', 700, 'fonts/inter-latin-700-normal.woff2'], ['Manrope', 800, 'fonts/manrope-latin-800-normal.woff2'],
 ];
 
-function useFonts() {
+export function useFonts() {
   const [handle] = useState(() => delayRender('Schriften laden'));
   useEffect(() => {
     Promise.all(FONTS.map(([fam, w, src]) => new FontFace(fam, `url(${staticFile(src)}) format('woff2')`, { weight: String(w) }).load()
