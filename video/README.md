@@ -12,6 +12,9 @@ Kurze Hochkant-Reels (1080 × 1920, 30 fps, 30 s) aus **echten App-Ansichten**. 
 | 4 | `freiertermin` | Vorstand | Schulfest → Freien Termin suchen (Mai/Juni, samstags, 5 Std) → grün/gelb/grau → Übernehmen → Passt → Prüfen |
 | 5 | `torwarttraining` | Torwart- und Mannschaftstrainer | Torwarttraining für E + F (Mail an Trainer) → Trainer: Zu erledigen → Torhüter anhaken → „2 angemeldet“ |
 | 6 | `freundschaftsspiel` | Trainer | Heimspiel, Anstoß → Platz „✓ frei“ → Training absagen? → DFBnet-Text → „Vorgemerkt“ → Auswärts belegt keinen Platz |
+| 7 | `anleitung-spielverlegung` (90 s, Erklärvideo) | Trainer | 7 Schritte mit Schrittanzeige: Lupe am Heimspiel → Tage/Uhrzeiten → Ergebnisse → 2 Vorschläge per WhatsApp → Zusage anhaken, vormerken (Anstoß, Heimrecht getauscht, Grund, Training absagen) → Jugendleiter-Text (2 Teile) → Kalender „Vorgemerkt“/„Verlegt auf …“, erneut senden → Zusammenfassung |
+
+Anleitungen nutzen zusätzlich `steps` (Schrittanzeige) und `summary` (Zusammenfassung vor der Endkarte); lange Texte lassen sich mit `messages[].range` in Teile aufteilen.
 
 Belegte Aussagen je Reel stehen in `src/reels/<id>.ts` → `claims` und in `out/sprechertexte.md`.
 

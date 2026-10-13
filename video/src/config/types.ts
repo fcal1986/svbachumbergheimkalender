@@ -16,7 +16,15 @@ export type Shot = {
 export type Caption = { from: number; to: number; title: string; accent?: string; sub?: string };
 export type SubtitleCue = { from: number; to: number; text: string };
 // Textkarte über der Handy-Karte, z. B. die von der App vorbereitete WhatsApp-Nachricht (Text aus dem Manifest).
-export type MessageOverlay = { from: number; to: number; textKey: string; label: string; maxLines?: number };
+export type MessageOverlay = {
+  from: number; to: number; textKey: string; label: string; maxLines?: number;
+  range?: [number, number]; // nur diese Zeilen des Textes (für lange Texte in mehreren Teilen)
+  fontSize?: number;
+};
+// Schrittanzeige für Anleitungen („Schritt 3 von 7 · Ergebnisse lesen“).
+export type Step = { from: number; to: number; n: number; label: string };
+// Zusammenfassung vor der Endkarte (nummerierte Liste).
+export type Summary = { from: number; title: string; items: string[] };
 
 export type Reel = {
   id: string;
@@ -28,6 +36,8 @@ export type Reel = {
   shots: Shot[];
   captions: Caption[];
   messages?: MessageOverlay[];
+  steps?: Step[];
+  summary?: Summary;
   narration: SubtitleCue[]; // '__HOOK__' = Text des gewählten Einstiegs; Zeiten geschätzt
   claims: string[]; // Belegte Aussagen (Doku/Prüfung)
   // Kamera: Zoom so begrenzen, dass ein fokussiertes Element immer ganz in die Breite passt (Reel 1: aus, Bestand).

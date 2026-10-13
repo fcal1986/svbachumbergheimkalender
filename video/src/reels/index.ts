@@ -6,8 +6,9 @@ import fussballde from './fussballde';
 import freiertermin from './freiertermin';
 import torwarttraining from './torwarttraining';
 import freundschaftsspiel from './freundschaftsspiel';
+import anleitungSpielverlegung from './anleitung-spielverlegung';
 
-export const REELS: Record<string, Reel> = { platzbelegung, spielverlegung, fussballde, freiertermin, torwarttraining, freundschaftsspiel };
+export const REELS: Record<string, Reel> = { platzbelegung, spielverlegung, fussballde, freiertermin, torwarttraining, freundschaftsspiel, 'anleitung-spielverlegung': anleitungSpielverlegung };
 
 export function reelById(id: string): Reel {
   const r = REELS[id];

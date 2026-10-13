@@ -7,7 +7,7 @@ import type { Reel, SubtitleCue } from './config/types';
 import { reelById } from './reels';
 import { manifestFor } from './lib/manifest';
 import { ShotView } from './components/ShotView';
-import { Background, Captions, EndCard, Hook, MessageCard, Subtitles } from './components/Parts';
+import { Background, Captions, EndCard, Hook, MessageCard, StepPill, Subtitles, SummaryCard } from './components/Parts';
 
 const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 
@@ -40,7 +40,7 @@ export const Film: React.FC<FilmProps> = ({ reel: reelId, hook: hookProp }) => {
   const endFrom = reel.durationS - endCardLen;
 
   const cardStart = reel.shots[0].from;
-  const cardEnd = endFrom + 0.1;
+  const cardEnd = (reel.summary?.from ?? endFrom) + 0.1;
   const cardIn = interpolate(t, [cardStart, cardStart + 0.7], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
   const cardOut = interpolate(t, [cardEnd - 0.5, cardEnd], [0, 1], { ...clamp, easing: Easing.in(Easing.cubic) });
   const cardVisible = t >= cardStart && t <= cardEnd;
@@ -71,7 +71,9 @@ export const Film: React.FC<FilmProps> = ({ reel: reelId, hook: hookProp }) => {
       {(reel.messages ?? []).map((m, i) => (
         <MessageCard key={i} t={t} m={m} text={(manifest.texts ?? {})[m.textKey] ?? `[Text „${m.textKey}“ fehlt]`} area={card} />
       ))}
+      {reel.steps && <StepPill t={t} steps={reel.steps} />}
       <Captions t={t} captions={reel.captions} />
+      {reel.summary && <SummaryCard t={t} s={reel.summary} until={endFrom} />}
       {t >= endFrom && <EndCard t={t} from={endFrom} />}
       <Subtitles t={t} cues={cuesFor(reel, hook)} />
       {voice && <Audio src={staticFile(voice.src)} volume={voice.volume} />}

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Easing, Img, interpolate, staticFile } from 'remotion';
 import { brand, endCard, safe, subtitles, WIDTH, HEIGHT } from '../config/common';
-import type { Caption, HookDef, MessageOverlay, SubtitleCue } from '../config/types';
+import type { Caption, HookDef, MessageOverlay, Step, SubtitleCue, Summary } from '../config/types';
 
 const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 export const DISPLAY = "'Manrope', 'Inter', sans-serif";
@@ -50,11 +50,13 @@ export const Captions: React.FC<{ t: number; captions: Caption[] }> = ({ t, capt
   if (!c) return null;
   const inP = interpolate(t, [c.from, c.from + 0.35], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
   const outP = interpolate(t, [c.to - 0.22, c.to], [1, 0], clamp);
-  // aufeinanderfolgende Überschriften mit gleichem Titel nicht neu einblenden
+  // Lange Zeilen automatisch verkleinern, damit jede Zeile einzeilig bleibt (Manrope 800 ≈ 0,56 em je Zeichen).
+  const longest = Math.max(c.title.length, (c.accent || '').length);
+  const fs = Math.min(86, Math.floor((WIDTH - 2 * safe.side) / (longest * 0.56)));
   return (
     <div style={{ position: 'absolute', left: safe.side, right: safe.side, top: safe.top + 30, height: 300, opacity: Math.min(inP, outP),
       transform: `translateY(${(1 - inP) * 24}px)`, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-      <div style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 86, lineHeight: 1.05, letterSpacing: -1.5, color: brand.white }}>
+      <div style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: fs, lineHeight: 1.05, letterSpacing: -1.5, color: brand.white, whiteSpace: 'nowrap' }}>
         {c.title}{c.accent ? <><br /><span style={{ color: brand.lime }}>{c.accent}</span></> : null}
       </div>
       {c.sub && <div style={{ fontFamily: TEXT, fontWeight: 600, fontSize: 40, color: brand.inkSoft, marginTop: 18 }}>{c.sub}</div>}
@@ -103,7 +105,10 @@ export const MessageCard: React.FC<{ t: number; m: MessageOverlay; text: string;
   if (t < m.from || t > m.to) return null;
   const inP = interpolate(t, [m.from, m.from + 0.45], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
   const outP = interpolate(t, [m.to - 0.3, m.to], [1, 0], clamp);
-  const lines = text.replace(/https?:\/\/\S+/g, (u) => u.replace(/^https?:\/\//, '')).split('\n').slice(0, m.maxLines ?? 14);
+  const all = text.replace(/https?:\/\/\S+/g, (u) => u.replace(/^https?:\/\//, '')).split('\n');
+  const lines = (m.range ? all.slice(m.range[0], m.range[1]) : all).slice(0, m.maxLines ?? 30);
+  while (lines.length && !lines[0].trim()) lines.shift();
+  while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
   return (
     <>
     <div style={{ position: 'absolute', left: area.x, top: area.y, width: area.w, height: area.h, borderRadius: 44,
@@ -111,11 +116,57 @@ export const MessageCard: React.FC<{ t: number; m: MessageOverlay; text: string;
     <div style={{ position: 'absolute', left: area.x + 30, width: area.w - 60, bottom: HEIGHT - (area.y + area.h) + 40, opacity: Math.min(inP, outP),
       transform: `translateY(${(1 - inP) * 80}px)` }}>
       <div style={{ fontFamily: TEXT, fontWeight: 700, fontSize: 26, letterSpacing: 1.5, textTransform: 'uppercase', color: brand.lime, marginBottom: 10, paddingLeft: 8 }}>{m.label}</div>
-      <div style={{ background: '#fff', borderRadius: 30, borderTopLeftRadius: 8, padding: '26px 30px', fontFamily: TEXT, fontWeight: 500, fontSize: 31, lineHeight: 1.36,
+      <div style={{ background: '#fff', borderRadius: 30, borderTopLeftRadius: 8, padding: '26px 30px', fontFamily: TEXT, fontWeight: 500, fontSize: m.fontSize ?? 31, lineHeight: 1.36,
         color: brand.navy, boxShadow: '0 30px 70px rgba(1,27,50,.45), 0 0 0 4px rgba(139,207,47,.85)' }}>
         {lines.map(richLine)}
       </div>
     </div>
     </>
+  );
+};
+
+export const StepPill: React.FC<{ t: number; steps: Step[] }> = ({ t, steps }) => {
+  const st = steps.find((x) => t >= x.from && t < x.to);
+  if (!st) return null;
+  const total = Math.max(...steps.map((x) => x.n));
+  const inP = interpolate(t, [st.from, st.from + 0.35], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
+  const outP = interpolate(t, [st.to - 0.2, st.to], [1, 0], clamp);
+  return (
+    <div style={{ position: 'absolute', left: safe.side, top: safe.top + 6, display: 'flex', alignItems: 'center', gap: 16, opacity: Math.min(inP, outP),
+      transform: `translateX(${(1 - inP) * -30}px)` }}>
+      <div style={{ fontFamily: TEXT, fontWeight: 800, fontSize: 32, color: brand.navy, background: brand.lime, borderRadius: 999, padding: '8px 24px', letterSpacing: 0.5 }}>
+        Schritt {st.n} von {total}
+      </div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        {Array.from({ length: total }, (_, i) => (
+          <div key={i} style={{ width: i + 1 === st.n ? 34 : 12, height: 12, borderRadius: 999, background: i + 1 <= st.n ? brand.lime : 'rgba(255,255,255,.22)' }} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export const SummaryCard: React.FC<{ t: number; s: Summary; until: number }> = ({ t, s, until }) => {
+  if (t < s.from || t > until) return null;
+  const rel = t - s.from;
+  const outP = interpolate(t, [until - 0.4, until], [1, 0], clamp);
+  return (
+    <div style={{ position: 'absolute', left: safe.side, right: safe.side, top: safe.top + 150, opacity: outP }}>
+      <div style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 80, lineHeight: 1.05, letterSpacing: -1.5, color: brand.white,
+        opacity: interpolate(rel, [0, 0.4], [0, 1], clamp) }}>{s.title}</div>
+      <div style={{ marginTop: 50 }}>
+        {s.items.map((it, i) => {
+          const a = 0.3 + i * 0.28;
+          const o = interpolate(rel, [a, a + 0.35], [0, 1], clamp);
+          return (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 28, marginBottom: 30, opacity: o, transform: `translateX(${(1 - o) * 40}px)` }}>
+              <div style={{ flex: 'none', width: 72, height: 72, borderRadius: 999, background: brand.lime, color: brand.navy, fontFamily: DISPLAY, fontWeight: 800,
+                fontSize: 38, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{i + 1}</div>
+              <div style={{ fontFamily: TEXT, fontWeight: 700, fontSize: 44, lineHeight: 1.2, color: brand.white }}>{it}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 };
