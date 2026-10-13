@@ -12,7 +12,7 @@ export type Seg = {
   chat?: { src: string; ratio: number; cam: [number, number, number][]; cx?: number }; // cam: [Sekunde im Abschnitt, Zoom, Mittelpunkt y 0–1]
   shots?: PShot[];
   kids?: boolean;
-  end?: { title: string; sub: string; name: string; url: string };
+  end?: { title: string; sub: string; name?: string; url: string };
 };
 
 export const pitch: {
@@ -138,7 +138,7 @@ export const pitch: {
     },
     {
       id: 'end', from: 103.5, to: 111,
-      end: { title: 'Lass uns 30 Minuten sprechen.', sub: 'Live-Demo am echten Vereinsplan.', name: 'Fabrizio Calcagno', url: 'platzcoach.de' },
+      end: { title: 'Lass uns 30 Minuten sprechen.', sub: 'Live-Demo am echten Vereinsplan.', url: 'platzcoach.de' },
     },
   ],
   // Echte Sprechzeiten der CapCut-Aufnahme (Filmzeit, aus den Pausen ermittelt).

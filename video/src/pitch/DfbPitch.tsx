@@ -204,7 +204,7 @@ const EndCardDfb: React.FC<{ t: number; seg: Seg }> = ({ t, seg }) => {
         <div style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 70, lineHeight: 1.08, color: brand.white, letterSpacing: -1.2, ...s(0.4) }}>{e.title}</div>
         <div style={{ fontFamily: TEXT, fontWeight: 600, fontSize: 36, color: '#C7D3DE', marginTop: 24, ...s(0.8) }}>{e.sub}</div>
         <div style={{ marginTop: 56, ...s(1.3) }}>
-          <div style={{ fontFamily: TEXT, fontWeight: 700, fontSize: 36, color: brand.white }}>{e.name}</div>
+          {e.name && <div style={{ fontFamily: TEXT, fontWeight: 700, fontSize: 36, color: brand.white }}>{e.name}</div>}
           <div style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 64, color: brand.lime, letterSpacing: -1, marginTop: 6 }}>{e.url}</div>
         </div>
       </div>
