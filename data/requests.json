@@ -32,36 +32,6 @@
           }
         }
       ]
-    },
-    {
-      "id": "1bcec2b2-6878-40b4-9f31-ca04de551d21",
-      "type": "move",
-      "created": "2026-10-13",
-      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "ownerName": "Fabrizio Calcagno",
-      "kind": "game",
-      "team": "E-Jugend",
-      "squad": 2,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-1-oeventrop-freienohl-wennemen/-/spiel/031J8LLJOS000000VS5489BUVVKNMR0J",
-      "opponent": "JSG Oeventrop/Freie./Wen. I",
-      "competition": "Kreisliga B",
-      "origD": "2026-11-06",
-      "origT": "16:15",
-      "movedTo": "",
-      "options": [
-        {
-          "d": "2026-11-06",
-          "kickFrom": "16:00",
-          "kickTo": "16:30",
-          "part": "A"
-        },
-        {
-          "d": "2026-11-13",
-          "kickFrom": "16:00",
-          "kickTo": "16:30",
-          "part": "A"
-        }
-      ]
     }
   ]
 }
