@@ -1760,7 +1760,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='12.10.2026 · 6';
+const APP_VERSION='13.10.2026 · 1';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -7162,14 +7162,26 @@ function saveRequestFromForm(list){
   saveStore('requests','Terminanfrage gespeichert: '+requestLabel(r)+' – '+r.options.map(x=>shareDay(x.d)+' '+x.start).join(', ')+' – '+session.name)
     .catch(err=>{ REQUESTS=REQUESTS.filter(x=>x.id!==r.id); showToast('Anfrage nicht gespeichert: '+err.message,6000); });
 }
-function requestLabel(r){ const who=r.team&&r.team!=='Alle Teams'?teamShort(r.team,r.squad)+' ':'';
+function requestLabel(r){ if(r.type==='move') return 'Verlegung '+teamShort(r.team,r.squad)+' – '+(r.opponent||'?'); const who=r.team&&r.team!=='Alle Teams'?teamShort(r.team,r.squad)+' ':'';
   return r.kind==='game'?'Freundschaftsspiel '+who+(r.ha==='away'?'bei ':'gegen ')+(r.opponent||'?'):(isMatchKind(r.kind)?kindLabel(r.kind)+' '+who:(r.title||kindLabel(r.kind))+(who?' ('+who.trim()+')':'')); }
 function reqOptEnd(r,x){ return minToTime(Math.min(timeToMin(x.start)+(r.dur||90),timeToMin('23:45'))); }
-function reqOptLive(r,x){ return x.d>todayStr||(x.d===todayStr&&x.start>nowHMStr()); }
+function reqOptLive(r,x){ const t=x.start||x.kickFrom; return x.d>todayStr||(x.d===todayStr&&t>nowHMStr()); }
+function reqGameIdx(r){ const hit=fbAllIndexed().find(([g])=>g.link===r.link); return hit?hit[1]:-1; }
+// Verlegungs-Anfrage erledigt: Spiel weg, fussball.de hat neu angesetzt oder eine neue/andere Verlegung ist vorgemerkt
+function moveRequestDone(r){
+  if(r.type!=='move') return false;
+  const raw=(FUSSBALLDE_RAW.games||[]).concat(FUSSBALLDE_RAW.awayGames||[]).find(x=>x.link===r.link);
+  if(!raw) return !!(FUSSBALLDE_RAW.games||[]).length; // Spiel nicht mehr gelistet (nur wenn Daten geladen)
+  if(raw.d!==r.origD||(raw.t||'')!==(r.origT||'')) return true;
+  const m=MOVES.find(x=>x.link===r.link), now=m?m.toD+' '+(m.toT||''):'';
+  return !!now&&now!==(r.movedTo||'');
+}
 function canSeeRequest(r){ if(!session) return false; if(session.isAdmin||r.ownerId===session.id) return true; return r.team!=='Alle Teams'&&canBookTeam(r.team,r.squad||1); }
-function openRequests(){ return REQUESTS.filter(r=>canSeeRequest(r)&&(r.options||[]).some(x=>reqOptLive(r,x))); }
+function openRequests(){ return REQUESTS.filter(r=>canSeeRequest(r)&&!moveRequestDone(r)&&(r.options||[]).some(x=>reqOptLive(r,x))); }
 // Noch frei? (live, ohne die eigene Trainingszeit – wie die Terminsuche)
 function reqOptStatus(r,x){
+  if(r.type==='move'){ const g=fbGame(reqGameIdx(r)); if(!g) return ''; const c=pitchCheckForGame(g,x.d,x.kickFrom);
+    return c.ok?'<span class="req-st ok">✓ frei</span>':'<span class="req-st busy">⚠ inzwischen belegt: '+esc([...new Set(c.conflicts.map(e=>occupationLabel(e)))].join(', '))+'</span>'; }
   if(r.ha==='away'||r.kind==='trainer') return '';
   const own=ownFreeFor(r.kind,r.ha==='away',r.team,r.squad);
   const hits=findConflicts(x.d,x.start,reqOptEnd(r,x),x.pitch,r.halle,r.res||[],null,r.kind).filter(c=>!isOwnTeamTraining(c.event,own));
@@ -7189,13 +7201,16 @@ function requestListHTML(){
   const list=openRequests().filter(r=>(!REQ_TEAM||teamShort(r.team,r.squad)===REQ_TEAM)&&(!q||[requestLabel(r),r.title,r.ownerName,r.opponent,r.participants,teamLabel(r.team,r.squad)].join(' ').toLowerCase().includes(q)))
     .sort((a,b)=>(a.options.find(x=>reqOptLive(a,x))||{}).d.localeCompare((b.options.find(x=>reqOptLive(b,x))||{}).d));
   if(!list.length) return '<p class="rs-empty">'+(REQUESTS.some(canSeeRequest)&&(q||REQ_TEAM)?'Keine Anfrage passt zur Suche.':'Keine offenen Anfragen. Neue entstehen in „Freien Termin suchen“ → Termine anhaken → per WhatsApp teilen.')+'</p>';
-  return list.map(r=>'<div class="req-card"><div class="req-head"><b>'+esc(requestLabel(r))+'</b><small>angefragt von '+esc(r.ownerName||'–')+' am '+esc(shareDay(r.created))+(r.options[0]&&r.options[0].pitch&&r.options[0].pitch.mode!=='ganz'?' · '+esc(pitchShort(r.options[0].pitch).replace(/ [AB1-4]$/,'')):'')+'</small></div>'
+  return list.map(r=>'<div class="req-card"><div class="req-head"><b>'+esc(requestLabel(r))+'</b><small>'+(r.type==='move'?'bisher '+esc(shareDay(r.origD)+(r.origT?', '+r.origT:''))+' · ':'')+'angefragt von '+esc(r.ownerName||'–')+' am '+esc(shareDay(r.created))+(r.options[0]&&r.options[0].pitch&&r.options[0].pitch.mode!=='ganz'?' · '+esc(pitchShort(r.options[0].pitch).replace(/ [AB1-4]$/,'')):'')+'</small></div>'
     +r.options.filter(x=>reqOptLive(r,x)).map(x=>{ const i=r.options.indexOf(x);
+      if(r.type==='move') return '<div class="req-opt"><div><b>'+esc(shareDay(x.d))+'</b> · Anstoß '+esc(x.kickFrom===x.kickTo?x.kickFrom:x.kickFrom+'–'+x.kickTo)+(x.part?' · Hälfte '+esc(x.part):'')+'<br>'+reqOptStatus(r,x)+'</div>'
+        +'<button type="button" class="fs-btn" onclick="acceptRequest(\''+jsArg(r.id)+'\','+i+')">Zugesagt</button></div>';
       return '<div class="req-opt"><div><b>'+esc(shareDay(x.d))+'</b> · '+(r.kind==='game'&&r.ha!=='away'?'Anstoß '+addMinutes(x.start,fussballBufferBeforeMin()):x.start+'–'+reqOptEnd(r,x))+(x.pitch&&x.pitch.mode!=='ganz'?' · '+esc(pitchShort(x.pitch)):'')+'<br>'+reqOptStatus(r,x)+'</div>'
         +'<button type="button" class="fs-btn" onclick="acceptRequest(\''+jsArg(r.id)+'\','+i+')">Zugesagt</button></div>'; }).join('')
     +'<div class="req-acts"><button type="button" class="ghost-btn" onclick="reshareRequest(\''+jsArg(r.id)+'\')">Erneut teilen</button><button type="button" class="ghost-btn danger" onclick="dropRequest(\''+jsArg(r.id)+'\')">Absage – löschen</button></div></div>').join('');
 }
 function reqTextOf(r){
+  if(r.type==='move'){ const g=fbGame(reqGameIdx(r)); return g?rescheduleProposalText(g,r.options.filter(x=>reqOptLive(r,x)).map(x=>({date:x.d,kickFrom:x.kickFrom,kickTo:x.kickTo}))):''; }
   const one=r.options.filter(x=>reqOptLive(r,x)), who=r.team&&r.team!=='Alle Teams'&&r.team!==GK_TEAM?teamLabel(r.team,r.squad):'';
   const own=fussballOwnTeamName({squad:isJugend(r.team)?r.squad:1});
   const head=r.kind==='game'?'📅 *Freundschaftsspiel gesucht*\n*'+own+(who?' ('+who+')':'')+(r.opponent?' – '+r.opponent:'')+'*'
@@ -7221,12 +7236,15 @@ function closeRequest(id,why){
 function pruneRequests(){
   if(!session||!session.token) return;
   let changed=false;
-  REQUESTS=REQUESTS.map(r=>{ const live=(r.options||[]).filter(x=>reqOptLive(r,x)); if(live.length===r.options.length||!canSeeRequest(r)) return r; changed=true; return live.length?{...r,options:live}:null; }).filter(Boolean);
+  REQUESTS=REQUESTS.map(r=>{ if(!canSeeRequest(r)) return r; if(moveRequestDone(r)){ changed=true; return null; }
+    const live=(r.options||[]).filter(x=>reqOptLive(r,x)); if(live.length===r.options.length) return r; changed=true; return live.length?{...r,options:live}:null; }).filter(Boolean);
   if(changed) saveStore('requests','Terminanfragen aufgeräumt (automatisch)').catch(()=>{});
 }
 function acceptRequest(id,i){
   if(!requireLogin()) return;
   const r=REQUESTS.find(x=>x.id===id), x=r&&r.options[i]; if(!x) return;
+  if(r.type==='move'){ const idx=reqGameIdx(r); if(idx<0){ showToast('Das Spiel steht nicht mehr bei fussball.de.',4000); return; }
+    openMoveModal(idx,x.d,x.kickFrom); return; } // nach dem Vormerken erledigt sich die Anfrage (moveRequestDone)
   const kick=r.kind==='game'?(r.ha==='away'?x.start:addMinutes(x.start,fussballBufferBeforeMin())):'';
   editingId=null;
   fillForm({d:x.d,t:x.start,bis:reqOptEnd(r,x),title:r.title,kind:r.kind,team:r.team,squad:r.squad,pitch:x.pitch,halle:r.halle,res:r.res||[],note:r.note,
@@ -8248,28 +8266,28 @@ function runRescheduleSearch(){
 function renderRescheduleResults(){
   const box=document.getElementById('rs-results');
   const results=rescheduleResults;
-  const shown=rescheduleShowAll?results:results.slice(0,15);
-  box.innerHTML='<div class="field-label" style="margin-bottom:8px;">'+results.length+' freie'+(results.length===1?'r Termin':' Termine')+' gefunden – zum Vorschlagen auswählen</div>'
-    +shown.map((r,i)=>{
-      const dt=new Date(r.date+'T00:00:00');
-      const checked=rescheduleSelected.has(i);
+  // Ab 13.10.2026 · 1: gleiche Zeilen und Knöpfe wie „Freien Termin suchen“ im Terminformular
+  const shown=rescheduleShowAll?results:results.filter((r,i)=>i<5||rescheduleSelected.has(i));
+  box.innerHTML='<p class="field-label" style="margin:4px 0 6px;">Freie Termine – zum Vorschlagen anhaken</p>'
+    +shown.map(r=>{
+      const i=results.indexOf(r), checked=rescheduleSelected.has(i);
       return '<label class="rs-result-row rs-selectable'+(checked?' on':'')+'">'
         +'<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleRescheduleSelect('+i+')">'
-        +'<b>'+DAYS_S[dt.getDay()]+' '+fmtShort(r.date)
-        +(r.sameDay?'<small class="rs-own">gleicher Tag, andere Anstoßzeit (bisher '+esc(rescheduleGame.t||'?')+')</small>':'')
-        +(r.ownTraining?'<small class="rs-own">in eurer Trainingszeit '+r.ownTraining.from+'–'+r.ownTraining.to+(r.ownTraining.part?' (Hälfte '+r.ownTraining.part+')':'')+'</small>':'')
-        +'</b><span>Anstoß '+kickoffRangeText(r,'short')+(r.part?'<br>Hälfte '+r.part:'')+'</span></label>';
+        +'<div style="flex:1;"><b>'+DOW[dowOf(r.date)-1]+', '+fmtShort(r.date)+'</b><br><small style="color:var(--ink-soft);">Anstoß '+kickoffRangeText(r,'short')+(r.part?' · Hälfte '+r.part:'')
+        +(r.sameDay?' · gleicher Tag (bisher '+esc(rescheduleGame.t||'?')+')':'')
+        +(r.ownTraining?' · in eurer Trainingszeit '+r.ownTraining.from+'–'+r.ownTraining.to:'')+'</small></div>'
+        +(rescheduleGame&&rescheduleGame.link&&session?'<button type="button" class="fs-btn" onclick="'+esc('event.preventDefault();event.stopPropagation();markMoveFromIdx('+i+')')+'">Übernehmen</button>':'')+'</label>';
     }).join('')
     +(results.length>shown.length?'<div class="rs-empty rs-showmore" onclick="expandRescheduleResults()">+ '+(results.length-shown.length)+' weitere anzeigen ▾</div>':'')
     +'<div id="rs-share-bar"></div>';
   renderRescheduleShareBar();
 }
-function markMoveFromResult(){
-  const g=rescheduleGame; if(!g||rescheduleSelected.size!==1) return;
-  const r=rescheduleResults[[...rescheduleSelected][0]]; if(!r) return;
+function markMoveFromResult(){ if(rescheduleSelected.size===1) markMoveFromIdx([...rescheduleSelected][0]); }
+function markMoveFromIdx(i){
+  const g=rescheduleGame, r=rescheduleResults[i]; if(!g||!r) return;
   const idx=FUSSBALLDE.games.findIndex(x=>x.link===g.link);
   closeRescheduleModal();
-  openMoveModal(idx,r.date,r.freeFrom);
+  openMoveModal(idx,r.date,r.kickFrom||r.freeFrom);
 }
 function expandRescheduleResults(){ rescheduleShowAll=true; renderRescheduleResults(); }
 function toggleRescheduleSelect(i){
@@ -8283,7 +8301,8 @@ function renderRescheduleShareBar(){
     +'<svg viewBox="0 0 24 24" fill="currentColor" style="width:17px;height:17px;"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.26 4.81L2.05 22l5.4-1.42a9.87 9.87 0 004.59 1.17h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2zm0 18.06a8.2 8.2 0 01-4.17-1.14l-.3-.18-3.1.82.83-3.02-.2-.31a8.15 8.15 0 01-1.26-4.32c0-4.51 3.68-8.19 8.2-8.19a8.15 8.15 0 015.8 2.4 8.15 8.15 0 012.4 5.8c0 4.52-3.68 8.14-8.2 8.14z"/></svg>'
     +(rescheduleSelected.size===1?'1 Vorschlag':rescheduleSelected.size+' Vorschläge')+' per WhatsApp teilen</button>'
     +(rescheduleSelected.size===1&&rescheduleGame&&rescheduleGame.link&&session
-      ?'<button class="ghost-btn" style="margin-top:8px;" onclick="markMoveFromResult()">Zugesagt? Als Verlegung vormerken</button>':'');
+      ?'<button class="ghost-btn" style="margin-top:8px;" onclick="markMoveFromResult()">Zugesagt? Übernehmen</button>':'')
+    +(rsCanSaveRequest()?'<p class="sf-hint" style="margin-top:6px;">Wird als offene Anfrage gemerkt (Konto → Terminanfragen). Kommt die Zusage, dort den Termin antippen – alles ist vorbefüllt.</p>':'');
 }
 // Anstoß-Spanne eines Suchergebnisses ("zwischen 16:00 und 16:15 Uhr" bzw. "um 16:00 Uhr").
 function kickoffRangeText(r,mode){
@@ -8300,14 +8319,31 @@ function fussballOwnTeamName(g){
 }
 function shareRescheduleProposal(){
   const g=rescheduleGame; if(!g||!rescheduleSelected.size)return;
+  const picked=[...rescheduleSelected].sort((a,b)=>a-b).map(i=>rescheduleResults[i]);
+  window.open('https://wa.me/?text='+encodeURIComponent(rescheduleProposalText(g,picked)),'_blank');
+  if(rsCanSaveRequest()) saveMoveRequest(g,picked);
+}
+function rsCanSaveRequest(){ const g=rescheduleGame; if(!g||!g.link||!session||!session.token) return false; const m=fussballFilterTeam(g.team,g.squad); return !!session.isAdmin||canBookTeam(m.team,m.squad); }
+// Verlegungs-Anfrage (ab 13.10.2026 · 1): gleiche Liste wie neue Termine; erledigt sich, sobald eine (andere) Verlegung
+// vorgemerkt ist oder fussball.de das Spiel neu ansetzt.
+function saveMoveRequest(g,picked){
+  const mp=fussballFilterTeam(g.team,g.squad), raw=rawGameOf(g)||g, m=moveOfGame(g);
+  const r={id:crypto.randomUUID(), type:'move', created:todayStr, ownerId:session.id, ownerName:session.name, kind:'game', team:mp.team, squad:mp.squad,
+    link:g.link, opponent:g.opponent, competition:g.competition||undefined, origD:raw.d, origT:raw.t||'', movedTo:m?m.toD+' '+(m.toT||''):'',
+    options:picked.map(x=>({d:x.date,kickFrom:x.kickFrom||x.freeFrom,kickTo:x.kickTo||x.kickFrom||x.freeFrom,part:x.part||null})).sort((a,b)=>a.d.localeCompare(b.d))};
+  REQUESTS.push(r);
+  closeRescheduleModal(); renderKonto();
+  showToast('Anfrage gemerkt – unter Konto → Terminanfragen. Kommt die Zusage, dort den Termin antippen.',5000);
+  saveStore('requests','Terminanfrage gespeichert: '+requestLabel(r)+' – '+r.options.map(x=>shareDay(x.d)+' '+x.kickFrom).join(', ')+' – '+session.name)
+    .catch(err=>{ REQUESTS=REQUESTS.filter(x=>x.id!==r.id); showToast('Anfrage nicht gespeichert: '+err.message,6000); });
+}
+function rescheduleProposalText(g,picked){
   const mapped=fussballFilterTeam(g.team,g.squad);
   const teamTxt=teamLabel(mapped.team,mapped.squad);
-  const picked=[...rescheduleSelected].sort((a,b)=>a-b).map(i=>rescheduleResults[i]);
   const one=picked.length===1;
   const orig=rawGameOf(g)||g; // bei vorgemerkter Verlegung: Termin laut fussball.de
   const lines=picked.map(r=>{
-    const dt=new Date(r.date+'T00:00:00');
-    return '• '+DAYS_S[dt.getDay()]+' '+fmtShort(r.date)+', Anstoß '+kickoffRangeText(r);
+    return '• '+shareDay(r.date)+', Anstoß '+kickoffRangeText(r); // gleiche Schreibweise wie bei neuen Terminen
   }).join('\n');
   const txt='📅 *Neue Ansetzung gesucht*\n'
     +'*'+fussballOwnTeamName(g)+' ('+teamTxt+') – '+g.opponent+'*\n'
@@ -8319,7 +8355,7 @@ function shareRescheduleProposal(){
     +lines+'\n\n'
     +(one?'Bitte kurz Rückmeldung, ob der Termin passt 🙏'
          :'Bitte kurz Rückmeldung, welcher Termin passt 🙏');
-  window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
+  return txt;
 }
 async function doCancelSlot(){
   const s=TRAINING.find(x=>x.id===cancelSlotId); if(!s)return;
