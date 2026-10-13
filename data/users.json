@@ -601,13 +601,12 @@
         "Ü32 / Ü50": []
       },
       "enc": {
-        "salt": "LSU5sscuqkp8GsdfzjAB9w==",
-        "iv": "EbSiTag6hOl8LQfu",
-        "cipher": "Oxtyr5VyO3nPE/yzdjMFI+hH7wprTRmpFlkyaqhUyOverBjvJw+9K43x/qV8gQBj6jxoA/L3RJqbCtTzJtiggyqWtfJgZW7KCHTKOCTBWRjMbnD4N6QZOKULbLh7caW/cntA/qCy9SXEguA8rA=="
+        "salt": "FdMgcLPjgJz4y/EHBEumyw==",
+        "iv": "a4i8b3Yt4Q+zGCht",
+        "cipher": "L2JsR7FU1KFbDQ5uxZBy7am4ibBGwvP9y3qEUFDNDYUymD91Vsu4BExY44/lFzSUp1uKlYKYt2P8FUL6j7TZcIOtn+I3WffuLsAL+Fqbx/fKocI7lgKb5tolXIVwETFJ9On2rjds+2Brr53uYQ=="
       },
       "created": "2026-10-13T15:19:40.230Z",
       "emailNotificationsEnabled": true,
-      "pwChangeRequired": true,
       "phone": "015159150404",
       "contactPublic": "phone",
       "role": "vorstand"
