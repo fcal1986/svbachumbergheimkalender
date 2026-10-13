@@ -28,7 +28,9 @@
       "kind": "training",
       "cancelled": [
         "2026-10-12",
-        "2026-10-26"
+        "2026-10-26",
+        "2027-03-29",
+        "2027-05-17"
       ],
       "seasonId": "2026-2027"
     },
@@ -177,8 +179,12 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "4263cd5a-6ebb-40e1-a7fc-f1f857db7fb6"
+      ],
+      "trainerNames": [
+        "Marco Dohle"
+      ],
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
       "validUntil": "2027-06-30"
@@ -192,21 +198,25 @@
       "squad": 1,
       "pitch": {
         "mode": "haelfte",
-        "part": "A"
+        "part": "B"
       },
       "res": [],
       "note": "",
       "trainerIds": [
-        "6085b3aa-f111-47fa-9d20-7e59a0a987e8"
+        "6085b3aa-f111-47fa-9d20-7e59a0a987e8",
+        "58d96de0-05f7-47cd-9330-1832ab2c12b2"
       ],
       "trainerNames": [
-        "Marc Geauf"
+        "Marc Geauf",
+        "Viktor Kurz"
       ],
-      "validFrom": "2026-07-19",
+      "validFrom": "2026-10-10",
       "validUntil": "2027-06-30",
       "trainerId": null,
       "trainerName": "",
-      "seasonId": "2026-2027"
+      "seasonId": "2026-2027",
+      "kind": "training",
+      "cancelled": []
     },
     {
       "id": "ca2dc0b4-a484-4593-98eb-4b55d8a60d93",
@@ -236,8 +246,8 @@
     {
       "id": "89485bc0-5f67-4a6d-b1a5-f83aa909f1f7",
       "day": 2,
-      "from": "18:00",
-      "to": "19:30",
+      "from": "17:30",
+      "to": "19:00",
       "team": "B-Jugend",
       "squad": 1,
       "pitch": {
@@ -252,10 +262,13 @@
       "trainerNames": [
         "Cetin Kurt"
       ],
-      "cancelled": [],
+      "cancelled": [
+        "2026-11-03"
+      ],
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
-      "validUntil": "2027-06-30"
+      "validUntil": "2027-06-30",
+      "kind": "training"
     },
     {
       "id": "c9f4e22e-daeb-43b8-914b-eae6f1db049e",
@@ -359,7 +372,8 @@
         "Fabian Honisch"
       ],
       "cancelled": [
-        "2026-10-06"
+        "2026-10-06",
+        "2026-10-13"
       ],
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
@@ -449,7 +463,10 @@
       "trainerName": "",
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
-      "validUntil": "2027-06-30"
+      "validUntil": "2027-06-30",
+      "cancelled": [
+        "2026-11-04"
+      ]
     },
     {
       "id": "8f1459db-27b3-42bf-be36-78c483ddcc58",
@@ -475,7 +492,9 @@
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
       "validUntil": "2027-06-30",
-      "cancelled": []
+      "cancelled": [
+        "2026-11-04"
+      ]
     },
     {
       "id": "4607193e-c5e6-40a3-b78e-ab9d668bc2f2",
@@ -498,7 +517,10 @@
       ],
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
-      "validUntil": "2027-06-30"
+      "validUntil": "2027-06-30",
+      "cancelled": [
+        "2026-11-04"
+      ]
     },
     {
       "id": "1b6e5d01-f80f-451d-94f4-766ecbb7fe79",
@@ -521,7 +543,10 @@
       ],
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
-      "validUntil": "2027-06-30"
+      "validUntil": "2027-06-30",
+      "cancelled": [
+        "2026-11-04"
+      ]
     },
     {
       "id": "43b94d34-c477-4108-b2b6-750164cd46ff",
@@ -537,10 +562,12 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "6085b3aa-f111-47fa-9d20-7e59a0a987e8"
+        "6085b3aa-f111-47fa-9d20-7e59a0a987e8",
+        "58d96de0-05f7-47cd-9330-1832ab2c12b2"
       ],
       "trainerNames": [
-        "Marc Geauf"
+        "Marc Geauf",
+        "Viktor Kurz"
       ],
       "validFrom": "2026-07-19",
       "validUntil": "2027-06-30",
@@ -594,10 +621,21 @@
       "trainerNames": [
         "Cetin Kurt"
       ],
-      "cancelled": [],
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
-      "validUntil": "2027-06-30"
+      "validUntil": "2027-06-30",
+      "moved": {
+        "2026-10-08": {
+          "from": "17:00",
+          "to": "18:00",
+          "pitch": {
+            "mode": "haelfte",
+            "part": "A"
+          },
+          "res": []
+        }
+      },
+      "cancelled": []
     },
     {
       "id": "a4dbb675-3e10-40c6-afa2-40c2ca82a21c",
@@ -705,7 +743,8 @@
       "validFrom": "2026-09-09",
       "validUntil": "2027-06-30",
       "cancelled": [
-        "2026-10-08"
+        "2026-10-08",
+        "2026-10-15"
       ],
       "seasonId": "2026-2027"
     },
@@ -722,12 +761,17 @@
       },
       "res": [],
       "note": "",
-      "trainerIds": [],
-      "trainerNames": [],
+      "trainerIds": [
+        "4263cd5a-6ebb-40e1-a7fc-f1f857db7fb6"
+      ],
+      "trainerNames": [
+        "Marco Dohle"
+      ],
       "validFrom": "2026-09-09",
       "validUntil": "2027-06-30",
       "cancelled": [
-        "2026-10-08"
+        "2026-10-08",
+        "2026-10-15"
       ],
       "seasonId": "2026-2027"
     },
@@ -758,7 +802,8 @@
       "validUntil": "2027-06-30",
       "cancelled": [
         "2026-10-23",
-        "2026-11-06"
+        "2027-01-01",
+        "2027-03-26"
       ],
       "seasonId": "2026-2027"
     },

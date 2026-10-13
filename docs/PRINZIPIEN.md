@@ -50,10 +50,10 @@ Gezählt wird ab der Ansicht, in der man die Aufgabe bemerkt (Startseite, Wochen
 |---|---|---|---|---|---|
 | Plan der eigenen Mannschaft ansehen | alle | 0 | ✅ 0 | Startseite „Meine Woche“ (ohne Konto einmalig Mannschaft wählen) | – |
 | Konflikt lösen (Vorschlag übernehmen) | Admin | 1 | ✅ 1 | „Training … absagen“ in der Live-Karte (eigener Konflikt) oder in „Zu erledigen“; andere Konflikte: „Ansehen“ | Nr. 6, 56 |
-| Training absagen | Trainer | 1 | ✅ 1 | „Training absagen“ in der Live-Karte (nächstes Training) oder „Absagen“ in Tag/Woche (Rückgängig 6 s) | Nr. 49, 53 |
+| Training absagen | Trainer | 1 | ✅ 1 | „Training absagen“ in der Live-Karte (nächstes Training); in „Deine Woche“ ab 09.10.2026 · 1 Kachel → „Absagen“ = 2 (Rückgängig 6 s) | Nr. 49, 53 |
 | Platz heute sperren | Admin | 2 | ✅ 2 | „Heute sperren“ unter dem Platz (Admin) → Grund | Nr. 5 |
 | Training oder Termin anlegen | Trainer/Admin | höchstens 3 | ✅ 3 | „+ frei“ im Zeitstrahl an der gewünschten Stelle antippen → Formular mit Tag, Beginn, Ende, Mannschaft und Fläche vorbefüllt → „Termin speichern“ → „Jetzt speichern“ im Blatt „Termin prüfen“ (ab 06.10.2026 · 13, weil Speichern Mails verschickt); sonst + → Speichern → Jetzt speichern | Nr. 2, 52, 66 |
-| Spielverlegung vormerken | Trainer | höchstens 3 | ⚠️ 5 | „Verlegen“ in der Spielzeile → neues Datum (2) → Grund-Chip → „Vormerken“; das Datum kennt nur der Nutzer | Nr. 50 |
+| Spielverlegung vormerken | Trainer | höchstens 3 | ⚠️ 5 | „Verlegen“ in der Live-Karte bzw. Spielkarte im Kalender (in „Deine Woche“ ab 09.10.2026 · 1 erst Kachel antippen, +1) → neues Datum (2) → Grund-Chip → „Vormerken“; das Datum kennt nur der Nutzer | Nr. 50 |
 | Trainer einladen | Admin | höchstens 2 | ✅ 1 | Hinweis „Noch ohne Trainer …“ in „Zu erledigen“ (sonst Konto → Zugänge → „Per WhatsApp einladen“ = 3) | Nr. 51 |
 
 Gezählt am Code (`index.html`) und im lokalen Browser-Test, nicht am echten Handy. Ein Datums- oder Zeitfeld zählt als 2 (öffnen + wählen); auf manchen Android-Geräten kommt „OK“ dazu. Nach jeder Änderung an einem dieser Wege die Ist-Spalte aktualisieren.
@@ -79,6 +79,22 @@ Neue häufige Aufgaben werden hier ergänzt.
 - **Klare Sprache.** Kurze deutsche Sätze, „du“, keine Fachbegriffe aus dem Code.
 - **Ruhige Oberfläche.** Wenige Farben mit Bedeutung (grün = frei/ok, gelb = Hinweis, rot = Konflikt).
 
+## 8. Technik und Betrieb (ab der Supabase-Migration)
+
+> Beschlossen am 12.10.2026 als Planung. Gilt ab dem Start der Migration für jede Änderung. Umsetzung und Abläufe: `docs/BETRIEB.md`.
+
+- **Rechte nur auf dem Server.** RLS ist auf jeder Tabelle an, geschrieben wird nur über `api.*`. Die Oberfläche blendet aus, sie schützt nicht. Jede Rechteänderung bekommt einen Test im selben Commit.
+- **Drei getrennte Umgebungen: Dev, Pre, Pro.** Jeder Stand läuft erst auf Pre (pre.platzcoach.de), dann auf Pro. Kein Release ohne grüne Tests auf Pre.
+- **Claude bekommt nie Zugang zu Pro.** Claude arbeitet auf Branches; Zugangsdaten zu Pro kennt nur die Release-Pipeline. Auch Menschen ändern Pro nicht von Hand.
+- **Schema nur über Migrationen im Repo.** Nur vorwärts und abwärtskompatibel: erst hinzufügen, im nächsten Release entfernen. Nie per Klick im Dashboard.
+- **Keine echten Personendaten außerhalb von Pro.** Pre und Dev arbeiten mit erfundenen Testvereinen.
+- **Geheimnisse nie im Client und nie im Repo.** Der Client bekommt nur URL und `anon`-Schlüssel.
+- **Europäische Dienste zuerst.** Daten in der EU (Supabase Frankfurt, Scaleway). Ein Dienst außerhalb der EU nur mit AVV und Begründung im Entscheidungsprotokoll (Projekt-Doc `claude/entscheidungen.md`).
+- **Keine Werbung, kein Tracking im eingeloggten Bereich.** Analyse höchstens anonym und mit Einwilligung.
+- **Was nicht überwacht wird, läuft nicht.** Jeder Hintergrundjob meldet einen Heartbeat; Fehler lösen einen Alarm aus, kein Nachschauen.
+- **Ein Backup zählt erst, wenn es einmal zurückgespielt wurde.**
+- **Verstehen vor Übernehmen.** Kritische Teile (Rechte, Outbox, Belegungskonflikte) werden erst gemergt, wenn wir sie erklären können.
+
 ## Prüfliste vor jedem neuen Feature
 
 Jede Frage muss mit Ja beantwortet sein, sonst wird das Feature angepasst oder nicht gebaut:
@@ -92,3 +108,4 @@ Jede Frage muss mit Ja beantwortet sein, sonst wird das Feature angepasst oder n
 7. Bleibt Lesen ohne Anmeldung möglich, und ist nichts SVBB-spezifisch fest eingebaut?
 8. Funktioniert es am Handy?
 9. Ist es im Backlog (`docs/BACKLOG.md`) eingetragen, und wird der Status im selben Commit aktualisiert?
+10. Ab der Migration: Sind Rechte auf dem Server geprüft und durch Tests abgesichert, und läuft die Änderung als Migration über Pre nach Pro?

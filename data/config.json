@@ -48,7 +48,8 @@
     "name": "Höllenbergkampfbahn",
     "lat": 51.44,
     "lon": 7.97,
-    "floodlight": "ganz"
+    "floodlight": "ganz",
+    "address": "Neheimer Str., 59757 Arnsberg"
   },
   "passwordReset": {
     "workerUrl": "https://platzcoach-passwort.silent-shape-c920.workers.dev"

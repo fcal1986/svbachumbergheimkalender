@@ -207,7 +207,10 @@
   .hero-mini .mini-pitch{transform:scale(1.6);transform-origin:right center;}
   .st-hero .mini-pitch i{background:rgba(255,255,255,.18);} .st-hero .mini-pitch i.on{background:#8BCF2F;}
   .hero-acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
-  .st-hero .wk-act{background:transparent;color:#fff;border-color:rgba(255,255,255,.35);min-height:40px;padding:0 14px;font-size:13px;}
+  .st-hero .wk-act{background:transparent;color:#fff;border-color:rgba(255,255,255,.35);min-height:36px;padding:0 12px;font-size:13px;}
+  /* Ab 07.10.2026 · 30: Verlegen und Absagen im Kopf nebeneinander, gleich breit */
+  .st-hero .wk-acts{flex:1 1 100%;flex-direction:row;gap:8px;}
+  .st-hero .wk-acts .wk-act{flex:1 1 0;min-width:0;white-space:nowrap;}
   .hero-conf{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--kbFDECEA);color:var(--kt8E2A1D);border-radius:12px;padding:8px 10px;font-size:12.5px;font-weight:600;}
   .hero-conf svg{width:16px;height:16px;flex:none;}
   .hero-conf span{flex:1;min-width:0;}
@@ -303,6 +306,10 @@
   .tl-blk.senior{background:#405366;} .tl-blk.other{background:#2C4A66;}
   .tl-blk.game{background:#FFD24A;color:var(--pc-navy);}
   .tl-blk.mine{background:#8BCF2F;color:var(--pc-navy);box-shadow:inset 0 0 0 2px var(--pc-navy);}
+  /* Ab 07.10.2026 · 31: Block, der sich mit einem anderen überschneidet (z. B. Training in der Aufwärmzeit eines Spiels) */
+  .tl-blk.clash{border:2.5px solid #E5484D;z-index:1;}
+  .tl-blk.clash b:before{content:"⚠ ";}
+  .lg.clash{background:transparent;border:2.5px solid #E5484D;box-sizing:border-box;}
   .tl-blk.canc{background:var(--white);color:var(--kt7C8A97);box-shadow:inset 0 0 0 1.5px var(--krB8C4CF);text-decoration:line-through;}
   .tl-conf{position:absolute;border-radius:4px;pointer-events:none;background:repeating-linear-gradient(135deg,#C0392B 0,#C0392B 3px,rgba(192,57,43,.2) 3px,rgba(192,57,43,.2) 6px);}
   .tl-lock{position:absolute;left:0;right:0;border-radius:6px;pointer-events:none;z-index:1;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,rgba(64,83,102,.35) 0,rgba(64,83,102,.35) 5px,rgba(64,83,102,.12) 5px,rgba(64,83,102,.12) 10px);}
@@ -336,6 +343,49 @@
   .st-platz .stw-day.today{box-shadow:inset 0 0 0 1.5px var(--green);}
   .st-platz .stw-day.on{background:var(--pc-navy);}
   .st-platz .stw-strip{gap:4px;}
+  /* Deine Woche als Zeitleiste (ab 09.10.2026 · 1) */
+  .stw-kw{font-size:12px;font-weight:600;color:var(--ink-soft);}
+  .st-card.wtl{padding:6px 12px;gap:0;}
+  .wtl-day{display:grid;grid-template-columns:44px minmax(0,1fr);column-gap:10px;padding:10px 0;}
+  .wtl-day+.wtl-day{border-top:1px solid var(--krEEF2F1);}
+  .wtl-day.sel{background:var(--green-dim);border-radius:14px;margin:4px -6px;padding:10px 6px;border-top-color:transparent;}
+  .wtl-day.sel+.wtl-day{border-top-color:transparent;}
+  .wtl-date{display:flex;flex-direction:column;align-items:center;gap:1px;align-self:start;min-height:44px;border:none;background:none;padding:2px 0;cursor:pointer;font-family:'Inter',sans-serif;color:var(--ink);}
+  .wtl-date span{font-size:11px;font-weight:700;color:var(--ink-soft);}
+  .wtl-day.sel .wtl-date span{color:var(--kt3E7A0E);font-weight:800;}
+  .wtl-date b{font-family:'Manrope','Inter',sans-serif;font-size:21px;font-weight:800;line-height:1.05;}
+  .wtl-hol{font-style:normal;font-size:9px;font-weight:700;color:var(--ktA35B00);text-align:center;line-height:1.15;margin-top:2px;}
+  .wtl-items{display:flex;flex-direction:column;gap:6px;min-width:0;}
+  .wtl-it{display:flex;align-items:center;gap:8px;padding:9px 10px 9px 12px;border-radius:12px;background:var(--bg);position:relative;cursor:pointer;}
+  .wtl-it::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:4px;border-radius:0 3px 3px 0;background:var(--green);}
+  .wtl-day.sel .wtl-it{background:var(--white);box-shadow:0 2px 8px rgba(1,27,50,.06);}
+  .wtl-it:active{filter:brightness(.97);}
+  .wtl-it.k-game::before{background:var(--ink);}
+  .wtl-it.k-tt::before{background:var(--blue-bright);}
+  .wtl-it.k-moved::before{background:var(--ktD97706);}
+  .wtl-it.k-off::before{background:var(--ktC0392B);}
+  .wtl-it.k-moved{background:var(--kbFFF8EE);}
+  .wtl-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+  .wtl-name{font-size:14px;font-weight:700;line-height:1.3;color:var(--ink);}
+  .wtl-name.x{color:var(--ink-soft);font-weight:600;}
+  .wtl-t{font-variant-numeric:tabular-nums;margin-right:6px;}
+  .wtl-t.x{text-decoration:line-through;}
+  .wtl-sub{font-size:12.5px;color:var(--ink-secondary);line-height:1.3;}
+  .wtl-st{font-size:12.5px;font-weight:600;line-height:1.3;}
+  .wtl-st.off{color:var(--ktB42318);}
+  .wtl-st.moved{color:var(--kt9A3412);}
+  .wtl-txt .move-badge{align-self:flex-start;margin-top:3px;}
+  .wtl-chev{flex:none;width:18px;height:18px;fill:none;stroke:var(--ink-soft);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+  .wtl-empty{font-size:12.5px;color:var(--ink-soft);padding:12px 2px;}
+  .wtl-free{font-size:12px;color:var(--ink-soft);padding:10px 2px 6px;border-top:1px solid var(--krEEF2F1);}
+  .wtl-free button{border:none;background:none;padding:6px 0;font:inherit;color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
+  .wtl-nexthead{margin-top:4px;}
+  .st-card.wtl-next{padding:8px 12px 12px;}
+  .wtl-nd{font-size:11px;font-weight:700;color:var(--ink-soft);margin:8px 2px 4px;}
+  .wtl-sheet .wtl-sk{margin:0 0 2px;font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--kt3E7A0E);text-transform:uppercase;}
+  .wtl-sacts,.wtl-sacts .wk-acts{display:flex;flex-direction:column;gap:8px;}
+  .wtl-sacts .wk-act{width:100%;min-height:48px;font-size:15px;border-radius:12px;}
+  .wtl-sdet{display:block;width:100%;min-height:46px;margin-top:6px;border:none;background:none;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:var(--ink-soft);cursor:pointer;}
   .wk-list .wk-day{display:block;width:100%;text-align:left;border:none;background:none;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;color:var(--ink-soft);margin:10px 0 5px;padding:2px;cursor:pointer;}
   .wk-list .wk-day.sel{color:#fff;background:var(--pc-navy);border-radius:8px;padding:4px 8px;}
   .wk-list .wk-day:first-child{margin-top:0;}
@@ -382,6 +432,7 @@
   .occ-line{font-size:14px;color:var(--ink);margin-top:3px;}
   .occ-canc{color:var(--warn);font-weight:700;}
   .occ-contact{margin-top:10px;}
+  .wk-acts{display:flex;flex-direction:column;gap:4px;flex:none;}
   .wk-act{flex:none;background:none;border:1.5px solid var(--line);color:var(--ink);font:inherit;font-size:11px;font-weight:700;padding:5px 9px;border-radius:9px;cursor:pointer;}
   .wk-act:active{background:var(--bg);}
   .mv-reasons{margin-top:8px;gap:6px;}
@@ -456,6 +507,7 @@
   .tt-badge{background:var(--kbE9EEF7) !important;color:var(--pc-navy) !important;}
   .tt-block{margin-top:10px;display:flex;flex-direction:column;gap:6px;font-size:13.5px;}
   .tt-addr a{color:var(--grass);font-weight:700;}
+  .fb-addr{margin-top:10px;font-size:13.5px;} .fb-note a{color:var(--grass);font-weight:700;}
   .tt-yes b{font-weight:800;} .tt-no{font-size:12.5px;color:var(--ink-soft);}
   .tt-acts{display:flex;gap:8px;margin-top:4px;}
   .tt-btn{flex:1;min-height:42px;border-radius:12px;border:1.5px solid var(--line);background:var(--white);font-family:'Inter',sans-serif;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;}
@@ -466,6 +518,12 @@
   .share-prev{white-space:pre-wrap;word-break:break-word;font-family:'Inter',sans-serif;font-size:14px;line-height:1.45;background:var(--kbF2F5F4);border-radius:12px;padding:12px;margin:0 0 12px;color:var(--ink);}
   .share-wa{background:#25D366 !important;border-color:#25D366 !important;}
   .share-sheet button{font-family:'Inter',sans-serif;font-weight:700;}
+  .share-seg{display:flex;gap:4px;padding:4px;margin:0 0 12px;background:var(--kbF2F5F4);border-radius:12px;}
+  .share-seg button{flex:1;min-height:40px;border:none;border-radius:9px;background:none;color:var(--ink-soft);font-size:14px;cursor:pointer;}
+  .share-seg button.on{background:var(--white);color:var(--ink);box-shadow:0 1px 4px rgba(1,27,50,.12);}
+  .share-imgbox{display:flex;align-items:center;justify-content:center;height:min(52dvh,440px);margin:0 0 12px;border-radius:12px;background:var(--kbF2F5F4);color:var(--ink-soft);font-size:13px;}
+  .share-imgbox img{height:100%;width:auto;border-radius:10px;box-shadow:0 6px 18px rgba(1,27,50,.18);}
+  .share-hint{margin:8px 2px 0;font-size:12px;color:var(--ink-soft);text-align:center;}
   .ibtn.del svg{stroke:var(--warn);}
   .empty-card{background:var(--white);border-radius:16px;padding:20px 16px;text-align:center;font-size:12px;color:var(--ink-soft);box-shadow:var(--card-shadow);margin-bottom:10px;}
   .fb-card{background:var(--white);border-radius:14px;padding:12px 14px;box-shadow:var(--card-shadow);margin-bottom:8px;display:flex;align-items:center;gap:10px;}
@@ -474,6 +532,14 @@
   .event-card.cancelled-card{opacity:.75;box-shadow:none;border:1px solid var(--line);background:var(--bg);}
   .event-card.cancelled-card .ev-head{background:transparent;}
   .event-card.external-away{opacity:.8;}
+  .tn-games{margin-top:10px;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;}
+  .tn-games summary{cursor:pointer;font-weight:700;font-size:13.5px;padding:10px 0;list-style:none;}
+  .tn-games summary::-webkit-details-marker{display:none;}
+  .tn-games summary:after{content:" ▾";color:var(--ink-soft);} .tn-games[open] summary:after{content:" ▴";}
+  .tn-games ul{list-style:none;margin:0;padding:0 0 8px;}
+  .tn-games li{display:flex;align-items:baseline;gap:10px;padding:6px 0;border-top:1px solid var(--line);font-size:13.5px;}
+  .tn-games li b{flex:none;width:42px;font-weight:800;} .tn-games li span{flex:1;min-width:0;}
+  .tn-games li em{font-style:normal;font-weight:800;} .tn-games li a{flex:none;font-size:12px;font-weight:700;color:var(--grass);text-decoration:none;}
   .badge-fb{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--ink-soft);background:var(--bg);border-radius:8px;padding:3px 8px;}
   .fb-link-btn{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--green);text-decoration:none;margin-left:auto;}
   .fb-link-btn svg{width:13px;height:13px;stroke:var(--green);}
@@ -519,7 +585,7 @@
   .log-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:none;}
   .log-icon svg{width:15px;height:15px;}
   .log-body{flex:1;min-width:0;}
-  .log-msg{font-size:12px;font-weight:600;color:var(--ink);line-height:1.4;}
+  .log-msg{font-size:12px;font-weight:600;color:var(--ink);line-height:1.4;white-space:pre-line;}
   .log-time{font-size:10.5px;color:var(--ink-soft);margin-top:3px;display:flex;align-items:center;gap:6px;}
   .log-cat{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:1px 7px;font-size:9.5px;font-weight:700;color:var(--ink-soft);}
   .squad-sq-chip{font-size:10px;font-weight:700;padding:4px 8px;border-radius:6px;background:var(--bg);border:1.5px solid var(--line);color:var(--ink-soft);cursor:pointer;user-select:none;}
@@ -600,6 +666,12 @@
   .rv-row span{flex:none;width:64px;color:var(--ink-soft);font-weight:600;}
   .rv-row b{flex:1;min-width:0;color:var(--ink);font-weight:700;}
   .rv-row.ok b{color:var(--grass);}
+  .rv-row.rv-tr{align-items:center;cursor:pointer;background:var(--kbFFF7ED);margin:6px -8px;padding:10px 8px;border-radius:10px;border-bottom:none;}
+  .rv-row.rv-tr input{width:20px;height:20px;flex:none;accent-color:var(--green);margin:0;}
+  .nf-st.rule-warn{display:block;margin-top:3px;color:var(--kt9A3412);font-weight:600;}
+  .rule-fix{margin-left:4px;border:1.5px solid var(--krFDBA8C);background:var(--white);color:var(--kt9A3412);border-radius:999px;padding:3px 10px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;}
+  .rv-row.rule b{color:var(--kt9A3412);}
+  .nf-st.own-tr{display:block;margin-top:3px;color:var(--kt9A3412);font-weight:600;}
   .fs-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin:14px 0 7px;}
   .fs-sub{font-size:11.5px;color:var(--ink-soft);margin:10px 0 6px;}
   .fs-acts{display:flex;gap:8px;margin-top:14px;}
@@ -1024,6 +1096,12 @@
   .modal-box h3{margin:0 0 8px;font-size:16px;font-weight:800;}
   .modal-box p{margin:0 0 16px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;}
   .modal-acts{display:flex;gap:8px;}
+  .req-card{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin:10px 0;}
+  .req-head b{display:block;font-size:14px;} .req-head small{color:var(--ink-soft);font-size:12px;}
+  .req-opt{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg);border-radius:10px;padding:8px 10px;margin-top:6px;font-size:13px;}
+  .req-st{font-size:11.5px;font-weight:700;} .req-st.ok{color:var(--kt1E5730);} .req-st.busy{color:var(--kt8E2A1D);}
+  .req-acts{display:flex;gap:8px;margin-top:8px;} .req-acts .ghost-btn{flex:1;margin:0;} .req-acts .ghost-btn.danger{color:var(--kt8E2A1D);}
+  .req-search{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:13px;margin:8px 0 4px;background:var(--bg);outline:none;box-sizing:border-box;}
   .rs-result-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;}
   .rs-result-row.rs-selectable{cursor:pointer;border:1.5px solid transparent;transition:.12s;}
   .rs-result-row.rs-selectable.on{background:var(--green-dim);border-color:var(--green);}
@@ -1373,6 +1451,9 @@
           </div></div>
         </div>
       </div>
+      <div id="f-ttfor-field" style="display:none;"><p class="nf-lbl">Für wen?</p>
+        <div class="chip-group" id="f-ttfor"></div>
+      </div>
       <div id="f-gkteams-field" style="display:none;"><p class="nf-lbl">Für welche Mannschaften?</p>
         <div class="chip-group" id="f-gkteams"></div>
         <p class="helptext">Die Trainer dieser Mannschaften bekommen beim Anlegen eine E-Mail mit der Bitte, ihre Torhüter an- oder abzumelden.</p>
@@ -1640,6 +1721,10 @@
       <div class="field" style="flex:3;margin-bottom:0;"><label>Neues Datum</label><input type="date" id="mv-date" onchange="updateMoveTrainingHint()"></div>
       <div class="field" style="flex:2;margin-bottom:0;"><label>Anstoß</label><input type="time" id="mv-time" onchange="updateMoveTrainingHint()"></div>
     </div>
+    <label class="rs-result-row rs-selectable" id="mv-swap-row" style="margin-top:12px;"><input type="checkbox" id="mv-swap" onchange="onMoveSwapChange()">
+      <b style="font-weight:600;" id="mv-swap-lbl">Heimrecht getauscht</b></label>
+    <div class="field" id="mv-venue-field" style="display:none;margin:10px 0 0;"><label>Spielort beim Gegner (optional)</label>
+      <input type="text" id="mv-venue" maxlength="200" placeholder="z. B. Sportplatz, Straße, Ort"></div>
     <div class="field" style="margin:12px 0 0;"><label id="mv-reason-lbl">Grund der Verlegung (für den DFBnet-Antrag)</label>
       <textarea id="mv-reason" oninput="renderMoveReasons()" rows="2" maxlength="300" placeholder="z. B. Herbstferien, mehrere Spieler fehlen" style="width:100%;box-sizing:border-box;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;font-family:'Inter';font-size:14px;resize:vertical;"></textarea></div>
     <div class="chip-group mv-reasons" id="mv-reasons"></div>
@@ -1675,10 +1760,11 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='06.10.2026 · 23';
+const APP_VERSION='12.10.2026 · 6';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
+let REQUESTS=[]; // offene Terminanfragen (data/requests.json, ab 12.10.2026 · 5) – blockieren keinen Platz
 let MOVES=[]; // vorgemerkte Spielverlegungen (data/game-moves.json), siehe applyGameMoves()
 let FUSSBALLDE={updated:null,games:[],awayGames:[]}; // Heim- und Auswärtsspiele von fussball.de (siehe data/fussballde.json, automatisch per GitHub Action befüllt)
 let selectedSeasonFilter='';
@@ -1844,16 +1930,18 @@ function teamLabel(team,squad){
 
 /* Trainings als virtuelle Termine expandieren (Alles ist ein Termin) */
 function trainingInstancesOn(d){
-  return TRAINING.filter(s=>slotActiveOn(s,d)).map(s=>({
-    id:'tr-'+s.id+'-'+d, d:d, t:s.from, bis:s.to,
+  // Ab 07.10.2026 · 29: einmalig verlegt = s.moved[datum] {from,to,pitch,res} – bleibt das Regeltraining, nur zu anderer Zeit/Fläche
+  return TRAINING.filter(s=>slotActiveOn(s,d)).map(s=>{ const ov=(s.moved||{})[d]; return {
+    id:'tr-'+s.id+'-'+d, d:d, t:ov?ov.from:s.from, bis:ov?ov.to:s.to,
+    movedFrom:ov?{from:s.from,to:s.to,pitch:s.pitch||null}:null,
     title:'Training', team:s.team, squad:s.squad||1,
-    pitch:s.pitch||null, halle:null, res:s.res||[], note:s.note||'',
+    pitch:ov&&('pitch' in ov)?ov.pitch:(s.pitch||null), halle:null, res:ov&&ov.res?ov.res:(s.res||[]), note:s.note||'',
     ownerId:getTrainerIds(s)[0]||null,
     ownerName:getTrainerNames(s)[0]||'Vorstand',
     trainerIds:getTrainerIds(s),
     trainerNames:getTrainerNames(s),
     isTraining:true, trainingSlotId:s.id, kind:s.kind||(s.team===GK_TEAM?'goalkeeper':'training')
-  })).sort((a,b)=>a.t.localeCompare(b.t));
+  }; }).sort((a,b)=>a.t.localeCompare(b.t));
 }
 /* Abgesagte Regeltermine: sollen NICHT einfach aus Start/Termine verschwinden, sondern
    sichtbar bleiben mit "Abgesagt"-Kennzeichnung – daher eine EIGENE, von der normalen
@@ -1864,7 +1952,8 @@ function cancelledTrainingInstancesOn(d){
     id:'trc-'+s.id+'-'+d, d:d, t:s.from, bis:s.to,
     title:'Training', team:s.team, squad:s.squad||1,
     pitch:null, halle:null, res:[], note:s.note||'',
-    isTraining:true, isCancelled:true, trainingSlotId:s.id, kind:s.kind||(s.team===GK_TEAM?'goalkeeper':'training')
+    isTraining:true, isCancelled:true, trainingSlotId:s.id, kind:s.kind||(s.team===GK_TEAM?'goalkeeper':'training'),
+    movedTo:(typeof EVENTS!=='undefined'?EVENTS.find(e=>e.d===d&&e.movedFromSlot&&e.movedFromSlot.slotId===s.id):null)||null
   })).sort((a,b)=>a.t.localeCompare(b.t));
 }
 
@@ -1902,6 +1991,8 @@ function fussballDurationMin(team){
   const override=cfg&&cfg.durationByAge&&cfg.durationByAge[key];
   return override||DURATION_BY_AGE[key]||110;
 }
+// Ab 08.10.2026 · 32: ein zusammengefasstes Turnier dauert vom ersten Anstoß bis zum Ende des letzten Spiels
+function fbGameDur(g){ return g&&g.tournament?g.tournament.dur:fussballDurationMin(g&&g.team); }
 function shiftTimeClamped(t,m){
   const[h,min]=t.split(':').map(Number);
   let tot=((h*60+min+m)%1440+1440)%1440; // sicher gegen Mitternachts-Über-/Unterlauf
@@ -1938,20 +2029,71 @@ function fbOnOwnPitch(g){ return !!g&&!g.withdrawn&&!g.foreignVenue; }
 function fbVenueShort(v){ const parts=String(v||'').split(',').map(x=>x.trim()).filter(Boolean); const last=parts[parts.length-1]||''; return last.replace(/^\d{5}\s+/,'')||parts[0]||''; }
 function applyGameMoves(){
   const raw=FUSSBALLDE_RAW||{games:[],awayGames:[]};
-  const withMove=g=>{
+  // isAway = Liste, in der fussball.de das Spiel gerade führt. Heimrecht getauscht (m.swap, ab 10.10.2026 · 2):
+  // m.away = Seite beim Vormerken; offen, solange fussball.de Tag, Anstoß UND Seite noch nicht geändert hat.
+  const withMove=(g,isAway)=>{
     const m=g.link?MOVES.find(x=>x.link===g.link):null;
     if(!m) return {...g};
-    if(g.d===m.fromD&&(g.t||'')===(m.fromT||'')&&!(g.d===m.toD&&(g.t||'')===(m.toT||'')))
-      return {...g, d:m.toD, t:m.toT, movedFrom:{d:g.d,t:g.t}, movePending:true, moveId:m.id};
+    const fromAway=!!m.away, sideChanged=isAway!==fromAway;
+    const atOld=g.d===m.fromD&&(g.t||'')===(m.fromT||'');
+    if(m.swap?(atOld&&!sideChanged):(atOld&&!(g.d===m.toD&&(g.t||'')===(m.toT||''))))
+      return {...g, d:m.toD, t:m.toT, movedFrom:{d:g.d,t:g.t}, movePending:true, moveId:m.id,
+        ...(m.swap?{swapPending:true, swapFrom:fromAway?'away':'home'}:{})};
     // fussball.de hat geändert: auf den vorgemerkten Tag (bestätigt) oder auf einen ANDEREN Tag
     // (abweichend) – dann gilt fussball.de, die Vormerkung ist überholt und wird gemeldet.
-    const confirmed=g.d===m.toD;
+    const confirmed=g.d===m.toD&&(!m.swap||sideChanged);
     return {...g, movedFrom:g.movedFrom||{d:m.fromD,t:m.fromT}, moveId:m.id, moveConfirmed:confirmed,
-      moveDiverged:!confirmed, plannedTo:{d:m.toD,t:m.toT}};
+      moveDiverged:!confirmed, plannedTo:{d:m.toD,t:m.toT}, ...(sideChanged?{swapFrom:fromAway?'away':'home'}:{})};
   };
   // Ab 06.10.2026 · 19 auch Auswärtsspiele (nur Info, keine Platzprüfung)
-  FUSSBALLDE={...raw, awayGames:(raw.awayGames||[]).map(fbNormalizeWithdrawn).map(withMove), games:(raw.games||[]).map(fbNormalizeWithdrawn).map(g=>fbOwnVenue(g)?g:{...g,foreignVenue:true}).map(withMove)};
+  const home=(raw.games||[]).map(fbNormalizeWithdrawn).map(g=>fbOwnVenue(g)?g:{...g,foreignVenue:true}).map(g=>withMove(g,false));
+  const away=(raw.awayGames||[]).map(fbNormalizeWithdrawn).map(g=>withMove(g,true));
+  // Vorgemerkter Heimrechttausch: bis fussball.de nachzieht, steht das Spiel schon auf der neuen Seite –
+  // als Auswärtsspiel belegt es keinen Platz mehr, als Heimspiel belegt es den eigenen Platz.
+  const venueOf=g=>{ const m=MOVES.find(x=>x.link===g.link); return (m&&m.venue)||null; };
+  FUSSBALLDE={...raw,
+    games:home.filter(g=>!g.swapPending).concat(away.filter(g=>g.swapPending).map(g=>({...g, venue:null, foreignVenue:false}))),
+    awayGames:away.filter(g=>!g.swapPending).concat(home.filter(g=>g.swapPending).map(g=>({...g, venue:venueOf(g), foreignVenue:false})))};
   linkOwnMatches();
+  fbGroupTournaments();
+}
+/* ---------- Turniere (ab 08.10.2026 · 32) ----------
+   fussball.de liefert jedes Turnierspiel einzeln (Wettbewerb „Kreisturnier“, „Vereinsturnier“ …).
+   Gleicher Tag + Mannschaft + Wettbewerb mit „Turnier“ und mind. 2 Spiele → EIN Termin „Turnier“; die Spiele
+   stehen darin (tournament.games). Ende = letzter Anstoß + Spielabstand (höchstens normale Spieldauer).
+   Ist eines der Spiele ein Heimspiel, steht das Turnier bei den Heimspielen (Spielort zählt wie gewohnt). */
+function fbIsTournamentGame(g){ return /turnier/i.test((g&&g.competition)||''); }
+function fbGroupTournaments(){
+  const groups=new Map();
+  const add=(g,home)=>{ if(!g||g.tournament||g.withdrawn||!g.d||!fbIsTournamentGame(g)) return;
+    const k=[g.d,g.team,g.squad||1,g.competition].join('|'); if(!groups.has(k)) groups.set(k,[]); groups.get(k).push({g,home}); };
+  (FUSSBALLDE.games||[]).forEach(g=>add(g,true)); (FUSSBALLDE.awayGames||[]).forEach(g=>add(g,false));
+  const drop=new Set(), addHome=[], addAway=[];
+  groups.forEach(list=>{
+    if(list.length<2) return;
+    list.sort((a,b)=>(a.g.t||'').localeCompare(b.g.t||''));
+    const first=list[0].g, homeX=list.find(x=>x.home), ts=list.map(x=>x.g.t).filter(Boolean), full=fussballDurationMin(first.team);
+    const gaps=ts.slice(1).map((t,i)=>hmMin(t)-hmMin(ts[i])).filter(x=>x>0);
+    const slot=Math.min(full,gaps.length?Math.min(...gaps):full);
+    const dur=ts.length?hmMin(ts[ts.length-1])-hmMin(ts[0])+slot:full;
+    const name=((list.find(x=>x.g.staffelName)||{}).g||{}).staffelName||first.competition;
+    const base=homeX?homeX.g:first;
+    (homeX?addHome:addAway).push({...base, t:ts[0]||first.t, opponent:name, link:first.link||null, score:null,
+      movedFrom:null, movePending:false, moveConfirmed:false, moveDiverged:false, plannedTo:null, moveId:null,
+      tournament:{name, dur, games:list.map(x=>({t:x.g.t||'',opponent:x.g.opponent,home:x.home,link:x.g.link||null,score:x.g.score||null}))}});
+    list.forEach(x=>drop.add(x.g));
+  });
+  if(!drop.size) return;
+  FUSSBALLDE.games=(FUSSBALLDE.games||[]).filter(g=>!drop.has(g)).concat(addHome);
+  FUSSBALLDE.awayGames=(FUSSBALLDE.awayGames||[]).filter(g=>!drop.has(g)).concat(addAway);
+}
+function tournamentGamesHTML(e){
+  const tn=e.tournament; if(!tn) return '';
+  return '<details class="tn-games" onclick="event.stopPropagation()"><summary>'+tn.games.length+' Spiele</summary><ul>'
+    +tn.games.map(m=>{ const sc=m.score?(m.home?m.score.home+':'+m.score.away:m.score.away+':'+m.score.home):'';
+      return '<li><b>'+esc(m.t||'–')+'</b><span>'+esc(m.opponent)+'</span>'+(sc?'<em>'+esc(sc)+'</em>':'')
+        +(m.link?'<a href="'+esc(m.link)+'" target="_blank" rel="noopener" title="Spiel bei fussball.de" onclick="event.stopPropagation()">fussball.de</a>':'')+'</li>'; }).join('')
+    +'</ul></details>';
 }
 /* Spiel-Nummer (fbIndex): Heimspiele 0…, Auswärtsspiele ab AWAY_IDX (ab 06.10.2026 · 19). */
 const AWAY_IDX=10000;
@@ -2005,14 +2147,14 @@ function fmtDayShort(d){ const dt=new Date(d+'T00:00:00'); return DAYS_S[dt.getD
 function movedGameGhostsOn(d){
   const out=[];
   fbAllIndexed().forEach(([g,idx])=>{
-    const mapped=fussballFilterTeam(g.team,g.squad), away=fbIsAwayIdx(idx);
+    const mapped=fussballFilterTeam(g.team,g.squad), away=g.swapFrom?g.swapFrom==='away':fbIsAwayIdx(idx); // alter Termin: alte Seite
     const base={opponent:g.opponent, team:mapped.team, squad:mapped.squad, pitch:null, halle:null, res:[], kind:'moved', isAway:away,
       title:away?'Auswärtsspiel: '+teamLabel(mapped.team,mapped.squad)+' bei '+g.opponent:'Heimspiel: '+teamLabel(mapped.team,mapped.squad)+' – '+g.opponent,
       isMovedGhost:true, toD:g.d, toT:g.t, pending:!!g.movePending, diverged:!!g.moveDiverged, plannedTo:g.plannedTo||null, fbIndex:idx};
     if(g.movedFrom&&g.movedFrom.d===d&&g.movedFrom.d!==g.d)
-      out.push({...base, id:'fbmoved-'+(g.link||idx)+'-'+d, d, t:g.movedFrom.t||'00:00', bis:g.movedFrom.t?shiftTimeClamped(g.movedFrom.t,fussballDurationMin(g.team)):'23:59'});
+      out.push({...base, id:'fbmoved-'+(g.link||idx)+'-'+d, d, t:g.movedFrom.t||'00:00', bis:g.movedFrom.t?shiftTimeClamped(g.movedFrom.t,fbGameDur(g)):'23:59'});
     if(g.moveDiverged&&g.plannedTo&&g.plannedTo.d===d&&g.plannedTo.d!==g.d&&!(g.movedFrom&&g.movedFrom.d===d))
-      out.push({...base, id:'fbstale-'+(g.link||idx)+'-'+d, d, t:g.plannedTo.t||'00:00', bis:g.plannedTo.t?shiftTimeClamped(g.plannedTo.t,fussballDurationMin(g.team)):'23:59', stalePlan:true});
+      out.push({...base, id:'fbstale-'+(g.link||idx)+'-'+d, d, t:g.plannedTo.t||'00:00', bis:g.plannedTo.t?shiftTimeClamped(g.plannedTo.t,fbGameDur(g)):'23:59', stalePlan:true});
   });
   return out;
 }
@@ -2053,12 +2195,12 @@ function fussballDisplayAll(){
   return (FUSSBALLDE.games||[]).map((g,idx)=>{
     const mapped=fussballFilterTeam(g.team,g.squad);
     const label=teamLabel(mapped.team,mapped.squad); // z.B. "E2-Jugend" statt nur "E-Junioren"
-    const bis=g.t?shiftTimeClamped(g.t,fussballDurationMin(g.team)):'23:59';
+    const bis=g.t?shiftTimeClamped(g.t,fbGameDur(g)):'23:59';
     const isFull=fussballTeamCategory(g.team)==='full';
     const offPitch=!fbOnOwnPitch(g);
     return {
       id:fussballGameLinkId(g), d:g.d, t:g.t||'00:00', bis,
-      title:'Heimspiel: '+label+' – '+g.opponent, opponent:g.opponent,
+      title:g.tournament?'Turnier: '+label+' · '+g.tournament.name:'Heimspiel: '+label+' – '+g.opponent, opponent:g.opponent, tournament:g.tournament||null,
       team:mapped.team, squad:mapped.squad, competition:g.competition||'', score:g.score||null,
       withdrawn:!!g.withdrawn, foreignVenue:!!g.foreignVenue, venue:g.venue||null, offPitch,
       isExternal:true, pitchIsFull:isFull&&!offPitch,
@@ -2074,12 +2216,12 @@ function fussballDisplayAwayAll(){
   return (FUSSBALLDE.awayGames||[]).map((g,idx)=>{
     const mapped=fussballFilterTeam(g.team,g.squad);
     const label=teamLabel(mapped.team,mapped.squad);
-    const bis=g.t?shiftTimeClamped(g.t,fussballDurationMin(g.team)):'23:59';
+    const bis=g.t?shiftTimeClamped(g.t,fbGameDur(g)):'23:59';
     return {
       id:'fbaway-'+(g.link||(g.d+'|'+g.t+'|'+g.opponent)), d:g.d, t:g.t||'00:00', bis,
-      title:'Auswärtsspiel: '+label+' bei '+g.opponent, opponent:g.opponent,
+      title:g.tournament?'Turnier: '+label+' · '+g.tournament.name:'Auswärtsspiel: '+label+' bei '+g.opponent, opponent:g.opponent, tournament:g.tournament||null,
       team:mapped.team, squad:mapped.squad, competition:g.competition||'', score:g.score||null,
-      withdrawn:!!g.withdrawn, offPitch:true,
+      withdrawn:!!g.withdrawn, offPitch:true, venue:g.venue||null, // Spielort ab 09.10.2026 · 8 auch für Auswärtsspiele
       isExternal:true, isAway:true, ownerName:'fussball.de', link:g.link||null,
       fbIndex:AWAY_IDX+idx, movedFrom:g.movedFrom||null, movePending:!!g.movePending, moveConfirmed:!!g.moveConfirmed,
       moveDiverged:!!g.moveDiverged, plannedTo:g.plannedTo||null
@@ -2089,7 +2231,7 @@ function fussballDisplayAwayAll(){
 function fussballDisplayAwayInstancesOn(d){ return fussballDisplayAwayAll().filter(e=>e.d===d); }
 
 function fussballGameWindow(g){
-  return { s:shiftTimeClamped(g.t,-fussballBufferBeforeMin()), e:shiftTimeClamped(g.t,fussballDurationMin(g.team)) };
+  return { s:shiftTimeClamped(g.t,-fussballBufferBeforeMin()), e:shiftTimeClamped(g.t,fbGameDur(g)) };
 }
 /* Nur "ganzer Platz"-Kategorien (D-Jugend aufwärts) gehen in die harte Konfliktprüfung ein. */
 function fussballInstancesOn(d){
@@ -2099,7 +2241,7 @@ function fussballInstancesOn(d){
     const win=fussballGameWindow(g);
     return {
       id, d:g.d, t:win.s, bis:win.e,
-      title:'Heimspiel: '+(g.team?g.team+' – ':'')+g.opponent, pitch:{mode:'ganz'}, halle:null, res:[],
+      title:(g.tournament?'Turnier: ':'Heimspiel: ')+(g.team?g.team+' – ':'')+g.opponent, pitch:{mode:'ganz'}, halle:null, res:[],
       isExternal:true, ownerName:'fussball.de (automatisch)', note:g.competition||'', game:g
     };
   }).filter(Boolean);
@@ -2126,7 +2268,7 @@ function fussballShareInstancesOn(d,skipId,skipSlotId,extra){
     const part=!halfBusy('A')?'A':(!halfBusy('B')?'B':(!gameBusy('A')?'A':(!gameBusy('B')?'B':'A')));
     placed.push({
       id:fussballGameLinkId(g), d:g.d, t:win.s, bis:win.e,
-      title:'Heimspiel: '+(g.team?g.team+' – ':'')+g.opponent, pitch:{mode:'haelfte',part}, halle:null, res:[],
+      title:(g.tournament?'Turnier: ':'Heimspiel: ')+(g.team?g.team+' – ':'')+g.opponent, pitch:{mode:'haelfte',part}, halle:null, res:[],
       isExternal:true, isSharedGame:true, ownerName:'fussball.de (automatisch)', note:g.competition||'', game:g
     });
   });
@@ -2158,7 +2300,7 @@ function fussballShareNotesFor(d,von,bis){
    Ganzplatz-Spielen oder eigenen Terminen erkennt conflictsOnDay() paarweise. */
 function fussballCapacityWarningsOn(d){
   const shared=(FUSSBALLDE.games||[]).filter(g=>g.d===d&&g.t&&fbOnOwnPitch(g)&&fussballTeamCategory(g.team)==='share')
-    .map(g=>({g,s:g.t,e:shiftTimeClamped(g.t,fussballDurationMin(g.team))}));
+    .map(g=>({g,s:g.t,e:shiftTimeClamped(g.t,fbGameDur(g))}));
   const warnings=[], seen=new Set();
   // Belegung zu jedem Anstoßzeitpunkt prüfen: welche geteilten Spiele laufen dann gerade?
   shared.forEach(x=>{
@@ -2416,8 +2558,15 @@ function updateFreeSlotsOnConflict(){
     const von=document.getElementById('f-von')?.value;
     const bis=document.getElementById('f-bis')?.value;
     // Auswärtsspiel/-turnier belegt bei uns nichts → keine freien Zeitfenster anbieten.
-    if(isMatchKind(formKind())&&formHA==='away'){ const fs=document.getElementById('free-slots-box'); if(fs) fs.innerHTML=''; return; }
-    if(d&&von&&bis) renderFreeSlotsBox('free-slots-box',d,von,bis,editingId);
+    const fs=document.getElementById('free-slots-box');
+    if(isMatchKind(formKind())&&formHA==='away'){ if(fs) fs.innerHTML=''; return; }
+    // Ab 07.10.2026 · 26: nur bei echtem Konflikt (vorher nach jeder Datums-/Zeitänderung); eigenes Training zählt als frei
+    if(d&&von&&bis&&von<bis){
+      const o=formOccupation();
+      const hits=findConflicts(d,von,bis,o.pitch,o.halle,o.res,editingId,o.kind).filter(c=>!isOwnTeamTraining(c.event,o.ownFree));
+      if(!hits.length){ if(fs) fs.innerHTML=''; return; }
+      renderFreeSlotsBox('free-slots-box',d,von,bis,editingId);
+    }
   }catch(e){ console.warn('updateFreeSlotsOnConflict:',e); }
 }
 
@@ -2616,6 +2765,11 @@ function teamTrailer(team,squad,item){
     const org=(item.trainerIds&&item.trainerIds.length)?item.trainerIds:(item.ownerId?[item.ownerId]:[]);
     if(org.length) t+='\nPlatzcoach-Orga: '+org.join(',');
   }
+  // Trainer-Termin mit Zielgruppe (ab 09.10.2026 · 3): Mail nur an deren Trainer (scripts/notify-email.mjs)
+  if(item&&kindOf(item)==='trainer'&&ttForList(item).length){
+    t+='\nPlatzcoach-Fuer: '+ttForList(item).join(',');
+    if(item.ownerId) t+='\nPlatzcoach-Orga: '+item.ownerId;
+  }
   return t;
 }
 // Mannschaft für Commit-Texte: beim Torwarttraining die gewählten Mannschaften statt "Torwarttraining".
@@ -2633,6 +2787,7 @@ const STORES={
   locks:   {path:'data/resource-locks.json',  key:'locks',   get:()=>LOCKS,    set:v=>{LOCKS=v;}},
   seasons: {path:'data/seasons.json',         key:'seasons', get:()=>SEASONS,  set:v=>{SEASONS=v;}},
   moves:   {path:'data/game-moves.json',      key:'moves',   get:()=>MOVES,    set:v=>{MOVES=v; applyGameMoves();}},
+  requests:{path:'data/requests.json',        key:'requests',get:()=>REQUESTS, set:v=>{REQUESTS=v;}},
   push:    {path:'data/push-subscriptions.json', key:'subs',  get:()=>PUSH_SUBS, set:v=>{PUSH_SUBS=v;}}
 };
 const STORE_BASE={};
@@ -3181,7 +3336,10 @@ const KIND_FILTERS=['training','torwart','spiele','turniere','trainer','sonstige
 const KIND_FILTER_LABELS={training:'Training',torwart:'Torwart',spiele:'Spiele',turniere:'Turniere',trainer:'Trainer',sonstiges:'Sonstiges'};
 let KIND_SEL=new Set();
 function kindGroupOf(e){
-  if(e.isExternal||e.isMovedGhost) return isTournamentGame(e)?'turniere':'spiele';
+  // Ab 09.10.2026 · 5: nur echte Turniere zählen als Turnier; ab · 9 nur noch zusammengefasste (≥ 2 Spiele am Tag). Einzelspiele
+  // aus „Kinderfußball“/„Spielfest“ mit festem Gegner sind Spiele – vorher fielen G-Jugend-Spiele aus dem Filter „Spiele“.
+  // (isTournamentGame bleibt für die Doppel-Spiel-Prüfung weiter, dort sollen Spielfest-Runden nicht als Konflikt zählen.)
+  if(e.isExternal||e.isMovedGhost) return e.tournament?'turniere':'spiele'; // ab 09.10.2026 · 9: einzelnes Spiel im „Kreisturnier“ (Ü32-Runde) = Spiel
   const k=kindOf(e);
   if(k==='goalkeeper'||e.team===GK_TEAM) return 'torwart';
   if(e.isTraining||k==='training') return 'training';
@@ -3379,6 +3537,9 @@ function passesFilter(e){
   // müssen zutreffen) – anders als die übrigen Chips (Jugend/Senioren/Verein), die weiterhin
   // exklusiv zur Mannschaftsauswahl sind, da "Jugend" + einzelne Teams auswählen redundant wäre.
   if(KIND_SEL.size&&!KIND_SEL.has(kindGroupOf(e))) return false;
+  if(teamMultiFilter.size&&isTrainerTermin(e)){ // ab 09.10.2026 · 3: Trainer-Termine nach Zielgruppe
+    const cls={}; teamMultiFilter.forEach(k=>{ const [t,q]=k.split(':'); (cls[t]=cls[t]||[]).push(parseInt(q)||1); });
+    return ttConcerns(e,cls,false); }
   if(teamMultiFilter.size) return teamMultiFilter.has((e.team)+':'+(e.squad||1))
     ||(teamMultiFilter.has(GK_TEAM+':1')&&(e.team===GK_TEAM||kindOf(e)==='goalkeeper')); // Torwarttraining auch, wenn einer Mannschaft zugeordnet
   if(filter==='alle') return true;
@@ -3412,8 +3573,17 @@ function usedQuartersWindow(d,von,bis,skipId,freeTeam){
 }
 // Heimspiel/-turnier im Formular: das Training derselben Mannschaft zählt als frei (wird nach dem Speichern zum Absagen angeboten).
 function isOwnTeamTraining(t,own){ return !!own&&!!t.isTraining&&t.team===own.team&&(!isJugend(own.team)||(t.squad||1)===(own.squad||1)); }
+/* Ab 07.10.2026 · 26 (Wunsch David Skwara/Fabrizio): Jeder Termin einer Mannschaft darf ihr eigenes Training ersetzen –
+   das Training gilt als frei und wird in „Termin prüfen“ zum Absagen angeboten (bei Spielen/Turnieren vorausgewählt).
+   Ausgenommen: Trainer-Termine (alle), Torwarttraining, Auswärtsspiele (belegen bei uns nichts). */
+function ownFreeFor(kind,away,team,squad){ return (kind!=='trainer'&&kind!=='goalkeeper'&&!away&&team&&team!=='Alle Teams'&&team!==GK_TEAM)?{team,squad:squad||1}:null; }
+function ownTrainingsOverlapping(d,von,bis,own,kind){
+  if(!own||!d||!von||!bis) return [];
+  const sameDay=kind==='training'||(FORM_MOVE&&FORM_MOVE.date===d); // neues Training am Trainingstag = meist Ersatz (ab · 28)
+  return trainingInstancesOn(d).filter(t=>t.trainingSlotId&&isOwnTeamTraining(t,own)&&(sameDay||(von<eventBis(t)&&bis>t.t)));
+}
 function formOwnTeamFree(){
-  const k=formKind(); if(!isMatchKind(k)||formHA==='away') return null;
+  const k=formKind(); if(k==='trainer'||k==='goalkeeper'||(isMatchKind(k)&&formHA==='away')) return null;
   const team=document.getElementById('f-team').value, sb=document.querySelector('#f-squad button.on');
   return {team,squad:sb?parseInt(sb.dataset.squad):1};
 }
@@ -3464,15 +3634,17 @@ function rowHTML(e){
     (e.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
     if(e.pitch)pitchVisual=pitchBadge(e.pitch);
     else if(e.halle&&e.halle.thirds&&e.halle.thirds.length)pitchVisual=halleBadge(e.halle);
+    if(e.movedFrom) b+='<span class="move-badge">↺ an diesem Tag verlegt (sonst '+esc(e.movedFrom.from+'–'+e.movedFrom.to)+')</span>';
   }else{
     title=e.title;
     b=kindOf(e)==='goalkeeper'
       ?gkBadge()+'<span class="badge-team verein">'+esc(gkTeamsText(gkTeamsOf(e)))+'</span>'
-      :(kindOf(e)==='trainer'?'<span class="badge-res tt-badge">Trainer-Termin</span>':'<span class="badge-team '+cat(e.team)+'">'+esc(teamLabel(e.team,e.squad))+'</span>');
+      :(kindOf(e)==='trainer'?'<span class="badge-res tt-badge">Trainer-Termin</span><span class="badge-team verein">'+esc('Für '+(ttForAll(e)?'alle Trainer':ttForText(e)))+'</span>':'<span class="badge-team '+cat(e.team)+'">'+esc(teamLabel(e.team,e.squad))+'</span>');
     if(e.pitch)b+=pitchBadge(e.pitch);
     if(e.halle&&e.halle.thirds&&e.halle.thirds.length)b+=halleBadge(e.halle);
     (e.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
   }
+  if(!e.isTraining&&e.movedFromSlot) b+='<span class="move-badge">↺ statt Regeltraining '+esc(e.movedFromSlot.from+'–'+e.movedFromSlot.to)+'</span>';
   const isMatch=!e.isTraining&&isMatchKind(kindOf(e))&&!!e.ha;
   if(isMatch) b=haPill({isAway:e.ha==='away'})+'<span class="badge-res">'+esc(kindLabel(kindOf(e)))+'</span>'+b;
   const sub=e.isTraining?'':(isMatch&&e.kickoff?'Anstoß '+e.kickoff+(e.ha==='away'?'':' · Platz '+e.t+'–'+bis):(e.t+'–'+bis))+' · '+esc(e.ownerName||'–');
@@ -3484,6 +3656,8 @@ function rowHTML(e){
   if(e.isTraining){
     acts=shareBtnHTML(e);
     if(session&&(session.isAdmin||canBookAnyOfTeam(e.team))){
+      if(e.movedFrom) acts+='<button class="ibtn" title="Wieder zur Regelzeit" onclick="resetTrainingMove(\''+e.trainingSlotId+'\',\''+e.d+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>';
+      acts+='<button class="ibtn" title="Nur an diesem Tag verlegen" onclick="moveTrainingDay(\''+e.trainingSlotId+'\',\''+e.d+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></button>';
       acts+='<button class="ibtn" title="Diesen Termin absagen" onclick="cancelTrainingDay(\''+e.trainingSlotId+'\',\''+e.d+'\')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M10 14l4 4M14 14l-4 4"/></svg></button>';
     }
 
@@ -3555,7 +3729,7 @@ function externalRowHTML(e){
   const bis=eventBis(e);
   if(e.withdrawn) return withdrawnRowHTML(e);
   const moveIco='<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M9 15h6M13 12.5l2.5 2.5-2.5 2.5"/></svg>';
-  const acts=(session&&e.isAway&&e.fbIndex!=null&&canMarkGameMove(e))?'<button class="ibtn" title="Verlegung vormerken" onclick="openMoveModal('+e.fbIndex+')">'+moveIco+'</button>'
+  const acts=e.tournament?'':(session&&e.isAway&&e.fbIndex!=null&&canMarkGameMove(e))?'<button class="ibtn" title="Verlegung vormerken" onclick="openMoveModal('+e.fbIndex+')">'+moveIco+'</button>'
     :(session&&!e.isAway&&!e.offPitch)?(
     '<button class="ibtn" title="Neue Ansetzung suchen" onclick="openRescheduleFinder('+e.fbIndex+')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>'
     +(canMarkGameMove(e)?'<button class="ibtn" title="Verlegung vormerken" onclick="openMoveModal('+e.fbIndex+')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M9 15h6M13 12.5l2.5 2.5-2.5 2.5"/></svg></button>':'')
@@ -3578,10 +3752,12 @@ function externalRowHTML(e){
     +'<div class="ev-time-col"><div class="ev-t">'+bis+'</div><div class="ev-tl">Bis</div></div>'
     +'</div>'
     +conflictBannerHTML(e)+holidayBannerHTML(e)+teamDayBannerHTML(e)+locksForItem(e).map(l=>lockBannerHTML(l,e)).join('')
-    +(e.foreignVenue&&e.venue?'<div class="fb-note">Heimrecht, aber Spielort: '+esc(e.venue)+'</div>':'')
+    +(e.foreignVenue&&e.venue?'<div class="fb-note">'+(e.tournament?'Spielort: ':'Heimrecht, aber Spielort: ')+mapsLinkHTML(String(e.venue).replace(/\s+,/g,','))+'</div>'
+      :(eventAddress(e)?'<div class="tt-addr fb-addr">📍 '+mapsLinkHTML((e.venue&&e.isAway?String(e.venue).replace(/\s+,/g,','):((!e.isAway&&CFG&&CFG.venue&&CFG.venue.name?CFG.venue.name+', ':'')+eventAddress(e))),e.venue||eventAddress(e))+'</div>':''))
+    +tournamentGamesHTML(e)
     +'<div class="badges" style="margin-top:10px;align-items:center;"><span class="badge-fb">⚽ '+esc(e.competition||'fussball.de')+'</span>'
     +moveBadgeHTML(e)
-    +(e.link?'<a href="'+esc(e.link)+'" target="_blank" rel="noopener" class="fb-link-btn" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg>Zum Spiel</a>':'')
+    +(e.link&&!e.tournament?'<a href="'+esc(e.link)+'" target="_blank" rel="noopener" class="fb-link-btn" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg>Zum Spiel</a>':'')
     +'</div>'
     +(trainerHtml?'<div class="ev-contact">'+trainerHtml+'</div>':'')
     +'</div>'
@@ -3602,7 +3778,7 @@ function withdrawnRowHTML(e){
     +'<div class="ev-body">'
     +'<span class="hoff-pill">Entfällt</span>'
     +'<div class="badges" style="margin-top:10px;align-items:center;"><span class="badge-fb">⚽ '+esc(e.competition||'fussball.de')+'</span>'
-    +(e.link?'<a href="'+esc(e.link)+'" target="_blank" rel="noopener" class="fb-link-btn" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg>Zum Spiel</a>':'')
+    +(e.link&&!e.tournament?'<a href="'+esc(e.link)+'" target="_blank" rel="noopener" class="fb-link-btn" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg>Zum Spiel</a>':'')
     +'</div></div></div>';
 }
 /* ---------- Mannschaft doppelt angesetzt (ab 30.09.2026 · 1) ----------
@@ -3709,7 +3885,10 @@ function inactiveRowHTML(e){
     why='Fällt aus'+(r?' · '+r:'');
     pill='Abgesagt';
     const canManage=session&&e.trainingSlotId&&(session.isAdmin||canBookAnyOfTeam(e.team));
-    if(canManage) act='<button class="ia-undo" title="Absage zurücknehmen" onclick="event.stopPropagation();reactivateCancelled(\''+e.trainingSlotId+'\',\''+e.d+'\')">Zurücknehmen</button>';
+    if(e.movedTo){ // ab 07.10.2026 · 28: einmalig verlegt – Ersatztermin antippen
+      tone='moved'; pill='Verlegt'; why='Verlegt auf '+e.movedTo.t+'–'+eventBis(e.movedTo)+' Uhr';
+      click='jumpToEvent(\''+jsArg(e.movedTo.id)+'\')';
+    } else if(canManage) act='<button class="ia-undo" title="Absage zurücknehmen" onclick="event.stopPropagation();reactivateCancelled(\''+e.trainingSlotId+'\',\''+e.d+'\')">Zurücknehmen</button>';
   }
   const clickAttr=click?' role="button" tabindex="0" onclick="'+click+'" onkeydown="if(event.key===\'Enter\'){'+click+'}"':'';
   return '<div class="ia-row ia-'+tone+(click?' clickable':'')+(e.id===highlightId?' hl':'')+'" id="ev-'+e.id+'"'+clickAttr+'>'
@@ -3893,11 +4072,29 @@ async function pushSetup(){
 /* ---------- Trainer-Termine mit Zusagen (ab 01.10.2026 · 15) ----------
    Terminart „trainer“ (z. B. DFB-Trainingsdialog, Fortbildung, Sitzung): belegt keinen Platz, Ort als Adresse.
    Jeder Zugang sagt an der Karte mit einem Tipp zu oder ab (e.rsvp[userId]={s:'yes'|'no',n:Name}); die Namen
-   der Zusagen sind öffentlich (wie Trainernamen am Training, ohne Telefon/Mail). Offene Antworten stehen in
+   der Zusagen sehen ab 09.10.2026 · 3 nur Angemeldete, öffentlich nur die Anzahl. Offene Antworten stehen in
    „Zu erledigen“ und in der Wochenmail; beim Anlegen geht über „Alle Teams“ eine Mail an alle Trainer. */
 const RSVP_TODO_DAYS=45;
 function ttPlace(e){ return e&&e.address?e.address.split(',').pop().replace(/\(.*?\)/g,'').trim():''; } // Ort kurz: „Eichholz, Arnsberg (SV 09)“ → „Arnsberg“
 function isTrainerTermin(e){ return !!e&&!e.isExternal&&!e.isTraining&&kindOf(e)==='trainer'; }
+/* Zielgruppe eines Trainer-Termins (ab 09.10.2026 · 3): e.ttFor = ['E-Jugend:2','D-Jugend:1','Vorstand'];
+   leer oder fehlend = alle Trainer (so bleiben ältere Termine unverändert). e.team bleibt „Alle Teams“. */
+function ttForList(e){ return Array.isArray(e&&e.ttFor)?e.ttFor.filter(Boolean):[]; }
+function ttForAll(e){ return !ttForList(e).length; }
+function ttForKeyLabel(k){ const [t,q]=String(k).split(':'); return t==='Vorstand'?'Vorstand':teamShort(t,parseInt(q)||1); }
+function ttForText(e){ return ttForAll(e)?'Alle Trainer':ttForList(e).map(ttForKeyLabel).join(', '); }
+function sessionIsVorstand(){ if(!session) return false; if(session.isAdmin) return true; const u=USERS.find(x=>x.id===session.id); return !!(u&&u.role==='vorstand'); }
+// Betrifft der Trainer-Termin diese Auswahl? cls = {Team:[Squads]} (Favoriten bzw. eigene Mannschaften);
+// angemeldet: „Alle Trainer“ immer, eigene Termine immer, „Vorstand“ für Vorstand und Admins.
+function ttConcerns(e,cls,loggedIn){
+  cls=cls||{};
+  if(loggedIn&&session&&e.ownerId===session.id) return true;
+  if(ttForAll(e)) return loggedIn||cls.hasOwnProperty('Trainer')||cls.hasOwnProperty('Alle Teams');
+  return ttForList(e).some(k=>{ const [t,q]=k.split(':');
+    if(t==='Vorstand') return cls.hasOwnProperty('Vorstand')||(loggedIn&&sessionIsVorstand());
+    if(!cls.hasOwnProperty(t)) return false; const sq=cls[t]||[];
+    return !isJugend(t)||!sq.length||sq.includes(parseInt(q)||1); });
+}
 function rsvpList(e,st){ return Object.entries(e.rsvp||{}).filter(([,v])=>v&&v.s===st).map(([id,v])=>({id,n:v.n||''})).sort((a,b)=>a.n.localeCompare(b.n,'de')); }
 function rsvpShortName(n){ const p=String(n||'').trim().split(/\s+/); return p.length>1?p[0]+' '+p[p.length-1][0]+'.':p[0]||''; }
 function rsvpOf(e){ return session&&e.rsvp&&e.rsvp[session.id]?e.rsvp[session.id].s:null; }
@@ -3907,7 +4104,8 @@ function rsvpBlockHTML(e){
   const yes=rsvpList(e,'yes'), no=rsvpList(e,'no'), me=rsvpOf(e);
   let h='<div class="tt-block">';
   if(e.address) h+='<div class="tt-addr">📍 <a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(e.address)+'" target="_blank" rel="noopener" onclick="event.stopPropagation();">'+esc(e.address)+'</a></div>';
-  h+='<div class="tt-yes"><b>'+(yes.length?yes.length+' dabei':'Noch keine Zusage')+'</b>'+(yes.length?': '+esc(yes.map(x=>x.n).join(', ')):'')+'</div>';
+  // Ab 09.10.2026 · 3: Namen der Zusagen nur für Angemeldete, öffentlich nur die Anzahl
+  h+='<div class="tt-yes"><b>'+(yes.length?yes.length+' dabei':'Noch keine Zusage')+'</b>'+(yes.length&&session?': '+esc(yes.map(x=>x.n).join(', ')):'')+'</div>';
   // Namen der Absagen nur für Angemeldete (öffentlich nur die Anzahl)
   if(no.length) h+='<div class="tt-no">'+(session?'<b>Abgesagt</b>: '+esc(no.map(x=>x.n).join(', ')):no.length+' '+(no.length===1?'sagt':'sagen')+' ab')+'</div>';
   if(canRsvp(e)) h+='<div class="tt-acts"><button type="button" class="tt-btn yes'+(me==='yes'?' on':'')+'" onclick="'+esc('event.stopPropagation();rsvpSet(\''+jsArg(e.id)+'\',\'yes\')')+'">'+(me==='yes'?'✓ Ich komme':'Ich komme')+'</button>'
@@ -3931,7 +4129,8 @@ function rsvpSet(id,st){
 function rsvpTodos(){
   if(!session||!isInActiveSeason(session.id)) return []; // ohne Token (Wochenmail) trotzdem auflisten
   const end=addDays(todayStr,RSVP_TODO_DAYS);
-  return EVENTS.filter(e=>isTrainerTermin(e)&&e.d>=todayStr&&e.d<=end&&!rsvpOf(e)).sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t)).map(e=>({
+  const mine=sessionWeekTeams(), cls=mine?mine.cls:{};
+  return EVENTS.filter(e=>isTrainerTermin(e)&&e.d>=todayStr&&e.d<=end&&!rsvpOf(e)&&(session.isAdmin&&!mine||ttConcerns(e,cls,true))).sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t)).map(e=>({
     click:'openTerminFromStart(\''+jsArg(e.id)+'\',\''+e.d+'\')',
     txt:'Trainer-Termin '+shareDay(e.d)+', '+e.t+': '+e.title+(ttPlace(e)?' in '+ttPlace(e):'')+' – kommst du?',
     act:'Ansehen',
@@ -3977,19 +4176,21 @@ function shareText(e){
     const away=e.isAway||e.ha==='away';
     L.push('⚽ *'+who+' – '+(e.opponent||e.title)+'* ('+(away?'auswärts':'Heim')+')');
     L.push(shareDay(e.d)+' · Anstoß '+(e.kickoff||e.t)+(e.movePending?' (Verlegung vorgemerkt)':''));
-    const place=away?(e.address||''):(e.foreignVenue&&e.venue?fbVenueShort(e.venue):venue);
-    if(place) L.push('📍 '+place); contact();
+    const place=away?(e.venue?fbVenueShort(e.venue):(e.address||'')):(e.foreignVenue&&e.venue?fbVenueShort(e.venue):venue);
+    const adr=eventAddress(e); // ab 09.10.2026 · 8 mit Adresse
+    if(place||adr) L.push('📍 '+(away&&adr?adr:[place,adr&&!String(place).includes(adr)?adr:''].filter(Boolean).join(' – '))); contact(); // auswärts: Adresse enthält den Ort schon
   }else if(e.isTraining||['training','goalkeeper'].includes(kindOf(e))){
     const gk=kindOf(e)==='goalkeeper';
     L.push((gk?'🧤 *Torwarttraining':'🏃 *Training '+who)+'*'+(gk&&who?' ('+who+')':''));
     const area=e.pitch?pitchShort(e.pitch):((e.res||[]).includes('Kleinspielfeld')?'Kleinspielfeld':'');
     L.push(shareDay(e.d)+' · '+e.t+'–'+eventBis(e));
-    if(venue||area) L.push('📍 '+[venue,area].filter(Boolean).join(' · ')); contact();
+    if(venue||area) L.push('📍 '+[venue,area].filter(Boolean).join(' · ')+(homeAddress()?' – '+homeAddress():'')); contact();
   }else{
     L.push('📅 *'+e.title+'*'+(who?' ('+who+')':''));
     L.push(shareDay(e.d)+' · '+e.t+'–'+eventBis(e));
     const area=e.pitch?pitchShort(e.pitch):(e.res||[]).join(', ');
-    if(venue||area) L.push('📍 '+[e.pitch?venue:'',area].filter(Boolean).join(' · ')); contact();
+    const adr2=eventAddress(e);
+    if(venue||area||adr2) L.push('📍 '+[[e.pitch?venue:'',area].filter(Boolean).join(' · '),adr2].filter(Boolean).join(' – ')); contact();
     if(e.note) L.push('ℹ️ '+e.note);
   }
   L.push('👉 '+shareLinkFor(e));
@@ -3998,11 +4199,237 @@ function shareText(e){
 let SHARE_CUR=null;
 function openShare(id,d){
   const e=shareItemsOn(d).find(x=>x.id===id); if(!e){ showToast('Termin nicht gefunden.'); return; }
-  SHARE_CUR={text:shareText(e),link:shareLinkFor(e)};
-  openSheet('<div class="share-sheet"><h3>Termin weiterleiten</h3><pre class="share-prev">'+esc(SHARE_CUR.text)+'</pre>'
+  SHARE_CUR={text:shareText(e),link:shareLinkFor(e),e,blob:null};
+  openSheet('<div class="share-sheet"><h3>Termin weiterleiten</h3>'
+    +'<div class="share-seg" role="tablist"><button type="button" class="on" data-mode="text" onclick="shareMode(\'text\')">Text</button><button type="button" data-mode="img" onclick="shareMode(\'img\')">Bild</button></div>'
+    +'<div id="share-text"><pre class="share-prev">'+esc(SHARE_CUR.text)+'</pre>'
     +'<button type="button" class="submit-btn share-wa" onclick="shareWhatsApp()">Per WhatsApp</button>'
-    +'<button type="button" class="cancel-btn" onclick="shareCopyLink()">Link kopieren</button></div>');
+    +'<button type="button" class="cancel-btn" onclick="shareCopyLink()">Link kopieren</button></div>'
+    +'<div id="share-img" style="display:none;"><div class="share-imgbox"><span>Bild wird erstellt …</span></div>'
+    +'<button type="button" class="submit-btn" id="share-img-go" onclick="shareImage()" disabled>Bild teilen</button>'
+    +'<button type="button" class="cancel-btn" onclick="shareImageSave()">Bild speichern</button>'
+    +'<p class="share-hint">Für WhatsApp-Status und Instagram-Story (9:16). Das Bild entsteht auf deinem Handy.</p></div></div>');
   trackEvent('termin_weiterleiten');
+}
+/* ---------- Termin als Bild teilen (ab 09.10.2026 · 4) ----------
+   Story-Bild 1080 × 1920 im Matchday-Look, gezeichnet im Browser (Canvas) aus einer festen Vorlage – keine KI,
+   kein Server, keine Kosten. Teilen über das Teilen-Menü des Handys (Web Share mit Datei), sonst Herunterladen.
+   QR-Code zum Termin über qrcode-generator (cdnjs, wird erst beim ersten Bild geladen); offline ohne QR. */
+function shareMode(m){
+  document.querySelectorAll('.share-seg button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  document.getElementById('share-text').style.display=m==='text'?'':'none';
+  document.getElementById('share-img').style.display=m==='img'?'':'none';
+  if(m==='img'&&SHARE_CUR&&!SHARE_CUR.blob) buildShareImage();
+}
+/* Adresse für das Bild (ab 09.10.2026 · 7): fussball.de-Spielort „Platz, Anlage, Straße, PLZ Ort“ → „Straße, PLZ Ort“;
+   eigener Platz aus config venue.address, sonst aus einem fussball.de-Heimspiel abgeleitet. */
+function addrFromVenue(v){ const parts=String(v||'').split(',').map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean); return parts.length>=2?parts.slice(-2).join(', '):(parts[0]||''); }
+function homeAddress(){
+  if(CFG&&CFG.venue&&CFG.venue.address) return CFG.venue.address;
+  const hv=(CFG&&CFG.fussballde&&CFG.fussballde.homeVenues)||[];
+  const g=fussballDisplayAll().find(x=>x.venue&&hv.some(h=>h&&x.venue.includes(h)));
+  return g?addrFromVenue(g.venue):'';
+}
+// Adresse eines Termins (ab 09.10.2026 · 8 gemeinsam für Bild, Text und Karte)
+function eventAddress(e){
+  const away=e.isAway||e.ha==='away';
+  if(e.isExternal||e.isMovedGhost) return e.venue&&(away||e.foreignVenue||e.tournament)?addrFromVenue(e.venue):(away?(e.address||''):homeAddress());
+  if(away) return e.address||'';
+  if(e.pitch||e.isTraining||(e.res||[]).length) return homeAddress();
+  return e.address||'';
+}
+function mapsLinkHTML(text,query){ return '<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(query||text)+'" target="_blank" rel="noopener" onclick="event.stopPropagation();">'+esc(text)+'</a>'; }
+function shareCardData(e){
+  const who=e.team===GK_TEAM||kindOf(e)==='goalkeeper'?'TW':(e.team&&e.team!=='Alle Teams'?teamShort(e.team,e.squad):'');
+  const venue=(CFG&&CFG.venue&&CFG.venue.name)||'';
+  const day=d=>{ const dt=new Date(d+'T00:00:00'); return {wd:DAYS[dt.getDay()],dm:String(dt.getDate()).padStart(2,'0')+'.'+String(dt.getMonth()+1).padStart(2,'0')+'.'}; };
+  const D={kicker:'TERMIN',team:who,vs:'',head:e.title||'Termin',date:day(e.d),time:e.t+'–'+eventBis(e),place:'',state:'',stateTxt:''};
+  const away=e.isAway||e.ha==='away';
+  if(isGameEntry(e)||e.isMovedGhost||e.withdrawn){
+    D.kicker=e.tournament?'TURNIER':'SPIELTAG'; D.vs=away?'bei':'gegen'; D.head=e.tournament?e.tournament.name:(e.opponent||e.title||'');
+    D.time='Anstoß '+(e.kickoff||e.t);
+    D.place=(away?'Auswärts':'Heimspiel')+' · '+(away?(e.address||(e.venue?fbVenueShort(e.venue):'')):(e.foreignVenue&&e.venue?fbVenueShort(e.venue):venue));
+    if(e.tournament){ // ab 09.10.2026 · 6: eigene Turnier-Vorlage mit Spielplan
+      const homeV=((CFG&&CFG.fussballde&&CFG.fussballde.homeVenues)||[]).some(h=>h&&String(e.venue||'').includes(h));
+      D.tour=true; D.vs=''; D.time=e.t+'–'+eventBis(e)+' Uhr';
+      D.place=homeV?'Heimturnier · '+venue:'Turnier in '+(e.venue?fbVenueShort(e.venue):(e.address||''));
+      D.games=e.tournament.games.map(g=>({t:g.t||'',opp:g.opponent||''}));
+    }
+  }else if(e.isTraining||['training','goalkeeper'].includes(kindOf(e))){
+    const gk=kindOf(e)==='goalkeeper'; D.kicker=gk?'TORWARTTRAINING':'TRAINING'; D.head=gk?'Torwarttraining':'Training';
+    if(gk&&gkTeamsOf(e).length) D.head+=' · '+gkTeamsText(gkTeamsOf(e));
+    D.place=[venue,e.pitch?pitchShort(e.pitch):''].filter(Boolean).join(' · ');
+  }else if(isTrainerTermin(e)){
+    D.kicker='TRAINER-TERMIN'; D.team=''; D.place=e.address||''; D.stateTxt='Für '+(ttForAll(e)?'alle Trainer':ttForText(e));
+  }else{
+    D.place=[e.pitch?venue:'',e.pitch?pitchShort(e.pitch):(e.res||[]).join(', ')].filter(Boolean).join(' · ');
+  }
+  if(e.isMovedGhost){ D.state='moved'; D.stateTxt='Verlegt auf '+shareDay(e.toD)+(e.toT?' · '+e.toT:''); }
+  else if(e.withdrawn){ D.state='off'; D.stateTxt='Fällt aus – Gegner hat zurückgezogen'; }
+  else if(e.isCancelled){ D.state='off'; D.stateTxt='Fällt aus'+(cancelReasonOf(e)?' – '+cancelReasonOf(e):''); }
+  D.place=D.place.replace(/^(Heimspiel|Auswärts) · $/,'$1');
+  // Adresse, wenn bekannt
+  let addr=isTrainerTermin(e)?'':eventAddress(e); // Trainer-Termin: Ort ist schon die Adresse
+  if(addr&&D.place&&D.place.includes(addr)) addr='';
+  D.addr=addr;
+  return D;
+}
+let QR_LIB=null;
+function loadQrLib(){
+  if(window.qrcode) return Promise.resolve(window.qrcode);
+  if(QR_LIB) return QR_LIB;
+  QR_LIB=new Promise(res=>{ const sc=document.createElement('script'); sc.src='https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
+    sc.onload=()=>res(window.qrcode||null); sc.onerror=()=>{ QR_LIB=null; res(null); }; document.head.appendChild(sc); setTimeout(()=>res(window.qrcode||null),4000); });
+  return QR_LIB;
+}
+function scFit(ctx,txt,maxW,size,min,weight,family){
+  let s=size; ctx.font=weight+' '+s+'px '+family;
+  while(s>min&&ctx.measureText(txt).width>maxW){ s-=4; ctx.font=weight+' '+s+'px '+family; }
+  return s;
+}
+function scWrap(ctx,txt,maxW,maxLines){
+  // Umbruch an Leerzeichen und nach „/“ (lange Spielgemeinschaften wie „JSG Oeventrop/Freie./Wen. I“)
+  const toks=[]; String(txt).split(/\s+/).forEach((w,i)=>{ w.split(/(?<=\/)/).forEach((p,j)=>toks.push({t:p,sp:i>0&&j===0})); });
+  const lines=[]; let cur='';
+  toks.forEach(k=>{ const t=cur?cur+(k.sp?' ':'')+k.t:k.t; if(ctx.measureText(t).width<=maxW||!cur) cur=t; else { lines.push(cur); cur=k.t; } });
+  if(cur) lines.push(cur);
+  // einzelnes Zeichen am Ende (z. B. „I“) an die vorige Zeile hängen
+  if(lines.length>1&&lines[lines.length-1].length<=2){ const last=lines.pop(); lines[lines.length-1]+=' '+last; }
+  if(lines.length>maxLines){ const keep=lines.slice(0,maxLines); let last=keep[maxLines-1]+' '+lines.slice(maxLines).join(' ');
+    while(ctx.measureText(last+'…').width>maxW&&last.length>1) last=last.slice(0,-1); keep[maxLines-1]=last.trim()+'…'; return keep; }
+  return lines;
+}
+function drawPin(c,x,y,s,col){ // Ortsmarke, Spitze unten bei (x+s/2, y+s)
+  c.save(); c.fillStyle=col; c.beginPath(); const r=s*0.36, cx=x+s/2, cy=y+r+2;
+  c.arc(cx,cy,r,Math.PI*0.85,Math.PI*0.15); c.lineTo(cx,y+s); c.closePath(); c.fill();
+  c.fillStyle='#011B32'; c.beginPath(); c.arc(cx,cy,r*0.42,0,2*Math.PI); c.fill(); c.restore();
+}
+function drawTrophy(c,x,y,s,col,fill){
+  // Pokal in einem Quadrat der Kantenlänge s (links oben x,y): Schale, Henkel, Stiel, Sockel
+  c.save(); c.translate(x,y); c.scale(s/100,s/100); c.lineJoin='round'; c.lineCap='round';
+  c.beginPath(); c.moveTo(26,10); c.lineTo(74,10); c.lineTo(72,40); c.quadraticCurveTo(68,62,50,64); c.quadraticCurveTo(32,62,28,40); c.closePath();
+  c.moveTo(46,64); c.lineTo(54,64); c.lineTo(56,80); c.lineTo(44,80); c.closePath();
+  c.moveTo(32,80); c.lineTo(68,80); c.lineTo(70,92); c.lineTo(30,92); c.closePath();
+  if(fill){ c.fillStyle=col; c.fill(); }
+  else { c.strokeStyle=col; c.lineWidth=6; c.stroke(); }
+  c.beginPath(); c.moveTo(27,18); c.quadraticCurveTo(8,18,12,32); c.quadraticCurveTo(16,44,30,46);
+  c.moveTo(73,18); c.quadraticCurveTo(92,18,88,32); c.quadraticCurveTo(84,44,70,46);
+  c.strokeStyle=col; c.lineWidth=fill?7:6; c.stroke();
+  c.restore();
+}
+async function drawShareCard(e){
+  const D=shareCardData(e), W=1080, H=1920, M=96, F="Manrope, Inter, sans-serif";
+  try{ await Promise.all([document.fonts.load('800 100px Manrope'),document.fonts.load('600 40px Inter')]); }catch(err){}
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const c=cv.getContext('2d');
+  const NAVY='#011B32', LIME='#8BCF2F', GREEN='#6BB41C', WHITE='#FFFFFF', SOFT='rgba(255,255,255,.72)';
+  // Grund: Navy, unten Rasen mit Mähstreifen und Mittelkreis
+  c.fillStyle=NAVY; c.fillRect(0,0,W,H);
+  const gy=1180; const g=c.createLinearGradient(0,gy-260,0,H); g.addColorStop(0,'rgba(47,122,70,0)'); g.addColorStop(.35,'rgba(47,122,70,.55)'); g.addColorStop(1,'#1F5A34'); c.fillStyle=g; c.fillRect(0,gy-260,W,H-gy+260);
+  c.save(); c.globalAlpha=.07; c.fillStyle=WHITE; for(let x=-H;x<W;x+=180){ c.beginPath(); c.moveTo(x,H); c.lineTo(x+90,H); c.lineTo(x+90+700,gy-260); c.lineTo(x+700,gy-260); c.closePath(); c.fill(); } c.restore();
+  c.save(); c.strokeStyle='rgba(255,255,255,.16)'; c.lineWidth=6; c.beginPath(); c.arc(W/2,H+40,330,Math.PI,2*Math.PI); c.stroke(); c.beginPath(); c.moveTo(0,H-290); c.lineTo(W,H-290); c.stroke(); c.restore();
+  // Kopf: Verein + Kicker
+  let y=150;
+  c.fillStyle=SOFT; c.font='600 38px Inter, sans-serif'; c.textBaseline='alphabetic';
+  c.fillText(String((CFG&&CFG.clubName)||'').toUpperCase(),M,y);
+  const SCOL=D.state==='off'?'#FF6B6B':(D.state==='moved'?'#F7B23B':LIME);
+  const kick=D.state==='off'?'FÄLLT AUS':(D.state==='moved'?'VERLEGT':D.kicker);
+  const GOLD='#F2C94C', tour=!!D.tour, PCOL=tour&&!D.state?GOLD:SCOL, ic=tour?52:0;
+  y+=110; c.font='800 46px '+F; const kw=c.measureText(kick).width+64+ic;
+  c.fillStyle=PCOL; c.beginPath(); c.roundRect(M,y-62,kw,84,42); c.fill(); c.fillStyle=NAVY;
+  if(tour) drawTrophy(c,M+22,y-48,52,NAVY,true);
+  c.fillText(kick,M+32+ic,y-4);
+  if(tour){
+    // Turnier: großer Pokal rechts oben, Mannschaft + Turniername, Datum kompakt, Spielplan als Liste
+    const AC=D.state?SCOL:GOLD;
+    c.save(); c.globalAlpha=.9; drawTrophy(c,W-M-200,y+28,200,AC,false); c.restore();
+    y+=190; const ts=scFit(c,D.team||'',W-2*M-280,200,110,'800',F); c.fillStyle=AC; c.font='800 '+ts+'px '+F; if(D.team) c.fillText(D.team,M-6,y);
+    y+=50; let hs=100, lines;
+    const fits=()=>{ c.font='800 '+hs+'px '+F; lines=scWrap(c,D.head,W-2*M,9); return lines.length<=2&&lines.every(l=>c.measureText(l).width<=W-2*M); };
+    while(!fits()&&hs>64) hs-=4;
+    if(lines.length>2){ c.font='800 '+hs+'px '+F; lines=scWrap(c,D.head,W-2*M,2); }
+    c.fillStyle=WHITE; y+=Math.round(hs*0.95); lines.forEach((l,i)=>{ c.fillText(l,M,y); if(i<lines.length-1) y+=Math.round(hs*1.06); });
+    const topEnd=y;
+    // Spielplan-Kasten über dem Fuß verankert
+    const G=D.games||[], maxRows=5, rowsArr=G.length>maxRows?G.slice(0,maxRows-1):G, more=G.length-rowsArr.length;
+    const rowH=56, nRows=rowsArr.length+(more?1:0), boxH=88+nRows*rowH+18, boxBot=H-M-330, boxTop=boxBot-boxH;
+    c.fillStyle='rgba(1,27,50,.55)'; c.beginPath(); c.roundRect(M-24,boxTop,W-2*M+48,boxH,28); c.fill();
+    c.strokeStyle='rgba(242,201,76,.45)'; c.lineWidth=3; c.stroke();
+    c.fillStyle=AC; c.font='800 34px '+F; c.fillText('SPIELPLAN · '+G.length+' SPIELE',M+8,boxTop+62);
+    let ry=boxTop+62+rowH;
+    rowsArr.forEach(g=>{ c.fillStyle=AC; c.font='800 40px '+F; c.fillText(g.t,M+8,ry);
+      c.fillStyle=WHITE; c.font='600 40px Inter, sans-serif'; let o=g.opp; const mw=W-2*M-170;
+      while(c.measureText(o).width>mw&&o.length>3) o=o.slice(0,-2).trim()+'…', o=o.replace(/…(?=.*…)/g,'');
+      c.fillText(o,M+160,ry); ry+=rowH; });
+    if(more){ c.fillStyle=SOFT; c.font='600 38px Inter, sans-serif'; c.fillText('+ '+more+' weitere Spiele',M+160,ry); }
+    // Datum, Zeit, Ort zwischen Titel und Spielplan
+    const strike=(txt,x,yb,size)=>{ if(!D.state) return; const w=c.measureText(txt).width; c.save(); c.strokeStyle=SCOL; c.lineWidth=Math.max(6,size/14); c.beginPath(); c.moveTo(x-6,yb-size*0.33); c.lineTo(x+w+6,yb-size*0.33); c.stroke(); c.restore(); };
+    let py=boxTop-46; if(D.stateTxt){ c.fillStyle=SCOL; c.font='700 44px Inter, sans-serif'; c.fillText(scWrap(c,D.stateTxt,W-2*M,1)[0],M,py); py-=60; }
+    if(D.addr){ c.fillStyle=SOFT; c.font='600 38px Inter, sans-serif'; drawPin(c,M,py-34,36,AC); c.fillText(scWrap(c,D.addr,W-2*M-52,1)[0],M+52,py); py-=56; }
+    c.fillStyle=SOFT; c.font='600 42px Inter, sans-serif'; const pl=scWrap(c,D.place,W-2*M,1)[0]||''; c.fillText(pl,M,py);
+    const tyy=py-66; c.fillStyle=D.state?SOFT:WHITE; c.font='700 62px '+F; c.fillText(D.time,M,tyy); strike(D.time,M,tyy,62);
+    let ds=150; const dyy=tyy-86; if(dyy-ds*0.75-70<topEnd+40) ds=120;
+    c.font='800 '+ds+'px '+F; c.fillText(D.date.dm,M-6,dyy); strike(D.date.dm,M-6,dyy,ds);
+    const dw=c.measureText(D.date.dm).width; c.fillStyle=AC; c.font='800 52px '+F; c.fillText(D.date.wd.toUpperCase(),M+dw+30,dyy);
+  }else{
+    // Oben: Mannschaft groß, darunter Gegner bzw. Titel (schrumpft, bis jede Zeile passt)
+    y+=230;
+    if(D.team){ const ts=scFit(c,D.team,W-2*M,250,120,'800',F); c.fillStyle=LIME; c.font='800 '+ts+'px '+F; c.fillText(D.team,M-6,y); y+=70; }
+    else y-=120;
+    if(D.vs){ y+=70; c.fillStyle=SOFT; c.font='700 56px '+F; c.fillText(D.vs,M,y); y+=24; }
+    let hs=124, lines;
+    const fits=()=>{ c.font='800 '+hs+'px '+F; lines=scWrap(c,D.head,W-2*M,3); return lines.length<=3&&lines.every(l=>c.measureText(l).width<=W-2*M); };
+    while(!fits()&&hs>56) hs-=6;
+    if(lines.length>2&&hs>84){ while(hs>84&&lines.length>2){ hs-=6; fits(); } }
+    c.fillStyle=WHITE; y+=Math.round(hs*0.95); lines.forEach((l,i)=>{ c.fillText(l,M,y); if(i<lines.length-1) y+=Math.round(hs*1.06); });
+    const topEnd=y;
+    // Unten (über dem Fuß verankert): Wochentag, Datum, Uhrzeit, Ort
+    c.font='600 42px Inter, sans-serif'; const pl=D.place?scWrap(c,D.place,W-2*M,2):[];
+    const extra=D.stateTxt?62:0;
+    c.font='600 38px Inter, sans-serif'; const al=D.addr?scWrap(c,D.addr,W-2*M-52,2):[];
+    let by=H-M-330-pl.length*58-al.length*52-(al.length?6:0)-extra;
+    const dateTop=by-96-120-150;
+    let yy=dateTop; c.fillStyle=LIME; c.font='800 54px '+F; c.fillText(D.date.wd.toUpperCase(),M,yy);
+    const strike=(txt,x,yb,size)=>{ if(!D.state) return; const w=c.measureText(txt).width; c.save(); c.strokeStyle=SCOL; c.lineWidth=Math.max(6,size/14); c.beginPath(); c.moveTo(x-6,yb-size*0.33); c.lineTo(x+w+6,yb-size*0.33); c.stroke(); c.restore(); };
+    yy+=190; c.fillStyle=D.state?SOFT:WHITE; c.font='800 200px '+F; c.fillText(D.date.dm,M-8,yy); strike(D.date.dm,M-8,yy,200);
+    yy+=110; c.font='700 70px '+F; c.fillText(D.time,M,yy); strike(D.time,M,yy,70);
+    yy+=34; c.fillStyle=SOFT; c.font='600 42px Inter, sans-serif'; pl.forEach(l=>{ yy+=58; c.fillText(l,M,yy); });
+    if(al.length){ yy+=6; c.font='600 38px Inter, sans-serif'; al.forEach((l,i)=>{ yy+=52; if(i===0) drawPin(c,M,yy-33,34,SCOL); c.fillText(l,M+52,yy); }); }
+    if(extra){ yy+=66; c.fillStyle=SCOL; c.font='700 46px Inter, sans-serif'; scWrap(c,D.stateTxt,W-2*M-300,1).forEach(l=>c.fillText(l,M,yy)); }
+  }
+  // Fuß: QR + Link
+  const link=shareLinkFor(e), qrS=250, qx=W-M-qrS, qy=H-M-qrS-40;
+  const qrlib=await loadQrLib();
+  if(qrlib){ try{ const q=qrlib(0,'M'); q.addData(link); q.make(); const n=q.getModuleCount(), pad=22, cell=(qrS-2*pad)/n;
+      c.fillStyle=WHITE; c.beginPath(); c.roundRect(qx,qy,qrS,qrS,24); c.fill(); c.fillStyle=NAVY;
+      for(let r=0;r<n;r++) for(let k=0;k<n;k++) if(q.isDark(r,k)) c.fillRect(Math.floor(qx+pad+k*cell),Math.floor(qy+pad+r*cell),Math.ceil(cell),Math.ceil(cell)); }catch(err){} }
+  c.fillStyle=WHITE; c.font='800 48px '+F; c.fillText('Alle Infos',M,H-M-150);
+  c.fillStyle=SOFT; c.font='600 36px Inter, sans-serif'; c.fillText(qrlib?'QR-Code scannen oder':'Link im Text',M,H-M-96);
+  c.fillText(location.host||'platzcoach.de',M,H-M-48);
+  c.fillStyle=LIME; c.font='800 34px '+F; c.fillText('PLATZCOACH',M,H-M+6);
+  return cv;
+}
+async function buildShareImage(){
+  const box=document.querySelector('.share-imgbox'), go=document.getElementById('share-img-go');
+  try{
+    const cv=await drawShareCard(SHARE_CUR.e);
+    SHARE_CUR.blob=await new Promise(r=>cv.toBlob(r,'image/png'));
+    if(box) box.innerHTML='<img alt="Vorschau des Bildes" src="'+cv.toDataURL('image/jpeg',.8)+'">';
+    if(go) go.disabled=false;
+  }catch(err){ if(box) box.innerHTML='<span>Bild konnte nicht erstellt werden.</span>'; }
+}
+function shareImageFile(){ return new File([SHARE_CUR.blob],'platzcoach-'+(SHARE_CUR.e.d||'termin')+'.png',{type:'image/png'}); }
+async function shareImage(){
+  if(!SHARE_CUR||!SHARE_CUR.blob) return;
+  const f=shareImageFile();
+  if(navigator.canShare&&navigator.canShare({files:[f]})){
+    try{ await navigator.share({files:[f]}); trackEvent('termin_bild_geteilt'); closeSheet(); }
+    catch(err){ if(err&&err.name!=='AbortError') shareImageSave(); }
+  }else shareImageSave();
+}
+function shareImageSave(){
+  if(!SHARE_CUR||!SHARE_CUR.blob) return;
+  const a=document.createElement('a'); a.href=URL.createObjectURL(SHARE_CUR.blob); a.download=shareImageFile().name; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1500); showToast('Bild gespeichert.'); trackEvent('termin_bild_gespeichert');
 }
 function shareWhatsApp(){ if(!SHARE_CUR) return; window.open('https://wa.me/?text='+encodeURIComponent(SHARE_CUR.text),'_blank','noopener'); closeSheet(); }
 async function shareCopyLink(){
@@ -4510,11 +4937,18 @@ function timelineHTML(ds,isMine,opts){
   // Sperren: ganze Fläche schraffiert
   activeLocksOn(ds).forEach(l=>{ const area=l.resource==='platz'?'platz':(l.resource==='halle'?'halle':null); const g=groups.find(x=>x.area===area); if(!g) return;
     h+='<div class="tl-lock" style="top:'+g.top+'px;height:'+(g.n*TL_LANE+(g.n-1)*TL_GAP)+'px"><span>gesperrt'+(l.note?' · '+esc(l.note):'')+'</span></div>'; });
+  // Ab 07.10.2026 · 31: Abgesagtes nicht mehr zeigen (die Fläche ist frei); Blöcke, die sich zeitlich und auf
+  // derselben Fläche überschneiden, rot umrandet – bei Spiel gegen Training nur das Training (Spiel hat Vorrang).
+  // Zählt die Zeitleisten-Zeit, also auch die Aufwärmzeit vor dem Anstoß; ein Konflikt im Sinne von Meldungen ist das nicht.
+  const live=occ.filter(o=>!o.cancelled);
+  const hits=(a,b)=>a!==b&&a.area===b.area&&a.lanes[0]<=b.lanes[1]&&b.lanes[0]<=a.lanes[1]&&hmMin(a.t)<hmMin(b.bis)&&hmMin(b.t)<hmMin(a.bis)&&a.id!==b.id;
+  const clashSet=new Set(live.filter(o=>live.some(x=>hits(o,x)&&!(o.kind==='g'&&x.kind!=='g'))));
   occ.forEach((o,i)=>{
+    if(o.cancelled) return;
     const g=groups.find(x=>x.area===o.area), span=o.lanes[1]-o.lanes[0]+1, ht=span*TL_LANE+(span-1)*TL_GAP, mine=occIsMine(o,isMine);
-    const cls='tl-blk'+(o.cancelled?' canc':(mine?' mine':(o.kind==='g'?' game':(o.kind==='o'?' other':(/Herren|Ü\d/.test(o.team||'')?' senior':'')))));
+    const cls='tl-blk'+(clashSet.has(o)?' clash':'')+(o.cancelled?' canc':(mine?' mine':(o.kind==='g'?' game':(o.kind==='o'?' other':(/Herren|Ü\d/.test(o.team||'')?' senior':'')))));
     if(!g) return;
-    h+='<button type="button" class="'+cls+'" style="top:'+laneY(o.area,o.lanes[0])+'px;height:'+ht+'px;left:'+P(hmMin(o.t))+'%;width:'+W(hmMin(o.t),hmMin(o.bis))+'%" onclick="'+esc('openOccDetail(\''+ds+'\','+i+(form?',\'form\'':'')+')')+'" aria-label="'+esc(o.label+' '+o.t+'–'+o.bis+' '+areaLabel(o)+(o.cancelled?' abgesagt':''))+'">'
+    h+='<button type="button" class="'+cls+'" style="top:'+laneY(o.area,o.lanes[0])+'px;height:'+ht+'px;left:'+P(hmMin(o.t))+'%;width:'+W(hmMin(o.t),hmMin(o.bis))+'%" onclick="'+esc('openOccDetail(\''+ds+'\','+i+(form?',\'form\'':'')+')')+'" aria-label="'+esc(o.label+' '+o.t+'–'+o.bis+' '+areaLabel(o)+(clashSet.has(o)?' – Überschneidung':''))+'">'
       +'<b>'+esc(o.label)+(o.kind==='g'?' · Spiel':'')+'</b>'+(ht>TL_LANE?'<i>'+o.t+'–'+o.bis+'</i>':'')+'</button>';
   });
   // Formular: der neue (bzw. bearbeitete) Termin gestrichelt auf seinen Spuren
@@ -4538,6 +4972,7 @@ function timelineHTML(ds,isMine,opts){
     +(sun?'<span><i class="lg sun"></i>'+sun+'</span>':'')+'</div>';
   h+='<div class="tl-legend">'+(isMine?'<span><i class="lg mine"></i>'+(session&&sessionWeekTeams()?'deine Mannschaft':'Favoriten')+'</span>':'')+'<span><i class="lg tr"></i>Training</span><span><i class="lg game"></i>Spiel</span>'
     +(conflictsOnDay(ds).length?'<span><i class="lg conf"></i>Konflikt</span>':'')
+    +(clashSet.size?'<span><i class="lg clash"></i>Überschneidung</span>':'')
     +(sun?'<span><i class="lg sun"></i>Sonnenuntergang '+sun+(fl==='ganz'?' · Flutlicht':'')+'</span>':'')
     +(canBook&&ds>=todayStr?'<span><i class="lg free"></i>frei – antippen zum Buchen</span>':'')+'</div>';
   return h;
@@ -4743,7 +5178,7 @@ function startHeroHTML(src,isMine){
       kicker='Als Nächstes';
       const days=Math.round((new Date(it.d+'T00:00:00')-new Date(todayStr+'T00:00:00'))/86400000);
       const when=days===0?'in '+(hmMin(it.t)-n>=60?Math.floor((hmMin(it.t)-n)/60)+' Std '+((hmMin(it.t)-n)%60)+' Min':(hmMin(it.t)-n)+' Min'):(days===1?'morgen':'in '+days+' Tagen');
-      sub=startDayLabel(it.d,false).replace(/^(Heute|Morgen) · .*/,'$1')+' · '+(it.isExternal||it.kickoff?'Anstoß '+(it.kickoff||it.t):it.t+'–'+eventBis(it))+(area(it)?' · '+area(it):'')+(days===1?'':' · '+when);
+      sub=startDayLabel(it.d,false).replace(/^(Heute|Morgen) · .*/,'$1')+' · '+((it.isExternal&&!it.tournament)||it.kickoff?'Anstoß '+(it.kickoff||it.t):it.t+'–'+eventBis(it))+(area(it)?' · '+area(it):'')+(days===1?'':' · '+when);
       if(it.pitch) right='<div class="hero-mini">'+miniPitch(pitchQuarters(it.pitch),true)+'</div>';
     }
     acts=weekRowActHTML(it).replace('>Absagen<','>Training absagen<');
@@ -4817,24 +5252,90 @@ function startWeekHTML(src,isMine,admin){
   let h=startPlaceHTML(startSel,isMine,admin,strip);
   // Woche: eigene Mannschaft(en) bzw. Favoriten; ohne Favoriten alle Termine des Vereins (gekürzt)
   const all=src?items:weekItems(()=>true);
-  h+='<section class="st-week"><div class="stw-head"><h2>'+esc(src?(src.fromSession?'Deine Woche · '+src.label:'Woche deiner Favoriten'):'Diese Woche im Verein')+'</h2></div>';
-  h+='<div class="st-card wk-list">';
+  return h+startWeekTimelineHTML(src,isMine,items,all);
+}
+/* ---------- „Deine Woche“ als Zeitleiste nach Tagen (ab 09.10.2026 · 1) ----------
+   Links eine schmale Datumsspalte (Wochentag + Tageszahl, antippen wählt den Tag für den Platz oben),
+   rechts die Termine als ruhige Kacheln mit Farbstreifen: grün Training, dunkelblau Spiel, blau Trainer-Termin,
+   orange verlegt/vorgemerkt, rot abgesagt/entfällt. Keine Knöpfe mehr in der Zeile: Antippen öffnet für
+   Berechtigte ein Blatt mit den Aktionen (Verlegen, Absagen, Zurücknehmen, Details), sonst direkt die Details.
+   Mannschafts-Kürzel nur, wenn die Woche mehrere Mannschaften zeigt. Tage ohne Termin stehen in einer Zeile. */
+let WTL_ITEMS=[];
+function wtlKind(e){
+  if(e.isCancelled||e.withdrawn) return 'off';
+  if(e.isMovedGhost||e.movePending||isMatchPlanned(e)) return 'moved';
+  if(isTrainerTermin(e)) return 'tt';
+  if(e.isExternal||isMatchKind(kindOf(e))) return 'game';
+  return 'tr';
+}
+function wtlTileHTML(e,multi,withDate){
+  const i=WTL_ITEMS.push(e)-1;
+  const {name, sub, tag}=weekRowParts(e);
+  const k=wtlKind(e), struck=e.isCancelled||e.withdrawn||e.isMovedGhost;
+  const chip=multi?'<span class="wk-team">'+esc(e.team===GK_TEAM||kindOf(e)==='goalkeeper'?'TW':teamShort(e.team,e.squad))+'</span>':'';
+  let line=sub, status='';
+  if(e.isMovedGhost){ status=sub; line=''; }
+  else if(e.isCancelled||e.withdrawn){ status=tag+(sub?' · '+sub:''); line=''; }
+  else if(isTrainerTermin(e)){ if(tag) line=[sub,tag==='Zugesagt'?'Du bist dabei':'Du hast abgesagt'].filter(Boolean).join(' · '); }
+  else if(e.isExternal||(kindOf(e)==='game'&&e.ha)){ if(tag&&!(sub||'').includes(tag)) line=[sub,tag].filter(Boolean).join(' · '); }
+  if(line&&e.t) line=line.replace(' · Anstoß '+e.t,''); // Uhrzeit steht schon vorn
+  if(!line&&!struck&&(e.isTraining||kindOf(e)==='goalkeeper')) line=pitchLabelOf(e);
+  const when=withDate?'':'<span class="wtl-t'+(struck?' x':'')+'">'+esc(e.t||'')+'</span>';
+  return '<div class="wtl-it k-'+k+'" role="button" tabindex="0" onclick="startWeekTap('+i+')" onkeydown="if(event.key===\'Enter\')startWeekTap('+i+')">'
+    +'<div class="wtl-txt"><div class="wtl-name'+(struck?' x':'')+'">'+when+chip+'<span>'+esc(name)+'</span></div>'
+    +(line?'<div class="wtl-sub">'+esc(line)+'</div>':'')
+    +(status?'<div class="wtl-st '+(e.isMovedGhost?'moved':'off')+'">'+esc(status)+'</div>':'')
+    +(e.isExternal&&!e.withdrawn?moveBadgeHTML(e):'')
+    +(teamDayPartners(e).length?'<span class="move-badge warn">⚠ weiteres Spiel am selben Tag</span>':'')
+    +'</div><svg class="wtl-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>';
+}
+function startWeekTimelineHTML(src,isMine,items,all){
+  WTL_ITEMS=[];
+  const end=weekEndStr();
+  const teamKeys=new Set(all.filter(e=>!isTrainerTermin(e)).map(e=>e.team===GK_TEAM||kindOf(e)==='goalkeeper'?'TW':e.team+':'+(e.squad||1)));
+  const multi=!src||teamKeys.size>1;
+  let h='<section class="st-week"><div class="stw-head"><h2>'+esc(src?(src.fromSession?'Deine Woche · '+src.label:'Woche deiner Favoriten'):'Diese Woche im Verein')+'</h2>'
+    +'<span class="stw-kw">KW '+isoWeekNo(todayStr)+(isoWeekNo(end)!==isoWeekNo(todayStr)?'/'+isoWeekNo(end):'')+'</span></div>';
+  h+='<div class="st-card wtl">';
   const limit=!src&&!weekShowAll?WEEK_MAX_ROWS:Infinity;
-  let last='', n=0, selDone=false;
-  const dayHead=ds=>'<button type="button" class="wk-day'+(ds===startSel?' sel':'')+'" onclick="'+esc(ds===todayStr?'startJumpNow()':'setStartDay(\''+ds+'\')')+'">'+esc(weekDayLabel(ds))+'</button>';
-  for(const e of all){
-    if(n>=limit) break;
-    if(src&&!selDone&&e.d>startSel){ h+=dayHead(startSel)+'<div class="wk-empty">An diesem Tag nichts für '+esc(src.label)+'.</div>'; selDone=true; }
-    if(e.d!==last){ h+=dayHead(e.d); last=e.d; if(e.d===startSel) selDone=true; }
-    h+=weekRowHTML(e); n++;
+  const byDay={}; let n=0;
+  for(const e of all){ if(n>=limit) break; (byDay[e.d]=byDay[e.d]||[]).push(e); n++; }
+  const free=[];
+  for(let i=0;i<WEEK_DAYS;i++){
+    const ds=addDays(todayStr,i), list=byDay[ds]||[], sel=ds===startSel, today=i===0;
+    if(!list.length&&!sel&&!today){ free.push(ds); continue; }
+    const dt=new Date(ds+'T00:00:00'), hol=holidayOn(ds);
+    h+='<div class="wtl-day'+(sel?' sel':'')+'">'
+      +'<button type="button" class="wtl-date" onclick="'+esc(today?'startJumpNow()':'setStartDay(\''+ds+'\')')+'" aria-label="'+esc(weekDayLabel(ds)+(hol?' · '+hol.name:''))+'">'
+      +'<span>'+(today?'Heute':DOW[dowOf(ds)-1])+'</span><b>'+dt.getDate()+'</b>'+(hol?'<i class="wtl-hol">'+esc(hol.name)+'</i>':'')+'</button>'
+      +'<div class="wtl-items">'+(list.length?list.map(e=>wtlTileHTML(e,multi,false)).join('')
+        :'<div class="wtl-empty">'+esc(src?'Nichts für '+src.label+'.':'Keine Termine.')+'</div>')+'</div></div>';
   }
-  if(src&&!selDone&&all.length) h+=dayHead(startSel)+'<div class="wk-empty">An diesem Tag nichts für '+esc(src.label)+'.</div>';
   if(!all.length) h+='<div class="wk-empty">In den nächsten 7 Tagen steht nichts an.</div>';
+  else if(free.length&&limit===Infinity) h+='<div class="wtl-free">Ohne Termine: '+free.map(ds=>'<button type="button" onclick="setStartDay(\''+ds+'\')">'+DOW[dowOf(ds)-1]+' '+new Date(ds+'T00:00:00').getDate()+'.</button>').join(', ')+'</div>';
   if(all.length>limit) h+='<button type="button" class="wk-more" onclick="weekShowAll=true;renderMyWeek();">Alle '+all.length+' Termine anzeigen</button>';
   else if(!src&&weekShowAll&&all.length>WEEK_MAX_ROWS) h+='<button type="button" class="wk-more" onclick="weekShowAll=false;renderMyWeek();">Weniger anzeigen</button>';
+  h+='</div>';
   const next=src?nextGamesBeyondWeek(isMine,items):[];
-  if(next.length){ h+='<div class="wk-day">Nächste Spiele</div>'; next.forEach(e=>{ h+=weekRowHTML(e,true); }); }
-  return h+'</div></section>';
+  if(next.length){
+    h+='<div class="stw-head wtl-nexthead"><h2>Nächste Spiele</h2></div><div class="st-card wtl wtl-next">';
+    next.forEach(e=>{ h+='<div class="wtl-nd">'+esc(dayCase(e.d))+(e.t?' · '+esc(e.kickoff||e.t):'')+'</div>'+wtlTileHTML(e,multi,true); });
+    h+='</div>';
+  }
+  return h+'</section>';
+}
+// Antippen einer Kachel: Wer etwas ändern darf, bekommt die Aktionen im Blatt, alle anderen direkt die Details.
+function startWeekTap(i){
+  const e=WTL_ITEMS[i]; if(!e) return;
+  const details=e.isMovedGhost?'jumpToGame('+e.fbIndex+')':'openTerminFromStart(\''+jsArg(e.id)+'\',\''+e.d+'\')';
+  const acts=weekRowActHTML(e);
+  if(!acts){ if(e.isMovedGhost) jumpToGame(e.fbIndex); else openTerminFromStart(e.id,e.d); return; }
+  const {name, sub}=weekRowParts(e);
+  const who=e.team===GK_TEAM||kindOf(e)==='goalkeeper'?'':' '+teamShort(e.team,e.squad);
+  openSheet('<div class="wtl-sheet"><p class="wtl-sk">'+esc(weekDayLabel(e.d)+(e.t?' · '+e.t:''))+'</p>'
+    +'<h3>'+esc(name+(e.isTraining?who:''))+'</h3>'+(sub||pitchLabelOf(e)?'<p class="sub">'+esc(sub||pitchLabelOf(e))+'</p>':'')
+    +'<div class="wtl-sacts">'+acts.replace(/event\.stopPropagation\(\);/g,'closeSheet();')+'</div>'
+    +'<button type="button" class="wtl-sdet" onclick="'+esc('closeSheet();'+details)+'">Details öffnen</button></div>');
 }
 /* Favoriten für Besucher (und Zugänge ohne eigene Mannschaft): auf dem Gerät gespeichert. */
 function startFavHTML(src){
@@ -4869,9 +5370,12 @@ function lsGet(k,def){ try{ const v=localStorage.getItem(k); return v==null?def:
 function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
 function weekEndStr(){ const d=new Date(todayStr+'T00:00:00'); d.setDate(d.getDate()+WEEK_DAYS-1); return ymd(d); }
 function teamShort(team,squad){ return isJugend(team)?jugendLetter(team)+(squad||1):team; }
-// Wählbare Mannschaften für die eigene Wahl (ohne Torwarttraining und Vereins-Sammelposten).
+// Wählbare Mannschaften für die eigene Wahl. Ab 09.10.2026 · 2 (Feedback Fabrizio) zusätzlich wie im Terminformular
+// unter „Sonstige“: Torwarttraining, Alle Teams und Vorstand – immer am Ende, auch wenn gerade nichts eingetragen ist.
+const PICK_EXTRA_TEAMS=[GK_TEAM,'Alle Teams','Trainer','Vorstand']; // „Trainer“ = Trainer-Termine für alle Trainer (ab 09.10.2026 · 3)
 function pickableTeams(){
-  return allKnownTeamKeys().filter(t=>{ const team=t.key.split(':')[0]; return ALL_CLASSES.includes(team)&&team!==GK_TEAM; });
+  const base=allKnownTeamKeys().filter(t=>{ const team=t.key.split(':')[0]; return ALL_CLASSES.includes(team)&&!PICK_EXTRA_TEAMS.includes(team); });
+  return base.concat(PICK_EXTRA_TEAMS.map(t=>({key:t+':1',label:t})));
 }
 // Mannschaften aus der Saison-Zuordnung des angemeldeten Zugangs. Jugend ohne Nummern = alle Nummern.
 function sessionWeekTeams(){
@@ -4900,7 +5404,7 @@ function weekMatcher(src){
   const hasJugend=Object.keys(cls).some(isJugend);
   return e=>{
     if(!e||!e.team) return false;
-    if(isTrainerTermin(e)) return !!src.fromSession; // Trainer-Termine: in der Woche jedes Zugangs
+    if(isTrainerTermin(e)) return ttConcerns(e,cls,!!src.fromSession); // ab 09.10.2026 · 3 nach Zielgruppe
     if(e.team===GK_TEAM||kindOf(e)==='goalkeeper'){
       if(cls.hasOwnProperty(GK_TEAM)) return true;
       const t=gkTeamsOf(e);
@@ -4946,6 +5450,8 @@ function weekRowParts(e){
     name=(e.isAway?'bei ':'gegen ')+e.opponent; sub='Gegner hat zurückgezogen'; tag='Entfällt';
   }else if(e.isCancelled){
     name=kindOf(e)==='goalkeeper'?'Torwarttraining':'Training'; sub=cancelReasonOf(e); tag='Abgesagt';
+  }else if(e.isExternal&&e.tournament){
+    name='Turnier'; sub=[e.tournament.name,e.tournament.games.length+' Spiele',e.venue?fbVenueShort(e.venue):''].filter(Boolean).join(' · '); tag='Turnier';
   }else if(e.isExternal){
     name=(e.isAway?'bei ':'gegen ')+e.opponent;
     sub=[e.movePending?'Vorgemerkt':'',e.competition,e.isAway?'':e.pitchLabelText].filter(Boolean).join(' · '); // ab · 12: vorgemerkte Verlegung wie Freundschaftsspiel
@@ -4954,7 +5460,7 @@ function weekRowParts(e){
     name='Torwarttraining'; sub=['für '+gkTeamsText(gkTeamsOf(e)),gkSignedCountText(e)].filter(Boolean).join(' · ');
   }else if(isTrainerTermin(e)){
     const y=rsvpList(e,'yes').length, me=rsvpOf(e);
-    name=e.title; sub=['Trainer-Termin',ttPlace(e),y?y+' dabei':''].filter(Boolean).join(' · ');
+    name=e.title; sub=['Trainer-Termin für '+(ttForAll(e)?'alle Trainer':ttForText(e)),ttPlace(e),y?y+' dabei':''].filter(Boolean).join(' · ');
     tag=me==='yes'?'Zugesagt':(me==='no'?'Abgesagt':'');
   }else if(!e.isTraining&&kindOf(e)==='game'&&e.ha&&e.opponent){
     name=(e.ha==='away'?'bei ':'gegen ')+e.opponent;
@@ -4992,7 +5498,8 @@ function weekRowActHTML(e){
   if(e.isCancelled) return e.isTraining&&e.trainingSlotId&&canCancelSlot(TRAINING.find(x=>x.id===e.trainingSlotId))
     ?'<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();reactivateCancelled(\''+jsArg(e.trainingSlotId)+'\',\''+e.d+'\')')+'">Zurücknehmen</button>':'';
   if(e.isTraining&&e.trainingSlotId&&canCancelSlot(TRAINING.find(x=>x.id===e.trainingSlotId)))
-    return '<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();cancelTrainingDay(\''+jsArg(e.trainingSlotId)+'\',\''+e.d+'\')')+'">Absagen</button>';
+    return '<span class="wk-acts"><button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();moveTrainingDay(\''+jsArg(e.trainingSlotId)+'\',\''+e.d+'\')')+'">Verlegen</button>'
+      +'<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();cancelTrainingDay(\''+jsArg(e.trainingSlotId)+'\',\''+e.d+'\')')+'">Absagen</button></span>';
   if(e.isExternal&&(e.isAway||!e.offPitch)&&e.fbIndex!=null&&canMarkGameMove(e))
     return '<button type="button" class="wk-act" onclick="'+esc('event.stopPropagation();openMoveModal('+e.fbIndex+')')+'">Verlegen</button>';
   return '';
@@ -5780,6 +6287,7 @@ function newEventFromFussball(idx){
   document.getElementById('f-anlass').value='Heimspiel: '+g.team+' – '+g.opponent+(g.competition?' ('+g.competition+')':'');
   const mt=fussballFilterTeam(g.team,g.squad); document.getElementById('f-team').value=mt.team; setSquadSeg('f-squad',mt.team,mt.squad,true);
   document.getElementById('f-opponent').value=g.opponent||''; document.getElementById('f-kickoff').value=g.t||''; setHomeAway('home',false);
+  setResChips('f-res',['Großspielfeld']); setPitchMode('ganz'); // Heimspiel: Platz wie bisher vorbelegt
   document.getElementById('f-kind').value='game'; kindTouched=true; onKindChange(false);
   if(g.t){ document.getElementById('f-von').value=g.t; document.getElementById('f-bis').value=addMinutes(g.t,120); onKickoffChange(false); }
   onTimeChange();
@@ -5843,6 +6351,8 @@ function onKindChange(byUser){
     :(occLevel(k)==='exclusive'?'Während eines Spiels ist auf dem Platz kein Torwarttraining möglich.':'');
   const gk=k==='goalkeeper', tt=k==='trainer';
   const gf=document.getElementById('f-gkteams-field'); if(gf) gf.style.display=gk?'block':'none';
+  const tf=document.getElementById('f-ttfor-field'); if(tf) tf.style.display=tt?'block':'none';
+  if(tt&&!document.querySelector('#f-ttfor .res-chip')) renderTtForChips([]);
   // Torwarttraining gehört keiner einzelnen Altersklasse: statt der Dropliste gilt die
   // Mehrfachauswahl "Für welche Mannschaften?" – das Team wird intern auf "Torwarttraining" gesetzt.
   const ts=document.getElementById('f-team-section'), sel=document.getElementById('f-team');
@@ -5886,7 +6396,7 @@ function applyMatchForm(byUser){
   show('f-res-label',!away&&!tt); show('f-res-field',!away&&!tt);
   if(tt){ show('f-pitch-field',false); show('f-halle-field',false); }
   const help=document.getElementById('f-match-help');
-  if(help) help.textContent=tt?'Trainer-Termin: belegt keinen Platz. Alle Trainer bekommen eine Mail und können an der Karte zu- oder absagen.':!match?'':(away
+  if(help) help.textContent=tt?'Trainer-Termin: belegt keinen Platz. Die gewählten Trainer bekommen eine Mail und können an der Karte zu- oder absagen.':!match?'':(away
     ?'Auswärts: belegt keinen Platz bei uns. Die Ansetzung im DFBnet macht der gastgebende Verein.'
     :'Heim: '+(k==='hallenturnier'?'die Halle':'der Platz')+' wird reserviert. Nach dem Speichern bekommst du den Text für den Jugendleiter ('+(k==='game'?'Ansetzung':'Turnier-Anmeldung')+' im DFBnet).');
   if(byUser&&match&&!fillingForm){
@@ -5906,6 +6416,30 @@ function autoMatchTitle(){
   an.dataset.auto='match'; showAnlassField();
 }
 // Anstoß → Von/Bis (und beim Heimspiel die Platzfläche) vorbelegen; bleibt danach frei änderbar.
+/* Platzbedarf laut Regel (ab 07.10.2026 · 27): E/F/G (config fussballde.shareCategories) eine Hälfte, sonst ganzer Platz.
+   Eigene Mannschaften heißen „E-Jugend“, fussball.de „E-Junioren“. */
+function gamePitchRule(team){ const t=String(team||''); return fussballTeamCategory(/-Jugend$/.test(t)?t.replace(/-Jugend$/,'-Junioren'):t)==='share'?'haelfte':'ganz'; }
+const PITCH_SIZE_LABEL={ganz:'den ganzen Platz',haelfte:'eine Hälfte',viertel:'ein Viertel'};
+// Abweichung der gewählten Fläche von der Regel – nur Heimspiele (Freundschaftsspiele)
+function formPitchRuleIssue(){
+  if(formKind()!=='game'||formHA==='away') return null;
+  const team=document.getElementById('f-team').value, rule=gamePitchRule(team);
+  const have=pitchOn()?pitchMode:null;
+  if(have===rule) return null;
+  const who=teamLabel(team,1).replace(/\d+-/,'-');
+  const txt=who+'-Spiel braucht laut Regel '+PITCH_SIZE_LABEL[rule]+(have?', gewählt: '+(have==='ganz'?'ganzer Platz':pitchShort(curPitch())):', gewählt: kein Platz')+'.';
+  return {rule,have,txt};
+}
+function applyRulePitch(){
+  const x=formPitchRuleIssue(); if(!x) return;
+  const on=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res);
+  setResChips('f-res',[...new Set(on.concat(['Großspielfeld']))]);
+  setPitchMode(x.rule);
+  if(x.rule==='haelfte'){ const v=document.getElementById('f-von').value, b=document.getElementById('f-bis').value;
+    const busy=usedQuartersWindow(dateInput().value,v,b,editingId,formOwnTeamFree());
+    pitchPart=HALF.A.every(q=>!busy.has(q))?'A':(HALF.B.every(q=>!busy.has(q))?'B':'A'); }
+  formDirty=true; hideConflicts(); renderPitch(); renderHalle();
+}
 function onKickoffChange(byUser){
   if(fillingForm||formKind()!=='game') return;
   const ko=document.getElementById('f-kickoff').value; if(!ko) return;
@@ -5917,7 +6451,7 @@ function onKickoffChange(byUser){
   const bis=q15(shiftTimeClamped(ko,fussballDurationMin(team)),true);
   document.getElementById('f-von').value=von; document.getElementById('f-bis').value=bis<von?'23:45':bis;
   if(!away&&pitchOn()){
-    if(/^[EFG]-Jugend$/.test(team)){
+    if(gamePitchRule(team)==='haelfte'){
       const busy=usedQuartersWindow(dateInput().value,von,bis,editingId,formOwnTeamFree());
       const part=HALF.A.every(q=>!busy.has(q))?'A':(HALF.B.every(q=>!busy.has(q))?'B':'A');
       setPitchMode('haelfte'); pitchPart=part;
@@ -6039,16 +6573,16 @@ function renderFussballShareNote(d,von,bis){
   if(games.some(e=>e.isSharedGame))
     h+='<p class="helptext" style="margin:4px 0 0;">Welche Hälfte ein E-, F- oder G-Jugendspiel nutzt, legt fussball.de nicht fest. Platzcoach plant es auf Hälfte A, bei einem zweiten gleichzeitigen Spiel oder belegter Hälfte A auf Hälfte B.</p>';
   // Vorschläge, wenn die Auswahl nicht passt
-  const pitch=curPitch();
-  const busy=usedQuartersWindow(d,von,bis,editingId);
-  const clash=pitchQuarters(pitch).some(q=>busy.has(q));
+  const pitch=curPitch(), ownF=formOwnTeamFree();
+  const busy=usedQuartersWindow(d,von,bis,editingId,ownF);
+  const clash=pitchOn()&&pitchQuarters(pitch).some(q=>busy.has(q));
   if(clash){
     const opts=[];
     ['A','B'].forEach(hh=>{
       if(HALF[hh].every(q=>!busy.has(q))&&!(pitch.mode==='haelfte'&&pitch.part===hh))
         opts.push('<button class="fs-btn" onclick="applyFreeHalf(\''+hh+'\')">Hälfte '+hh+' buchen</button><span class="fs-time">Hälfte '+hh+' ist von '+von+' bis '+bis+' frei</span>');
     });
-    const nxt=nextFreePitchWindow(d,von,bis,pitch,editingId);
+    const nxt=nextFreePitchWindow(d,von,bis,pitch,editingId,ownF);
     if(nxt) opts.push('<button class="fs-btn" onclick="applySlot(\''+nxt.s+'\',\''+nxt.e+'\')">Zeit übernehmen</button><span class="fs-time">'+esc(pitchShort(pitch))+' ist ab '+nxt.s+' frei ('+nxt.s+'–'+nxt.e+')</span>');
     h+='<div class="free-slots-box" style="margin-top:8px;"><div class="fs-header" style="color:var(--warn);">⚠ Deine Auswahl ist zu dieser Zeit belegt</div>'
       +(opts.length?opts.map(o=>'<div class="fs-item fs-item-rev">'+o+'</div>').join(''):'<div class="fs-item"><span class="fs-time">Heute ist dafür keine passende Zeit mehr frei. Bitte einen anderen Tag wählen.</span></div>')
@@ -6058,12 +6592,12 @@ function renderFussballShareNote(d,von,bis){
 }
 /* Nächstes Zeitfenster gleicher Länge (ab der Wunschzeit, in 15-Minuten-Schritten bis 22:00),
    in dem die gewählte Platzfläche komplett frei ist. */
-function nextFreePitchWindow(d,von,bis,pitch,skipId){
+function nextFreePitchWindow(d,von,bis,pitch,skipId,ownF){
   const dur=timeToMin(bis)-timeToMin(von); if(dur<=0)return null;
   const want=pitchQuarters(pitch);
   for(let m=timeToMin(von)+15;m+dur<=timeToMin('22:00');m+=15){
     const s=minToTime(m), e=minToTime(m+dur);
-    const busy=usedQuartersWindow(d,s,e,skipId);
+    const busy=usedQuartersWindow(d,s,e,skipId,ownF);
     if(!want.some(q=>busy.has(q))) return {s,e};
   }
   return null;
@@ -6109,13 +6643,14 @@ function renderTrainingGameNote(){
     +'<br>Beim Speichern wird das Training an diesen Tagen automatisch abgesagt.</div>';
 }
 function resetForm(){
+  FORM_REQUEST=null;
   document.getElementById('f-anlass').value='';document.getElementById('f-bem').value='';
   document.getElementById('f-von').value='15:00';document.getElementById('f-bis').value='17:00';
   document.getElementById('f-team').value='F-Jugend';
   setSquadSeg('f-squad',document.getElementById('f-team').value,1,false);
   document.querySelectorAll('#f-res .res-chip').forEach(c=>c.classList.toggle('on',c.dataset.res==='Großspielfeld'));
   pitchMode='ganz';pitchPart=null;document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode==='ganz'));
-  document.getElementById('f-kind').value='other'; kindTouched=false; renderGkTeamChips('f-gkteams',[]);
+  document.getElementById('f-kind').value='other'; kindTouched=false; renderGkTeamChips('f-gkteams',[]); renderTtForChips([]);
   ['f-opponent','f-participants','f-kickoff','f-address'].forEach(id=>{ document.getElementById(id).value=''; });
   document.getElementById('f-anlass').dataset.auto=''; setHomeAway('home',false);
   halleThirds=[];onTeamChange();onKindChange(false);renderPitch();renderHalle();hideConflicts();formDirty=false;
@@ -6277,12 +6812,15 @@ function renderFormTimeline(){
   const el=box.querySelector('.tl-scroll'), edge=FORM_TL.edge; FORM_TL.edge=null; FORM_TL.ds=ds;
   const place=()=>{ if(!el||!el.isConnected) return; const g=tlGeom(el); if(!(g.w>0)) return;
     if(edge){ el.scrollLeft=edge==='start'?0:el.scrollWidth; return; }
-    const m0=sameDay&&FORM_TL.m!=null?FORM_TL.m:(cand.von?hmMin(cand.von):(ds===todayStr?hmMin(nowHMStr()):15*60));
-    const m=Math.max(g.t0,Math.min(g.t1,m0)); el.scrollLeft=Math.round((m-g.t0)/(g.t1-g.t0)*g.w); tlCurLabel(el,m); FORM_TL.m=m; };
+    // Ab 12.10.2026 · 3: geänderte Uhrzeit (z. B. Anstoß) → Zeitleiste springt mit; sonst bleibt die eigene Scroll-Position
+    const timeMoved=!!cand.von&&FORM_TL.von!==cand.von;
+    const m0=sameDay&&FORM_TL.m!=null&&!timeMoved?FORM_TL.m:(cand.von?hmMin(cand.von):(ds===todayStr?hmMin(nowHMStr()):15*60));
+    const m=Math.max(g.t0,Math.min(g.t1,m0)); el.scrollLeft=Math.round((m-g.t0)/(g.t1-g.t0)*g.w); tlCurLabel(el,m); FORM_TL.m=m; FORM_TL.von=cand.von; };
   place(); requestAnimationFrame(place);
 }
 // Zeilenkopf angetippt: Fläche/Ressource ein- oder ausschalten (gleiche Datenquelle wie die bisherigen Chips).
 function formTlPick(kind,arg){
+  formAreaFromAuto(kind==='res');
   const on=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res);
   const has=r=>on.includes(r), set=list=>setResChips('f-res',[...new Set(list)]);
   const overlay=occLevel(formKind())==='overlay';
@@ -6323,7 +6861,8 @@ function renderFormTlStatus(cand){
   const el=document.getElementById('f-tl-status'); if(!el) return;
   if(!cand.areas.length){ el.innerHTML=occLevel(formKind())==='overlay'
     ?'<span class="nf-st">Ohne Fläche – optional „A“ oder „B“ antippen, wenn es auf dem Platz stattfindet.</span>'
-    :'<span class="nf-st warn">Noch keine Fläche gewählt – links eine Zeile antippen.</span>'; return; }
+    :'<span class="nf-st warn">Noch keine Fläche gewählt – links eine Zeile antippen.</span>'
+    +(formPitchRuleIssue()?'<span class="nf-st rule-warn">'+esc(formPitchRuleIssue().txt)+' <button type="button" class="rule-fix" onclick="applyRulePitch()">'+(formPitchRuleIssue().rule==='ganz'?'Ganzen Platz wählen':'Hälfte wählen')+'</button></span>':''); return; }
   const o=formOccupation(), parts=[];
   if(o.pitch) parts.push(pitchShort(o.pitch)); else if(o.res.includes('Großspielfeld')) parts.push('auf dem Platz');
   if(o.halle) parts.push(halleShort(o.halle));
@@ -6334,6 +6873,10 @@ function renderFormTlStatus(cand){
     const hits=findConflicts(d,von,bis,o.pitch,o.halle,o.res,editingId,o.kind).filter(c=>!isOwnTeamTraining(c.event,o.ownFree));
     if(hits.length) msg='<span class="nf-st warn">⚠ belegt: '+esc([...new Set(hits.map(c=>occupationLabel(c.event)))].join(', '))+'</span>';
   }
+  const ri=formPitchRuleIssue();
+  if(ri) msg+='<span class="nf-st rule-warn">⚠ '+esc(ri.txt)+' <button type="button" class="rule-fix" onclick="applyRulePitch()">'+(ri.rule==='ganz'?'Ganzen Platz wählen':'Hälfte wählen')+'</button></span>';
+  const ownTr=ownTrainingsOverlapping(d,von,bis,o.ownFree,o.kind);
+  if(ownTr.length) msg+='<span class="nf-st own-tr">'+(o.kind==='training'?'Verlegt euer Regeltraining ':'Euer Training ')+esc(ownTr.map(t=>t.t+'–'+eventBis(t)).join(', '))+(o.kind==='training'?' an dem Tag hierher':' – Absage beim Speichern')+'</span>';
   el.innerHTML='<b>'+esc(parts.join(' · '))+'</b> '+msg;
 }
 function toggleFormTlAdd(){
@@ -6361,6 +6904,7 @@ function tlShiftDay(n,pos){
 }
 // „+“ in einer freien Lücke: Beginn = angetippte Stelle (15 Min), Dauer wie im Formular, höchstens bis zur nächsten Belegung.
 function formTlFree(ds,area,lane,from,to,ev){
+  if(FORM_TL) FORM_TL.areaAuto=false;
   let start=from;
   if(ev&&ev.currentTarget&&ev.currentTarget.getBoundingClientRect){ const r=ev.currentTarget.getBoundingClientRect(), x=(ev.clientX||r.left)-r.left;
     start=from+Math.floor(((to-from)*Math.max(0,Math.min(1,x/Math.max(1,r.width))))/15)*15; }
@@ -6390,7 +6934,7 @@ function formTlFree(ds,area,lane,from,to,ev){
    zeigt, wo die Wunschzeit passt, wo nur eine andere Uhrzeit (08–22 Uhr) und wo nichts frei ist.
    „Übernehmen“ trägt Tag und Zeit ins Formular ein. Spiele, die fussball.de noch nicht kennt, kann die
    Suche nicht sehen – dafür der Hinweis; kommen sie später dazu, meldet die Änderungsmail Konflikte. */
-let SF={months:new Set(),days:new Set(),dur:90,start:'15:00',flex:true,moreRes:false};
+let SF={months:new Set(),days:new Set(),dur:90,start:'15:00',flex:true,moreRes:false,sel:new Map(),showAll:false};
 const SF_MONTHS=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 const SF_WIN_FROM='08:00', SF_WIN_TO='22:00';
 function formOccupation(){
@@ -6402,7 +6946,7 @@ function formOccupation(){
   let pitch=(pitchOn()&&!overlay)?curPitch():null;
   let halle=halleResOn()?{thirds:halleThirds.length?[...halleThirds]:[1,2,3]}:null;
   if(away||kind==='trainer'){ res=[]; pitch=null; halle=null; }
-  return {kind,pitch,halle,res,ownFree:isMatchKind(kind)&&!away?{team,squad}:null};
+  return {kind,pitch,halle,res,ownFree:ownFreeFor(kind,away,team,squad)};
 }
 function sfMonthKeys(){
   const t=new Date(todayStr+'T00:00:00'), out=[];
@@ -6420,6 +6964,10 @@ function openSlotFinder(){
   SF.start=document.getElementById('f-von').value||'15:00';
   SF.flex=true;
   SF.moreRes=false;
+  SF.sel=new Map(); SF.showAll=false; // Ab 12.10.2026 · 4: freie Termine zum Vorschlagen auswählen
+  if(formKind()==='game'&&formHA!=='away'){ const rule=gamePitchRule(document.getElementById('f-team').value);
+    const on=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res);
+    if(!on.includes('Großspielfeld')||pitchMode!==rule){ setResChips('f-res',[...new Set(on.concat(['Großspielfeld']))]); setPitchMode(rule); renderPitch(); } }
   document.getElementById('sf-start').value=SF.start;
   renderSlotFinder();
   document.getElementById('slot-modal').classList.add('show');
@@ -6434,20 +6982,26 @@ function sfCheckDay(d,o){
   const occ=EVENTS.filter(e=>e.d===d&&e.id!==editingId).concat(trainingInstancesOn(d)).concat(fussballBookingOccupations(d,editingId));
   const locked=locksForItem({d,pitch:o.pitch,halle:o.halle,res:o.res}).length>0;
   if(locked) return {status:'busy',why:'gesperrt'};
-  const fits=s=>{
+  // Ab 07.10.2026 · 27: bei „Hälfte“/„Viertel“ jede Fläche dieser Größe probieren (gewählte zuerst)
+  const cands=!o.pitch?[null]:o.pitch.mode==='haelfte'?[o.pitch.part||'A','A','B'].filter((x,i,a)=>a.indexOf(x)===i).map(p=>({mode:'haelfte',part:p}))
+    :o.pitch.mode==='viertel'?[+o.pitch.part||1,1,2,3,4].filter((x,i,a)=>a.indexOf(x)===i).map(p=>({mode:'viertel',part:p})):[o.pitch];
+  const fitsP=(s,p)=>{
     const e=minToTime(timeToMin(s)+SF.dur);
-    const me={id:'__candidate',d,t:s,bis:e,pitch:o.pitch,halle:o.halle,res:o.res,kind:o.kind};
+    const me={id:'__candidate',d,t:s,bis:e,pitch:p,halle:o.halle,res:o.res,kind:o.kind};
     return !occ.some(x=>timesOverlap(me,x)&&!isOwnTeamTraining(x,o.ownFree)&&occupationConflictReasons(me,x,quarterPitchReason).length);
   };
+  const fits=s=>cands.find(p=>fitsP(s,p));
   const wish=SF.start, wishEnd=timeToMin(wish)+SF.dur;
-  if(wishEnd<=timeToMin('23:45')&&fits(wish)) return {status:'free',start:wish};
+  // Ab 12.10.2026 · 5: heute nur, was noch nicht angefangen hat
+  const minStart=d===todayStr?Math.ceil(hmMin(nowHMStr())/15)*15:0;
+  if(wishEnd<=timeToMin('23:45')&&timeToMin(wish)>=minStart){ const p=fits(wish); if(p!==undefined) return {status:'free',start:wish,pitch:p}; }
   if(!SF.flex) return {status:'busy'};
-  let best=null;
-  for(let m=timeToMin(SF_WIN_FROM);m+SF.dur<=timeToMin(SF_WIN_TO);m+=15){
-    const s=minToTime(m);
-    if(fits(s)&&(!best||Math.abs(m-timeToMin(wish))<Math.abs(timeToMin(best)-timeToMin(wish)))) best=s;
+  let best=null, bp=null;
+  for(let m=Math.max(timeToMin(SF_WIN_FROM),minStart);m+SF.dur<=timeToMin(SF_WIN_TO);m+=15){
+    const s=minToTime(m), p=fits(s);
+    if(p!==undefined&&(!best||Math.abs(m-timeToMin(wish))<Math.abs(timeToMin(best)-timeToMin(wish)))){ best=s; bp=p; }
   }
-  return best?{status:'part',start:best}:{status:'busy'};
+  return best?{status:'part',start:best,pitch:bp}:{status:'busy'};
 }
 /* „Was brauchst du?“ (ab 06.10.2026 · 5): dieselbe Auswahl wie die Zeilen in „Wo?“ – direkt im Suchfenster,
    damit klar ist, wofür gesucht wird. Antippen ändert auch das Formular. */
@@ -6458,8 +7012,9 @@ function sfWhatChips(){
   let h='';
   if(ov) h+=chip('Platz',on('Großspielfeld'),"sfPick('gk')");
   else{
-    h+=chip('Ganzer Platz',same([1,2,3,4]),"sfPick('ganz')")+chip('Hälfte A',same([1,2]),"sfPick('A')")+chip('Hälfte B',same([3,4]),"sfPick('B')");
-    if(pq.length===1) h+=chip('Viertel '+pq[0],true,"sfPick('ganz')");
+    // Ab 07.10.2026 · 27: Größe statt konkreter Fläche – die Suche findet irgendeine freie Hälfte bzw. ein freies Viertel
+    const size=o.pitch?o.pitch.mode:null;
+    h+=chip('Ganzer Platz',size==='ganz',"sfPick('size','ganz')")+chip('Hälfte',size==='haelfte',"sfPick('size','haelfte')")+chip('Viertel',size==='viertel',"sfPick('size','viertel')");
   }
   h+=chip('Kleinfeld',on('Kleinspielfeld'),"sfPick('klein')");
   const all=formTlResAll(), vis=SF.moreRes?all:all.filter(r=>formTlStored().includes(r)||on(r)||(r==='Halle'&&o.halle));
@@ -6468,6 +7023,12 @@ function sfWhatChips(){
   return h;
 }
 function sfPick(k,r){
+  formAreaFromAuto(k==='res');
+  if(k==='size'){ const on0=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res);
+    if(on0.includes('Großspielfeld')&&pitchMode===r) setResChips('f-res',on0.filter(x=>x!=='Großspielfeld'));
+    else{ setResChips('f-res',[...new Set(on0.concat(['Großspielfeld']))]); setPitchMode(r); }
+    formDirty=true; hideConflicts(); renderPitch(); renderHalle(); renderSlotFinder(); return; }
+  if(k==='q'){ const on0=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res); setResChips('f-res',on0.filter(x=>x!=='Großspielfeld')); formDirty=true; hideConflicts(); renderPitch(); renderHalle(); renderSlotFinder(); return; }
   const on=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res);
   const set=list=>setResChips('f-res',[...new Set(list)]), without=x=>on.filter(y=>y!==x);
   if(k==='gk'||k==='klein'){ const x=k==='gk'?'Großspielfeld':'Kleinspielfeld'; set(on.includes(x)?without(x):on.concat([x])); }
@@ -6521,21 +7082,163 @@ function renderSlotFinder(){
     const [y,m]=r.k.split('-');
     h+='<div class="sf-month"><b>'+SF_MONTHS[parseInt(m)-1]+' '+y.slice(2)+'</b><div class="sf-days">'+r.days.map(x=>{
       const dd=parseInt(x.d.slice(8)), wd=DOW[dowOf(x.d)-1];
-      const tip=x.status==='free'?x.start+'–'+endOf(x.start)+' frei':(x.status==='part'?'frei ab '+x.start:(x.why==='gesperrt'?'gesperrt':'nichts frei'));
+      const where=x.pitch&&x.pitch.mode!=='ganz'?' ('+pitchShort(x.pitch)+')':'';
+      const tip=x.status==='free'?x.start+'–'+endOf(x.start)+' frei'+where:(x.status==='part'?'frei ab '+x.start+where:(x.why==='gesperrt'?'gesperrt':'nichts frei'));
       return '<button type="button" class="sf-day '+(x.status==='free'?'free':x.status==='part'?'part':'busy')+'" title="'+esc(fmtShort(x.d)+': '+tip)+'"'
-        +(x.status==='busy'?' disabled':' onclick="applySlotFinder(\''+x.d+'\',\''+x.start+'\')"')+'>'+dd+'<small>'+wd+'</small></button>';
+        +(x.status==='busy'?' disabled':' onclick="applySlotFinder(\''+x.d+'\',\''+x.start+'\''+(x.pitch&&x.pitch.mode!=='ganz'?',\''+x.pitch.mode+'\',\''+x.pitch.part+'\'':'')+')"')+'>'+dd+'<small>'+wd+'</small></button>';
     }).join('')+'</div></div>';
   });
   h+='<div class="sf-legend"><span><i style="background:#6BB41C"></i>Wunschzeit frei</span><span><i style="background:#FFD24A"></i>andere Uhrzeit</span><span><i style="background:var(--kbE4E9E8)"></i>belegt</span></div>';
-  const best=days.filter(x=>x.status==='free').concat(days.filter(x=>x.status==='part')).slice(0,5);
-  if(best.length){
-    h+='<p class="field-label" style="margin:4px 0 6px;">Vorschläge</p>'+best.map(x=>'<div class="rs-result-row"><div><b>'+DOW[dowOf(x.d)-1]+', '+fmtShort(x.d)+'</b><br><small style="color:var(--ink-soft);">'
-      +x.start+'–'+endOf(x.start)+(x.status==='part'?' (statt '+SF.start+')':'')+'</small></div>'
-      +'<button class="fs-btn" onclick="applySlotFinder(\''+x.d+'\',\''+x.start+'\')">Übernehmen</button></div>').join('');
+  // Ab 12.10.2026 · 4: freie Termine anhaken und per WhatsApp vorschlagen (wie bei der Spielverlegung) – blockiert nichts.
+  // Nach der Zusage „Übernehmen“ → Formular wie gewohnt speichern.
+  const all=days.filter(x=>x.status==='free').concat(days.filter(x=>x.status==='part'));
+  [...SF.sel.keys()].forEach(d=>{ const x=all.find(y=>y.d===d); if(x) SF.sel.set(d,x); else SF.sel.delete(d); });
+  const shown=SF.showAll?all:all.filter((x,i)=>i<5||SF.sel.has(x.d));
+  const apply=x=>'applySlotFinder(\''+x.d+'\',\''+x.start+'\''+(x.pitch&&x.pitch.mode!=='ganz'?',\''+x.pitch.mode+'\',\''+x.pitch.part+'\'':'')+')';
+  if(shown.length){
+    h+='<p class="field-label" style="margin:4px 0 6px;">Freie Termine – zum Vorschlagen anhaken</p>'+shown.map(x=>'<label class="rs-result-row rs-selectable'+(SF.sel.has(x.d)?' on':'')+'">'
+      +'<input type="checkbox"'+(SF.sel.has(x.d)?' checked':'')+' onchange="sfSel(\''+x.d+'\')">'
+      +'<div style="flex:1;"><b>'+DOW[dowOf(x.d)-1]+', '+fmtShort(x.d)+'</b><br><small style="color:var(--ink-soft);">'
+      +x.start+'–'+endOf(x.start)+(x.status==='part'?' (statt '+SF.start+')':'')+(x.pitch&&x.pitch.mode!=='ganz'?' · '+pitchShort(x.pitch):'')+'</small></div>'
+      +'<button type="button" class="fs-btn" onclick="'+esc('event.preventDefault();event.stopPropagation();'+apply(x))+'">Übernehmen</button></label>').join('')
+      +(all.length>shown.length?'<div class="rs-empty rs-showmore" onclick="SF.showAll=true;renderSlotFinder()">+ '+(all.length-shown.length)+' weitere anzeigen ▾</div>':'');
+    if(SF.sel.size){
+      const one=[...SF.sel.values()][0];
+      h+='<button type="button" class="submit-btn" style="margin-top:10px;background:#25D366;" onclick="sfShare()">'
+        +'<svg viewBox="0 0 24 24" fill="currentColor" style="width:17px;height:17px;"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.26 4.81L2.05 22l5.4-1.42a9.87 9.87 0 004.59 1.17h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2zm0 18.06a8.2 8.2 0 01-4.17-1.14l-.3-.18-3.1.82.83-3.02-.2-.31a8.15 8.15 0 01-1.26-4.32c0-4.51 3.68-8.19 8.2-8.19a8.15 8.15 0 015.8 2.4 8.15 8.15 0 012.4 5.8c0 4.52-3.68 8.14-8.2 8.14z"/></svg>'
+        +(SF.sel.size===1?'1 Vorschlag':SF.sel.size+' Vorschläge')+' per WhatsApp teilen</button>'
+        +(sfCanSaveRequest()?'<p class="sf-hint" style="margin-top:6px;">Wird als offene Anfrage gemerkt (Konto → Terminanfragen). Kommt die Zusage, dort den Termin antippen – alles ist vorbefüllt.</p>':'')
+        +(SF.sel.size===1?'<button type="button" class="ghost-btn" style="margin-top:8px;" onclick="'+esc(apply(one))+'">Zugesagt? Übernehmen</button>':'');
+    } else h+='<p class="sf-hint" style="margin-top:8px;">Noch nicht abgesprochen? Termine anhaken und per WhatsApp vorschlagen – der Platz wird dabei nicht blockiert. Nach der Zusage „Übernehmen“ und speichern.</p>';
   } else h+='<p class="rs-empty">Nichts frei. Andere Monate, Wochentage oder eine kürzere Dauer probieren.</p>';
   out.innerHTML=h;
 }
-function applySlotFinder(d,start){
+function sfSel(d){ if(SF.sel.has(d)) SF.sel.delete(d); else SF.sel.set(d,{d}); renderSlotFinder(); }
+// WhatsApp-Text wie bei der Spielverlegung (shareRescheduleProposal)
+function sfShareText(list){
+  const k=formKind(), team=document.getElementById('f-team').value, sb=document.querySelector('#f-squad button.on'), squad=sb?parseInt(sb.dataset.squad):1;
+  const one=list.length===1, opp=(document.getElementById('f-opponent').value||'').trim(), title=(document.getElementById('f-anlass').value||'').trim();
+  const who=team&&team!=='Alle Teams'&&team!==GK_TEAM&&team!=='Vorstand'?teamLabel(team,squad):'';
+  const own=fussballOwnTeamName({squad:isJugend(team)?squad:1});
+  const away=isMatchKind(k)&&formHA==='away';
+  const head=k==='game'?'📅 *Freundschaftsspiel gesucht*\n*'+own+(who?' ('+who+')':'')+(opp?' – '+opp:'')+'*'
+    :isMatchKind(k)?'📅 *'+kindLabel(k)+' – Termin gesucht*\n*'+own+(who?' ('+who+')':'')+'*'
+    :'📅 *'+(title||kindLabel(k))+' – Termin gesucht*'+(who?'\n'+who:'');
+  const endOf=t=>minToTime(Math.min(timeToMin(t)+SF.dur,timeToMin('23:45')));
+  const lines=list.sort((a,b)=>a.d.localeCompare(b.d)).map(x=>'• '+shareDay(x.d)+', '
+    +(k==='game'?'Anstoß um '+(away?x.start:addMinutes(x.start,fussballBufferBeforeMin()))+' Uhr':x.start+'–'+endOf(x.start)+' Uhr')).join('\n');
+  return head+'\n\n'
+    +(one?'Folgender Termin wäre bei uns frei – würde der passen?\n\n':'Folgende Termine wären bei uns frei – passt einer davon?\n\n')
+    +lines+'\n\n'
+    +(one?'Bitte kurz Rückmeldung, ob der Termin passt 🙏':'Bitte kurz Rückmeldung, welcher Termin passt 🙏');
+}
+function sfShare(){
+  if(!SF.sel.size) return;
+  const list=[...SF.sel.values()];
+  window.open('https://wa.me/?text='+encodeURIComponent(sfShareText(list)),'_blank','noopener');
+  trackEvent('freier_termin_vorgeschlagen');
+  if(sfCanSaveRequest()) saveRequestFromForm(list);
+}
+/* ---------- Terminanfragen (ab 12.10.2026 · 5) ----------
+   Vorgeschlagene freie Termine werden mit allen Formular-Angaben gemerkt (data/requests.json) – sie blockieren
+   keinen Platz. Sehen und bearbeiten dürfen die Trainer der Mannschaft und Admins (alle Mannschaften).
+   Zusage → Termin antippen → Formular vorbefüllt → normal speichern; danach ist die Anfrage erledigt.
+   Vergangene Vorschläge fallen weg, ohne Vorschlag verschwindet die Anfrage. */
+let FORM_REQUEST=null, REQ_Q='', REQ_TEAM='';
+function sfCanSaveRequest(){ if(!session||!session.token||editingId) return false; const k=formKind(); if(k==='goalkeeper') return false;
+  const team=k==='trainer'?'Alle Teams':document.getElementById('f-team').value, sb=document.querySelector('#f-squad button.on');
+  return k==='trainer'||canBookTeam(team,sb?parseInt(sb.dataset.squad):1); }
+function saveRequestFromForm(list){
+  const k=formKind(), team=k==='trainer'?'Alle Teams':document.getElementById('f-team').value, sb=document.querySelector('#f-squad button.on'), squad=sb?parseInt(sb.dataset.squad):1;
+  const mf=readMatchFields(k), o=formOccupation();
+  const r={id:crypto.randomUUID(), created:todayStr, ownerId:session.id, ownerName:session.name, kind:k, team, squad,
+    title:document.getElementById('f-anlass').value.trim()||kindLabel(k), note:document.getElementById('f-bem').value.trim()||undefined, dur:SF.dur,
+    ha:mf.ha, opponent:mf.opponent, participants:mf.participants, address:mf.address,
+    res:o.res.filter(x=>x!=='Großspielfeld'&&x!=='Halle'), halle:o.halle||null, ttFor:k==='trainer'?readTtForChips():undefined,
+    options:list.slice().sort((a,b)=>a.d.localeCompare(b.d)).map(x=>({d:x.d,start:x.start,pitch:x.pitch||o.pitch||null}))};
+  REQUESTS.push(r);
+  closeSlotFinder(); formDirty=false; resetForm(); goto('start');
+  showToast('Anfrage gemerkt – unter Konto → Terminanfragen. Kommt die Zusage, dort den Termin antippen.',5000);
+  saveStore('requests','Terminanfrage gespeichert: '+requestLabel(r)+' – '+r.options.map(x=>shareDay(x.d)+' '+x.start).join(', ')+' – '+session.name)
+    .catch(err=>{ REQUESTS=REQUESTS.filter(x=>x.id!==r.id); showToast('Anfrage nicht gespeichert: '+err.message,6000); });
+}
+function requestLabel(r){ const who=r.team&&r.team!=='Alle Teams'?teamShort(r.team,r.squad)+' ':'';
+  return r.kind==='game'?'Freundschaftsspiel '+who+(r.ha==='away'?'bei ':'gegen ')+(r.opponent||'?'):(isMatchKind(r.kind)?kindLabel(r.kind)+' '+who:(r.title||kindLabel(r.kind))+(who?' ('+who.trim()+')':'')); }
+function reqOptEnd(r,x){ return minToTime(Math.min(timeToMin(x.start)+(r.dur||90),timeToMin('23:45'))); }
+function reqOptLive(r,x){ return x.d>todayStr||(x.d===todayStr&&x.start>nowHMStr()); }
+function canSeeRequest(r){ if(!session) return false; if(session.isAdmin||r.ownerId===session.id) return true; return r.team!=='Alle Teams'&&canBookTeam(r.team,r.squad||1); }
+function openRequests(){ return REQUESTS.filter(r=>canSeeRequest(r)&&(r.options||[]).some(x=>reqOptLive(r,x))); }
+// Noch frei? (live, ohne die eigene Trainingszeit – wie die Terminsuche)
+function reqOptStatus(r,x){
+  if(r.ha==='away'||r.kind==='trainer') return '';
+  const own=ownFreeFor(r.kind,r.ha==='away',r.team,r.squad);
+  const hits=findConflicts(x.d,x.start,reqOptEnd(r,x),x.pitch,r.halle,r.res||[],null,r.kind).filter(c=>!isOwnTeamTraining(c.event,own));
+  return hits.length?'<span class="req-st busy">⚠ inzwischen belegt: '+esc([...new Set(hits.map(c=>occupationLabel(c.event)))].join(', '))+'</span>':'<span class="req-st ok">✓ frei</span>';
+}
+function requestsCardHTML(){
+  pruneRequests();
+  const list=openRequests(), teams=[...new Set(list.map(r=>r.team==='Alle Teams'?'':teamShort(r.team,r.squad)).filter(Boolean))].sort();
+  return '<div class="card"><h4>Offene Terminanfragen</h4><p class="sub">Vorschläge, die ihr dem Gegner geschickt habt. Sie blockieren keinen Platz – „✓ frei“ zeigt den aktuellen Stand. Kommt die Zusage, den Termin antippen.</p>'
+    +(list.length>3?'<input type="search" placeholder="Suche nach Gegner, Mannschaft, Name …" value="'+esc(REQ_Q)+'" oninput="REQ_Q=this.value;renderRequestList()" class="req-search">':'')
+    +(teams.length>1?'<div class="nf-chips" style="margin:6px 0 4px;">'+['',...teams].map(t=>'<span class="weekday-chip'+(REQ_TEAM===t?' on':'')+'" onclick="REQ_TEAM=\''+jsArg(t)+'\';renderKonto()">'+(t||'Alle')+'</span>').join('')+'</div>':'')
+    +'<div id="req-list">'+requestListHTML()+'</div></div>';
+}
+function renderRequestList(){ const b=document.getElementById('req-list'); if(b) b.innerHTML=requestListHTML(); }
+function requestListHTML(){
+  const q=REQ_Q.trim().toLowerCase();
+  const list=openRequests().filter(r=>(!REQ_TEAM||teamShort(r.team,r.squad)===REQ_TEAM)&&(!q||[requestLabel(r),r.title,r.ownerName,r.opponent,r.participants,teamLabel(r.team,r.squad)].join(' ').toLowerCase().includes(q)))
+    .sort((a,b)=>(a.options.find(x=>reqOptLive(a,x))||{}).d.localeCompare((b.options.find(x=>reqOptLive(b,x))||{}).d));
+  if(!list.length) return '<p class="rs-empty">'+(REQUESTS.some(canSeeRequest)&&(q||REQ_TEAM)?'Keine Anfrage passt zur Suche.':'Keine offenen Anfragen. Neue entstehen in „Freien Termin suchen“ → Termine anhaken → per WhatsApp teilen.')+'</p>';
+  return list.map(r=>'<div class="req-card"><div class="req-head"><b>'+esc(requestLabel(r))+'</b><small>angefragt von '+esc(r.ownerName||'–')+' am '+esc(shareDay(r.created))+(r.options[0]&&r.options[0].pitch&&r.options[0].pitch.mode!=='ganz'?' · '+esc(pitchShort(r.options[0].pitch).replace(/ [AB1-4]$/,'')):'')+'</small></div>'
+    +r.options.filter(x=>reqOptLive(r,x)).map(x=>{ const i=r.options.indexOf(x);
+      return '<div class="req-opt"><div><b>'+esc(shareDay(x.d))+'</b> · '+(r.kind==='game'&&r.ha!=='away'?'Anstoß '+addMinutes(x.start,fussballBufferBeforeMin()):x.start+'–'+reqOptEnd(r,x))+(x.pitch&&x.pitch.mode!=='ganz'?' · '+esc(pitchShort(x.pitch)):'')+'<br>'+reqOptStatus(r,x)+'</div>'
+        +'<button type="button" class="fs-btn" onclick="acceptRequest(\''+jsArg(r.id)+'\','+i+')">Zugesagt</button></div>'; }).join('')
+    +'<div class="req-acts"><button type="button" class="ghost-btn" onclick="reshareRequest(\''+jsArg(r.id)+'\')">Erneut teilen</button><button type="button" class="ghost-btn danger" onclick="dropRequest(\''+jsArg(r.id)+'\')">Absage – löschen</button></div></div>').join('');
+}
+function reqTextOf(r){
+  const one=r.options.filter(x=>reqOptLive(r,x)), who=r.team&&r.team!=='Alle Teams'&&r.team!==GK_TEAM?teamLabel(r.team,r.squad):'';
+  const own=fussballOwnTeamName({squad:isJugend(r.team)?r.squad:1});
+  const head=r.kind==='game'?'📅 *Freundschaftsspiel gesucht*\n*'+own+(who?' ('+who+')':'')+(r.opponent?' – '+r.opponent:'')+'*'
+    :isMatchKind(r.kind)?'📅 *'+kindLabel(r.kind)+' – Termin gesucht*\n*'+own+(who?' ('+who+')':'')+'*':'📅 *'+(r.title||kindLabel(r.kind))+' – Termin gesucht*'+(who?'\n'+who:'');
+  const lines=one.map(x=>'• '+shareDay(x.d)+', '+(r.kind==='game'?'Anstoß um '+(r.ha==='away'?x.start:addMinutes(x.start,fussballBufferBeforeMin()))+' Uhr':x.start+'–'+reqOptEnd(r,x)+' Uhr')).join('\n');
+  return head+'\n\n'+(one.length===1?'Folgender Termin wäre bei uns frei – würde der passen?':'Folgende Termine wären bei uns frei – passt einer davon?')+'\n\n'+lines+'\n\n'
+    +(one.length===1?'Bitte kurz Rückmeldung, ob der Termin passt 🙏':'Bitte kurz Rückmeldung, welcher Termin passt 🙏');
+}
+function reshareRequest(id){ const r=REQUESTS.find(x=>x.id===id); if(r) window.open('https://wa.me/?text='+encodeURIComponent(reqTextOf(r)),'_blank','noopener'); }
+function dropRequest(id){
+  const r=REQUESTS.find(x=>x.id===id); if(!r) return;
+  askConfirm('Anfrage löschen?','„'+requestLabel(r)+'“ – der Gegner hat abgesagt oder es hat sich erledigt.','Löschen',()=>closeRequest(id,'gelöscht'));
+}
+function closeRequest(id,why){
+  const r=REQUESTS.find(x=>x.id===id); if(!r) return Promise.resolve();
+  const backup=JSON.stringify(REQUESTS);
+  REQUESTS=REQUESTS.filter(x=>x.id!==id); renderKonto();
+  if(why==='gelöscht') showToast('Anfrage gelöscht.');
+  return saveStore('requests','Terminanfrage '+why+': '+requestLabel(r)+' (automatisch) – '+session.name)
+    .catch(err=>{ REQUESTS=JSON.parse(backup); renderKonto(); showToast('Fehler: '+err.message,6000); });
+}
+// Vergangene Vorschläge entfernen; ohne Vorschlag ist die Anfrage weg (nur wer sie bearbeiten darf, speichert)
+function pruneRequests(){
+  if(!session||!session.token) return;
+  let changed=false;
+  REQUESTS=REQUESTS.map(r=>{ const live=(r.options||[]).filter(x=>reqOptLive(r,x)); if(live.length===r.options.length||!canSeeRequest(r)) return r; changed=true; return live.length?{...r,options:live}:null; }).filter(Boolean);
+  if(changed) saveStore('requests','Terminanfragen aufgeräumt (automatisch)').catch(()=>{});
+}
+function acceptRequest(id,i){
+  if(!requireLogin()) return;
+  const r=REQUESTS.find(x=>x.id===id), x=r&&r.options[i]; if(!x) return;
+  const kick=r.kind==='game'?(r.ha==='away'?x.start:addMinutes(x.start,fussballBufferBeforeMin())):'';
+  editingId=null;
+  fillForm({d:x.d,t:x.start,bis:reqOptEnd(r,x),title:r.title,kind:r.kind,team:r.team,squad:r.squad,pitch:x.pitch,halle:r.halle,res:r.res||[],note:r.note,
+    ha:r.ha,opponent:r.opponent,participants:r.participants,address:r.address,kickoff:kick,ttFor:r.ttFor});
+  FORM_REQUEST=id;
+  document.getElementById('save-label').textContent='Termin speichern';
+  document.getElementById('cancel-btn').style.display='block';
+  document.getElementById('owner-name').textContent=session.name;
+  goto('neu');
+  showToast('Aus der Anfrage übernommen – prüfen und speichern.',3500);
+}
+function applySlotFinder(d,start,mode,part){
   dateInput().value=d;
   document.getElementById('f-von').value=start;
   const end=timeToMin(start)+SF.dur;
@@ -6543,7 +7246,9 @@ function applySlotFinder(d,start){
   formDirty=true; closeSlotFinder();
   if(formKind()==='game'){ document.getElementById('f-kickoff').value=formHA==='away'?start:addMinutes(start,fussballBufferBeforeMin()); onKickoffChange(false); }
   updateWeekday(); onTimeChange();
-  showToast('Übernommen: '+DOW[dowOf(d)-1]+', '+fmtShort(d)+', '+start+'–'+document.getElementById('f-bis').value+' Uhr',3000);
+  if(mode){ setPitchMode(mode); pitchPart=mode==='viertel'?+part:part; } // gefundene Hälfte bzw. gefundenes Viertel übernehmen (nach dem Anstoß, der sonst die Regel-Fläche setzt)
+  showToast('Übernommen: '+DOW[dowOf(d)-1]+', '+fmtShort(d)+', '+start+'–'+document.getElementById('f-bis').value+' Uhr'+(mode?' · '+pitchShort({mode,part}):''),3000);
+  renderPitch();
   trackEvent('freier_termin_uebernommen');
 }
 function requireLogin(){
@@ -6659,9 +7364,10 @@ function newEvent(d){
     }
     if(!d&&!session.isAdmin&&!seasonForDate(todayStr)) d=open.map(se=>se.from).sort()[0]; // nur für die kommende Saison eingetragen
   }
-  editingId=null; resetForm();
+  editingId=null; resetForm(); FORM_MOVE=null;
   filterTeamOptions(); onTeamChange();
   dateInput().value=d||todayStr;
+  setResChips('f-res',[]); halleThirds=[]; pitchMode='ganz'; pitchPart=null; // Fläche wählt man in der Zeitleiste selbst
   prefillOwnTraining(d||todayStr);
   updateWeekday(); renderPitch();
   document.getElementById('save-label').textContent='Termin speichern';
@@ -6694,18 +7400,20 @@ function prefillOwnTraining(d){
   const an=document.getElementById('f-anlass'); an.value=KIND_AUTO_TITLE.training; an.dataset.auto='1';
   onKindChange(false);
   const s=usualSlotFor(my.team,my.squad,d);
-  if(s){
-    document.getElementById('f-von').value=s.from; document.getElementById('f-bis').value=s.to;
-    if(s.pitch){
-      setResChips('f-res',['Großspielfeld'].concat(s.res||[])); setPitchMode(s.pitch.mode); pitchPart=s.pitch.part||null;
-      // Ist die übliche Fläche an dem Tag belegt, gleich eine freie gleicher Größe nehmen.
-      const busy=usedQuartersWindow(d,s.from,s.to,null,formOwnTeamFree());
-      if(s.pitch.mode==='viertel'&&busy.has(pitchPart)){ const q=[1,2,3,4].find(q=>!busy.has(q)); if(q) pitchPart=q; }
-      if(s.pitch.mode==='haelfte'&&HALF[pitchPart]&&HALF[pitchPart].some(q=>busy.has(q))){ const h=['A','B'].find(h=>HALF[h].every(q=>!busy.has(q))); if(h) pitchPart=h; }
-    }
-    else setResChips('f-res',s.res||[]);
-  }
+  if(s){ document.getElementById('f-von').value=s.from; document.getElementById('f-bis').value=s.to; }
+  // Ab 07.10.2026 · 25: keine Fläche mehr vorbelegen (Wunsch Fabrizio). Die übliche Fläche eines anderen Wochentags
+  // war oft belegt (Mi: Viertel 2 vom Montagstraining, dort trainiert E3) – vorbelegt stand dann ein Konflikt da.
   formDirty=false;
+}
+/* Ab 06.10.2026 · 24: Die Vorbelegung „eigenes Training“ (z. B. Viertel 3) blieb beim Antippen von „KF“ oder
+   „Kleinfeld“ unsichtbar mitgebucht – gespeichert wurde dann Platz + Kleinfeld bzw. später „Ganzer Platz“.
+   Jetzt ersetzt die erste bewusst gewählte Fläche die Vorbelegung; Ressourcen wie Vereinsheim bleiben. */
+function formAreaFromAuto(isRes){
+  if(!FORM_TL||!FORM_TL.areaAuto) return;
+  FORM_TL.areaAuto=false;
+  if(isRes) return;
+  const on=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res);
+  setResChips('f-res',on.filter(r=>!['Großspielfeld','Kleinspielfeld','Halle'].includes(r))); halleThirds=[];
 }
 // Datum für „Neu“: der im Kalender gewählte Tag, wenn man gerade dort ist (sonst heute).
 function newEventDateFromView(){
@@ -6713,6 +7421,7 @@ function newEventDateFromView(){
   return pane==='termine'&&selDate&&selDate>=todayStr?selDate:undefined;
 }
 function fillForm(e){
+  FORM_REQUEST=null;
   dateInput().value=e.d;document.getElementById('f-von').value=e.t;document.getElementById('f-bis').value=e.bis||addMinutes(e.t,120);
   document.getElementById('f-anlass').value=e.title;document.getElementById('f-bem').value=e.note||'';
   document.getElementById('f-team').value=e.team;
@@ -6725,7 +7434,7 @@ function fillForm(e){
   if(e.pitch){pitchMode=e.pitch.mode;pitchPart=e.pitch.part||null;document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode===pitchMode));}
   else{pitchMode='ganz';pitchPart=null;document.querySelectorAll('#pitch-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode==='ganz'));}
   halleThirds=e.halle&&e.halle.thirds?[...e.halle.thirds]:[];
-  document.getElementById('f-kind').value=kindOf(e); kindTouched=true; renderGkTeamChips('f-gkteams',e.gkTeams||[]);
+  document.getElementById('f-kind').value=kindOf(e); kindTouched=true; renderGkTeamChips('f-gkteams',e.gkTeams||[]); renderTtForChips(ttForList(e));
   document.getElementById('f-opponent').value=e.opponent||''; document.getElementById('f-participants').value=e.participants||'';
   document.getElementById('f-kickoff').value=e.kickoff||''; document.getElementById('f-address').value=e.address||'';
   document.getElementById('f-anlass').dataset.auto=''; setHomeAway(e.ha==='away'?'away':'home',false);
@@ -6769,7 +7478,13 @@ function reviewRecipients(o){
   const name=id=>{ const u=USERS.find(x=>x.id===id); return u?((u.first||'')+' '+(u.last||'')).trim():''; };
   const ids=se?(se.trainerIds||[]):USERS.map(u=>u.id);
   const has=(id,t,q)=>{ const c=se?classesInSeason(id,se):normalizeClasses((USERS.find(u=>u.id===id)||{}).classes||{}); if(!c.hasOwnProperty(t)) return false; const sq=c[t]||[]; return !isJugend(t)||!sq.length||sq.includes(q||1); };
-  if(o.kind==='trainer') return {all:true,names:[]};
+  if(o.kind==='trainer'&&!(o.ttFor&&o.ttFor.length)) return {all:true,names:[]};
+  if(o.kind==='trainer'){ // ab 09.10.2026 · 3: nur Trainer der gewählten Mannschaften (+ Vorstand)
+    ids.forEach(id=>{ if(session&&id===session.id) return; const u=USERS.find(x=>x.id===id)||{};
+      const hit=o.ttFor.some(k=>{ const [t,q]=k.split(':'); return t==='Vorstand'?(u.role==='vorstand'||u.admin===true):has(id,t,parseInt(q)||1); });
+      if(hit){ const n=name(id); if(n) out.push(n); } });
+    return {all:false,names:out};
+  }
   ids.forEach(id=>{ if(session&&id===session.id) return;
     const hit=o.kind==='goalkeeper'?((o.gkTeams||[]).some(t=>{ const c=se?classesInSeason(id,se):{}; return c.hasOwnProperty(t); })||has(id,GK_TEAM,1)):has(id,o.team,o.squad);
     if(hit){ const n=name(id); if(n) out.push(n); } });
@@ -6778,23 +7493,33 @@ function reviewRecipients(o){
 function openReviewSheet(o){
   const dt=new Date(o.d+'T00:00:00');
   const when=DAYS[dt.getDay()]+', '+fmtShort(o.d)+' · '+(o.kind==='game'&&o.mf.kickoff?'Anstoß '+o.mf.kickoff+' (Platz '+o.von+'–'+o.bis+')':o.von+'–'+o.bis+' Uhr');
-  const who=o.kind==='trainer'?'Alle Trainer':(o.kind==='goalkeeper'?'Torwarttraining für '+gkTeamsText(o.gkTeams||[]):teamLabel(o.team,o.squad));
+  const who=o.kind==='trainer'?ttForText({ttFor:o.ttFor||[]}):(o.kind==='goalkeeper'?'Torwarttraining für '+gkTeamsText(o.gkTeams||[]):teamLabel(o.team,o.squad));
   const where=o.away?('Auswärts'+(o.mf.address?' · '+o.mf.address:'')):[o.pitch?pitchShort(o.pitch):'',o.halle?halleShort(o.halle):'',...(o.res||[])].filter(Boolean).join(' · ')||'keine Fläche';
   const what=kindLabel(o.kind)+(o.title&&o.title!==kindLabel(o.kind)?' · '+o.title:'')+(o.mf.opponent?(o.away?' bei ':' gegen ')+o.mf.opponent:'');
   const rc=reviewRecipients(o);
   const mail=rc.all?'alle Trainer der Saison':(rc.names.length?rc.names.join(', '):'niemand außer dir');
   const row=(l,v,cls)=>'<div class="rv-row'+(cls?' '+cls:'')+'"><span>'+l+'</span><b>'+esc(v)+'</b></div>';
   const edit=!!editingId;
+  const own=ownFreeFor(o.kind,o.away,o.team,o.squad), ownTr=ownTrainingsOverlapping(o.d,o.von,o.bis,own,o.kind);
+  const clashIds=new Set(findConflicts(o.d,o.von,o.bis,o.pitch,o.halle,o.res,editingId,o.kind).map(c=>c.event.id));
+  const trRows=ownTr.map(t=>{ const repl=o.kind==='training', pre=repl||isMatchKind(o.kind)||clashIds.has(t.id);
+    return '<label class="rv-row rv-tr"><input type="checkbox" class="rv-cancel" data-slot="'+esc(t.trainingSlotId)+'"'+(pre?' checked':'')+'><b>'
+      +(repl?'Regeltraining '+esc(teamShort(t.team,t.squad))+' '+t.t+'–'+eventBis(t)+' an dem Tag auf diese Zeit verlegen':'Training '+esc(teamShort(t.team,t.squad))+' '+t.t+'–'+eventBis(t)+' an dem Tag absagen')+'</b></label>'; }).join('');
   openSheet('<div class="rv-sheet"><h3>'+(edit?'Änderungen prüfen':'Termin prüfen')+'</h3>'
     +row('Was',what)+row('Wer',who)+row('Wann',when)+row('Wo',where)
     +(o.away||o.kind==='trainer'?'':row('Platz','✓ frei','ok'))
+    +((()=>{ const ri=!o.away&&o.kind==='game'?formPitchRuleIssue():null; return ri?row('Regel','⚠ '+ri.txt,'rule'):''; })())
+    +trRows
+    +((()=>{ if(o.kind!=='training'||!own) return ''; const dup=EVENTS.filter(x=>x.d===o.d&&x.id!==editingId&&kindOf(x)==='training'&&x.team===own.team&&(x.squad||1)===(own.squad||1));
+        return dup.length?row('Achtung','Am selben Tag gibt es schon: '+dup.map(x=>'Training '+x.t+'–'+eventBis(x)+' ('+(x.ownerName||'–')+')').join(', ')+' – ggf. dort ändern statt neu anlegen.','rule'):''; })())
     +row('Mail an',mail)
     +'<div class="fs-acts"><button type="button" class="cancel-btn" onclick="closeSheet()">Weiter bearbeiten</button>'
     +'<button type="button" class="submit-btn" onclick="confirmReviewSave()">'+(edit?'Änderungen speichern':'Jetzt speichern')+'</button></div></div>');
 }
 async function confirmReviewSave(){
+  submitEvent._cancelSlots=[...document.querySelectorAll('#gksheet .rv-cancel')].filter(c=>c.checked).map(c=>c.dataset.slot);
   closeSheet(); submitEvent._confirmed=true;
-  try{ await submitEvent(); } finally{ submitEvent._confirmed=false; }
+  try{ await submitEvent(); } finally{ submitEvent._confirmed=false; submitEvent._cancelSlots=null; }
 }
 async function submitEvent(){
   if(!requireLogin())return;
@@ -6832,12 +7557,12 @@ async function submitEvent(){
   if(away||kind==='trainer'){ res=[]; pitch=null; halle=null; } // Auswärts und Trainer-Termine belegen bei uns nichts
   const note=document.getElementById('f-bem').value.trim();
   // HARTE KONFLIKTPRÜFUNG
-  const ownFree=isMatchKind(kind)&&!away?{team,squad}:null;
+  const ownFree=ownFreeFor(kind,away,team,squad);
   const conflicts=findConflicts(d,von,bis,pitch,halle,res,editingId,kind).filter(c=>!isOwnTeamTraining(c.event,ownFree));
   if(conflicts.length){showConflicts(conflicts);renderFreeSlotsBox('free-slots-box',d,von,bis,editingId);return;}
   hideConflicts();
   // Ab 06.10.2026 · 13: vor dem Speichern „Termin prüfen“ – Speichern verschickt Mails, darum konkrete Zusammenfassung statt „Wirklich?“
-  if(!submitEvent._confirmed){ openReviewSheet({d,von,bis,title,kind,team,squad,pitch,halle,res,mf,away,gkTeams:kind==='goalkeeper'?readGkTeamChips('f-gkteams'):null}); return; }
+  if(!submitEvent._confirmed){ openReviewSheet({d,von,bis,title,kind,team,squad,pitch,halle,res,mf,away,gkTeams:kind==='goalkeeper'?readGkTeamChips('f-gkteams'):null,ttFor:kind==='trainer'?readTtForChips():null}); return; }
   const btn=document.getElementById('save-btn'),lblEl=document.getElementById('save-label');
   const spinEl=document.getElementById('save-spin'),checkEl=document.getElementById('save-check');
   const lbl=lblEl.textContent;btn.disabled=true;lblEl.textContent='Speichere …';
@@ -6846,29 +7571,56 @@ async function submitEvent(){
   const backup=JSON.stringify(EVENTS);
   try{
     const gkTeams=kind==='goalkeeper'?readGkTeamChips('f-gkteams'):undefined;
+    const ttFor=kind==='trainer'?readTtForChips():undefined;
     let newId=null;
+    const doneReq=editingId?null:FORM_REQUEST;
     const before=editingId?JSON.stringify(EVENTS.find(x=>x.id===editingId)||{}):null;
-    if(editingId)Object.assign(EVENTS.find(x=>x.id===editingId),{d,t:von,bis,title,kind,team,squad,pitch,halle,res,note,gkTeams,...mf});
-    else{ newId=crypto.randomUUID(); EVENTS.push({id:newId,d,t:von,bis,title,kind,team,squad,pitch,halle,res,note,gkTeams,...mf,ownerId:session.id,ownerName:session.name}); }
+    if(editingId)Object.assign(EVENTS.find(x=>x.id===editingId),{d,t:von,bis,title,kind,team,squad,pitch,halle,res,note,gkTeams,ttFor,...mf});
+    else{ newId=crypto.randomUUID(); EVENTS.push({id:newId,d,t:von,bis,title,kind,team,squad,pitch,halle,res,note,gkTeams,ttFor,...mf,ownerId:session.id,ownerName:session.name}); }
     applyGameMoves(); // Verknüpfung mit fussball.de neu berechnen
     // Neues Torwarttraining: Trainer der gewählten Jugenden per Mail bitten, Torhüter an-/abzumelden.
     if(newId&&kind==='goalkeeper') setTimeout(()=>sendGkRequest(gkTeams,title,DAYS[new Date(d+'T00:00:00').getDay()]+', '+fmtShort(d)+' · '+von+'–'+bis+' Uhr',location.origin+location.pathname+'#t='+newId,[session.id]),4000);
     const wasEditing=!!editingId;
     const savedEv=EVENTS.find(x=>x.id===(newId||editingId))||{};
-    const logMsg=isMatchKind(kind)&&mf.ha
+    const cancelSlots=Array.isArray(submitEvent._cancelSlots)?submitEvent._cancelSlots.map(id=>TRAINING.find(x=>x.id===id)).filter(x=>x&&!(x.cancelled||[]).includes(d)):[];
+    const reviewed=Array.isArray(submitEvent._cancelSlots);
+    const backupT=JSON.stringify(TRAINING);
+    cancelSlots.forEach(x=>{ x.cancelled=[...new Set([...(x.cancelled||[]),d])].sort(); });
+    let logMsg=isMatchKind(kind)&&mf.ha
       ?matchLogMsg(savedEv,wasEditing?'geändert':'angelegt')
-      :(wasEditing?'Termin geändert: ':'Neuer Termin: ')+title+' – '+msgTeam(team,squad,gkTeams)+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name+teamTrailer(team,squad,savedEv);
+      :(wasEditing?'Termin geändert: ':'Neuer Termin: ')+title+' – '+(kind==='trainer'?'Trainer-Termin für '+(ttFor&&ttFor.length?ttForText({ttFor}):'alle Trainer'):msgTeam(team,squad,gkTeams))+' · '+von+'–'+bis+' · '+fmtShort(d)+' – '+session.name+teamTrailer(team,squad,savedEv);
     editingId=null;formDirty=false;document.getElementById('cancel-btn').style.display='none';
     selDate=d;const dt=new Date(d+'T00:00:00');curY=dt.getFullYear();curM=dt.getMonth();yearShown=curY;
     if(FORM_ORIGIN&&FORM_ORIGIN.pane==='start'&&!wasEditing){ render(); resetForm(); goto('start'); } // aus der Zeitleiste: zurück an dieselbe Stelle
     else{ goto('termine');setView('woche');render();renderStart();resetForm(); }
-    showToast('Gespeichert: '+title);
-    saveEvents(logMsg).catch(err=>{ EVENTS=JSON.parse(backup);applyGameMoves();render();renderStart();showToast('Speichern fehlgeschlagen: '+err.message,6000); });
+    const movedSlot=kind==='training'&&!wasEditing?cancelSlots.find(x=>x.team===team&&(x.squad||1)===(squad||1)):null;
+    let moveMsg=null;
+    if(movedSlot){ // kein eigener Termin: das Regeltraining bekommt für diesen Tag Zeit/Fläche (ab 07.10.2026 · 29)
+      const prev=(movedSlot.moved||{})[d];
+      EVENTS=EVENTS.filter(x=>x.id!==newId);
+      movedSlot.cancelled=(movedSlot.cancelled||[]).filter(x=>x!==d);
+      movedSlot.moved={...(movedSlot.moved||{}),[d]:{from:von,to:bis,pitch:pitch||null,res:res||[]}};
+      moveMsg='Training verlegt: '+teamLabel(team,squad)+' am '+fmtShort(d)+' von '+(prev?prev.from+'–'+prev.to:movedSlot.from+'–'+movedSlot.to)+' auf '+von+'–'+bis
+        +(pitch?' ('+pitchShort(pitch)+')':'')+' – '+session.name+teamTrailer(team,squad,movedSlot);
+    }
+    FORM_MOVE=null;
+    if(cancelSlots.length&&!movedSlot){ // Absage steht in derselben Mail; der Trainings-Commit selbst ist „(automatisch)“
+      const add=', Training '+teamShort(team,squad)+' am '+fmtShort(d)+' abgesagt';
+      logMsg=logMsg.includes('\n\nPlatzcoach-Team')?logMsg.replace('\n\nPlatzcoach-Team',add+'\n\nPlatzcoach-Team'):logMsg+add;
+      renderTraining(); render(); renderStart();
+    }
+    if(movedSlot){ renderTraining(); render(); renderStart(); }
+    showToast(movedSlot?'Training verlegt auf '+von+'–'+bis+' Uhr.':'Gespeichert: '+title+(cancelSlots.length?' · Training abgesagt':''));
+    if(movedSlot) saveTraining(moveMsg).catch(err=>{ EVENTS=JSON.parse(backup); TRAINING=JSON.parse(backupT); applyGameMoves();render();renderStart();renderTraining();showToast('Speichern fehlgeschlagen: '+err.message,6000); });
+    else saveEvents(logMsg)
+      .then(()=>doneReq?closeRequest(doneReq,'erledigt'):null)
+      .then(()=>cancelSlots.length?saveTraining('Training abgesagt: '+teamLabel(team,squad)+' am '+fmtShort(d)+' wegen '+title+' (automatisch) – '+session.name+teamTrailer(team,squad,savedEv)):null)
+      .catch(err=>{ EVENTS=JSON.parse(backup); TRAINING=JSON.parse(backupT); applyGameMoves();render();renderStart();renderTraining();showToast('Speichern fehlgeschlagen: '+err.message,6000); });
     // Heimspiel/-turnier: Training der Mannschaft zur selben Zeit absagen? Danach Text für den Jugendleiter.
     if(isMatchKind(kind)&&!away){
       const b=before?JSON.parse(before):null;
       const changed=!b||['d','t','bis','kickoff','opponent','kind','ha','team','squad','participants'].some(f=>JSON.stringify(b[f])!==JSON.stringify(savedEv[f]));
-      if(changed) setTimeout(()=>afterHomeMatchSaved(savedEv,!b),350);
+      if(changed) setTimeout(()=>afterHomeMatchSaved(savedEv,!b,reviewed),350);
     }
   }catch(err){EVENTS=JSON.parse(backup);showToast('Fehler: '+err.message,6000);}
   finally{btn.disabled=false;lblEl.textContent=lbl;if(spinEl){spinEl.style.display='none';}if(checkEl){checkEl.style.display='inline';}hideSaving();}
@@ -6877,9 +7629,12 @@ function deleteEvent(id){
   if(!requireLogin()) return;
   const e=EVENTS.find(x=>x.id===id); if(!e)return;
   if(!canEdit(e)){showToast('Das ist nicht dein Termin.');return;}
-  askConfirm('Termin löschen?','„'+e.title+'" am '+fmtShort(e.d)+' wird dauerhaft entfernt.','Löschen',async()=>{
+  const ms=e.movedFromSlot?TRAINING.find(x=>x.id===e.movedFromSlot.slotId):null;
+  askConfirm('Termin löschen?','„'+e.title+'" am '+fmtShort(e.d)+' wird dauerhaft entfernt.'+(ms?' Das Regeltraining '+ms.from+'–'+ms.to+' findet dann wieder statt.':''),'Löschen',async()=>{
     const backup=JSON.stringify(EVENTS);
     EVENTS=EVENTS.filter(x=>x.id!==id); applyGameMoves();
+    if(ms&&(ms.cancelled||[]).includes(e.d)){ ms.cancelled=ms.cancelled.filter(x=>x!==e.d); renderTraining();
+      saveTraining('Absage zurückgenommen: '+teamLabel(ms.team,ms.squad)+' am '+fmtShort(e.d)+' (Ersatztermin gelöscht, automatisch) – '+session.name+teamTrailer(ms.team,ms.squad,ms)).catch(()=>{}); }
     render(); renderStart(); showToast('Termin gelöscht.');
     if(kindOf(e)==='goalkeeper') sendGkCancel(e.gkTeams||[],e.title||'Torwarttraining',DAYS[new Date(e.d+'T00:00:00').getDay()]+', '+fmtShort(e.d)+' · '+e.t+'–'+eventBis(e)+' Uhr',[e.ownerId],'Der Termin wurde gelöscht.');
     saveEvents(isMatchKind(kindOf(e))&&e.ha?matchLogMsg(e,'gelöscht'):'Termin gelöscht: '+e.title+' – '+msgTeam(e.team,e.squad,e.gkTeams)+' · '+e.t+'–'+eventBis(e)+' · '+fmtShort(e.d)+' – '+session.name+teamTrailer(e.team,e.squad,e))
@@ -6959,6 +7714,28 @@ function canMarkGameMove(e){
   const m=fussballFilterTeam(g.team,g.squad);
   return !!session.isAdmin||canBookTeam(m.team,m.squad);
 }
+/* Heimrecht getauscht (ab 10.10.2026 · 2, Backlog 106): Anlass E3 gegen Rumbeck III – DFBnet hat das Heimspiel
+   als Auswärtsspiel neu angesetzt. moveOrigAway = Seite laut fussball.de (vor dem Tausch), moveEffAway = Seite am neuen Termin. */
+function moveOrigAway(idx){ const g=fbGame(idx); return g&&g.swapPending?g.swapFrom==='away':fbIsAwayIdx(idx); }
+function moveEffAway(){ const sw=document.getElementById('mv-swap'); return moveOrigAway(moveGameIdx)!==!!(sw&&sw.checked); }
+// Spielort des Gegners aus einem anderen Spiel bei ihm (z. B. Rückspiel) – Vorschlag fürs Feld „Spielort“
+function opponentVenueGuess(g){
+  const x=(FUSSBALLDE_RAW.awayGames||[]).find(a=>a.venue&&a.link!==g.link&&a.team===g.team&&(a.squad||1)===(g.squad||1)&&a.opponent===g.opponent)
+    ||(FUSSBALLDE_RAW.awayGames||[]).find(a=>a.venue&&a.link!==g.link&&a.opponent===g.opponent);
+  return x?String(x.venue).replace(/\s+,/g,','):'';
+}
+function onMoveSwapChange(){
+  const eff=moveEffAway(), orig=moveOrigAway(moveGameIdx), sw=document.getElementById('mv-swap').checked;
+  document.getElementById('mv-swap-row').classList.toggle('on',sw);
+  const vf=document.getElementById('mv-venue-field');
+  vf.style.display=sw&&eff?'block':'none';
+  const vi=document.getElementById('mv-venue'); if(sw&&eff&&!vi.value) vi.value=opponentVenueGuess(fbGame(moveGameIdx)||{});
+  document.getElementById('mv-hint').textContent=sw
+    ?(eff?'Platzcoach führt das Spiel ab sofort als Auswärtsspiel am neuen Termin – unser Platz ist dafür nicht mehr belegt. Am alten Termin steht „verlegt auf …“. Sobald fussball.de den Tausch übernimmt, gilt er als bestätigt.'
+         :'Platzcoach führt das Spiel ab sofort als Heimspiel am neuen Termin und belegt unseren Platz (Prüfung oben). Sobald fussball.de den Tausch übernimmt, gilt er als bestätigt.')
+    :(orig?'Nur zur Info für die Trainer: Platzcoach zeigt das Spiel ab sofort am neuen Termin, am alten steht „verlegt auf …“. Sobald fussball.de die Verlegung übernimmt, gilt automatisch fussball.de.':MV_HINT_HOME);
+  updateMoveTrainingHint();
+}
 function openMoveModal(fbIndex,preDate,preTime){
   const g=fbGame(fbIndex); if(!g) return;
   if(!session){ showToast('Bitte zuerst anmelden.'); return; }
@@ -6966,7 +7743,7 @@ function openMoveModal(fbIndex,preDate,preTime){
   if(!raw){ showToast('Dieses Spiel hat keinen fussball.de-Link und kann nicht vorgemerkt werden.',5000); return; }
   if(!canMarkGameMove({fbIndex})){ showToast('Verlegungen kann nur ein Trainer der Mannschaft oder ein Admin vormerken.',5000); return; }
   moveGameIdx=fbIndex;
-  const away=fbIsAwayIdx(fbIndex);
+  const away=moveOrigAway(fbIndex);
   document.getElementById('mv-title').textContent=away?'Auswärtsspiel verlegen':'Verlegung vormerken';
   document.getElementById('mv-reason-lbl').textContent=away?'Grund (optional)':'Grund der Verlegung (für den DFBnet-Antrag)';
   document.getElementById('mv-hint').textContent=away
@@ -6987,7 +7764,10 @@ function openMoveModal(fbIndex,preDate,preTime){
   rm.style.display=(m&&(g.movePending||g.moveDiverged))?'block':'none';
   rm.textContent=(m&&g.moveDiverged)?'Vormerkung abschließen':'Vormerkung aufheben';
   document.getElementById('mv-yl').style.display=(m&&g.movePending&&!away)?'block':'none';
-  updateMoveTrainingHint();
+  document.getElementById('mv-swap-lbl').textContent=away?'Heimrecht getauscht – neu als Heimspiel bei uns':'Heimrecht getauscht – neu als Auswärtsspiel bei '+g.opponent;
+  document.getElementById('mv-swap').checked=!!(m&&g.movePending&&m.swap);
+  document.getElementById('mv-venue').value=(m&&g.movePending&&m.venue)||'';
+  onMoveSwapChange();
   document.getElementById('move-modal').classList.add('show');
 }
 /* Häufige Verlegungsgründe als Auswahl statt Tippen (ab 01.10.2026 · 1). Antippen setzt den Grund,
@@ -6997,7 +7777,7 @@ const MOVE_REASONS_AWAY=['Wunsch des Gegners','Platz beim Gegner belegt','Ferien
 function renderMoveReasons(){
   const box=document.getElementById('mv-reasons'); if(!box) return;
   const cur=(document.getElementById('mv-reason').value||'').split(',').map(x=>x.trim());
-  box.innerHTML=(fbIsAwayIdx(moveGameIdx)?MOVE_REASONS_AWAY:MOVE_REASONS).map(r=>'<span class="res-chip'+(cur.includes(r)?' on':'')+'" onclick="'+esc('pickMoveReason(\''+jsArg(r)+'\')')+'">'+esc(r)+'</span>').join('');
+  box.innerHTML=(moveOrigAway(moveGameIdx)?MOVE_REASONS_AWAY:MOVE_REASONS).map(r=>'<span class="res-chip'+(cur.includes(r)?' on':'')+'" onclick="'+esc('pickMoveReason(\''+jsArg(r)+'\')')+'">'+esc(r)+'</span>').join('');
 }
 function pickMoveReason(r){
   const ta=document.getElementById('mv-reason');
@@ -7010,14 +7790,14 @@ function closeMoveModal(){ document.getElementById('move-modal').classList.remov
 function ownTrainingsForMove(g,date,time){
   if(!g||!date||!time) return [];
   const own=fussballFilterTeam(g.team,g.squad);
-  const from=shiftTimeClamped(time,-fussballBufferBeforeMin()), to=shiftTimeClamped(time,fussballDurationMin(g.team));
+  const from=shiftTimeClamped(time,-fussballBufferBeforeMin()), to=shiftTimeClamped(time,fbGameDur(g));
   return trainingInstancesOn(date).filter(t=>t.trainingSlotId&&isOwnTrainingFor(t,own)&&from<eventBis(t)&&to>t.t);
 }
 /* Platzprüfung für einen Anstoß dieses Spiels: das Spiel selbst zählt nicht mit, die eigene Trainingszeit
    gilt als frei (wie in der Ansetzungssuche). E/F/G: eine freie Hälfte genügt, sonst ganzer Platz. */
 function pitchCheckForGame(g,date,time){
   const own=fussballFilterTeam(g.team,g.squad);
-  const from=time, to=shiftTimeClamped(time,fussballDurationMin(g.team));
+  const from=time, to=shiftTimeClamped(time,fbGameDur(g));
   const prevSkip=formSkipFussballLink; formSkipFussballLink=fussballGameLinkId(g);
   let occ; try{ occ=rescheduleOccupationsOn(date,own); } finally{ formSkipFussballLink=prevSkip; }
   const opts=fussballTeamCategory(g.team)==='share'?[{part:'A',q:HALF.A},{part:'B',q:HALF.B}]:[{part:null,q:[1,2,3,4]}];
@@ -7032,7 +7812,7 @@ function updateMoveTrainingHint(){
   const date=document.getElementById('mv-date').value, time=document.getElementById('mv-time').value;
   let h='';
   // Platz am neuen Termin prüfen (nur Hinweis, Speichern bleibt möglich – oft lässt sich mit den anderen Mannschaften tauschen).
-  if(g&&date&&time&&!fbIsAwayIdx(moveGameIdx)){ // Auswärts: kein eigener Platz, keine Prüfung
+  if(g&&date&&time&&!moveEffAway()){ // Auswärts (auch nach Heimrechttausch): kein eigener Platz, keine Prüfung
     const c=pitchCheckForGame(g,date,time);
     h+=c.ok
       ?'<div class="mv-check ok">Platz frei am '+fmtDayShort(date)+', '+c.from+'–'+c.to+(c.part?' (Hälfte '+c.part+')':' (ganzer Platz)')+'.</div>'
@@ -7056,15 +7836,18 @@ async function saveGameMove(){
   const toD=document.getElementById('mv-date').value, toT=document.getElementById('mv-time').value;
   if(!toD||!toT){ showToast('Bitte Datum und Anstoß angeben.'); return; }
   if(toD<todayStr){ showToast('Das Datum liegt in der Vergangenheit.'); return; }
-  if(toD===raw.d&&toT===(raw.t||'')){ showToast('Das ist der aktuelle Termin bei fussball.de.'); return; }
+  const swap=!!document.getElementById('mv-swap').checked, effAway=moveEffAway();
+  if(toD===raw.d&&toT===(raw.t||'')&&!swap){ showToast('Das ist der aktuelle Termin bei fussball.de.'); return; }
   const reason=document.getElementById('mv-reason').value.replace(/\s+/g,' ').trim();
-  const away=fbIsAwayIdx(moveGameIdx);
+  const away=moveOrigAway(moveGameIdx);
+  const venue=swap&&effAway?document.getElementById('mv-venue').value.replace(/\s+/g,' ').trim():'';
   if(!away&&reason.length<3){ showToast('Bitte einen Grund für die Verlegung angeben – der DFBnet-Antrag braucht ihn.',5000); document.getElementById('mv-reason').focus(); return; }
   const mapped=fussballFilterTeam(raw.team,raw.squad), label=teamLabel(mapped.team,mapped.squad), vs=away?' bei ':' – ';
   const slotIds=[...document.querySelectorAll('#mv-training .mv-cancel')].filter(c=>c.checked).map(c=>c.dataset.slot);
   const old=moveOfGame(raw);
   const backupM=JSON.stringify(MOVES), backupT=JSON.stringify(TRAINING);
   const rec={id:old?old.id:crypto.randomUUID(), link:raw.link, team:raw.team, squad:raw.squad||1, opponent:raw.opponent, ...(away?{away:true}:{}),
+    ...(swap?{swap:true}:{}), ...(venue?{venue}:{}),
     fromD:raw.d, fromT:raw.t||'', toD, toT, reason, byId:session.id, byName:session.name, at:new Date().toISOString(),
     cancelledTraining:[...((old&&old.cancelledTraining)||[]), ...slotIds.map(id=>({slotId:id,date:toD}))]};
   MOVES=MOVES.filter(x=>x.link!==raw.link).concat([rec]);
@@ -7074,10 +7857,12 @@ async function saveGameMove(){
   try{
     // Eine Mail für alles: die Trainingsabsage steht im Text der Verlegung, der Trainings-Commit ist "(automatisch)".
     await saveStore('moves',(old?'Spielverlegung geändert: ':'Spielverlegung vorgemerkt: ')+label+vs+raw.opponent+(away?' (Auswärtsspiel)':'')
-      +(toD===raw.d?', Anstoßzeit am '+fmtShort(toD)+' von '+(raw.t||'?')+' auf '+toT+' Uhr':' von '+fmtShort(raw.d)+(raw.t?' '+raw.t:'')+' auf '+fmtShort(toD)+' '+toT+' Uhr')
+      +(toD===raw.d&&toT===(raw.t||'')?' am '+fmtShort(toD)+' '+toT+' Uhr'
+        :toD===raw.d?', Anstoßzeit am '+fmtShort(toD)+' von '+(raw.t||'?')+' auf '+toT+' Uhr':' von '+fmtShort(raw.d)+(raw.t?' '+raw.t:'')+' auf '+fmtShort(toD)+' '+toT+' Uhr')
+      +(swap?(effAway?', Heimrecht getauscht: jetzt Auswärtsspiel bei '+raw.opponent+(venue?' ('+venue+')':'')+', unser Platz ist frei':', Heimrecht getauscht: jetzt Heimspiel bei uns'):'')
       +(slotIds.length?', Training am '+fmtShort(toD)+' abgesagt':'')+'.'+(reason?' Grund: '+reason:'')+' – '+session.name+teamTrailer(mapped.team,mapped.squad)+'\nPlatzcoach-Link: '+fbDeepLinkId(raw));
     if(slotIds.length) await saveTraining('Training abgesagt: '+label+' am '+fmtShort(toD)+' wegen Spielverlegung (automatisch) – '+session.name+teamTrailer(mapped.team,mapped.squad));
-    showToast('Verlegung auf '+fmtShort(toD)+', '+toT+' Uhr vorgemerkt'+(slotIds.length?', Training abgesagt.':'.')+(away?' Die Trainer bekommen eine Info.':''),4500);
+    showToast('Verlegung auf '+fmtShort(toD)+', '+toT+' Uhr vorgemerkt'+(swap?(effAway?' (jetzt auswärts)':' (jetzt Heimspiel)'):'')+(slotIds.length?', Training abgesagt.':'.')+(away?' Die Trainer bekommen eine Info.':''),4500);
     if(!away) openYouthLeaderModal(rec,true);
   }catch(e){
     MOVES=JSON.parse(backupM); TRAINING=JSON.parse(backupT); applyGameMoves(); render(); renderStart(); renderTraining();
@@ -7088,8 +7873,9 @@ async function saveGameMove(){
    (fussball.de-Spiel + Vormerkung). */
 let ylText='';
 function youthLeaderMessage(m){
-  const raw=(FUSSBALLDE_RAW.games||[]).find(x=>x.link===m.link)||{};
+  const raw=(FUSSBALLDE_RAW.games||[]).find(x=>x.link===m.link)||(FUSSBALLDE_RAW.awayGames||[]).find(x=>x.link===m.link)||{};
   const team=raw.team||m.team, squad=raw.squad||m.squad||1;
+  const swapAway=!!m.swap&&!m.away; // Heimrecht getauscht: wir sind am neuen Termin Gast
   const mapped=fussballFilterTeam(team,squad);
   const fromD=raw.movedFrom&&raw.d!==m.fromD?raw.movedFrom.d:m.fromD; // falls fussball.de schon geändert hat
   const fromT=raw.movedFrom&&raw.d!==m.fromD?raw.movedFrom.t:m.fromT;
@@ -7103,16 +7889,22 @@ function youthLeaderMessage(m){
     +(raw.gameNo?'Spielnummer: '+raw.gameNo+(raw.matchday?' · '+raw.matchday+'. Spieltag':'')+'\n':'')
     +team+(raw.competition?' · '+raw.competition:'')+'\n'
     +(raw.staffelName||raw.staffelId?'Staffel: '+[raw.staffelName,raw.staffelId?'ID '+raw.staffelId:''].filter(Boolean).join(' · ')+'\n':'')
-    +'Heim: '+fussballOwnTeamName({...raw,squad})+' ('+teamLabel(mapped.team,mapped.squad)+')\n'
-    +'Gast: '+(raw.opponent||m.opponent)+'\n\n'
-    +'❌ *Bisher:* '+fmtShare(fromD)+(fromT?', '+fromT+' Uhr':'')+'\n\n'
+    +(swapAway
+      ?'Bisher Heim: '+fussballOwnTeamName({...raw,squad})+' ('+teamLabel(mapped.team,mapped.squad)+')\n'+'Bisher Gast: '+(raw.opponent||m.opponent)+'\n'
+        +'🔁 *Heimrecht tauschen:* neu Heim '+(raw.opponent||m.opponent)+', Gast '+fussballOwnTeamName({...raw,squad})+'\n\n'
+      :'Heim: '+fussballOwnTeamName({...raw,squad})+' ('+teamLabel(mapped.team,mapped.squad)+')\n'+'Gast: '+(raw.opponent||m.opponent)+'\n\n')
+    +'❌ *Bisher:* '+fmtShare(fromD)+(fromT?', '+fromT+' Uhr':'')+(swapAway?' (Heimspiel bei uns)':'')+'\n\n'
     +'✅ *Neu*\n'
-    +(m.toD===fromD
+    +(m.toD===fromD&&m.toT===fromT
+      ?'Spieldatum: unverändert ('+fmtShare(m.toD)+')\n'+'Anstoßzeit: unverändert ('+m.toT+' Uhr)\n'
+      :m.toD===fromD
       ?'Spieldatum: unverändert ('+fmtShare(m.toD)+')\n'+'Anstoßzeit: '+m.toT+' Uhr (statt '+(fromT||'?')+' Uhr)\n'
       :'Spieldatum: '+fmtShare(m.toD)+'\n'+'Anstoßzeit: '+m.toT+' Uhr\n')
-    +'Spielstätte: unverändert'+(raw.venue?' – '+raw.venue:'')+'\n'
+    +(swapAway
+      ?'Spielstätte: '+(m.venue||'beim Gegner – bitte ergänzen')+'\n'
+      :'Spielstätte: unverändert'+(raw.venue?' – '+raw.venue:'')+'\n')
     +'Begründung: '+(m.reason||'bitte ergänzen')+'\n\n'
-    +'Der Platz ist am neuen Termin frei und in Platzcoach vorgemerkt.\n'
+    +(swapAway?'Das Spiel ist in Platzcoach als Auswärtsspiel vorgemerkt, unser Platz wird dafür nicht gebraucht.\n':'Der Platz ist am neuen Termin frei und in Platzcoach vorgemerkt.\n')
     +(m.link?'\nSpiel bei fussball.de: '+m.link+'\n':'')
     +(m.link?'In Platzcoach: '+fbDeepLinkUrl(m)+'\n':'')
     +'\nDanke!'+(first?'\n'+first:'');
@@ -7227,8 +8019,9 @@ function openMatchYouthLeader(id,title){
     matchYouthLeaderMessage(e));
 }
 // Nach dem Speichern eines Heimspiels/-turniers: überlappendes Training der Mannschaft absagen (Rückfrage), dann Jugendleiter-Text.
-function afterHomeMatchSaved(e,isNew){
+function afterHomeMatchSaved(e,isNew,trainingDecided){
   const title=isNew?'Gespeichert – jetzt an den Jugendleiter':'Geändert – Jugendleiter informieren?';
+  if(trainingDecided){ openMatchYouthLeader(e.id,title); return; } // in „Termin prüfen“ schon entschieden
   const slots=TRAINING.filter(s=>s.team===e.team&&(!isJugend(e.team)||(s.squad||1)===(e.squad||1))&&slotActiveOn(s,e.d)&&s.from<eventBis(e)&&s.to>e.t);
   if(!slots.length){ openMatchYouthLeader(e.id,title); return; }
   const no=document.querySelector('#modal .no');
@@ -7263,7 +8056,7 @@ async function removeGameMove(){
   const react=document.getElementById('mv-reactivate');
   const diverged=!!g.moveDiverged, curD=g.d, curT=g.t;
   const ct=(react&&react.checked)?(m.cancelledTraining||[]).filter(c=>!(diverged&&c.date===curD)):[];
-  const mapped=fussballFilterTeam(m.team,m.squad), away=fbIsAwayIdx(moveGameIdx), label=teamLabel(mapped.team,mapped.squad);
+  const mapped=fussballFilterTeam(m.team,m.squad), away=!!m.away, label=teamLabel(mapped.team,mapped.squad);
   const opp=m.opponent+(away?' (Auswärtsspiel)':'');
   const backupM=JSON.stringify(MOVES), backupT=JSON.stringify(TRAINING);
   MOVES=MOVES.filter(x=>x.id!==m.id);
@@ -7382,7 +8175,7 @@ function runRescheduleSearch(){
   if(badDay){ box.innerHTML='<div class="rs-empty">'+WDAYS[badDay]+': "Von" muss vor "Bis" liegen.</div>'; return; }
 
   const g=rescheduleGame;
-  const durationMin=fussballDurationMin(g.team);
+  const durationMin=fbGameDur(g);
   // Benötigte Fläche nach derselben Regel wie die Platzbelegung (ab 25.09.2026 · 4):
   // E/F/G-Spiele ("share") brauchen genau eine Hälfte, ab D-Jugend den ganzen Platz.
   const isShare=fussballTeamCategory(g.team)==='share';
@@ -7542,6 +8335,38 @@ async function doCancelSlot(){
    Genutzt von „Meine Woche“, der Kalenderkarte, „Zu erledigen“ und dem Konflikt-Hinweis;
    der Dialog mit Datumswahl bleibt nur für die Trainingszeiten-Liste (dort ist kein Tag bekannt). */
 function canCancelSlot(s){ return !!(session&&s&&(session.isAdmin||canBookAnyOfTeam(s.team))); }
+/* Regeltraining einmalig verlegen (ab 07.10.2026 · 28): öffnet „Neuer Termin“ mit Training, Mannschaft, Zeit und Fläche
+   des Regeltrainings. In „Termin prüfen“ ist „Regeltraining … ersetzen“ vorausgewählt; Speichern legt den Ersatztermin an
+   (movedFromSlot) und sagt das Regeltraining an dem Tag ab – eine Mail „Training verlegt“. Löschen des Ersatztermins
+   lässt das Regeltraining wieder stattfinden. Dauerhafte Änderungen bleiben bei den Admins (Trainingszeit bearbeiten). */
+function moveTrainingDay(id,date){
+  const s=TRAINING.find(x=>x.id===id); if(!s||!date) return;
+  if(!canCancelSlot(s)){ showToast('Verlegen kann nur ein Trainer der Mannschaft oder ein Admin.',4000); return; }
+  newEvent(date); if(!document.querySelector('.pane[data-pane="neu"].active')) return;
+  document.getElementById('f-team').value=s.team; setSquadSeg('f-squad',s.team,s.squad||1,true); onTeamChange();
+  pickFormKind(s.team===GK_TEAM||s.kind==='goalkeeper'?'goalkeeper':'training');
+  const inst=trainingInstancesOn(date).find(t=>t.trainingSlotId===s.id)||{t:s.from,bis:s.to,pitch:s.pitch,res:s.res||[]};
+  document.getElementById('f-von').value=inst.t; document.getElementById('f-bis').value=inst.bis;
+  const res=(inst.res||[]).slice(); if(inst.pitch) res.unshift('Großspielfeld'); if(s.halle&&s.halle.thirds&&s.halle.thirds.length) res.push('Halle');
+  setResChips('f-res',res);
+  if(inst.pitch){ setPitchMode(inst.pitch.mode); pitchPart=inst.pitch.part||null; }
+  halleThirds=s.halle&&s.halle.thirds?[...s.halle.thirds]:[];
+  FORM_MOVE={slotId:s.id,date};
+  formDirty=false; onTimeChange(); renderPitch(); renderHalle();
+  showToast('Neue Zeit oder Fläche wählen – das Regeltraining findet dann an dem Tag dort statt.',4000);
+}
+function resetTrainingMove(id,date){
+  const s=TRAINING.find(x=>x.id===id); if(!s||!s.moved||!s.moved[date]) return;
+  if(!canCancelSlot(s)){ showToast('Nur ein Trainer der Mannschaft oder ein Admin.',4000); return; }
+  const ov=s.moved[date], backup=JSON.stringify(TRAINING);
+  delete s.moved[date]; if(!Object.keys(s.moved).length) delete s.moved;
+  renderTraining(); render(); renderStart();
+  showToast('Training am '+fmtShort(date)+' wieder zur Regelzeit '+s.from+'–'+s.to+'.');
+  saveTraining('Training verlegt: '+trainName(s)+' am '+fmtShort(date)+' wieder zur Regelzeit '+s.from+'–'+s.to+' (statt '+ov.from+'–'+ov.to+') – '+session.name+teamTrailer(s.team,s.squad,s))
+    .catch(e=>{ TRAINING=JSON.parse(backup); renderTraining(); render(); renderStart(); showToast('Fehler: '+e.message,6000); });
+}
+let FORM_MOVE=null;
+function jumpToEvent(id){ const e=EVENTS.find(x=>x.id===id); if(e) focusEventCard(e); }
 function cancelTrainingDay(id,date,reason){
   const s=TRAINING.find(x=>x.id===id); if(!s||!date) return;
   if(!canCancelSlot(s)){ showToast('Absagen kann nur ein Trainer der Mannschaft oder ein Admin.',4000); return; }
@@ -7893,6 +8718,54 @@ function editTrainingSlot(id){
   document.getElementById('tf-label').textContent='Änderungen speichern';
   goto('tform');
 }
+/* ---------- Änderungsmail Trainingszeit (ab 10.10.2026 · 1, Backlog 105) ----------
+   Anlass (Fabrizio 10.10.): Bei der E1 wurde nur die Platzhälfte geändert, die Mail sagte aber
+   „Trainingszeit geändert: Dienstag 16:30 … (ab 10.10.2026) – wegen Heimspielen abgesagt am 03.11.2026“.
+   Jetzt: Kopfzeile mit Mannschaft + Regelzeit, eine Zeile „Geändert: …“ mit genau den geänderten
+   Angaben (neu + bisher), Ausfälle mit Datum und belegendem Spiel, Autor in eigener Zeile.
+   Die Zeilen bilden den ersten Absatz der Commit-Nachricht; notify-email.mjs bricht sie um. */
+function slotPlaceText(s){
+  if(s.pitch) return pitchShort(s.pitch);
+  return (s.res||[]).filter(r=>FIELD_RES.includes(r)).join(', ');
+}
+function slotExtraResText(s){ return (s.res||[]).filter(r=>!FIELD_RES.includes(r)).slice().sort().join(', '); }
+function slotTrainersText(s){ return (s.trainerNames||[]).filter(Boolean).slice().sort().join(', '); }
+function slotValidText(s){ return (s.validFrom?fmtShort(s.validFrom):'')+(s.validUntil?' – '+fmtShort(s.validUntil):' – offen'); }
+function slotWeekdayAdv(day){ return (WDAYS[day]||'').toLowerCase()+'s'; } // "dienstags"
+function slotHead(s){ return msgTeam(s.team,s.squad,s.gkTeams)+' · '+slotWeekdayAdv(s.day)+' '+s.from+'–'+s.to; }
+function shortDate(d){ return DAYS[new Date(d+'T00:00:00').getDay()].slice(0,2)+' '+fmtShort(d); } // "Di 03.11.2026"
+function trainingSlotChanges(o,n){
+  const ch=[], was=v=>v?v:'keine';
+  const kindName=x=>(x.kind||(x.team===GK_TEAM?'goalkeeper':'training'))==='goalkeeper'?'Torwarttraining':'Training';
+  if(kindName(o)!==kindName(n)) ch.push('Art '+kindName(n)+' (bisher '+kindName(o)+')');
+  const tO=msgTeam(o.team,o.squad,o.gkTeams), tN=msgTeam(n.team,n.squad,n.gkTeams);
+  if(tO!==tN) ch.push('Mannschaft '+tN+' (bisher '+tO+')');
+  if(o.day!==n.day) ch.push('Tag '+slotWeekdayAdv(n.day)+' (bisher '+slotWeekdayAdv(o.day)+')');
+  if(o.from!==n.from||o.to!==n.to) ch.push('Uhrzeit '+n.from+'–'+n.to+' (bisher '+o.from+'–'+o.to+')');
+  if(slotPlaceText(o)!==slotPlaceText(n)) ch.push('Platz '+was(slotPlaceText(n))+' (bisher '+was(slotPlaceText(o))+')');
+  if(slotExtraResText(o)!==slotExtraResText(n)) ch.push('Ressourcen '+was(slotExtraResText(n))+' (bisher '+was(slotExtraResText(o))+')');
+  if(slotTrainersText(o)!==slotTrainersText(n)) ch.push('Trainer '+was(slotTrainersText(n))+' (bisher '+was(slotTrainersText(o))+')');
+  if((o.validFrom||'')!==(n.validFrom||'')||(o.validUntil||'')!==(n.validUntil||'')) ch.push('gültig '+slotValidText(n)+' (bisher '+slotValidText(o)+')');
+  if((o.note||'')!==(n.note||'')) ch.push(n.note?'Bemerkung „'+n.note+'“':'Bemerkung entfernt');
+  return ch;
+}
+// before = Stand vor dem Speichern (null bei Neuanlage), after = gespeicherte Zeit, cancels = [{d,labels}] neu abgesagt
+function trainingSlotMessage(before,after,cancels){
+  const lines=[];
+  if(before){
+    const ch=trainingSlotChanges(before,after);
+    if(!ch.length&&!cancels.length) return 'Trainingszeit gespeichert (unverändert): '+slotHead(after)+' – '+session.name; // keine Mail (kein Mail-Präfix)
+    lines.push('Trainingszeit geändert: '+slotHead(after));
+    if(ch.length) lines.push('Geändert: '+ch.join(' · '));
+  }else{
+    lines.push('Trainingszeit angelegt: '+slotHead(after));
+    lines.push([slotPlaceText(after)?'Platz '+slotPlaceText(after):'',slotExtraResText(after)?'Ressourcen '+slotExtraResText(after):'',
+      'gültig '+slotValidText(after),slotTrainersText(after)?'Trainer '+slotTrainersText(after):''].filter(Boolean).join(' · '));
+  }
+  if(cancels.length) lines.push('Fällt aus: '+cancels.map(c=>shortDate(c.d)+' – Platz belegt durch '+c.labels.join(', ')).join('; '));
+  lines.push((before?'Geändert':'Angelegt')+' von '+session.name);
+  return lines.join('\n');
+}
 async function saveTrainingSlot(){
   if(!requireAdmin()) return;
   const day=parseInt(document.getElementById('tf-day').value);
@@ -7946,6 +8819,7 @@ async function saveTrainingSlot(){
   const old=lbl.textContent; btn.disabled=true;
   lbl.innerHTML='<span class="spinner" style="width:13px;height:13px;border-color:rgba(0,0,0,.15);border-top-color:var(--ink);display:inline-block;vertical-align:middle;margin-right:5px;"></span>Speichere …';
   const backup=JSON.stringify(TRAINING);
+  const before=tEditId?JSON.parse(JSON.stringify(TRAINING.find(x=>x.id===tEditId)||{})):null; // für die Änderungsmail
   try{
     if(tEditId){
       const existing=TRAINING.find(x=>x.id===tEditId);
@@ -7962,8 +8836,9 @@ async function saveTrainingSlot(){
           location.origin+location.pathname+(nd?'#t='+encodeURIComponent('tr-'+ns.id+'-'+nd):''),trainerIds),4000);
       }
     }
-    const tMsg=(tEditId?'Trainingszeit geändert: ':'Trainingszeit angelegt: ')+WDAYS[day]+' '+from+' '+msgTeam(team,squad,gkTeams)+' (ab '+fmtShort(validFrom)+')'
-      +(newCancels.length?' – wegen Heimspielen abgesagt am '+newCancels.map(fmtShort).join(', '):'')+' – '+session.name+teamTrailer(team,squad,{gkTeams,trainerIds});
+    const saved=tEditId?TRAINING.find(x=>x.id===tEditId):TRAINING[TRAINING.length-1];
+    const tMsg=trainingSlotMessage(before,saved,gameCol.filter(c=>newCancels.includes(c.d)))+teamTrailer(team,squad,{gkTeams,trainerIds})
+      +((newCancels[0]||nextGkOccurrence(saved))?'\nPlatzcoach-Link: tr-'+saved.id+'-'+(newCancels[0]||nextGkOccurrence(saved)):'');
     tEditId=null; renderTraining(); renderStart(); goto('training');
     if(warn.length) showToast('⚠ Gespeichert – Achtung: '+warn[0],5000);
     else if(newCancels.length) showToast('Trainingszeit gespeichert – an '+newCancels.length+' Spieltag'+(newCancels.length===1?'':'en')+' abgesagt.',5000);
@@ -8595,6 +9470,8 @@ function renderKonto(){
     SEC.push({id:'kontakt',g:'mine',t:'Profil & Kontakt',sum:[u.phone||'kein Telefon',visTxt].filter(Boolean).join(' · '),i:ico('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>'),html:()=>profileCard(),hide1:true});
     SEC.push({id:'benachrichtigungen',g:'mine',t:'Benachrichtigungen',sum:'Mail '+(u.emailNotificationsEnabled!==false?'an':'aus')+' · Push '+(pushOn?'an':'aus')+' · Wochenübersicht '+(u.weeklyDigest!==false?'an':'aus'),i:ico('<path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 003.4 0"/>'),html:()=>notificationsCard()+(isAdmin&&!pushKey()?pushSetupCardHTML():''),hide1:true});
   }
+  { const nReq=openRequests().length; // ab 12.10.2026 · 6 auch für den Notzugang (Vorstand Admin)
+    SEC.push({id:'anfragen',g:'mine',t:'Terminanfragen',sum:nReq?nReq+' offen':'keine offen',badge:nReq,i:ico('<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M8 9h8M8 13h5"/>'),html:()=>requestsCardHTML(),hide1:true}); }
   if(hasKeepers) SEC.push({id:'torhueter',g:'mine',t:'Meine Torhüter',sum:'für Torwarttraining-Anmeldungen',i:ico('<path d="M8 13V6a1.5 1.5 0 013 0v5M11 11V4.5a1.5 1.5 0 013 0V11M14 11V6a1.5 1.5 0 013 0v7c0 4-2.5 7-6 7s-6-3-6-6v-2a1.5 1.5 0 013 0"/>'),html:()=>keeperCardHTML(),hide1:true});
   SEC.push({id:'app',g:'mine',t:'Als App installieren',sum:'auf dem Startbildschirm',i:ico('<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>'),html:()=>pwaCard(),hide1:true});
   SEC.push({id:'darstellung',g:'mine',t:'Darstellung',sum:THEME_LABELS[themePref()]+(themePref()==='auto'?' ('+(themeIsDark()?'dunkel':'hell')+')':''),i:ico('<circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 010 18z" fill="currentColor" stroke="none"/>'),html:()=>themeCardHTML(),hide1:true});
@@ -9894,6 +10771,23 @@ function renderGkTeamChips(containerId,selected){
   el.innerHTML=GK_TEAM_CHOICES().map(t=>'<div class="res-chip'+(sel.has(t)?' on':'')+'" data-gkteam="'+esc(t)+'" onclick="this.classList.toggle(\'on\')">'+esc(t)+'</div>').join('');
 }
 function readGkTeamChips(containerId){ return [...document.querySelectorAll('#'+containerId+' .res-chip.on')].map(c=>c.dataset.gkteam); }
+/* „Für wen?“ beim Trainer-Termin (ab 09.10.2026 · 3): „Alle Trainer“ vorausgewählt, sonst eine oder mehrere
+   Mannschaften und/oder Vorstand. Eine Mannschaft wählen nimmt „Alle Trainer“ weg, „Alle Trainer“ leert den Rest. */
+function renderTtForChips(selected){
+  const el=document.getElementById('f-ttfor'); if(!el) return;
+  const sel=new Set(selected||[]);
+  const ord=k=>{ const [t,q]=k.split(':'); return ALL_CLASSES.indexOf(t)*10+(parseInt(q)||1); }; // wie im Formular: G1 … A1, Herren
+  const teams=pickableTeams().filter(t=>!PICK_EXTRA_TEAMS.includes(t.key.split(':')[0])).map(t=>t.key).sort((a,b)=>ord(a)-ord(b)).concat(['Vorstand']);
+  el.innerHTML='<div class="res-chip'+(sel.size?'':' on')+'" data-ttfor="" onclick="toggleTtFor(this)">Alle Trainer</div>'
+    +teams.map(k=>'<div class="res-chip'+(sel.has(k)?' on':'')+'" data-ttfor="'+esc(k)+'" onclick="toggleTtFor(this)">'+esc(ttForKeyLabel(k))+'</div>').join('');
+}
+function toggleTtFor(chip){
+  const box=document.getElementById('f-ttfor'), all=box.querySelector('[data-ttfor=""]');
+  if(chip===all){ box.querySelectorAll('.res-chip').forEach(c=>c.classList.toggle('on',c===all)); }
+  else{ chip.classList.toggle('on'); all.classList.toggle('on',!box.querySelector('.res-chip.on:not([data-ttfor=""])')); }
+  formDirty=true;
+}
+function readTtForChips(){ return [...document.querySelectorAll('#f-ttfor .res-chip.on')].map(c=>c.dataset.ttfor).filter(Boolean); }
 
 /* ---------- Passwort: Pflichtwechsel, Admin-Reset, "Passwort vergessen" ----------
    Hintergrund: Jeder Zugang speichert den gemeinsamen Schreib-Token, verschlüsselt mit dem
@@ -10556,7 +11450,7 @@ function openHashEvent(){
   }
   // fussball.de-Heimspiel: "fb-<Spiel-Code>" (bei vorgemerkter Verlegung am neuen Termin)
   const fm=!e&&hid.match(/^fb-([A-Za-z0-9]{12,})$/);
-  if(fm) e=fussballDisplayAll().concat(fussballDisplayAwayAll()).find(x=>x.link&&fbDeepLinkId(x)===hid)||null;
+  if(fm) e=fussballDisplayAll().concat(fussballDisplayAwayAll()).find(x=>(x.link&&fbDeepLinkId(x)===hid)||(x.tournament&&x.tournament.games.some(m=>m.link&&fbDeepLinkId(m)===hid)))||null;
   if(!e){ showToast('Dieser Termin existiert nicht mehr.'); return; }
   focusEventCard(e);
 }
@@ -10661,6 +11555,9 @@ async function boot(){
   catch(e){ FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; }
   try{ const mv=await loadJSON('data/game-moves.json'); MOVES=Array.isArray(mv.moves)?mv.moves:[]; }
   catch(e){ MOVES=[]; }
+  try{ const rq=await loadJSON('data/requests.json'); REQUESTS=Array.isArray(rq.requests)?rq.requests:[]; }
+  catch(e){ REQUESTS=[]; }
+  snapStore('requests');
   snapStore('moves');
   applyGameMoves();
   try{ const lk=await loadJSON('data/resource-locks.json'); LOCKS=Array.isArray(lk.locks)?lk.locks:[]; }

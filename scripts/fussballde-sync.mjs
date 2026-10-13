@@ -260,7 +260,11 @@ function parseGameInfo(html, date) {
 const GAME_INFO_FIELDS = ['gameNo', 'matchday', 'staffelId', 'staffelName', 'venue', 'infoAt'];
 // Holt die Angaben nur, wo sie fehlen, sich der Termin geändert hat oder sie älter als 7 Tage sind –
 // sonst werden sie aus dem letzten Lauf übernommen. Höchstens 40 Seitenabrufe pro Lauf, mit Pause.
-async function enrichGameInfo(games, prevGames, debug) {
+// Ab 09.10.2026 · 8 auch für Auswärtsspiele (Spielort/Adresse für Bild, Text und Karte): opts.until begrenzt
+// auf die nächsten Wochen, opts.maxFetch ist ein eigenes Abruf-Budget.
+async function enrichGameInfo(games, prevGames, debug, opts = {}) {
+  const maxFetch = opts.full ? Infinity : (opts.maxFetch || 40), until = opts.full ? null : (opts.until || null), label = opts.label || 'Spielinfos';
+  // opts.full (Workflow-Eingabe „vollständig“): alle bekannten Spiele neu lesen, auch die der letzten 3 Wochen, ohne Budget
   const prevByLink = new Map((prevGames || []).filter(g => g && g.link).map(g => [g.link, g]));
   const today = new Date().toISOString().slice(0, 10);
   const staleBefore = new Date(Date.now() - 7 * 86400000).toISOString();
@@ -271,7 +275,7 @@ async function enrichGameInfo(games, prevGames, debug) {
     if (prev) for (const f of GAME_INFO_FIELDS) if (prev[f] !== undefined && g[f] === undefined) g[f] = prev[f];
     const sameSlot = prev && prev.d === g.d && (prev.t || '') === (g.t || '');
     const fresh = g.infoAt && g.infoAt > staleBefore && g.gameNo;
-    if (g.d < today || (sameSlot && fresh) || fetched >= 40 || g.withdrawn) continue; // zurückgezogen: Spielseite ohne Angaben
+    if ((!opts.full && g.d < today) || (until && g.d > until) || (!opts.full && sameSlot && fresh) || fetched >= maxFetch || g.withdrawn) continue; // zurückgezogen: Spielseite ohne Angaben
     fetched++;
     try {
       const res = await fetch(g.link, { headers: FD_HEADERS });
@@ -297,7 +301,7 @@ async function enrichGameInfo(games, prevGames, debug) {
     }
     await new Promise(r => setTimeout(r, 400)); // fussball.de nicht mit schnellen Folgeanfragen belasten
   }
-  console.log(`Spielinfos: ${ok} von ${fetched} Spielseiten gelesen (Rest aus dem letzten Lauf übernommen).`);
+  console.log(`${label}: ${ok} von ${fetched} Spielseiten gelesen (Rest aus dem letzten Lauf übernommen).`);
 }
 
 // Doppelt gelistete Spiele (Spielverlegungen) anhand der Spielseite auflösen.
@@ -594,7 +598,12 @@ async function main() {
   markMovedGames(awayGames, previous && previous.awayGames);
 
   // Spielnummer, Staffel und Spielort von den Spielseiten der Heimspiele (für den DFBnet-Verlegungsantrag).
-  await enrichGameInfo(allGames, previous && previous.games, debug);
+  const full = process.env.FUSSBALLDE_FULL === '1' || process.argv.includes('--full');
+  if (full) console.log('Vollständiger Abgleich: alle Spielseiten (Heim + Auswärts) werden neu gelesen.');
+  await enrichGameInfo(allGames, previous && previous.games, debug, { full });
+  // Spielort aller künftigen Auswärtsspiele (ab 09.10.2026 · 8/9), eigenes Budget von 30 Abrufen pro Lauf;
+  // einmal gelesen, wird er nur nach 7 Tagen oder bei Terminänderung neu geprüft.
+  await enrichGameInfo(awayGames, previous && previous.awayGames, debug, { full, maxFetch: 30, label: 'Spielorte Auswärtsspiele' });
 
   // Änderungen gegenüber dem letzten Lauf für die E-Mail an die Trainer (verschickt der Workflow
   // danach mit scripts/notify-email.mjs, siehe .github/workflows/fussballde-sync.yml).
@@ -729,17 +738,25 @@ function ageKey(team) { const m = (team || '').trim().match(/^([A-G])-(Junioren|
 function toMin(t) { const [h, m] = String(t || '0:0').split(':').map(Number); return h * 60 + (m || 0); }
 function toTime(n) { n = ((n % 1440) + 1440) % 1440; return String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 60).padStart(2, '0'); }
 function pitchQuarters(p) { if (!p) return []; if (p.mode === 'ganz') return [1, 2, 3, 4]; if (p.mode === 'haelfte') return HALF[p.part] || []; return [p.part]; }
-function makePitchChecker(cfg, games, slots, events, moves) {
+function makePitchChecker(cfg, games, slots, events, moves, awayGames = []) {
   const fb = cfg.fussballde || {};
   const share = fb.shareCategories || ['E-Junioren', 'F-Junioren', 'G-Junioren', 'Bambini'];
   const isShare = team => share.some(c => (team || '').toLowerCase().startsWith(c.toLowerCase()));
   const dur = team => (fb.durationByAge && fb.durationByAge[ageKey(team)]) || DURATION_BY_AGE[ageKey(team)] || 110;
   const buffer = fb.bufferBeforeMin ?? 15;
   // Heimspiele mit vorgemerkten Verlegungen (fussball.de noch am alten Termin) am neuen Termin führen.
+  // Heimrecht getauscht (ab 10.10.2026 · 2): vorgemerktes Heim → Auswärts belegt keinen Platz mehr,
+  // vorgemerktes Auswärts → Heim belegt den eigenen Platz am neuen Termin.
+  const pendingMove = (g, isAway) => g.link && moves.find(x => x.link === g.link && x.fromD === g.d && (x.fromT || '') === (g.t || '')
+    && (!x.swap || !!x.away === isAway));
   const effGames = games.filter(g => occupiesOwnPitch(g, cfg)).map(g => {
-    const m = g.link && moves.find(x => x.link === g.link && x.fromD === g.d && (x.fromT || '') === (g.t || ''));
+    const m = pendingMove(g, false);
+    if (m && m.swap) return null;
     return m ? { ...g, d: m.toD, t: m.toT } : g;
-  });
+  }).filter(Boolean).concat(awayGames.map(g => {
+    const m = pendingMove(g, true);
+    return m && m.swap && !isWithdrawnGame(g) ? { ...g, d: m.toD, t: m.toT, venue: null } : null;
+  }).filter(Boolean));
   return function check(g, d, t) {
     if (!t || !occupiesOwnPitch(g, cfg)) return null;
     const at = appTeam(g.team, g.squad);
@@ -805,15 +822,18 @@ async function detectGameChanges(home, away, previous) {
   const moves = ((await readJson('data/game-moves.json', {})).moves) || [];
   const slots = ((await readJson('data/training.json', {})).slots) || [];
   const events = ((await readJson('data/events.json', {})).events) || [];
-  const checkPitch = makePitchChecker(cfg, home, slots, events, moves);
+  const checkPitch = makePitchChecker(cfg, home, slots, events, moves, away);
   const today = new Date().toISOString().slice(0, 10);
   // priority: "action" = bitte prüfen (oben in der Mail), "info" = zur Info (z. B. Bestätigung)
   const out = [], added = [], removed = [];
-  const lists = [[home, previous.games || [], 'Heimspiel'], [away, previous.awayGames || [], 'Auswärtsspiel']];
-  for (const [list, prevList, kind] of lists) {
+  const lists = [[home, previous.games || [], 'Heimspiel', previous.awayGames || [], away],
+                 [away, previous.awayGames || [], 'Auswärtsspiel', previous.games || [], home]];
+  for (const [list, prevList, kind, prevOther, otherList] of lists) {
     const isHome = kind === 'Heimspiel';
     const prevByLink = new Map(prevList.filter(g => g && g.link).map(g => [g.link, g]));
+    const prevOtherByLink = new Map(prevOther.filter(g => g && g.link).map(g => [g.link, g]));
     const nowLinks = new Set(list.filter(g => g.link).map(g => g.link));
+    const otherNowLinks = new Set(otherList.filter(g => g.link).map(g => g.link));
     for (const g of list) {
       if (!g.link) continue;
       const at = appTeam(g.team, g.squad), label = appTeamLabel(at.team, at.squad);
@@ -826,6 +846,24 @@ async function detectGameChanges(home, away, previous) {
           out.push({ text: `Gegner hat zurückgezogen: ${label} – ${g.opponent} (${kind}${g.competition ? ', ' + g.competition : ''}) am ${fmtGameDate(g.d, g.t)} entfällt.`
               + (isHome ? ' Der Platz ist zu der Zeit wieder frei.' : ''),
             team: at.team, squad: at.squad, link: fbLinkId(g.link), priority: 'info', type: 'withdrawn' });
+        continue;
+      }
+      // Heimrecht getauscht (ab 10.10.2026 · 2): gleiches Spiel (gleicher Link), jetzt in der anderen Liste
+      const ps = !p && prevOtherByLink.get(g.link);
+      if (ps && !isWithdrawnGame(ps) && g.d >= today) {
+        const was = isHome ? 'Auswärtsspiel' : 'Heimspiel';
+        const m = moves.find(x => x.link === g.link);
+        const asPlanned = m && m.swap && m.toD === g.d;
+        const timeDiff = asPlanned && (m.toT || '') !== (g.t || '') && g.t;
+        const c = isHome ? checkPitch(g, g.d, g.t) : null;
+        out.push({ text: (asPlanned
+            ? `Verlegung bestätigt: ${who} jetzt auch bei fussball.de am ${fmtGameDate(g.d, g.t)} – Heimrecht getauscht wie vorgemerkt (bisher ${was} am ${fmtGameDate(ps.d, ps.t)}).`
+              + (timeDiff ? ` Achtung: Anstoß ${g.t} statt vorgemerkt ${m.toT} Uhr.` : '')
+            : `Heimrecht bei fussball.de getauscht: ${who} am ${fmtGameDate(g.d, g.t)} (bisher ${was} am ${fmtGameDate(ps.d, ps.t)}).`
+              + (m ? ` ACHTUNG: abweichend von der Vormerkung in Platzcoach (${fmtGameDate(m.toD, m.toT)}${m.swap ? '' : ', ohne Heimrechttausch'}). Bitte in Platzcoach „Vormerkung abschließen“.` : '')
+              + (isHome ? '' : ' Unser Platz ist zur alten Zeit wieder frei.'))
+            + ((!asPlanned || timeDiff) ? pitchText(c) : '') + (asPlanned ? '' : dayHint) + trainingHint(slots, at, g.d),
+          team: at.team, squad: at.squad, link: fbLinkId(g.link), priority: asPlanned && !timeDiff ? 'info' : 'action', type: asPlanned ? 'confirmed' : 'swapped' });
         continue;
       }
       if (!p) {
@@ -841,11 +879,20 @@ async function detectGameChanges(home, away, previous) {
         if (g.d >= today) {
           const c = isHome ? checkPitch(g, g.d, g.t) : null;
           added.push({ text: `Neues Spiel bei fussball.de: ${who} am ${fmtGameDate(g.d, g.t)}.` + pitchText(c) + dayHint + trainingHint(slots, at, g.d),
-            team: at.team, squad: at.squad, link: fbLinkId(g.link), priority: 'action', type: 'new' });
+            team: at.team, squad: at.squad, link: fbLinkId(g.link), priority: 'action', type: 'new',
+            tn: /turnier/i.test(g.competition || '') ? { key: [g.d, g.team, g.squad || 1, g.competition].join('|'), g, c, label, slots, at } : null });
         }
         continue;
       }
       const moved = p.d !== g.d || (p.t || '') !== (g.t || '');
+      // Spielstätte geändert (ab 09.10.2026 · 8): nur wenn beide Läufe einen Spielort kennen und das Spiel noch kommt
+      const normV = v => String(v || '').replace(/\s+/g, ' ').replace(/\s*,\s*/g, ', ').trim().toLowerCase();
+      const venueChanged = p.venue && g.venue && normV(p.venue) !== normV(g.venue) && g.d >= today;
+      if (venueChanged && !moved) {
+        out.push({ text: `Spielort geändert: ${who} am ${fmtGameDate(g.d, g.t)} jetzt ${String(g.venue).replace(/\s+,/g, ',')} (bisher ${String(p.venue).replace(/\s+,/g, ',')}).`,
+          team: at.team, squad: at.squad, link: fbLinkId(g.link), priority: 'action', type: 'venue' });
+        continue;
+      }
       if (!moved || (g.d < today && p.d < today)) continue;
       const sameDay = p.d === g.d;
       const change = sameDay ? `am ${fmtGameDate(g.d)}: ${p.t || '?'} → ${g.t || '?'} Uhr` : `von ${fmtGameDate(p.d, p.t)} auf ${fmtGameDate(g.d, g.t)}`;
@@ -870,23 +917,48 @@ async function detectGameChanges(home, away, previous) {
           + pitchText(isHome ? checkPitch(g, g.d, g.t) : null);
       }
       if (dayHint) { text += dayHint; priority = 'action'; }
+      if (venueChanged) text += ` Neuer Spielort: ${String(g.venue).replace(/\s+,/g, ',')}.`;
       text += trainingHint(slots, at, g.d);
       out.push({ text, team: at.team, squad: at.squad, link: fbLinkId(g.link), priority, type });
     }
     if (list.length) {
       for (const p of prevList) {
-        if (!p.link || nowLinks.has(p.link) || p.d < today || isWithdrawnGame(p)) continue;
+        if (!p.link || nowLinks.has(p.link) || otherNowLinks.has(p.link) || p.d < today || isWithdrawnGame(p)) continue; // andere Liste = Heimrecht getauscht
         const at = appTeam(p.team, p.squad);
         removed.push({ text: `Spiel nicht mehr bei fussball.de gelistet: ${appTeamLabel(at.team, at.squad)} – ${p.opponent} (${kind}${p.competition ? ', ' + p.competition : ''}), war ${fmtGameDate(p.d, p.t)}. Abgesetzt oder zurückgezogen? Bitte prüfen.`,
           team: at.team, squad: at.squad, link: null, priority: 'action', type: 'removed' });
       }
     }
   }
+  groupTournamentMails(added);
   if (added.length > 10) console.log(`  ${added.length} neue Spiele auf einmal (Saisonimport?) – keine Einzel-Mails dafür.`);
   else out.push(...added);
   if (removed.length > 5) console.warn(`  ${removed.length} Spiele auf einmal verschwunden – vermutlich Abruffehler, keine Mails dafür.`);
   else out.push(...removed);
   return out;
+}
+
+/* Turniere (ab 08.10.2026 · 32): mehrere neue Turnierspiele einer Mannschaft am selben Tag (gleicher Wettbewerb
+   mit „Turnier“) → EINE Zeile „Neues Turnier …“ statt einer Zeile je Spiel. Platzkonflikte bleiben erwähnt. */
+function groupTournamentMails(added) {
+  const groups = new Map();
+  added.forEach(a => { if (a.tn) { if (!groups.has(a.tn.key)) groups.set(a.tn.key, []); groups.get(a.tn.key).push(a); } });
+  for (const list of groups.values()) {
+    if (list.length < 2) continue;
+    list.sort((a, b) => (a.tn.g.t || '').localeCompare(b.tn.g.t || ''));
+    const gs = list.map(a => a.tn.g), first = gs[0], last = gs[gs.length - 1];
+    const name = (gs.find(g => g.staffelName) || {}).staffelName || first.competition;
+    const venue = (gs.find(g => g.venue) || {}).venue;
+    const place = venue ? String(venue).split(',').pop().trim().replace(/^\d{5}\s+/, '') : '';
+    const conflicts = list.map(a => a.tn.c).filter(c => c && !c.ok);
+    const text = `Neues Turnier bei fussball.de: ${list[0].tn.label} – ${name} (${first.competition}) am ${fmtGameDate(first.d)}, `
+      + `${list.length} Spiele, Anstöße ${first.t || '?'}–${last.t || '?'} Uhr` + (place ? `, Spielort ${place}` : '') + '.'
+      + (conflicts.length ? pitchText(conflicts[0]) : '') + trainingHint(list[0].tn.slots, list[0].tn.at, first.d);
+    const idx = added.indexOf(list[0]);
+    added[idx] = { ...list[0], text };
+    list.slice(1).forEach(a => added.splice(added.indexOf(a), 1));
+  }
+  added.forEach(a => { delete a.tn; });
 }
 
 function markMovedGames(games, prevGames) {

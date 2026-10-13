@@ -197,35 +197,22 @@
           "n": "Younes Al Musaui"
         },
         "af1a6546-fdc2-4059-bef4-5a4966181701": {
-          "s": "no",
+          "s": "yes",
           "n": "Michael Raneck"
         },
         "6085b3aa-f111-47fa-9d20-7e59a0a987e8": {
           "s": "yes",
           "n": "Marc Geauf"
+        },
+        "58d96de0-05f7-47cd-9330-1832ab2c12b2": {
+          "s": "no",
+          "n": "Viktor Kurz"
+        },
+        "a21f28cb-3527-4337-ba43-9752dab0bcdb": {
+          "s": "no",
+          "n": "Markus Vielhaber"
         }
       }
-    },
-    {
-      "id": "aeb8b548-909f-4a5b-9ef3-9aa323e93f37",
-      "d": "2027-06-20",
-      "t": "15:30",
-      "bis": "19:30",
-      "title": "Schulfest Test",
-      "kind": "other",
-      "team": "E-Jugend",
-      "squad": 2,
-      "pitch": {
-        "mode": "ganz"
-      },
-      "halle": null,
-      "res": [
-        "Vereinsheim",
-        "Theke"
-      ],
-      "note": "",
-      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
-      "ownerName": "Fabrizio Calcagno"
     },
     {
       "id": "57deca7a-cef4-4235-bfd0-f90972c4e312",
@@ -245,6 +232,27 @@
       "ha": "home",
       "opponent": "DJK Grün-Weiß Menden",
       "kickoff": "13:00",
+      "ownerId": "af1a6546-fdc2-4059-bef4-5a4966181701",
+      "ownerName": "Michael Raneck"
+    },
+    {
+      "id": "fbb33abb-527a-48b5-8bcd-f3bee0a53677",
+      "d": "2026-11-07",
+      "t": "15:15",
+      "bis": "17:15",
+      "title": "Freundschaftsspiel gegen RW Ahlen U17",
+      "kind": "game",
+      "team": "B-Jugend",
+      "squad": 1,
+      "pitch": {
+        "mode": "ganz"
+      },
+      "halle": null,
+      "res": [],
+      "note": "",
+      "ha": "home",
+      "opponent": "RW Ahlen U17",
+      "kickoff": "15:30",
       "ownerId": "af1a6546-fdc2-4059-bef4-5a4966181701",
       "ownerName": "Michael Raneck"
     }

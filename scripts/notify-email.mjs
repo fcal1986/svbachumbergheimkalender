@@ -63,6 +63,14 @@ function getCommitMessages() {
   }
 }
 
+// Betreff-Zusatz für Trainingszeiten mit Ausfällen: " – fällt am 03.11. aus" bzw. " – fällt an 3 Tagen aus"
+function ausfallHint(text) {
+  const line = String(text).split('\n').find(l => l.startsWith('Fällt aus:'));
+  if (!line) return '';
+  const days = line.match(/\d{2}\.\d{2}\.(?=\d{4})/g) || [];
+  return days.length === 1 ? ` – fällt am ${days[0]} aus` : ` – fällt an ${days.length} Tagen aus`;
+}
+
 function escapeHtml(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -80,7 +88,7 @@ const CATEGORIES = {
                 'Freundschaftsspiel angelegt:', 'Freundschaftsspiel geändert:', 'Freundschaftsspiel gelöscht:',
                 'Turnier angelegt:', 'Turnier geändert:', 'Turnier gelöscht:'],
   training:    ['Trainingszeit angelegt:', 'Trainingszeit geändert:', 'Trainingszeit gelöscht:',
-                'Training abgesagt:', 'Absage zurückgenommen:', 'Torwarttraining-Anmeldung geändert:'],
+                'Training abgesagt:', 'Absage zurückgenommen:', 'Training verlegt:', 'Torwarttraining-Anmeldung geändert:'],
   sperren:     ['Sperre angelegt:', 'Sperre aufgehoben:'],
   verwaltung:  ['Zugang angelegt:', 'Zugang gelöscht:', 'Zugang gesperrt:', 'Zugang entsperrt:',
                 'Admin-Recht vergeben:', 'Admin-Recht entzogen:', 'Rolle geändert:', 'Notaus:',
@@ -110,11 +118,14 @@ function parseCommit(raw) {
   // Torwarttraining: betroffene Mannschaften und Organisator(en)
   const gk = raw.match(/^Platzcoach-GK: (.+)$/m);
   const orga = raw.match(/^Platzcoach-Orga: (.+)$/m);
+  // Trainer-Termin mit Zielgruppe (ab 09.10.2026 · 3): "E-Jugend:2,D-Jugend:1,Vorstand"; fehlt = alle Trainer
+  const fuer = raw.match(/^Platzcoach-Fuer: (.+)$/m);
   const link = raw.match(/^Platzcoach-Link: (\S+)\s*$/m); // Direktlink-ID in der App ("fb-…", Termin-ID)
   return {
     text,
     gkTeams: gk ? gk[1].split(',').map(s => s.trim()).filter(Boolean) : [],
     orga: orga ? orga[1].split(',').map(s => s.trim()).filter(Boolean) : [],
+    fuer: fuer ? fuer[1].split(',').map(s => s.trim()).filter(Boolean) : [],
     team: team ? team[1].trim() : null,
     squad: team ? parseInt(team[2], 10) : null,
     by: by ? by[1] : null,
@@ -203,8 +214,19 @@ function trainerClassesFor(user, seasons, today) {
   if (cur && cur.trainerClasses && cur.trainerClasses[user.id]) return cur.trainerClasses[user.id];
   return user.classes || {};
 }
-function concernsTrainer(c, classes, userId) {
+function concernsTrainer(c, classes, userId, user) {
   if (c.category !== 'termine' && c.category !== 'training') return true; // z. B. Platzsperren: vereinsweit
+  // Trainer-Termin für bestimmte Mannschaften/Vorstand: nur deren Trainer + Organisator
+  if (c.fuer && c.fuer.length) {
+    if (userId && c.orga.includes(userId)) return true;
+    return c.fuer.some(k => {
+      const [t, q] = k.split(':');
+      if (t === 'Vorstand') return !!(user && user.role === 'vorstand');
+      const squads = classes[t];
+      if (!squads) return false;
+      return !squads.length || !/Jugend/.test(t) || squads.includes(parseInt(q, 10) || 1);
+    });
+  }
   // Torwarttraining: Organisator, Torwarttrainer und Trainer der gewählten Mannschaften
   if (c.team === 'Torwarttraining') {
     if (userId && c.orga.includes(userId)) return true;
@@ -306,7 +328,7 @@ async function main() {
     return changes.filter(c =>
       allowed.includes(c.category)
       && (notifyAuthorToo(c) || !(user && c.by && c.by === user.id))
-      && (role === 'admin' || concernsTrainer(c, classes, user && user.id)));
+      && (role === 'admin' || concernsTrainer(c, classes, user && user.id, user)));
   };
 
   // Push: je Zugang mit angemeldetem Gerät eine Nachricht (bei mehreren Änderungen zusammengefasst).
@@ -328,7 +350,7 @@ async function main() {
     const one = mine.length === 1;
     const payload = {
       title: changesFile ? (mine.some(c => c.priority !== 'info') ? 'Bitte prüfen: fussball.de' : 'fussball.de') : (one ? mine[0].text.split(':')[0] : mine.length + ' Änderungen in Platzcoach'),
-      body: one ? mine[0].text.replace(/^[^:]+:\s*/, '') : mine.slice(0, 4).map(c => '• ' + c.text).join('\n') + (mine.length > 4 ? '\n…' : ''),
+      body: one ? mine[0].text.replace(/^[^:]+:\s*/, '') : mine.slice(0, 4).map(c => '• ' + c.text.split('\n')[0]).join('\n') + (mine.length > 4 ? '\n…' : ''),
       url: appLink(cfg, one ? mine[0].link : null),
       tag: one && mine[0].link ? 'pc-' + mine[0].link : 'pc-changes',
     };
@@ -347,8 +369,10 @@ async function main() {
     const texts = mine.map(c => c.text);
     const siteUrl = String(cfg.siteUrl || 'https://platzcoach.de/').replace(/\/?$/, '/');
     const linkOf = c => (c.link ? siteUrl + '#t=' + encodeURIComponent(c.link) : '');
-    const li = c => `<li style="margin-bottom:6px;">${escapeHtml(c.text)}${c.link ? `<br><a href="${escapeHtml(linkOf(c))}" style="color:#16A34A;">In Platzcoach öffnen</a>` : ''}</li>`;
-    const txt = c => `- ${c.text}` + (c.link ? `\n  ${linkOf(c)}` : '');
+    // Mehrzeilige Einträge (z. B. Trainingszeit: Kopfzeile, „Geändert: …“, Ausfälle, Autor): erste Zeile fett
+    const liText = t => { const [head, ...rest] = String(t).split('\n'); return rest.length ? `<strong>${escapeHtml(head)}</strong><br>${rest.map(escapeHtml).join('<br>')}` : escapeHtml(head); };
+    const li = c => `<li style="margin-bottom:6px;">${liText(c.text)}${c.link ? `<br><a href="${escapeHtml(linkOf(c))}" style="color:#16A34A;">In Platzcoach öffnen</a>` : ''}</li>`;
+    const txt = c => `- ${c.text.replace(/\n/g, '\n  ')}` + (c.link ? `\n  ${linkOf(c)}` : '');
     // fussball.de-Abgleich: "Bitte prüfen" (Handlungsbedarf) zuerst, "Zur Info" (Bestätigungen) danach.
     const act = changesFile ? mine.filter(c => c.priority !== 'info') : mine;
     const inf = changesFile ? mine.filter(c => c.priority === 'info') : [];
@@ -380,6 +404,9 @@ async function main() {
         to: r.email,
         subject: changesFile ? subjectFb : (texts.length === 1 && /^(Freundschaftsspiel|Turnier) /.test(texts[0])
           ? 'Platzcoach: ' + texts[0].split(' · ')[0].replace(/: /, ' – ')   // z. B. "Freundschaftsspiel angelegt – E2-Jugend bei SC Neheim"
+          : texts.length === 1 && /^Trainingszeit (angelegt|geändert): /.test(texts[0])
+          ? 'Platzcoach: ' + texts[0].split('\n')[0].split(' · ')[0].replace(/: /, ' – ')   // z. B. "Trainingszeit geändert – E1-Jugend"
+            + ausfallHint(texts[0])
           : `Platzcoach: ${texts.length} Änderung${texts.length === 1 ? '' : 'en'}`),
         text,
         html,
