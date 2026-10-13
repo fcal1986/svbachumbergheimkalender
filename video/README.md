@@ -17,7 +17,7 @@ Kurze Hochkant-Reels (1080 × 1920, 30 fps, 30 s) aus **echten App-Ansichten**. 
 
 ### Vorstellungsfilm für den DFB (16:9)
 
-`Pitch-dfb` → `out/platzcoach-vorstellung-dfb.mp4` (1920 × 1080, ≈ 111 s): echte WhatsApp-Nachrichten aus dem Pilotverein (Namen durch Rollen ersetzt, Profilbilder neutralisiert) → neue Spielformen im Kinderfußball (Quelle dfb.de) → Platzcoach in der echten App (Live-Platz, Konflikt mit Vorschlag, fussball.de automatisch, Verlegung/Jugendleiter-Text) → Gesprächsangebot. Inhalt in `src/pitch/dfb.ts`, Gestaltung in `src/pitch/DfbPitch.tsx`. Die anonymisierten Bilder liegen nur lokal in `public/pitch/` (gitignored); Rendern mit `node scripts/render.mjs pitch-dfb`.
+`Pitch-dfb` → `out/platzcoach-vorstellung-dfb.mp4` (1920 × 1080, 88,5 s mit Stimme): echte WhatsApp-Nachrichten aus dem Pilotverein (Namen durch Rollen ersetzt, Profilbilder neutralisiert) → neue Spielformen im Kinderfußball (Quelle dfb.de) → Platzcoach in der echten App (Live-Platz, Konflikt mit Vorschlag, fussball.de automatisch, Verlegung/Jugendleiter-Text) → Gesprächsangebot. Inhalt in `src/pitch/dfb.ts`, Gestaltung in `src/pitch/DfbPitch.tsx`. Die anonymisierten Bilder liegen nur lokal in `public/pitch/` (gitignored); Rendern mit `node scripts/render.mjs pitch-dfb`.
 
 Anleitungen nutzen zusätzlich `steps` (Schrittanzeige) und `summary` (Zusammenfassung vor der Endkarte); lange Texte lassen sich mit `messages[].range` in Teile aufteilen.
 

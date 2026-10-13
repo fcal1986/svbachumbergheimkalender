@@ -20,6 +20,9 @@ export const pitch: {
   warp?: [number, number][]; audio?: { voiceover?: { src: string; volume: number } }; claims: string[];
 } = {
   durationS: 111,
+  // An die CapCut-Stimme vom 13.10.2026 angepasst: Abschnitt beginnt 0,3 s vor dem Satz. [Konfiguration, Film]
+  warp: [[0, 0], [6, 4.27], [15, 11.47], [24, 17.68], [31, 22.44], [50, 37.58], [60, 44.72], [69.5, 52.65], [78, 60.67], [94, 73.18], [103.5, 80.76], [111, 88.5]],
+  audio: { voiceover: { src: 'audio/dfb-stimme.wav', volume: 1 } },
   segments: [
     {
       id: 'hook', from: 0, to: 6,
@@ -138,18 +141,19 @@ export const pitch: {
       end: { title: 'Lass uns 30 Minuten sprechen.', sub: 'Live-Demo am echten Vereinsplan.', name: 'Fabrizio Calcagno', url: 'platzcoach.de' },
     },
   ],
+  // Echte Sprechzeiten der CapCut-Aufnahme (Filmzeit, aus den Pausen ermittelt).
   narration: [
-    { from: 0.3, to: 5.6, text: 'So plant ein Amateurverein heute seinen Platz: per WhatsApp.' },
-    { from: 6.2, to: 14.6, text: 'Trainiert Freitag eine Jugend? Vielleicht. Erst ab nächster Woche. Daumen hoch. Und wer hat jetzt den Platz?' },
-    { from: 15.2, to: 23.6, text: 'Der Plan hängt am Brett – und ist schon wieder geändert. Das sind echte Nachrichten aus unserem Pilotverein.' },
-    { from: 24.2, to: 30.6, text: 'Trainerinnen und Trainer organisieren den Platz – statt sich um die Kinder zu kümmern.' },
-    { from: 31.2, to: 49.6, text: 'Und es wird nicht einfacher: Mit den neuen Spielformen im Kinderfußball spielen G-, F- und E-Jugend auf mehreren kleinen Feldern gleichzeitig. Gut für die Kinder – aber auf demselben Platz heißt das: mehr Teams, kleinere Flächen und mehr Absprachen.' },
-    { from: 50.2, to: 59.6, text: 'Platzcoach macht daraus einen gemeinsamen Stand: Wer ist wann auf welchem Viertel – live und für alle sichtbar.' },
-    { from: 60.2, to: 69.1, text: 'Will eine Mannschaft auf eine belegte Fläche, zeigt Platzcoach sofort, was stattdessen frei ist. Ein Tipp – fertig.' },
-    { from: 69.7, to: 77.6, text: 'Spiele kommen automatisch von fussball.de. Heimspiele belegen ihre Fläche selbst, Verlegungen werden übernommen.' },
-    { from: 78.2, to: 93.6, text: 'Und bei Sonderfällen wie Verlegungen oder Freundschaftsspielen findet Platzcoach freie Termine, fragt den Gegner an und gibt dem Jugendleiter jedes Mal denselben Text mit allen Angaben fürs DFBnet.' },
-    { from: 94.2, to: 103.1, text: 'Damit sich Trainer um die Kinder kümmern können – und Platzcoach um den Platz. Im Pilotbetrieb beim SV Bachum/Bergheim.' },
-    { from: 103.7, to: 110.5, text: 'Lass uns dreißig Minuten sprechen – mit einer Live-Demo am echten Vereinsplan.' },
+    { from: 0.39, to: 3.82, text: 'So plant ein Amateurverein heute seinen Platz: per WhatsApp.' },
+    { from: 4.57, to: 11.14, text: 'Trainiert Freitag eine Jugend? Vielleicht. Erst ab nächster Woche. Daumen hoch. Und wer hat jetzt den Platz?' },
+    { from: 11.77, to: 17.29, text: 'Der Plan hängt am Brett – und ist schon wieder geändert. Das sind echte Nachrichten aus unserem Pilotverein.' },
+    { from: 17.98, to: 22.1, text: 'Trainerinnen und Trainer organisieren den Platz – statt sich um die Kinder zu kümmern.' },
+    { from: 22.74, to: 37.2, text: 'Und es wird nicht einfacher: Mit den neuen Spielformen im Kinderfußball spielen G-, F- und E-Jugend auf mehreren kleinen Feldern gleichzeitig. Gut für die Kinder – aber auf demselben Platz heißt das: mehr Teams, kleinere Flächen und mehr Absprachen.' },
+    { from: 37.88, to: 44.25, text: 'Platzcoach macht daraus einen gemeinsamen Stand: Wer ist wann auf welchem Viertel – live und für alle sichtbar.' },
+    { from: 45.02, to: 52.31, text: 'Will eine Mannschaft auf eine belegte Fläche, zeigt Platzcoach sofort, was stattdessen frei ist. Ein Tipp – fertig.' },
+    { from: 52.95, to: 60.27, text: 'Spiele kommen automatisch von fussball.de. Heimspiele belegen ihre Fläche selbst, Verlegungen werden übernommen.' },
+    { from: 60.97, to: 72.77, text: 'Und bei Sonderfällen wie Verlegungen oder Freundschaftsspielen findet Platzcoach freie Termine, fragt den Gegner an und gibt dem Jugendleiter jedes Mal denselben Text mit allen Angaben fürs DFBnet.' },
+    { from: 73.48, to: 80.43, text: 'Damit sich Trainer um die Kinder kümmern können – und Platzcoach um den Platz. Im Pilotbetrieb beim SV Bachum/Bergheim.' },
+    { from: 81.06, to: 85.12, text: 'Lass uns dreißig Minuten sprechen – mit einer Live-Demo am echten Vereinsplan.' },
   ],
   claims: [
     'WhatsApp-Bilder: echte Nachrichten aus dem Pilotverein (vom Nutzer bereitgestellt), Namen durch Rollen ersetzt, Profilbilder neutralisiert',
