@@ -1,23 +1,6 @@
 {
-  "updated": "2026-10-13T21:14:01.391Z",
+  "updated": "2026-10-14T01:12:56.280Z",
   "games": [
-    {
-      "d": "2026-09-22",
-      "t": "17:00",
-      "team": "E-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim I",
-      "gameNo": "210883005",
-      "opponent": "SV Hüsten 09 I",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-sv-huesten-09-1/-/spiel/031J8I24FK000000VS5489BUVVKNMR0J",
-      "matchday": 2,
-      "staffelId": "210883",
-      "staffelName": "KL A Gruppe 1",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:13.926Z"
-    },
     {
       "d": "2026-09-23",
       "t": "16:50",
@@ -4058,9 +4041,9 @@
         "Kreisliga A",
         "Kreisturnier"
       ],
-      "games": 18,
-      "homeGames": 9,
-      "first": "2026-09-22",
+      "games": 17,
+      "homeGames": 8,
+      "first": "2026-09-26",
       "last": "2027-06-12",
       "teamId": "011MIBAMEC000000VTVG0001VTR8C1K7"
     },
@@ -4213,6 +4196,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-09-22",
+  "teamsFrom": "2026-09-23",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
