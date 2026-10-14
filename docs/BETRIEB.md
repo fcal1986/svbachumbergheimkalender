@@ -8,7 +8,7 @@
 
 | Baustein | Dienst | Region | Plan | Zweck |
 |---|---|---|---|---|
-| Datenbank, Login, API | Supabase | Frankfurt (eu-central-1), ausdrücklich gewählt | Pro (Pro-Umgebung), Free (Pre) | PostgreSQL 16, RLS, PostgREST (`api.*`), Supabase Auth |
+| Datenbank, Login, API | Supabase | Frankfurt (eu-central-1), ausdrücklich gewählt | Pre: Free · Pro: **Free in der Pilotphase** (bis 20–30 Vereine), danach Pro-Plan (siehe 9a) | PostgreSQL 16, RLS, PostgREST (`api.*`), Supabase Auth |
 | Hintergrundjobs | Supabase Edge Functions + pg_cron | Ausführung auf Frankfurt festgelegt | im Pro-Plan enthalten | Outbox (Mail, Push), fussball.de-Abgleich, Wartung |
 | Frontend | Cloudflare Pages | global (statische Dateien) | Free | App-Dateien, Upload per Direct Upload aus GitHub Actions |
 | DNS | Cloudflare | – | Free | Zone `platzcoach.de` (Nameserver von checkdomain zu Cloudflare), Domain bleibt bei checkdomain registriert |
@@ -28,7 +28,7 @@ Wir nutzen **Dev, Pre und Pro** (wie bei Openbank). Pre ist die Vorab-Umgebung, 
 | | Dev | Pre | Pro |
 |---|---|---|---|
 | Adresse | keine (Branch + Pull Request) | **pre.platzcoach.de** | **www.platzcoach.de** (platzcoach.de leitet weiter) |
-| Datenbank | nur in den Tests: Postgres + PostgREST im GitHub-Actions-Runner, wird nach jedem Lauf verworfen | Supabase-Projekt `platzcoach-pre`, Free, Frankfurt | Supabase-Projekt `platzcoach-pro`, Pro, Frankfurt |
+| Datenbank | nur in den Tests: Postgres + PostgREST im GitHub-Actions-Runner, wird nach jedem Lauf verworfen | Supabase-Projekt `platzcoach-pre`, Free, Frankfurt | Supabase-Projekt `platzcoach-pro`, Frankfurt; Free in der Pilotphase, dann Pro-Plan |
 | Cloudflare-Pages-Projekt | – | `platzcoach-pre` | `platzcoach-pro` |
 | Daten | Testdaten aus den Szenarien | **pseudonymisierte Spiegelung** des Pilots (vor dem Umzug) bzw. von Pro (danach), nächtlich; siehe unten | echte Vereine |
 | Mail und Push | nur Log | nur an die Test-Adressen aus der Spiegelung (+ harte Allowlist als zweite Sicherung) | an alle |
@@ -105,7 +105,28 @@ Grundregeln: Der `service_role`-Schlüssel kommt nie in den Client und nie ins R
 - DNS: SPF um Scaleway ergänzen, DKIM von Scaleway eintragen, DMARC bleibt. Brevo-Einträge nach dem Umzug entfernen.
 - Scaleway beginnt mit 10.000 Mails im Monat. Erhöhung **vor** dem Ausrollen an weitere Vereine beim Support beantragen.
 - Push ist der Standard, Mail auf Wunsch. Das hält die Mailmenge klein.
+- **Ein Anbieter-Wechsel ist nur eine Einstellung:** Alle Mails laufen über eine SMTP-Verbindung (Supabase Auth) bzw. die Outbox-Function. Brevo ↔ Scaleway heißt Zugangsdaten und DNS-Einträge tauschen, kein Code.
 
+### Mail in der kostenlosen Pilotphase: Brevo Free geprüft (14.10.2026)
+
+Brevo Free erlaubt **300 Mails pro Tag** (ca. 9.000 im Monat); der Pilot nutzt Brevo bereits (SMTP, DKIM, DMARC eingerichtet).
+
+| | Brevo Free | Scaleway |
+|---|---|---|
+| Kosten bei 30 Vereinen | 0 € | ca. 2 €/Monat (300 frei, dann 0,25 € je 1.000) |
+| Grenze | **300 pro Tag**, auch für Einladungen und Passwort-Mails | keine Tagesgrenze (Start 10.000/Monat) |
+| Einrichtung | schon vorhanden | neu (Domain, DKIM) |
+| Hinweis „Sent with Brevo“ | im Free-Plan laut Testberichten möglich – an den heutigen Pilot-Mails prüfen | nein |
+| Sitz | Frankreich | Frankreich |
+
+Bedarf bei ca. 750 Konten: Wochenmail 750 pro Woche plus Benachrichtigungen – im Schnitt grob 150–350 Mails am Tag, je nachdem, wie viele Trainer Push statt Mail nutzen. **Die Spitze ist das Problem**, nicht der Monat: Geht die Wochenmail an alle am selben Tag, ist die Tagesgrenze überschritten.
+
+Brevo Free reicht für 20–30 Vereine nur mit diesen Regeln in der Outbox:
+- **Reserve:** Die Wochenmail darf höchstens 200 Mails pro Tag verbrauchen; 100 bleiben für Einladungen, Passwort-Mails und dringende Änderungen.
+- **Wochenmail verteilt** auf Donnerstag bis Samstag (je Verein ein fester Tag).
+- **Push als Standard**, Mail nur auf Wunsch.
+- Ist das Tageslimit erreicht, wird die Mail auf den nächsten Tag verschoben, ohne dass es als Fehlversuch zählt.
+- Alarm, wenn an drei Tagen hintereinander über 250 Mails nötig waren → Wechsel zu Scaleway.
 ## 6. Überwachung
 
 | Art | Was | Alarm wenn |
@@ -118,10 +139,13 @@ Grundregeln: Der `service_role`-Schlüssel kommt nie in den Client und nie ins R
 
 Zusätzlich in Supabase: Nutzungs-Benachrichtigungen einschalten, einmal pro Woche CPU, RAM, Verbindungen und Speicher ansehen. Ausgabengrenze im Pro-Plan bleibt an.
 
+In der kostenlosen Pilotphase zusätzlich (Teil von `health`): **Datenbankgröße über 350 MB** und **API-Datenverkehr über 4 GB im Monat** lösen einen Alarm aus – das sind die Grenzen für den Wechsel auf den Pro-Plan (9a). Bei 500 MB schaltet Supabase Free die Datenbank auf „nur lesen“.
+
 ## 7. Backup und Wiederherstellung
 
-- Supabase Pro: tägliche Backups, 7 Tage aufbewahrt.
-- Zusätzlich nächtlicher `pg_dump` per GitHub Action in einen Speicher außerhalb von Supabase (verschlüsselt), damit wir nicht von einem Anbieter abhängen. Speicherort ist noch offen (siehe 10).
+- **Pilotphase (Supabase Free): keine automatischen Backups von Supabase.** Deshalb ist der nächtliche `pg_dump` hier Pflicht, nicht Zusatz. Ohne ihn keine echten Vereinsdaten auf Free.
+- Nach dem Wechsel auf den Pro-Plan: tägliche Backups von Supabase, 7 Tage aufbewahrt.
+- Nächtlicher `pg_dump` per GitHub Action, verschlüsselt, nach **Cloudflare R2** (im kostenlosen Rahmen 10 GB), 30 Tage aufbewahrt; Heartbeat an Better Stack. Bleibt auch mit dem Pro-Plan, damit wir nicht von einem Anbieter abhängen.
 - **Wiederherstellung üben:** vor dem Go-live und danach einmal pro Quartal einen Dump in ein frisches Projekt zurückspielen und die Rauchtests dagegen laufen lassen.
 - Point-in-Time-Recovery (ab 100 $/Monat) erst, wenn mehrere Vereine produktiv arbeiten und ein verlorener Tag wirklich wehtut.
 
@@ -138,8 +162,9 @@ Zusätzlich in Supabase: Nutzungs-Benachrichtigungen einschalten, einmal pro Woc
 
 | Dienst | Kosten/Monat | Wichtigste Grenze | Auslastung |
 |---|---|---|---|
-| Supabase Pro + Micro | 25 $ (10 $ Compute-Guthaben enthalten) | 100.000 aktive Nutzer, 8 GB Speicher, 2 Mio. Function-Aufrufe | ca. 3 % der Nutzer |
+| Supabase Pro-Umgebung, ab Wechsel auf den Pro-Plan (Micro) | 25 $ (10 $ Compute-Guthaben enthalten) | 100.000 aktive Nutzer, 8 GB Speicher, 2 Mio. Function-Aufrufe | ca. 3 % der Nutzer |
 | Supabase Pre (Free) | 0 $ | 500 MB, Pause nach 7 Tagen | – |
+| Cloudflare R2 (Backups) | 0 € | 10 GB Speicher im kostenlosen Rahmen | – |
 | Cloudflare Pages + DNS | 0 € | 500 Builds/Monat (wir nutzen Direct Upload) | – |
 | Scaleway TEM | ca. 5 € (0,25 € je 1.000 Mails) | Start 10.000 Mails/Monat, erhöhbar | Hauptunsicherheit: Mailmenge |
 | Better Stack | 0 € | 10 Monitore, 10 Heartbeats | – |
@@ -148,9 +173,30 @@ Zusätzlich in Supabase: Nutzungs-Benachrichtigungen einschalten, einmal pro Woc
 
 Preise geprüft am 12.10.2026; vor der Einrichtung erneut prüfen.
 
+### 9a. Kostenlose Pilotphase (Entscheidung 14.10.2026)
+
+Für die ersten 20–30 Pilotvereine läuft auch die Pro-Umgebung auf **Supabase Free**. Gerechnet mit ca. 25 Konten je Verein (Trainer und Admins, keine Spieler):
+
+| Grenze Supabase Free | Bedarf bei 30 Vereinen (Schätzung) | Einschätzung |
+|---|---|---|
+| 50.000 aktive Nutzer | ca. 750 | reicht deutlich |
+| 500 MB Datenbank (danach nur lesen) | grob 150–300 MB im ersten Jahr | vermutlich; auf Pre am gespiegelten Pilotverein messen und hochrechnen |
+| 5 GB API-Datenverkehr | grob 2–5 GB | knapp, beobachten |
+| 500.000 Function-Aufrufe | ca. 70.000–100.000 | reicht |
+| 2 aktive Projekte | Pre + Pro | genau ausgeschöpft (für Wiederherstellungs-Übungen Pre kurz pausieren) |
+| geteilte CPU, 500 MB RAM | – | vor dem Go-live auf Pre per Lasttest bestätigen |
+
+**Bedingungen:**
+1. Nächtliches Backup nach R2 läuft und ist einmal erfolgreich zurückgespielt (Abschnitt 7).
+2. Alarme bei 350 MB Datenbank und 4 GB Datenverkehr (Abschnitt 6).
+3. **Wechsel auf den Pro-Plan**, sobald eine Grenze erreicht ist **oder** der erste Verein für Platzcoach bezahlt. Der Wechsel ist ein Klick im Dashboard, ohne Umzug und ohne Ausfall.
+
+Ohne Pro-Plan fehlen außerdem: E-Mail-Support (nur Community-Forum), Logs länger als einen Tag.
+
+**Kosten in der Pilotphase:** Supabase, Cloudflare, GitHub, Better Stack 0 €; Mails je nach Anbieter 0–2 € (siehe Abschnitt 5).
+
 ## 10. Offene Punkte
 
-- [ ] Speicherort für den zusätzlichen nächtlichen `pg_dump` (z. B. Scaleway Object Storage oder Hetzner Storage Box)
 - [ ] Better Stack oder Sentry für Frontend-Fehler (ein Werkzeug reicht)
 - [ ] Budget und Zeitpunkt für ein externes Sicherheits-Review vor dem Ausrollen an weitere Vereine
 - [ ] AVV-Kette: Platzcoach als Auftragsverarbeiter der Vereine, Unterauftragsverarbeiter Supabase, Scaleway, Cloudflare, Better Stack (rechtlich prüfen lassen)
@@ -182,7 +228,9 @@ Reihenfolge der Datenübernahme steht im Funktionsinventar (Projekt-Doc), hier n
 - [ ] Security Advisor ohne Befund
 
 **C. Pro aufbauen (erst kurz vor dem Umzug, damit Pro nie Testdaten enthält)**
-- [ ] Projekt `platzcoach-pro` (Frankfurt, Pro-Plan), Pages-Projekt `platzcoach-pro`
+- [ ] Projekt `platzcoach-pro` (Frankfurt, zunächst Free – siehe 9a), Pages-Projekt `platzcoach-pro`
+- [ ] Nächtliches Backup nach Cloudflare R2, einmal zurückgespielt; Alarme bei 350 MB und 4 GB
+- [ ] Lasttest auf Pre mit der Hochrechnung für 30 Vereine
 - [ ] `release.yml`, `PRO_*`-Secrets; Probe-Release mit leerem Schema
 - [ ] Wiederherstellung aus Backup einmal geübt
 
