@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-14T18:37:01.517Z",
+  "updated": "2026-10-14T23:12:25.287Z",
   "games": [
     {
       "d": "2026-09-23",
@@ -2521,6 +2521,22 @@
       "infoAt": "2026-10-09T09:07:03.882Z"
     },
     {
+      "d": "2026-10-27",
+      "t": "19:30",
+      "team": "Herren",
+      "squad": 1,
+      "ownName": "SV Bachum/Bergheim",
+      "opponent": "TuS Niederense",
+      "competition": "Kreisfreundschaftsspiele",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/tus-niederense-sv-bachum-bergheim/-/spiel/032D333LT8000000VS5489BUVV5V31CI",
+      "gameNo": "240038204",
+      "staffelId": "240038",
+      "staffelName": "Freundschaftsspiele Kreis Soest",
+      "venue": "Kunstrasenplatz, Sportplatz am Heuerwerth -Kunst-, Heuerwerth 7, 59469 Ense",
+      "infoAt": "2026-10-14T23:12:24.882Z"
+    },
+    {
       "d": "2026-10-30",
       "t": "19:30",
       "team": "Herren",
@@ -4147,12 +4163,14 @@
         "SV Bachum/Bergheim"
       ],
       "teamIds": [
-        "011MIANBCK000000VTVG0001VTR8C1K7"
+        "011MIANBCK000000VTVG0001VTR8C1K7",
+        "027IVI3RO8000000VS5489B1VUA37ON8"
       ],
       "competitions": [
-        "Kreisliga A"
+        "Kreisliga A",
+        "Kreisfreundschaftsspiele"
       ],
-      "games": 26,
+      "games": 27,
       "homeGames": 13,
       "first": "2026-09-27",
       "last": "2027-05-30",
