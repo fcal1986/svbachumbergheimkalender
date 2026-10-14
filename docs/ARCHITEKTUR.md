@@ -31,7 +31,7 @@ Für einen schnell gewachsenen Piloten normal. Für Vibe Coding ist die Datei zu
 | Aussehen | das bestehende CSS (Farben, Abstände, Komponenten) übernommen, als CSS-Module je Komponente | Oberfläche bleibt wiedererkennbar; keine UI-Bibliothek, kein Tailwind |
 | PWA | `vite-plugin-pwa` (Service Worker, Manifest, Update-Hinweis) | ersetzt `sw.js` und `checkForAppUpdate` |
 | Tests | **Vitest** (Logik), **Testing Library** (Komponenten), **Playwright** (Abläufe gegen Pre) | laufen in `ci.yml` bei jedem Pull Request |
-| Qualität | ESLint (inkl. Regeln unten), Prettier, `tsc --noEmit` | automatisch in der CI |
+| Qualität | **ESLint** für Richtigkeit und Sicherheit (Empfehlungen von ESLint, TypeScript-ESLint und das React-Plugin `eslint-plugin-react-hooks`, dazu die Regeln unten), **Prettier** nur für das Aussehen des Codes, `tsc --noEmit` | automatisch in der CI; ESLint formatiert nicht (ESLint hat seine Formatierungsregeln 2023 abgeschafft) |
 
 Bewusst **nicht**: Next.js oder anderes Server-Rendering (bräuchte einen Server, widerspricht Cloudflare Pages + Supabase), Redux oder andere globale Zustands-Bibliotheken (TanStack Query + React-Zustand reichen), UI-Komponentenbibliotheken.
 
@@ -77,7 +77,14 @@ Die Fachbereiche entsprechen den Domänen des Datenmodells. Fachregeln, die die 
 6. **Kleine Dateien:** Richtwert unter 300 Zeilen je Datei, damit jede Datei vollständig in eine Vibe-Coding-Sitzung passt.
 7. **Nichts vereinsspezifisch:** kein Vereinsname, keine Platznamen, keine IDs im Code (wie im Pilot-Prinzip 5).
 
-Regel 1, 2 und 4 prüft ESLint (`no-restricted-imports`, Grenzen zwischen Ordnern, verbotene Eigenschaften); Regel 6 als Warnung.
+| Regel | geprüft durch | Herkunft |
+|---|---|---|
+| 1, 2 | ESLint, sperrt (`no-restricted-imports`, Grenzen zwischen Ordnern) | übliche Schichtentrennung |
+| 3 | Tests (App und Datenbank liefern dasselbe Ergebnis) und Durchsehen des Pull Requests | Prinzip „Don't repeat yourself“ |
+| 4 | ESLint, sperrt | OWASP-Empfehlung gegen Cross-Site-Scripting |
+| 5 | Geheimnis-Suche von GitHub, Prüfung beim Bauen | OWASP-Empfehlung |
+| 6 | ESLint `max-lines`, nur Warnung | Standardwert der Regel (300) |
+| 7 | Suche nach Vereins- und Platznamen in der CI, Durchsehen | Platzcoach-Prinzip 5 |
 
 ## 5. Reihenfolge des Aufbaus
 
