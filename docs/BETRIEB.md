@@ -12,12 +12,12 @@
 | Hintergrundjobs | Supabase Edge Functions + pg_cron | Ausführung auf Frankfurt festgelegt | im Pro-Plan enthalten | Outbox (Mail, Push), fussball.de-Abgleich, Wartung |
 | Frontend | Cloudflare Pages | global (statische Dateien) | Free | App-Dateien, Upload per Direct Upload aus GitHub Actions |
 | DNS | Cloudflare | – | Free | Zone `platzcoach.de` (Nameserver von checkdomain zu Cloudflare), Domain bleibt bei checkdomain registriert |
-| Transaktionsmails | Scaleway Transactional Email | Paris | Essential (nach Verbrauch) | Auth-Mails, Benachrichtigungen, Wochenmail |
+| Transaktionsmails | **Pilotphase: Brevo Free** (schon eingerichtet) · danach bzw. bei Alarm: Scaleway Transactional Email | Frankreich | Brevo Free · Scaleway Essential (nach Verbrauch) | Auth-Mails, Benachrichtigungen, Wochenmail |
 | Mail-Empfang | ImprovMX | – | wie bisher | info@platzcoach.de → Gmail |
 | Überwachung | Better Stack | – | Free | Erreichbarkeit, Heartbeats der Jobs, Frontend-Fehler |
 | Code | GitHub, Repo privat | – | Free | Code, Migrationen, Tests, Pipeline |
 
-Entfällt nach der Migration: JSON-Dateien in `data/`, Schreiben über die GitHub Contents API mit geteiltem Token, GitHub Actions für Sync und Mails, die Cloudflare-Worker für Registrierung und Passwort (übernimmt Supabase Auth), Brevo.
+Entfällt nach der Migration: JSON-Dateien in `data/`, Schreiben über die GitHub Contents API mit geteiltem Token, GitHub Actions für Sync und Mails, die Cloudflare-Worker für Registrierung und Passwort (übernimmt Supabase Auth).
 
 ## 2. Umgebungen
 
@@ -91,19 +91,18 @@ Nur Namen, nie Werte. GitHub Free erlaubt bei privaten Repos keine Environments;
 | `PRE_TEST_MAIL` | GitHub | Basis-Adresse für die Plus-Aliase der Test-Konten |
 | `PILOT_GK_KEY` | GitHub, nur bis zum Umzug | Torhüter-Liste des Pilots entschlüsseln (wird in der Spiegelung sofort pseudonymisiert) |
 | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | GitHub | Upload zu Cloudflare Pages (Token nur mit Recht „Pages bearbeiten“) |
-| `SCALEWAY_SMTP_USER`, `SCALEWAY_SMTP_PASSWORD` | Supabase (Auth-SMTP und Function-Secrets), je Umgebung eigene | Mailversand |
+| `SMTP_HOST`, `SMTP_USER`, `SMTP_PASSWORD` | Supabase (Auth-SMTP und Function-Secrets), je Umgebung eigene | Mailversand – Pilotphase Brevo, später Scaleway; neutral benannt, damit der Wechsel nur die Werte ändert |
 | `VAPID_PRIVATE_KEY` | Supabase Function-Secrets, je Umgebung eigener | Web-Push |
 | `BETTERSTACK_HEARTBEAT_*` | Supabase Function-Secrets | Heartbeats der Jobs |
 | `HEALTH_TOKEN` | Supabase Function-Secrets + Better Stack | Schutz des Gesundheits-Endpunkts |
 
-Grundregeln: Der `service_role`-Schlüssel kommt nie in den Client und nie ins Repo. Der Client bekommt nur URL und `anon`-Schlüssel; die Rechte erzwingt RLS. Alle Geheimnisse aus dem Pilot (geteilter GitHub-Token, Worker-Variablen, Brevo) werden nach dem Umzug ausgetauscht bzw. gelöscht.
+Grundregeln: Der `service_role`-Schlüssel kommt nie in den Client und nie ins Repo. Der Client bekommt nur URL und `anon`-Schlüssel; die Rechte erzwingt RLS. Alle Geheimnisse aus dem Pilot (geteilter GitHub-Token, Worker-Variablen, der bisherige Brevo-SMTP-Schlüssel) werden nach dem Umzug ausgetauscht bzw. gelöscht; die neue App bekommt eigene Brevo-SMTP-Zugangsdaten je Umgebung.
 
 ## 5. Mail
 
 - Absender immer „Platzcoach &lt;noreply@platzcoach.de&gt;“, Antworten an info@platzcoach.de (unverändert).
-- Supabase Auth verschickt Einladung, Passwort-Reset und Bestätigung über Scaleway-SMTP; die Outbox-Function verschickt Benachrichtigungen und Wochenmail ebenfalls über Scaleway.
-- DNS: SPF um Scaleway ergänzen, DKIM von Scaleway eintragen, DMARC bleibt. Brevo-Einträge nach dem Umzug entfernen.
-- Scaleway beginnt mit 10.000 Mails im Monat. Erhöhung **vor** dem Ausrollen an weitere Vereine beim Support beantragen.
+- **Pilotphase (Entscheidung 14.10.2026): Brevo Free.** Supabase Auth verschickt Einladung, Passwort-Reset und Bestätigung über Brevo-SMTP; die Outbox-Function verschickt Benachrichtigungen und Wochenmail ebenfalls über Brevo. Die DNS-Einträge (Brevo-Code, DKIM, DMARC) sind schon vorhanden.
+- **Wechsel zu Scaleway**, sobald der Mail-Alarm kommt (siehe unten): SPF um Scaleway ergänzen, DKIM von Scaleway eintragen, Brevo-Einträge danach entfernen. Scaleway beginnt mit 10.000 Mails im Monat; Erhöhung rechtzeitig beim Support beantragen.
 - Push ist der Standard, Mail auf Wunsch. Das hält die Mailmenge klein.
 - **Ein Anbieter-Wechsel ist nur eine Einstellung:** Alle Mails laufen über eine SMTP-Verbindung (Supabase Auth) bzw. die Outbox-Function. Brevo ↔ Scaleway heißt Zugangsdaten und DNS-Einträge tauschen, kein Code.
 
@@ -116,7 +115,7 @@ Brevo Free erlaubt **300 Mails pro Tag** (ca. 9.000 im Monat); der Pilot nutzt B
 | Kosten bei 30 Vereinen | 0 € | ca. 2 €/Monat (300 frei, dann 0,25 € je 1.000) |
 | Grenze | **300 pro Tag**, auch für Einladungen und Passwort-Mails | keine Tagesgrenze (Start 10.000/Monat) |
 | Einrichtung | schon vorhanden | neu (Domain, DKIM) |
-| Hinweis „Sent with Brevo“ | im Free-Plan laut Testberichten möglich – an den heutigen Pilot-Mails prüfen | nein |
+| Hinweis „Sent with Brevo“ | nein – an den Pilot-Mails geprüft (14.10.2026) | nein |
 | Sitz | Frankreich | Frankreich |
 
 Bedarf bei ca. 750 Konten: Wochenmail 750 pro Woche plus Benachrichtigungen – im Schnitt grob 150–350 Mails am Tag, je nachdem, wie viele Trainer Push statt Mail nutzen. **Die Spitze ist das Problem**, nicht der Monat: Geht die Wochenmail an alle am selben Tag, ist die Tagesgrenze überschritten.
@@ -154,7 +153,7 @@ In der kostenlosen Pilotphase zusätzlich (Teil von `health`): **Datenbankgröß
 | Fall | Erste Schritte |
 |---|---|
 | Seite nicht erreichbar | Better Stack und Statusseiten von Cloudflare und Supabase prüfen → bei eigenem Fehler Frontend in Cloudflare auf das vorige Deployment zurücksetzen |
-| Mails oder Push gehen nicht raus | `health` und Outbox ansehen → Scaleway-Kontingent und -Status prüfen → fehlgeschlagene Nachrichten nach der Behebung erneut einreihen |
+| Mails oder Push gehen nicht raus | `health` und Outbox ansehen → Tageslimit und Status beim Mail-Anbieter (Brevo bzw. Scaleway) prüfen → fehlgeschlagene Nachrichten nach der Behebung erneut einreihen |
 | Fehlerhaftes Release | Frontend zurücksetzen, Korrektur-Migration über die normale Pipeline (Pre → Pro) |
 | Verdacht auf Datenleck | Betroffene Schlüssel sofort austauschen, „Alle abmelden“ (Supabase-Admin-API), Logs sichern, Umfang klären. Meldung an die Aufsichtsbehörde innerhalb von 72 Stunden prüfen; Vereine als Verantwortliche informieren |
 
@@ -166,7 +165,8 @@ In der kostenlosen Pilotphase zusätzlich (Teil von `health`): **Datenbankgröß
 | Supabase Pre (Free) | 0 $ | 500 MB, Pause nach 7 Tagen | – |
 | Cloudflare R2 (Backups) | 0 € | 10 GB Speicher im kostenlosen Rahmen | – |
 | Cloudflare Pages + DNS | 0 € | 500 Builds/Monat (wir nutzen Direct Upload) | – |
-| Scaleway TEM | ca. 5 € (0,25 € je 1.000 Mails) | Start 10.000 Mails/Monat, erhöhbar | Hauptunsicherheit: Mailmenge |
+| Mail: Brevo Free (Pilotphase) | 0 € | 300 Mails pro Tag | Tagesspitzen der Wochenmail – Regeln in Abschnitt 5 |
+| Mail: Scaleway TEM (ab Alarm) | ca. 2 € bei 30 Vereinen, ca. 5 € bei 50 (0,25 € je 1.000 Mails) | Start 10.000 Mails/Monat, erhöhbar | – |
 | Better Stack | 0 € | 10 Monitore, 10 Heartbeats | – |
 | GitHub (privat) | 0 € | 2.000 Actions-Minuten/Monat | Ausgabenlimit für Actions auf 0 $ |
 | **Summe** | **ca. 30 €** | | |
@@ -199,7 +199,7 @@ Ohne Pro-Plan fehlen außerdem: E-Mail-Support (nur Community-Forum), Logs läng
 
 - [ ] Better Stack oder Sentry für Frontend-Fehler (ein Werkzeug reicht)
 - [ ] Budget und Zeitpunkt für ein externes Sicherheits-Review vor dem Ausrollen an weitere Vereine
-- [ ] AVV-Kette: Platzcoach als Auftragsverarbeiter der Vereine, Unterauftragsverarbeiter Supabase, Scaleway, Cloudflare, Better Stack (rechtlich prüfen lassen)
+- [ ] AVV-Kette: Platzcoach als Auftragsverarbeiter der Vereine, Unterauftragsverarbeiter Supabase, Brevo (später Scaleway), Cloudflare, Better Stack (rechtlich prüfen lassen)
 - [ ] Content Security Policy für die App festlegen (`_headers`), vorher klären, wo Nutzertext per `innerHTML` landet
 - [ ] Clarity und GA4 im eingeloggten Bereich: behalten, einschränken oder entfernen
 
@@ -212,7 +212,7 @@ Reihenfolge der Datenübernahme steht im Funktionsinventar (Projekt-Doc), hier n
 **A. Vorbereitung**
 - [ ] Supabase-Organisation anlegen, AVV (DPA) abschließen
 - [ ] DNS-Zone zu Cloudflare umziehen; vorher alle Einträge (MX ImprovMX, SPF, DKIM, DMARC, Verifizierungen) vollständig übernehmen
-- [ ] Scaleway-Konto, Domain verifizieren, Kontingent-Erhöhung beantragen
+- [ ] Brevo: eigene SMTP-Zugangsdaten für Pre und Pro anlegen (Pilot-Schlüssel nicht mitnehmen); Scaleway erst beim Wechsel
 - [ ] Better Stack einrichten
 
 **B. Pre aufbauen (parallel zum Pilot; platzcoach.de bleibt unverändert)**
