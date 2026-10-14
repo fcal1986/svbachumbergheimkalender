@@ -23,16 +23,18 @@ Entfällt nach der Migration: JSON-Dateien in `data/`, Schreiben über die GitHu
 
 Wir nutzen **Dev, Pre und Pro** (wie bei Openbank). Pre ist die Vorab-Umgebung, in der jeder Stand geprüft wird, bevor er nach Pro geht.
 
+**Entwicklung nur online (Entscheidung 14.10.2026):** Es gibt keine lokale Installation. Entwickelt wird per Vibe Coding in Claude-Code-Sitzungen im Browser bzw. am Handy; jede Änderung landet auf einem eigenen Branch mit Pull Request. „Dev“ ist damit keine laufende Umgebung, sondern Branch + Pull Request + automatische Tests in GitHub Actions. Die erste laufende App mit Datenbank ist Pre.
+
 | | Dev | Pre | Pro |
 |---|---|---|---|
-| Adresse | lokal | **pre.platzcoach.de** | **www.platzcoach.de** (platzcoach.de leitet weiter) |
-| Datenbank | `supabase start` (Docker, lokal) | Supabase-Projekt `platzcoach-pre`, Free, Frankfurt | Supabase-Projekt `platzcoach-pro`, Pro, Frankfurt |
+| Adresse | keine (Branch + Pull Request) | **pre.platzcoach.de** | **www.platzcoach.de** (platzcoach.de leitet weiter) |
+| Datenbank | nur in den Tests: Postgres + PostgREST im GitHub-Actions-Runner, wird nach jedem Lauf verworfen | Supabase-Projekt `platzcoach-pre`, Free, Frankfurt | Supabase-Projekt `platzcoach-pro`, Pro, Frankfurt |
 | Cloudflare-Pages-Projekt | – | `platzcoach-pre` | `platzcoach-pro` |
 | Daten | Testdaten aus den Szenarien | erfundene Testvereine, **keine echten Personen- und Kinderdaten** | echte Vereine |
 | Mail und Push | nur Log | nur an eigene Adressen (Allowlist) | an alle |
 | fussball.de-Abgleich | aus | Pilotverein lesend oder aus | alle Vereine |
 | Wird ausgerollt bei | – | Merge auf `main` | Tag `v…` oder manueller Start |
-| Zugriff für Claude | ja | nur über die Pipeline | **nie**, auch nicht lesend |
+| Zugriff für Claude | ja (Branches, nie `main` direkt) | nur über die Pipeline | **nie**, auch nicht lesend |
 
 Hinweise:
 
@@ -134,6 +136,8 @@ Preise geprüft am 12.10.2026; vor der Einrichtung erneut prüfen.
 
 ## 11. Migrations-Checkliste
 
+> Verfolgt wird der Umbau im GitHub-Projekt **„Migration Supabase“** (ein Issue je Punkt, Meilensteine A–E). Diese Liste ist die Vorlage; der aktuelle Stand steht im Projekt, nicht hier.
+
 Reihenfolge der Datenübernahme steht im Funktionsinventar (Projekt-Doc), hier nur die Schritte für Betrieb und Infrastruktur.
 
 **A. Vorbereitung**
@@ -146,7 +150,7 @@ Reihenfolge der Datenübernahme steht im Funktionsinventar (Projekt-Doc), hier n
 - [ ] Projekt `platzcoach-pre` (Frankfurt) und Pages-Projekt `platzcoach-pre`, Domain pre.platzcoach.de
 - [ ] Schema v7 als `supabase/migrations/` ins Repo, `ci.yml` grün
 - [ ] `deploy-pre.yml` und Secrets einrichten, erster automatischer Deploy
-- [ ] Rechte-Tests und HTTP-Tests gegen Pre grün (bisher nur lokal nachgebildet)
+- [ ] Rechte-Tests und HTTP-Tests gegen Pre grün (bisher nur im Test-Runner nachgebildet)
 - [ ] Edge Functions: Outbox, fussball.de-Abgleich, `health`; Heartbeats aktiv
 - [ ] Security Advisor ohne Befund
 
