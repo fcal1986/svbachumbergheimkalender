@@ -30,17 +30,37 @@ Wir nutzen **Dev, Pre und Pro** (wie bei Openbank). Pre ist die Vorab-Umgebung, 
 | Adresse | keine (Branch + Pull Request) | **pre.platzcoach.de** | **www.platzcoach.de** (platzcoach.de leitet weiter) |
 | Datenbank | nur in den Tests: Postgres + PostgREST im GitHub-Actions-Runner, wird nach jedem Lauf verworfen | Supabase-Projekt `platzcoach-pre`, Free, Frankfurt | Supabase-Projekt `platzcoach-pro`, Pro, Frankfurt |
 | Cloudflare-Pages-Projekt | – | `platzcoach-pre` | `platzcoach-pro` |
-| Daten | Testdaten aus den Szenarien | erfundene Testvereine, **keine echten Personen- und Kinderdaten** | echte Vereine |
-| Mail und Push | nur Log | nur an eigene Adressen (Allowlist) | an alle |
+| Daten | Testdaten aus den Szenarien | **pseudonymisierte Spiegelung** des Pilots (vor dem Umzug) bzw. von Pro (danach), nächtlich; siehe unten | echte Vereine |
+| Mail und Push | nur Log | nur an die Test-Adressen aus der Spiegelung (+ harte Allowlist als zweite Sicherung) | an alle |
 | fussball.de-Abgleich | aus | Pilotverein lesend oder aus | alle Vereine |
 | Wird ausgerollt bei | – | Merge auf `main` | Tag `v…` oder manueller Start |
 | Zugriff für Claude | ja (Branches, nie `main` direkt) | nur über die Pipeline | **nie**, auch nicht lesend |
 
 Hinweise:
 
-- Free-Projekte von Supabase pausieren nach einer Woche ohne Aktivität. Ein wöchentlicher Ping-Job in GitHub Actions hält `platzcoach-pre` wach.
-- Pre hat im Free-Plan keine automatischen Backups. Das ist gewollt: Pre enthält nur Testdaten und kann jederzeit neu aufgebaut werden.
-- Pre ist für Suchmaschinen gesperrt (`X-Robots-Tag: noindex` in `_headers`) und zeigt ein Band „Pre-Umgebung – keine echten Daten“.
+- Free-Projekte von Supabase pausieren nach einer Woche ohne Aktivität. Die nächtliche Spiegelung hält `platzcoach-pre` wach.
+- Pre hat im Free-Plan keine automatischen Backups. Das ist gewollt: Pre enthält keine echten Personendaten und wird jede Nacht aus der Spiegelung neu befüllt.
+- Pre ist für Suchmaschinen gesperrt (`X-Robots-Tag: noindex` in `_headers`) und zeigt ein Band „Pre-Umgebung – Testdaten“.
+
+### Daten auf Pre: pseudonymisierte Spiegelung (Entscheidung 14.10.2026)
+
+Pre soll mit realistischen Daten testen. Deshalb werden die echten Daten jede Nacht nach Pre gespiegelt, **personenbezogene Felder aber ersetzt**. Der größte Teil der Platzcoach-Daten ist nicht personenbezogen und bleibt 1:1 echt.
+
+| Bleibt echt | Wird ersetzt |
+|---|---|
+| Verein, Anlage, Plätze, Teilflächen, Kabinen | Namen der Zugänge → „Trainer E2“, „Admin 1“ … (Rolle + Mannschaft) |
+| Saisons, Mannschaften, Trainingszeiten, Termine, Absagen, Verlegungen | E-Mail → Test-Adresse mit Plus-Alias aus `PRE_TEST_MAIL` (z. B. `<Postfach>+e2@…`), Telefon → leer |
+| Sperren, fussball.de-Spiele (öffentliche Daten), Konflikte | Torhüter → „Torhüter 1, 2 …“, keine echten Vor- und Nachnamen |
+| Zusagen und Anmeldungen (Verknüpfungen bleiben, Personen sind pseudonym) | Freitexte mit möglichem Personenbezug (Notizen, Grund) → gekürzt auf die Terminart |
+| | Passwörter, Passkeys, Push-Geräte → nicht übernommen; Anmeldung auf Pre per Einladung an die Test-Adressen |
+
+Regeln:
+
+- **Gleiche Person, gleiches Pseudonym:** Pseudonyme werden mit einem geheimen Salz (`PRE_SPIEGEL_SALT`) stabil berechnet, damit Tests von Nacht zu Nacht dieselben Konten finden.
+- **Das Spiegelskript ist das Migrationsskript.** `scripts/migrate/` überträgt die Pilotdaten (JSON) in das neue Schema – nachts mit Pseudonymisierung nach Pre, am Umzugstag einmal ohne nach Pro. Damit ist der Umzug jede Nacht geprobt.
+- **Abgleich nach jedem Lauf:** Konflikte und Tagesbelegung der nächsten 220 Tage auf Pre gegen den Pilot vergleichen; Abweichungen melden (Heartbeat schlägt fehl).
+- **Richtung:** vor dem Umzug Pilot (Repo-JSON) → Pre; nach dem Umzug Pro → Pre. Der Job nach dem Umzug liest Pro und läuft nur in einem Workflow mit `PRO_*`-Secrets, den Menschen prüfen und freigeben; Claude bekommt dadurch keinen Zugriff auf Pro.
+- **Keine Gegenrichtung:** Von Pre fließt nie etwas nach Pro.
 
 ## 3. Deployment-Pipeline
 
@@ -66,7 +86,10 @@ Nur Namen, nie Werte. GitHub Free erlaubt bei privaten Repos keine Environments;
 |---|---|---|
 | `SUPABASE_ACCESS_TOKEN` | GitHub | Supabase-CLI (Deploy) |
 | `PRE_SUPABASE_PROJECT_REF`, `PRE_SUPABASE_DB_PASSWORD` | GitHub | Deploy nach Pre |
-| `PRO_SUPABASE_PROJECT_REF`, `PRO_SUPABASE_DB_PASSWORD` | GitHub | Deploy nach Pro, nur `release.yml` |
+| `PRO_SUPABASE_PROJECT_REF`, `PRO_SUPABASE_DB_PASSWORD` | GitHub | Deploy nach Pro, nur `release.yml` (und nach dem Umzug der Spiegel-Job Pro → Pre) |
+| `PRE_SPIEGEL_SALT` | GitHub | stabile Pseudonyme in der Spiegelung |
+| `PRE_TEST_MAIL` | GitHub | Basis-Adresse für die Plus-Aliase der Test-Konten |
+| `PILOT_GK_KEY` | GitHub, nur bis zum Umzug | Torhüter-Liste des Pilots entschlüsseln (wird in der Spiegelung sofort pseudonymisiert) |
 | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | GitHub | Upload zu Cloudflare Pages (Token nur mit Recht „Pages bearbeiten“) |
 | `SCALEWAY_SMTP_USER`, `SCALEWAY_SMTP_PASSWORD` | Supabase (Auth-SMTP und Function-Secrets), je Umgebung eigene | Mailversand |
 | `VAPID_PRIVATE_KEY` | Supabase Function-Secrets, je Umgebung eigener | Web-Push |
@@ -90,7 +113,7 @@ Grundregeln: Der `service_role`-Schlüssel kommt nie in den Client und nie ins R
 | Monitor | www.platzcoach.de, pre.platzcoach.de | keine Antwort 200 |
 | Monitor | Supabase Auth `/auth/v1/health` (Pro) | keine Antwort |
 | Monitor | Edge Function `health` (Pro), mit `HEALTH_TOKEN` | Antwort 503: fehlgeschlagene Nachrichten, älteste offene Nachricht zu alt, Partition fehlt (aus `api.outbox_health()` und `private.partition_health`) |
-| Heartbeat | fussball.de-Abgleich, Outbox-Worker, `maintain_partitions`, `purge_expired`, nächtlicher `pg_dump` | Meldung bleibt aus |
+| Heartbeat | fussball.de-Abgleich, Outbox-Worker, `maintain_partitions`, `purge_expired`, nächtlicher `pg_dump`, nächtliche Spiegelung nach Pre (inkl. Abgleich) | Meldung bleibt aus oder Abgleich weicht ab |
 | Fehler | Frontend-Fehler (ohne personenbezogene Daten) | neue Fehlerart |
 
 Zusätzlich in Supabase: Nutzungs-Benachrichtigungen einschalten, einmal pro Woche CPU, RAM, Verbindungen und Speicher ansehen. Ausgabengrenze im Pro-Plan bleibt an.
@@ -146,23 +169,31 @@ Reihenfolge der Datenübernahme steht im Funktionsinventar (Projekt-Doc), hier n
 - [ ] Scaleway-Konto, Domain verifizieren, Kontingent-Erhöhung beantragen
 - [ ] Better Stack einrichten
 
-**B. Pre aufbauen**
+**B. Pre aufbauen (parallel zum Pilot; platzcoach.de bleibt unverändert)**
 - [ ] Projekt `platzcoach-pre` (Frankfurt) und Pages-Projekt `platzcoach-pre`, Domain pre.platzcoach.de
 - [ ] Schema v7 als `supabase/migrations/` ins Repo, `ci.yml` grün
 - [ ] `deploy-pre.yml` und Secrets einrichten, erster automatischer Deploy
 - [ ] Rechte-Tests und HTTP-Tests gegen Pre grün (bisher nur im Test-Runner nachgebildet)
+- [ ] Migrationsskript `scripts/migrate/` (Pilot-JSON → Schema, Reihenfolge laut Funktionsinventar) mit Pseudonymisierung
+- [ ] Nächtliche Spiegelung Pilot → Pre mit Abgleich 220 Tage; zwei Wochen ohne Abweichung
 - [ ] Edge Functions: Outbox, fussball.de-Abgleich, `health`; Heartbeats aktiv
+- [ ] Mail und Push auf Pre landen nachweislich nur bei den Test-Adressen
+- [ ] Testphase mit Trainern auf pre.platzcoach.de (Test-Konten)
 - [ ] Security Advisor ohne Befund
 
-**C. Pro aufbauen**
+**C. Pro aufbauen (erst kurz vor dem Umzug, damit Pro nie Testdaten enthält)**
 - [ ] Projekt `platzcoach-pro` (Frankfurt, Pro-Plan), Pages-Projekt `platzcoach-pro`
-- [ ] `release.yml`, `PRO_*`-Secrets; Probe-Release ohne echte Daten
+- [ ] `release.yml`, `PRO_*`-Secrets; Probe-Release mit leerem Schema
 - [ ] Wiederherstellung aus Backup einmal geübt
 
-**D. Umzug Pilotverein**
-- [ ] Datenübernahme nach Funktionsinventar, Abgleich 220 Tage gegen den Pilot
-- [ ] Einladungen statt Passwort-Übernahme, Push-Geräte melden sich neu an
-- [ ] www.platzcoach.de auf Cloudflare Pages umstellen
+**D. Umzugstag Pilotverein**
+- [ ] Termin mit dem Verein abstimmen, Trainer vorab informieren
+- [ ] Pilot auf „nur lesen“ stellen (Speichern gesperrt, Hinweis in der App)
+- [ ] Migrationsskript einmal ohne Pseudonymisierung nach Pro, Abgleich 220 Tage gegen den Pilot
+- [ ] platzcoach.de / www.platzcoach.de auf Cloudflare Pages `platzcoach-pro` umstellen
+- [ ] Einladungen an alle Zugänge (keine Passwort-Übernahme), Push-Geräte melden sich neu an
+- [ ] Alter Pilot zwei Wochen nur lesend unter der GitHub-Pages-Adresse als Rückfallebene
+- [ ] Spiegelung auf Pro → Pre umstellen
 
 **E. Aufräumen**
 - [ ] `data/` aus dem Repo entfernen, Pilot-Workflows und Worker abschalten

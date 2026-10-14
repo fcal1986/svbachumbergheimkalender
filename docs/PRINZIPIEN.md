@@ -88,7 +88,7 @@ Neue häufige Aufgaben werden hier ergänzt.
 - **Jede Aufgabe ist ein Issue, jede Änderung ein Pull Request, der sein Issue schließt** („Closes #…“). So zeigt das Projekt-Board den Stand ohne Nachpflegen.
 - **Claude bekommt nie Zugang zu Pro.** Claude arbeitet auf Branches; Zugangsdaten zu Pro kennt nur die Release-Pipeline. Auch Menschen ändern Pro nicht von Hand.
 - **Schema nur über Migrationen im Repo.** Nur vorwärts und abwärtskompatibel: erst hinzufügen, im nächsten Release entfernen. Nie per Klick im Dashboard.
-- **Keine echten Personendaten außerhalb von Pro.** Pre und Dev arbeiten mit erfundenen Testvereinen.
+- **Keine echten Personendaten außerhalb von Pro.** Pre testet mit echten Terminen, Plätzen und Spielen, aber pseudonymisierten Personen (nächtliche Spiegelung); Dev nur mit Testdaten. Von Pre fließt nie etwas nach Pro.
 - **Geheimnisse nie im Client und nie im Repo.** Der Client bekommt nur URL und `anon`-Schlüssel.
 - **Europäische Dienste zuerst.** Daten in der EU (Supabase Frankfurt, Scaleway). Ein Dienst außerhalb der EU nur mit AVV und Begründung im Entscheidungsprotokoll (Projekt-Doc `claude/entscheidungen.md`).
 - **Keine Werbung, kein Tracking im eingeloggten Bereich.** Analyse höchstens anonym und mit Einwilligung.
