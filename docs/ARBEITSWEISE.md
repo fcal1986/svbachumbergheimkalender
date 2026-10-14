@@ -94,7 +94,7 @@ Für jede Einrichtung (Supabase-Projekt, Cloudflare, Brevo, Better Stack, GitHub
 ## 8. Rhythmus
 
 - Kein fester Takt, keine Sprints. Gearbeitet wird, wann du Zeit hast.
-- **Einmal pro Woche ein Blick aufs Board** (10 Minuten): Was ist auf Pre und kann live? Was hängt? Was kommt als Nächstes? Claude kann dafür eine kurze Zusammenfassung schreiben.
+- **Wochenblick jeden Sonntag gegen 19 Uhr:** Eine geplante Aufgabe von Claude schickt dir per Push und Mail eine Zusammenfassung – was live ging, was auf Pre auf deine Abnahme wartet, was in Arbeit ist, was hängt und was als Nächstes dran ist. Sie liest nur und ändert nichts. Danach 10 Minuten Blick aufs Board.
 - Pro Woche höchstens **ein Release-Kandidat** gleichzeitig auf Pre in Abnahme (siehe `BETRIEB.md`).
 
 ## 9. Wenn etwas schiefgeht
