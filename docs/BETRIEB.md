@@ -104,9 +104,16 @@ Die Rechteprüfung zählt nicht Testfälle, sondern muss diese Fälle abdecken �
 - dieselbe Anfrage zweimal (keine doppelte Absage, keine doppelte Mail)
 - ein alter App-Stand gegen das neue Schema (Kompatibilität)
 
-### Freigabe technisch absichern (offen, Entscheidung ausstehend)
+### Freigabe nach Pro (Entscheidung 14.10.2026: vorerst Arbeitsanweisung)
 
-„Claude fasst Pro nicht an“ ist bisher eine Arbeitsanweisung. Technisch erzwingen lässt es sich mit Schutzregeln für `main`, einer Regel, dass nur Fabrizio `v*`-Tags anlegen darf, und einer Umgebung „pro“, deren Secrets nur der Release-Job auf einem solchen Tag erhält. Bei privaten Repos setzt das GitHub Pro voraus (ca. 4 $/Monat); bei öffentlichen Repos ist es kostenlos. Bis zur Entscheidung gilt die Arbeitsanweisung.
+„Claude fasst Pro nicht an“ wird vorerst **nicht technisch erzwungen** (GitHub Free, privates Repo). Technisch möglich wären Schutzregeln für `main`, eine Regel, dass nur Fabrizio `v*`-Tags anlegen darf, und eine Umgebung „pro“, deren Secrets nur der Release-Job auf einem solchen Tag erhält – bei privaten Repos ab GitHub Pro (ca. 4 $/Monat).
+
+Bis dahin gilt:
+- Solange es Pro nicht gibt, gibt es auch keine `PRO_*`-Secrets – während des Aufbaus von Pre besteht das Risiko also noch nicht.
+- **Spätestens bevor die `PRO_*`-Secrets angelegt werden** (Checkliste C), wird die Entscheidung erneut geprüft.
+- Änderungen an `.github/workflows/` werden im Pull Request ausdrücklich genannt und von Fabrizio besonders genau durchgesehen; die CI markiert solche Pull Requests.
+- Pro-Zugangsdaten mit möglichst wenig Rechten: Cloudflare-Token nur für das Pages-Projekt `platzcoach-pro`, eigenes Datenbank-Passwort je Umgebung.
+- Bei Verdacht: alle `PRO_*`-Secrets sofort austauschen.
 
 ## 4. Geheimnisse
 
@@ -186,7 +193,6 @@ Preise geprüft am 12.10.2026; vor der Einrichtung erneut prüfen.
 - [ ] AVV-Kette: Platzcoach als Auftragsverarbeiter der Vereine, Unterauftragsverarbeiter Supabase, Scaleway, Cloudflare, Better Stack (rechtlich prüfen lassen)
 - [ ] Content Security Policy für die App festlegen (`_headers`), vorher klären, wo Nutzertext per `innerHTML` landet
 - [ ] Clarity und GA4 im eingeloggten Bereich: behalten, einschränken oder entfernen
-- [ ] Freigabe technisch absichern: GitHub Pro für das private Repo, öffentliches Repo oder nur Arbeitsanweisung (siehe Abschnitt 3)
 - [ ] Zulässiger Datenverlust und Wiederherstellungszeit festlegen (z. B. höchstens ein Tag Datenverlust, Wiederherstellung innerhalb eines Tages) – davon hängt ab, ob tägliche Backups reichen
 
 ## 11. Migrations-Checkliste
@@ -215,6 +221,7 @@ Reihenfolge der Datenübernahme steht im Funktionsinventar (Projekt-Doc), hier n
 
 **C. Pro aufbauen (erst kurz vor dem Umzug, damit Pro nie Testdaten enthält)**
 - [ ] Projekt `platzcoach-pro` (Frankfurt, Pro-Plan), Pages-Projekt `platzcoach-pro`
+- [ ] Entscheidung „Freigabe technisch absichern“ (GitHub Pro?) erneut prüfen – **vor** dem Anlegen der `PRO_*`-Secrets
 - [ ] `release.yml`, `PRO_*`-Secrets; Probe-Release mit leerem Schema
 - [ ] Wiederherstellung aus Backup einmal geübt
 
