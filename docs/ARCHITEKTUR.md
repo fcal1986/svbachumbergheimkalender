@@ -69,7 +69,7 @@ Die Fachbereiche entsprechen den Domänen des Datenmodells. Fachregeln, die die 
 
 ## 4. Regeln (werden in der CI geprüft)
 
-1. **Nur `api.ts` spricht mit Supabase.** Kein Supabase-Aufruf in Komponenten, Views oder Hooks anderer Bereiche.
+1. **Nur `api.ts` spricht mit Supabase.** Kein Supabase-Aufruf in Komponenten, Views oder Hooks anderer Bereiche. *Das ist eine Ordnungsregel für den Code, keine Sicherheitsgrenze:* Jeder kann die API auch ohne unsere App aufrufen. Geschützt wird ausschließlich in der Datenbank (RLS, Rechte, `api.*`), getestet über die Angriffsfälle in `BETRIEB.md`.
 2. **Abhängigkeiten nur in eine Richtung:** `views` → `domains` → `core`. Fachbereiche importieren andere Fachbereiche nur über deren `index.ts`, nie über innere Dateien.
 3. **Keine Fachregel doppelt.** Was die Datenbank entscheidet, entscheidet nur die Datenbank; was das Frontend berechnet, steht genau einmal in einem `logik.ts`.
 4. **Kein `dangerouslySetInnerHTML`, kein `innerHTML`.**

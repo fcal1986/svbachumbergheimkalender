@@ -39,7 +39,7 @@ Wir nutzen **Dev, Pre und Pro** (wie bei Openbank). Pre ist die Vorab-Umgebung, 
 Hinweise:
 
 - Free-Projekte von Supabase pausieren nach einer Woche ohne Aktivität. Die nächtliche Spiegelung hält `platzcoach-pre` wach.
-- Pre hat im Free-Plan keine automatischen Backups. Das ist gewollt: Pre enthält keine echten Personendaten und wird jede Nacht aus der Spiegelung neu befüllt.
+- Pre hat im Free-Plan keine automatischen Backups. Das ist vertretbar: Pre wird jede Nacht aus der Spiegelung neu befüllt.
 - Pre ist für Suchmaschinen gesperrt (`X-Robots-Tag: noindex` in `_headers`) und zeigt ein Band „Pre-Umgebung – Testdaten“.
 
 ### Daten auf Pre: pseudonymisierte Spiegelung (Entscheidung 14.10.2026)
@@ -61,6 +61,13 @@ Regeln:
 - **Abgleich nach jedem Lauf:** Konflikte und Tagesbelegung der nächsten 220 Tage auf Pre gegen den Pilot vergleichen; Abweichungen melden (Heartbeat schlägt fehl).
 - **Richtung:** vor dem Umzug Pilot (Repo-JSON) → Pre; nach dem Umzug Pro → Pre. Der Job nach dem Umzug liest Pro und läuft nur in einem Workflow mit `PRO_*`-Secrets, den Menschen prüfen und freigeben; Claude bekommt dadurch keinen Zugriff auf Pro.
 - **Keine Gegenrichtung:** Von Pre fließt nie etwas nach Pro.
+- **Rechtlich bleiben die Daten personenbezogen.** Pseudonymisierte Daten gelten nach DSGVO weiter als personenbezogen, solange sich die Personen zurückverfolgen lassen (hier über Salz und Mannschaftszuordnung). Bewusst so entschieden am 14.10.2026. Deshalb gilt für Pre:
+  - Pre ist in der AVV-Kette mit abgedeckt (Supabase, Cloudflare, Scaleway).
+  - Zugriff auf das Pre-Dashboard von Supabase nur für Fabrizio; Claude nur über die Pipeline.
+  - **Serverseitige Empfängerliste:** Auth-Mails, Benachrichtigungen und Push auf Pre gehen nur an Adressen aus `PRE_TEST_MAIL`; alles andere wird in der Datenbank verworfen, nicht erst in der App.
+  - Der fussball.de-Abgleich auf Pre liest nur, Webhooks und andere externe Aufrufe sind aus.
+- **Spiegelung pausieren:** Während du ein Feature auf Pre abnimmst, kann die Spiegelung angehalten werden (Repository-Variable `PRE_SPIEGEL_PAUSE`), damit der Testzustand nicht über Nacht überschrieben wird.
+- **Feste Testszenarien zusätzlich:** Für die automatischen Tests (CI und Playwright) gibt es einen erfundenen Testverein mit allen Rollen und Sonderfällen (Sperre, Überschneidung, Absage, Torwarttraining, Verlegung). Er wird von der Spiegelung nicht angefasst, damit Tests wiederholbar sind.
 
 ## 3. Deployment-Pipeline
 
@@ -68,15 +75,38 @@ Drei Workflows in `.github/workflows/`:
 
 | Workflow | Auslöser | Schritte |
 |---|---|---|
-| `ci.yml` | jeder Pull Request | Postgres + PostgREST im Runner starten → alle Migrationen einspielen → Szenarien, Rechteprüfung, Paralleltests, HTTP-Tests → Frontend bauen. Rot = nicht mergen. |
-| `deploy-pre.yml` | Merge auf `main` | 1. `supabase db push` gegen Pre · 2. `supabase functions deploy` · 3. Frontend mit Pre-Konfiguration bauen, `wrangler pages deploy` nach `platzcoach-pre` · 4. Rauchtest: Rechteprüfung und HTTP-Tests gegen Pre · 5. Supabase Security Advisor auswerten |
-| `release.yml` | Tag `vJJJJ.MM.TT-N` (entspricht Version „TT.MM.JJJJ · N“) oder manuell | 1. `pg_dump` von Pro als Sicherung · 2. dieselben Schritte wie Pre gegen Pro, **mit genau dem Commit, der auf Pre grün war** · 3. Rauchtest gegen Pro · 4. Heartbeat „Release“ an Better Stack |
+| `ci.yml` | jeder Pull Request | Typen (`tsc`), ESLint, Prettier, Vitest → Postgres + PostgREST im Runner: **frische Datenbank** und **Upgrade vom zuletzt veröffentlichten Pro-Schema** → Szenarien, Rechteprüfung, Angriffsfälle (siehe unten), Paralleltests, HTTP-Tests → Geheimnis-Suche und Prüfung der Pakete auf bekannte Lücken → Frontend bauen. Rot = nicht mergen. |
+| `deploy-pre.yml` | Merge auf `main` | 1. `supabase db push` gegen Pre · 2. `supabase functions deploy` · 3. Frontend mit Pre-Konfiguration bauen (`npm ci`, feste Paketversionen), `wrangler pages deploy` nach `platzcoach-pre` · 4. Rauchtest: Rechteprüfung und HTTP-Tests gegen Pre · 5. Playwright-Abläufe · 6. Supabase Security Advisor: Befunde der Stufe „Error“ stoppen · 7. Erfolg wird als GitHub-Deployment „pre“ **mit Commit** festgehalten. Läufe stehen in einer Warteschlange (`concurrency`), damit sich Auslieferungen nicht überholen. |
+| `release.yml` | Tag `vJJJJ.MM.TT-N` (entspricht Version „TT.MM.JJJJ · N“) | 0. **Prüfung:** Der Tag muss genau auf dem Commit stehen, der zuletzt erfolgreich auf Pre lief – sonst Abbruch · 1. `pg_dump` von Pro als Sicherung · 2. dieselben Schritte wie Pre gegen Pro, aus demselben Commit mit denselben Paketversionen; die Pro-Einstellungen (URL, Schlüssel) werden vor dem Bauen geprüft · 3. Rauchtest gegen Pro · 4. Heartbeat „Release“ an Better Stack · 5. Issues mit „Refs #…“ aus diesem Release werden geschlossen. **Bei jedem Fehler:** sofort stoppen, Alarm, kein automatisches Zurückspielen der Datenbank. |
 
 Reihenfolge ist immer: Datenbank → Edge Functions → Frontend. Deshalb baut Cloudflare nicht selbst (keine Git-Anbindung), sondern bekommt das fertige Ergebnis per Direct Upload.
 
 **Migrationen:** liegen in `supabase/migrations/`. Die Dateien 01–12 aus Schema v7 werden die erste Migration. Änderungen am Schema nur als neue Migrationsdatei, nie im Dashboard. Jede Migration muss mindestens eine App-Version lang mit dem alten Client funktionieren (Service Worker hält alte Versionen am Leben): erst hinzufügen, im nächsten Release entfernen.
 
-**Rückgängig machen:** Frontend in Cloudflare auf das vorige Deployment zurücksetzen (ein Klick). Datenbank nie zurückrollen, sondern mit einer Korrektur-Migration reparieren; im Notfall den `pg_dump` vom Release-Zeitpunkt.
+**Ein Release-Kandidat zur Zeit:** Während du einen Stand auf Pre abnimmst, wird nichts Neues gemergt. Wird doch gemergt, verweigert `release.yml` den alten Tag, weil Pre inzwischen einen anderen Commit hat – dann neu abnehmen.
+
+**Board-Status:** In Arbeit → Auf Pre → Live. Pull Requests verweisen mit „Refs #…“ auf ihr Issue (nicht „Closes“, das würde schon beim Merge schließen). Geschlossen wird beim Release.
+
+**Rückweg bei einem fehlerhaften Release:**
+1. Frontend in Cloudflare auf das vorige Deployment zurücksetzen (ein Klick).
+2. Edge Functions aus dem vorigen Tag erneut ausrollen.
+3. Datenbank **nicht** zurückspielen – sonst gehen zwischenzeitlich eingetragene Termine verloren. Stattdessen Korrektur-Migration über Pre → Pro. Das Zurückspielen des `pg_dump` ist nur der letzte Ausweg nach bewusster Entscheidung.
+4. Weil Migrationen abwärtskompatibel sind (erst hinzufügen, später entfernen), funktioniert die vorige App mit der neuen Datenbank. Trainer, die das Update noch nicht angenommen haben, arbeiten ohnehin mit der alten Version weiter.
+
+### Angriffsfälle in den Tests
+
+Die Rechteprüfung zählt nicht Testfälle, sondern muss diese Fälle abdecken – über direkte HTTP-Aufrufe an die API, nicht über die App:
+- Trainer aus Verein A liest oder ändert Daten von Verein B (Tabellen, Views, Funktionen)
+- manipulierte Vereins-ID oder Mannschafts-ID in einer Anfrage
+- Trainer macht sich selbst zum Admin oder ändert fremde Rollen
+- Zugriff ohne Anmeldung auf alles außer dem öffentlichen Kalender
+- gleichzeitige Buchungen derselben Fläche (genau eine gewinnt)
+- dieselbe Anfrage zweimal (keine doppelte Absage, keine doppelte Mail)
+- ein alter App-Stand gegen das neue Schema (Kompatibilität)
+
+### Freigabe technisch absichern (offen, Entscheidung ausstehend)
+
+„Claude fasst Pro nicht an“ ist bisher eine Arbeitsanweisung. Technisch erzwingen lässt es sich mit Schutzregeln für `main`, einer Regel, dass nur Fabrizio `v*`-Tags anlegen darf, und einer Umgebung „pro“, deren Secrets nur der Release-Job auf einem solchen Tag erhält. Bei privaten Repos setzt das GitHub Pro voraus (ca. 4 $/Monat); bei öffentlichen Repos ist es kostenlos. Bis zur Entscheidung gilt die Arbeitsanweisung.
 
 ## 4. Geheimnisse
 
@@ -156,6 +186,8 @@ Preise geprüft am 12.10.2026; vor der Einrichtung erneut prüfen.
 - [ ] AVV-Kette: Platzcoach als Auftragsverarbeiter der Vereine, Unterauftragsverarbeiter Supabase, Scaleway, Cloudflare, Better Stack (rechtlich prüfen lassen)
 - [ ] Content Security Policy für die App festlegen (`_headers`), vorher klären, wo Nutzertext per `innerHTML` landet
 - [ ] Clarity und GA4 im eingeloggten Bereich: behalten, einschränken oder entfernen
+- [ ] Freigabe technisch absichern: GitHub Pro für das private Repo, öffentliches Repo oder nur Arbeitsanweisung (siehe Abschnitt 3)
+- [ ] Zulässiger Datenverlust und Wiederherstellungszeit festlegen (z. B. höchstens ein Tag Datenverlust, Wiederherstellung innerhalb eines Tages) – davon hängt ab, ob tägliche Backups reichen
 
 ## 11. Migrations-Checkliste
 

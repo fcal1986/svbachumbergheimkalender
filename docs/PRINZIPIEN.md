@@ -85,7 +85,7 @@ Neue häufige Aufgaben werden hier ergänzt.
 
 - **Rechte nur auf dem Server.** RLS ist auf jeder Tabelle an, geschrieben wird nur über `api.*`. Die Oberfläche blendet aus, sie schützt nicht. Jede Rechteänderung bekommt einen Test im selben Commit.
 - **Drei getrennte Umgebungen: Dev, Pre, Pro.** Entwickelt wird nur online auf Branches (Dev = Branch + Pull Request + Tests). Jeder Stand läuft erst auf Pre (pre.platzcoach.de), dann auf Pro. Kein Release ohne grüne Tests auf Pre.
-- **Jede Aufgabe ist ein Issue, jede Änderung ein Pull Request, der sein Issue schließt** („Closes #…“). So zeigt das Projekt-Board den Stand ohne Nachpflegen.
+- **Jede Aufgabe ist ein Issue, jede Änderung ein Pull Request, der auf sein Issue verweist** („Refs #…“). Das Issue wird erst beim Release geschlossen; das Board zeigt In Arbeit → Auf Pre → Live.
 - **Claude bekommt nie Zugang zu Pro.** Claude arbeitet auf Branches; Zugangsdaten zu Pro kennt nur die Release-Pipeline. Auch Menschen ändern Pro nicht von Hand.
 - **Schema nur über Migrationen im Repo.** Nur vorwärts und abwärtskompatibel: erst hinzufügen, im nächsten Release entfernen. Nie per Klick im Dashboard.
 - **Keine echten Personendaten außerhalb von Pro.** Pre testet mit echten Terminen, Plätzen und Spielen, aber pseudonymisierten Personen (nächtliche Spiegelung); Dev nur mit Testdaten. Von Pre fließt nie etwas nach Pro.
