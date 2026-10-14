@@ -84,7 +84,8 @@ Neue häufige Aufgaben werden hier ergänzt.
 > Beschlossen am 12.10.2026 als Planung. Gilt ab dem Start der Migration für jede Änderung. Umsetzung und Abläufe: `docs/BETRIEB.md`.
 
 - **Rechte nur auf dem Server.** RLS ist auf jeder Tabelle an, geschrieben wird nur über `api.*`. Die Oberfläche blendet aus, sie schützt nicht. Jede Rechteänderung bekommt einen Test im selben Commit.
-- **Drei getrennte Umgebungen: Dev, Pre, Pro.** Jeder Stand läuft erst auf Pre (pre.platzcoach.de), dann auf Pro. Kein Release ohne grüne Tests auf Pre.
+- **Drei getrennte Umgebungen: Dev, Pre, Pro.** Entwickelt wird nur online auf Branches (Dev = Branch + Pull Request + Tests). Jeder Stand läuft erst auf Pre (pre.platzcoach.de), dann auf Pro. Kein Release ohne grüne Tests auf Pre.
+- **Jede Aufgabe ist ein Issue, jede Änderung ein Pull Request, der sein Issue schließt** („Closes #…“). So zeigt das Projekt-Board den Stand ohne Nachpflegen.
 - **Claude bekommt nie Zugang zu Pro.** Claude arbeitet auf Branches; Zugangsdaten zu Pro kennt nur die Release-Pipeline. Auch Menschen ändern Pro nicht von Hand.
 - **Schema nur über Migrationen im Repo.** Nur vorwärts und abwärtskompatibel: erst hinzufügen, im nächsten Release entfernen. Nie per Klick im Dashboard.
 - **Keine echten Personendaten außerhalb von Pro.** Pre und Dev arbeiten mit erfundenen Testvereinen.
