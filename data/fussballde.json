@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-15T11:25:26.635Z",
+  "updated": "2026-10-15T16:58:40.442Z",
   "games": [
     {
       "d": "2026-09-26",
@@ -2274,6 +2274,27 @@
       "infoAt": "2026-10-09T09:06:57.625Z"
     },
     {
+      "d": "2026-10-15",
+      "t": "19:30",
+      "team": "Herren Ü32",
+      "squad": 1,
+      "ownName": "SV Bachum/Bergheim",
+      "opponent": "SC Neheim",
+      "competition": "Kreisturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sc-neheim-sv-bachum-bergheim/-/spiel/031SAEVJ4G000000VS5489BTVTPHHFPR",
+      "movedFrom": {
+        "d": "2026-10-19",
+        "t": "19:30"
+      },
+      "movedAt": "2026-10-15T16:58:39.539Z",
+      "gameNo": "191234003",
+      "staffelId": "191234",
+      "staffelName": "Kreisturnier",
+      "venue": "Kunstrasenplatz, Binnerfeldstadion Neheim, Binnerfeld 51, 59755 Arnsberg",
+      "infoAt": "2026-10-15T16:58:40.026Z"
+    },
+    {
       "d": "2026-10-17",
       "t": "09:00",
       "team": "E-Junioren",
@@ -2354,22 +2375,6 @@
       "staffelName": "B-Junioren - Bezirksliga, Staffel 3",
       "venue": "Kunstrasenplatz, Huckenohl-Stadion NP, Oesberner Weg 40, 58706 Menden (Sauerland)",
       "infoAt": "2026-10-09T09:07:00.807Z"
-    },
-    {
-      "d": "2026-10-19",
-      "t": "19:30",
-      "team": "Herren Ü32",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "opponent": "SC Neheim",
-      "competition": "Kreisturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sc-neheim-sv-bachum-bergheim/-/spiel/031SAEVJ4G000000VS5489BTVTPHHFPR",
-      "gameNo": "191234003",
-      "staffelId": "191234",
-      "staffelName": "Kreisturnier",
-      "venue": "Kunstrasenplatz, Binnerfeldstadion Neheim, Binnerfeld 51, 59755 Arnsberg",
-      "infoAt": "2026-10-09T09:07:01.447Z"
     },
     {
       "d": "2026-10-22",
@@ -4086,7 +4091,7 @@
       ],
       "games": 3,
       "homeGames": 0,
-      "first": "2026-10-19",
+      "first": "2026-10-15",
       "last": "2026-11-16",
       "teamId": "01OR4F5HES000000VV0AG811VS8BP574"
     },
