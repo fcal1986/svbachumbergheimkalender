@@ -1,39 +1,6 @@
 {
-  "updated": "2026-10-14T23:12:25.287Z",
+  "updated": "2026-10-15T04:35:12.032Z",
   "games": [
-    {
-      "d": "2026-09-23",
-      "t": "16:50",
-      "team": "E-Junioren",
-      "squad": 3,
-      "ownName": "SV Bachum/Bergheim III",
-      "gameNo": "210869006",
-      "opponent": "JSG Vosswinkel/Echthausen II",
-      "competition": "Kreisliga C",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-3-jsg-vosswinkel-echthausen-ii/-/spiel/031J8T2KJ0000000VS5489BUVVKNMR0J",
-      "matchday": 2,
-      "staffelId": "210869",
-      "staffelName": "KL C Gruppe 2",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:14.564Z"
-    },
-    {
-      "d": "2026-09-23",
-      "t": "18:30",
-      "team": "B-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "gameNo": "200278003",
-      "opponent": "JSG Herdringen/Mü. I",
-      "competition": "Kreispokal",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-herdringen-mueschede/-/spiel/031JUNCVJO000000VS5489BUVVKNMR0J",
-      "staffelId": "200278",
-      "staffelName": "B.- Jugend Kreispokal",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:15.270Z"
-    },
     {
       "d": "2026-09-26",
       "t": "10:00",
@@ -1934,39 +1901,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-09-23",
-      "t": "19:00",
-      "team": "A-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "opponent": "SG Balve/Garbeck/La/Kü/Aff 1",
-      "competition": "Kreispokal",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sg-balve-garbeck-la-kue-aff-1-sv-bachum-bergheim/-/spiel/031JV746I8000000VS5489BUVVKNMR0J",
-      "gameNo": "200276004",
-      "staffelId": "200276",
-      "staffelName": "Kreispokal 2026/27",
-      "venue": "Kunstrasenplatz, Am Holloh, Tannenstraße , 58802 Balve",
-      "infoAt": "2026-10-09T09:06:41.446Z"
-    },
-    {
-      "d": "2026-09-23",
-      "t": "19:30",
-      "team": "Herren",
-      "squad": 2,
-      "ownName": "SV Bachum/Bergheim II",
-      "opponent": "SG Eintracht 25",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sg-eintracht-25-sv-bachum-bergheim-ii/-/spiel/031IK2S5D4000000VS5489BUVVKNMR0J",
-      "gameNo": "211386008",
-      "matchday": 1,
-      "staffelId": "211386",
-      "staffelName": "Kreisliga B Arnsberg",
-      "venue": "Kunstrasenplatz, Sportpark Westenfeld, Im Schlink 33, 59846 Sundern (Sauerland)",
-      "infoAt": "2026-10-09T09:06:42.330Z"
-    },
     {
       "d": "2026-09-26",
       "t": "10:00",
@@ -3931,13 +3865,13 @@
         "02B9BQVPIG000000VS5489B1VU20GQ5T"
       ],
       "competitions": [
-        "Kreispokal",
         "Kreisliga A",
-        "Kreisfreundschaftsspiele"
+        "Kreisfreundschaftsspiele",
+        "Kreispokal"
       ],
-      "games": 17,
+      "games": 16,
       "homeGames": 8,
-      "first": "2026-09-23",
+      "first": "2026-10-02",
       "last": "2027-05-21",
       "teamId": "027IVI3RO8000000VS5489B1VUA37ON8"
     },
@@ -3951,13 +3885,13 @@
         "02B9BQVPIG000000VS5489B1VU20GQ5T"
       ],
       "competitions": [
-        "Kreispokal",
         "Bezirksliga",
+        "Kreispokal",
         "Kreisfreundschaftsspiele"
       ],
-      "games": 25,
-      "homeGames": 14,
-      "first": "2026-09-23",
+      "games": 24,
+      "homeGames": 13,
+      "first": "2026-09-27",
       "last": "2027-06-13",
       "teamId": "02B9BQVPIG000000VS5489B1VU20GQ5T"
     },
@@ -4095,9 +4029,9 @@
       "competitions": [
         "Kreisliga C"
       ],
-      "games": 13,
-      "homeGames": 7,
-      "first": "2026-09-23",
+      "games": 12,
+      "homeGames": 6,
+      "first": "2026-09-28",
       "last": "2027-06-12",
       "teamId": "031BFRLD74000000VS5489BRVTPI24NQ"
     },
@@ -4189,9 +4123,9 @@
         "Kreisliga B",
         "Kreispokal"
       ],
-      "games": 26,
+      "games": 25,
       "homeGames": 12,
-      "first": "2026-09-23",
+      "first": "2026-09-27",
       "last": "2027-05-30",
       "teamId": "011MIBAEQC000000VTVG0001VTR8C1K7"
     },
@@ -4214,6 +4148,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-09-23",
+  "teamsFrom": "2026-09-24",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
