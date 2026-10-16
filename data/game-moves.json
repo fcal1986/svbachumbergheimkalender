@@ -113,6 +113,23 @@
       "byName": "Michael Raneck",
       "at": "2026-10-10T18:38:52.476Z",
       "cancelledTraining": []
+    },
+    {
+      "id": "880a38fc-6162-4bc9-9d27-0f4fb17fa2ee",
+      "link": "https://www.fussball.de/spiel/jsg-niedereimer-bruchhausen-sv-bachum-bergheim/-/spiel/031I1BDOEC000000VS5489BUVVKNMR0J",
+      "team": "C-Junioren",
+      "squad": 1,
+      "opponent": "JSG Niedereimer/Bruchh. I",
+      "away": true,
+      "fromD": "2026-10-17",
+      "fromT": "14:45",
+      "toD": "2026-10-23",
+      "toT": "18:30",
+      "reason": "Wunsch des Gegners",
+      "byId": "af1a6546-fdc2-4059-bef4-5a4966181701",
+      "byName": "Michael Raneck",
+      "at": "2026-10-16T09:12:15.719Z",
+      "cancelledTraining": []
     }
   ]
 }
