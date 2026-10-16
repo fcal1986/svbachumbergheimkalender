@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-16T18:03:02.110Z",
+  "updated": "2026-10-16T21:06:01.044Z",
   "games": [
     {
       "d": "2026-09-26",
@@ -1762,7 +1762,7 @@
       "staffelId": "211049",
       "staffelName": "B-Junioren - Bezirksliga, Staffel 3",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:06:28.949Z"
+      "infoAt": "2026-10-16T21:05:31.818Z"
     },
     {
       "d": "2027-05-23",
@@ -1779,7 +1779,7 @@
       "staffelId": "211386",
       "staffelName": "Kreisliga B Arnsberg",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:06:29.788Z"
+      "infoAt": "2026-10-16T21:05:32.651Z"
     },
     {
       "d": "2027-05-23",
@@ -1796,7 +1796,7 @@
       "staffelId": "210697",
       "staffelName": "Kreisliga A Arnsberg",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:06:30.621Z"
+      "infoAt": "2026-10-16T21:05:33.369Z"
     },
     {
       "d": "2027-05-30",
@@ -1813,7 +1813,7 @@
       "staffelId": "210824",
       "staffelName": "Kreisliga D Arnsberg",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:06:31.325Z"
+      "infoAt": "2026-10-16T21:05:34.200Z"
     },
     {
       "d": "2027-06-05",
@@ -1830,7 +1830,7 @@
       "staffelId": "210883",
       "staffelName": "KL A Gruppe 1",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:06:32.022Z"
+      "infoAt": "2026-10-16T21:05:35.012Z"
     },
     {
       "d": "2027-06-05",
@@ -1847,7 +1847,7 @@
       "staffelId": "210931",
       "staffelName": "KL B Gruppe 1",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:06:32.841Z"
+      "infoAt": "2026-10-16T21:05:35.711Z"
     },
     {
       "d": "2027-06-05",
@@ -1864,7 +1864,7 @@
       "staffelId": "210825",
       "staffelName": "KL A",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:06:33.667Z"
+      "infoAt": "2026-10-16T21:05:36.528Z"
     },
     {
       "d": "2027-06-05",
@@ -1880,7 +1880,7 @@
       "matchday": 13,
       "staffelId": "210869",
       "staffelName": "KL C Gruppe 2",
-      "infoAt": "2026-10-09T09:06:34.375Z"
+      "infoAt": "2026-10-16T21:05:37.358Z"
     },
     {
       "d": "2027-06-06",
@@ -1897,7 +1897,7 @@
       "staffelId": "211049",
       "staffelName": "B-Junioren - Bezirksliga, Staffel 3",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:06:35.198Z"
+      "infoAt": "2026-10-16T21:05:38.067Z"
     }
   ],
   "awayGames": [
@@ -3356,7 +3356,7 @@
       "staffelId": "210869",
       "staffelName": "KL C Gruppe 2",
       "venue": "Kunstrasenplatz, Waldstadion-Vosswinkel, Franziskusstr., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:07:41.963Z"
+      "infoAt": "2026-10-16T21:05:38.885Z"
     },
     {
       "d": "2027-04-17",
@@ -3373,7 +3373,7 @@
       "staffelId": "211396",
       "staffelName": "KL A Meisterrunde",
       "venue": "Kunstrasenplatz, Sportplatz Zur Friederichshöhe, Himmelpfortener Weg 2a, 59823 Arnsberg",
-      "infoAt": "2026-10-09T09:07:42.666Z"
+      "infoAt": "2026-10-16T21:05:39.584Z"
     },
     {
       "d": "2027-04-18",
@@ -3390,7 +3390,7 @@
       "staffelId": "211049",
       "staffelName": "B-Junioren - Bezirksliga, Staffel 3",
       "venue": "Kunstrasenplatz, Rothesportplatz Kunstrasen, Mährenstraße 35, 33102 Paderborn",
-      "infoAt": "2026-10-09T09:07:43.372Z"
+      "infoAt": "2026-10-16T21:05:40.300Z"
     },
     {
       "d": "2027-04-18",
@@ -3407,7 +3407,7 @@
       "staffelId": "211386",
       "staffelName": "Kreisliga B Arnsberg",
       "venue": "Kunstrasenplatz, Sportpark Westenfeld, Im Schlink 33, 59846 Sundern (Sauerland)",
-      "infoAt": "2026-10-09T09:07:44.099Z"
+      "infoAt": "2026-10-16T21:05:41.014Z"
     },
     {
       "d": "2027-04-18",
@@ -3424,7 +3424,7 @@
       "staffelId": "210697",
       "staffelName": "Kreisliga A Arnsberg",
       "venue": "Kunstrasenplatz, Sportplatz Affeln Auf der Stummel, Zum Imberg, 58809 Neuenrade",
-      "infoAt": "2026-10-09T09:07:44.816Z"
+      "infoAt": "2026-10-16T21:05:41.725Z"
     },
     {
       "d": "2027-04-24",
@@ -3441,7 +3441,7 @@
       "staffelId": "212741",
       "staffelName": "KL B",
       "venue": "Kunstrasenplatz, Sportplatz Grevenstein Im Wiesengrund, Im Wiesengrund, 59872 Meschede",
-      "infoAt": "2026-10-09T09:07:45.631Z"
+      "infoAt": "2026-10-16T21:05:42.422Z"
     },
     {
       "d": "2027-04-24",
@@ -3458,7 +3458,7 @@
       "staffelId": "211396",
       "staffelName": "KL A Meisterrunde",
       "venue": "Kunstrasenplatz, Sportplatz Balve Am Krumpaul, Am Krumpaul, 58802 Balve",
-      "infoAt": "2026-10-09T09:07:46.444Z"
+      "infoAt": "2026-10-16T21:05:43.119Z"
     },
     {
       "d": "2027-04-25",
@@ -3475,7 +3475,7 @@
       "staffelId": "211049",
       "staffelName": "B-Junioren - Bezirksliga, Staffel 3",
       "venue": "Kunstrasenplatz, Sportplatz Am Hallenbad, Oesterstr. 66, 44309 Dortmund",
-      "infoAt": "2026-10-09T09:07:47.262Z"
+      "infoAt": "2026-10-16T21:05:43.967Z"
     },
     {
       "d": "2027-04-25",
@@ -3492,7 +3492,7 @@
       "staffelId": "210824",
       "staffelName": "Kreisliga D Arnsberg",
       "venue": "Kunstrasenplatz, Sportplatz Schreppenberg, Neuer Schulweg 23, 59821 Arnsberg",
-      "infoAt": "2026-10-09T09:07:47.967Z"
+      "infoAt": "2026-10-16T21:05:44.785Z"
     },
     {
       "d": "2027-04-30",
@@ -3521,7 +3521,7 @@
       "staffelId": "211386",
       "staffelName": "Kreisliga B Arnsberg",
       "venue": "Kunstrasenplatz, Sportplatz Affeln Auf der Stummel, Zum Imberg, 58809 Neuenrade",
-      "infoAt": "2026-10-09T09:07:48.802Z"
+      "infoAt": "2026-10-16T21:05:45.618Z"
     },
     {
       "d": "2027-05-02",
@@ -3538,7 +3538,7 @@
       "staffelId": "210697",
       "staffelName": "Kreisliga A Arnsberg",
       "venue": "Rasenplatz, Sportplatz Beckum Zur Hinsel, Zur Hinsel, 58802 Balve",
-      "infoAt": "2026-10-09T09:07:49.522Z"
+      "infoAt": "2026-10-16T21:05:46.458Z"
     },
     {
       "d": "2027-05-09",
@@ -3555,7 +3555,7 @@
       "staffelId": "211049",
       "staffelName": "B-Junioren - Bezirksliga, Staffel 3",
       "venue": "Kunstrasenplatz, Sportplatz Waldhausweg, Waldhausweg 1, 44229 Dortmund",
-      "infoAt": "2026-10-09T09:07:50.352Z"
+      "infoAt": "2026-10-16T21:05:47.285Z"
     },
     {
       "d": "2027-05-15",
@@ -3572,7 +3572,7 @@
       "staffelId": "210883",
       "staffelName": "KL A Gruppe 1",
       "venue": "Kunstrasenplatz, Röhrtalstadion Sundern, Hauptstr. 189 A, 59846 Sundern (Sauerland)",
-      "infoAt": "2026-10-09T09:07:51.174Z"
+      "infoAt": "2026-10-16T21:05:47.981Z"
     },
     {
       "d": "2027-05-15",
@@ -3589,7 +3589,7 @@
       "staffelId": "210931",
       "staffelName": "KL B Gruppe 1",
       "venue": "Kunstrasenplatz, Küppelkampfbahn Meschede-Freienohl (Kunstrasen), Im Ohl, 59872 Meschede",
-      "infoAt": "2026-10-09T09:07:51.986Z"
+      "infoAt": "2026-10-16T21:05:48.795Z"
     },
     {
       "d": "2027-05-15",
@@ -3606,7 +3606,7 @@
       "staffelId": "210869",
       "staffelName": "KL C Gruppe 2",
       "venue": "Kunstrasenplatz, Sportplatz Schreppenberg, Neuer Schulweg 23, 59821 Arnsberg",
-      "infoAt": "2026-10-09T09:07:52.680Z"
+      "infoAt": "2026-10-16T21:05:49.606Z"
     },
     {
       "d": "2027-05-17",
@@ -3623,7 +3623,7 @@
       "staffelId": "210697",
       "staffelName": "Kreisliga A Arnsberg",
       "venue": "Kunstrasenplatz, Sportplatz Grevenstein Im Wiesengrund, Im Wiesengrund, 59872 Meschede",
-      "infoAt": "2026-10-09T09:07:53.522Z"
+      "infoAt": "2026-10-16T21:05:50.328Z"
     },
     {
       "d": "2027-05-17",
@@ -3640,7 +3640,7 @@
       "staffelId": "211386",
       "staffelName": "Kreisliga B Arnsberg",
       "venue": "Kunstrasenplatz, Sportpark Langscheid, Langscheider Str. 91, 59846 Sundern (Sauerland)",
-      "infoAt": "2026-10-09T09:07:54.246Z"
+      "infoAt": "2026-10-16T21:05:51.046Z"
     },
     {
       "d": "2027-05-21",
@@ -3657,7 +3657,7 @@
       "staffelId": "211375",
       "staffelName": "KL A",
       "venue": "Kunstrasenplatz, Ruhr-Möhne-Sportplatz Neheim, Zum Besenberg, 59755 Arnsberg",
-      "infoAt": "2026-10-09T09:07:55.064Z"
+      "infoAt": "2026-10-16T21:05:51.860Z"
     },
     {
       "d": "2027-05-22",
@@ -3674,7 +3674,7 @@
       "staffelId": "210825",
       "staffelName": "KL A",
       "venue": "Kunstrasenplatz, Sportplatz Braukweg, Braukweg 6, 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:07:55.769Z"
+      "infoAt": "2026-10-16T21:05:52.672Z"
     },
     {
       "d": "2027-05-22",
@@ -3691,7 +3691,7 @@
       "staffelId": "210869",
       "staffelName": "KL C Gruppe 2",
       "venue": "Kunstrasenplatz, Eichholzsportplatz Arnsberg, Feauxweg 26, 59821 Arnsberg",
-      "infoAt": "2026-10-09T09:07:56.464Z"
+      "infoAt": "2026-10-16T21:05:53.365Z"
     },
     {
       "d": "2027-05-23",
@@ -3708,7 +3708,7 @@
       "staffelId": "210824",
       "staffelName": "Kreisliga D Arnsberg",
       "venue": "Kunstrasenplatz, Sportplatz Hachen Hüttenwiese, Am Sportplatz 13, 59846 Sundern (Sauerland)",
-      "infoAt": "2026-10-09T09:07:57.281Z"
+      "infoAt": "2026-10-16T21:05:54.066Z"
     },
     {
       "d": "2027-05-30",
@@ -3725,7 +3725,7 @@
       "staffelId": "211386",
       "staffelName": "Kreisliga B Arnsberg",
       "venue": "Kunstrasenplatz, Düsterloh-Arena Langenholthausen, Iserlohner Str., 58802 Balve",
-      "infoAt": "2026-10-09T09:07:58.113Z"
+      "infoAt": "2026-10-16T21:05:54.896Z"
     },
     {
       "d": "2027-05-30",
@@ -3742,7 +3742,7 @@
       "staffelId": "210697",
       "staffelName": "Kreisliga A Arnsberg",
       "venue": "Kunstrasenplatz, Sportplatz Braukweg, Braukweg 6, 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:07:58.829Z"
+      "infoAt": "2026-10-16T21:05:55.624Z"
     },
     {
       "d": "2027-06-05",
@@ -3759,7 +3759,7 @@
       "staffelId": "211396",
       "staffelName": "KL A Meisterrunde",
       "venue": "Kunstrasenplatz, Nebenplatz Stadion Kunstrasen Hüsten, Am Solepark 11, 59759 Arnsberg",
-      "infoAt": "2026-10-09T09:07:59.659Z"
+      "infoAt": "2026-10-16T21:05:56.324Z"
     },
     {
       "d": "2027-06-05",
@@ -3776,7 +3776,7 @@
       "staffelId": "212741",
       "staffelName": "KL B",
       "venue": "Kunstrasenplatz, Sportplatz Stockum Am Bergmer, Im Wienig, 59846 Sundern (Sauerland)",
-      "infoAt": "2026-10-09T09:08:00.480Z"
+      "infoAt": "2026-10-16T21:05:57.020Z"
     },
     {
       "d": "2027-06-05",
@@ -3792,7 +3792,7 @@
       "matchday": 14,
       "staffelId": "210420",
       "staffelName": "KL B Gruppe 2",
-      "infoAt": "2026-10-09T09:08:01.178Z"
+      "infoAt": "2026-10-16T21:05:57.830Z"
     },
     {
       "d": "2027-06-12",
@@ -3809,7 +3809,7 @@
       "staffelId": "210931",
       "staffelName": "KL B Gruppe 1",
       "venue": "Kunstrasenplatz, Sportplatz Telgenweg, Telgenweg, 59759 Arnsberg",
-      "infoAt": "2026-10-09T09:08:01.880Z"
+      "infoAt": "2026-10-16T21:05:58.533Z"
     },
     {
       "d": "2027-06-12",
@@ -3826,7 +3826,7 @@
       "staffelId": "210883",
       "staffelName": "KL A Gruppe 1",
       "venue": "Kunstrasenplatz, Sportplatz Telgenweg, Telgenweg, 59759 Arnsberg",
-      "infoAt": "2026-10-09T09:08:02.574Z"
+      "infoAt": "2026-10-16T21:05:59.229Z"
     },
     {
       "d": "2027-06-12",
@@ -3843,7 +3843,7 @@
       "staffelId": "210869",
       "staffelName": "KL C Gruppe 2",
       "venue": "Kunstrasenplatz, Sportplatz Affeln Auf der Stummel, Zum Imberg, 58809 Neuenrade",
-      "infoAt": "2026-10-09T09:08:03.392Z"
+      "infoAt": "2026-10-16T21:05:59.925Z"
     },
     {
       "d": "2027-06-13",
@@ -3860,7 +3860,7 @@
       "staffelId": "211049",
       "staffelName": "B-Junioren - Bezirksliga, Staffel 3",
       "venue": "Kunstrasenplatz, Sportpark Am Ardey -Kunst-, Ardeyweg 31-33, 59494 Soest",
-      "infoAt": "2026-10-09T09:08:04.219Z"
+      "infoAt": "2026-10-16T21:06:00.637Z"
     }
   ],
   "teams": [
