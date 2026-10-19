@@ -1,22 +1,6 @@
 {
-  "updated": "2026-10-18T22:24:54.033Z",
+  "updated": "2026-10-19T04:37:15.103Z",
   "games": [
-    {
-      "d": "2026-09-27",
-      "t": "11:30",
-      "team": "D-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum-Bergheim",
-      "gameNo": "240283016",
-      "opponent": "BSV Menden",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-bsv-menden/-/spiel/03249PQL6S000000VS5489BUVV5UN1SE",
-      "staffelId": "240283",
-      "staffelName": "Freundschaftsspiele Kreis Arnsberg",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:17.444Z"
-    },
     {
       "d": "2026-10-02",
       "t": "19:30",
@@ -1868,96 +1852,6 @@
   ],
   "awayGames": [
     {
-      "d": "2026-09-27",
-      "t": "11:00",
-      "team": "C-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum-Bergh. I",
-      "opponent": "JSG Balve/Gar./La/Be/Aff I",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/jsg-balve-garbeck-la-be-aff-i-sv-bachum-bergheim/-/spiel/031I1BDONO000000VS5489BUVVKNMR0J",
-      "movedFrom": {
-        "d": "2026-09-26",
-        "t": "13:30"
-      },
-      "movedAt": "2026-10-18T00:04:43.749Z",
-      "gameNo": "210825011",
-      "matchday": 3,
-      "staffelId": "210825",
-      "staffelName": "KL A",
-      "venue": "Kunstrasenplatz, Düsterloh-Arena Langenholthausen, Iserlohner Str., 58802 Balve",
-      "infoAt": "2026-10-09T09:06:46.262Z"
-    },
-    {
-      "d": "2026-09-27",
-      "t": "11:00",
-      "team": "B-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "opponent": "SF DJK Mastbruch",
-      "competition": "Bezirksliga",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sf-djk-mastbruch-sv-bachum-bergheim/-/spiel/031GM5IA2O000000VS5489BTVVG7L386",
-      "gameNo": "211049019",
-      "matchday": 3,
-      "staffelId": "211049",
-      "staffelName": "B-Junioren - Bezirksliga, Staffel 3",
-      "venue": "Kunstrasenplatz, Sportplatz am Schatenweg Kunstrasenplatz, Trakehnerstraße 39, 33104 Paderborn",
-      "infoAt": "2026-10-09T09:06:47.689Z"
-    },
-    {
-      "d": "2026-09-27",
-      "t": "12:30",
-      "team": "Herren",
-      "squad": 3,
-      "ownName": "SV Bachum/Bergheim III",
-      "opponent": "TuS Niedereimer II",
-      "competition": "Kreisliga D",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/tus-niedereimer-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IPOS000000VS5489BUVVKNMR0J",
-      "gameNo": "210824013",
-      "matchday": 5,
-      "staffelId": "210824",
-      "staffelName": "Kreisliga D Arnsberg",
-      "venue": "Kunstrasenplatz, Sportplatz Zur Friederichshöhe, Himmelpfortener Weg 2a, 59823 Arnsberg",
-      "infoAt": "2026-10-09T09:06:48.559Z"
-    },
-    {
-      "d": "2026-09-27",
-      "t": "15:00",
-      "team": "Herren",
-      "squad": 2,
-      "ownName": "SV Bachum/Bergheim II",
-      "opponent": "FC BW Gierskämpen",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/fc-bw-gierskaempen-sv-bachum-bergheim-ii/-/spiel/031IK2RVS8000000VS5489BUVVKNMR0J",
-      "gameNo": "211386057",
-      "matchday": 8,
-      "staffelId": "211386",
-      "staffelName": "Kreisliga B Arnsberg",
-      "venue": "Kunstrasenplatz, Sportplatz Altes Feld, Altes Feld, 59821 Arnsberg",
-      "infoAt": "2026-10-09T09:06:49.298Z"
-    },
-    {
-      "d": "2026-09-27",
-      "t": "15:30",
-      "team": "Herren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "opponent": "SG Balve/Garbeck",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sg-balve-garbeck-sv-bachum-bergheim/-/spiel/031I0BNBIS000000VS5489BUVVKNMR0J",
-      "gameNo": "210697064",
-      "matchday": 8,
-      "staffelId": "210697",
-      "staffelName": "Kreisliga A Arnsberg",
-      "venue": "Kunstrasenplatz, Am Holloh, Tannenstraße , 58802 Balve",
-      "infoAt": "2026-10-09T09:06:50.035Z"
-    },
-    {
       "d": "2026-09-28",
       "t": "17:00",
       "team": "E-Junioren",
@@ -3786,9 +3680,9 @@
         "Kreispokal",
         "Kreisfreundschaftsspiele"
       ],
-      "games": 24,
+      "games": 23,
       "homeGames": 13,
-      "first": "2026-09-27",
+      "first": "2026-10-04",
       "last": "2027-06-13",
       "teamId": "02B9BQVPIG000000VS5489B1VU20GQ5T"
     },
@@ -3803,13 +3697,13 @@
         "011MIB6N6S000000VTVG0001VTR8C1K7"
       ],
       "competitions": [
-        "Kreisliga A",
         "Kreispokal",
-        "Kreisfreundschaftsspiele"
+        "Kreisfreundschaftsspiele",
+        "Kreisliga A"
       ],
-      "games": 17,
+      "games": 16,
       "homeGames": 8,
-      "first": "2026-09-27",
+      "first": "2026-10-08",
       "last": "2027-06-05",
       "teamId": "011MIB6N6S000000VTVG0001VTR8C1K7"
     },
@@ -3848,9 +3742,9 @@
         "Vereinsturnier",
         "Kreispokal"
       ],
-      "games": 24,
-      "homeGames": 11,
-      "first": "2026-09-27",
+      "games": 23,
+      "homeGames": 10,
+      "first": "2026-10-02",
       "last": "2027-06-05",
       "teamId": "011MI9U4VO000000VTVG0001VTR8C1K7"
     },
@@ -4001,9 +3895,9 @@
         "Kreisliga A",
         "Kreisfreundschaftsspiele"
       ],
-      "games": 27,
+      "games": 26,
       "homeGames": 13,
-      "first": "2026-09-27",
+      "first": "2026-10-04",
       "last": "2027-05-30",
       "teamId": "011MIANBCK000000VTVG0001VTR8C1K7"
     },
@@ -4020,9 +3914,9 @@
         "Kreisliga B",
         "Kreispokal"
       ],
-      "games": 25,
+      "games": 24,
       "homeGames": 12,
-      "first": "2026-09-27",
+      "first": "2026-10-04",
       "last": "2027-05-30",
       "teamId": "011MIBAEQC000000VTVG0001VTR8C1K7"
     },
@@ -4038,13 +3932,13 @@
       "competitions": [
         "Kreisliga D"
       ],
-      "games": 17,
+      "games": 16,
       "homeGames": 9,
-      "first": "2026-09-27",
+      "first": "2026-10-11",
       "last": "2027-05-30",
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-09-27",
+  "teamsFrom": "2026-09-28",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
