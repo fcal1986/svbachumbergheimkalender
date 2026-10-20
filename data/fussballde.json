@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-20T11:32:49.555Z",
+  "updated": "2026-10-20T17:00:33.377Z",
   "games": [
     {
       "d": "2026-10-02",
@@ -565,7 +565,7 @@
       "staffelId": "240244",
       "staffelName": "Freundschaftsspiele Kreis Arnsberg",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-13T15:56:22.946Z"
+      "infoAt": "2026-10-20T17:00:32.337Z"
     },
     {
       "d": "2026-11-08",
@@ -2294,6 +2294,27 @@
       "infoAt": "2026-10-16T13:14:47.144Z"
     },
     {
+      "d": "2026-11-02",
+      "t": "19:30",
+      "team": "Herren Ü32",
+      "squad": 1,
+      "ownName": "SV Bachum/Bergheim",
+      "opponent": "TuS Bruchhausen",
+      "competition": "Kreispokal",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/tus-bruchhausen-sv-bachum-bergheim/-/spiel/0327PMS1UO000000VS5489BTVUCVBQ5B",
+      "movedFrom": {
+        "d": "2026-11-09",
+        "t": "19:30"
+      },
+      "movedAt": "2026-10-20T17:00:32.111Z",
+      "gameNo": "200208013",
+      "staffelId": "200208",
+      "staffelName": "Krombacher Kreispokal Ü32",
+      "venue": "Kunstrasenplatz, Sportpark An der Hiag, Am Hackeland 1, 59759 Arnsberg",
+      "infoAt": "2026-10-20T17:00:32.966Z"
+    },
+    {
       "d": "2026-11-07",
       "t": "11:00",
       "team": "E-Junioren",
@@ -2376,22 +2397,6 @@
       "staffelName": "Freundschaftsspiele Kreis Hochsauerlandkreis",
       "venue": "Kunstrasenplatz, REMBE-Sport-Park Stadion, Zur Jakobuslinde 38, 59929 Brilon",
       "infoAt": "2026-10-16T13:14:50.314Z"
-    },
-    {
-      "d": "2026-11-09",
-      "t": "19:30",
-      "team": "Herren Ü32",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "opponent": "TuS Bruchhausen",
-      "competition": "Kreispokal",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/tus-bruchhausen-sv-bachum-bergheim/-/spiel/0327PMS1UO000000VS5489BTVUCVBQ5B",
-      "gameNo": "200208013",
-      "staffelId": "200208",
-      "staffelName": "Krombacher Kreispokal Ü32",
-      "venue": "Kunstrasenplatz, Sportpark An der Hiag, Am Hackeland 1, 59759 Arnsberg",
-      "infoAt": "2026-10-16T13:14:50.877Z"
     },
     {
       "d": "2026-11-14",
