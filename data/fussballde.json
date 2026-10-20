@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-19T23:38:32.144Z",
+  "updated": "2026-10-20T04:46:47.675Z",
   "games": [
     {
       "d": "2026-10-02",
@@ -1851,23 +1851,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-09-28",
-      "t": "17:00",
-      "team": "E-Junioren",
-      "squad": 3,
-      "ownName": "SV Bachum/Bergheim III",
-      "opponent": "SV Hüsten 09 III",
-      "competition": "Kreisliga C",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-huesten-09-3-sv-bachum-bergheim-3/-/spiel/031J8T2KG4000000VS5489BUVVKNMR0J",
-      "gameNo": "210869011",
-      "matchday": 3,
-      "staffelId": "210869",
-      "staffelName": "KL C Gruppe 2",
-      "venue": "Kunstrasenplatz, Nebenplatz Stadion Kunstrasen Hüsten, Am Solepark 11, 59759 Arnsberg",
-      "infoAt": "2026-10-09T09:06:50.674Z"
-    },
     {
       "d": "2026-10-02",
       "t": "17:30",
@@ -3820,9 +3803,9 @@
       "competitions": [
         "Kreisliga C"
       ],
-      "games": 12,
+      "games": 11,
       "homeGames": 6,
-      "first": "2026-09-28",
+      "first": "2026-10-10",
       "last": "2027-06-12",
       "teamId": "031BFRLD74000000VS5489BRVTPI24NQ"
     },
@@ -3939,6 +3922,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-09-28",
+  "teamsFrom": "2026-09-29",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
