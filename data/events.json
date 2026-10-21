@@ -255,6 +255,25 @@
       "kickoff": "15:30",
       "ownerId": "af1a6546-fdc2-4059-bef4-5a4966181701",
       "ownerName": "Michael Raneck"
+    },
+    {
+      "id": "6979e576-f5d7-4f0a-8b9d-eebe6654fec0",
+      "d": "2026-12-05",
+      "t": "15:00",
+      "bis": "19:00",
+      "title": "Interne Mannschaftsfeier",
+      "kind": "other",
+      "team": "E-Jugend",
+      "squad": 1,
+      "pitch": null,
+      "halle": null,
+      "res": [
+        "Vereinsheim",
+        "Theke"
+      ],
+      "note": "",
+      "ownerId": "af1a6546-fdc2-4059-bef4-5a4966181701",
+      "ownerName": "Michael Raneck"
     }
   ]
 }
