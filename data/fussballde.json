@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-21T18:36:45.223Z",
+  "updated": "2026-10-21T23:17:12.232Z",
   "games": [
     {
       "d": "2026-10-02",
@@ -2129,22 +2129,6 @@
       "infoAt": "2026-10-16T13:14:42.206Z"
     },
     {
-      "d": "2026-10-22",
-      "t": "19:30",
-      "team": "Herren",
-      "squad": 2,
-      "ownName": "SV Bachum/Bergheim II",
-      "opponent": "SG Allendorf/Amecke II",
-      "competition": "Kreispokal",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sg-allendorf-amecke-ii-sv-bachum-bergheim-ii/-/spiel/032AODOMM4000000VS5489BTVU989P58",
-      "gameNo": "200207021",
-      "staffelId": "200207",
-      "staffelName": "Krombacher Reservepokal",
-      "venue": "Kunstrasenplatz, Sportplatz Allendorf Im Hespel, Im Hespel 70, 59846 Sundern (Sauerland)",
-      "infoAt": "2026-10-16T13:14:42.845Z"
-    },
-    {
       "d": "2026-10-23",
       "t": "18:30",
       "team": "C-Junioren",
@@ -2247,7 +2231,28 @@
       "staffelId": "240038",
       "staffelName": "Freundschaftsspiele Kreis Soest",
       "venue": "Kunstrasenplatz, Sportplatz am Heuerwerth -Kunst-, Heuerwerth 7, 59469 Ense",
-      "infoAt": "2026-10-14T23:12:24.882Z"
+      "infoAt": "2026-10-21T23:17:11.176Z"
+    },
+    {
+      "d": "2026-10-30",
+      "t": "19:30",
+      "team": "Herren",
+      "squad": 2,
+      "ownName": "SV Bachum/Bergheim II",
+      "opponent": "SG Allendorf/Amecke II",
+      "competition": "Kreispokal",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sg-allendorf-amecke-ii-sv-bachum-bergheim-ii/-/spiel/032AODOMM4000000VS5489BTVU989P58",
+      "movedFrom": {
+        "d": "2026-10-22",
+        "t": "19:30"
+      },
+      "movedAt": "2026-10-21T23:17:10.880Z",
+      "gameNo": "200207021",
+      "staffelId": "200207",
+      "staffelName": "Krombacher Reservepokal",
+      "venue": "Kunstrasenplatz, Sportplatz Allendorf Im Hespel, Im Hespel 70, 59846 Sundern (Sauerland)",
+      "infoAt": "2026-10-21T23:17:11.826Z"
     },
     {
       "d": "2026-10-30",
