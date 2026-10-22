@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-22T04:40:47.695Z",
+  "updated": "2026-10-22T11:48:39.130Z",
   "games": [
     {
       "d": "2026-10-02",
@@ -808,22 +808,6 @@
     },
     {
       "d": "2026-11-21",
-      "t": "15:30",
-      "team": "Herren",
-      "squad": 3,
-      "ownName": "SV Bachum/Bergheim III",
-      "gameNo": "210824028",
-      "opponent": "TuS Niedereimer II",
-      "competition": "Kreisliga D",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-tus-niedereimer-ii/-/spiel/031KK1IQ6C000000VS5489BUVVKNMR0J",
-      "matchday": 10,
-      "staffelId": "210824",
-      "staffelName": "Kreisliga D Arnsberg",
-      "infoAt": "2026-10-16T13:14:29.325Z"
-    },
-    {
-      "d": "2026-11-21",
       "t": "16:00",
       "team": "Herren",
       "squad": 1,
@@ -923,6 +907,28 @@
       "staffelName": "Kreisliga A Arnsberg",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
       "infoAt": "2026-10-16T13:14:33.582Z"
+    },
+    {
+      "d": "2026-12-06",
+      "t": "11:00",
+      "team": "Herren",
+      "squad": 3,
+      "ownName": "SV Bachum/Bergheim III",
+      "gameNo": "210824028",
+      "opponent": "TuS Niedereimer II",
+      "competition": "Kreisliga D",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-tus-niedereimer-ii/-/spiel/031KK1IQ6C000000VS5489BUVVKNMR0J",
+      "movedFrom": {
+        "d": "2026-11-21",
+        "t": "15:30"
+      },
+      "movedAt": "2026-10-22T11:48:38.506Z",
+      "matchday": 10,
+      "staffelId": "210824",
+      "staffelName": "Kreisliga D Arnsberg",
+      "infoAt": "2026-10-22T11:48:38.716Z",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg"
     },
     {
       "d": "2026-12-06",
