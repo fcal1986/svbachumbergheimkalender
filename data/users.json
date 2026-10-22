@@ -538,7 +538,8 @@
         },
         "mail": {
           "other": false,
-          "moves": false
+          "moves": false,
+          "club": false
         }
       }
     },
