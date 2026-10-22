@@ -535,7 +535,8 @@
       "notifyPrefs": {
         "push": {},
         "mail": {
-          "other": false
+          "other": false,
+          "moves": false
         }
       }
     },
