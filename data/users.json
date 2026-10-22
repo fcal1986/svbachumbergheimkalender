@@ -533,7 +533,9 @@
       "contactEmail": "fabian.honisch@sv-bachum-bergheim.de",
       "contactPublic": "email",
       "notifyPrefs": {
-        "push": {},
+        "push": {
+          "admin": true
+        },
         "mail": {
           "other": false,
           "moves": false
