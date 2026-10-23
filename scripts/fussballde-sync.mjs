@@ -252,12 +252,17 @@ function parseGameInfo(html, date) {
   const staffelLinks = $('a[href*="/spieltag/"]').filter((_, a) => /\/staffel\//.test($(a).attr('href') || ''));
   const byDate = date ? staffelLinks.filter((_, a) => ($(a).attr('href') || '').includes('/spieldatum/' + date)) : staffelLinks.slice(0, 0);
   const staffelLink = (byDate.length ? byDate : staffelLinks).first();
-  if (staffelLink.length) { const n = cleanText(staffelLink.text()); if (n) info.staffelName = n; }
+  if (staffelLink.length) {
+    const n = cleanText(staffelLink.text()); if (n) info.staffelName = n;
+    // Ab 23.10.2026: Link zur Staffel bzw. zum Turnier (für „Zum Turnier“ in der Turnier-Karte)
+    const href = staffelLink.attr('href') || '';
+    if (href) info.staffelUrl = href.startsWith('http') ? href : 'https://www.fussball.de' + (href.startsWith('/') ? '' : '/') + href;
+  }
   const venueLink = $('a[href*="maps"]').filter((_, a) => /google\.[a-z.]+\/maps|maps\.google/i.test($(a).attr('href') || '')).first();
   if (venueLink.length) { const v = cleanText(venueLink.text()); if (v) info.venue = v; }
   return info;
 }
-const GAME_INFO_FIELDS = ['gameNo', 'matchday', 'staffelId', 'staffelName', 'venue', 'infoAt'];
+const GAME_INFO_FIELDS = ['gameNo', 'matchday', 'staffelId', 'staffelName', 'staffelUrl', 'venue', 'infoAt'];
 // Holt die Angaben nur, wo sie fehlen, sich der Termin geändert hat oder sie älter als 7 Tage sind –
 // sonst werden sie aus dem letzten Lauf übernommen. Höchstens 40 Seitenabrufe pro Lauf, mit Pause.
 // Ab 09.10.2026 · 8 auch für Auswärtsspiele (Spielort/Adresse für Bild, Text und Karte): opts.until begrenzt
