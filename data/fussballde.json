@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-24T10:55:56.571Z",
+  "updated": "2026-10-24T15:55:41.135Z",
   "games": [
     {
       "d": "2026-10-03",
@@ -2202,7 +2202,8 @@
       "staffelId": "240142",
       "staffelName": "Freundschaftsspiele Kreis Hochsauerlandkreis",
       "venue": "Kunstrasenplatz, Sparkassen Arena, Stadionstr. 13, 59939 Olsberg",
-      "infoAt": "2026-10-17T15:31:44.757Z"
+      "infoAt": "2026-10-24T15:55:39.902Z",
+      "staffelUrl": "https://www.fussball.de/spieltag/fs-aj-k-fs-hsk-1-kreis-hochsauerlandkreis-a-junioren-kreis-fs-a-junioren-saison2627-westfalen/-/spieldatum/2026-10-24/staffel/0316MD5HEC000000VS5489BTVU7GTVLE-D"
     },
     {
       "d": "2026-10-25",
@@ -2737,6 +2738,23 @@
       "staffelUrl": "https://www.fussball.de/spieltag/kreisliga-a-arnsberg-kreis-arnsberg-kreisliga-a-herren-saison2627-westfalen/-/spieldatum/2026-12-06/staffel/031I0AE5E8000009VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Ruhr-Möhne-Sportplatz Neheim, Zum Besenberg, 59755 Arnsberg",
       "infoAt": "2026-10-23T18:19:43.322Z"
+    },
+    {
+      "d": "2026-12-12",
+      "t": "12:00",
+      "team": "D-Junioren",
+      "squad": 1,
+      "ownName": "SV Bachum-Bergheim",
+      "opponent": "Rot-Weiß Lüdenscheid II",
+      "competition": "Kreisfreundschaftsspiele",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/rot-weiss-luedenscheid-ii-sv-bachum-bergheim/-/spiel/032G66K0M4000000VS5489BTVU989P58",
+      "gameNo": "240169073",
+      "staffelId": "240169",
+      "staffelName": "Freundschaftsspiele Kreis Lüdenscheid",
+      "staffelUrl": "https://www.fussball.de/spieltag/fs-dj-k-fs-ls-1-kreis-luedenscheid-d-junioren-kreis-fs-d-junioren-saison2627-westfalen/-/spieldatum/2026-12-12/staffel/0317TAS04K000000VS5489BUVSBBVPEU-D",
+      "venue": "Kunstrasenplatz, Sportplatz Winkhausen, Volmestr. 161, 58515 Lüdenscheid",
+      "infoAt": "2026-10-24T15:55:40.727Z"
     },
     {
       "d": "2026-12-12",
@@ -3837,7 +3855,7 @@
         "Vereinsturnier",
         "Kreispokal"
       ],
-      "games": 22,
+      "games": 23,
       "homeGames": 10,
       "first": "2026-10-03",
       "last": "2027-06-05",
