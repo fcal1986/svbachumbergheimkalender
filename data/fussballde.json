@@ -1,38 +1,6 @@
 {
-  "updated": "2026-10-24T22:28:04.318Z",
+  "updated": "2026-10-25T04:37:46.535Z",
   "games": [
-    {
-      "d": "2026-10-03",
-      "t": "11:30",
-      "team": "D-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum-Bergheim",
-      "gameNo": "240283015",
-      "opponent": "Hammer SportClub 2008",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-hammer-sportclub-2008/-/spiel/0323NL89K0000000VS5489BUVSORQI22",
-      "staffelId": "240283",
-      "staffelName": "Freundschaftsspiele Kreis Arnsberg",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:18.799Z"
-    },
-    {
-      "d": "2026-10-03",
-      "t": "13:30",
-      "team": "D-Junioren",
-      "squad": 2,
-      "ownName": "SV Bachum-Bergheim 2",
-      "gameNo": "240283022",
-      "opponent": "SC Neheim I",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-sc-neheim-i/-/spiel/0327RNNSL4000000VS5489BUVUFHD2VV",
-      "staffelId": "240283",
-      "staffelName": "Freundschaftsspiele Kreis Arnsberg",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:19.636Z"
-    },
     {
       "d": "2026-10-04",
       "t": "11:00",
@@ -3855,9 +3823,9 @@
         "Vereinsturnier",
         "Kreispokal"
       ],
-      "games": 23,
-      "homeGames": 10,
-      "first": "2026-10-03",
+      "games": 22,
+      "homeGames": 9,
+      "first": "2026-10-04",
       "last": "2027-06-05",
       "teamId": "011MI9U4VO000000VTVG0001VTR8C1K7"
     },
@@ -3875,9 +3843,9 @@
         "Kreisfreundschaftsspiele",
         "Kreisliga B"
       ],
-      "games": 12,
-      "homeGames": 6,
-      "first": "2026-10-03",
+      "games": 11,
+      "homeGames": 5,
+      "first": "2026-10-07",
       "last": "2027-06-05",
       "teamId": "02PU7K56SO000000VS5489B2VSE05932"
     },
@@ -4052,6 +4020,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-10-03",
+  "teamsFrom": "2026-10-04",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
