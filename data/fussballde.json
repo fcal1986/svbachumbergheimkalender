@@ -1,57 +1,6 @@
 {
-  "updated": "2026-10-25T22:32:02.458Z",
+  "updated": "2026-10-26T12:57:21.112Z",
   "games": [
-    {
-      "d": "2026-10-04",
-      "t": "11:00",
-      "team": "B-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "gameNo": "211049025",
-      "opponent": "SV Heide Paderborn",
-      "competition": "Bezirksliga",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-heide-paderborn/-/spiel/031GM5I9OC000000VS5489BTVVG7L386",
-      "matchday": 4,
-      "staffelId": "211049",
-      "staffelName": "B-Junioren - Bezirksliga, Staffel 3",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:20.497Z"
-    },
-    {
-      "d": "2026-10-04",
-      "t": "13:15",
-      "team": "Herren",
-      "squad": 2,
-      "ownName": "SV Bachum/Bergheim II",
-      "gameNo": "211386071",
-      "opponent": "KF 2. Korriku Sundern",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-kf-2-korriku-sundern/-/spiel/031IK2RVNC000000VS5489BUVVKNMR0J",
-      "matchday": 9,
-      "staffelId": "211386",
-      "staffelName": "Kreisliga B Arnsberg",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:21.393Z"
-    },
-    {
-      "d": "2026-10-04",
-      "t": "15:30",
-      "team": "Herren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "gameNo": "210697072",
-      "opponent": "SV Affeln 28",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-affeln-28/-/spiel/031I0BNAS8000000VS5489BUVVKNMR0J",
-      "matchday": 9,
-      "staffelId": "210697",
-      "staffelName": "Kreisliga A Arnsberg",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:22.135Z"
-    },
     {
       "d": "2026-10-08",
       "t": "19:30",
@@ -430,9 +379,9 @@
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-sundern/-/spiel/031JUJSA64000000VS5489BUVVKNMR0J",
       "staffelId": "200276",
       "staffelName": "Kreispokal 2026/27",
+      "staffelUrl": "https://www.fussball.de/spieltag/runde-2-kreis-arnsberg-a-junioren-kreispokal-a-junioren-saison2627-westfalen/-/spieldatum/2026-11-04/staffel/031JUH8C4S000009VS5489BUVVKNMR0J-R",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-25T22:32:02.047Z",
-      "staffelUrl": "https://www.fussball.de/spieltag/runde-2-kreis-arnsberg-a-junioren-kreispokal-a-junioren-saison2627-westfalen/-/spieldatum/2026-11-04/staffel/031JUH8C4S000009VS5489BUVVKNMR0J-R"
+      "infoAt": "2026-10-25T22:32:02.047Z"
     },
     {
       "d": "2026-11-06",
@@ -1878,22 +1827,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-10-04",
-      "t": "13:00",
-      "team": "D-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum-Bergheim",
-      "opponent": "ASC 09 Dortmund III",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/asc-09-dortmund-iii-sv-bachum-bergheim/-/spiel/0321O2JISG000000VS5489BUVSORQI22",
-      "gameNo": "240010212",
-      "staffelId": "240010",
-      "staffelName": "Freundschaftsspiele Kreis Dortmund",
-      "venue": "Kunstrasenplatz, Sportplatz Schweizer Allee, Schweizer Allee 29 a, 44287 Dortmund",
-      "infoAt": "2026-10-09T09:06:52.082Z"
-    },
     {
       "d": "2026-10-07",
       "t": "17:45",
@@ -3762,9 +3695,9 @@
         "Kreisfreundschaftsspiele",
         "Kreispokal"
       ],
-      "games": 24,
-      "homeGames": 14,
-      "first": "2026-10-04",
+      "games": 23,
+      "homeGames": 13,
+      "first": "2026-10-11",
       "last": "2027-06-13",
       "teamId": "02B9BQVPIG000000VS5489B1VU20GQ5T"
     },
@@ -3811,22 +3744,22 @@
       "type": "D-Junioren",
       "squad": 1,
       "names": [
-        "SV Bachum-Bergheim",
         "SV Bachum-Bergh. I",
+        "SV Bachum-Bergheim",
         "SV Bachum-Berg. I"
       ],
       "teamIds": [
         "011MI9U4VO000000VTVG0001VTR8C1K7"
       ],
       "competitions": [
-        "Kreisfreundschaftsspiele",
         "Kreisliga A",
+        "Kreisfreundschaftsspiele",
         "Vereinsturnier",
         "Kreispokal"
       ],
-      "games": 22,
+      "games": 21,
       "homeGames": 9,
-      "first": "2026-10-04",
+      "first": "2026-10-10",
       "last": "2027-06-05",
       "teamId": "011MI9U4VO000000VTVG0001VTR8C1K7"
     },
@@ -3977,9 +3910,9 @@
         "Kreisliga A",
         "Kreisfreundschaftsspiele"
       ],
-      "games": 26,
-      "homeGames": 13,
-      "first": "2026-10-04",
+      "games": 25,
+      "homeGames": 12,
+      "first": "2026-10-08",
       "last": "2027-05-30",
       "teamId": "011MIANBCK000000VTVG0001VTR8C1K7"
     },
@@ -3996,9 +3929,9 @@
         "Kreisliga B",
         "Kreispokal"
       ],
-      "games": 24,
-      "homeGames": 12,
-      "first": "2026-10-04",
+      "games": 23,
+      "homeGames": 11,
+      "first": "2026-10-11",
       "last": "2027-05-30",
       "teamId": "011MIBAEQC000000VTVG0001VTR8C1K7"
     },
@@ -4021,6 +3954,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-10-04",
+  "teamsFrom": "2026-10-05",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
