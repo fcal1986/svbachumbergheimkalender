@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-27T12:07:40.327Z",
+  "updated": "2026-10-27T17:59:17.951Z",
   "games": [
     {
       "d": "2026-10-08",
@@ -470,7 +470,8 @@
       "staffelId": "240244",
       "staffelName": "Freundschaftsspiele Kreis Arnsberg",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-20T17:00:32.337Z"
+      "infoAt": "2026-10-27T17:59:16.008Z",
+      "staffelUrl": "https://www.fussball.de/spieltag/fs-bj-k-fs-ar-1-kreis-arnsberg-b-junioren-kreis-fs-b-junioren-saison2627-westfalen/-/spieldatum/2026-11-07/staffel/031BHB8STO000000VS5489BTVUS470OH-D"
     },
     {
       "d": "2026-11-08",
@@ -542,9 +543,9 @@
       "matchday": 6,
       "staffelId": "211375",
       "staffelName": "KL A",
+      "staffelUrl": "https://www.fussball.de/spieltag/kl-a-kreis-arnsberg-a-junioren-kreisliga-a-a-junioren-saison2627-westfalen/-/spieldatum/2026-11-09/staffel/031JKJK6Q0000004VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-27T12:07:39.922Z",
-      "staffelUrl": "https://www.fussball.de/spieltag/kl-a-kreis-arnsberg-a-junioren-kreisliga-a-a-junioren-saison2627-westfalen/-/spieldatum/2026-11-09/staffel/031JKJK6Q0000004VS5489BUVVKNMR0J-G"
+      "infoAt": "2026-10-27T12:07:39.922Z"
     },
     {
       "d": "2026-11-11",
@@ -2240,15 +2241,16 @@
       "team": "D-Junioren",
       "squad": 1,
       "ownName": "SV Bachum-Bergheim",
-      "opponent": "Team 8",
+      "opponent": "SV Wanne 1911",
       "competition": "Vereinsturnier",
       "score": null,
-      "link": "https://www.fussball.de/spiel/team-8-sv-bachum-bergheim/-/spiel/031S94RMMC000000VS5489BTVTPHHFPR",
+      "link": "https://www.fussball.de/spiel/sv-wanne-1911-sv-bachum-bergheim/-/spiel/031S94RMMC000000VS5489BTVTPHHFPR",
       "gameNo": "191351011",
       "staffelId": "191351",
       "staffelName": "Hölzkener Herbstturnier D- Junioren Kreisliga A & höher",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-b-kreis-unna-hamm-d-junioren-vereinsturnier-d-junioren-saison2627-westfalen/-/spieldatum/2026-10-31/staffel/031S94FR18000000VS5489BTVTPHHFPR-G",
       "venue": "Kunstrasenplatz, Sportplatz TuS Lohauserholz (Kunstrasen), Am Hahnenbach 11, 59067 Hamm",
-      "infoAt": "2026-10-23T13:24:35.381Z"
+      "infoAt": "2026-10-27T17:59:16.856Z"
     },
     {
       "d": "2026-11-02",
@@ -2269,7 +2271,8 @@
       "staffelId": "200208",
       "staffelName": "Krombacher Kreispokal Ü32",
       "venue": "Kunstrasenplatz, Sportpark An der Hiag, Am Hackeland 1, 59759 Arnsberg",
-      "infoAt": "2026-10-20T17:00:32.966Z"
+      "infoAt": "2026-10-27T17:59:17.544Z",
+      "staffelUrl": "https://www.fussball.de/spieltag/viertelfinale-kreis-arnsberg-herren-ue32-kreispokal-herren-ue32-saison2627-westfalen/-/spieldatum/2026-11-02/staffel/031GJ8ORAO000002VS5489BTVVG7L386-R"
     },
     {
       "d": "2026-11-07",
