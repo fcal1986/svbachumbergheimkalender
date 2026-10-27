@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-27T05:00:13.521Z",
+  "updated": "2026-10-27T12:07:40.327Z",
   "games": [
     {
       "d": "2026-10-08",
@@ -406,23 +406,6 @@
       "infoAt": "2026-10-23T13:24:07.242Z"
     },
     {
-      "d": "2026-11-06",
-      "t": "19:30",
-      "team": "A-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "gameNo": "211375027",
-      "opponent": "TuS Vosswinkel",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-vosswinkel/-/spiel/031JKQC6MC000000VS5489BUVVKNMR0J",
-      "matchday": 6,
-      "staffelId": "211375",
-      "staffelName": "KL A",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-23T13:24:07.947Z"
-    },
-    {
       "d": "2026-11-07",
       "t": "10:00",
       "team": "F-Junioren",
@@ -539,6 +522,29 @@
       "staffelName": "Kreisliga A Arnsberg",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
       "infoAt": "2026-10-23T13:24:12.868Z"
+    },
+    {
+      "d": "2026-11-09",
+      "t": "19:30",
+      "team": "A-Junioren",
+      "squad": 1,
+      "ownName": "SV Bachum/Bergheim",
+      "gameNo": "211375027",
+      "opponent": "TuS Vosswinkel",
+      "competition": "Kreisliga A",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-vosswinkel/-/spiel/031JKQC6MC000000VS5489BUVVKNMR0J",
+      "movedFrom": {
+        "d": "2026-11-06",
+        "t": "19:30"
+      },
+      "movedAt": "2026-10-27T12:07:39.644Z",
+      "matchday": 6,
+      "staffelId": "211375",
+      "staffelName": "KL A",
+      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
+      "infoAt": "2026-10-27T12:07:39.922Z",
+      "staffelUrl": "https://www.fussball.de/spieltag/kl-a-kreis-arnsberg-a-junioren-kreisliga-a-a-junioren-saison2627-westfalen/-/spieldatum/2026-11-09/staffel/031JKJK6Q0000004VS5489BUVVKNMR0J-G"
     },
     {
       "d": "2026-11-11",
