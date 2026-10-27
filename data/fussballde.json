@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-27T17:59:17.951Z",
+  "updated": "2026-10-27T22:11:12.883Z",
   "games": [
     {
       "d": "2026-10-08",
@@ -469,9 +469,9 @@
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-rw-ahlen/-/spiel/032CMJKBEO000000VS5489BUVV5V31CI",
       "staffelId": "240244",
       "staffelName": "Freundschaftsspiele Kreis Arnsberg",
+      "staffelUrl": "https://www.fussball.de/spieltag/fs-bj-k-fs-ar-1-kreis-arnsberg-b-junioren-kreis-fs-b-junioren-saison2627-westfalen/-/spieldatum/2026-11-07/staffel/031BHB8STO000000VS5489BTVUS470OH-D",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-27T17:59:16.008Z",
-      "staffelUrl": "https://www.fussball.de/spieltag/fs-bj-k-fs-ar-1-kreis-arnsberg-b-junioren-kreis-fs-b-junioren-saison2627-westfalen/-/spieldatum/2026-11-07/staffel/031BHB8STO000000VS5489BTVUS470OH-D"
+      "infoAt": "2026-10-27T17:59:16.008Z"
     },
     {
       "d": "2026-11-08",
@@ -2270,9 +2270,9 @@
       "gameNo": "200208013",
       "staffelId": "200208",
       "staffelName": "Krombacher Kreispokal Ü32",
+      "staffelUrl": "https://www.fussball.de/spieltag/viertelfinale-kreis-arnsberg-herren-ue32-kreispokal-herren-ue32-saison2627-westfalen/-/spieldatum/2026-11-02/staffel/031GJ8ORAO000002VS5489BTVVG7L386-R",
       "venue": "Kunstrasenplatz, Sportpark An der Hiag, Am Hackeland 1, 59759 Arnsberg",
-      "infoAt": "2026-10-27T17:59:17.544Z",
-      "staffelUrl": "https://www.fussball.de/spieltag/viertelfinale-kreis-arnsberg-herren-ue32-kreispokal-herren-ue32-saison2627-westfalen/-/spieldatum/2026-11-02/staffel/031GJ8ORAO000002VS5489BTVVG7L386-R"
+      "infoAt": "2026-10-27T17:59:17.544Z"
     },
     {
       "d": "2026-11-07",
