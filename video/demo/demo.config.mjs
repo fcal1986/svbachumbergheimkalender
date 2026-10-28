@@ -31,6 +31,7 @@ export const DEMO_USERS = {
   trainer: { email: 'max.mustermann@demo.invalid', password: DEMO_PASSWORD, name: 'Max Mustermann' },
   vorstand: { email: 'vorstand@demo.invalid', password: DEMO_PASSWORD, name: 'Erika Musterfrau' },
   torwart: { email: 'kai.beispielmann@demo.invalid', password: DEMO_PASSWORD, name: 'Kai Beispielmann' },
+  gjugend: { email: 'sara.muster@demo.invalid', password: DEMO_PASSWORD, name: 'Sara Muster' },
 };
 export const DEMO_LOGIN = DEMO_USERS.trainer;
 

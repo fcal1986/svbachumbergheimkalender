@@ -14,6 +14,7 @@ Kurze Hochkant-Reels (1080 × 1920, 30 fps, 30 s) aus **echten App-Ansichten**. 
 | 6 | `freundschaftsspiel` | Trainer | Heimspiel, Anstoß → Platz „✓ frei“ → Training absagen? → DFBnet-Text → „Vorgemerkt“ → Auswärts belegt keinen Platz |
 | 7 | `anleitung-spielverlegung` (100 s, Erklärvideo) | Trainer | 8 Schritte mit Schrittanzeige: Lupe am Heimspiel → Tage/Uhrzeiten → Ergebnisse → 2 Vorschläge per WhatsApp (als offene Terminanfrage gemerkt) → Konto → Terminanfragen → „Zugesagt“ → vormerken (Anstoß, Heimrecht getauscht, Grund, Training absagen) → Jugendleiter-Text (2 Teile) → Anfrage erledigt, Kalender „Vorgemerkt“/„Verlegt auf …“, erneut senden → Zusammenfassung |
 | 8 | `anleitung-freundschaftsspiel` (96 s, Erklärvideo) | Trainer | 7 Schritte: Neu → Spiel, Gegner → Freien Termin suchen (Bedarf vorgewählt, grün/gelb) → Termine anhaken, per WhatsApp an den Gegner (offene Terminanfrage) → Konto → Terminanfragen → „Zugesagt“ → Formular vorbefüllt, Platz frei, Training absagen, speichern → Jugendleiter-Text (2 Teile) → Kalender „Vorgemerkt“, Tipp Auswärts → Zusammenfassung |
+| 9 | `anleitung-spiel-in-trainingszeit` (69 s, Erklärvideo) | Trainer (G-Jugend) | Training öffnen → Uhr („Nur an diesem Tag verlegen“) übernimmt Tag, Zeit, Mannschaft, Fläche → „Spiel“, Gegner → Anstoß 16:15 → „Euer Training – Absage beim Speichern“ → Prüfen → Jugendleiter-Text (2 Teile) → Kalender: Spiel vorgemerkt, Training abgesagt |
 
 ### Vorstellungsfilm für den DFB (16:9)
 
@@ -64,7 +65,7 @@ video/
 
 ## Demo-Umgebung und Sicherheit
 
-- **Fiktiv:** „SV Musterstadt e.V.“, Zugänge `max.mustermann@`, `vorstand@`, `kai.beispielmann@demo.invalid`, Passwort `demo-passwort-2026`, erfundene Gegner, Torhüter und Spiele. Echte `data/*.json` werden nie gelesen oder geschrieben.
+- **Fiktiv:** „SV Musterstadt e.V.“, Zugänge `max.mustermann@`, `vorstand@`, `kai.beispielmann@`, `sara.muster@demo.invalid` (G-Jugend), Passwort `demo-passwort-2026`, erfundene Gegner, Torhüter und Spiele. Echte `data/*.json` werden nie gelesen oder geschrieben.
 - **Fester Zeitpunkt:** Di, 13.10.2026, 16:20 Uhr (Europe/Berlin), Sprache de-DE. Vor jedem Reel werden die Daten zurückgesetzt.
 - **Adresse:** Die App läuft im Aufnahme-Browser unter `https://platzcoach.demo` (keine echte Domain, lokal umgeleitet), damit Texte wie „In Platzcoach: …“ keine lokale Adresse zeigen.
 - **Kein Produktivzugriff:** Anfragen an `api.github.com` gehen an den lokalen Mock (nur Repo `demo/platzcoach-demo`, nur Platzhalter-Token). Alles andere Externe (Clarity, Analytics, Worker, Push, wa.me) wird blockiert bzw. abgefangen und im Manifest protokolliert. Service Worker sind aus.

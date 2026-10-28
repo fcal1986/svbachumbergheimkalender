@@ -8,9 +8,11 @@ import torwarttraining from './torwarttraining';
 import freundschaftsspiel from './freundschaftsspiel';
 import anleitungSpielverlegung from './anleitung-spielverlegung';
 import anleitungFreundschaftsspiel from './anleitung-freundschaftsspiel';
+import anleitungSpielInTrainingszeit from './anleitung-spiel-in-trainingszeit';
 
 export const REELS: Record<string, Reel> = { platzbelegung, spielverlegung, fussballde, freiertermin, torwarttraining, freundschaftsspiel, 'anleitung-spielverlegung': anleitungSpielverlegung,
-  'anleitung-freundschaftsspiel': anleitungFreundschaftsspiel };
+  'anleitung-freundschaftsspiel': anleitungFreundschaftsspiel,
+  'anleitung-spiel-in-trainingszeit': anleitungSpielInTrainingszeit };
 
 export function reelById(id: string): Reel {
   const r = REELS[id];

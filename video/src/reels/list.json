@@ -49,5 +49,11 @@
     "nr": 8,
     "file": "anleitung-freundschaftsspiel",
     "previews": []
+  },
+  {
+    "id": "anleitung-spiel-in-trainingszeit",
+    "nr": 9,
+    "file": "anleitung-spiel-in-trainingszeit",
+    "previews": []
   }
 ]
