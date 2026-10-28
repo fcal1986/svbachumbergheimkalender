@@ -327,7 +327,7 @@
       "created": "2026-09-25T18:54:46.559Z",
       "emailNotificationsEnabled": true,
       "phone": "+4916090347220",
-      "contactPublic": "phone",
+      "contactPublic": "none",
       "contactEmail": ""
     },
     {
