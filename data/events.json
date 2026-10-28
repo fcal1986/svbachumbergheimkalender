@@ -294,6 +294,28 @@
       "kickoff": "17:30",
       "ownerId": "a73f2e9e-f267-4fcb-8b64-ff55ba5e46f3",
       "ownerName": "Florian Landgraf"
+    },
+    {
+      "id": "d73f4efc-45b9-4df0-a876-fc831a398a95",
+      "d": "2026-10-28",
+      "t": "16:15",
+      "bis": "17:30",
+      "title": "Freundschaftsspiel",
+      "kind": "game",
+      "team": "G-Jugend",
+      "squad": 1,
+      "pitch": {
+        "mode": "haelfte",
+        "part": "B"
+      },
+      "halle": null,
+      "res": [],
+      "note": "",
+      "ha": "home",
+      "opponent": "Echthausen",
+      "kickoff": "16:30",
+      "ownerId": "123c8c2c-5a1a-43d6-be82-455af9f3b407",
+      "ownerName": "Younes Al Musaui"
     }
   ]
 }
