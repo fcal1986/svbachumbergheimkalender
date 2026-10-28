@@ -278,8 +278,8 @@
     {
       "id": "e200d4ec-216c-4c45-bc5c-1fae49326ba1",
       "d": "2026-11-04",
-      "t": "17:00",
-      "bis": "18:00",
+      "t": "17:30",
+      "bis": "18:30",
       "title": "Freundschaftsspiel bei SV Holzen",
       "kind": "game",
       "team": "F-Jugend",
@@ -291,7 +291,7 @@
       "ha": "away",
       "opponent": "SV Holzen",
       "address": "Braukweg 6, 59759 Arnsberg",
-      "kickoff": "17:00",
+      "kickoff": "17:30",
       "ownerId": "a73f2e9e-f267-4fcb-8b64-ff55ba5e46f3",
       "ownerName": "Florian Landgraf"
     }
