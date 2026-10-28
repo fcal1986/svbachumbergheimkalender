@@ -626,7 +626,9 @@
       ],
       "validFrom": "2026-09-01",
       "validUntil": "2027-06-30",
-      "cancelled": [],
+      "cancelled": [
+        "2026-10-28"
+      ],
       "seasonId": "2026-2027"
     },
     {
