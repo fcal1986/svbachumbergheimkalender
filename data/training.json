@@ -59,7 +59,9 @@
       "trainerName": "",
       "seasonId": "2026-2027",
       "cancelled": [
-        "2026-10-12"
+        "2026-10-12",
+        "2026-10-19",
+        "2026-10-26"
       ]
     },
     {
@@ -116,7 +118,10 @@
       "trainerName": "",
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
-      "validUntil": "2027-06-30"
+      "validUntil": "2027-06-30",
+      "cancelled": [
+        "2026-11-02"
+      ]
     },
     {
       "id": "39c5be5c-b23c-41a0-88d1-76e4b5fe474e",
@@ -141,7 +146,11 @@
       "validUntil": "2027-06-30",
       "trainerId": null,
       "trainerName": "",
-      "seasonId": "2026-2027"
+      "seasonId": "2026-2027",
+      "cancelled": [
+        "2026-10-19",
+        "2026-11-02"
+      ]
     },
     {
       "id": "56d7534c-ebee-4fe3-80e9-3aa0663e8d67",
@@ -164,7 +173,10 @@
       ],
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
-      "validUntil": "2027-06-30"
+      "validUntil": "2027-06-30",
+      "cancelled": [
+        "2026-11-09"
+      ]
     },
     {
       "id": "3bc5eb93-4747-4202-8de0-65b5a74a4692",
@@ -180,14 +192,19 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "4263cd5a-6ebb-40e1-a7fc-f1f857db7fb6"
+        "4263cd5a-6ebb-40e1-a7fc-f1f857db7fb6",
+        "7ede557d-96ff-4e26-812a-cff339443471"
       ],
       "trainerNames": [
-        "Marco Dohle"
+        "Marco Dohle",
+        "Thomas Stellpflug"
       ],
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
-      "validUntil": "2027-06-30"
+      "validUntil": "2027-06-30",
+      "cancelled": [
+        "2026-11-02"
+      ]
     },
     {
       "id": "0762da36-6387-4fc7-bc41-2d256a677a30",
@@ -327,7 +344,10 @@
       "validUntil": "2027-06-30",
       "trainerId": null,
       "trainerName": "",
-      "seasonId": "2026-2027"
+      "seasonId": "2026-2027",
+      "cancelled": [
+        "2026-11-03"
+      ]
     },
     {
       "id": "a0fba6c3-540b-44c1-aa2f-ee7d4d6f5907",
@@ -373,7 +393,9 @@
       ],
       "cancelled": [
         "2026-10-06",
-        "2026-10-13"
+        "2026-10-13",
+        "2026-10-20",
+        "2026-10-27"
       ],
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
@@ -401,7 +423,9 @@
       ],
       "validFrom": "2026-09-01",
       "validUntil": "2027-06-30",
-      "cancelled": [],
+      "cancelled": [
+        "2026-10-21"
+      ],
       "trainerId": null,
       "trainerName": "",
       "seasonId": "2026-2027"
@@ -433,7 +457,10 @@
       "validUntil": "2027-06-30",
       "seasonId": "2026-2027",
       "cancelled": [
-        "2026-10-14"
+        "2026-10-14",
+        "2026-10-28",
+        "2026-11-04",
+        "2026-11-11"
       ]
     },
     {
@@ -744,7 +771,8 @@
       "validUntil": "2027-06-30",
       "cancelled": [
         "2026-10-08",
-        "2026-10-15"
+        "2026-10-15",
+        "2026-10-29"
       ],
       "seasonId": "2026-2027"
     },
@@ -762,10 +790,12 @@
       "res": [],
       "note": "",
       "trainerIds": [
-        "4263cd5a-6ebb-40e1-a7fc-f1f857db7fb6"
+        "4263cd5a-6ebb-40e1-a7fc-f1f857db7fb6",
+        "7ede557d-96ff-4e26-812a-cff339443471"
       ],
       "trainerNames": [
-        "Marco Dohle"
+        "Marco Dohle",
+        "Thomas Stellpflug"
       ],
       "validFrom": "2026-09-09",
       "validUntil": "2027-06-30",

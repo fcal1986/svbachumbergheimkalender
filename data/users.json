@@ -76,7 +76,7 @@
       "emailNotificationsEnabled": true,
       "phone": "01722342821",
       "contactPublic": "both",
-      "contactEmail": "info@bcw-software.de",
+      "contactEmail": "markus.vielhaber@sv-bachum-bergheim.de",
       "role": "jugendleiter"
     },
     {
@@ -327,7 +327,8 @@
       "created": "2026-09-25T18:54:46.559Z",
       "emailNotificationsEnabled": true,
       "phone": "+4916090347220",
-      "contactPublic": "none"
+      "contactPublic": "none",
+      "contactEmail": ""
     },
     {
       "id": "d1cc03c0-324c-40de-a4f8-49d75efeb828",
@@ -531,7 +532,17 @@
       "role": "vorstand",
       "phone": "",
       "contactEmail": "fabian.honisch@sv-bachum-bergheim.de",
-      "contactPublic": "email"
+      "contactPublic": "email",
+      "notifyPrefs": {
+        "push": {
+          "admin": true
+        },
+        "mail": {
+          "other": false,
+          "moves": false,
+          "club": false
+        }
+      }
     },
     {
       "id": "2f2f62e8-9030-48aa-80c3-a4d9b65938ee",
@@ -590,6 +601,26 @@
       "emailNotificationsEnabled": true,
       "phone": "+491711263121",
       "contactPublic": "none"
+    },
+    {
+      "id": "7ede557d-96ff-4e26-812a-cff339443471",
+      "first": "Thomas",
+      "last": "Stellpflug",
+      "email": "stellpflug0207@gmail.com",
+      "admin": false,
+      "classes": {
+        "Ü32 / Ü50": []
+      },
+      "enc": {
+        "salt": "FdMgcLPjgJz4y/EHBEumyw==",
+        "iv": "a4i8b3Yt4Q+zGCht",
+        "cipher": "L2JsR7FU1KFbDQ5uxZBy7am4ibBGwvP9y3qEUFDNDYUymD91Vsu4BExY44/lFzSUp1uKlYKYt2P8FUL6j7TZcIOtn+I3WffuLsAL+Fqbx/fKocI7lgKb5tolXIVwETFJ9On2rjds+2Brr53uYQ=="
+      },
+      "created": "2026-10-13T15:19:40.230Z",
+      "emailNotificationsEnabled": true,
+      "phone": "015159150404",
+      "contactPublic": "phone",
+      "role": "vorstand"
     }
   ]
 }

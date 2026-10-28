@@ -255,6 +255,45 @@
       "kickoff": "15:30",
       "ownerId": "af1a6546-fdc2-4059-bef4-5a4966181701",
       "ownerName": "Michael Raneck"
+    },
+    {
+      "id": "6979e576-f5d7-4f0a-8b9d-eebe6654fec0",
+      "d": "2026-12-05",
+      "t": "15:00",
+      "bis": "19:00",
+      "title": "Interne Mannschaftsfeier",
+      "kind": "other",
+      "team": "E-Jugend",
+      "squad": 1,
+      "pitch": null,
+      "halle": null,
+      "res": [
+        "Vereinsheim",
+        "Theke"
+      ],
+      "note": "",
+      "ownerId": "af1a6546-fdc2-4059-bef4-5a4966181701",
+      "ownerName": "Michael Raneck"
+    },
+    {
+      "id": "e200d4ec-216c-4c45-bc5c-1fae49326ba1",
+      "d": "2026-11-04",
+      "t": "17:30",
+      "bis": "18:30",
+      "title": "Freundschaftsspiel bei SV Holzen",
+      "kind": "game",
+      "team": "F-Jugend",
+      "squad": 1,
+      "pitch": null,
+      "halle": null,
+      "res": [],
+      "note": "",
+      "ha": "away",
+      "opponent": "SV Holzen",
+      "address": "Braukweg 6, 59759 Arnsberg",
+      "kickoff": "17:30",
+      "ownerId": "a73f2e9e-f267-4fcb-8b64-ff55ba5e46f3",
+      "ownerName": "Florian Landgraf"
     }
   ]
 }

@@ -1760,7 +1760,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='13.10.2026 · 1';
+const APP_VERSION='23.10.2026 · 1';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -2077,10 +2077,11 @@ function fbGroupTournaments(){
     const slot=Math.min(full,gaps.length?Math.min(...gaps):full);
     const dur=ts.length?hmMin(ts[ts.length-1])-hmMin(ts[0])+slot:full;
     const name=((list.find(x=>x.g.staffelName)||{}).g||{}).staffelName||first.competition;
+    const url=((list.find(x=>x.g.staffelUrl)||{}).g||{}).staffelUrl||null; // Turnier-/Staffelseite (ab 23.10.2026, aus dem Sync)
     const base=homeX?homeX.g:first;
     (homeX?addHome:addAway).push({...base, t:ts[0]||first.t, opponent:name, link:first.link||null, score:null,
       movedFrom:null, movePending:false, moveConfirmed:false, moveDiverged:false, plannedTo:null, moveId:null,
-      tournament:{name, dur, games:list.map(x=>({t:x.g.t||'',opponent:x.g.opponent,home:x.home,link:x.g.link||null,score:x.g.score||null}))}});
+      tournament:{name, dur, url, games:list.map(x=>({t:x.g.t||'',opponent:x.g.opponent,home:x.home,link:x.g.link||null,score:x.g.score||null}))}});
     list.forEach(x=>drop.add(x.g));
   });
   if(!drop.size) return;
@@ -3757,6 +3758,7 @@ function externalRowHTML(e){
     +tournamentGamesHTML(e)
     +'<div class="badges" style="margin-top:10px;align-items:center;"><span class="badge-fb">⚽ '+esc(e.competition||'fussball.de')+'</span>'
     +moveBadgeHTML(e)
+    +(e.tournament&&(e.tournament.url||e.link)?'<a href="'+esc(e.tournament.url||e.link)+'" target="_blank" rel="noopener" class="fb-link-btn" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg>Zum Turnier</a>':'') // ab 23.10.2026: Turnierseite bei fussball.de, sonst erstes Spiel
     +(e.link&&!e.tournament?'<a href="'+esc(e.link)+'" target="_blank" rel="noopener" class="fb-link-btn" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg>Zum Spiel</a>':'')
     +'</div>'
     +(trainerHtml?'<div class="ev-contact">'+trainerHtml+'</div>':'')
