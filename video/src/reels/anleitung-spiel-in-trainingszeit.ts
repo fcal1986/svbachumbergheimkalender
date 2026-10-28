@@ -1,6 +1,6 @@
 // Anleitung: Spiel in der Trainingszeit anlegen (G1, ≈ 69 s, 7 Schritte). Weg über die Uhr auf der Trainingskarte
 // („Nur an diesem Tag verlegen“ übernimmt Tag, Zeit, Mannschaft, Fläche), dann Art „Spiel“.
-// Noch ohne Stimme: Zeiten geschätzt. Nach der CapCut-Aufnahme `warp`, `audio` und `narration` anpassen.
+// Stimme: CapCut-Aufnahme vom 28.10.2026, Bilder per `warp` an die Sprechzeiten angepasst.
 import type { Reel } from '../config/types';
 
 const reel: Reel = {
@@ -9,6 +9,9 @@ const reel: Reel = {
   audience: 'Trainer (Erklärvideo)',
   durationS: 69,
   cameraFit: true,
+  // An die Stimme angepasst: Abschnitt beginnt 0,3 s vor dem Satz. [Konfiguration, Film]
+  warp: [[0,0],[3,5.26],[9,9.67],[15,15.86],[21,21.24],[32,31.62],[40,39.79],[50,49.2],[57.5,56.18],[64,64.72],[69,71.0]],
+  audio: { voiceover: { src: 'audio/anleitung-spiel-in-trainingszeit-stimme.wav', volume: 1 } },
   hooks: {
     anleitung: { label: 'Spiel in der Trainingszeit – so geht’s in Platzcoach.', lines: ['Spiel in der', 'Trainingszeit?', 'In 7 Schritten.'], accent: 'In 7 Schritten.' },
   },
@@ -99,17 +102,18 @@ const reel: Reel = {
       'Text an den Jugendleiter senden',
     ],
   },
+  // Zeiten = echte Sprechzeiten der CapCut-Aufnahme vom 28.10.2026 (Filmzeit, aus den Pausen ermittelt).
   narration: [
-    { from: 0.3, to: 2.9, text: 'Ein Spiel in der Trainingszeit anlegen? So geht’s in Platzcoach – in sieben Schritten.' },
-    { from: 3.2, to: 8.6, text: 'Schritt eins: Im Kalender das Training öffnen und auf die Uhr tippen.' },
-    { from: 9.2, to: 14.6, text: 'Schritt zwei: Platzcoach übernimmt Tag, Uhrzeit, Mannschaft und Fläche des Trainings.' },
-    { from: 15.2, to: 20.6, text: 'Schritt drei: Oben auf Spiel tippen, Heim lassen und den Gegner eintragen.' },
-    { from: 21.2, to: 31.6, text: 'Schritt vier: Die Anstoßzeit eintragen. Platzcoach prüft den Platz. Liegt das Spiel in eurer Trainingszeit, wird das Training beim Speichern automatisch abgesagt.' },
-    { from: 32.2, to: 39.6, text: 'Schritt fünf: Termin speichern, kurz prüfen – der Haken für die Trainingsabsage ist schon gesetzt – und jetzt speichern.' },
-    { from: 40.2, to: 49.6, text: 'Schritt sechs: Der fertige Text für den Jugendleiter liegt bereit, damit er das Spiel im DFBnet ansetzt. Per WhatsApp senden oder kopieren.' },
-    { from: 50.2, to: 57.2, text: 'Schritt sieben: Im Kalender steht das Spiel als vorgemerkt, das Training ist abgesagt – für alle sichtbar.' },
-    { from: 57.8, to: 63.6, text: 'Kurz gesagt: Uhr am Training, Spiel und Gegner, Anstoß, speichern, Jugendleiter informieren – fertig.' },
-    { from: 64.2, to: 67.4, text: 'Platzcoach. Jetzt ansehen auf platzcoach.de.' },
+    { from: 0.38, to: 5.01, text: 'Ein Spiel in der Trainingszeit anlegen? So geht’s in Platzcoach – in sieben Schritten.' },
+    { from: 5.56, to: 9.33, text: 'Schritt eins: Im Kalender das Training öffnen und auf die Uhr tippen.' },
+    { from: 9.97, to: 15.35, text: 'Schritt zwei: Platzcoach übernimmt Tag, Uhrzeit, Mannschaft und Fläche des Trainings.' },
+    { from: 16.16, to: 20.84, text: 'Schritt drei: Oben auf Spiel tippen, Heim lassen und den Gegner eintragen.' },
+    { from: 21.54, to: 31.16, text: 'Schritt vier: Die Anstoßzeit eintragen. Platzcoach prüft den Platz. Liegt das Spiel in eurer Trainingszeit, wird das Training beim Speichern automatisch abgesagt.' },
+    { from: 31.92, to: 39.49, text: 'Schritt fünf: Termin speichern, kurz prüfen – der Haken für die Trainingsabsage ist schon gesetzt – und jetzt speichern.' },
+    { from: 40.09, to: 48.8, text: 'Schritt sechs: Der fertige Text für den Jugendleiter liegt bereit, damit er das Spiel im DFBnet ansetzt. Per WhatsApp senden oder kopieren.' },
+    { from: 49.5, to: 55.79, text: 'Schritt sieben: Im Kalender steht das Spiel als vorgemerkt, das Training ist abgesagt – für alle sichtbar.' },
+    { from: 56.48, to: 64.3, text: 'Kurz gesagt: Uhr am Training, Spiel und Gegner, Anstoß, speichern, Jugendleiter informieren – fertig.' },
+    { from: 65.02, to: 68.33, text: 'Platzcoach. Jetzt ansehen auf platzcoach.de.' },
   ],
   claims: [
     'Trainingskarte: Uhr „Nur an diesem Tag verlegen“ (moveTrainingDay) öffnet „Neuer Termin“ mit Tag, Zeit 16:00–17:00, Mannschaft G1 und Viertel 1',
