@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-29T19:37:13.922Z",
+  "updated": "2026-10-29T23:55:40.847Z",
   "games": [
     {
       "d": "2026-10-08",
@@ -310,9 +310,9 @@
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-spielverein-westfalia-soest/-/spiel/032FIFT2DS000000VS5489BUVSGKI48U",
       "staffelId": "240244",
       "staffelName": "Freundschaftsspiele Kreis Arnsberg",
+      "staffelUrl": "https://www.fussball.de/spieltag/fs-bj-k-fs-ar-1-kreis-arnsberg-b-junioren-kreis-fs-b-junioren-saison2627-westfalen/-/spieldatum/2026-10-29/staffel/031BHB8STO000000VS5489BTVUS470OH-D",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-29T19:37:11.311Z",
-      "staffelUrl": "https://www.fussball.de/spieltag/fs-bj-k-fs-ar-1-kreis-arnsberg-b-junioren-kreis-fs-b-junioren-saison2627-westfalen/-/spieldatum/2026-10-29/staffel/031BHB8STO000000VS5489BTVUS470OH-D"
+      "infoAt": "2026-10-29T19:37:11.311Z"
     },
     {
       "d": "2026-10-31",
@@ -348,9 +348,9 @@
       "movedAt": "2026-10-22T17:08:16.340Z",
       "staffelId": "200226",
       "staffelName": "Kreispokal 2026/27",
+      "staffelUrl": "https://www.fussball.de/spieltag/runde-3-kreis-arnsberg-c-junioren-kreispokal-c-junioren-saison2627-westfalen/-/spieldatum/2026-11-02/staffel/031JUUE97G000004VS5489BUVVKNMR0J-R",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-29T19:37:11.999Z",
-      "staffelUrl": "https://www.fussball.de/spieltag/runde-3-kreis-arnsberg-c-junioren-kreispokal-c-junioren-saison2627-westfalen/-/spieldatum/2026-11-02/staffel/031JUUE97G000004VS5489BUVVKNMR0J-R"
+      "infoAt": "2026-10-29T19:37:11.999Z"
     },
     {
       "d": "2026-11-03",
@@ -2365,9 +2365,9 @@
       "matchday": 12,
       "staffelId": "211386",
       "staffelName": "Kreisliga B Arnsberg",
+      "staffelUrl": "https://www.fussball.de/spieltag/kreisliga-b-arnsberg-kreis-arnsberg-kreisliga-b-herren-saison2627-westfalen/-/spieldatum/2026-11-11/staffel/031I0V20RC00000AVS5489BUVVKNMR0J-G",
       "venue": "Hartplatz, Nebenplatz Stadion Hartplatz Hüsten, Am Solepark 11, 59759 Arnsberg",
-      "infoAt": "2026-10-29T19:37:13.513Z",
-      "staffelUrl": "https://www.fussball.de/spieltag/kreisliga-b-arnsberg-kreis-arnsberg-kreisliga-b-herren-saison2627-westfalen/-/spieldatum/2026-11-11/staffel/031I0V20RC00000AVS5489BUVVKNMR0J-G"
+      "infoAt": "2026-10-29T19:37:13.513Z"
     },
     {
       "d": "2026-11-14",
