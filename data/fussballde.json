@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-29T12:57:09.408Z",
+  "updated": "2026-10-29T19:37:13.922Z",
   "games": [
     {
       "d": "2026-10-08",
@@ -311,7 +311,8 @@
       "staffelId": "240244",
       "staffelName": "Freundschaftsspiele Kreis Arnsberg",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-22T17:08:16.636Z"
+      "infoAt": "2026-10-29T19:37:11.311Z",
+      "staffelUrl": "https://www.fussball.de/spieltag/fs-bj-k-fs-ar-1-kreis-arnsberg-b-junioren-kreis-fs-b-junioren-saison2627-westfalen/-/spieldatum/2026-10-29/staffel/031BHB8STO000000VS5489BTVUS470OH-D"
     },
     {
       "d": "2026-10-31",
@@ -348,7 +349,8 @@
       "staffelId": "200226",
       "staffelName": "Kreispokal 2026/27",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-22T17:08:17.275Z"
+      "infoAt": "2026-10-29T19:37:11.999Z",
+      "staffelUrl": "https://www.fussball.de/spieltag/runde-3-kreis-arnsberg-c-junioren-kreispokal-c-junioren-saison2627-westfalen/-/spieldatum/2026-11-02/staffel/031JUUE97G000004VS5489BUVVKNMR0J-R"
     },
     {
       "d": "2026-11-03",
@@ -851,9 +853,9 @@
       "matchday": 10,
       "staffelId": "210824",
       "staffelName": "Kreisliga D Arnsberg",
+      "staffelUrl": "https://www.fussball.de/spieltag/kreisliga-d-arnsberg-kreis-arnsberg-kreisliga-d-herren-saison2627-westfalen/-/spieldatum/2026-12-06/staffel/031IU83U78000009VS5489BTVSRD0UH9-G",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-29T12:57:09.000Z",
-      "staffelUrl": "https://www.fussball.de/spieltag/kreisliga-d-arnsberg-kreis-arnsberg-kreisliga-d-herren-saison2627-westfalen/-/spieldatum/2026-12-06/staffel/031IU83U78000009VS5489BTVSRD0UH9-G"
+      "infoAt": "2026-10-29T12:57:09.000Z"
     },
     {
       "d": "2026-12-06",
@@ -2134,23 +2136,6 @@
       "infoAt": "2026-10-23T13:24:32.104Z"
     },
     {
-      "d": "2026-10-25",
-      "t": "15:00",
-      "team": "Herren",
-      "squad": 2,
-      "ownName": "SV Bachum/Bergheim II",
-      "opponent": "Türkiyemspor Neh.-Hüsten",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/tuerkiyemspor-neh-huesten-sv-bachum-bergheim-ii/-/spiel/031IK2RTPG000000VS5489BUVVKNMR0J",
-      "gameNo": "211386093",
-      "matchday": 12,
-      "staffelId": "211386",
-      "staffelName": "Kreisliga B Arnsberg",
-      "venue": "Hartplatz, Nebenplatz Stadion Hartplatz Hüsten, Am Solepark 11, 59759 Arnsberg",
-      "infoAt": "2026-10-23T13:24:32.963Z"
-    },
-    {
       "d": "2026-10-27",
       "t": "19:30",
       "team": "Herren",
@@ -2296,6 +2281,23 @@
     },
     {
       "d": "2026-11-07",
+      "t": "12:00",
+      "team": "C-Junioren",
+      "squad": 1,
+      "ownName": "SV Bachum-Bergheim",
+      "opponent": "FC Ense",
+      "competition": "Kreisfreundschaftsspiele",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/fc-ense-sv-bachum-bergheim/-/spiel/032HSHFFFG000000VS5489BUVSGKI48U",
+      "gameNo": "240158041",
+      "staffelId": "240158",
+      "staffelName": "Freundschaftsspiele Kreis Soest",
+      "staffelUrl": "https://www.fussball.de/spieltag/fs-cj-k-fs-so-1-kreis-soest-c-junioren-kreis-fs-c-junioren-saison2627-westfalen/-/spieldatum/2026-11-07/staffel/03179V3P2C000000VS5489BUVSBBVPEU-D",
+      "venue": "Kunstrasenplatz, Husaren-Sportplatz -Kunst-, Schulweg 15, 59469 Ense",
+      "infoAt": "2026-10-29T19:37:12.835Z"
+    },
+    {
+      "d": "2026-11-07",
       "t": "13:45",
       "team": "E-Junioren",
       "squad": 1,
@@ -2343,6 +2345,29 @@
       "staffelName": "Freundschaftsspiele Kreis Hochsauerlandkreis",
       "venue": "Kunstrasenplatz, REMBE-Sport-Park Stadion, Zur Jakobuslinde 38, 59929 Brilon",
       "infoAt": "2026-10-23T13:24:39.306Z"
+    },
+    {
+      "d": "2026-11-11",
+      "t": "19:30",
+      "team": "Herren",
+      "squad": 2,
+      "ownName": "SV Bachum/Bergheim II",
+      "opponent": "Türkiyemspor Neh.-Hüsten",
+      "competition": "Kreisliga B",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/tuerkiyemspor-neh-huesten-sv-bachum-bergheim-ii/-/spiel/031IK2RTPG000000VS5489BUVVKNMR0J",
+      "movedFrom": {
+        "d": "2026-10-25",
+        "t": "15:00"
+      },
+      "movedAt": "2026-10-29T19:37:10.813Z",
+      "gameNo": "211386093",
+      "matchday": 12,
+      "staffelId": "211386",
+      "staffelName": "Kreisliga B Arnsberg",
+      "venue": "Hartplatz, Nebenplatz Stadion Hartplatz Hüsten, Am Solepark 11, 59759 Arnsberg",
+      "infoAt": "2026-10-29T19:37:13.513Z",
+      "staffelUrl": "https://www.fussball.de/spieltag/kreisliga-b-arnsberg-kreis-arnsberg-kreisliga-b-herren-saison2627-westfalen/-/spieldatum/2026-11-11/staffel/031I0V20RC00000AVS5489BUVVKNMR0J-G"
     },
     {
       "d": "2026-11-14",
@@ -3711,7 +3736,7 @@
         "Kreisfreundschaftsspiele",
         "Kreisliga A"
       ],
-      "games": 16,
+      "games": 17,
       "homeGames": 8,
       "first": "2026-10-08",
       "last": "2027-06-05",
