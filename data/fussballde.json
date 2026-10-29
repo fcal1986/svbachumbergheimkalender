@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-29T05:44:51.570Z",
+  "updated": "2026-10-29T12:57:09.408Z",
   "games": [
     {
       "d": "2026-10-08",
@@ -852,7 +852,8 @@
       "staffelId": "210824",
       "staffelName": "Kreisliga D Arnsberg",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-22T11:48:38.716Z"
+      "infoAt": "2026-10-29T12:57:09.000Z",
+      "staffelUrl": "https://www.fussball.de/spieltag/kreisliga-d-arnsberg-kreis-arnsberg-kreisliga-d-herren-saison2627-westfalen/-/spieldatum/2026-12-06/staffel/031IU83U78000009VS5489BTVSRD0UH9-G"
     },
     {
       "d": "2026-12-06",
@@ -2183,9 +2184,9 @@
       "gameNo": "200207021",
       "staffelId": "200207",
       "staffelName": "Krombacher Reservepokal",
+      "staffelUrl": "https://www.fussball.de/spieltag/runde-2-kreis-arnsberg-kreispokal-herren-saison2627-westfalen/-/spieldatum/2026-10-30/staffel/031GIPB0RK000000VS5489BTVVG7L386-R",
       "venue": "Kunstrasenplatz, Sportplatz Allendorf Im Hespel, Im Hespel 70, 59846 Sundern (Sauerland)",
-      "infoAt": "2026-10-29T05:44:51.163Z",
-      "staffelUrl": "https://www.fussball.de/spieltag/runde-2-kreis-arnsberg-kreispokal-herren-saison2627-westfalen/-/spieldatum/2026-10-30/staffel/031GIPB0RK000000VS5489BTVVG7L386-R"
+      "infoAt": "2026-10-29T05:44:51.163Z"
     },
     {
       "d": "2026-10-30",
