@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-28T22:33:03.777Z",
+  "updated": "2026-10-29T05:44:51.570Z",
   "games": [
     {
       "d": "2026-10-08",
@@ -1835,22 +1835,6 @@
   ],
   "awayGames": [
     {
-      "d": "2026-10-07",
-      "t": "17:45",
-      "team": "D-Junioren",
-      "squad": 2,
-      "ownName": "SV Bachum-Bergheim 2",
-      "opponent": "SV Hüsten 09 1",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-huesten-09-1-sv-bachum-bergheim-2/-/spiel/0326SITQQS000000VS5489BUVUFHD2VV",
-      "gameNo": "240283019",
-      "staffelId": "240283",
-      "staffelName": "Freundschaftsspiele Kreis Arnsberg",
-      "venue": "Kunstrasenplatz, Nebenplatz Stadion Kunstrasen Hüsten, Am Solepark 11, 59759 Arnsberg",
-      "infoAt": "2026-10-09T09:06:52.791Z"
-    },
-    {
       "d": "2026-10-08",
       "t": "18:00",
       "team": "C-Junioren",
@@ -2200,7 +2184,8 @@
       "staffelId": "200207",
       "staffelName": "Krombacher Reservepokal",
       "venue": "Kunstrasenplatz, Sportplatz Allendorf Im Hespel, Im Hespel 70, 59846 Sundern (Sauerland)",
-      "infoAt": "2026-10-21T23:17:11.826Z"
+      "infoAt": "2026-10-29T05:44:51.163Z",
+      "staffelUrl": "https://www.fussball.de/spieltag/runde-2-kreis-arnsberg-kreispokal-herren-saison2627-westfalen/-/spieldatum/2026-10-30/staffel/031GIPB0RK000000VS5489BTVVG7L386-R"
     },
     {
       "d": "2026-10-30",
@@ -3776,19 +3761,17 @@
       "type": "D-Junioren",
       "squad": 2,
       "names": [
-        "SV Bachum-Bergheim 2",
         "SV Bachum-Bergheim II"
       ],
       "teamIds": [
         "02PU7K56SO000000VS5489B2VSE05932"
       ],
       "competitions": [
-        "Kreisfreundschaftsspiele",
         "Kreisliga B"
       ],
-      "games": 11,
+      "games": 10,
       "homeGames": 5,
-      "first": "2026-10-07",
+      "first": "2026-10-10",
       "last": "2027-06-05",
       "teamId": "02PU7K56SO000000VS5489B2VSE05932"
     },
@@ -3963,6 +3946,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-10-07",
+  "teamsFrom": "2026-10-08",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
