@@ -1,28 +1,6 @@
 {
-  "updated": "2026-10-29T23:55:40.847Z",
+  "updated": "2026-10-30T05:44:34.091Z",
   "games": [
-    {
-      "d": "2026-10-08",
-      "t": "19:30",
-      "team": "Herren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "gameNo": "210697008",
-      "opponent": "FC Neheim-Erlenbruch",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-fc-neheim-erlenbruch/-/spiel/031I0BNGSK000000VS5489BUVVKNMR0J",
-      "movedFrom": {
-        "d": "2026-10-08",
-        "t": "19:45"
-      },
-      "movedAt": "2026-10-01T17:01:35.820Z",
-      "matchday": 1,
-      "staffelId": "210697",
-      "staffelName": "Kreisliga A Arnsberg",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:22.774Z"
-    },
     {
       "d": "2026-10-10",
       "t": "10:00",
@@ -1837,22 +1815,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-10-08",
-      "t": "18:00",
-      "team": "C-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum-Bergh. I",
-      "opponent": "JSG Niedereimer/Bruchh. I",
-      "competition": "Kreispokal",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/jsg-niedereimer-bruchhausen-sv-bachum-bergheim/-/spiel/031JUUND7G000000VS5489BUVVKNMR0J",
-      "gameNo": "200226009",
-      "staffelId": "200226",
-      "staffelName": "Kreispokal 2026/27",
-      "venue": "Kunstrasenplatz, Sportplatz Zur Friederichshöhe, Himmelpfortener Weg 2a, 59823 Arnsberg",
-      "infoAt": "2026-10-09T09:06:53.496Z"
-    },
     {
       "d": "2026-10-09",
       "t": "19:00",
@@ -3725,20 +3687,20 @@
       "type": "C-Junioren",
       "squad": 1,
       "names": [
-        "SV Bachum-Bergh. I",
-        "SV Bachum-Bergheim"
+        "SV Bachum-Bergheim",
+        "SV Bachum-Bergh. I"
       ],
       "teamIds": [
         "011MIB6N6S000000VTVG0001VTR8C1K7"
       ],
       "competitions": [
-        "Kreispokal",
         "Kreisfreundschaftsspiele",
-        "Kreisliga A"
+        "Kreisliga A",
+        "Kreispokal"
       ],
-      "games": 17,
+      "games": 16,
       "homeGames": 8,
-      "first": "2026-10-08",
+      "first": "2026-10-10",
       "last": "2027-06-05",
       "teamId": "011MIB6N6S000000VTVG0001VTR8C1K7"
     },
@@ -3928,9 +3890,9 @@
         "Kreisliga A",
         "Kreisfreundschaftsspiele"
       ],
-      "games": 25,
-      "homeGames": 12,
-      "first": "2026-10-08",
+      "games": 24,
+      "homeGames": 11,
+      "first": "2026-10-11",
       "last": "2027-05-30",
       "teamId": "011MIANBCK000000VTVG0001VTR8C1K7"
     },
@@ -3972,6 +3934,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-10-08",
+  "teamsFrom": "2026-10-09",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
