@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-30T23:45:27.824Z",
+  "updated": "2026-10-31T05:36:59.489Z",
   "games": [
     {
       "d": "2026-10-10",
@@ -1847,23 +1847,6 @@
   ],
   "awayGames": [
     {
-      "d": "2026-10-09",
-      "t": "19:00",
-      "team": "A-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "opponent": "JSG Balve/Garbeck/La/Kü/Aff I",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sg-balve-garbeck-la-kue-aff-1-sv-bachum-bergheim/-/spiel/031JKQC6SK000000VS5489BUVVKNMR0J",
-      "gameNo": "211375023",
-      "matchday": 5,
-      "staffelId": "211375",
-      "staffelName": "KL A",
-      "venue": "Kunstrasenplatz, Am Holloh, Tannenstraße , 58802 Balve",
-      "infoAt": "2026-10-09T09:06:54.129Z"
-    },
-    {
       "d": "2026-10-10",
       "t": "11:00",
       "team": "D-Junioren",
@@ -3383,7 +3366,7 @@
       "staffelName": "KL A Gruppe 1",
       "staffelUrl": "https://www.fussball.de/spieltag/kl-a-gruppe-1-kreis-arnsberg-e-junioren-kreisliga-a-e-junioren-saison2627-westfalen/-/spieldatum/2027-05-15/staffel/031J722P24000004VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Röhrtalstadion Sundern, Hauptstr. 189 A, 59846 Sundern (Sauerland)",
-      "infoAt": "2026-10-23T23:07:57.988Z"
+      "infoAt": "2026-10-31T05:36:45.677Z"
     },
     {
       "d": "2027-05-15",
@@ -3401,7 +3384,7 @@
       "staffelName": "KL B Gruppe 1",
       "staffelUrl": "https://www.fussball.de/spieltag/kl-b-gruppe-1-kreis-arnsberg-e-junioren-kreisliga-b-e-junioren-saison2627-westfalen/-/spieldatum/2027-05-15/staffel/031J87AGJ4000002VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Küppelkampfbahn Meschede-Freienohl (Kunstrasen), Im Ohl, 59872 Meschede",
-      "infoAt": "2026-10-23T23:07:58.745Z"
+      "infoAt": "2026-10-31T05:36:46.496Z"
     },
     {
       "d": "2027-05-15",
@@ -3419,7 +3402,7 @@
       "staffelName": "KL C Gruppe 2",
       "staffelUrl": "https://www.fussball.de/spieltag/kl-c-gruppe-2-kreis-arnsberg-e-junioren-kreisliga-c-e-junioren-saison2627-westfalen/-/spieldatum/2027-05-15/staffel/031J88T7TK000004VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Sportplatz Schreppenberg, Neuer Schulweg 23, 59821 Arnsberg",
-      "infoAt": "2026-10-23T23:07:59.508Z"
+      "infoAt": "2026-10-31T05:36:47.324Z"
     },
     {
       "d": "2027-05-17",
@@ -3437,7 +3420,7 @@
       "staffelName": "Kreisliga A Arnsberg",
       "staffelUrl": "https://www.fussball.de/spieltag/kreisliga-a-arnsberg-kreis-arnsberg-kreisliga-a-herren-saison2627-westfalen/-/spieldatum/2027-05-17/staffel/031I0AE5E8000009VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Sportplatz Grevenstein Im Wiesengrund, Im Wiesengrund, 59872 Meschede",
-      "infoAt": "2026-10-23T23:08:00.295Z"
+      "infoAt": "2026-10-31T05:36:48.157Z"
     },
     {
       "d": "2027-05-17",
@@ -3455,7 +3438,7 @@
       "staffelName": "Kreisliga B Arnsberg",
       "staffelUrl": "https://www.fussball.de/spieltag/kreisliga-b-arnsberg-kreis-arnsberg-kreisliga-b-herren-saison2627-westfalen/-/spieldatum/2027-05-17/staffel/031I0V20RC00000AVS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Sportpark Langscheid, Langscheider Str. 91, 59846 Sundern (Sauerland)",
-      "infoAt": "2026-10-23T23:08:01.069Z"
+      "infoAt": "2026-10-31T05:36:49.002Z"
     },
     {
       "d": "2027-05-21",
@@ -3473,7 +3456,7 @@
       "staffelName": "KL A",
       "staffelUrl": "https://www.fussball.de/spieltag/kl-a-kreis-arnsberg-a-junioren-kreisliga-a-a-junioren-saison2627-westfalen/-/spieldatum/2027-05-21/staffel/031JKJK6Q0000004VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Ruhr-Möhne-Sportplatz Neheim, Zum Besenberg, 59755 Arnsberg",
-      "infoAt": "2026-10-23T23:08:01.959Z"
+      "infoAt": "2026-10-31T05:36:49.820Z"
     },
     {
       "d": "2027-05-22",
@@ -3491,7 +3474,7 @@
       "staffelName": "KL A",
       "staffelUrl": "https://www.fussball.de/spieltag/kl-a-kreis-arnsberg-c-junioren-kreisliga-a-c-junioren-saison2627-westfalen/-/spieldatum/2027-05-22/staffel/031I05QOSK000004VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Sportplatz Braukweg, Braukweg 6, 59757 Arnsberg",
-      "infoAt": "2026-10-23T23:08:02.839Z"
+      "infoAt": "2026-10-31T05:36:50.524Z"
     },
     {
       "d": "2027-05-22",
@@ -3509,7 +3492,7 @@
       "staffelName": "KL C Gruppe 2",
       "staffelUrl": "https://www.fussball.de/spieltag/kl-c-gruppe-2-kreis-arnsberg-e-junioren-kreisliga-c-e-junioren-saison2627-westfalen/-/spieldatum/2027-05-22/staffel/031J88T7TK000004VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Eichholzsportplatz Arnsberg, Feauxweg 26, 59821 Arnsberg",
-      "infoAt": "2026-10-23T23:08:03.597Z"
+      "infoAt": "2026-10-31T05:36:51.222Z"
     },
     {
       "d": "2027-05-23",
@@ -3527,7 +3510,7 @@
       "staffelName": "Kreisliga D Arnsberg",
       "staffelUrl": "https://www.fussball.de/spieltag/kreisliga-d-arnsberg-kreis-arnsberg-kreisliga-d-herren-saison2627-westfalen/-/spieldatum/2027-05-23/staffel/031IU83U78000009VS5489BTVSRD0UH9-G",
       "venue": "Kunstrasenplatz, Sportplatz Hachen Hüttenwiese, Am Sportplatz 13, 59846 Sundern (Sauerland)",
-      "infoAt": "2026-10-23T23:08:04.358Z"
+      "infoAt": "2026-10-31T05:36:52.033Z"
     },
     {
       "d": "2027-05-30",
@@ -3545,7 +3528,7 @@
       "staffelName": "Kreisliga B Arnsberg",
       "staffelUrl": "https://www.fussball.de/spieltag/kreisliga-b-arnsberg-kreis-arnsberg-kreisliga-b-herren-saison2627-westfalen/-/spieldatum/2027-05-30/staffel/031I0V20RC00000AVS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Düsterloh-Arena Langenholthausen, Iserlohner Str., 58802 Balve",
-      "infoAt": "2026-10-23T23:08:05.138Z"
+      "infoAt": "2026-10-31T05:36:52.876Z"
     },
     {
       "d": "2027-05-30",
@@ -3563,7 +3546,7 @@
       "staffelName": "Kreisliga A Arnsberg",
       "staffelUrl": "https://www.fussball.de/spieltag/kreisliga-a-arnsberg-kreis-arnsberg-kreisliga-a-herren-saison2627-westfalen/-/spieldatum/2027-05-30/staffel/031I0AE5E8000009VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Sportplatz Braukweg, Braukweg 6, 59757 Arnsberg",
-      "infoAt": "2026-10-23T23:08:06.030Z"
+      "infoAt": "2026-10-31T05:36:53.725Z"
     },
     {
       "d": "2027-06-05",
@@ -3581,7 +3564,7 @@
       "staffelName": "KL A Meisterrunde",
       "staffelUrl": "https://www.fussball.de/spieltag/kl-a-meisterrunde-kreis-arnsberg-d-junioren-kreisliga-a-d-junioren-saison2627-westfalen/-/spieldatum/2027-06-05/staffel/031OE6QQEC000004VS5489BUVT2M8LCU-G",
       "venue": "Kunstrasenplatz, Nebenplatz Stadion Kunstrasen Hüsten, Am Solepark 11, 59759 Arnsberg",
-      "infoAt": "2026-10-23T23:08:06.792Z"
+      "infoAt": "2026-10-31T05:36:54.539Z"
     },
     {
       "d": "2027-06-05",
@@ -3599,7 +3582,7 @@
       "staffelName": "KL B",
       "staffelUrl": "https://www.fussball.de/spieltag/kl-b-kreis-arnsberg-c-junioren-kreisliga-b-c-junioren-saison2627-westfalen/-/spieldatum/2027-06-05/staffel/031I0RAPK0000004VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Sportplatz Stockum Am Bergmer, Im Wienig, 59846 Sundern (Sauerland)",
-      "infoAt": "2026-10-23T23:08:07.667Z"
+      "infoAt": "2026-10-31T05:36:55.240Z"
     },
     {
       "d": "2027-06-05",
@@ -3616,7 +3599,7 @@
       "staffelId": "210420",
       "staffelName": "KL B Gruppe 2",
       "staffelUrl": "https://www.fussball.de/spieltag/kl-b-gruppe-2-kreis-arnsberg-d-junioren-kreisliga-b-d-junioren-saison2627-westfalen/-/spieldatum/2027-06-05/staffel/031OEH228C000002VS5489BUVT2M8LCU-G",
-      "infoAt": "2026-10-23T23:08:08.432Z"
+      "infoAt": "2026-10-31T05:36:56.058Z"
     },
     {
       "d": "2027-06-12",
@@ -3634,7 +3617,7 @@
       "staffelName": "KL B Gruppe 1",
       "staffelUrl": "https://www.fussball.de/spieltag/kl-b-gruppe-1-kreis-arnsberg-e-junioren-kreisliga-b-e-junioren-saison2627-westfalen/-/spieldatum/2027-06-12/staffel/031J87AGJ4000002VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Sportplatz Telgenweg, Telgenweg, 59759 Arnsberg",
-      "infoAt": "2026-10-23T23:08:09.313Z"
+      "infoAt": "2026-10-31T05:36:56.866Z"
     },
     {
       "d": "2027-06-12",
@@ -3652,7 +3635,7 @@
       "staffelName": "KL A Gruppe 1",
       "staffelUrl": "https://www.fussball.de/spieltag/kl-a-gruppe-1-kreis-arnsberg-e-junioren-kreisliga-a-e-junioren-saison2627-westfalen/-/spieldatum/2027-06-12/staffel/031J722P24000004VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Sportplatz Telgenweg, Telgenweg, 59759 Arnsberg",
-      "infoAt": "2026-10-23T23:08:10.186Z"
+      "infoAt": "2026-10-31T05:36:57.564Z"
     },
     {
       "d": "2027-06-12",
@@ -3670,7 +3653,7 @@
       "staffelName": "KL C Gruppe 2",
       "staffelUrl": "https://www.fussball.de/spieltag/kl-c-gruppe-2-kreis-arnsberg-e-junioren-kreisliga-c-e-junioren-saison2627-westfalen/-/spieldatum/2027-06-12/staffel/031J88T7TK000004VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Sportplatz Affeln Auf der Stummel, Zum Imberg, 58809 Neuenrade",
-      "infoAt": "2026-10-23T23:08:11.067Z"
+      "infoAt": "2026-10-31T05:36:58.259Z"
     },
     {
       "d": "2027-06-13",
@@ -3688,7 +3671,7 @@
       "staffelName": "B-Junioren - Bezirksliga, Staffel 3",
       "staffelUrl": "https://www.fussball.de/spieltag/b-junioren--bezirksliga-staffel-3-bezirk-westfalen-b-junioren-bezirksliga-b-junioren-saison2627-westfalen/-/spieldatum/2027-06-13/staffel/03106MNDA000000QVS5489BTVT51B5B5-G",
       "venue": "Kunstrasenplatz, Sportpark Am Ardey -Kunst-, Ardeyweg 31-33, 59494 Soest",
-      "infoAt": "2026-10-23T23:08:11.836Z"
+      "infoAt": "2026-10-31T05:36:59.084Z"
     }
   ],
   "teams": [
@@ -3699,19 +3682,19 @@
         "SV Bachum/Bergheim"
       ],
       "teamIds": [
-        "027IVI3RO8000000VS5489B1VUA37ON8",
-        "02B9BQVPIG000000VS5489B1VU20GQ5T"
+        "02B9BQVPIG000000VS5489B1VU20GQ5T",
+        "027IVI3RO8000000VS5489B1VUA37ON8"
       ],
       "competitions": [
-        "Kreisliga A",
         "Kreisfreundschaftsspiele",
-        "Kreispokal"
+        "Kreispokal",
+        "Kreisliga A"
       ],
-      "games": 15,
+      "games": 14,
       "homeGames": 7,
-      "first": "2026-10-09",
+      "first": "2026-10-24",
       "last": "2027-05-21",
-      "teamId": "027IVI3RO8000000VS5489B1VUA37ON8"
+      "teamId": "02B9BQVPIG000000VS5489B1VU20GQ5T"
     },
     {
       "type": "B-Junioren",
@@ -3984,6 +3967,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-10-09",
+  "teamsFrom": "2026-10-10",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
