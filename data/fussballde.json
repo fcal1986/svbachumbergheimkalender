@@ -1,56 +1,6 @@
 {
-  "updated": "2026-11-01T23:34:13.241Z",
+  "updated": "2026-11-02T05:58:30.674Z",
   "games": [
-    {
-      "d": "2026-10-11",
-      "t": "11:00",
-      "team": "B-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "gameNo": "211049032",
-      "opponent": "SV Brackel 06",
-      "competition": "Bezirksliga",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sv-brackel-06/-/spiel/031GM5I9FO000000VS5489BTVVG7L386",
-      "matchday": 5,
-      "staffelId": "211049",
-      "staffelName": "B-Junioren - Bezirksliga, Staffel 3",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:26.610Z"
-    },
-    {
-      "d": "2026-10-11",
-      "t": "13:00",
-      "team": "D-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum-Bergheim",
-      "gameNo": "240283011",
-      "opponent": "DJK Grün-Weiß Menden 1",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-djk-gruen-weiss-menden-1/-/spiel/032AE78SQ4000000VS5489BUVV5V31CI",
-      "staffelId": "240283",
-      "staffelName": "Freundschaftsspiele Kreis Arnsberg",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:27.138Z"
-    },
-    {
-      "d": "2026-10-11",
-      "t": "15:00",
-      "team": "Herren",
-      "squad": 3,
-      "ownName": "SV Bachum/Bergheim III",
-      "gameNo": "210824012",
-      "opponent": "TuS Hachen II",
-      "competition": "Kreisliga D",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-tus-hachen-ii/-/spiel/031KK1IPTG000000VS5489BUVVKNMR0J",
-      "matchday": 4,
-      "staffelId": "210824",
-      "staffelName": "Kreisliga D Arnsberg",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:05:27.781Z"
-    },
     {
       "d": "2026-10-17",
       "t": "09:44",
@@ -1739,40 +1689,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-10-11",
-      "t": "15:00",
-      "team": "Herren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "opponent": "SG Allendorf/Amecke",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sg-allendorf-amecke-sv-bachum-bergheim/-/spiel/031I0BNA28000000VS5489BUVVKNMR0J",
-      "gameNo": "210697078",
-      "matchday": 10,
-      "staffelId": "210697",
-      "staffelName": "Kreisliga A Arnsberg",
-      "venue": "Kunstrasenplatz, Sportplatz Allendorf Im Hespel, Im Hespel 70, 59846 Sundern (Sauerland)",
-      "infoAt": "2026-10-09T09:06:55.927Z"
-    },
-    {
-      "d": "2026-10-11",
-      "t": "15:00",
-      "team": "Herren",
-      "squad": 2,
-      "ownName": "SV Bachum/Bergheim II",
-      "opponent": "DJK GW Arnsberg",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/djk-gw-arnsberg-sv-bachum-bergheim-ii/-/spiel/031IK2RV40000000VS5489BUVVKNMR0J",
-      "gameNo": "211386079",
-      "matchday": 10,
-      "staffelId": "211386",
-      "staffelName": "Kreisliga B Arnsberg",
-      "venue": "Kunstrasenplatz, Sportplatz Schreppenberg, Neuer Schulweg 23, 59821 Arnsberg",
-      "infoAt": "2026-10-09T09:06:56.562Z"
-    },
     {
       "d": "2026-10-14",
       "t": "16:30",
@@ -3570,9 +3486,9 @@
         "Kreisfreundschaftsspiele",
         "Kreispokal"
       ],
-      "games": 23,
-      "homeGames": 13,
-      "first": "2026-10-11",
+      "games": 22,
+      "homeGames": 12,
+      "first": "2026-10-18",
       "last": "2027-06-13",
       "teamId": "02B9BQVPIG000000VS5489B1VU20GQ5T"
     },
@@ -3627,14 +3543,14 @@
         "011MI9U4VO000000VTVG0001VTR8C1K7"
       ],
       "competitions": [
-        "Kreisfreundschaftsspiele",
         "Vereinsturnier",
         "Kreisliga A",
+        "Kreisfreundschaftsspiele",
         "Kreispokal"
       ],
-      "games": 20,
-      "homeGames": 9,
-      "first": "2026-10-11",
+      "games": 19,
+      "homeGames": 8,
+      "first": "2026-10-31",
       "last": "2027-06-05",
       "teamId": "011MI9U4VO000000VTVG0001VTR8C1K7"
     },
@@ -3765,9 +3681,9 @@
         "Kreisliga A",
         "Kreisfreundschaftsspiele"
       ],
-      "games": 24,
+      "games": 23,
       "homeGames": 11,
-      "first": "2026-10-11",
+      "first": "2026-10-18",
       "last": "2027-05-30",
       "teamId": "011MIANBCK000000VTVG0001VTR8C1K7"
     },
@@ -3784,9 +3700,9 @@
         "Kreisliga B",
         "Kreispokal"
       ],
-      "games": 23,
+      "games": 22,
       "homeGames": 11,
-      "first": "2026-10-11",
+      "first": "2026-10-18",
       "last": "2027-05-30",
       "teamId": "011MIBAEQC000000VTVG0001VTR8C1K7"
     },
@@ -3802,13 +3718,13 @@
       "competitions": [
         "Kreisliga D"
       ],
-      "games": 16,
-      "homeGames": 9,
-      "first": "2026-10-11",
+      "games": 15,
+      "homeGames": 8,
+      "first": "2026-10-18",
       "last": "2027-05-30",
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-10-11",
+  "teamsFrom": "2026-10-12",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
