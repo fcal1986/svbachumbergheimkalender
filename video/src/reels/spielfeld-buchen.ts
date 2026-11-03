@@ -1,5 +1,5 @@
 // Kurzvideo: Zeiten direkt im Spielfeldbild buchen (Backlog 113, ab 03.11.2026 · 1/2), ≈ 39 s.
-// Noch ohne Stimme: Zeiten geschätzt. Nach der CapCut-Aufnahme `warp`, `audio` und `narration` anpassen.
+// Stimme: CapCut-Aufnahme vom 03.11.2026, Bilder per `warp` an die Sprechzeiten angepasst.
 import type { Reel } from '../config/types';
 
 const reel: Reel = {
@@ -8,6 +8,9 @@ const reel: Reel = {
   audience: 'Trainer',
   durationS: 39,
   cameraFit: true,
+  // An die Stimme angepasst: Abschnitt beginnt 0,3 s vor dem Satz. [Konfiguration, Film]
+  warp: [[0,0],[3,3.98],[10,9.66],[18,17.06],[22,19.87],[27,23.3],[34,27.01],[39,33.0]],
+  audio: { voiceover: { src: 'audio/spielfeld-buchen-stimme.wav', volume: 1 } },
   hooks: {
     neu: { label: 'Neu: Zeiten direkt im Spielfeld buchen.', lines: ['Neu:', 'Direkt im', 'Spielfeld buchen.'], accent: 'Spielfeld buchen.' },
   },
@@ -60,14 +63,15 @@ const reel: Reel = {
     { from: 22, to: 27, title: 'Schon steht deine', accent: 'Mannschaft im Bild', sub: 'Für alle sichtbar' },
     { from: 27, to: 34, title: 'Auch Kleinspielfeld', accent: 'und Hallendrittel', sub: 'Alles, was im Bild frei ist' },
   ],
+  // Zeiten = echte Sprechzeiten der CapCut-Aufnahme vom 03.11.2026 (Filmzeit, aus den Pausen ermittelt).
   narration: [
-    { from: 0.3, to: 2.8, text: 'Neu in Platzcoach: Zeiten direkt im Spielfeld buchen.' },
-    { from: 3.2, to: 9.6, text: 'Auf der Startseite siehst du live, was auf dem Platz los ist. Freie Viertel sind mit Plus frei markiert.' },
-    { from: 10.2, to: 17.6, text: 'Tipp einfach drauf. Platzcoach übernimmt Tag, Fläche und eine passende Uhrzeit – höchstens bis zur nächsten Belegung.' },
-    { from: 18.2, to: 21.6, text: 'Kurz prüfen, speichern – fertig.' },
-    { from: 22.2, to: 26.6, text: 'Und schon steht deine Mannschaft im Bild – für alle sichtbar.' },
-    { from: 27.2, to: 33.6, text: 'Das geht genauso beim Kleinspielfeld und bei freien Hallendritteln.' },
-    { from: 34.2, to: 37.4, text: 'Platzcoach. Jetzt ansehen auf platzcoach.de.' },
+    { from: 0.41, to: 3.76, text: 'Neu in Platzcoach: Zeiten direkt im Spielfeld buchen.' },
+    { from: 4.28, to: 9.44, text: 'Auf der Startseite siehst du live, was auf dem Platz los ist. Freie Viertel sind mit Plus frei markiert.' },
+    { from: 9.96, to: 16.6, text: 'Tipp einfach drauf. Platzcoach übernimmt Tag, Fläche und eine passende Uhrzeit – höchstens bis zur nächsten Belegung.' },
+    { from: 17.36, to: 19.61, text: 'Kurz prüfen, speichern – fertig.' },
+    { from: 20.17, to: 23.16, text: 'Und schon steht deine Mannschaft im Bild – für alle sichtbar.' },
+    { from: 23.6, to: 26.77, text: 'Das geht genauso beim Kleinspielfeld und bei freien Hallendritteln.' },
+    { from: 27.31, to: 30.9, text: 'Platzcoach. Jetzt ansehen auf platzcoach.de.' },
   ],
   claims: [
     'Start „Jetzt auf dem Platz“: angemeldet und buchberechtigt sehen freie Viertel als „+ frei“ (canBookSpot, ab 03.11.2026 · 1, Backlog 113)',
