@@ -234,7 +234,18 @@
       "trainerName": "",
       "seasonId": "2026-2027",
       "kind": "training",
-      "cancelled": []
+      "cancelled": [],
+      "moved": {
+        "2026-11-03": {
+          "from": "16:30",
+          "to": "17:45",
+          "pitch": {
+            "mode": "haelfte",
+            "part": "B"
+          },
+          "res": []
+        }
+      }
     },
     {
       "id": "ca2dc0b4-a484-4593-98eb-4b55d8a60d93",
