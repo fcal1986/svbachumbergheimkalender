@@ -322,7 +322,9 @@
         "Marcel Mohr",
         "Daniel Schauerte-Becker"
       ],
-      "cancelled": [],
+      "cancelled": [
+        "2026-11-03"
+      ],
       "validFrom": "2026-09-09",
       "validUntil": "2027-06-30",
       "trainerId": null,
