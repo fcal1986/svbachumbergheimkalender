@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-03T06:44:19.356Z",
+  "updated": "2026-11-03T16:14:02.921Z",
   "games": [
     {
       "d": "2026-10-17",
@@ -377,7 +377,7 @@
       "staffelName": "KL A",
       "staffelUrl": "https://www.fussball.de/spieltag/kl-a-kreis-arnsberg-a-junioren-kreisliga-a-a-junioren-saison2627-westfalen/-/spieldatum/2026-11-09/staffel/031JKJK6Q0000004VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-27T12:07:39.922Z"
+      "infoAt": "2026-11-03T16:14:01.735Z"
     },
     {
       "d": "2026-11-11",
@@ -2327,6 +2327,22 @@
     },
     {
       "d": "2026-11-21",
+      "t": "10:30",
+      "team": "C-Junioren",
+      "squad": 1,
+      "ownName": "SV Bachum-Bergh. I",
+      "opponent": "TuS Sundern I",
+      "competition": "Kreispokal",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/tus-sundern-sv-bachum-bergheim/-/spiel/031JV083EO000000VS5489BUVVKNMR0J",
+      "gameNo": "200280001",
+      "staffelId": "200280",
+      "staffelName": "Kreispokal 2026/27",
+      "staffelUrl": "https://www.fussball.de/spieltag/endspiel-kreis-arnsberg-c-junioren-kreispokal-c-junioren-saison2627-westfalen/-/spieldatum/2026-11-21/staffel/031JUVKAMO000004VS5489BUVVKNMR0J-R",
+      "infoAt": "2026-11-03T16:14:02.513Z"
+    },
+    {
+      "d": "2026-11-21",
       "t": "14:00",
       "team": "D-Junioren",
       "squad": 1,
@@ -3507,7 +3523,7 @@
         "Kreispokal",
         "Kreisfreundschaftsspiele"
       ],
-      "games": 14,
+      "games": 15,
       "homeGames": 7,
       "first": "2026-10-23",
       "last": "2027-06-05",
