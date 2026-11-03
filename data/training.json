@@ -234,7 +234,9 @@
       "trainerName": "",
       "seasonId": "2026-2027",
       "kind": "training",
-      "cancelled": [],
+      "cancelled": [
+        "2026-11-03"
+      ],
       "moved": {
         "2026-11-03": {
           "from": "16:30",
