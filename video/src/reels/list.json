@@ -55,5 +55,11 @@
     "nr": 9,
     "file": "anleitung-spiel-in-trainingszeit",
     "previews": []
+  },
+  {
+    "id": "spielfeld-buchen",
+    "nr": 10,
+    "file": "spielfeld-buchen",
+    "previews": []
   }
 ]

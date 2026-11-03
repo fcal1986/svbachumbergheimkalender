@@ -9,10 +9,12 @@ import freundschaftsspiel from './freundschaftsspiel';
 import anleitungSpielverlegung from './anleitung-spielverlegung';
 import anleitungFreundschaftsspiel from './anleitung-freundschaftsspiel';
 import anleitungSpielInTrainingszeit from './anleitung-spiel-in-trainingszeit';
+import spielfeldBuchen from './spielfeld-buchen';
 
 export const REELS: Record<string, Reel> = { platzbelegung, spielverlegung, fussballde, freiertermin, torwarttraining, freundschaftsspiel, 'anleitung-spielverlegung': anleitungSpielverlegung,
   'anleitung-freundschaftsspiel': anleitungFreundschaftsspiel,
-  'anleitung-spiel-in-trainingszeit': anleitungSpielInTrainingszeit };
+  'anleitung-spiel-in-trainingszeit': anleitungSpielInTrainingszeit,
+  'spielfeld-buchen': spielfeldBuchen };
 
 export function reelById(id: string): Reel {
   const r = REELS[id];
