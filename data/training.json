@@ -868,10 +868,7 @@
         "2026-10-30": {
           "from": "16:00",
           "to": "17:30",
-          "pitch": {
-            "mode": "haelfte",
-            "part": "A"
-          },
+          "pitch": null,
           "res": [
             "Kleinspielfeld"
           ]
