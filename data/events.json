@@ -316,6 +316,24 @@
       "kickoff": "16:30",
       "ownerId": "123c8c2c-5a1a-43d6-be82-455af9f3b407",
       "ownerName": "Younes Al Musaui"
+    },
+    {
+      "id": "dad2a825-e01d-464f-858c-a769755a2913",
+      "d": "2026-11-03",
+      "t": "18:00",
+      "bis": "19:30",
+      "title": "Training",
+      "kind": "training",
+      "team": "D-Jugend",
+      "squad": 1,
+      "pitch": null,
+      "halle": null,
+      "res": [
+        "Kleinspielfeld"
+      ],
+      "note": "",
+      "ownerId": "d1cc03c0-324c-40de-a4f8-49d75efeb828",
+      "ownerName": "Marcel Mohr"
     }
   ]
 }
