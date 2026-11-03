@@ -259,8 +259,9 @@
   .lp-freeq>div{flex:1;border:2px dashed rgba(255,255,255,.7);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#fff;}
   .lp-freeq b{font-size:16px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;}
   .lp-freeq span{font-size:11px;font-weight:700;opacity:.9;}
-  .lp-freeq.book{cursor:pointer;}
-  .lp-freeq.book:active>div{background:rgba(255,255,255,.14);}
+  .lp-freeq.book,.lp-klein.book,.lp-third.book{cursor:pointer;}
+  .lp-freeq.book:active>div,.lp-klein.book:active,.lp-third.book:active{background:rgba(255,255,255,.14);}
+  .lp-klein.book .lp-freetxt{color:#fff;}
   .lp-freeq small{font-size:10.5px;font-weight:600;margin-top:2px;background:rgba(1,27,50,.35);padding:1px 6px;border-radius:6px;}
   .lp-klein.occ{background:rgba(1,27,50,.88);border-color:rgba(1,27,50,.88);} .lp-klein.occ.mine{background:#8BCF2F;border-color:#fff;}
   .lp-klein b{font-size:14px;font-weight:800;color:#fff;} .lp-klein.mine b,.lp-klein.mine .lp-kbis,.lp-klein.mine .lp-klein-t{color:var(--pc-navy);}
@@ -1763,7 +1764,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='03.11.2026 · 1';
+const APP_VERSION='03.11.2026 · 2';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -5080,6 +5081,7 @@ function openSlotSheet(ds,area,lane,from,to,ev,exact){ // exact: genau from–to
   const dur=us?Math.max(30,hmMin(us.to)-hmMin(us.from)):90, end=exact?to:Math.min(to,start+dur), von=minHM(start), bis=minHM(end);
   document.getElementById('f-von').value=von; document.getElementById('f-bis').value=bis;
   if(area==='klein'){ setResChips('f-res',['Kleinspielfeld']); }
+  else if(area==='halle'){ setResChips('f-res',['Halle']); halleThirds=[lane]; }
   else{
     const keep=(us&&us.res||[]).filter(r=>r!=='Kleinspielfeld');
     setResChips('f-res',['Großspielfeld'].concat(keep));
@@ -5138,20 +5140,30 @@ function liveNow(ds,m){ // ds/m leer = heute jetzt; sonst Belegung am Tag ds um 
 }
 /* Ab 03.11.2026 · 1: freies Viertel im Spielfeldbild antippen = buchen (Feedback Markus V. 03.11.: „Draufklicken geht nicht“).
    Freie Zeit des Viertels rund um die gezeigte Uhrzeit; heute frühestens ab der laufenden Viertelstunde. */
-function freeWindowAt(L,q){
+function freeWindowAt(L,area,q){
   let a=TL_DAY_FROM, b=Math.max(TL_DAY_TO,L.n+30);
-  L.occ.filter(o=>!o.cancelled&&o.area==='platz'&&o.lanes[0]<=q&&o.lanes[1]>=q).forEach(o=>{ const s=hmMin(o.t), e=hmMin(o.bis);
+  L.occ.filter(o=>!o.cancelled&&o.area===area&&o.lanes[0]<=q&&o.lanes[1]>=q).forEach(o=>{ const s=hmMin(o.t), e=hmMin(o.bis);
     if(e<=L.n) a=Math.max(a,e); else if(s>L.n) b=Math.min(b,s); });
   if(L.ds===todayStr) a=Math.max(a,Math.floor(hmMin(nowHMStr())/15)*15);
   return [a,b];
 }
 // Wurde dort ein Termin abgesagt, wird genau seine Zeit vorgeschlagen („den Slot übernehmen“), sonst ab der gezeigten Uhrzeit
 // die übliche Trainingsdauer – wie „+ frei“ in der Zeitleiste.
-function bookFreeQuarter(ds,q,m){
-  const L=liveNow(ds,m), w=freeWindowAt(L,q);
-  const cx=L.canc.find(o=>o.area==='platz'&&o.lanes[0]<=q&&o.lanes[1]>=q);
-  if(cx){ const s=Math.max(w[0],hmMin(cx.t)), e=Math.min(w[1],hmMin(cx.bis)); if(e-s>=30){ openSlotSheet(ds,'platz',q,s,e,null,true); return; } }
-  openSlotSheet(ds,'platz',q,Math.max(w[0],Math.floor(L.n/15)*15),w[1]);
+// Ab 03.11.2026 · 2 für alles, was im Bild zu sehen ist: Viertel, Kleinspielfeld, Hallendrittel (area/lane wie in der Zeitleiste)
+function bookFreeSpot(ds,area,q,m){
+  const L=liveNow(ds,m), w=freeWindowAt(L,area,q);
+  const cx=L.canc.find(o=>o.area===area&&o.lanes[0]<=q&&o.lanes[1]>=q);
+  if(cx){ const s=Math.max(w[0],hmMin(cx.t)), e=Math.min(w[1],hmMin(cx.bis)); if(e-s>=30){ openSlotSheet(ds,area,q,s,e,null,true); return; } }
+  openSlotSheet(ds,area,q,Math.max(w[0],Math.floor(L.n/15)*15),w[1]);
+}
+// Darf hier gebucht werden? Angemeldet mit Buchungsrecht, nicht in der Vergangenheit, nicht gesperrt, mind. 30 Min frei
+function canBookSpot(L,area,q){
+  if(!canBookSlots()||L.ds<todayStr) return false;
+  if(activeLocksOn(L.ds).some(l=>l.resource===(area==='halle'?'halle':'platz'))) return false;
+  const w=freeWindowAt(L,area,q); return w[1]-w[0]>=30;
+}
+function bookSpotAttr(L,area,q,label){
+  return ' role="button" aria-label="'+esc(label+' frei – buchen')+'" onclick="'+esc('bookFreeSpot(\''+L.ds+'\',\''+area+'\','+q+','+(L.isNow?'null':L.n)+')')+'"';
 }
 function livePitchHTML(isMine,compact,L,top){
   L=L||liveNow();
@@ -5171,16 +5183,18 @@ function livePitchHTML(isMine,compact,L,top){
   const cancShown=new Set();
   [1,2,3,4].filter(q=>!covered[q]).forEach(q=>{ const c=cell(q), cx=canc.find(o=>o.area==='platz'&&o.lanes[0]<=q&&o.lanes[1]>=q);
     const show=cx&&!cancShown.has(cx.id); if(show) cancShown.add(cx.id);
-    const nx=L.nextOn(q), book=!lock&&canBookSlots()&&L.ds>=todayStr&&(()=>{ const w=freeWindowAt(L,q); return w[1]-w[0]>=30; })();
-    h+='<div class="lp-freeq'+(book?' book':'')+'"'+(book?' role="button" aria-label="'+esc('Viertel '+q+' frei – buchen')+'" onclick="'+esc('bookFreeQuarter(\''+L.ds+'\','+q+','+(L.isNow?'null':L.n)+')')+'"':'')+' style="left:'+c.c*50+'%;top:'+c.r*50+'%"><div><b>'+(book?'+ frei':'frei')+'</b>'+(nx?'<span>bis '+nx.t+'</span>':'<span>'+(L.ds===todayStr?'heute':'bis abends')+'</span>')+(show?'<small>'+esc(cx.label)+' abgesagt</small>':'')+'</div></div>'; });
+    const nx=L.nextOn(q), book=canBookSpot(L,'platz',q);
+    h+='<div class="lp-freeq'+(book?' book':'')+'"'+(book?bookSpotAttr(L,'platz',q,'Viertel '+q):'')+' style="left:'+c.c*50+'%;top:'+c.r*50+'%"><div><b>'+(book?'+ frei':'frei')+'</b>'+(nx?'<span>bis '+nx.t+'</span>':'<span>'+(L.ds===todayStr?'heute':'bis abends')+'</span>')+(show?'<small>'+esc(cx.label)+' abgesagt</small>':'')+'</div></div>'; });
   if(lock) h+='<div class="lp-lock"><b>Gesperrt</b>'+(lock.note?'<span>'+esc(lock.note)+'</span>':'')+'</div>';
   h+='</div>';
   const k=live.find(o=>o.area==='klein'), kc=canc.find(o=>o.area==='klein');
-  h+='<div class="lp-klein'+(k?(occIsMine(k,isMine)?' occ mine':' occ'):'')+'"'+(k?' role="button" onclick="'+esc('openOccDetail(\''+L.ds+'\','+L.occ.indexOf(k)+')')+'"':'')+'><span class="lp-klein-t">Kleinspielfeld</span>'+(k?'<b>'+esc(k.label+tag(k))+'</b><span class="lp-kbis">bis '+k.bis+'</span>'
-    :'<span class="lp-freetxt">frei'+(kc?' · '+esc(kc.label)+' abgesagt':'')+'</span>')+'</div>';
+  const kBook=!k&&canBookSpot(L,'klein',1);
+  h+='<div class="lp-klein'+(k?(occIsMine(k,isMine)?' occ mine':' occ'):(kBook?' book':''))+'"'+(k?' role="button" onclick="'+esc('openOccDetail(\''+L.ds+'\','+L.occ.indexOf(k)+')')+'"':(kBook?bookSpotAttr(L,'klein',1,'Kleinspielfeld'):''))+'><span class="lp-klein-t">Kleinspielfeld</span>'+(k?'<b>'+esc(k.label+tag(k))+'</b><span class="lp-kbis">bis '+k.bis+'</span>'
+    :'<span class="lp-freetxt">'+(kBook?'+ frei':'frei')+(kc?' · '+esc(kc.label)+' abgesagt':'')+'</span>')+'</div>';
   const hall=live.filter(o=>o.area==='halle');
   if(hall.length){ h+='<div class="lp-halle"><span class="lp-klein-t">Halle</span><div class="lp-thirds">'+[1,2,3].map(t=>{ const o=hall.find(x=>x.lanes[0]===t);
-      return '<div class="lp-third'+(o?(occIsMine(o,isMine)?' mine':' occ'):'')+'">'+(o?esc(o.label):'frei')+'</div>'; }).join('')+'</div></div>'; }
+      const b=!o&&canBookSpot(L,'halle',t);
+      return '<div class="lp-third'+(o?(occIsMine(o,isMine)?' mine':' occ'):(b?' book':''))+'"'+(b?bookSpotAttr(L,'halle',t,'Halle Drittel '+t):'')+'>'+(o?esc(o.label):(b?'+ frei':'frei'))+'</div>'; }).join('')+'</div></div>'; }
   return h+'</div>';
 }
 /* ---------- Live-Karte oben: „Läuft gerade“ oder „Als Nächstes“ der eigenen Mannschaft(en) ---------- */
