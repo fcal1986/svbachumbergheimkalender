@@ -342,7 +342,7 @@
         }
       ],
       "teamSync": {
-        "checkedAt": "2026-09-29T10:32:56.425Z",
+        "checkedAt": "2026-11-01T10:43:20.811Z",
         "removed": [
           {
             "team": "G-Jugend",
@@ -394,6 +394,9 @@
             "squad": 3,
             "at": "2026-09-29"
           }
+        ],
+        "ignored": [
+          "app:G-Jugend#1"
         ]
       }
     }

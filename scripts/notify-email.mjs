@@ -88,7 +88,7 @@ const CATEGORIES = {
                 'Freundschaftsspiel angelegt:', 'Freundschaftsspiel geändert:', 'Freundschaftsspiel gelöscht:',
                 'Turnier angelegt:', 'Turnier geändert:', 'Turnier gelöscht:'],
   training:    ['Trainingszeit angelegt:', 'Trainingszeit geändert:', 'Trainingszeit gelöscht:',
-                'Training abgesagt:', 'Absage zurückgenommen:', 'Training verlegt:', 'Torwarttraining-Anmeldung geändert:'],
+                'Training abgesagt:', 'Absage zurückgenommen:', 'Training verlegt:', 'Training auf anderer Fläche:', 'Torwarttraining-Anmeldung geändert:'],
   sperren:     ['Sperre angelegt:', 'Sperre aufgehoben:'],
   verwaltung:  ['Zugang angelegt:', 'Zugang gelöscht:', 'Zugang gesperrt:', 'Zugang entsperrt:',
                 'Admin-Recht vergeben:', 'Admin-Recht entzogen:', 'Rolle geändert:', 'Notaus:',
@@ -407,6 +407,9 @@ async function main() {
           : texts.length === 1 && /^Trainingszeit (angelegt|geändert): /.test(texts[0])
           ? 'Platzcoach: ' + texts[0].split('\n')[0].split(' · ')[0].replace(/: /, ' – ')   // z. B. "Trainingszeit geändert – E1-Jugend"
             + ausfallHint(texts[0])
+          : texts.length === 1 && /^Training (verlegt|auf anderer Fläche): /.test(texts[0])
+          // Ab 03.11.2026: Betreff sagt, was sich ändert – z. B. "E2-Jugend am Fr 30.10. auf dem Kleinspielfeld"
+          ? 'Platzcoach: ' + texts[0].split('\n')[0].replace(/^[^:]+: /, '').split(' statt ')[0].split(' · ')[0].split(' – ')[0]
           : `Platzcoach: ${texts.length} Änderung${texts.length === 1 ? '' : 'en'}`),
         text,
         html,

@@ -259,6 +259,9 @@
   .lp-freeq>div{flex:1;border:2px dashed rgba(255,255,255,.7);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#fff;}
   .lp-freeq b{font-size:16px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;}
   .lp-freeq span{font-size:11px;font-weight:700;opacity:.9;}
+  .lp-freeq.book,.lp-klein.book,.lp-third.book{cursor:pointer;}
+  .lp-freeq.book:active>div,.lp-klein.book:active,.lp-third.book:active{background:rgba(255,255,255,.14);}
+  .lp-klein.book .lp-freetxt{color:#fff;}
   .lp-freeq small{font-size:10.5px;font-weight:600;margin-top:2px;background:rgba(1,27,50,.35);padding:1px 6px;border-radius:6px;}
   .lp-klein.occ{background:rgba(1,27,50,.88);border-color:rgba(1,27,50,.88);} .lp-klein.occ.mine{background:#8BCF2F;border-color:#fff;}
   .lp-klein b{font-size:14px;font-weight:800;color:#fff;} .lp-klein.mine b,.lp-klein.mine .lp-kbis,.lp-klein.mine .lp-klein-t{color:var(--pc-navy);}
@@ -393,7 +396,8 @@
   .stp-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;}
   .stp-foot a{font-size:13px;font-weight:700;color:var(--grass);text-decoration:none;}
   .lp-occ[role=button],.lp-klein[role=button]{cursor:pointer;}
-  .tl-free{position:absolute;height:24px;box-sizing:border-box;border:1.5px dashed var(--kr9CC57A);border-radius:6px;background:rgba(107,180,28,.07);color:var(--grass);font:inherit;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:flex-start;padding:0 8px;white-space:nowrap;overflow:hidden;}
+  .tl-free{position:absolute;height:24px;box-sizing:border-box;border:1.5px dashed var(--kr9CC57A);border-radius:6px;background:rgba(107,180,28,.07);color:var(--grass);font:inherit;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:flex-start;padding:0 8px;white-space:nowrap;overflow:hidden;overflow:clip;}
+  .tl-free>span{position:sticky;left:8px;right:8px;}
   .form-back{display:inline-flex;align-items:center;min-height:40px;margin:0 0 10px;padding:0 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--white);font-family:'Inter',sans-serif;font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;}
   .tl-free:active{background:rgba(107,180,28,.2);}
   .tl-cand{position:absolute;box-sizing:border-box;border:2px dashed var(--pc-navy);border-radius:6px;background:rgba(107,180,28,.35);z-index:2;pointer-events:none;display:flex;align-items:center;padding:0 5px;overflow:hidden;}
@@ -1197,8 +1201,8 @@
   .nf-datebox{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--bg);border-radius:10px;padding:0 8px;font-weight:800;font-size:15px;color:var(--ink);}
   .nf-datebox input{border:none;background:none;font-family:'Inter';font-size:15px;font-weight:700;color:var(--ink);min-width:0;width:auto;padding:10px 0;outline:none;}
   .nf-times{display:flex;gap:8px;margin-top:8px;}
-  .nf-times label{flex:1;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);}
-  .nf-times input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:10px;padding:9px 8px;font-family:'Inter';font-size:15px;font-weight:700;color:var(--ink);background:var(--white);}
+  .nf-times label{flex:1;min-width:0;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);}
+  .nf-times input{flex:1;min-width:0;width:100%;box-sizing:border-box;border:1.5px solid var(--line);border-radius:10px;padding:9px 8px;font-family:'Inter';font-size:15px;font-weight:700;color:var(--ink);background:var(--white);}
   .nf-durs{display:flex;gap:5px;margin-top:8px;align-items:center;}
   .nf-durs span{font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;margin-right:3px;}
   .nf-durs button{flex:1;min-height:36px;border-radius:9px;border:1.5px solid var(--line);background:var(--white);font-family:'Inter';font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;}
@@ -1760,7 +1764,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='23.10.2026 · 1';
+const APP_VERSION='03.11.2026 · 3';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
@@ -1928,12 +1932,28 @@ function teamLabel(team,squad){
   return team;
 }
 
+/* Ab 03.11.2026 · 3: Regeltraining an einem Tag geändert – nur nennen, was sich wirklich ändert (Zeit, Fläche oder beides).
+   Anlass: E2 am 30.10. nur aufs Kleinspielfeld gewechselt, Karte und Mail sagten „verlegt … von 16:00–17:30 auf 16:00–17:30“. */
+function dayAreaText(pitch,res){ const p=[]; if(pitch) p.push(pitchShort(pitch)); (res||[]).filter(r=>r!=='Großspielfeld').slice().sort().forEach(r=>p.push(r)); return p.join(' + ')||'ohne Fläche'; }
+function dayAreaPrep(a){ return a==='Kleinspielfeld'?'auf dem Kleinspielfeld':(a==='Ganzer Platz'?'auf dem ganzen Platz':(a==='Halle'?'in der Halle':'auf '+a)); }
+function dayChange(base,ov){ const a0=dayAreaText(base.pitch,base.res), a1=dayAreaText(ov.pitch,ov.res);
+  return {time:base.from!==ov.from||base.to!==ov.to, area:a0!==a1, a0, a1, t0:base.from+'–'+base.to, t1:ov.from+'–'+ov.to}; }
+// Ganze Flächen, die dadurch frei werden (für „… ist dadurch frei“)
+function dayFreed(base,ov){ const out=[]; if(base.pitch&&!ov.pitch) out.push(pitchShort(base.pitch));
+  (base.res||[]).filter(r=>r!=='Großspielfeld'&&!(ov.res||[]).includes(r)).forEach(r=>out.push(r)); return out; }
+function dayDateShort(d){ const dt=new Date(d+'T00:00:00'); return ['So','Mo','Di','Mi','Do','Fr','Sa'][dt.getDay()]+' '+fmtShort(d).slice(0,6); }
+// Kurztext für Karte und Spielfeldbild
+function dayChangeBadge(c){
+  if(c.time&&c.area) return 'an diesem Tag '+c.t1+' '+dayAreaPrep(c.a1)+' (sonst '+c.t0+', '+c.a0+')';
+  if(c.area) return 'an diesem Tag '+dayAreaPrep(c.a1)+' (sonst '+c.a0+')';
+  return 'an diesem Tag '+c.t1+' (sonst '+c.t0+')';
+}
 /* Trainings als virtuelle Termine expandieren (Alles ist ein Termin) */
 function trainingInstancesOn(d){
   // Ab 07.10.2026 · 29: einmalig verlegt = s.moved[datum] {from,to,pitch,res} – bleibt das Regeltraining, nur zu anderer Zeit/Fläche
   return TRAINING.filter(s=>slotActiveOn(s,d)).map(s=>{ const ov=(s.moved||{})[d]; return {
     id:'tr-'+s.id+'-'+d, d:d, t:ov?ov.from:s.from, bis:ov?ov.to:s.to,
-    movedFrom:ov?{from:s.from,to:s.to,pitch:s.pitch||null}:null,
+    movedFrom:ov?{from:s.from,to:s.to,pitch:s.pitch||null,res:s.res||[]}:null,
     title:'Training', team:s.team, squad:s.squad||1,
     pitch:ov&&('pitch' in ov)?ov.pitch:(s.pitch||null), halle:null, res:ov&&ov.res?ov.res:(s.res||[]), note:s.note||'',
     ownerId:getTrainerIds(s)[0]||null,
@@ -3635,7 +3655,7 @@ function rowHTML(e){
     (e.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
     if(e.pitch)pitchVisual=pitchBadge(e.pitch);
     else if(e.halle&&e.halle.thirds&&e.halle.thirds.length)pitchVisual=halleBadge(e.halle);
-    if(e.movedFrom) b+='<span class="move-badge">↺ an diesem Tag verlegt (sonst '+esc(e.movedFrom.from+'–'+e.movedFrom.to)+')</span>';
+    if(e.movedFrom){ const c=dayChange(e.movedFrom,{from:e.t,to:e.bis,pitch:e.pitch,res:e.res}); if(c.time||c.area) b+='<span class="move-badge">↺ '+esc(dayChangeBadge(c))+'</span>'; }
   }else{
     title=e.title;
     b=kindOf(e)==='goalkeeper'
@@ -4839,7 +4859,7 @@ function occupancyOn(ds,opts){
   const quarters=p=>pitchQuarters(p);
   const push=(src,cancelled,o)=>{
     const base={src, cancelled:!!cancelled, t:o.t||src.t, bis:o.bis||eventBis(src), team:o.team!==undefined?o.team:src.team, squad:o.squad||src.squad||1,
-      kind:o.kind, opp:o.opp||'', kickoff:o.kickoff||'', id:o.id||src.id};
+      kind:o.kind, opp:o.opp||'', kickoff:o.kickoff||'', id:o.id||src.id, moved:o.moved||null};
     base.label=o.label||(base.team&&base.team!=='Alle Teams'?(base.team===GK_TEAM?'TW':teamShort(base.team,base.squad)):(src.title||'Termin'));
     if(o.pitch){ const q=quarters(o.pitch); if(q.length) out.push({...base, area:'platz', lanes:[Math.min(...q),Math.max(...q)]}); }
     if(o.klein) out.push({...base, area:'klein', lanes:[1,1]});
@@ -4850,10 +4870,13 @@ function occupancyOn(ds,opts){
   const fromEvent=(e,canc)=>{
     if(isMatchKind(kindOf(e))&&e.ha==='away') return;
     push(e,canc,{kind:kindFor(e), pitch:e.pitch, klein:(e.res||[]).includes('Kleinspielfeld'), thirds:(e.halle&&e.halle.thirds)||[],
-      opp:e.opponent||'', kickoff:e.kickoff||'', res:e.res||[]});
+      opp:e.opponent||'', kickoff:e.kickoff||'', res:e.res||[], moved:e._movedHint||null});
   };
   EVENTS.filter(e=>e.d===ds&&(!skipId||e.id!==skipId)).forEach(e=>fromEvent(e,false));
   trainingInstancesOn(ds).forEach(e=>fromEvent(e,false));
+  // Ab 03.11.2026 · 3: Regeltraining an diesem Tag woanders/zu anderer Zeit – die Regelbelegung gilt als frei („E2 → Kleinspielfeld“)
+  trainingInstancesOn(ds).filter(e=>e.movedFrom).forEach(e=>{ const m=e.movedFrom, c=dayChange(m,{from:e.t,to:e.bis,pitch:e.pitch,res:e.res}); if(!c.time&&!c.area) return;
+    fromEvent({...e, id:e.id+'-regel', t:m.from, bis:m.to, pitch:m.pitch, res:m.res||[], halle:null, _movedHint:'→ '+(c.area?c.a1:e.t)},true); });
   cancelledTrainingInstancesOn(ds).forEach(e=>{ const s=TRAINING.find(x=>x.id===e.trainingSlotId)||{};
     fromEvent({...e, pitch:s.pitch||null, res:s.res||[], halle:s.halle||null},true); });
   fussballBookingOccupations(ds).forEach(o=>{ const g=o.game||{}, m=fussballFilterTeam(g.team,g.squad);
@@ -4933,7 +4956,7 @@ function timelineHTML(ds,isMine,opts){
     // Heute beginnt die freie Zeit an der laufenden Viertelstunde (vorher erst an der nächsten – das kürzte den Block)
     const nowM=isToday?hmMin(now):-1; let cur=Math.max(T0,isToday?Math.floor(nowM/15)*15:T0);
     busy.concat([[T1,T1]]).forEach(([a,b])=>{ if(a-Math.max(cur,nowM)>=30){
-        h+='<button type="button" class="tl-free" style="height:'+TL_LANE+'px;top:'+laneY(g.area,l)+'px;left:'+P(cur)+'%;width:'+W(cur,a)+'%" onclick="'+esc((form?'formTlFree':'openSlotSheet')+'(\''+ds+'\',\''+jsArg(g.area)+'\','+l+','+cur+','+a+',event)')+'" aria-label="'+esc('Frei '+minHM(cur)+'–'+minHM(a)+' '+(g.area==='klein'?'Kleinspielfeld':(g.res||(g.area==='halle'?'Halle Drittel '+l:'Viertel '+l)))+(form?' – übernehmen':' – buchen'))+'">'+(form?'+':'+ frei')+'</button>'; }
+        h+='<button type="button" class="tl-free" style="height:'+TL_LANE+'px;top:'+laneY(g.area,l)+'px;left:'+P(cur)+'%;width:'+W(cur,a)+'%" onclick="'+esc((form?'formTlFree':'openSlotSheet')+'(\''+ds+'\',\''+jsArg(g.area)+'\','+l+','+cur+','+a+',event)')+'" aria-label="'+esc('Frei '+minHM(cur)+'–'+minHM(a)+' '+(g.area==='klein'?'Kleinspielfeld':(g.res||(g.area==='halle'?'Halle Drittel '+l:'Viertel '+l)))+(form?' – übernehmen':' – buchen'))+'"><span>'+(form?'+':'+ frei')+'</span></button>'; }
       cur=Math.max(cur,b); });
   } });
   // Sperren: ganze Fläche schraffiert
@@ -4985,7 +5008,10 @@ function timelineHTML(ds,isMine,opts){
    nächsten bzw. vorigen Tag der Woche. Die Scroll-Position bleibt beim automatischen Auffrischen erhalten. */
 let _tlTouch=null, _tlRaf=0;
 function tlGeom(el){ const b=el.querySelector('.tl-body'); return {t0:+el.dataset.t0,t1:+el.dataset.t1,w:b?b.offsetWidth:1}; }
-function tlCurLabel(el,m){ const c=el.parentNode&&el.parentNode.querySelector('.tl-cur-t'); if(c) c.textContent=minHM(m); }
+function tlCurLabel(el,m){ const c=el.parentNode&&el.parentNode.querySelector('.tl-cur-t'); if(!c) return; c.textContent=minHM(m);
+  // Ab 03.11.2026 · 1: Stundenzahlen, die unter der Uhrzeit-Marke liegen, ausblenden (Android: „17:30“ überdeckte 17:00 und 18:00)
+  const r=c.getBoundingClientRect(); if(!r.width) return;
+  el.querySelectorAll('.tl-tick').forEach(t=>{ t.style.visibility=''; const q=t.getBoundingClientRect(); if(q.right>r.left-4&&q.left<r.right+4) t.style.visibility='hidden'; }); }
 // Uhrzeit unter dem Strich → Feld darüber neu zeichnen (auf 5 Min gerundet; nahe „jetzt“ = jetzt)
 function tlScroll(el){
   const g=tlGeom(el), ds=el.dataset.ds;
@@ -5061,7 +5087,7 @@ function shiftStartDay(n,pos){
    „‹ Zurück“ oben im Formular, ab · 10 immer sichtbar) und Speichern führen an dieselbe Stelle zurück. */
 let FORM_ORIGIN=null; // {pane,scroll} – woher das Formular „Neuer Termin“ geöffnet wurde (ab 01.10.2026 · 10)
 function canBookSlots(){ return !!(session&&isInActiveSeason(session.id)&&(session.isAdmin||Object.keys(normalizeClasses(session.classes||{})).length)); }
-function openSlotSheet(ds,area,lane,from,to,ev){
+function openSlotSheet(ds,area,lane,from,to,ev,exact){ // exact: genau from–to übernehmen (Zeit eines abgesagten Termins)
   if(!canBookSlots()){ showToast('Buchen geht nur angemeldet für die eigene Mannschaft.',4000); return; }
   // Beginn = angetippte Stelle im freien Feld (auf 15 Min gerundet)
   let start=from;
@@ -5071,9 +5097,10 @@ function openSlotSheet(ds,area,lane,from,to,ev){
   newEvent(ds); if(!document.querySelector('.pane[data-pane="neu"].active')) return; // nicht berechtigt o. Ä.
   // Dauer: übliche Trainingsdauer der Mannschaft (sonst 90 Min), aber nur bis zur nächsten Belegung
   const my=myPreferredTeam(), us=my?usualSlotFor(my.team,my.squad,ds):null;
-  const dur=us?Math.max(30,hmMin(us.to)-hmMin(us.from)):90, end=Math.min(to,start+dur), von=minHM(start), bis=minHM(end);
+  const dur=us?Math.max(30,hmMin(us.to)-hmMin(us.from)):90, end=exact?to:Math.min(to,start+dur), von=minHM(start), bis=minHM(end);
   document.getElementById('f-von').value=von; document.getElementById('f-bis').value=bis;
   if(area==='klein'){ setResChips('f-res',['Kleinspielfeld']); }
+  else if(area==='halle'){ setResChips('f-res',['Halle']); halleThirds=[lane]; }
   else{
     const keep=(us&&us.res||[]).filter(r=>r!=='Kleinspielfeld');
     setResChips('f-res',['Großspielfeld'].concat(keep));
@@ -5110,7 +5137,7 @@ function openOccDetail(ds,i,ctx){
   const jumpId=o.kind==='g'?(fussballDisplayAll().find(x=>x.d===ds&&x.t===o.kickoff&&x.team===o.team&&(x.squad||1)===o.squad)||{}).id||o.id:e.id;
   openSheet('<div class="occ-sheet"><div class="occ-kicker">'+esc(startDayLabel(ds,true))+'</div>'
     +'<h3>'+esc(o.team?teamLabel(o.team,o.squad):o.label)+'</h3>'
-    +'<div class="occ-line"><b>'+esc(what)+'</b>'+(o.cancelled?' · <span class="occ-canc">abgesagt</span>':'')+'</div>'
+    +'<div class="occ-line"><b>'+esc(what)+'</b>'+(o.cancelled?' · <span class="occ-canc">'+esc(o.moved?'an diesem Tag '+o.moved:'abgesagt')+'</span>':'')+'</div>'
     +'<div class="occ-line">'+o.t+'–'+o.bis+' Uhr · '+esc(areaLabel(o))+'</div>'
     +(contact?'<div class="occ-contact">'+contact+'</div>':'')
     +'<button type="button" class="submit-btn" style="margin-top:14px;" onclick="'+esc('closeSheet();openTerminFromStart(\''+jsArg(jumpId)+'\',\''+ds+'\')')+'">Im Kalender ansehen</button></div>');
@@ -5130,6 +5157,33 @@ function liveNow(ds,m){ // ds/m leer = heute jetzt; sonst Belegung am Tag ds um 
   const state=lock?'lock':(nFree===4?'free':(nFree===0?'full':'part'));
   return {ds,isNow,n,occ,live,canc,lock,covered,nextOn,nFree,state};
 }
+/* Ab 03.11.2026 · 1: freies Viertel im Spielfeldbild antippen = buchen (Feedback Markus V. 03.11.: „Draufklicken geht nicht“).
+   Freie Zeit des Viertels rund um die gezeigte Uhrzeit; heute frühestens ab der laufenden Viertelstunde. */
+function freeWindowAt(L,area,q){
+  let a=TL_DAY_FROM, b=Math.max(TL_DAY_TO,L.n+30);
+  L.occ.filter(o=>!o.cancelled&&o.area===area&&o.lanes[0]<=q&&o.lanes[1]>=q).forEach(o=>{ const s=hmMin(o.t), e=hmMin(o.bis);
+    if(e<=L.n) a=Math.max(a,e); else if(s>L.n) b=Math.min(b,s); });
+  if(L.ds===todayStr) a=Math.max(a,Math.floor(hmMin(nowHMStr())/15)*15);
+  return [a,b];
+}
+// Wurde dort ein Termin abgesagt, wird genau seine Zeit vorgeschlagen („den Slot übernehmen“), sonst ab der gezeigten Uhrzeit
+// die übliche Trainingsdauer – wie „+ frei“ in der Zeitleiste.
+// Ab 03.11.2026 · 2 für alles, was im Bild zu sehen ist: Viertel, Kleinspielfeld, Hallendrittel (area/lane wie in der Zeitleiste)
+function bookFreeSpot(ds,area,q,m){
+  const L=liveNow(ds,m), w=freeWindowAt(L,area,q);
+  const cx=L.canc.find(o=>o.area===area&&o.lanes[0]<=q&&o.lanes[1]>=q);
+  if(cx){ const s=Math.max(w[0],hmMin(cx.t)), e=Math.min(w[1],hmMin(cx.bis)); if(e-s>=30){ openSlotSheet(ds,area,q,s,e,null,true); return; } }
+  openSlotSheet(ds,area,q,Math.max(w[0],Math.floor(L.n/15)*15),w[1]);
+}
+// Darf hier gebucht werden? Angemeldet mit Buchungsrecht, nicht in der Vergangenheit, nicht gesperrt, mind. 30 Min frei
+function canBookSpot(L,area,q){
+  if(!canBookSlots()||L.ds<todayStr) return false;
+  if(activeLocksOn(L.ds).some(l=>l.resource===(area==='halle'?'halle':'platz'))) return false;
+  const w=freeWindowAt(L,area,q); return w[1]-w[0]>=30;
+}
+function bookSpotAttr(L,area,q,label){
+  return ' role="button" aria-label="'+esc(label+' frei – buchen')+'" onclick="'+esc('bookFreeSpot(\''+L.ds+'\',\''+area+'\','+q+','+(L.isNow?'null':L.n)+')')+'"';
+}
 function livePitchHTML(isMine,compact,L,top){
   L=L||liveNow();
   const {n,live,canc,lock,covered}=L;
@@ -5148,16 +5202,18 @@ function livePitchHTML(isMine,compact,L,top){
   const cancShown=new Set();
   [1,2,3,4].filter(q=>!covered[q]).forEach(q=>{ const c=cell(q), cx=canc.find(o=>o.area==='platz'&&o.lanes[0]<=q&&o.lanes[1]>=q);
     const show=cx&&!cancShown.has(cx.id); if(show) cancShown.add(cx.id);
-    const nx=L.nextOn(q);
-    h+='<div class="lp-freeq" style="left:'+c.c*50+'%;top:'+c.r*50+'%"><div><b>frei</b>'+(nx?'<span>bis '+nx.t+'</span>':'<span>'+(L.ds===todayStr?'heute':'bis abends')+'</span>')+(show?'<small>'+esc(cx.label)+' abgesagt</small>':'')+'</div></div>'; });
+    const nx=L.nextOn(q), book=canBookSpot(L,'platz',q);
+    h+='<div class="lp-freeq'+(book?' book':'')+'"'+(book?bookSpotAttr(L,'platz',q,'Viertel '+q):'')+' style="left:'+c.c*50+'%;top:'+c.r*50+'%"><div><b>'+(book?'+ frei':'frei')+'</b>'+(nx?'<span>bis '+nx.t+'</span>':'<span>'+(L.ds===todayStr?'heute':'bis abends')+'</span>')+(show?'<small>'+esc(cx.label+' '+(cx.moved||'abgesagt'))+'</small>':'')+'</div></div>'; });
   if(lock) h+='<div class="lp-lock"><b>Gesperrt</b>'+(lock.note?'<span>'+esc(lock.note)+'</span>':'')+'</div>';
   h+='</div>';
   const k=live.find(o=>o.area==='klein'), kc=canc.find(o=>o.area==='klein');
-  h+='<div class="lp-klein'+(k?(occIsMine(k,isMine)?' occ mine':' occ'):'')+'"'+(k?' role="button" onclick="'+esc('openOccDetail(\''+L.ds+'\','+L.occ.indexOf(k)+')')+'"':'')+'><span class="lp-klein-t">Kleinspielfeld</span>'+(k?'<b>'+esc(k.label+tag(k))+'</b><span class="lp-kbis">bis '+k.bis+'</span>'
-    :'<span class="lp-freetxt">frei'+(kc?' · '+esc(kc.label)+' abgesagt':'')+'</span>')+'</div>';
+  const kBook=!k&&canBookSpot(L,'klein',1);
+  h+='<div class="lp-klein'+(k?(occIsMine(k,isMine)?' occ mine':' occ'):(kBook?' book':''))+'"'+(k?' role="button" onclick="'+esc('openOccDetail(\''+L.ds+'\','+L.occ.indexOf(k)+')')+'"':(kBook?bookSpotAttr(L,'klein',1,'Kleinspielfeld'):''))+'><span class="lp-klein-t">Kleinspielfeld</span>'+(k?'<b>'+esc(k.label+tag(k))+'</b><span class="lp-kbis">bis '+k.bis+'</span>'
+    :'<span class="lp-freetxt">'+(kBook?'+ frei':'frei')+(kc?' · '+esc(kc.label+' '+(kc.moved||'abgesagt')):'')+'</span>')+'</div>';
   const hall=live.filter(o=>o.area==='halle');
   if(hall.length){ h+='<div class="lp-halle"><span class="lp-klein-t">Halle</span><div class="lp-thirds">'+[1,2,3].map(t=>{ const o=hall.find(x=>x.lanes[0]===t);
-      return '<div class="lp-third'+(o?(occIsMine(o,isMine)?' mine':' occ'):'')+'">'+(o?esc(o.label):'frei')+'</div>'; }).join('')+'</div></div>'; }
+      const b=!o&&canBookSpot(L,'halle',t);
+      return '<div class="lp-third'+(o?(occIsMine(o,isMine)?' mine':' occ'):(b?' book':''))+'"'+(b?bookSpotAttr(L,'halle',t,'Halle Drittel '+t):'')+'>'+(o?esc(o.label):(b?'+ frei':'frei'))+'</div>'; }).join('')+'</div></div>'; }
   return h+'</div>';
 }
 /* ---------- Live-Karte oben: „Läuft gerade“ oder „Als Nächstes“ der eigenen Mannschaft(en) ---------- */
@@ -6518,9 +6574,21 @@ function renderPitchGrid(ids,state,busy,capPrefixHtml){
     (clash.length?'<span class="warnpill">Überschneidung: Viertel '+clash.join(', ')+'</span>':'<span class="okpill">Passt</span>');
   return clash;
 }
-function toggleRes(el){el.classList.toggle('on');hideConflicts();if(el.dataset.res==='Großspielfeld')renderPitch();
+function applyResToggle(el){el.classList.toggle('on');hideConflicts();if(el.dataset.res==='Großspielfeld')renderPitch();
   if(el.dataset.res==='Halle'){halleThirds=[];renderHalle();}
   if(el.dataset.res!=='Großspielfeld') renderFormTimeline();}
+// Ab 03.11.2026 · 3: Beim Verlegen eines Regeltrainings (FORM_MOVE) fragen, ob die neue Fläche die bisherige ersetzt –
+// sonst waren beide gebucht (E2 am 30.10.: Hälfte A und Kleinspielfeld). Nachfrage gewünscht von Fabrizio.
+const AREA_RES=['Großspielfeld','Kleinspielfeld','Halle'];
+function toggleRes(el){
+  const name=el.dataset.res, others=FORM_MOVE&&!el.classList.contains('on')&&AREA_RES.includes(name)
+    ?[...document.querySelectorAll('#f-res .res-chip.on')].filter(c=>AREA_RES.includes(c.dataset.res)&&c!==el):[];
+  if(!others.length){ applyResToggle(el); return; }
+  const now=others.map(c=>c.dataset.res==='Großspielfeld'&&pitchOn()?pitchShort(curPitch()):c.dataset.res).join(' und ');
+  askConfirm('Nur '+name+'?','Das Training ist an diesem Tag bisher '+dayAreaPrep(now)+'. Soll es nur '+dayAreaPrep(name)+' stattfinden? Dann wird '+now+' frei.','Nur '+name,()=>{
+    others.forEach(c=>applyResToggle(c)); applyResToggle(el); });
+  const no=document.querySelector('#modal .no'); if(no){ no.textContent='Zusätzlich'; no.onclick=()=>{ closeModal(); applyResToggle(el); }; }
+}
 function halleResOn(){return resChipOn('f-res','Halle');}
 function toggleHalleThird(n){const i=halleThirds.indexOf(n);if(i>=0)halleThirds.splice(i,1);else halleThirds.push(n);hideConflicts();renderHalle();renderFormTimeline();}
 function renderHalle(){
@@ -7524,7 +7592,11 @@ function openReviewSheet(o){
   const clashIds=new Set(findConflicts(o.d,o.von,o.bis,o.pitch,o.halle,o.res,editingId,o.kind).map(c=>c.event.id));
   const trRows=ownTr.map(t=>{ const repl=o.kind==='training', pre=repl||isMatchKind(o.kind)||clashIds.has(t.id);
     return '<label class="rv-row rv-tr"><input type="checkbox" class="rv-cancel" data-slot="'+esc(t.trainingSlotId)+'"'+(pre?' checked':'')+'><b>'
-      +(repl?'Regeltraining '+esc(teamShort(t.team,t.squad))+' '+t.t+'–'+eventBis(t)+' an dem Tag auf diese Zeit verlegen':'Training '+esc(teamShort(t.team,t.squad))+' '+t.t+'–'+eventBis(t)+' an dem Tag absagen')+'</b></label>'; }).join('');
+      +(repl?(()=>{ const c=dayChange({from:t.t,to:eventBis(t),pitch:t.pitch||null,res:t.res||[]},{from:o.von,to:o.bis,pitch:o.pitch||null,res:o.res||[]}), n='Regeltraining '+esc(teamShort(t.team,t.squad))+' an dem Tag ';
+        return c.time&&c.area?n+'auf '+c.t1+' '+esc(dayAreaPrep(c.a1))+' verlegen (sonst '+c.t0+', '+esc(c.a0)+')'
+          :c.area?n+esc(dayAreaPrep(c.a1))+' statt '+esc(c.a0)+' (Zeit bleibt '+c.t1+')'
+          :c.time?n+'auf '+c.t1+' verlegen (sonst '+c.t0+')'
+          :'Regeltraining '+esc(teamShort(t.team,t.squad))+' '+t.t+'–'+eventBis(t)+' an dem Tag so lassen'; })():'Training '+esc(teamShort(t.team,t.squad))+' '+t.t+'–'+eventBis(t)+' an dem Tag absagen')+'</b></label>'; }).join('');
   openSheet('<div class="rv-sheet"><h3>'+(edit?'Änderungen prüfen':'Termin prüfen')+'</h3>'
     +row('Was',what)+row('Wer',who)+row('Wann',when)+row('Wo',where)
     +(o.away||o.kind==='trainer'?'':row('Platz','✓ frei','ok'))
@@ -7616,12 +7688,22 @@ async function submitEvent(){
     const movedSlot=kind==='training'&&!wasEditing?cancelSlots.find(x=>x.team===team&&(x.squad||1)===(squad||1)):null;
     let moveMsg=null;
     if(movedSlot){ // kein eigener Termin: das Regeltraining bekommt für diesen Tag Zeit/Fläche (ab 07.10.2026 · 29)
-      const prev=(movedSlot.moved||{})[d];
       EVENTS=EVENTS.filter(x=>x.id!==newId);
       movedSlot.cancelled=(movedSlot.cancelled||[]).filter(x=>x!==d);
-      movedSlot.moved={...(movedSlot.moved||{}),[d]:{from:von,to:bis,pitch:pitch||null,res:res||[]}};
-      moveMsg='Training verlegt: '+teamLabel(team,squad)+' am '+fmtShort(d)+' von '+(prev?prev.from+'–'+prev.to:movedSlot.from+'–'+movedSlot.to)+' auf '+von+'–'+bis
-        +(pitch?' ('+pitchShort(pitch)+')':'')+' – '+session.name+teamTrailer(team,squad,movedSlot);
+      const base={from:movedSlot.from,to:movedSlot.to,pitch:movedSlot.pitch||null,res:movedSlot.res||[]}, ov={from:von,to:bis,pitch:pitch||null,res:res||[]};
+      const ch=dayChange(base,ov), who=teamLabel(team,squad)+' am '+dayDateShort(d), freed=dayFreed(base,ov);
+      if(!ch.time&&!ch.area){ // wieder genau wie das Regeltraining: Tagesänderung entfällt
+        if(movedSlot.moved){ delete movedSlot.moved[d]; if(!Object.keys(movedSlot.moved).length) delete movedSlot.moved; }
+        moveMsg='Training verlegt: '+who+' wieder wie immer ('+ch.t0+', '+ch.a0+')';
+      }else{
+        movedSlot.moved={...(movedSlot.moved||{}),[d]:ov};
+        moveMsg=!ch.time
+          ?'Training auf anderer Fläche: '+who+' '+dayAreaPrep(ch.a1)+' statt '+ch.a0+', Zeit bleibt '+ch.t1
+          :'Training verlegt: '+who+' auf '+ch.t1+(ch.area?' '+dayAreaPrep(ch.a1)+' statt '+ch.t0+', '+ch.a0:' statt '+ch.t0+' ('+ch.a1+')');
+        if(ch.area&&freed.length) moveMsg+=' · '+freed.join(' und ')+(freed.length>1?' sind':' ist')+' dadurch frei';
+      }
+      moveMsg+=' – '+session.name+teamTrailer(team,squad,movedSlot);
+      FORM_MOVE_TOAST=!ch.time&&!ch.area?'Training am '+fmtShort(d)+' wieder wie immer.':'Training am '+fmtShort(d)+' '+(ch.time?ch.t1+' Uhr ':'')+(ch.area?dayAreaPrep(ch.a1):'')+'.';
     }
     FORM_MOVE=null;
     if(cancelSlots.length&&!movedSlot){ // Absage steht in derselben Mail; der Trainings-Commit selbst ist „(automatisch)“
@@ -7630,7 +7712,7 @@ async function submitEvent(){
       renderTraining(); render(); renderStart();
     }
     if(movedSlot){ renderTraining(); render(); renderStart(); }
-    showToast(movedSlot?'Training verlegt auf '+von+'–'+bis+' Uhr.':'Gespeichert: '+title+(cancelSlots.length?' · Training abgesagt':''));
+    showToast(movedSlot?FORM_MOVE_TOAST.replace(/ \.$/,'.'):'Gespeichert: '+title+(cancelSlots.length?' · Training abgesagt':''));
     if(movedSlot) saveTraining(moveMsg).catch(err=>{ EVENTS=JSON.parse(backup); TRAINING=JSON.parse(backupT); applyGameMoves();render();renderStart();renderTraining();showToast('Speichern fehlgeschlagen: '+err.message,6000); });
     else saveEvents(logMsg)
       .then(()=>doneReq?closeRequest(doneReq,'erledigt'):null)
@@ -8399,11 +8481,11 @@ function resetTrainingMove(id,date){
   const ov=s.moved[date], backup=JSON.stringify(TRAINING);
   delete s.moved[date]; if(!Object.keys(s.moved).length) delete s.moved;
   renderTraining(); render(); renderStart();
-  showToast('Training am '+fmtShort(date)+' wieder zur Regelzeit '+s.from+'–'+s.to+'.');
-  saveTraining('Training verlegt: '+trainName(s)+' am '+fmtShort(date)+' wieder zur Regelzeit '+s.from+'–'+s.to+' (statt '+ov.from+'–'+ov.to+') – '+session.name+teamTrailer(s.team,s.squad,s))
+  showToast('Training am '+fmtShort(date)+' wieder wie immer: '+s.from+'–'+s.to+', '+dayAreaText(s.pitch||null,s.res||[])+'.');
+  saveTraining('Training verlegt: '+trainName(s)+' am '+dayDateShort(date)+' wieder wie immer ('+s.from+'–'+s.to+', '+dayAreaText(s.pitch||null,s.res||[])+') – '+session.name+teamTrailer(s.team,s.squad,s))
     .catch(e=>{ TRAINING=JSON.parse(backup); renderTraining(); render(); renderStart(); showToast('Fehler: '+e.message,6000); });
 }
-let FORM_MOVE=null;
+let FORM_MOVE=null, FORM_MOVE_TOAST='';
 function jumpToEvent(id){ const e=EVENTS.find(x=>x.id===id); if(e) focusEventCard(e); }
 function cancelTrainingDay(id,date,reason){
   const s=TRAINING.find(x=>x.id===id); if(!s||!date) return;

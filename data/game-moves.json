@@ -172,6 +172,28 @@
           "date": "2026-11-09"
         }
       ]
+    },
+    {
+      "id": "4f30d803-e959-4e1c-b057-4912ee4cb91a",
+      "link": "https://www.fussball.de/spiel/jsg-vosswinkel-echthausen-sv-bachum-bergheim-2/-/spiel/031J8LLJMG000000VS5489BUVVKNMR0J",
+      "team": "E-Junioren",
+      "squad": 2,
+      "opponent": "JSG Vosswinkel/Echthausen I",
+      "away": true,
+      "fromD": "2026-11-07",
+      "fromT": "11:00",
+      "toD": "2026-11-16",
+      "toT": "17:00",
+      "reason": "Wunsch des Gegners",
+      "byId": "a30f8c9b-96f9-4557-b28b-619e122080ea",
+      "byName": "David Skwara",
+      "at": "2026-10-30T08:08:35.747Z",
+      "cancelledTraining": [
+        {
+          "slotId": "fa4cc53b-2c8e-453a-8756-315e87e71dce",
+          "date": "2026-11-16"
+        }
+      ]
     }
   ]
 }
