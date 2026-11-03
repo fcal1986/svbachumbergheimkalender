@@ -334,6 +334,25 @@
       "note": "",
       "ownerId": "d1cc03c0-324c-40de-a4f8-49d75efeb828",
       "ownerName": "Marcel Mohr"
+    },
+    {
+      "id": "9c1b1bbe-09a7-4a55-98ef-9135655532e6",
+      "d": "2026-11-04",
+      "t": "17:00",
+      "bis": "18:30",
+      "title": "Training",
+      "kind": "training",
+      "team": "C-Jugend",
+      "squad": 2,
+      "pitch": {
+        "mode": "viertel",
+        "part": 3
+      },
+      "halle": null,
+      "res": [],
+      "note": "",
+      "ownerId": "a21f28cb-3527-4337-ba43-9752dab0bcdb",
+      "ownerName": "Markus Vielhaber"
     }
   ]
 }
