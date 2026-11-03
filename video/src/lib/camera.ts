@@ -1,32 +1,41 @@
 // Kamera über einem Screenshot: Fokuspunkt (CSS-Pixel) + Zoom → Transformation in Film-Pixel.
 // zoom 1 = Screenshot-Breite füllt die Karte. Der Ausschnitt wird an den Bildrändern festgehalten.
 import { Easing, interpolate } from 'remotion';
-import { card, type CameraKey } from '../config/film';
-import { el, VIEW_H, VIEW_W, type Box } from './manifest';
+import { card } from '../config/common';
+import type { CameraKey } from '../config/types';
+import { elOf, type Box, type Scene } from './manifest';
 
 export type Cam = { cx: number; cy: number; k: number };
+export type View = { w: number; h: number };
+export type Area = { w: number; h: number }; // Ausschnitt in Film-Pixeln (Standard: Handy-Karte der Reels)
 
-function focusOf(sceneId: string, key: CameraKey) {
+function focusOf(scene: Scene, view: View, key: CameraKey, fit: boolean) {
   if (key.el) {
-    const b = el(sceneId, key.el);
-    return { x: b.x + b.w / 2 + (key.x ?? 0), y: b.y + b.h / 2 + (key.dy ?? 0) };
+    const b = elOf(scene, key.el);
+    if (fit) {
+      // Breite Elemente: mittig und höchstens so weit zoomen, dass sie mit 10 CSS-px Rand ganz sichtbar bleiben.
+      const maxZoom = Math.max(1, view.w / (b.w + 20));
+      const wide = b.w > view.w * 0.6;
+      return { x: wide ? view.w / 2 : b.x + b.w / 2 + (key.x ?? 0), y: b.y + b.h / 2 + (key.dy ?? 0), zoom: Math.min(key.zoom, maxZoom) };
+    }
+    return { x: b.x + b.w / 2 + (key.x ?? 0), y: b.y + b.h / 2 + (key.dy ?? 0), zoom: key.zoom };
   }
-  return { x: key.x ?? VIEW_W / 2, y: (key.y ?? VIEW_H / 2) + (key.dy ?? 0) };
+  return { x: key.x ?? view.w / 2, y: (key.y ?? view.h / 2) + (key.dy ?? 0), zoom: key.zoom };
 }
 
-function clampCam(cx: number, cy: number, k: number): Cam {
-  const halfW = card.w / 2 / k;
-  const halfH = card.h / 2 / k;
+function clampCam(view: View, cx: number, cy: number, k: number, area: Area): Cam {
+  const halfW = area.w / 2 / k;
+  const halfH = area.h / 2 / k;
   return {
     k,
-    cx: VIEW_W <= 2 * halfW ? VIEW_W / 2 : Math.min(Math.max(cx, halfW), VIEW_W - halfW),
-    cy: VIEW_H <= 2 * halfH ? VIEW_H / 2 : Math.min(Math.max(cy, halfH), VIEW_H - halfH),
+    cx: view.w <= 2 * halfW ? view.w / 2 : Math.min(Math.max(cx, halfW), view.w - halfW),
+    cy: view.h <= 2 * halfH ? view.h / 2 : Math.min(Math.max(cy, halfH), view.h - halfH),
   };
 }
 
-export function cameraAt(sceneId: string, keys: CameraKey[], tRel: number): Cam {
-  const base = card.w / VIEW_W;
-  const pts = keys.map((k) => ({ at: k.at, zoom: k.zoom, ...focusOf(sceneId, k) }));
+export function cameraAt(scene: Scene, view: View, keys: CameraKey[], tRel: number, fit = false, area: Area = card): Cam {
+  const base = area.w / view.w;
+  const pts = keys.map((k) => ({ at: k.at, ...focusOf(scene, view, k, fit) }));
   let a = pts[0], b = pts[0];
   for (let i = 0; i < pts.length; i++) {
     if (pts[i].at <= tRel) { a = pts[i]; b = pts[Math.min(i + 1, pts.length - 1)]; }
@@ -34,14 +43,14 @@ export function cameraAt(sceneId: string, keys: CameraKey[], tRel: number): Cam 
   if (tRel < pts[0].at) { a = b = pts[0]; }
   const p = a === b ? 0 : interpolate(tRel, [a.at, b.at], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.inOut(Easing.cubic) });
   const zoom = a.zoom + (b.zoom - a.zoom) * p;
-  return clampCam(a.x + (b.x - a.x) * p, a.y + (b.y - a.y) * p, base * zoom);
+  return clampCam(view, a.x + (b.x - a.x) * p, a.y + (b.y - a.y) * p, base * zoom, area);
 }
 
 // CSS-Pixel des Screenshots → Pixel innerhalb der Karte.
-export function toCard(cam: Cam, x: number, y: number) {
-  return { x: card.w / 2 + (x - cam.cx) * cam.k, y: card.h / 2 + (y - cam.cy) * cam.k };
+export function toCard(cam: Cam, x: number, y: number, area: Area = card) {
+  return { x: area.w / 2 + (x - cam.cx) * cam.k, y: area.h / 2 + (y - cam.cy) * cam.k };
 }
-export function boxToCard(cam: Cam, b: Box, pad = 0) {
-  const p = toCard(cam, b.x - pad, b.y - pad);
+export function boxToCard(cam: Cam, b: Box, pad = 0, area: Area = card) {
+  const p = toCard(cam, b.x - pad, b.y - pad, area);
   return { x: p.x, y: p.y, w: (b.w + 2 * pad) * cam.k, h: (b.h + 2 * pad) * cam.k };
 }

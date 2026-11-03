@@ -13,10 +13,12 @@ export function prepare() {
   for (const f of ['logo-white.svg', 'logo-horizontal.svg']) copy(path.join(REPO_ROOT, 'assets', f), path.join(pub, 'brand', f));
   const inter = path.join(path.dirname(require.resolve('@fontsource/inter/package.json')), 'files');
   const manrope = path.join(path.dirname(require.resolve('@fontsource/manrope/package.json')), 'files');
-  for (const w of [600, 700]) copy(path.join(inter, `inter-latin-${w}-normal.woff2`), path.join(pub, 'fonts', `inter-latin-${w}-normal.woff2`));
+  for (const w of [500, 600, 700]) copy(path.join(inter, `inter-latin-${w}-normal.woff2`), path.join(pub, 'fonts', `inter-latin-${w}-normal.woff2`));
   copy(path.join(manrope, 'manrope-latin-800-normal.woff2'), path.join(pub, 'fonts', 'manrope-latin-800-normal.woff2'));
-  if (!fs.existsSync(path.join(pub, 'capture', 'manifest.json'))) {
-    console.error('Aufnahme fehlt: zuerst „npm run capture“ ausführen.');
+  const list = JSON.parse(fs.readFileSync(path.join(VIDEO_DIR, 'src', 'reels', 'list.json'), 'utf8'));
+  const missing = list.filter((r) => !fs.existsSync(path.join(pub, 'capture', r.id, 'manifest.json'))).map((r) => r.id);
+  if (missing.length) {
+    console.error(`Aufnahme fehlt für: ${missing.join(', ')} – zuerst „npm run capture -- ${missing.join(' ')}“ ausführen.`);
     process.exit(1);
   }
 }
