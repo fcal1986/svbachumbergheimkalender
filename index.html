@@ -489,7 +489,8 @@
   .ev-day{display:block;font-size:14px;font-weight:800;color:var(--ink);}
   .ev-sep{width:1px;height:32px;background:rgba(0,0,0,.15);flex:none;}
   .ev-title-box{flex:1;min-width:0;padding-right:4px;}
-  .ev-title-box h4{margin:0;font-size:14.5px;font-weight:800;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25;}
+  /* Ab 04.11.2026 · 1: ganzer Titel statt zwei Zeilen mit „…“ – Mannschaft und Gegner vollständig (Feedback Fabrizio, Backlog 115) */
+  .ev-title-box h4{margin:0;font-size:14.5px;font-weight:800;color:var(--ink);overflow-wrap:anywhere;line-height:1.25;}
   .ev-title-box .ev-sub{font-size:10.5px;color:rgba(0,0,0,.5);margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.35;}
   .ev-body{padding:11px 12px 12px;}
   .ev-times{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:0;}
@@ -1764,7 +1765,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='03.11.2026 · 3';
+const APP_VERSION='04.11.2026 · 1';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
 let FUSSBALLDE_RAW={updated:null,games:[],awayGames:[]}; // unveränderter Stand aus data/fussballde.json
