@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-05T09:27:49.594Z",
+  "updated": "2026-11-05T17:59:58.629Z",
   "games": [
     {
       "d": "2026-10-17",
@@ -700,7 +700,7 @@
       "staffelName": "Kreisliga D Arnsberg",
       "staffelUrl": "https://www.fussball.de/spieltag/kreisliga-d-arnsberg-kreis-arnsberg-kreisliga-d-herren-saison2627-westfalen/-/spieldatum/2026-12-06/staffel/031IU83U78000009VS5489BTVSRD0UH9-G",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-29T12:57:09.000Z"
+      "infoAt": "2026-11-05T17:59:57.650Z"
     },
     {
       "d": "2026-12-06",
@@ -2271,6 +2271,23 @@
       "infoAt": "2026-10-30T19:21:02.901Z"
     },
     {
+      "d": "2026-11-15",
+      "t": "16:00",
+      "team": "D-Junioren",
+      "squad": 1,
+      "ownName": "SV Bachum-Bergheim",
+      "opponent": "RW Ahlen",
+      "competition": "Kreisfreundschaftsspiele",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/rw-ahlen-sv-bachum-bergheim/-/spiel/032K36ADIO000000VS5489BTVSIO88SN",
+      "gameNo": "240200054",
+      "staffelId": "240200",
+      "staffelName": "Freundschaftsspiele Kreis Beckum",
+      "staffelUrl": "https://www.fussball.de/spieltag/fs-dj-k-fs-bec-1-kreis-beckum-d-junioren-kreis-fs-d-junioren-saison2627-westfalen/-/spieldatum/2026-11-15/staffel/0319GNRIHG000000VS5489BTVSK8S3O6-D",
+      "venue": "Kunstrasenplatz, Wersestadion Kunst, August-Kirchner-Str. 14, 59229 Ahlen",
+      "infoAt": "2026-11-05T17:59:58.220Z"
+    },
+    {
       "d": "2026-11-16",
       "t": "19:30",
       "team": "Herren Ü32",
@@ -3526,7 +3543,7 @@
         "Kreisfreundschaftsspiele",
         "Kreispokal"
       ],
-      "games": 19,
+      "games": 20,
       "homeGames": 8,
       "first": "2026-10-31",
       "last": "2027-06-05",
