@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-04T19:43:13.460Z",
+  "updated": "2026-11-05T00:52:49.941Z",
   "games": [
     {
       "d": "2026-10-17",
@@ -1689,44 +1689,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-10-14",
-      "t": "16:30",
-      "team": "F-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim I",
-      "opponent": "TuS Vosswinkel I",
-      "competition": "Kinderfußball",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/tus-vosswinkel-sv-bachum-bergheim-1/-/spiel/031J6SGO64000000VS5489BUVVKNMR0J",
-      "movedFrom": {
-        "d": "2026-10-10",
-        "t": "10:00"
-      },
-      "movedAt": "2026-10-06T16:48:03.039Z",
-      "gameNo": "211754016",
-      "matchday": 4,
-      "staffelId": "211754",
-      "staffelName": "Herbstrunde Gruppe 2",
-      "venue": "Kunstrasenplatz, Waldstadion-Vosswinkel, Franziskusstr., 59757 Arnsberg",
-      "infoAt": "2026-10-09T09:06:57.093Z"
-    },
-    {
-      "d": "2026-10-14",
-      "t": "17:00",
-      "team": "E-Junioren",
-      "squad": 2,
-      "ownName": "SV Bachum/Bergheim 2",
-      "opponent": "SC Neheim II",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sc-neheim-ii-sv-bachum-bergheim-2/-/spiel/0328H4GU5G000000VS5489BTVUCVBQ5B",
-      "gameNo": "240267003",
-      "staffelId": "240267",
-      "staffelName": "Freundschaftsspiele Kreis Arnsberg",
-      "venue": "Kunstrasenplatz, Binnerfeldstadion Neheim, Binnerfeld 51, 59755 Arnsberg",
-      "infoAt": "2026-10-09T09:06:57.625Z"
-    },
     {
       "d": "2026-10-15",
       "t": "19:30",
@@ -3612,19 +3574,17 @@
       "type": "E-Junioren",
       "squad": 2,
       "names": [
-        "SV Bachum/Bergheim 2",
         "SV Bachum/Bergheim II"
       ],
       "teamIds": [
         "027IVP92OK000000VS5489B1VUA37ON8"
       ],
       "competitions": [
-        "Kreisfreundschaftsspiele",
         "Kreisliga B"
       ],
-      "games": 12,
+      "games": 11,
       "homeGames": 6,
-      "first": "2026-10-14",
+      "first": "2026-11-06",
       "last": "2027-06-12",
       "teamId": "027IVP92OK000000VS5489B1VUA37ON8"
     },
@@ -3658,9 +3618,9 @@
       "competitions": [
         "Kinderfußball"
       ],
-      "games": 4,
+      "games": 3,
       "homeGames": 2,
-      "first": "2026-10-14",
+      "first": "2026-11-07",
       "last": "2026-11-21",
       "teamId": "011MIAKB1G000000VTVG0001VTR8C1K7"
     },
@@ -3741,6 +3701,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-10-14",
+  "teamsFrom": "2026-10-15",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
