@@ -353,6 +353,25 @@
       "note": "",
       "ownerId": "a21f28cb-3527-4337-ba43-9752dab0bcdb",
       "ownerName": "Markus Vielhaber"
+    },
+    {
+      "id": "765bb3a8-e846-46fc-ad0f-029158c2a865",
+      "d": "2026-11-07",
+      "t": "09:45",
+      "bis": "11:15",
+      "title": "Training",
+      "kind": "training",
+      "team": "F-Jugend",
+      "squad": 1,
+      "pitch": {
+        "mode": "viertel",
+        "part": 4
+      },
+      "halle": null,
+      "res": [],
+      "note": "",
+      "ownerId": "c5f27a4d-fc49-438a-9221-b72392d040b4",
+      "ownerName": "Patrick Voß"
     }
   ]
 }
