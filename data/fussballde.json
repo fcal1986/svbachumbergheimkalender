@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-06T06:38:46.235Z",
+  "updated": "2026-11-06T15:54:38.477Z",
   "games": [
     {
       "d": "2026-10-17",
@@ -1942,24 +1942,6 @@
     },
     {
       "d": "2026-11-07",
-      "t": "11:00",
-      "team": "E-Junioren",
-      "squad": 2,
-      "ownName": "SV Bachum/Bergheim II",
-      "opponent": "JSG Vosswinkel/Echthausen I",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/jsg-vosswinkel-echthausen-sv-bachum-bergheim-2/-/spiel/031J8LLJMG000000VS5489BUVVKNMR0J",
-      "gameNo": "210931018",
-      "matchday": 5,
-      "staffelId": "210931",
-      "staffelName": "KL B Gruppe 1",
-      "staffelUrl": "https://www.fussball.de/spieltag/kl-b-gruppe-1-kreis-arnsberg-e-junioren-kreisliga-b-e-junioren-saison2627-westfalen/-/spieldatum/2026-11-07/staffel/031J87AGJ4000002VS5489BUVVKNMR0J-G",
-      "venue": "Kunstrasenplatz, Waldstadion-Vosswinkel, Franziskusstr., 59757 Arnsberg",
-      "infoAt": "2026-10-30T19:20:50.317Z"
-    },
-    {
-      "d": "2026-11-07",
       "t": "12:00",
       "team": "D-Junioren",
       "squad": 2,
@@ -2265,6 +2247,29 @@
       "staffelUrl": "https://www.fussball.de/spieltag/fs-dj-k-fs-bec-1-kreis-beckum-d-junioren-kreis-fs-d-junioren-saison2627-westfalen/-/spieldatum/2026-11-15/staffel/0319GNRIHG000000VS5489BTVSK8S3O6-D",
       "venue": "Kunstrasenplatz, Wersestadion Kunst, August-Kirchner-Str. 14, 59229 Ahlen",
       "infoAt": "2026-11-05T17:59:58.220Z"
+    },
+    {
+      "d": "2026-11-16",
+      "t": "17:00",
+      "team": "E-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum/Bergheim II",
+      "opponent": "JSG Vosswinkel/Echthausen I",
+      "competition": "Kreisliga B",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/jsg-vosswinkel-echthausen-sv-bachum-bergheim-2/-/spiel/031J8LLJMG000000VS5489BUVVKNMR0J",
+      "movedFrom": {
+        "d": "2026-11-07",
+        "t": "11:00"
+      },
+      "movedAt": "2026-11-06T15:54:37.786Z",
+      "gameNo": "210931018",
+      "matchday": 5,
+      "staffelId": "210931",
+      "staffelName": "KL B Gruppe 1",
+      "staffelUrl": "https://www.fussball.de/spieltag/kl-b-gruppe-1-kreis-arnsberg-e-junioren-kreisliga-b-e-junioren-saison2627-westfalen/-/spieldatum/2026-11-16/staffel/031J87AGJ4000002VS5489BUVVKNMR0J-G",
+      "venue": "Kunstrasenplatz, Waldstadion-Vosswinkel, Franziskusstr., 59757 Arnsberg",
+      "infoAt": "2026-11-06T15:54:38.072Z"
     },
     {
       "d": "2026-11-16",
