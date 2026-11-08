@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-08T16:39:14.226Z",
+  "updated": "2026-11-08T22:01:14.644Z",
   "games": [
     {
       "d": "2026-10-18",
@@ -706,6 +706,40 @@
       "staffelUrl": "https://www.fussball.de/spieltag/b-junioren--bezirksliga-staffel-3-bezirk-westfalen-b-junioren-bezirksliga-b-junioren-saison2627-westfalen/-/spieldatum/2026-12-13/staffel/03106MNDA000000QVS5489BTVT51B5B5-G",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
       "infoAt": "2026-11-06T21:29:24.616Z"
+    },
+    {
+      "d": "2026-12-27",
+      "t": "10:42",
+      "team": "E-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum/Bergheim 2",
+      "gameNo": "192882002",
+      "opponent": "JSG Günne/Möhnesee",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-guenne-moehnesee/-/spiel/032L4BT37O000000VS5489BTVSIO88SN",
+      "staffelId": "192882",
+      "staffelName": "Vereinsturnier",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-soest-e-junioren-vereinsturnier-e-junioren-saison2627-westfalen/-/spieldatum/2026-12-27/staffel/032KLMLKQK000000VS5489BUVT7T9F23-G",
+      "venue": "Halle, Ballspielhalle Ense, Schulweg, 59469 Ense",
+      "infoAt": "2026-11-08T22:01:12.319Z"
+    },
+    {
+      "d": "2026-12-27",
+      "t": "13:42",
+      "team": "E-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum/Bergheim 2",
+      "gameNo": "192882009",
+      "opponent": "TuS Wickede/Ruhr",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-tus-wickede-ruhr/-/spiel/032L4BT3B0000000VS5489BTVSIO88SN",
+      "staffelId": "192882",
+      "staffelName": "Vereinsturnier",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-soest-e-junioren-vereinsturnier-e-junioren-saison2627-westfalen/-/spieldatum/2026-12-27/staffel/032KLMLKQK000000VS5489BUVT7T9F23-G",
+      "venue": "Halle, Ballspielhalle Ense, Schulweg, 59469 Ense",
+      "infoAt": "2026-11-08T22:01:12.948Z"
     },
     {
       "d": "2027-02-19",
@@ -2350,6 +2384,40 @@
       "infoAt": "2026-11-06T21:29:51.766Z"
     },
     {
+      "d": "2026-12-27",
+      "t": "11:30",
+      "team": "E-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum/Bergheim 2",
+      "opponent": "JSG Vosswinkel/Echthausen III",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/jsg-vosswinkel-echthausen-iii-sv-bachum-bergheim-2/-/spiel/032L4BT38S000000VS5489BTVSIO88SN",
+      "gameNo": "192882004",
+      "staffelId": "192882",
+      "staffelName": "Vereinsturnier",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-soest-e-junioren-vereinsturnier-e-junioren-saison2627-westfalen/-/spieldatum/2026-12-27/staffel/032KLMLKQK000000VS5489BUVT7T9F23-G",
+      "venue": "Halle, Ballspielhalle Ense, Schulweg, 59469 Ense",
+      "infoAt": "2026-11-08T22:01:13.604Z"
+    },
+    {
+      "d": "2026-12-27",
+      "t": "12:18",
+      "team": "E-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum/Bergheim 2",
+      "opponent": "TuS Bremen",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/tus-bremen-sv-bachum-bergheim-2/-/spiel/032L4BT39K000000VS5489BTVSIO88SN",
+      "gameNo": "192882006",
+      "staffelId": "192882",
+      "staffelName": "Vereinsturnier",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-soest-e-junioren-vereinsturnier-e-junioren-saison2627-westfalen/-/spieldatum/2026-12-27/staffel/032KLMLKQK000000VS5489BUVT7T9F23-G",
+      "venue": "Halle, Ballspielhalle Ense, Schulweg, 59469 Ense",
+      "infoAt": "2026-11-08T22:01:14.237Z"
+    },
+    {
       "d": "2027-02-14",
       "t": "09:00",
       "team": "B-Junioren",
@@ -3476,16 +3544,18 @@
       "type": "E-Junioren",
       "squad": 2,
       "names": [
-        "SV Bachum/Bergheim II"
+        "SV Bachum/Bergheim II",
+        "SV Bachum/Bergheim 2"
       ],
       "teamIds": [
         "027IVP92OK000000VS5489B1VUA37ON8"
       ],
       "competitions": [
-        "Kreisliga B"
+        "Kreisliga B",
+        "Vereinsturnier"
       ],
-      "games": 11,
-      "homeGames": 6,
+      "games": 15,
+      "homeGames": 8,
       "first": "2026-11-06",
       "last": "2027-06-12",
       "teamId": "027IVP92OK000000VS5489B1VUA37ON8"
