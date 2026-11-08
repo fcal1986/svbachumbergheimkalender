@@ -1,55 +1,6 @@
 {
-  "updated": "2026-11-07T21:47:16.486Z",
+  "updated": "2026-11-08T01:25:34.295Z",
   "games": [
-    {
-      "d": "2026-10-17",
-      "t": "09:44",
-      "team": "E-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim 1",
-      "gameNo": "191970009",
-      "opponent": "DJK Grün-Weiß Menden 1",
-      "competition": "Kreisturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-djk-gruen-weiss-menden-1/-/spiel/032AL4GS48000000VS5489BUVV5V31CI",
-      "staffelId": "191970",
-      "staffelName": "Lothar-Hiller-CUP Reloaded E-Jugend",
-      "venue": "Kunstrasenplatz, Waldstadion Garenfeld, Neuer Mühlenweg , 58099 Hagen",
-      "infoAt": "2026-10-16T13:14:11.519Z"
-    },
-    {
-      "d": "2026-10-17",
-      "t": "10:28",
-      "team": "E-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim 1",
-      "gameNo": "191970014",
-      "opponent": "SC Berchum/Garenfeld 53/74",
-      "competition": "Kreisturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-sc-berchum-garenfeld-53-74/-/spiel/032AL4GS78000000VS5489BUVV5V31CI",
-      "staffelId": "191970",
-      "staffelName": "Lothar-Hiller-CUP Reloaded E-Jugend",
-      "venue": "Kunstrasenplatz, Waldstadion Garenfeld, Neuer Mühlenweg , 58099 Hagen",
-      "infoAt": "2026-10-16T13:14:12.173Z"
-    },
-    {
-      "d": "2026-10-17",
-      "t": "14:45",
-      "team": "C-Junioren",
-      "squad": 2,
-      "ownName": "SV Bachum-Bergh. II",
-      "gameNo": "212741018",
-      "opponent": "JSG Grevenstein/Helf.-Alth./Be./Cal-Wa. I (9er)",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-grevenstein-hellefeld-altenh-berge-calle-wallen-9er/-/spiel/031I192R5O000000VS5489BUVVKNMR0J",
-      "matchday": 5,
-      "staffelId": "212741",
-      "staffelName": "KL B",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-16T13:14:12.834Z"
-    },
     {
       "d": "2026-10-18",
       "t": "11:00",
@@ -1689,54 +1640,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-10-17",
-      "t": "09:00",
-      "team": "E-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim 1",
-      "opponent": "Mettmann-Sport e.V.",
-      "competition": "Kreisturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/mettmann-sport-ev-sv-bachum-bergheim-1/-/spiel/032AL4GRVO000000VS5489BUVV5V31CI",
-      "gameNo": "191970001",
-      "staffelId": "191970",
-      "staffelName": "Lothar-Hiller-CUP Reloaded E-Jugend",
-      "venue": "Kunstrasenplatz, Waldstadion Garenfeld, Neuer Mühlenweg , 58099 Hagen",
-      "infoAt": "2026-10-16T13:14:39.219Z"
-    },
-    {
-      "d": "2026-10-17",
-      "t": "09:22",
-      "team": "E-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim 1",
-      "opponent": "SSV Hagen-Fussball e. V. II",
-      "competition": "Kreisturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/ssv-hagen-fussball-e-v-ii-sv-bachum-bergheim-1/-/spiel/032AL4GS20000000VS5489BUVV5V31CI",
-      "gameNo": "191970005",
-      "staffelId": "191970",
-      "staffelName": "Lothar-Hiller-CUP Reloaded E-Jugend",
-      "venue": "Kunstrasenplatz, Waldstadion Garenfeld, Neuer Mühlenweg , 58099 Hagen",
-      "infoAt": "2026-10-16T13:14:39.987Z"
-    },
-    {
-      "d": "2026-10-17",
-      "t": "10:06",
-      "team": "E-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim 1",
-      "opponent": "FC Iserlohn W I",
-      "competition": "Kreisturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/fc-iserlohn-w-i-sv-bachum-bergheim-1/-/spiel/032AL4GS60000000VS5489BUVV5V31CI",
-      "gameNo": "191970012",
-      "staffelId": "191970",
-      "staffelName": "Lothar-Hiller-CUP Reloaded E-Jugend",
-      "venue": "Kunstrasenplatz, Waldstadion Garenfeld, Neuer Mühlenweg , 58099 Hagen",
-      "infoAt": "2026-10-16T13:14:40.643Z"
-    },
     {
       "d": "2026-10-18",
       "t": "11:00",
@@ -3504,9 +3407,9 @@
       "competitions": [
         "Kreisliga B"
       ],
-      "games": 9,
-      "homeGames": 5,
-      "first": "2026-10-17",
+      "games": 8,
+      "homeGames": 4,
+      "first": "2026-11-07",
       "last": "2027-06-05",
       "teamId": "031A86T3J0000000VS5489BSVU0ORN69"
     },
@@ -3555,19 +3458,17 @@
       "type": "E-Junioren",
       "squad": 1,
       "names": [
-        "SV Bachum/Bergheim 1",
         "SV Bachum/Bergheim I"
       ],
       "teamIds": [
         "011MIBAMEC000000VTVG0001VTR8C1K7"
       ],
       "competitions": [
-        "Kreisturnier",
         "Kreisliga A"
       ],
-      "games": 15,
-      "homeGames": 7,
-      "first": "2026-10-17",
+      "games": 10,
+      "homeGames": 5,
+      "first": "2026-11-07",
       "last": "2027-06-12",
       "teamId": "011MIBAMEC000000VTVG0001VTR8C1K7"
     },
@@ -3702,6 +3603,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-10-17",
+  "teamsFrom": "2026-10-18",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
