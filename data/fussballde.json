@@ -1,57 +1,6 @@
 {
-  "updated": "2026-11-08T22:01:14.644Z",
+  "updated": "2026-11-09T01:43:07.365Z",
   "games": [
-    {
-      "d": "2026-10-18",
-      "t": "11:00",
-      "team": "Herren",
-      "squad": 3,
-      "ownName": "SV Bachum/Bergheim III",
-      "gameNo": "210824016",
-      "opponent": "SG Allendorf/Amecke III",
-      "competition": "Kreisliga D",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-iii-sg-allendorf-amecke-iii/-/spiel/031KK1IQI8000000VS5489BUVVKNMR0J",
-      "matchday": 6,
-      "staffelId": "210824",
-      "staffelName": "Kreisliga D Arnsberg",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-16T13:14:13.510Z"
-    },
-    {
-      "d": "2026-10-18",
-      "t": "13:15",
-      "team": "Herren",
-      "squad": 2,
-      "ownName": "SV Bachum/Bergheim II",
-      "gameNo": "211386087",
-      "opponent": "SV Affeln 28 II",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-sv-affeln-28-ii/-/spiel/031IK2RUGS000000VS5489BUVVKNMR0J",
-      "matchday": 11,
-      "staffelId": "211386",
-      "staffelName": "Kreisliga B Arnsberg",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-16T13:14:14.194Z"
-    },
-    {
-      "d": "2026-10-18",
-      "t": "15:30",
-      "team": "Herren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "gameNo": "210697088",
-      "opponent": "SG Beckum/Hövel/Mellen",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-sg-beckum-hoevel-mellen/-/spiel/031I0BN9JC000000VS5489BUVVKNMR0J",
-      "matchday": 11,
-      "staffelId": "210697",
-      "staffelName": "Kreisliga A Arnsberg",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-16T13:14:14.886Z"
-    },
     {
       "d": "2026-10-21",
       "t": "19:30",
@@ -1674,23 +1623,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-10-18",
-      "t": "11:00",
-      "team": "B-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "opponent": "BSV Menden",
-      "competition": "Bezirksliga",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/bsv-menden-sv-bachum-bergheim/-/spiel/031GM5I93S000000VS5489BTVVG7L386",
-      "gameNo": "211049037",
-      "matchday": 6,
-      "staffelId": "211049",
-      "staffelName": "B-Junioren - Bezirksliga, Staffel 3",
-      "venue": "Kunstrasenplatz, Huckenohl-Stadion NP, Oesberner Weg 40, 58706 Menden (Sauerland)",
-      "infoAt": "2026-10-16T13:14:42.206Z"
-    },
     {
       "d": "2026-10-23",
       "t": "18:30",
@@ -3432,13 +3364,13 @@
         "02B9BQVPIG000000VS5489B1VU20GQ5T"
       ],
       "competitions": [
-        "Bezirksliga",
         "Kreisfreundschaftsspiele",
-        "Kreispokal"
+        "Kreispokal",
+        "Bezirksliga"
       ],
-      "games": 22,
+      "games": 21,
       "homeGames": 12,
-      "first": "2026-10-18",
+      "first": "2026-10-29",
       "last": "2027-06-13",
       "teamId": "02B9BQVPIG000000VS5489B1VU20GQ5T"
     },
@@ -3629,9 +3561,9 @@
         "Kreisliga A",
         "Kreisfreundschaftsspiele"
       ],
-      "games": 23,
-      "homeGames": 11,
-      "first": "2026-10-18",
+      "games": 22,
+      "homeGames": 10,
+      "first": "2026-10-25",
       "last": "2027-05-30",
       "teamId": "011MIANBCK000000VTVG0001VTR8C1K7"
     },
@@ -3648,9 +3580,9 @@
         "Kreisliga B",
         "Kreispokal"
       ],
-      "games": 22,
-      "homeGames": 11,
-      "first": "2026-10-18",
+      "games": 21,
+      "homeGames": 10,
+      "first": "2026-10-21",
       "last": "2027-05-30",
       "teamId": "011MIBAEQC000000VTVG0001VTR8C1K7"
     },
@@ -3666,13 +3598,13 @@
       "competitions": [
         "Kreisliga D"
       ],
-      "games": 15,
-      "homeGames": 8,
-      "first": "2026-10-18",
+      "games": 14,
+      "homeGames": 7,
+      "first": "2026-10-25",
       "last": "2027-05-30",
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-10-18",
+  "teamsFrom": "2026-10-19",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
