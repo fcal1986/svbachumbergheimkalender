@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-10T12:36:40.000Z",
+  "updated": "2026-11-10T20:48:48.667Z",
   "games": [
     {
       "d": "2026-10-21",
@@ -2159,7 +2159,7 @@
     },
     {
       "d": "2026-11-21",
-      "t": "10:30",
+      "t": "11:00",
       "team": "C-Junioren",
       "squad": 1,
       "ownName": "SV Bachum-Bergh. I",
@@ -2167,11 +2167,16 @@
       "competition": "Kreispokal",
       "score": null,
       "link": "https://www.fussball.de/spiel/tus-sundern-sv-bachum-bergheim/-/spiel/031JV083EO000000VS5489BUVVKNMR0J",
+      "movedFrom": {
+        "d": "2026-11-21",
+        "t": "10:30"
+      },
+      "movedAt": "2026-11-10T20:48:47.830Z",
       "gameNo": "200280001",
       "staffelId": "200280",
       "staffelName": "Kreispokal 2026/27",
       "staffelUrl": "https://www.fussball.de/spieltag/endspiel-kreis-arnsberg-c-junioren-kreispokal-c-junioren-saison2627-westfalen/-/spieldatum/2026-11-21/staffel/031JUVKAMO000004VS5489BUVVKNMR0J-R",
-      "infoAt": "2026-11-03T16:14:02.513Z"
+      "infoAt": "2026-11-10T20:48:48.260Z"
     },
     {
       "d": "2026-11-21",
