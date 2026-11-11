@@ -27,6 +27,38 @@ try {
   assert.equal(await page.locator('.st-now .pc-venue-list .nf-chip.on').count(), 1);
   await page.screenshot({ path: 'tests/_results/start-halle.png', fullPage: true });
 
+  // Regression #135: Beim Wischen darf die Höllenbergkampfbahn KEINE Halle anzeigen.
+  // Donnerstag 17:25 läuft in Bergheim-Schule die E3. Diese ist am Außen-Spielort unsichtbar.
+  await page.evaluate(() => {
+    startSel = '2026-11-12';
+    START_VENUE = 'home';
+    delete START_CUR[startSel];
+    renderStart();
+  });
+  await page.locator('#stp-live .lp-field').waitFor();
+  assert.equal(await page.locator('#stp-live .lp-halle').count(), 0, 'Außenplatz ohne Hallenzeile');
+  await page.evaluate(() => {
+    const el = document.querySelector('.st-now .tl-scroll');
+    const g = tlGeom(el), target = 17 * 60 + 25;
+    el.scrollLeft = Math.round((target - g.t0) / (g.t1 - g.t0) * g.w);
+    tlScroll(el);
+  });
+  await page.waitForFunction(() => START_CUR['2026-11-12'] >= 1040 && START_CUR['2026-11-12'] <= 1050);
+  await page.waitForTimeout(100); // requestAnimationFrame für Live-Bild
+  assert.equal(await page.locator('#stp-live .lp-halle').count(), 0, 'Auch nach dem Scrollen keine Halle auf dem Außenplatz');
+  assert.equal(await page.locator('.st-now .tl-labels').innerText().then(t => /H1|H2|H3|Halle/.test(t)), false,
+    'Zeitleiste am Außenplatz enthält keine Hallenspuren');
+  await page.screenshot({ path: 'tests/_results/start-aussen-nach-scroll.png', fullPage: true });
+
+  // Spielortwechsel bei derselben Uhrzeit zeigt ausschließlich die echte Hallenbelegung.
+  await page.locator('.st-now .pc-venue-list button').filter({ hasText: 'Bergheim-Schule' }).click();
+  await page.locator('#stp-live .lp-hall-only').waitFor();
+  assert.equal(await page.locator('#stp-live .lp-field').count(), 0, 'Hallenspielort hat kein Außen-Spielfeld');
+  assert.match(await page.locator('#stp-live').innerText(), /E3/, 'E3 ist 17:25 in der Bergheim-Schule');
+  await page.locator('.st-now .pc-venue-list button').filter({ hasText: 'Höllenbergkampfbahn' }).click();
+  await page.locator('#stp-live .lp-field').waitFor();
+  assert.equal(await page.locator('#stp-live .lp-halle').count(), 0, 'Zurück auf den Außenplatz ohne Halle');
+
   // Vorhandener Tab „Neu“ (ohne Login gegen das echte Repo):
   // nur lokale, fiktive Testsitzung; KEIN Speichern, KEINE externen Schreibzugriffe.
   await page.evaluate(() => {
