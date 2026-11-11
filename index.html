@@ -281,7 +281,7 @@
   .seg-mini button:disabled{opacity:.4;}
   .stw-strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;min-width:0;}
   /* Heute bleibt fest, ausschließlich die sechs rechten Spalten scrollen. */
-  .stw-strip-scroll{grid-column:span 6;display:flex;gap:5px;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x proximity;}
+  .stw-strip-scroll{grid-column:span 6;display:flex;gap:5px;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;touch-action:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x proximity;}
   .stw-strip-scroll::-webkit-scrollbar{display:none;}
   .stw-strip-scroll .stw-day{flex:0 0 calc((100% - 25px)/6);min-width:0;scroll-snap-align:start;}
   .stw-day{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;min-height:60px;border-radius:12px;border:none;background:var(--white);color:var(--ink);font:inherit;cursor:pointer;box-shadow:var(--card-shadow);}
@@ -5410,9 +5410,10 @@ function startStripDayHTML(i,isMine){
   const dotOf=e=>(e.isCancelled||e.isMovedGhost||e.withdrawn)?'grey':(e.isExternal||isMatchKind(kindOf(e))?'game':'tr');
   const dots=startDayItems(ds,isMine).slice(0,3).map(e=>'<i class="'+dotOf(e)+'"></i>').join('');
   const hol=holidayOn(ds), halls=PlatzcoachVenues.venues(CFG,ds).filter(v=>v.kind==='hall').length;
+  const fullDate=DOW[dowOf(ds)-1]+' '+dt.getDate()+'.'+(dt.getMonth()+1)+'.'+dt.getFullYear();
   return '<button type="button" class="stw-day'+(sel?' on':'')+(i===0?' today':'')
     +'" onclick="'+(i===0?'startJumpNow()':'setStartDay(\''+ds+'\')')+'"'
-    +' aria-label="'+esc((i===0?'Heute, ':'')+dayCase(ds)+(hol?', '+hol.name:''))
+    +' aria-label="'+esc((i===0?'Heute, ':'')+fullDate+(hol?', '+hol.name:''))
     +'"'+(sel?' aria-current="date"':'')+'>'
     +(hol?'<span class="hol-dot"></span>':'')
     +'<span>'+(i===0?(startAtNow()?'Heute':'↺ Jetzt'):DOW[dowOf(ds)-1])
@@ -5421,6 +5422,7 @@ function startStripDayHTML(i,isMine){
     +'</button>';
 }
 function startStripScroll(el){
+  if(!el.isConnected) return;
   START_STRIP_SCROLL=el.scrollLeft;
   if(el.scrollLeft+el.clientWidth<el.scrollWidth-Math.max(120,el.clientWidth)) return;
   const old=START_STRIP_DAYS, total=startStripTotalDays();
@@ -5443,7 +5445,7 @@ function startWeekHTML(src,isMine,admin){
   const items=src?weekItems(isMine):[];
   const count=Math.min(startStripTotalDays(),START_STRIP_DAYS);
   let strip='<div class="stw-strip">'+startStripDayHTML(0,isMine)
-    +'<div class="stw-strip-scroll" aria-label="Weitere Tage" onscroll="startStripScroll(this)">';
+    +'<div class="stw-strip-scroll" role="group" aria-label="Weitere Tage" onscroll="startStripScroll(this)">';
   for(let i=1;i<count;i++) strip+=startStripDayHTML(i,isMine);
   strip+='</div></div>';
   let h=startPlaceHTML(startSel,isMine,admin,strip);
