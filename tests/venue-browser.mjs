@@ -134,6 +134,9 @@ try {
   await page.locator('#f-venue-wrap').waitFor({ state: 'hidden' });
   assert.equal(await page.locator('#f-tl .tl-pick-b').count() >= 7, true, 'A/B, Viertel 1–4, KF');
   await page.screenshot({ path: 'tests/_results/neu-aussenplan.png', fullPage: true });
+  // Aus dem vorherigen Formular-Test zurück auf die sichtbare Startseite.
+  await page.evaluate(() => goto('start'));
+  await page.locator('.stw-strip > .stw-day.today').waitFor({ state: 'visible' });
   // Desktop/Tablet und Accessibility: native vertikale Geste bleibt zugelassen.
   await page.setViewportSize({ width: 768, height: 1024 });
   assert.equal(await page.locator('.stw-strip-scroll').evaluate(el => getComputedStyle(el).touchAction),
