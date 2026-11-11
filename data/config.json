@@ -59,5 +59,52 @@
   },
   "control": {
     "reloadAt": 1791227047436
+  },
+  "hallPlan": {
+    "from": "2026-11-01",
+    "until": "2027-03-31",
+    "venues": [
+      {
+        "id": "bergheim-schule",
+        "name": "Bergheim-Schule",
+        "parts": 1,
+        "windows": [
+          {
+            "day": 2,
+            "from": "16:00",
+            "to": "17:00"
+          },
+          {
+            "day": 4,
+            "from": "16:00",
+            "to": "20:00"
+          }
+        ]
+      },
+      {
+        "id": "sug",
+        "name": "SUG",
+        "parts": 1,
+        "windows": [
+          {
+            "day": 5,
+            "from": "17:00",
+            "to": "18:30"
+          }
+        ]
+      },
+      {
+        "id": "binnerfeld",
+        "name": "Binnerfeld",
+        "parts": 3,
+        "windows": [
+          {
+            "day": 6,
+            "from": "10:30",
+            "to": "13:00"
+          }
+        ]
+      }
+    ]
   }
 }
