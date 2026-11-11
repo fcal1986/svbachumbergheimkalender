@@ -25,6 +25,14 @@ Stand: 11.11.2026 · 1 · Pilot-Entwicklung im PR #136 (noch nicht produktiv).
 - **Verfügbarkeit:** Die vereinseigene Zuteilung ist nicht identisch mit einer freien Zeit. + frei in der Halle wird ausschließlich innerhalb des zugeteilten Fensters angeboten. Die Prüfung erfolgt zusätzlich beim Speichern. Ein belegter Hallentermin führt in den normalen Tab „Termine“, nicht in eine neue Hallenansicht.
 - **Freigabe:** Der Trainer sagt **nur seine einzelne** Hallentrainingseinheit ab (mit der bestehenden Rückgängig-Funktion). Die Fläche wird frei, bleibt aber nur innerhalb der Vereinszeit buchbar. Eine bestätigte Freigabe löst die reguläre Benachrichtigungs-Pipeline aus. Eine Mail an jeden aktiven Trainer mit E-Mail-Adresse, Push ausschließlich bei registriertem/aktiviertem Gerät. Ein Mail-Direktlink übernimmt das ausgefallene Hallenfenster in „Neuer Termin“.
 
+## Bugfix 11.11.2026 – Spielort bleibt beim Wischen verbindlich
+
+**Reproduktion:** Donnerstag, 12.11.2026, auf der Startseite **Höllenbergkampfbahn** auswählen und die Zeitleiste auf **17:25 Uhr** schieben. Vor dem Fix erschien unter dem Außenplatz fälschlich die **Halle mit E3**, obwohl diese zur **Bergheim-Schule** gehört. Ursache: Der Zeitstrahl war bereits nach Spielort gefiltert, aber die Live-Platzgrafik verwendete beim zeitgesteuerten Neuzeichnen globale Belegungen.
+
+**Behebung in PR #136:** Platzgrafik und Zeitstrahl nutzen denselben Spielort-Filter. Bei Höllenbergkampfbahn nur A/B, vier Viertel und Kleinspielfeld; bei Bergheim-Schule nur die vollständige Halle; bei Binnerfeld nur H1–H3. Auch beim Zeitwischen, Datums- und Spielortwechsel sowie bei „Jetzt“ dürfen keine Ressourcen anderer Spielorte erscheinen. Ein alter Scroll-Callback darf eine inzwischen neu ausgewählte Ansicht nicht überschreiben.
+
+**Automatisierte Regression:** `tests/venue-browser.mjs` prüft bei 375 px den Fall **Höllenbergkampfbahn → 17:25 → keine Halle**, danach den Wechsel **Bergheim-Schule → E3 sichtbar**, und zurück zum Außenplatz ohne Hallenzeile. Keine neuen UI-Elemente, keine Änderung an Termin- und Buchungsrechten.
+
 ## Technische Grenzen / Datenschutz
 
 Der Pilot hat ausschließlich **clientseitige** Rollen- und Belegungskontrollen und speichert JSON-Dateien auf GitHub: gleichzeitige Schreibvorgänge lassen sich nicht atomar gegen Doppelbelegung schützen. Die bestehenden 3-Wege-Merges und Konfliktanzeige bleiben erhalten. `data/` ist öffentlich und bleibt in der Git-Historie. Keine persönlichen Details Minderjähriger in Konfiguration und Commit-Mails hinterlegen; Trainerdaten müssen auf den notwendigen Umfang begrenzt bleiben.
