@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import { chromium } from 'playwright';
 
 // Kein GitHub-Token, keine echten E-Mails und kein Speichern: nur lokaler HTTP-Server.
+fs.mkdirSync('tests/_results', { recursive: true });
 const server = spawn('python3', ['-m', 'http.server', '8765', '--bind', '127.0.0.1'], { stdio: 'ignore' });
 let browser;
 try {
