@@ -5387,10 +5387,10 @@ function openDayInCalendar(ds){ const dt=new Date(ds+'T00:00:00'); curY=dt.getFu
 /* Die Tagesleiste ist nur eine Datumsauswahl. Die darunterliegende Wochenübersicht
    bleibt wie bisher auf die nächsten sieben Tage beschränkt. */
 let START_STRIP_DAYS=28, START_STRIP_SCROLL=0;
-function startSeasonEnd(){
-  const active=(SEASONS||[]).filter(s=>s.from<=todayStr&&s.to>=todayStr)
+function startSeasonEnd(referenceDate=todayStr){
+  const active=(SEASONS||[]).filter(s=>s.from<=referenceDate&&s.to>=referenceDate)
     .sort((a,b)=>b.from.localeCompare(a.from))[0];
-  return active?active.to:todayStr; // Ohne laufende Saison keine erfundenen Zukunftstermine.
+  return active?active.to:referenceDate; // Ohne laufende Saison keine erfundenen Zukunftstermine.
 }
 function startStripTotalDays(){
   const end=startSeasonEnd();
