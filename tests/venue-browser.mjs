@@ -150,11 +150,8 @@ try {
 
   // Neue Saison wird aus Konfigurationsdaten bestimmt, nicht als 2027 fixiert.
   const newSeasonEnd = await page.evaluate(() => {
-    const saved = todayStr;
     SEASONS.push({ id: 'test-next-season', from: '2027-07-01', to: '2028-06-30' });
-    todayStr = '2027-07-01';
-    const actual = startSeasonEnd();
-    todayStr = saved;
+    const actual = startSeasonEnd('2027-07-01');
     SEASONS.pop();
     return actual;
   });
