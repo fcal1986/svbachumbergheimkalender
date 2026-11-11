@@ -1973,7 +1973,7 @@ function trainingInstancesOn(d){
   // Ab 07.10.2026 · 29: einmalig verlegt = s.moved[datum] {from,to,pitch,res} – bleibt das Regeltraining, nur zu anderer Zeit/Fläche
   return TRAINING.filter(s=>slotActiveOn(s,d)).map(s=>{ const ov=(s.moved||{})[d]; return {
     id:'tr-'+s.id+'-'+d, d:d, t:ov?ov.from:s.from, bis:ov?ov.to:s.to,
-    movedFrom:ov?{from:s.from,to:s.to,pitch:s.pitch||null,res:s.res||[]}:null,
+    movedFrom:ov?{from:s.from,to:s.to,pitch:s.pitch||null,res:s.res||[],halle:s.halle||null,venueId:s.venueId||'home'}:null,
     title:'Training', team:s.team, squad:s.squad||1,
     pitch:ov&&('pitch' in ov)?ov.pitch:(s.pitch||null), halle:ov&&('halle' in ov)?ov.halle:(s.halle||null), res:ov&&ov.res?ov.res:(s.res||[]), venueId:ov&&ov.venueId||s.venueId||'home', note:s.note||'',
     ownerId:getTrainerIds(s)[0]||null,
@@ -5329,7 +5329,7 @@ function placeLiveHTML(ds,cur,isMine){
       if(free&&canBookSlots()){
         const action='openSlotSheet('+JSON.stringify(ds)+',"halle",'+i+','+hmMin(free.from)+','+hmMin(free.to)+',event)';
         return '<div class="lp-third book" role="button" tabindex="0" onclick="'+esc(action)+'" onkeydown="if(event.key===\'Enter\'||event.key===\' \')this.click()">+ frei</div>'; }
-      return '<div class="lp-third">frei</div>';
+      return '<div class="lp-third">'+(win.some(w=>hmMin(w.from)<=n&&hmMin(w.to)>n)?'frei':'–')+'</div>';
     }).join('');
     const active=win.some(w=>hmMin(w.from)<=n&&hmMin(w.to)>n);
     return '<div class="lp lp-hall-only"><div class="lp-status '+(active?'part':'free')+'"><b>'+esc(v.name)+'</b><span>'+(active?'Vereinszeit':'Außerhalb der Hallenzeit')+'</span></div>'
@@ -6010,7 +6010,7 @@ function agendaOn(ds){
 }
 function pitchLabelOf(e){
   if(e.pitch)return pitchShort(e.pitch);
-  if(e.halle&&e.halle.thirds&&e.halle.thirds.length)return halleShort(e.halle);
+  if(e.halle&&e.halle.thirds&&e.halle.thirds.length) return ((PlatzcoachVenues.hall(CFG,e.venueId)||{}).name||'Halle')+' · '+halleShort(e.halle);
   if(e.isExternal)return e.pitchLabelText||'fussball.de';
   if(e.res&&e.res.length)return e.res.join(', ');
   return '';
@@ -8561,14 +8561,15 @@ function moveTrainingDay(id,date){
   const s=TRAINING.find(x=>x.id===id); if(!s||!date) return;
   if(!canCancelSlot(s)){ showToast('Verlegen kann nur ein Trainer der Mannschaft oder ein Admin.',4000); return; }
   newEvent(date); if(!document.querySelector('.pane[data-pane="neu"].active')) return;
+  if(s.venueId&&s.venueId!=='home') selectFormVenue(s.venueId);
   document.getElementById('f-team').value=s.team; setSquadSeg('f-squad',s.team,s.squad||1,true); onTeamChange();
   pickFormKind(s.team===GK_TEAM||s.kind==='goalkeeper'?'goalkeeper':'training');
-  const inst=trainingInstancesOn(date).find(t=>t.trainingSlotId===s.id)||{t:s.from,bis:s.to,pitch:s.pitch,res:s.res||[]};
+  const inst=trainingInstancesOn(date).find(t=>t.trainingSlotId===s.id)||{t:s.from,bis:s.to,pitch:s.pitch,halle:s.halle,res:s.res||[]};
   document.getElementById('f-von').value=inst.t; document.getElementById('f-bis').value=inst.bis;
-  const res=(inst.res||[]).slice(); if(inst.pitch) res.unshift('Großspielfeld'); if(s.halle&&s.halle.thirds&&s.halle.thirds.length) res.push('Halle');
+  const res=(inst.res||[]).slice(); if(inst.pitch) res.unshift('Großspielfeld'); if(inst.halle&&inst.halle.thirds&&inst.halle.thirds.length) res.push('Halle');
   setResChips('f-res',res);
   if(inst.pitch){ setPitchMode(inst.pitch.mode); pitchPart=inst.pitch.part||null; }
-  halleThirds=s.halle&&s.halle.thirds?[...s.halle.thirds]:[];
+  halleThirds=inst.halle&&inst.halle.thirds?[...inst.halle.thirds]:[];
   FORM_MOVE={slotId:s.id,date};
   formDirty=false; onTimeChange(); renderPitch(); renderHalle();
   showToast('Neue Zeit oder Fläche wählen – das Regeltraining findet dann an dem Tag dort statt.',4000);
@@ -8579,8 +8580,8 @@ function resetTrainingMove(id,date){
   const ov=s.moved[date], backup=JSON.stringify(TRAINING);
   delete s.moved[date]; if(!Object.keys(s.moved).length) delete s.moved;
   renderTraining(); render(); renderStart();
-  showToast('Training am '+fmtShort(date)+' wieder wie immer: '+s.from+'–'+s.to+', '+dayAreaText(s.pitch||null,s.res||[])+'.');
-  saveTraining('Training verlegt: '+trainName(s)+' am '+dayDateShort(date)+' wieder wie immer ('+s.from+'–'+s.to+', '+dayAreaText(s.pitch||null,s.res||[])+') – '+session.name+teamTrailer(s.team,s.squad,s))
+  showToast('Training am '+fmtShort(date)+' wieder wie immer: '+s.from+'–'+s.to+', '+dayAreaText(s.pitch||null,s.res||[],s.halle,s.venueId)+'.');
+  saveTraining('Training verlegt: '+trainName(s)+' am '+dayDateShort(date)+' wieder wie immer ('+s.from+'–'+s.to+', '+dayAreaText(s.pitch||null,s.res||[],s.halle,s.venueId)+') – '+session.name+teamTrailer(s.team,s.squad,s))
     .catch(e=>{ TRAINING=JSON.parse(backup); renderTraining(); render(); renderStart(); showToast('Fehler: '+e.message,6000); });
 }
 let FORM_MOVE=null, FORM_MOVE_TOAST='';
@@ -8680,6 +8681,7 @@ function fillTrainerSelect(selectedId){ renderTrainerChips(document.getElementBy
 function trainLocHTML(s){
   let h=(s.team===GK_TEAM||s.kind==='goalkeeper')?gkBadge()+'<span class="badge-res">'+esc(gkTeamsText(s.gkTeams||[]))+'</span>':'';
   if(s.pitch) h+=pitchBadge(s.pitch);
+  if(s.halle&&s.halle.thirds&&s.halle.thirds.length) h+='<span class="badge-halle">'+esc(((PlatzcoachVenues.hall(CFG,s.venueId)||{}).name||'Halle')+' · '+halleShort(s.halle))+'</span>';
   (s.res||[]).forEach(r=>h+='<span class="badge-res">'+esc(r)+'</span>');
   if(s.note) h+='<span class="badge-res">'+esc(s.note)+'</span>';
   return h||'<span class="badge-res">–</span>';
@@ -8938,6 +8940,7 @@ function newTrainingSlot(day){
 function editTrainingSlot(id){
   if(!requireAdmin()) return;
   const s=TRAINING.find(x=>x.id===id); if(!s)return;
+  if(s.venueId&&s.venueId!=='home'){showToast('Die festen Hallen-Zuteilungen werden im Pilot zentral gepflegt. Einzeltermine kannst du weiterhin absagen oder verlegen.',6000);return;}
   tEditId=id; tfFill(s); tfApplySeasonBounds(SEASONS.length?seasonOfSlot(s):null);
   document.getElementById('tf-label').textContent='Änderungen speichern';
   goto('tform');
@@ -8950,6 +8953,7 @@ function editTrainingSlot(id){
    Die Zeilen bilden den ersten Absatz der Commit-Nachricht; notify-email.mjs bricht sie um. */
 function slotPlaceText(s){
   if(s.pitch) return pitchShort(s.pitch);
+  if(s.halle&&s.halle.thirds&&s.halle.thirds.length) return ((PlatzcoachVenues.hall(CFG,s.venueId)||{}).name||'Halle')+' · '+halleShort(s.halle);
   return (s.res||[]).filter(r=>FIELD_RES.includes(r)).join(', ');
 }
 function slotExtraResText(s){ return (s.res||[]).filter(r=>!FIELD_RES.includes(r)).slice().sort().join(', '); }
@@ -8992,6 +8996,7 @@ function trainingSlotMessage(before,after,cancels){
 }
 async function saveTrainingSlot(){
   if(!requireAdmin()) return;
+  if(tEditId&&((TRAINING.find(x=>x.id===tEditId)||{}).venueId||'home')!=='home'){showToast('Hallen-Zuteilungen können in dieser Außenplatz-Maske nicht geändert werden.',6000);return;}
   const day=parseInt(document.getElementById('tf-day').value);
   const from=document.getElementById('tf-from').value;
   const to=document.getElementById('tf-to').value;
@@ -9074,6 +9079,7 @@ async function saveTrainingSlot(){
 function deleteTrainingSlot(id){
   if(!requireAdmin()) return;
   const s=TRAINING.find(x=>x.id===id); if(!s)return;
+  if(s.venueId&&s.venueId!=='home'){showToast('Feste Hallen-Zuteilungen werden im Pilot zentral gepflegt. Einzelne Termine bitte absagen.',6000);return;}
   askConfirm('Trainingszeit löschen?',trainName(s)+' am '+WDAYS[s.day]+' '+s.from+'–'+s.to+' wird entfernt.','Löschen',async()=>{
     const backup=JSON.stringify(TRAINING);
     TRAINING=TRAINING.filter(x=>x.id!==id);
