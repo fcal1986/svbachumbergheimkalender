@@ -1,0 +1,44 @@
+name: Pilot #135 – Hallen und Syntax
+on:
+  pull_request:
+    paths:
+      - index.html
+      - assets/venue-plan.js
+      - data/config.json
+      - data/training.json
+      - tests/**
+      - scripts/check-inline.mjs
+      - scripts/notify-email.mjs
+      - .github/workflows/pilot-hall-check.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04 # Playwright Chromium 1.56 unterstützt Runner 24.04; ubuntu-latest ist 26.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JSON, Terminformular und Bibliothek prüfen
+        run: |
+          node --check assets/venue-plan.js
+          node --check scripts/notify-email.mjs
+          node scripts/check-inline.mjs
+          node -e "for(const n of ['config','training']) JSON.parse(require('fs').readFileSync('data/'+n+'.json'))"
+      - name: Fachtests für Hallen und Zeitfenster
+        run: node --test tests/*.test.mjs
+      - name: Browserprüfung vorbereiten (Chromium)
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Browserprüfung bei 375 px
+        run: node tests/venue-browser.mjs
+      - name: Prüf-Screenshots bereitstellen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hallen-pruefung-375px
+          path: tests/_results/
+          if-no-files-found: ignore

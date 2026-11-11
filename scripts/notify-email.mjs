@@ -87,6 +87,7 @@ const CATEGORIES = {
                 'Spielverlegung abgeschlossen:',
                 'Freundschaftsspiel angelegt:', 'Freundschaftsspiel geändert:', 'Freundschaftsspiel gelöscht:',
                 'Turnier angelegt:', 'Turnier geändert:', 'Turnier gelöscht:'],
+  hallfree:    ['Hallenzeit frei:'],
   training:    ['Trainingszeit angelegt:', 'Trainingszeit geändert:', 'Trainingszeit gelöscht:',
                 'Training abgesagt:', 'Absage zurückgenommen:', 'Training verlegt:', 'Training auf anderer Fläche:', 'Torwarttraining-Anmeldung geändert:'],
   sperren:     ['Sperre angelegt:', 'Sperre aufgehoben:'],
@@ -101,8 +102,8 @@ const CATEGORIES = {
 // Standard: Trainer bekommen Termine, Training und Platzsperren; Admins zusätzlich die Verwaltung.
 // Überschreibbar in config.json: "notify": {"categories": {"trainer": [...], "admin": [...]}}
 const ROLE_CATEGORIES = {
-  trainer: ['termine', 'training', 'sperren'],
-  admin:   ['termine', 'training', 'sperren', 'verwaltung'],
+  trainer: ['termine', 'training', 'sperren', 'hallfree'],
+  admin:   ['termine', 'training', 'sperren', 'verwaltung', 'hallfree'],
 };
 // Mannschaften, die einem Trainer "gehören" können. Termine/Training anderer Kategorien
 // (z. B. "Alle Teams", "Vorstand") gelten als vereinsweit und gehen an alle Trainer.
@@ -145,7 +146,7 @@ function isFromPlatzcoach(msg) {
 // Spielverlegungen gehen an ALLE Trainer der Mannschaft – auch an den, der sie eingetragen hat
 // (Bestätigung + Info für den Mit-Trainer). Sonst gilt: keine Mail über eigene Änderungen.
 // Freundschaftsspiele/Turniere ebenso: der Organisator bekommt die Mail als Bestätigung mit Link.
-const NOTIFY_AUTHOR_TOO = ['Spielverlegung vorgemerkt:', 'Spielverlegung geändert:', 'Spielverlegung aufgehoben:', 'Spielverlegung abgeschlossen:',
+const NOTIFY_AUTHOR_TOO = ['Hallenzeit frei:', 'Spielverlegung vorgemerkt:', 'Spielverlegung geändert:', 'Spielverlegung aufgehoben:', 'Spielverlegung abgeschlossen:',
   'Freundschaftsspiel angelegt:', 'Freundschaftsspiel geändert:', 'Freundschaftsspiel gelöscht:', 'Turnier angelegt:', 'Turnier geändert:', 'Turnier gelöscht:'];
 function notifyAuthorToo(c) { return NOTIFY_AUTHOR_TOO.some(p => c.text.startsWith(p)); }
 // Automatische Bot-Läufe und Aufräumarbeiten der App gehen nie per Mail raus.
@@ -215,6 +216,7 @@ function trainerClassesFor(user, seasons, today) {
   return user.classes || {};
 }
 function concernsTrainer(c, classes, userId, user) {
+  if (c.category === 'hallfree') return true; // Hallenzeit ist für jeden Trainer im Verein relevant.
   if (c.category !== 'termine' && c.category !== 'training') return true; // z. B. Platzsperren: vereinsweit
   // Trainer-Termin für bestimmte Mannschaften/Vorstand: nur deren Trainer + Organisator
   if (c.fuer && c.fuer.length) {
@@ -301,6 +303,15 @@ async function main() {
     console.log(`${allMessages.length} Commit(s) im Push, davon ${platzcoachMessages.length} von Platzcoach, ${changes.length} nach Filter. Kategorien: ${JSON.stringify(changes.map(c => c.category))}`);
   }
 
+  // Ausnahme Hallenfreigabe: ausdrücklich jeder aktive Trainer, unabhängig vom normalen
+  // E-Mail-Schalter. Keine fremden Empfänger, kein Serien-/Doppelversand durch gleiche Mailadresse.
+  const hallRelease = changes.some(c => c.category === 'hallfree');
+  const activeTrainer = u => !!u && Object.keys(trainerClassesFor(u, seasons, today)).length > 0;
+  if (hallRelease) users.filter(u => !u.locked && u.email && activeTrainer(u)).forEach(u => {
+    const email = u.email.trim().toLowerCase();
+    recipients.set(email, { email, user: u, role: u.admin ? 'admin' : 'trainer' });
+  });
+
   const transporter = !smtpOk ? null : nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || '587', 10),
@@ -326,9 +337,10 @@ async function main() {
     const allowed = roleCats[role] || [];
     const classes = user ? trainerClassesFor(user, seasons, today) : {};
     return changes.filter(c =>
-      allowed.includes(c.category)
-      && (notifyAuthorToo(c) || !(user && c.by && c.by === user.id))
-      && (role === 'admin' || concernsTrainer(c, classes, user && user.id, user)));
+      (c.category === 'hallfree'
+        ? !!user && activeTrainer(user)
+        : allowed.includes(c.category) && (role === 'admin' || concernsTrainer(c, classes, user && user.id, user)))
+      && (notifyAuthorToo(c) || !(user && c.by && c.by === user.id)));
   };
 
   // Push: je Zugang mit angemeldetem Gerät eine Nachricht (bei mehreren Änderungen zusammengefasst).
@@ -338,7 +350,7 @@ async function main() {
   // Admins: eigene Einstellung je Bereich (Konto → Profil, Vorgabe siehe notify-prefs.mjs).
   const adminFilter = (u, channel, list) => {
     const classes = trainerClassesFor(u, seasons, today);
-    return list.filter(c => adminWants(u, channel, areaOf(c, classes, u.id, !!changesFile)));
+    return list.filter(c => c.category === 'hallfree' && channel === 'mail' || adminWants(u, channel, areaOf(c, classes, u.id, !!changesFile)));
   };
   const pushRelevantFor = u => u.admin
     ? adminFilter(u, 'push', relevantFor('admin', u))
@@ -364,7 +376,9 @@ async function main() {
   // Vereinsweites, und nie die eigenen Änderungen.
   let sent = 0;
   for (const r of recipients.values()) {
-    const mine = (r.role === 'admin' && r.user) ? adminFilter(r.user, 'mail', relevantFor('admin', r.user)) : relevantFor(r.role, r.user);
+    let mine = (r.role === 'admin' && r.user) ? adminFilter(r.user, 'mail', relevantFor('admin', r.user)) : relevantFor(r.role, r.user);
+    // Der verpflichtende Hallen-Hinweis darf das bestehende Abmelden von sonstigen Mails nicht umgehen.
+    if (r.user && r.user.emailNotificationsEnabled === false) mine = mine.filter(c => c.category === 'hallfree');
     if (!mine.length) continue;
     const texts = mine.map(c => c.text);
     const siteUrl = String(cfg.siteUrl || 'https://platzcoach.de/').replace(/\/?$/, '/');
@@ -402,7 +416,9 @@ async function main() {
         from: `Platzcoach <${fromAddress}>`, // Absendername bewusst immer "Platzcoach" (SaaS); der Verein steht im Text
         ...(replyTo ? { replyTo } : {}),
         to: r.email,
-        subject: changesFile ? subjectFb : (texts.length === 1 && /^(Freundschaftsspiel|Turnier) /.test(texts[0])
+        subject: changesFile ? subjectFb : (texts.length === 1 && texts[0].startsWith('Hallenzeit frei:')
+          ? 'Platzcoach: ' + texts[0].replace(/^Hallenzeit frei: /, 'Hallenzeit frei – ').split(' · ').slice(0, 3).join(' · ')
+          : texts.length === 1 && /^(Freundschaftsspiel|Turnier) /.test(texts[0])
           ? 'Platzcoach: ' + texts[0].split(' · ')[0].replace(/: /, ' – ')   // z. B. "Freundschaftsspiel angelegt – E2-Jugend bei SC Neheim"
           : texts.length === 1 && /^Trainingszeit (angelegt|geändert): /.test(texts[0])
           ? 'Platzcoach: ' + texts[0].split('\n')[0].split(' · ')[0].replace(/: /, ' – ')   // z. B. "Trainingszeit geändert – E1-Jugend"

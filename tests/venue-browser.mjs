@@ -1,0 +1,59 @@
+import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+import fs from 'node:fs';
+import { chromium } from 'playwright';
+
+// Kein GitHub-Token, keine echten E-Mails und kein Speichern: nur lokaler HTTP-Server.
+fs.mkdirSync('tests/_results', { recursive: true });
+const server = spawn('python3', ['-m', 'http.server', '8765', '--bind', '127.0.0.1'], { stdio: 'ignore' });
+let browser;
+try {
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage({ viewport: { width: 375, height: 812 }, deviceScaleFactor: 1 });
+  // Stabile Kalender-Woche: Test muss auch nach November 2026 reproduzierbar sein.
+  await page.clock.install({ time: new Date('2026-11-11T09:00:00Z') });
+  const errors = [];
+  page.on('pageerror', err => errors.push(err.message));
+  await page.goto('http://127.0.0.1:8765/', { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => document.querySelector('.stw-strip') && document.getElementById('hd-title')?.textContent === 'Start', { timeout: 25000 });
+
+  // Öffentliche Startseite: Tagesleiste über Platz, am 14.11. eine zugeteilte Halle.
+  await page.evaluate(() => { startSel = '2026-11-14'; renderStart(); });
+  await page.waitForSelector('.stw-day .hall-mark');
+  assert.ok((await page.locator('.stw-day .hall-mark').allTextContents()).includes('1 Halle'));
+  assert.equal(await page.locator('.st-now .pc-venue-list button').count(), 2);
+  await page.locator('.st-now .pc-venue-list button').filter({ hasText: 'Binnerfeld' }).click();
+  assert.equal(await page.locator('.st-now .pc-venue-list .nf-chip.on').count(), 1);
+  await page.screenshot({ path: 'tests/_results/start-halle.png', fullPage: true });
+
+  // Vorhandener Tab „Neu“ (ohne Login gegen das echte Repo):
+  // nur lokale, fiktive Testsitzung; KEIN Speichern, KEINE externen Schreibzugriffe.
+  await page.evaluate(() => {
+    session = { id: 'ci-test-user', name: 'Test', token: 'nicht-echt', isAdmin: true, classes: { 'E-Jugend': [2] } };
+    newEvent('2026-11-14');
+  });
+  await page.locator('#f-venue-wrap').waitFor({ state: 'visible' });
+  assert.equal(await page.locator('#f-venue-chips button').count(), 2);
+  assert.equal(await page.locator('#f-tl-addbtn').innerText(), 'Ressourcen einblenden');
+  assert.equal(await page.locator('#save-label').innerText(), 'Termin speichern');
+  await page.locator('#f-venue-chips button').filter({ hasText: 'Binnerfeld' }).click();
+  assert.equal(await page.locator('#f-tl .tl-pick-b').count(), 3, 'Binnerfeld H1/H2/H3');
+  assert.equal(await page.locator('#f-tl .tl-blk').count(), 6, 'C2/D1 und C1 auf allen 3 Dritteln');
+  assert.equal(await page.locator('#f-tl .tl-free').count(), 0, 'Belegte Halle ist nicht frei');
+  await page.screenshot({ path: 'tests/_results/neu-hallenplan.png', fullPage: true });
+
+  // Außerhalb 01.11.–31.03.: nur Außenplatz, keine Spielort-Auswahl.
+  await page.evaluate(() => {
+    dateInput().value = '2026-09-12';
+    updateWeekday(); renderPitch(); renderHalle();
+  });
+  await page.locator('#f-venue-wrap').waitFor({ state: 'hidden' });
+  assert.equal(await page.locator('#f-tl .tl-pick-b').count() >= 7, true, 'A/B, Viertel 1–4, KF');
+  await page.screenshot({ path: 'tests/_results/neu-aussenplan.png', fullPage: true });
+  assert.deepEqual(errors, [], 'Keine JavaScript-Ausführungsfehler');
+  console.log('375px: Start, Binnerfeld, Hallenzeitleiste und Außenplan korrekt.');
+} finally {
+  await browser?.close();
+  server.kill();
+}
