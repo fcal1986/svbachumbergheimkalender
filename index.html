@@ -4932,12 +4932,16 @@ function tlEdgesHTML(ds,T0,T1,H,form){
    steht gestrichelt drin. Der Termin, der gerade bearbeitet wird, zählt nicht als Belegung. */
 function timelineHTML(ds,isMine,opts){
   const form=!!(opts&&opts.form), vkey=form?'form:'+ds:ds, TL_LANE=form?30:TL_LANE_START, sel=(form&&opts.sel)||null;
-  const occ=occupancyOn(ds,form?{res:opts.resAll,skipId:opts.skipId}:undefined); OCC_VIEW[vkey]=occ;
-  const groups=[{area:'platz',n:4,label:['A','B']}];
+  const venueId=(opts&&opts.venueId)||(form?FORM_VENUE:START_VENUE);
+  const hallMode=venueId!=='home', hallCfg=hallMode?PlatzcoachVenues.hall(CFG,venueId):null;
+  const occ=occupancyOn(ds,form?{res:opts.resAll,skipId:opts.skipId}:undefined).filter(o=>(o.venueId||'home')===venueId); OCC_VIEW[vkey]=occ;
+  const groups=hallMode?[{area:'halle',n:hallCfg?hallCfg.parts:1,label:['Halle']}]:[{area:'platz',n:4,label:['A','B']}];
   const canBook=form?true:canBookSlots();
-  if(canBook||occ.some(o=>o.area==='klein')) groups.push({area:'klein',n:1,label:['K']});
-  if(occ.some(o=>o.area==='halle')||(form&&opts.show.includes('Halle'))) groups.push({area:'halle',n:3,label:['Halle']});
-  if(form) opts.resAll.filter(r=>r!=='Halle'&&(opts.show.includes(r)||occ.some(o=>o.area==='res:'+r))).forEach(r=>groups.push({area:'res:'+r,n:1,res:r}));
+  if(!hallMode){
+    if(canBook||occ.some(o=>o.area==='klein')) groups.push({area:'klein',n:1,label:['K']});
+    if(occ.some(o=>o.area==='halle')||(form&&opts.show.includes('Halle'))) groups.push({area:'halle',n:3,label:['Halle']});
+    if(form) opts.resAll.filter(r=>r!=='Halle'&&(opts.show.includes(r)||occ.some(o=>o.area==='res:'+r))).forEach(r=>groups.push({area:'res:'+r,n:1,res:r}));
+  }
   let y=TL_TOP; groups.forEach((g,i)=>{ if(i) y+=TL_SEP; g.top=y; y+=g.n*TL_LANE+(g.n-1)*TL_GAP; });
   const H=y;
   const laneY=(area,l)=>{ const g=groups.find(x=>x.area===area); return g.top+(l-1)*(TL_LANE+TL_GAP); };
@@ -4958,7 +4962,7 @@ function timelineHTML(ds,isMine,opts){
       ['A','B'].forEach((hh,i)=>{ const q0=i?3:1; h+=btn('half',hh,laneY('platz',q0),two,hh,sel.has('platz',q0)&&sel.has('platz',q0+1),0,22,'Hälfte '+hh); });
       for(let l=1;l<=4;l++) h+=btn('quarter',String(l),laneY('platz',l),TL_LANE,String(l),sel.has('platz',l),24,22,'Viertel '+l);
     } else if(g.area==='halle'){
-      for(let l=1;l<=3;l++) h+=btn('third',String(l),laneY('halle',l),TL_LANE,l===2?'H'+l:'H'+l,sel.has('halle',l),0,46,'Halle Drittel '+l);
+      for(let l=1;l<=3;l++) h+=btn('third',String(l),laneY('halle',l),TL_LANE,g.n===1?'H':'H'+l,sel.has('halle',l),0,46,'Halle Drittel '+l);
     } else h+=btn(g.res?'res':'klein',g.res||'Kleinspielfeld',g.top,TL_LANE,g.res?resShort(g.res):'KF',sel.has(g.area,1),0,46,g.res||'Kleinspielfeld');
   });
   else groups.forEach(g=>{ if(g.area==='platz'){ h+='<span style="top:'+g.top+'px;height:'+(2*TL_LANE+TL_GAP)+'px">A</span><span style="top:'+laneY('platz',3)+'px;height:'+(2*TL_LANE+TL_GAP)+'px">B</span>'; }
@@ -4970,7 +4974,18 @@ function timelineHTML(ds,isMine,opts){
   for(let hh=h0+1;hh<h1;hh++) h+='<span class="tl-tick" style="left:'+P(hh*60)+'%">'+hh+':00</span><div class="tl-grid" style="left:'+P(hh*60)+'%;top:'+TL_TOP+'px"></div>';
   // Freie Zeiten (angemeldet, darf buchen): je Spur die ganze freie Zeit als „+ frei“, sobald sie mind. 30 Min lang ist (ab 01.10.2026 · 9, vorher 60) – antippen = Formular
   const locked=a=>activeLocksOn(ds).some(l=>l.resource===(a==='halle'?'halle':'platz'));
-  if(canBook&&ds>=todayStr) groups.filter(g=>(form||g.area!=='halle')&&!locked(g.area)).forEach(g=>{ for(let l=1;l<=g.n;l++){
+  if(hallMode){
+    // Keine fiktiven freien Zeiten außerhalb der Zuteilung; je Hallendrittel getrennt.
+    if(canBook&&ds>=todayStr&&!locked('halle')&&hallCfg) for(let l=1;l<=hallCfg.parts;l++){
+      for(const win of PlatzcoachVenues.free(CFG,ds,venueId,l,occ)){
+        let a=hmMin(win.from), b=hmMin(win.to);
+        if(isToday) a=Math.max(a,Math.floor(hmMin(now)/15)*15);
+        if(b-a<30) continue;
+        const action=(form?'formTlFree':'openSlotSheet')+'('+JSON.stringify(ds)+',"halle",'+l+','+a+','+b+',event)';
+        h+='<button type="button" class="tl-free" style="height:'+TL_LANE+'px;top:'+laneY('halle',l)+'px;left:'+P(a)+'%;width:'+W(a,b)+'%" onclick="'+esc(action)+'" aria-label="'+esc('Frei '+minHM(a)+'–'+minHM(b)+' '+(hallCfg.parts===1?'Halle':'Halle Drittel '+l))+'"><span>'+(form?'+':'+ frei')+'</span></button>';
+      }
+    }
+  }else if(canBook&&ds>=todayStr) groups.filter(g=>(form||g.area!=='halle')&&!locked(g.area)).forEach(g=>{ for(let l=1;l<=g.n;l++){
     const busy=occ.filter(o=>!o.cancelled&&o.area===g.area&&o.lanes[0]<=l&&o.lanes[1]>=l).map(o=>[hmMin(o.t),hmMin(o.bis)]).sort((a,b)=>a[0]-b[0]);
     // Heute beginnt die freie Zeit an der laufenden Viertelstunde (vorher erst an der nächsten – das kürzte den Block)
     const nowM=isToday?hmMin(now):-1; let cur=Math.max(T0,isToday?Math.floor(nowM/15)*15:T0);
