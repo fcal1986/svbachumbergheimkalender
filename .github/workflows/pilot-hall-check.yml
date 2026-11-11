@@ -8,6 +8,7 @@ on:
       - data/training.json
       - tests/**
       - scripts/check-inline.mjs
+      - scripts/notify-email.mjs
       - .github/workflows/pilot-hall-check.yml
   workflow_dispatch:
 permissions:
@@ -23,6 +24,7 @@ jobs:
       - name: JSON, Terminformular und Bibliothek prüfen
         run: |
           node --check assets/venue-plan.js
+          node --check scripts/notify-email.mjs
           node scripts/check-inline.mjs
           node -e "for(const n of ['config','training']) JSON.parse(require('fs').readFileSync('data/'+n+'.json'))"
       - name: Fachtests für Hallen und Zeitfenster
