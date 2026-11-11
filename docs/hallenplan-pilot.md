@@ -16,7 +16,7 @@ Stand: 11.11.2026 · 1 · Pilot-Entwicklung im PR #136 (noch nicht produktiv).
 
 **Belegungen:** Bergheim-Schule Di G 16:00–17:00, Do F 16:00–17:15, E3 17:15–18:45, D2 18:45–20:00; SUG Fr E2 17:00–17:45, E1 17:45–18:30; Binnerfeld Sa C2 10:30–11:45 auf H1+H2, D1 gleichzeitig H3, danach C1 11:45–13:00 auf H1+H2+H3.
 
-Das Außenplatz-Regeltraining wird durch diesen Pilot **nicht automatisch gestrichen**. **Offen:** E2 hat freitags draußen 16:00–17:30 und in SUG 17:00–17:45, Überschneidung 17:00–17:30.
+**Entscheidung 11.11.2026:** Das E2-Außentraining am Freitag **16:00–17:30 Uhr bleibt bestehen**, ebenso der SUG-Hallentermin 17:00–17:45 Uhr. Die zeitliche Überschneidung ist bekannt und gewollt: **Der zuständige Trainer sagt den jeweiligen Außentermin eigenständig und nur für das betreffende Datum über die bestehende Absagefunktion ab**, wenn stattdessen in der Halle trainiert wird. Keine automatische Absage, kein Löschen/Ändern der Außentrainingsserie, keine automatische Sperre des Hallentermins. Bis zu dieser manuellen Absage sind beide Trainings sichtbar.
 
 ## Was sich für Trainer ändert
 
@@ -39,6 +39,7 @@ Die bestehende SMTP-Benachrichtigung dedupliziert Empfänger pro Workflow-Lauf. 
 4. 14.11.2026 (Sa): Binnerfeld H1–H3, C2 2/3, D1 1/3, danach C1 3/3; keine fiktiv freie Fläche.
 5. In einem isolierten Test einen C1-Termin absagen, Rückgängig-Zeit abwarten, prüfen ob 11:45–13:00 als freie drei Drittel angezeigt wird. **Nur mit ausdrücklich vorher festgelegten Testempfängern**, denn der echte Freigabe-Commit würde sonst alle aktiven Trainer benachrichtigen.
 6. Auf belegten Hallentermin tippen → normaler Tab „Termine“. In „Neu“ Datum wechseln → tagesabhängige Spielorte, richtige Ressourcen.
-7. Erst nach Abnahme und Entscheidung zum E2-Überschneidungsfall für den generischen Neubau `fcal1986/platzcoach#181` vormerken.
+7. E2-Freitag: Außentraining und SUG-Hallentraining stehen zunächst parallel im Plan. Als berechtigter E2-Trainer **nur einen Außentermin absagen**; der SUG-Termin und die Außentrainingsserie für die nächsten Freitage bleiben erhalten.
+8. Erst nach Abnahme für den generischen Neubau `fcal1986/platzcoach#181` vormerken.
 
 CI: `.github/workflows/pilot-hall-check.yml` testet JSON, JavaScript, Fachfälle sowie die 375px-Browseransichten und veröffentlicht anonymisierte UI-Prüfscreenshots (Testnutzer, kein echtes Login).
