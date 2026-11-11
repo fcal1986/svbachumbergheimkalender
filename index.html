@@ -8601,7 +8601,7 @@ function cancelTrainingDay(id,date,reason){
       const notification=hall
         ?'Hallenzeit frei: '+hall.name+' · '+dayDateShort(date)+' · '+s.from+'–'+s.to+' Uhr · '+teamLabel(s.team,s.squad)
           +' · '+(hall.parts===1?'ganze Halle':halleShort(s.halle))
-          +'\n\nPlatzcoach-Link: trc-'+s.id+'-'+date
+          +'\n\nPlatzcoach-Link: frei-'+s.id+'-'+date
         :'Training abgesagt: '+msgTeam(s.team,s.squad,s.gkTeams)+' am '+fmtShort(date)+(reason?' – '+reason:'')+' – '+session.name+teamTrailer(s.team,s.squad,s);
       saveTraining(notification)
         .catch(e=>{ TRAINING=JSON.parse(backup); rerender(); showToast('Fehler: '+e.message,6000); });
@@ -11671,6 +11671,25 @@ function openHashEvent(){
   const m=location.hash.match(/^#t=(.+)$/);
   if(!m) return;
   const hid=decodeURIComponent(m[1]);
+  // Direkter Weg aus der Freigabe-Mail in das vorhandene Terminformular.
+  // Nur ein tatsächlich abgesagter, noch gültig zugeteilter Hallenslot darf vorausgefüllt werden.
+  const free=hid.match(/^frei-(hall135-[a-z0-9-]+)-(\d{4}-\d{2}-\d{2})$/);
+  if(free){
+    const s=TRAINING.find(x=>x.id===free[1]), d=free[2];
+    if(!s||!(s.cancelled||[]).includes(d)||!s.venueId||s.venueId==='home'
+      ||!PlatzcoachVenues.permitted(CFG,d,s.venueId,s.from,s.to,s.halle&&s.halle.thirds)){
+      showToast('Diese Hallenzeit ist nicht mehr buchbar.',5000);return;
+    }
+    newEvent(d);
+    if(!document.querySelector('.pane[data-pane="neu"].active)) return;
+    selectFormVenue(s.venueId);
+    document.getElementById('f-von').value=s.from;
+    document.getElementById('f-bis').value=s.to;
+    setResChips('f-res',['Halle']); halleThirds=[...s.halle.thirds];
+    onTimeChange(); renderPitch(); renderHalle();
+    showToast('Freie Hallenzeit übernommen – Mannschaft wählen und Termin prüfen.',4500);
+    return;
+  }
   let e=EVENTS.find(x=>x.id===hid);
   // Einzelner Tag einer festen Trainingszeit: "tr-<Trainingszeit-ID>-<Datum>"
   const tm=!e&&hid.match(/^tr-(.+)-(\d{4}-\d{2}-\d{2})$/);
