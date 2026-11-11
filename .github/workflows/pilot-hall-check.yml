@@ -1,0 +1,29 @@
+name: Pilot #135 – Hallen und Syntax
+on:
+  pull_request:
+    paths:
+      - index.html
+      - assets/venue-plan.js
+      - data/config.json
+      - data/training.json
+      - tests/**
+      - scripts/check-inline.mjs
+      - .github/workflows/pilot-hall-check.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JSON, Terminformular und Bibliothek prüfen
+        run: |
+          node --check assets/venue-plan.js
+          node scripts/check-inline.mjs
+          node -e "for(const n of ['config','training']) JSON.parse(require('fs').readFileSync('data/'+n+'.json'))"
+      - name: Fachtests für Hallen und Zeitfenster
+        run: node --test tests/venue-plan.test.mjs
