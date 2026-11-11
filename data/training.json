@@ -953,6 +953,283 @@
       "seasonId": "2026-2027",
       "validFrom": "2026-07-01",
       "validUntil": "2027-06-30"
+    },
+    {
+      "id": "hall135-bergheim-g",
+      "day": 2,
+      "from": "16:00",
+      "to": "17:00",
+      "team": "G-Jugend",
+      "squad": 1,
+      "pitch": null,
+      "halle": {
+        "thirds": [
+          1
+        ]
+      },
+      "venueId": "bergheim-schule",
+      "res": [],
+      "note": "",
+      "trainerIds": [
+        "123c8c2c-5a1a-43d6-be82-455af9f3b407",
+        "030cee1e-0fb7-426d-a231-b3cbb92c7262"
+      ],
+      "trainerNames": [
+        "Younes Al Musaui",
+        "Marcel Schomberg"
+      ],
+      "validFrom": "2026-11-01",
+      "validUntil": "2027-03-31",
+      "seasonId": "2026-2027",
+      "kind": "training",
+      "cancelled": []
+    },
+    {
+      "id": "hall135-bergheim-f",
+      "day": 4,
+      "from": "16:00",
+      "to": "17:15",
+      "team": "F-Jugend",
+      "squad": 1,
+      "pitch": null,
+      "halle": {
+        "thirds": [
+          1
+        ]
+      },
+      "venueId": "bergheim-schule",
+      "res": [],
+      "note": "",
+      "trainerIds": [
+        "c5f27a4d-fc49-438a-9221-b72392d040b4",
+        "a73f2e9e-f267-4fcb-8b64-ff55ba5e46f3",
+        "f9f5d5e9-2907-46bb-b5a7-a04477c65b5a"
+      ],
+      "trainerNames": [
+        "Patrick Voß",
+        "Florian Landgraf",
+        "Malak Khalil"
+      ],
+      "validFrom": "2026-11-01",
+      "validUntil": "2027-03-31",
+      "seasonId": "2026-2027",
+      "kind": "training",
+      "cancelled": []
+    },
+    {
+      "id": "hall135-bergheim-e3",
+      "day": 4,
+      "from": "17:15",
+      "to": "18:45",
+      "team": "E-Jugend",
+      "squad": 3,
+      "pitch": null,
+      "halle": {
+        "thirds": [
+          1
+        ]
+      },
+      "venueId": "bergheim-schule",
+      "res": [],
+      "note": "",
+      "trainerIds": [
+        "df7c1228-0999-452e-9a08-33244bf13cc0"
+      ],
+      "trainerNames": [
+        "Valerij Bolinger"
+      ],
+      "validFrom": "2026-11-01",
+      "validUntil": "2027-03-31",
+      "seasonId": "2026-2027",
+      "kind": "training",
+      "cancelled": []
+    },
+    {
+      "id": "hall135-bergheim-d2",
+      "day": 4,
+      "from": "18:45",
+      "to": "20:00",
+      "team": "D-Jugend",
+      "squad": 2,
+      "pitch": null,
+      "halle": {
+        "thirds": [
+          1
+        ]
+      },
+      "venueId": "bergheim-schule",
+      "res": [],
+      "note": "",
+      "trainerIds": [
+        "bde8d374-560d-4037-9dea-322d7dd85ba9",
+        "35b36d62-9cf2-40c1-8eee-9940273a6353",
+        "82278cba-af88-4663-bd3c-937db4a7b122"
+      ],
+      "trainerNames": [
+        "Sven Svejn",
+        "Salvatore Macri",
+        "Bülent Gencsen"
+      ],
+      "validFrom": "2026-11-01",
+      "validUntil": "2027-03-31",
+      "seasonId": "2026-2027",
+      "kind": "training",
+      "cancelled": []
+    },
+    {
+      "id": "hall135-sug-e2",
+      "day": 5,
+      "from": "17:00",
+      "to": "17:45",
+      "team": "E-Jugend",
+      "squad": 2,
+      "pitch": null,
+      "halle": {
+        "thirds": [
+          1
+        ]
+      },
+      "venueId": "sug",
+      "res": [],
+      "note": "",
+      "trainerIds": [
+        "a30f8c9b-96f9-4557-b28b-619e122080ea",
+        "935d13de-b21e-43c5-a35f-405bfaf4cc6c"
+      ],
+      "trainerNames": [
+        "David Skwara",
+        "Fabrizio Calcagno"
+      ],
+      "validFrom": "2026-11-01",
+      "validUntil": "2027-03-31",
+      "seasonId": "2026-2027",
+      "kind": "training",
+      "cancelled": []
+    },
+    {
+      "id": "hall135-sug-e1",
+      "day": 5,
+      "from": "17:45",
+      "to": "18:30",
+      "team": "E-Jugend",
+      "squad": 1,
+      "pitch": null,
+      "halle": {
+        "thirds": [
+          1
+        ]
+      },
+      "venueId": "sug",
+      "res": [],
+      "note": "",
+      "trainerIds": [
+        "6085b3aa-f111-47fa-9d20-7e59a0a987e8",
+        "58d96de0-05f7-47cd-9330-1832ab2c12b2"
+      ],
+      "trainerNames": [
+        "Marc Geauf",
+        "Viktor Kurz"
+      ],
+      "validFrom": "2026-11-01",
+      "validUntil": "2027-03-31",
+      "seasonId": "2026-2027",
+      "kind": "training",
+      "cancelled": []
+    },
+    {
+      "id": "hall135-binnerfeld-c2",
+      "day": 6,
+      "from": "10:30",
+      "to": "11:45",
+      "team": "C-Jugend",
+      "squad": 2,
+      "pitch": null,
+      "halle": {
+        "thirds": [
+          1,
+          2
+        ]
+      },
+      "venueId": "binnerfeld",
+      "res": [],
+      "note": "",
+      "trainerIds": [
+        "a21f28cb-3527-4337-ba43-9752dab0bcdb"
+      ],
+      "trainerNames": [
+        "Markus Vielhaber"
+      ],
+      "validFrom": "2026-11-01",
+      "validUntil": "2027-03-31",
+      "seasonId": "2026-2027",
+      "kind": "training",
+      "cancelled": []
+    },
+    {
+      "id": "hall135-binnerfeld-d1",
+      "day": 6,
+      "from": "10:30",
+      "to": "11:45",
+      "team": "D-Jugend",
+      "squad": 1,
+      "pitch": null,
+      "halle": {
+        "thirds": [
+          3
+        ]
+      },
+      "venueId": "binnerfeld",
+      "res": [],
+      "note": "",
+      "trainerIds": [
+        "2def1cdd-2baf-4442-b139-4bc3abe69405",
+        "d1cc03c0-324c-40de-a4f8-49d75efeb828",
+        "0f7e4fdb-535c-4b5c-95d9-8bdbe98300c7"
+      ],
+      "trainerNames": [
+        "Sascha Rabura",
+        "Marcel Mohr",
+        "Daniel Schauerte-Becker"
+      ],
+      "validFrom": "2026-11-01",
+      "validUntil": "2027-03-31",
+      "seasonId": "2026-2027",
+      "kind": "training",
+      "cancelled": []
+    },
+    {
+      "id": "hall135-binnerfeld-c1",
+      "day": 6,
+      "from": "11:45",
+      "to": "13:00",
+      "team": "C-Jugend",
+      "squad": 1,
+      "pitch": null,
+      "halle": {
+        "thirds": [
+          1,
+          2,
+          3
+        ]
+      },
+      "venueId": "binnerfeld",
+      "res": [],
+      "note": "",
+      "trainerIds": [
+        "3a132e64-7713-4fe2-b6db-838da96eefa7",
+        "1d67889f-3194-43d7-9ead-2faa97e9b782",
+        "af1a6546-fdc2-4059-bef4-5a4966181701"
+      ],
+      "trainerNames": [
+        "Dirk Pfeiffer",
+        "Damian Cvetkov",
+        "Michael Raneck"
+      ],
+      "validFrom": "2026-11-01",
+      "validUntil": "2027-03-31",
+      "seasonId": "2026-2027",
+      "kind": "training",
+      "cancelled": []
     }
   ]
 }
