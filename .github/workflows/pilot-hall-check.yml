@@ -28,7 +28,7 @@ jobs:
           node scripts/check-inline.mjs
           node -e "for(const n of ['config','training']) JSON.parse(require('fs').readFileSync('data/'+n+'.json'))"
       - name: Fachtests für Hallen und Zeitfenster
-        run: node --test tests/venue-plan.test.mjs
+        run: node --test tests/*.test.mjs
       - name: Browserprüfung vorbereiten (Chromium)
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.56.1
