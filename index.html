@@ -4931,16 +4931,22 @@ function tlEdgesHTML(ds,T0,T1,H,form){
    Ressourcen (Kabinen, Vereinsheim, Theke, Halle) automatisch, wenn belegt oder gewählt, sonst über
    „Ressourcen einblenden“ (pro Gerät gemerkt). „+ frei“ übernimmt Zeit und Fläche ins Formular, der neue Termin
    steht gestrichelt drin. Der Termin, der gerade bearbeitet wird, zählt nicht als Belegung. */
+// Startseite und Formular dürfen nur Ressourcen des ausgewählten Spielorts verwenden.
+// Eine frühere globale "Halle"-Belegung ist keine Teilfläche des Außensportplatzes.
+function occupancyForVenue(ds,venueId,opts){
+  return occupancyOn(ds,opts).filter(o=>(o.venueId||'home')===venueId
+    &&(venueId!=='home'||o.area!=='halle'));
+}
 function timelineHTML(ds,isMine,opts){
   const form=!!(opts&&opts.form), vkey=form?'form:'+ds:ds, TL_LANE=form?30:TL_LANE_START, sel=(form&&opts.sel)||null;
   const venueId=(opts&&opts.venueId)||(form?FORM_VENUE:START_VENUE);
   const hallMode=venueId!=='home', hallCfg=hallMode?PlatzcoachVenues.hall(CFG,venueId):null;
-  const occ=occupancyOn(ds,form?{res:opts.resAll,skipId:opts.skipId}:undefined).filter(o=>(o.venueId||'home')===venueId); OCC_VIEW[vkey]=occ;
+  const occ=occupancyForVenue(ds,venueId,form?{res:opts.resAll,skipId:opts.skipId}:undefined); OCC_VIEW[vkey]=occ;
   const groups=hallMode?[{area:'halle',n:hallCfg?hallCfg.parts:1,label:['Halle']}]:[{area:'platz',n:4,label:['A','B']}];
   const canBook=form?true:canBookSlots();
   if(!hallMode){
     if(canBook||occ.some(o=>o.area==='klein')) groups.push({area:'klein',n:1,label:['K']});
-    if(occ.some(o=>o.area==='halle')||(form&&opts.show.includes('Halle'))) groups.push({area:'halle',n:3,label:['Halle']});
+    // Die Hallenzeilen gehören ausschließlich zu den gesondert auswählbaren Hallenspielorten.
     if(form) opts.resAll.filter(r=>r!=='Halle'&&(opts.show.includes(r)||occ.some(o=>o.area==='res:'+r))).forEach(r=>groups.push({area:'res:'+r,n:1,res:r}));
   }
   let y=TL_TOP; groups.forEach((g,i)=>{ if(i) y+=TL_SEP; g.top=y; y+=g.n*TL_LANE+(g.n-1)*TL_GAP; });
@@ -5061,7 +5067,13 @@ function tlScroll(el){
   if(follow){ if(prev==null) return; delete START_CUR[ds]; }
   else{ if(prev===m||(prev==null&&ds!==todayStr&&startCurOf(ds)===m)) return; START_CUR[ds]=m; }
   cancelAnimationFrame(_tlRaf);
-  _tlRaf=requestAnimationFrame(()=>{ const box=document.getElementById('stp-live'); if(box) box.innerHTML=placeLiveHTML(ds,startCurOf(ds),START_ISMINE); startTodayTile(); });
+  _tlRaf=requestAnimationFrame(()=>{
+    // Ein ausgetauschter Zeitstrahl (Datum/Spielort gewechselt) darf das neue Bild nicht aktualisieren.
+    if(ds!==startSel||!el.isConnected) return;
+    const box=document.getElementById('stp-live');
+    if(box) box.innerHTML=placeLiveHTML(ds,startCurOf(ds),START_ISMINE);
+    startTodayTile();
+  });
 }
 function tlRestore(){ document.querySelectorAll('.tl-scroll:not([data-ctx])').forEach(el=>{ const g=tlGeom(el), ds=el.dataset.ds;
   if(!(g.w>0)) return; // ausgeblendet: beim Zurückkehren zur Startseite (goto) erneut
@@ -5185,9 +5197,11 @@ function openOccDetail(ds,i,ctx){
 }
 /* ---------- Live-Platz: was ist JETZT auf Großfeld, Kleinspielfeld und (falls belegt) Halle ---------- */
 /* ---------- Jetzt auf dem Platz (ab 01.10.2026 · 6: auf einen Blick frei/belegt, welche Viertel, von wem) ---------- */
-function liveNow(ds,m){ // ds/m leer = heute jetzt; sonst Belegung am Tag ds um Minute m (Zeitleiste, ab 01.10.2026 · 7)
+function liveNow(ds,m,venueId){ // Optionaler Spielort-Filter für das Live-Feld der Startseite.
   ds=ds||todayStr; const isNow=m==null;
-  const n=isNow?hmMin(nowHMStr()):m, occ=occupancyOn(ds); OCC_VIEW[ds]=occ;
+  const n=isNow?hmMin(nowHMStr()):m;
+  const occ=venueId?occupancyForVenue(ds,venueId):occupancyOn(ds);
+  OCC_VIEW[ds]=occ;
   const run=occ.filter(o=>hmMin(o.t)<=n&&hmMin(o.bis)>n);
   const live=run.filter(o=>!o.cancelled), canc=run.filter(o=>o.cancelled);
   const lock=activeLocksOn(ds).find(l=>l.resource==='platz');
@@ -5303,7 +5317,7 @@ const START_CUR={}; let START_ISMINE=null;
 function startCurOf(ds){
   if(START_CUR[ds]!=null&&isFinite(START_CUR[ds])) return START_CUR[ds];
   if(ds===todayStr) return null;
-  const occ=occupancyOn(ds).filter(o=>!o.cancelled); return occ.length?Math.min(...occ.map(o=>hmMin(o.t))):15*60;
+  const occ=occupancyForVenue(ds,START_VENUE).filter(o=>!o.cancelled); return occ.length?Math.min(...occ.map(o=>hmMin(o.t))):15*60;
 }
 function placeStatus(L){
   const st={free:['Frei','Platz komplett frei'],full:['Belegt','alle 4 Viertel belegt'],part:['Teilweise belegt',L.nFree+' von 4 Vierteln frei'],lock:['Gesperrt',L.lock&&L.lock.note||'']}[L.state];
@@ -5335,7 +5349,7 @@ function placeLiveHTML(ds,cur,isMine){
     return '<div class="lp lp-hall-only"><div class="lp-status '+(active?'part':'free')+'"><b>'+esc(v.name)+'</b><span>'+(active?'Vereinszeit':'Außerhalb der Hallenzeit')+'</span></div>'
       +'<div class="lp-halle"><span class="lp-klein-t">'+(v.parts===1?'Halle':'Hallendrittel')+'</span><div class="lp-thirds" style="grid-template-columns:repeat('+v.parts+',minmax(0,1fr))">'+parts+'</div></div></div>';
   }
-  const L=liveNow(ds,cur), st=placeStatus(L);
+  const L=liveNow(ds,cur,'home'), st=placeStatus(L);
   return livePitchHTML(isMine,false,L,'<div class="lp-status '+L.state+'"><b>'+esc(st[0])+'</b><span>'+esc(st[1])+'</span></div>');
 }
 // „Heute“-Kachel = Jetzt-Knopf: zeigt „↺ Jetzt“, sobald ein anderer Tag oder eine andere Uhrzeit gewählt ist
