@@ -5128,7 +5128,9 @@ function openSlotSheet(ds,area,lane,from,to,ev,exact){ // exact: genau from–to
   if(ev&&ev.currentTarget&&ev.currentTarget.getBoundingClientRect){ const r=ev.currentTarget.getBoundingClientRect(), x=(ev.clientX||r.left)-r.left;
     start=from+Math.floor(((to-from)*Math.max(0,Math.min(1,x/Math.max(1,r.width))))/15)*15; }
   start=Math.max(from,Math.min(to-30,start));
+  const venueFromStart=START_VENUE;
   newEvent(ds); if(!document.querySelector('.pane[data-pane="neu"].active')) return; // nicht berechtigt o. Ä.
+  if(venueFromStart!=='home') selectFormVenue(venueFromStart);
   // Dauer: übliche Trainingsdauer der Mannschaft (sonst 90 Min), aber nur bis zur nächsten Belegung
   const my=myPreferredTeam(), us=my?usualSlotFor(my.team,my.squad,ds):null;
   const dur=us?Math.max(30,hmMin(us.to)-hmMin(us.from)):90, end=exact?to:Math.min(to,start+dur), von=minHM(start), bis=minHM(end);
@@ -5163,6 +5165,10 @@ function openOccDetail(ds,i,ctx){
   if(!OCC_VIEW[key]) OCC_VIEW[key]=occupancyOn(ds);
   const o=(OCC_VIEW[key]||[])[i]; if(!o) return;
   const e=o.src;
+  if(ctx!=='form'&&o.area==='halle'&&o.venueId!=='home'){
+    // Hallentermine führen direkt in den bestehenden Tab „Termine“.
+    openTerminFromStart(e.id,ds); return;
+  }
   let contact='';
   if(e.isTraining) contact=getTrainersContactHTML(e);
   else if(o.kind==='g'&&o.team){ const tr=fussballTrainersFor(o.team,o.squad); contact=tr?getTrainersContactHTML(tr):''; }
@@ -5306,8 +5312,28 @@ function placeStatus(L){
   return st;
 }
 function placeLiveHTML(ds,cur,isMine){
-  // Ab 01.10.2026 · 8: keine Kopfzeile mehr – Tag steht in der Tagesleiste, Uhrzeit am Strich der Zeitleiste;
-  // Frei/Belegt als Schild oben im Feld.
+  // Die bestehende Platzgrafik bleibt vollständig erhalten – nur am Hallenspielort
+  // erscheint die vorhandene Hallendrittel-Darstellung statt eines erfundenen Spielfelds.
+  if(START_VENUE!=='home'){
+    const v=PlatzcoachVenues.hall(CFG,START_VENUE);
+    if(!v) return '';
+    const n=cur==null?hmMin(nowHMStr()):cur, occ=occupancyOn(ds);
+    const live=occ.filter(o=>o.venueId===START_VENUE&&o.area==='halle'&&!o.cancelled&&hmMin(o.t)<=n&&hmMin(o.bis)>n);
+    const win=PlatzcoachVenues.windows(CFG,ds,START_VENUE);
+    const parts=Array.from({length:v.parts},(_,i)=>i+1).map(i=>{
+      const o=live.find(x=>x.lanes[0]<=i&&x.lanes[1]>=i);
+      if(o){const action='openTerminFromStart('+JSON.stringify(o.src.id)+','+JSON.stringify(ds)+')';
+        return '<div class="lp-third occ'+(occIsMine(o,isMine)?' mine':'')+'" role="button" tabindex="0" onclick="'+esc(action)+'" onkeydown="if(event.key===\'Enter\'||event.key===\' \')this.click()">'+esc(o.label)+'<small>bis '+esc(o.bis)+'</small></div>'; }
+      const free=PlatzcoachVenues.free(CFG,ds,START_VENUE,i,occ).find(w=>hmMin(w.from)<=n&&hmMin(w.to)>n);
+      if(free&&canBookSlots()){
+        const action='openSlotSheet('+JSON.stringify(ds)+',"halle",'+i+','+hmMin(free.from)+','+hmMin(free.to)+',event)';
+        return '<div class="lp-third book" role="button" tabindex="0" onclick="'+esc(action)+'" onkeydown="if(event.key===\'Enter\'||event.key===\' \')this.click()">+ frei</div>'; }
+      return '<div class="lp-third">frei</div>';
+    }).join('');
+    const active=win.some(w=>hmMin(w.from)<=n&&hmMin(w.to)>n);
+    return '<div class="lp lp-hall-only"><div class="lp-status '+(active?'part':'free')+'"><b>'+esc(v.name)+'</b><span>'+(active?'Vereinszeit':'Außerhalb der Hallenzeit')+'</span></div>'
+      +'<div class="lp-halle"><span class="lp-klein-t">'+(v.parts===1?'Halle':'Hallendrittel')+'</span><div class="lp-thirds" style="grid-template-columns:repeat('+v.parts+',minmax(0,1fr))">'+parts+'</div></div></div>';
+  }
   const L=liveNow(ds,cur), st=placeStatus(L);
   return livePitchHTML(isMine,false,L,'<div class="lp-status '+L.state+'"><b>'+esc(st[0])+'</b><span>'+esc(st[1])+'</span></div>');
 }
@@ -5315,9 +5341,18 @@ function placeLiveHTML(ds,cur,isMine){
 function startAtNow(){ return startSel===todayStr&&START_CUR[todayStr]==null; }
 function startTodayTile(){ const t=document.querySelector('.stw-day.today span'); if(t) t.textContent=startAtNow()?'Heute':'↺ Jetzt'; }
 function startJumpNow(){ startSel=todayStr; delete START_CUR[todayStr]; renderMyWeek(); }
+function selectStartVenue(id){
+  if(!PlatzcoachVenues.venues(CFG,startSel).some(v=>v.id===id)) return;
+  START_VENUE=id;
+  renderMyWeek(); tlRestore();
+}
 function startPlaceHTML(ds,isMine,admin,strip){
   START_ISMINE=isMine;
-  let h='<section class="st-now st-platz">'+(strip||'')+'<div id="stp-live">'+placeLiveHTML(ds,startCurOf(ds),isMine)+'</div>';
+  const venues=PlatzcoachVenues.venues(CFG,ds);
+  if(!venues.some(v=>v.id===START_VENUE)) START_VENUE='home';
+  const venueStrip=venues.length>1?'<div class="pc-venue-list" role="group" aria-label="Spielorte">'
+    +venues.map(v=>'<button type="button" class="nf-chip'+(v.id===START_VENUE?' on':'')+'" onclick="'+esc('selectStartVenue('+JSON.stringify(v.id)+')')+'">'+esc(v.name)+'</button>').join('')+'</div>':'';
+  let h='<section class="st-now st-platz">'+(strip||'')+venueStrip+'<div id="stp-live">'+placeLiveHTML(ds,startCurOf(ds),isMine)+'</div>';
   h+=timelineHTML(ds,isMine);
   const canLock=admin&&ds===todayStr&&!activeLocksOn(todayStr).some(l=>l.resource==='platz');
   h+='<div class="stp-foot">'+(canLock?'<button type="button" class="wk-act" onclick="openQuickLock()">Heute sperren</button>':'<span></span>')
@@ -5337,9 +5372,9 @@ function startWeekHTML(src,isMine,admin){
   let strip='<div class="stw-strip">';
   for(let i=0;i<WEEK_DAYS;i++){ const ds=addDays(todayStr,i), dt=new Date(ds+'T00:00:00'), sel=ds===startSel;
     const dots=items.filter(e=>e.d===ds).slice(0,3).map(e=>'<i class="'+dotOf(e)+'"></i>').join('');
-    const hol=holidayOn(ds);
+    const hol=holidayOn(ds), halls=PlatzcoachVenues.venues(CFG,ds).filter(v=>v.kind==='hall').length;
     strip+='<button type="button" class="stw-day'+(sel?' on':'')+(i===0?' today':'')+'" onclick="'+(i===0?'startJumpNow()':'setStartDay(\''+ds+'\')')+'"'+(hol?' aria-label="'+esc(hol.name)+'"':'')+'>'+(hol?'<span class="hol-dot"></span>':'')
-      +'<span>'+(i===0?(startAtNow()?'Heute':'↺ Jetzt'):DOW[dowOf(ds)-1])+'</span><b>'+dt.getDate()+'</b><em>'+dots+'</em></button>'; }
+      +'<span>'+(i===0?(startAtNow()?'Heute':'↺ Jetzt'):DOW[dowOf(ds)-1])+'</span><b>'+dt.getDate()+'</b><em>'+dots+'</em>'+(halls?'<small class="hall-mark">'+halls+' Halle'+(halls>1?'n':'')+'</small>':'')+'</button>'; }
   strip+='</div>';
   let h=startPlaceHTML(startSel,isMine,admin,strip);
   // Woche: eigene Mannschaft(en) bzw. Favoriten; ohne Favoriten alle Termine des Vereins (gekürzt)
