@@ -1938,7 +1938,7 @@ function pitchBadge(p){
 /* Halle */
 function halleShort(h){if(!h||!h.thirds||!h.thirds.length)return'';return h.thirds.length===3?'Halle: ganz':'Halle: Drittel '+[...h.thirds].sort((a,b)=>a-b).join('+');}
 function miniHalle(thirds,big){const on=new Set(thirds||[]);return '<span class="mini-halle'+(big?' lg':'')+'">'+[1,2,3].map(d=>'<s'+(on.has(d)?' class="on"':'')+'></s>').join('')+'</span>';}
-function halleBadge(h){if(!h||!h.thirds||!h.thirds.length)return'';return '<span class="badge-halle">'+miniHalle(h.thirds)+esc(halleShort(h))+'</span>';}
+function halleBadge(h,venueId){if(!h||!h.thirds||!h.thirds.length)return'';const name=venueId&&venueId!=='home'?(PlatzcoachVenues.hall(CFG,venueId)||{}).name:null;return '<span class="badge-halle">'+miniHalle(h.thirds)+esc((name?name+' · ':'')+halleShort(h))+'</span>';}
 
 /* Zeithelfer */
 function addMinutes(t,m){const[h,min]=t.split(':').map(Number);const tot=h*60+min+m;return String(Math.floor(tot/60)%24).padStart(2,'0')+':'+String(tot%60).padStart(2,'0');}
@@ -3671,18 +3671,18 @@ function rowHTML(e){
     // Team+Typ stehen jetzt direkt in der Headline -> Team-Chip und "Training"-Chip entfallen.
     title=kindOf(e)==='goalkeeper'?'Torwarttraining'+(e.team!==GK_TEAM?' · '+teamLabel(e.team,e.squad):''):'Training · '+teamLabel(e.team,e.squad);
     if(kindOf(e)==='goalkeeper')b+=gkBadge()+'<span class="badge-team verein">'+esc(gkTeamsText(gkTeamsOf(e)))+'</span>';
-    if(e.halle&&e.halle.thirds&&e.halle.thirds.length)b+=halleBadge(e.halle);
+    if(e.halle&&e.halle.thirds&&e.halle.thirds.length)b+=halleBadge(e.halle,e.venueId);
     (e.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
     if(e.pitch)pitchVisual=pitchBadge(e.pitch);
-    else if(e.halle&&e.halle.thirds&&e.halle.thirds.length)pitchVisual=halleBadge(e.halle);
-    if(e.movedFrom){ const c=dayChange(e.movedFrom,{from:e.t,to:e.bis,pitch:e.pitch,res:e.res}); if(c.time||c.area) b+='<span class="move-badge">↺ '+esc(dayChangeBadge(c))+'</span>'; }
+    else if(e.halle&&e.halle.thirds&&e.halle.thirds.length)pitchVisual=halleBadge(e.halle,e.venueId);
+    if(e.movedFrom){ const c=dayChange(e.movedFrom,{from:e.t,to:e.bis,pitch:e.pitch,res:e.res,halle:e.halle,venueId:e.venueId}); if(c.time||c.area) b+='<span class="move-badge">↺ '+esc(dayChangeBadge(c))+'</span>'; }
   }else{
     title=e.title;
     b=kindOf(e)==='goalkeeper'
       ?gkBadge()+'<span class="badge-team verein">'+esc(gkTeamsText(gkTeamsOf(e)))+'</span>'
       :(kindOf(e)==='trainer'?'<span class="badge-res tt-badge">Trainer-Termin</span><span class="badge-team verein">'+esc('Für '+(ttForAll(e)?'alle Trainer':ttForText(e)))+'</span>':'<span class="badge-team '+cat(e.team)+'">'+esc(teamLabel(e.team,e.squad))+'</span>');
     if(e.pitch)b+=pitchBadge(e.pitch);
-    if(e.halle&&e.halle.thirds&&e.halle.thirds.length)b+=halleBadge(e.halle);
+    if(e.halle&&e.halle.thirds&&e.halle.thirds.length)b+=halleBadge(e.halle,e.venueId);
     (e.res||[]).forEach(r=>b+='<span class="badge-res">'+esc(r)+'</span>');
   }
   if(!e.isTraining&&e.movedFromSlot) b+='<span class="move-badge">↺ statt Regeltraining '+esc(e.movedFromSlot.from+'–'+e.movedFromSlot.to)+'</span>';
@@ -6019,7 +6019,7 @@ function pitchVisualOf(e){
   // Kabinen & Co. zusätzlich zur Platzfläche anzeigen (z. B. "Viertel 2 · Kabine 3").
   const extra=(e.res||[]).filter(r=>!FIELD_RES.includes(r)).map(r=>' <span class="badge-res">'+esc(r)+'</span>').join('');
   if(e.pitch)return pitchBadge(e.pitch)+extra;
-  if(e.halle&&e.halle.thirds&&e.halle.thirds.length)return halleBadge(e.halle);
+  if(e.halle&&e.halle.thirds&&e.halle.thirds.length)return halleBadge(e.halle,e.venueId);
   if(e.isExternal)return '<span class="badge-pitch">'+(e.pitchIsFull?miniPitch([1,2,3,4]):'⚽')+esc(e.pitchLabelText||'fussball.de')+'</span>';
   // Auch reine Ressourcen-Buchungen (z.B. nur Theke/Vereinsheim, ohne Platz/Halle) sollen in
   // "Platzbelegung heute" erkennbar sein, statt nur als leerer "–"-Platzhalter zu erscheinen.
@@ -8673,7 +8673,7 @@ function refreshTrainerChips(){
 function trainResBadges(s){
   let h='';
   if(s.pitch) h+=pitchBadge(s.pitch);
-  if(s.halle&&s.halle.thirds&&s.halle.thirds.length) h+=halleBadge(s.halle);
+  if(s.halle&&s.halle.thirds&&s.halle.thirds.length) h+=halleBadge(s.halle,s.venueId);
   (s.res||[]).forEach(r=>h+='<span class="badge-res">'+esc(r)+'</span>');
   return h;
 }
