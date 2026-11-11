@@ -1104,9 +1104,7 @@
       "validUntil": "2027-03-31",
       "seasonId": "2026-2027",
       "kind": "training",
-      "cancelled": [
-        "2026-11-13"
-      ]
+      "cancelled": []
     },
     {
       "id": "hall135-sug-e1",
