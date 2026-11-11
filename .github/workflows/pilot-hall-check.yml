@@ -29,3 +29,16 @@ jobs:
           node -e "for(const n of ['config','training']) JSON.parse(require('fs').readFileSync('data/'+n+'.json'))"
       - name: Fachtests für Hallen und Zeitfenster
         run: node --test tests/venue-plan.test.mjs
+      - name: Browserprüfung vorbereiten (Chromium)
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Browserprüfung bei 375 px
+        run: node tests/venue-browser.mjs
+      - name: Prüf-Screenshots bereitstellen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hallen-pruefung-375px
+          path: tests/_results/
+          if-no-files-found: ignore
