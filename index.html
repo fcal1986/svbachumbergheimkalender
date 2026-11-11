@@ -11681,7 +11681,7 @@ function openHashEvent(){
       showToast('Diese Hallenzeit ist nicht mehr buchbar.',5000);return;
     }
     newEvent(d);
-    if(!document.querySelector('.pane[data-pane="neu"].active)) return;
+    if(!document.querySelector('.pane[data-pane="neu"].active')) return;
     selectFormVenue(s.venueId);
     document.getElementById('f-von').value=s.from;
     document.getElementById('f-bis').value=s.to;
