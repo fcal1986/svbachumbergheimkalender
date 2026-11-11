@@ -11,6 +11,8 @@ try {
   await new Promise(resolve => setTimeout(resolve, 1000));
   browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 375, height: 812 }, deviceScaleFactor: 1 });
+  // Stabile Kalender-Woche: Test muss auch nach November 2026 reproduzierbar sein.
+  await page.clock.install({ time: new Date('2026-11-11T09:00:00Z') });
   const errors = [];
   page.on('pageerror', err => errors.push(err.message));
   await page.goto('http://127.0.0.1:8765/', { waitUntil: 'domcontentloaded' });
