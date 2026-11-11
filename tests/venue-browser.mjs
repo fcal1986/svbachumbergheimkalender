@@ -137,6 +137,7 @@ try {
   // Aus dem vorherigen Formular-Test zurück auf die sichtbare Startseite.
   await page.evaluate(() => goto('start'));
   await page.locator('.stw-strip > .stw-day.today').waitFor({ state: 'visible' });
+  await page.locator('.stw-strip > .stw-day.today').click(); // Auch nach Terminformular ist Heute selektiert.
   // Desktop/Tablet und Accessibility: native vertikale Geste bleibt zugelassen.
   await page.setViewportSize({ width: 768, height: 1024 });
   assert.equal(await page.locator('.stw-strip-scroll').evaluate(el => getComputedStyle(el).touchAction),
