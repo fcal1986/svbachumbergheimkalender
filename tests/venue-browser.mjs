@@ -18,6 +18,57 @@ try {
   await page.goto('http://127.0.0.1:8765/', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => document.querySelector('.stw-strip') && document.getElementById('hd-title')?.textContent === 'Start', { timeout: 25000 });
 
+  // Pilot #139: Nur die Folgetage wischen; Heute bleibt links fixiert.
+  const fixedToday = page.locator('.stw-strip > .stw-day.today');
+  const dayStrip = page.locator('.stw-strip-scroll');
+  assert.equal(await fixedToday.count(), 1, 'Heute ist eine eigene feste Kachel');
+  assert.equal(await dayStrip.locator('.stw-day').count(), 27, 'Initial nur vier Wochen DOM, keine ganze Saison');
+  const todayX = (await fixedToday.boundingBox()).x;
+  await dayStrip.evaluate((el) => { el.scrollLeft = 280; });
+  await page.waitForFunction(() => document.querySelector('.stw-strip-scroll')?.scrollLeft >= 200);
+  assert.equal(Math.round((await fixedToday.boundingBox()).x), Math.round(todayX),
+    'Heute bleibt beim Wischen an derselben Bildschirmposition');
+  assert.equal(await page.evaluate(() => startSel), '2026-11-11', 'Wischen ändert nicht den gewählten Tag');
+
+  const futureDay = dayStrip.locator('button[onclick="setStartDay(\'2026-11-23\')"]');
+  await futureDay.click();
+  assert.equal(await page.evaluate(() => startSel), '2026-11-23', 'Tag in der Folgewoche anwählbar');
+  assert.equal(await page.locator('.stw-strip > .stw-day.today').count(), 1);
+  assert.ok(await dayStrip.evaluate((el) => el.scrollLeft > 0), 'Scrollposition bleibt nach Tageswahl erhalten');
+
+  // Späterer Freitag: SUG ist nur an diesem Spielort belegt; keine falsche Halle im Außenplatz.
+  await page.locator('.stw-strip-scroll button[onclick="setStartDay(\'2026-11-20\')"]').click();
+  assert.equal(await page.evaluate(() => startSel), '2026-11-20');
+  assert.equal(await page.locator('.pc-venue-list button').count(), 2);
+  assert.equal(await page.locator('#stp-live .lp-halle').count(), 0, 'Außenplatz ohne Hallendarstellung');
+  await page.locator('.pc-venue-list button').filter({ hasText: 'SUG' }).click();
+  assert.equal(await page.locator('#stp-live .lp-hall-only').count(), 1);
+
+  // Zurück zu Heute: heutige Uhrzeit, Anfangsposition und erste sieben Tage sichtbar.
+  await fixedToday.click();
+  assert.equal(await page.evaluate(() => startSel), '2026-11-11');
+  assert.equal(await dayStrip.evaluate((el) => el.scrollLeft), 0);
+  assert.equal(await page.locator('.stw-strip-scroll .stw-day').count(), 27);
+  assert.equal(await page.locator('.stw-strip > .stw-day.today span').innerText(), 'Heute');
+
+  // Beim Erreichen des aktuell gerenderten Endes wird die nächste Gruppe von Tagen ergänzt.
+  await dayStrip.evaluate((el) => { el.scrollLeft = el.scrollWidth; });
+  await page.waitForFunction(() => document.querySelectorAll('.stw-strip-scroll .stw-day').length > 27);
+  assert.equal(await dayStrip.locator('.stw-day').count(), 41, 'Weitere zwei Wochen inkrementell ergänzt');
+
+  // Saisonende stammt aus data/seasons.json, kein festes Vierwochenlimit.
+  await page.evaluate(() => { START_STRIP_DAYS = startStripTotalDays(); renderMyWeek(); });
+  const lastDay = dayStrip.locator('button[onclick="setStartDay(\'2027-06-30\')"]');
+  assert.equal(await lastDay.count(), 1, 'Letzter Saisontag ist vorhanden');
+  assert.equal(await dayStrip.locator('button[onclick="setStartDay(\'2027-07-01\')"]').count(), 0);
+  await lastDay.click();
+  assert.equal(await page.evaluate(() => startSel), '2027-06-30');
+  await page.evaluate(() => setStartDay('2027-07-01'));
+  assert.equal(await page.evaluate(() => startSel), '2027-06-30', 'Kein Tag außerhalb der Saison');
+  await page.locator('.stw-strip > .stw-day.today').click();
+  assert.equal(await page.evaluate(() => startSel), '2026-11-11');
+  await page.screenshot({ path: 'tests/_results/start-tagesleiste-139.png', fullPage: true });
+
   // Öffentliche Startseite: Tagesleiste über Platz, am 14.11. eine zugeteilte Halle.
   await page.evaluate(() => { startSel = '2026-11-14'; renderStart(); });
   await page.waitForSelector('.stw-day .hall-mark');
@@ -83,6 +134,29 @@ try {
   await page.locator('#f-venue-wrap').waitFor({ state: 'hidden' });
   assert.equal(await page.locator('#f-tl .tl-pick-b').count() >= 7, true, 'A/B, Viertel 1–4, KF');
   await page.screenshot({ path: 'tests/_results/neu-aussenplan.png', fullPage: true });
+  // Aus dem vorherigen Formular-Test zurück auf die sichtbare Startseite.
+  await page.evaluate(() => goto('start'));
+  await page.locator('.stw-strip > .stw-day.today').waitFor({ state: 'visible' });
+  await page.locator('.stw-strip > .stw-day.today').click(); // Auch nach Terminformular ist Heute selektiert.
+  // Desktop/Tablet und Accessibility: native vertikale Geste bleibt zugelassen.
+  await page.setViewportSize({ width: 768, height: 1024 });
+  assert.equal(await page.locator('.stw-strip-scroll').evaluate(el => getComputedStyle(el).touchAction),
+    'auto', 'Vertikales Scrollen der Seite bleibt möglich');
+  const fixed = await page.locator('.stw-strip > .stw-day.today').boundingBox();
+  const follow = await page.locator('.stw-strip-scroll').boundingBox();
+  assert.ok(fixed.x + fixed.width <= follow.x + 7, 'Heute überlappt die Folgetage nicht');
+  assert.equal(await page.locator('.stw-strip > .stw-day.today').getAttribute('aria-current'),
+    'date', 'Screenreader erkennt das ausgewählte Datum');
+
+  // Neue Saison wird aus Konfigurationsdaten bestimmt, nicht als 2027 fixiert.
+  const newSeasonEnd = await page.evaluate(() => {
+    SEASONS.push({ id: 'test-next-season', from: '2027-07-01', to: '2028-06-30' });
+    const actual = startSeasonEnd('2027-07-01');
+    SEASONS.pop();
+    return actual;
+  });
+  assert.equal(newSeasonEnd, '2028-06-30', 'Saisonwechsel dynamisch');
+
   assert.deepEqual(errors, [], 'Keine JavaScript-Ausführungsfehler');
   console.log('375px: Start, Binnerfeld, Hallenzeitleiste und Außenplan korrekt.');
 } finally {
