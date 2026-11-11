@@ -279,7 +279,11 @@
   .seg-mini button{min-height:34px;padding:0 13px;border-radius:9px;border:none;background:transparent;font:inherit;font-size:13px;font-weight:700;color:var(--ink-soft);cursor:pointer;}
   .seg-mini button.on{background:var(--white);color:var(--ink);box-shadow:0 1px 4px rgba(1,27,50,.12);}
   .seg-mini button:disabled{opacity:.4;}
-  .stw-strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;}
+  .stw-strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;min-width:0;}
+  /* Heute bleibt fest, ausschließlich die sechs rechten Spalten scrollen. */
+  .stw-strip-scroll{grid-column:span 6;display:flex;gap:5px;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x proximity;}
+  .stw-strip-scroll::-webkit-scrollbar{display:none;}
+  .stw-strip-scroll .stw-day{flex:0 0 calc((100% - 25px)/6);min-width:0;scroll-snap-align:start;}
   .stw-day{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;min-height:60px;border-radius:12px;border:none;background:var(--white);color:var(--ink);font:inherit;cursor:pointer;box-shadow:var(--card-shadow);}
   .stw-day span{font-size:10.5px;font-weight:700;color:var(--ink-soft);}
   .stw-day b{font-family:'Manrope','Inter',sans-serif;font-size:16px;font-weight:800;}
@@ -1782,7 +1786,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='11.11.2026 · 1';
+const APP_VERSION='11.11.2026 · 2';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let START_VENUE='home', FORM_VENUE='home'; // Spielort auf Start und im Terminformular
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
@@ -5123,7 +5127,7 @@ function tlMouseUp(ev){ const d=_tlDrag; _tlDrag=null;
   if(dx<0&&d.atEnd) fn(1,'start'); else if(dx>0&&d.atStart) fn(-1,'end');
 }
 function shiftStartDay(n,pos){
-  const ds=addDays(startSel||todayStr,n); if(ds<todayStr||ds>weekEndStr()) return;
+  const ds=addDays(startSel||todayStr,n); if(ds<todayStr||ds>startSeasonEnd()) return;
   startSel=ds; renderMyWeek();
   const el=document.querySelector('.tl-scroll[data-ds="'+ds+'"]'); if(el&&pos) el.scrollLeft=pos==='start'?0:el.scrollWidth;
 }
@@ -5355,7 +5359,11 @@ function placeLiveHTML(ds,cur,isMine){
 // „Heute“-Kachel = Jetzt-Knopf: zeigt „↺ Jetzt“, sobald ein anderer Tag oder eine andere Uhrzeit gewählt ist
 function startAtNow(){ return startSel===todayStr&&START_CUR[todayStr]==null; }
 function startTodayTile(){ const t=document.querySelector('.stw-day.today span'); if(t) t.textContent=startAtNow()?'Heute':'↺ Jetzt'; }
-function startJumpNow(){ startSel=todayStr; delete START_CUR[todayStr]; renderMyWeek(); }
+function startJumpNow(){
+  startSel=todayStr; delete START_CUR[todayStr];
+  START_STRIP_SCROLL=0; START_STRIP_DAYS=28;
+  renderMyWeek();
+}
 function selectStartVenue(id){
   if(!PlatzcoachVenues.venues(CFG,startSel).some(v=>v.id===id)) return;
   START_VENUE=id;
@@ -5376,21 +5384,68 @@ function startPlaceHTML(ds,isMine,admin,strip){
 }
 /* ---------- Woche: Leiste zum Tag-Wählen + Tag (Termine + Platz) oder Woche (Liste) ---------- */
 function openDayInCalendar(ds){ const dt=new Date(ds+'T00:00:00'); curY=dt.getFullYear(); curM=dt.getMonth(); yearShown=curY; selDate=ds; goto('termine'); setView('woche'); scrollToWeekDay(ds); }
-function setStartDay(ds){ startSel=ds; renderMyWeek(); }
+/* Die Tagesleiste ist nur eine Datumsauswahl. Die darunterliegende Wochenübersicht
+   bleibt wie bisher auf die nächsten sieben Tage beschränkt. */
+let START_STRIP_DAYS=28, START_STRIP_SCROLL=0;
+function startSeasonEnd(){
+  const active=(SEASONS||[]).filter(s=>s.from<=todayStr&&s.to>=todayStr)
+    .sort((a,b)=>b.from.localeCompare(a.from))[0];
+  return active?active.to:todayStr; // Ohne laufende Saison keine erfundenen Zukunftstermine.
+}
+function startStripTotalDays(){
+  const end=startSeasonEnd();
+  const at=d=>Date.UTC(+d.slice(0,4),+d.slice(5,7)-1,+d.slice(8,10));
+  return Math.max(1,Math.round((at(end)-at(todayStr))/86400000)+1);
+}
+function startDayItems(ds,isMine){
+  if(!isMine) return [];
+  return EVENTS.filter(e=>e.d===ds)
+    .concat(trainingInstancesOn(ds),cancelledTrainingInstancesOn(ds),
+      fussballDisplayInstancesOn(ds),fussballDisplayAwayInstancesOn(ds),
+      movedGameGhostsOn(ds))
+    .filter(isMine).sort((a,b)=>a.t.localeCompare(b.t));
+}
+function startStripDayHTML(i,isMine){
+  const ds=addDays(todayStr,i), dt=new Date(ds+'T00:00:00'), sel=ds===startSel;
+  const dotOf=e=>(e.isCancelled||e.isMovedGhost||e.withdrawn)?'grey':(e.isExternal||isMatchKind(kindOf(e))?'game':'tr');
+  const dots=startDayItems(ds,isMine).slice(0,3).map(e=>'<i class="'+dotOf(e)+'"></i>').join('');
+  const hol=holidayOn(ds), halls=PlatzcoachVenues.venues(CFG,ds).filter(v=>v.kind==='hall').length;
+  return '<button type="button" class="stw-day'+(sel?' on':'')+(i===0?' today':'')
+    +'" onclick="'+(i===0?'startJumpNow()':'setStartDay(\''+ds+'\')')+'"'
+    +' aria-label="'+esc((i===0?'Heute, ':'')+dayCase(ds)+(hol?', '+hol.name:''))
+    +'"'+(sel?' aria-current="date"':'')+'>'
+    +(hol?'<span class="hol-dot"></span>':'')
+    +'<span>'+(i===0?(startAtNow()?'Heute':'↺ Jetzt'):DOW[dowOf(ds)-1])
+    +'</span><b>'+dt.getDate()+'</b><em>'+dots+'</em>'
+    +(halls?'<small class="hall-mark">'+halls+' Halle'+(halls>1?'n':'')+'</small>':'')
+    +'</button>';
+}
+function startStripScroll(el){
+  START_STRIP_SCROLL=el.scrollLeft;
+  if(el.scrollLeft+el.clientWidth<el.scrollWidth-Math.max(120,el.clientWidth)) return;
+  const old=START_STRIP_DAYS, total=startStripTotalDays();
+  START_STRIP_DAYS=Math.min(total,START_STRIP_DAYS+14);
+  if(START_STRIP_DAYS<=old) return;
+  const src=myWeekSource(), isMine=src?weekMatcher(src):null;
+  let html='';
+  for(let i=old;i<START_STRIP_DAYS;i++) html+=startStripDayHTML(i,isMine);
+  el.insertAdjacentHTML('beforeend',html);
+}
+function setStartDay(ds){
+  if(!ds||ds<todayStr||ds>startSeasonEnd()) return;
+  startSel=ds; renderMyWeek();
+}
 /* Ab 01.10.2026 · 8: Tagesleiste oben im Platz-Baustein (statt Kopfzeile), darunter Feld + Zeitleiste;
    unter dem Platz immer die Woche als Liste (kein Tag/Woche-Schalter mehr), der gewählte Tag ist markiert. */
 function startWeekHTML(src,isMine,admin){
-  const end=weekEndStr();
+  const end=startSeasonEnd();
   if(!startSel||startSel<todayStr||startSel>end) startSel=todayStr;
   const items=src?weekItems(isMine):[];
-  const dotOf=e=>(e.isCancelled||e.isMovedGhost||e.withdrawn)?'grey':(e.isExternal||isMatchKind(kindOf(e))?'game':'tr');
-  let strip='<div class="stw-strip">';
-  for(let i=0;i<WEEK_DAYS;i++){ const ds=addDays(todayStr,i), dt=new Date(ds+'T00:00:00'), sel=ds===startSel;
-    const dots=items.filter(e=>e.d===ds).slice(0,3).map(e=>'<i class="'+dotOf(e)+'"></i>').join('');
-    const hol=holidayOn(ds), halls=PlatzcoachVenues.venues(CFG,ds).filter(v=>v.kind==='hall').length;
-    strip+='<button type="button" class="stw-day'+(sel?' on':'')+(i===0?' today':'')+'" onclick="'+(i===0?'startJumpNow()':'setStartDay(\''+ds+'\')')+'"'+(hol?' aria-label="'+esc(hol.name)+'"':'')+'>'+(hol?'<span class="hol-dot"></span>':'')
-      +'<span>'+(i===0?(startAtNow()?'Heute':'↺ Jetzt'):DOW[dowOf(ds)-1])+'</span><b>'+dt.getDate()+'</b><em>'+dots+'</em>'+(halls?'<small class="hall-mark">'+halls+' Halle'+(halls>1?'n':'')+'</small>':'')+'</button>'; }
-  strip+='</div>';
+  const count=Math.min(startStripTotalDays(),START_STRIP_DAYS);
+  let strip='<div class="stw-strip">'+startStripDayHTML(0,isMine)
+    +'<div class="stw-strip-scroll" aria-label="Weitere Tage" onscroll="startStripScroll(this)">';
+  for(let i=1;i<count;i++) strip+=startStripDayHTML(i,isMine);
+  strip+='</div></div>';
   let h=startPlaceHTML(startSel,isMine,admin,strip);
   // Woche: eigene Mannschaft(en) bzw. Favoriten; ohne Favoriten alle Termine des Vereins (gekürzt)
   const all=src?items:weekItems(()=>true);
@@ -5935,6 +5990,8 @@ function renderMyWeek(){
   // Admin: eigene Mannschaft nach „Zu erledigen“ und den Zahlen
   heroBox.innerHTML=hero;
   weekBox.innerHTML=startWeekHTML(src,isMine,admin);
+  const dayScroll=weekBox.querySelector('.stw-strip-scroll');
+  if(dayScroll) dayScroll.scrollLeft=START_STRIP_SCROLL;
   tlRestore();
   if(seasonBox) seasonBox.innerHTML=session?startSeasonLineHTML():'';
 }
