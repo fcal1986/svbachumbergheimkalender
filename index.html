@@ -8600,7 +8600,7 @@ function cancelTrainingDay(id,date,reason){
       const notification=hall
         ?'Hallenzeit frei: '+hall.name+' · '+dayDateShort(date)+' · '+s.from+'–'+s.to+' Uhr · '+teamLabel(s.team,s.squad)
           +' · '+(hall.parts===1?'ganze Halle':halleShort(s.halle))
-          +'\\n\\nPlatzcoach-Link: trc-'+s.id+'-'+date
+          +'\n\nPlatzcoach-Link: trc-'+s.id+'-'+date
         :'Training abgesagt: '+msgTeam(s.team,s.squad,s.gkTeams)+' am '+fmtShort(date)+(reason?' – '+reason:'')+' – '+session.name+teamTrailer(s.team,s.squad,s);
       saveTraining(notification)
         .catch(e=>{ TRAINING=JSON.parse(backup); rerender(); showToast('Fehler: '+e.message,6000); });
