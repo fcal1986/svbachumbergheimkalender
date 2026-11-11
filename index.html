@@ -6470,7 +6470,7 @@ function onKindChange(byUser){
     else if(!autoT&&an.dataset.auto==='1'){ an.value=''; an.dataset.auto=''; }
     // Ressourcen sind beim Torwarttraining optional: Vorauswahl "Großspielfeld" entfernen.
     if((k==='goalkeeper'||k==='trainer')&&!editingId) setResChips('f-res',[]);
-    else if(!editingId&&![...document.querySelectorAll('#f-res .res-chip.on')].length) setResChips('f-res',['Großspielfeld']);
+    else if(!editingId&&FORM_VENUE==='home'&&![...document.querySelectorAll('#f-res .res-chip.on')].length) setResChips('f-res',['Großspielfeld']);
   }
   const rl=document.getElementById('f-res-label'); if(rl) rl.textContent=k==='goalkeeper'?'Wo? (optional)':'Wo?';
   if(help) help.textContent=occLevel(k)==='overlay'
@@ -6666,7 +6666,7 @@ function renderHalle(){
   const d=dateInput().value,von=document.getElementById('f-von')||{value:''},bis=document.getElementById('f-bis')||{value:''};
   const vonV=von.value||'',bisV=bis.value||'';
   const busyThirds=new Set();
-  if(d&&vonV&&bisV){EVENTS.filter(e=>e.d===d&&e.id!==editingId&&e.halle&&e.halle.thirds).forEach(e=>{const eBis=eventBis(e);if(vonV<eBis&&bisV>e.t)e.halle.thirds.forEach(t=>busyThirds.add(t));});}
+  if(d&&vonV&&bisV){EVENTS.filter(e=>e.d===d&&e.id!==editingId).concat(trainingInstancesOn(d)).filter(e=>e.halle&&e.halle.thirds&&(e.venueId||'home')===FORM_VENUE).forEach(e=>{const eBis=eventBis(e);if(vonV<eBis&&bisV>e.t)e.halle.thirds.forEach(t=>busyThirds.add(t));});}
   [1,2,3].forEach(n=>{const el=document.querySelector('#halle-segs .hs[data-d="'+n+'"]');if(!el)return;el.classList.toggle('on',halleThirds.includes(n));el.classList.toggle('busy',busyThirds.has(n));});
   const clash=halleThirds.filter(n=>busyThirds.has(n));
   const cap=document.getElementById('halle-cap');
@@ -6782,7 +6782,7 @@ function renderTrainingGameNote(){
     +'<br>Beim Speichern wird das Training an diesen Tagen automatisch abgesagt.</div>';
 }
 function resetForm(){
-  FORM_REQUEST=null;
+  FORM_REQUEST=null; FORM_VENUE='home';
   document.getElementById('f-anlass').value='';document.getElementById('f-bem').value='';
   document.getElementById('f-von').value='15:00';document.getElementById('f-bis').value='17:00';
   document.getElementById('f-team').value='F-Jugend';
@@ -6910,7 +6910,7 @@ function openFormNote(show){
    Wischen am Rand bzw. die Polster wechseln den Tag. */
 let FORM_TL={ds:null,m:null,edge:null,touched:[]};
 const FORM_TL_KEY='pc_form_res';
-function formTlResAll(){ return [...document.querySelectorAll('#f-res .res-chip')].map(c=>c.dataset.res).filter(r=>r!=='Großspielfeld'&&r!=='Kleinspielfeld'); }
+function formTlResAll(){ return FORM_VENUE!=='home'?['Halle']:[...document.querySelectorAll('#f-res .res-chip')].map(c=>c.dataset.res).filter(r=>r!=='Großspielfeld'&&r!=='Kleinspielfeld'&&r!=='Halle'); }
 function formTlStored(){ try{ const v=JSON.parse(localStorage.getItem(FORM_TL_KEY)||'[]'); return Array.isArray(v)?v:[]; }catch(e){ return []; } }
 function formTlStore(list){ try{ localStorage.setItem(FORM_TL_KEY,JSON.stringify(list)); }catch(e){} }
 function resShort(r){ const m=/^Kabine\s*(\d+)$/.exec(r); return m?'K'+m[1]:r.replace(/[^A-Za-zÄÖÜäöüß]/g,'').slice(0,2); }
@@ -6931,10 +6931,29 @@ function formTlCand(){
   const lbl=formKind()==='goalkeeper'?'TW':teamShort(team,sb?parseInt(sb.dataset.squad):1);
   return {von,bis,areas,label:(editingId?'':'Neu ')+lbl};
 }
+function selectFormVenue(id){
+  const d=dateInput().value;
+  if(!PlatzcoachVenues.venues(CFG,d).some(v=>v.id===id)) return;
+  if(FORM_VENUE===id) return;
+  FORM_VENUE=id; setResChips('f-res',[]); halleThirds=[];
+  formDirty=true; hideConflicts(); renderPitch(); renderHalle();
+}
+function renderFormVenues(ds,visible){
+  const box=document.getElementById('f-venue-wrap'), chips=document.getElementById('f-venue-chips');
+  const list=PlatzcoachVenues.venues(CFG,ds);
+  if(!list.some(v=>v.id===FORM_VENUE)){
+    FORM_VENUE='home'; halleThirds=[]; setResChips('f-res',[]);
+  }
+  if(!box||!chips) return;
+  box.style.display=visible&&list.length>1?'':'none';
+  chips.innerHTML=list.length>1?list.map(v=>'<button type="button" class="nf-chip'+(v.id===FORM_VENUE?' on':'')+'" aria-pressed="'+(v.id===FORM_VENUE)+'" onclick="'+esc('selectFormVenue('+JSON.stringify(v.id)+')')+'">'+esc(v.name)+'</button>').join(''):'';
+}
 function renderFormTimeline(){
   const box=document.getElementById('f-tl'), wrap=document.getElementById('f-tl-wrap'); if(!box||!wrap) return;
   const k=formKind(), ds=dateInput().value;
-  if(k==='trainer'||(isMatchKind(k)&&formHA==='away')||!ds){ wrap.style.display='none'; return; }
+  const visible=k!=='trainer'&&!(isMatchKind(k)&&formHA==='away')&&!!ds;
+  renderFormVenues(ds,visible);
+  if(!visible){ wrap.style.display='none'; return; }
   wrap.style.display='';
   const head=document.getElementById('f-tl-day'); if(head) head.textContent='Wo? · '+DOW[dowOf(ds)-1]+' '+fmtDM(ds);
   const resAll=formTlResAll(), cand=formTlCand();
@@ -6944,7 +6963,7 @@ function renderFormTimeline(){
   (FORM_TL.touched||[]).forEach(r=>{ if(resAll.includes(r)&&!show.includes(r)) show.push(r); }); // eben abgewählte Zeile bleibt stehen
   const selSet=new Set(cand.areas.flatMap(a=>{ const o=[]; for(let l=a.lanes[0];l<=a.lanes[1];l++) o.push(a.area+'#'+l); return o; }));
   const sel={has:(area,l)=>selSet.has(area+'#'+l)};
-  box.innerHTML=timelineHTML(ds,null,{form:true,resAll,show,skipId:editingId,cand,sel});
+  box.innerHTML=timelineHTML(ds,null,{form:true,resAll,show,skipId:editingId,cand,sel,venueId:FORM_VENUE});
   renderFormTlStatus(cand);
   const add=document.getElementById('f-tl-add');
   if(add&&add.style.display!=='none') renderFormTlAdd();
@@ -7008,6 +7027,7 @@ function renderFormTlStatus(cand){
   o.res.filter(r=>r!=='Großspielfeld').forEach(r=>parts.push(r==='Kleinspielfeld'?'Kleinspielfeld':r));
   const d=dateInput().value, von=cand.von, bis=cand.bis;
   let msg='<span class="nf-st ok">✓ Passt</span>';
+  if(FORM_VENUE!=='home'&&o.halle&&!PlatzcoachVenues.permitted(CFG,d,FORM_VENUE,von,bis,o.halle.thirds)) msg='<span class="nf-st warn">Nur innerhalb der zugeteilten Hallenzeit buchbar.</span>';
   if(d&&von&&bis&&von<bis){
     const hits=findConflicts(d,von,bis,o.pitch,o.halle,o.res,editingId,o.kind).filter(c=>!isOwnTeamTraining(c.event,o.ownFree));
     if(hits.length) msg='<span class="nf-st warn">⚠ belegt: '+esc([...new Set(hits.map(c=>occupationLabel(c.event)))].join(', '))+'</span>';
@@ -7083,9 +7103,9 @@ function formOccupation(){
   let res=[...document.querySelectorAll('#f-res .res-chip.on')].map(c=>c.dataset.res).filter(r=>r!=='Großspielfeld'&&r!=='Halle');
   if(overlay&&pitchOn()) res.unshift('Großspielfeld');
   let pitch=(pitchOn()&&!overlay)?curPitch():null;
-  let halle=halleResOn()?{thirds:halleThirds.length?[...halleThirds]:[1,2,3]}:null;
+  let halle=halleResOn()&&halleThirds.length?{thirds:[...halleThirds]}:null;
   if(away||kind==='trainer'){ res=[]; pitch=null; halle=null; }
-  return {kind,pitch,halle,res,ownFree:ownFreeFor(kind,away,team,squad)};
+  return {kind,pitch,halle,res,venueId:FORM_VENUE,ownFree:ownFreeFor(kind,away,team,squad)};
 }
 function sfMonthKeys(){
   const t=new Date(todayStr+'T00:00:00'), out=[];
@@ -7578,7 +7598,7 @@ function newEventDateFromView(){
   return pane==='termine'&&selDate&&selDate>=todayStr?selDate:undefined;
 }
 function fillForm(e){
-  FORM_REQUEST=null;
+  FORM_REQUEST=null; FORM_VENUE=e.venueId||'home';
   dateInput().value=e.d;document.getElementById('f-von').value=e.t;document.getElementById('f-bis').value=e.bis||addMinutes(e.t,120);
   document.getElementById('f-anlass').value=e.title;document.getElementById('f-bem').value=e.note||'';
   document.getElementById('f-team').value=e.team;
