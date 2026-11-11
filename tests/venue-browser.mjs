@@ -134,6 +134,28 @@ try {
   await page.locator('#f-venue-wrap').waitFor({ state: 'hidden' });
   assert.equal(await page.locator('#f-tl .tl-pick-b').count() >= 7, true, 'A/B, Viertel 1–4, KF');
   await page.screenshot({ path: 'tests/_results/neu-aussenplan.png', fullPage: true });
+  // Desktop/Tablet und Accessibility: native vertikale Geste bleibt zugelassen.
+  await page.setViewportSize({ width: 768, height: 1024 });
+  assert.equal(await page.locator('.stw-strip-scroll').evaluate(el => getComputedStyle(el).touchAction),
+    'auto', 'Vertikales Scrollen der Seite bleibt möglich');
+  const fixed = await page.locator('.stw-strip > .stw-day.today').boundingBox();
+  const follow = await page.locator('.stw-strip-scroll').boundingBox();
+  assert.ok(fixed.x + fixed.width <= follow.x + 7, 'Heute überlappt die Folgetage nicht');
+  assert.equal(await page.locator('.stw-strip > .stw-day.today').getAttribute('aria-current'),
+    'date', 'Screenreader erkennt das ausgewählte Datum');
+
+  // Neue Saison wird aus Konfigurationsdaten bestimmt, nicht als 2027 fixiert.
+  const newSeasonEnd = await page.evaluate(() => {
+    const saved = todayStr;
+    SEASONS.push({ id: 'test-next-season', from: '2027-07-01', to: '2028-06-30' });
+    todayStr = '2027-07-01';
+    const actual = startSeasonEnd();
+    todayStr = saved;
+    SEASONS.pop();
+    return actual;
+  });
+  assert.equal(newSeasonEnd, '2028-06-30', 'Saisonwechsel dynamisch');
+
   assert.deepEqual(errors, [], 'Keine JavaScript-Ausführungsfehler');
   console.log('375px: Start, Binnerfeld, Hallenzeitleiste und Außenplan korrekt.');
 } finally {
