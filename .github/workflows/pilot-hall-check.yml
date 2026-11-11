@@ -15,7 +15,7 @@ permissions:
   contents: read
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # Playwright Chromium 1.56 unterstützt Runner 24.04; ubuntu-latest ist 26.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
