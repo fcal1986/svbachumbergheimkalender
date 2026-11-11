@@ -10,7 +10,7 @@ Ausführliche Analyse: Projekt-Doc `claude/vereinsneo-analyse-2026-10.md`.
 **Status:** ✅ umgesetzt · 🟡 teilweise · ⬜ offen · ⛔ bewusst nicht
 **Phase:** Pilot = aktuelle Technik · 1.0 = mit Supabase/Einrichtungsassistent · Später
 
-Letzte Aktualisierung: 10.10.2026 (Version 10.10.2026 · 2)
+Letzte Aktualisierung: 11.11.2026 (Version 11.11.2026 · 2)
 
 ## Must have
 
@@ -100,6 +100,8 @@ Letzte Aktualisierung: 10.10.2026 (Version 10.10.2026 · 2)
 | 115 | Terminkarten: ganzer Titel statt zwei Zeilen mit „…“ (Feedback Fabrizio 04.11.: „Heimspiel: E2-Jugend – JSG…“, Gegner nicht zu erkennen). Lange Titel brechen um; Ausnahme von „Pilot nicht umbauen“, von Fabrizio freigegeben (Neubau gleich, platzcoach #106) | Pilot | ✅ | 04.11.2026 · 1 |
 | 100 | Termin als Bild teilen (Idee Fabrizio 09.10.): im Blatt „Termin weiterleiten“ Umschalter Text | Bild. Bild = Story 1080 × 1920 im Matchday-Look (Navy, Rasen, Mannschaft groß, Gegner/Titel, Wochentag + Datum, Anstoß/Uhrzeit, Ort + Heim/Auswärts, QR-Code zum Termin), für alle Termine; abgesagt/verlegt mit rotem bzw. orangem Etikett und durchgestrichenem Datum. Gezeichnet im Browser (Canvas) aus fester Vorlage – keine KI, kein Server, keine Kosten. „Bild teilen“ öffnet das Teilen-Menü des Handys (WhatsApp-Status, Instagram-Story), sonst „Bild speichern“. QR über qrcode-generator (cdnjs, erst beim ersten Bild geladen, offline ohne QR) | Pilot | ✅ | 09.10.2026 · 4. Später möglich: Quadrat 1:1, Vereinswappen aus der Konfiguration |
 | 43 | Mannschaften mit Lücken-Filtern („ohne Trainer“, „ohne Trainingszeit“, „ohne Platzfreigabe“) | Pilot | ⬜ | „Termine heute ohne Trainer“ gibt es als Warnzeile; Filter in der Mannschaftsliste fehlen |
+
+| 116 | Tagesleiste auf Startseite horizontal bis zum Ende der laufenden Saison wischen; „Heute“ bleibt links stehen und setzt beim Antippen die Ansicht zurück | Pilot | 🟡 | 11.11.2026 · 2: Umsetzung auf Branch / Entwurfs-PR #140, Ref Issue #139. Vorhandene Tageskacheln erhalten, künftige Tage in Gruppen nachladen, alle Spielorte korrekt filtern; Browser-CI und Pilotabnahme vor Status ✅. React/Supabase nach Pilotabnahme: fcal1986/platzcoach#182. |
 
 ## Nice to have
 
