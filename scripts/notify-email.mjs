@@ -376,7 +376,9 @@ async function main() {
   // Vereinsweites, und nie die eigenen Änderungen.
   let sent = 0;
   for (const r of recipients.values()) {
-    const mine = (r.role === 'admin' && r.user) ? adminFilter(r.user, 'mail', relevantFor('admin', r.user)) : relevantFor(r.role, r.user);
+    let mine = (r.role === 'admin' && r.user) ? adminFilter(r.user, 'mail', relevantFor('admin', r.user)) : relevantFor(r.role, r.user);
+    // Der verpflichtende Hallen-Hinweis darf das bestehende Abmelden von sonstigen Mails nicht umgehen.
+    if (r.user && r.user.emailNotificationsEnabled === false) mine = mine.filter(c => c.category === 'hallfree');
     if (!mine.length) continue;
     const texts = mine.map(c => c.text);
     const siteUrl = String(cfg.siteUrl || 'https://platzcoach.de/').replace(/\/?$/, '/');
