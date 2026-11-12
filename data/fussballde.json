@@ -1,23 +1,6 @@
 {
-  "updated": "2026-11-11T17:52:44.831Z",
+  "updated": "2026-11-12T00:39:35.556Z",
   "games": [
-    {
-      "d": "2026-10-21",
-      "t": "19:30",
-      "team": "Herren",
-      "squad": 2,
-      "ownName": "SV Bachum/Bergheim II",
-      "gameNo": "211386015",
-      "opponent": "SG Herdringen/Müschede II",
-      "competition": "Kreisliga B",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-ii-sg-herdringen-mueschede-ii/-/spiel/031IK2S4HK000000VS5489BUVVKNMR0J",
-      "matchday": 2,
-      "staffelId": "211386",
-      "staffelName": "Kreisliga B Arnsberg",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-16T13:14:15.564Z"
-    },
     {
       "d": "2026-10-29",
       "t": "18:15",
@@ -3582,12 +3565,12 @@
         "011MIBAEQC000000VTVG0001VTR8C1K7"
       ],
       "competitions": [
-        "Kreisliga B",
-        "Kreispokal"
+        "Kreispokal",
+        "Kreisliga B"
       ],
-      "games": 21,
-      "homeGames": 10,
-      "first": "2026-10-21",
+      "games": 20,
+      "homeGames": 9,
+      "first": "2026-10-30",
       "last": "2027-05-30",
       "teamId": "011MIBAEQC000000VTVG0001VTR8C1K7"
     },
@@ -3610,6 +3593,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-10-21",
+  "teamsFrom": "2026-10-22",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
