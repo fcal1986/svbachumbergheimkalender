@@ -392,6 +392,25 @@
       "note": "",
       "ownerId": "c5f27a4d-fc49-438a-9221-b72392d040b4",
       "ownerName": "Patrick Voß"
+    },
+    {
+      "id": "4e9fd0cb-2b09-48d6-97bf-f506445a78b9",
+      "d": "2027-02-27",
+      "t": "14:00",
+      "bis": "18:00",
+      "title": "Hallenturnier (auswärts)",
+      "kind": "hallenturnier",
+      "team": "E-Jugend",
+      "squad": 2,
+      "pitch": null,
+      "halle": null,
+      "res": [],
+      "venueId": "home",
+      "note": "",
+      "ha": "away",
+      "address": "Dünnefeldhalle Meschede",
+      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
+      "ownerName": "Fabrizio Calcagno"
     }
   ]
 }
