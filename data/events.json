@@ -411,6 +411,26 @@
       "address": "Dünnefeldhalle Meschede",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
       "ownerName": "Fabrizio Calcagno"
+    },
+    {
+      "id": "dbb010a5-b4e4-4752-b7e3-2f760465cb54",
+      "d": "2027-01-31",
+      "t": "08:30",
+      "bis": "14:00",
+      "title": "Hallenturnier (auswärts)",
+      "kind": "hallenturnier",
+      "team": "E-Jugend",
+      "squad": 2,
+      "pitch": null,
+      "halle": null,
+      "res": [],
+      "venueId": "home",
+      "note": "",
+      "ha": "away",
+      "participants": "SC Neheim",
+      "address": "Große Wiese Hüsten",
+      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
+      "ownerName": "Fabrizio Calcagno"
     }
   ]
 }
