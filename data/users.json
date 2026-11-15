@@ -371,7 +371,8 @@
       "created": "2026-09-25T18:55:04.895Z",
       "emailNotificationsEnabled": true,
       "phone": "01627402073",
-      "contactPublic": "none"
+      "contactPublic": "none",
+      "contactEmail": "jugendschutz@sv-bavhum-berheim.de"
     },
     {
       "id": "0f7e4fdb-535c-4b5c-95d9-8bdbe98300c7",
