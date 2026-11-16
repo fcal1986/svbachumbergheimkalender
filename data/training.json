@@ -1015,7 +1015,9 @@
       "validUntil": "2027-03-31",
       "seasonId": "2026-2027",
       "kind": "training",
-      "cancelled": []
+      "cancelled": [
+        "2026-11-19"
+      ]
     },
     {
       "id": "hall135-bergheim-e3",
