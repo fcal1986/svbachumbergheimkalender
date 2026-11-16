@@ -431,6 +431,27 @@
       "address": "Große Wiese Hüsten",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
       "ownerName": "Fabrizio Calcagno"
+    },
+    {
+      "id": "672b013b-b26e-4dea-b4ee-5dee834c7e99",
+      "d": "2026-11-19",
+      "t": "16:00",
+      "bis": "17:15",
+      "title": "Training",
+      "kind": "training",
+      "team": "G-Jugend",
+      "squad": 1,
+      "pitch": null,
+      "halle": {
+        "thirds": [
+          1
+        ]
+      },
+      "res": [],
+      "venueId": "bergheim-schule",
+      "note": "",
+      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
+      "ownerName": "Fabrizio Calcagno"
     }
   ]
 }
