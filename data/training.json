@@ -653,9 +653,7 @@
       ],
       "validFrom": "2026-07-19",
       "validUntil": "2027-06-30",
-      "cancelled": [
-        "2026-11-27"
-      ],
+      "cancelled": [],
       "trainerId": null,
       "trainerName": "",
       "seasonId": "2026-2027"
