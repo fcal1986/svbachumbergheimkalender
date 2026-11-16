@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-15T22:46:39.941Z",
+  "updated": "2026-11-16T06:23:35.576Z",
   "games": [
     {
       "d": "2026-10-29",
@@ -1606,40 +1606,6 @@
     }
   ],
   "awayGames": [
-    {
-      "d": "2026-10-25",
-      "t": "12:30",
-      "team": "Herren",
-      "squad": 3,
-      "ownName": "SV Bachum/Bergheim III",
-      "opponent": "DJK GW Arnsberg II",
-      "competition": "Kreisliga D",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/djk-gw-arnsberg-ii-sv-bachum-bergheim-iii/-/spiel/031KK1IQH8000000VS5489BUVVKNMR0J",
-      "gameNo": "210824021",
-      "matchday": 7,
-      "staffelId": "210824",
-      "staffelName": "Kreisliga D Arnsberg",
-      "venue": "Kunstrasenplatz, Sportplatz Schreppenberg, Neuer Schulweg 23, 59821 Arnsberg",
-      "infoAt": "2026-10-23T13:24:31.254Z"
-    },
-    {
-      "d": "2026-10-25",
-      "t": "15:00",
-      "team": "Herren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "opponent": "TuS Hachen",
-      "competition": "Kreisliga A",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/tus-hachen-sv-bachum-bergheim/-/spiel/031I0BN8L8000000VS5489BUVVKNMR0J",
-      "gameNo": "210697092",
-      "matchday": 12,
-      "staffelId": "210697",
-      "staffelName": "Kreisliga A Arnsberg",
-      "venue": "Kunstrasenplatz, Sportplatz Hachen Hüttenwiese, Am Sportplatz 13, 59846 Sundern (Sauerland)",
-      "infoAt": "2026-10-23T13:24:32.104Z"
-    },
     {
       "d": "2026-10-27",
       "t": "19:30",
@@ -3505,18 +3471,18 @@
         "SV Bachum/Bergheim"
       ],
       "teamIds": [
-        "011MIANBCK000000VTVG0001VTR8C1K7",
-        "027IVI3RO8000000VS5489B1VUA37ON8"
+        "027IVI3RO8000000VS5489B1VUA37ON8",
+        "011MIANBCK000000VTVG0001VTR8C1K7"
       ],
       "competitions": [
-        "Kreisliga A",
-        "Kreisfreundschaftsspiele"
+        "Kreisfreundschaftsspiele",
+        "Kreisliga A"
       ],
-      "games": 22,
+      "games": 21,
       "homeGames": 10,
-      "first": "2026-10-25",
+      "first": "2026-10-27",
       "last": "2027-05-30",
-      "teamId": "011MIANBCK000000VTVG0001VTR8C1K7"
+      "teamId": "027IVI3RO8000000VS5489B1VUA37ON8"
     },
     {
       "type": "Herren",
@@ -3528,8 +3494,8 @@
         "011MIBAEQC000000VTVG0001VTR8C1K7"
       ],
       "competitions": [
-        "Kreisliga B",
-        "Kreispokal"
+        "Kreispokal",
+        "Kreisliga B"
       ],
       "games": 20,
       "homeGames": 9,
@@ -3549,13 +3515,13 @@
       "competitions": [
         "Kreisliga D"
       ],
-      "games": 14,
+      "games": 13,
       "homeGames": 7,
-      "first": "2026-10-25",
+      "first": "2026-11-08",
       "last": "2027-05-30",
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-10-25",
+  "teamsFrom": "2026-10-26",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
