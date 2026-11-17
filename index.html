@@ -1786,7 +1786,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='11.11.2026 · 2';
+const APP_VERSION='17.11.2026 · 1';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let START_VENUE='home', FORM_VENUE='home'; // Spielort auf Start und im Terminformular
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
@@ -2310,7 +2310,11 @@ function fussballShareInstancesOn(d,skipId,skipSlotId,extra){
     // Ist keine Hälfte frei, haben Spiele Vorrang: dann die Hälfte, die kein anderes Spiel belegt
     // (der Konflikt trifft so die eigene Buchung und wird sicher erkannt).
     const gameBusy=h=>busyBy(placed.concat(fussballInstancesOn(d)),h);
-    const part=!halfBusy('A')?'A':(!halfBusy('B')?'B':(!gameBusy('A')?'A':(!gameBusy('B')?'B':'A')));
+    // Ab 17.11.2026 · 1: Belegt ein Ganzplatz-Spiel beide Hälften (z. B. D2-Vorlauf 12:00 bei E2+E3 bis 12:15 am 21.11.),
+    // nicht jedes geteilte Spiel auf A legen – sonst liegen zwei gleichzeitige Spiele übereinander, eines ist
+    // unsichtbar und Hälfte B wirkt frei. Dann zählt nur, welche Hälfte schon ein anderes geteiltes Spiel hat.
+    const shareBusy=h=>busyBy(placed,h);
+    const part=!halfBusy('A')?'A':(!halfBusy('B')?'B':(!gameBusy('A')?'A':(!gameBusy('B')?'B':(!shareBusy('A')?'A':(!shareBusy('B')?'B':'A')))));
     placed.push({
       id:fussballGameLinkId(g), d:g.d, t:win.s, bis:win.e,
       title:(g.tournament?'Turnier: ':'Heimspiel: ')+(g.team?g.team+' – ':'')+g.opponent, pitch:{mode:'haelfte',part}, halle:null, res:[],
