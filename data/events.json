@@ -452,6 +452,26 @@
       "note": "",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
       "ownerName": "Fabrizio Calcagno"
+    },
+    {
+      "id": "f2774c5b-70da-4ce6-9497-6c596c867bd2",
+      "d": "2027-01-09",
+      "t": "09:00",
+      "bis": "15:00",
+      "title": "Hallenturnier (auswärts)",
+      "kind": "hallenturnier",
+      "team": "E-Jugend",
+      "squad": 2,
+      "pitch": null,
+      "halle": null,
+      "res": [],
+      "venueId": "home",
+      "note": "",
+      "ha": "away",
+      "participants": "Hüsten",
+      "address": "Große Wiese",
+      "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
+      "ownerName": "Fabrizio Calcagno"
     }
   ]
 }
