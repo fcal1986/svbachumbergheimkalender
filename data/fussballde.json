@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-17T13:20:18.253Z",
+  "updated": "2026-11-17T22:19:45.502Z",
   "games": [
     {
       "d": "2026-10-29",
@@ -2090,7 +2090,8 @@
       "staffelId": "200280",
       "staffelName": "Kreispokal 2026/27",
       "staffelUrl": "https://www.fussball.de/spieltag/endspiel-kreis-arnsberg-c-junioren-kreispokal-c-junioren-saison2627-westfalen/-/spieldatum/2026-11-21/staffel/031JUVKAMO000004VS5489BUVVKNMR0J-R",
-      "infoAt": "2026-11-10T20:48:48.260Z"
+      "infoAt": "2026-11-17T22:19:44.331Z",
+      "venue": "Kunstrasenplatz, Ruhr-Möhne-Sportplatz Neheim, Zum Besenberg, 59755 Arnsberg"
     },
     {
       "d": "2026-11-21",
@@ -2284,6 +2285,23 @@
       "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-soest-e-junioren-vereinsturnier-e-junioren-saison2627-westfalen/-/spieldatum/2026-12-27/staffel/032KLMLKQK000000VS5489BUVT7T9F23-G",
       "venue": "Halle, Ballspielhalle Ense, Schulweg, 59469 Ense",
       "infoAt": "2026-11-15T22:46:39.526Z"
+    },
+    {
+      "d": "2027-01-29",
+      "t": "19:00",
+      "team": "Herren",
+      "squad": 1,
+      "ownName": "SV Bachum/Bergheim",
+      "opponent": "Höinger SV",
+      "competition": "Kreisfreundschaftsspiele",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/hoeinger-sv-sv-bachum-bergheim/-/spiel/032O13RDIK000000VS5489BUVT7T9F23",
+      "gameNo": "240038245",
+      "staffelId": "240038",
+      "staffelName": "Freundschaftsspiele Kreis Soest",
+      "staffelUrl": "https://www.fussball.de/spieltag/fs-h-k-fs-so-1-kreis-soest-kreis-fs-herren-saison2627-westfalen/-/spieldatum/2027-01-29/staffel/03126PPR10000000VS5489BTVT51B5B5-D",
+      "venue": "Kunstrasenplatz, Karl-Kleine Stadion Höingen, Schützenstr. 72, 59469 Ense",
+      "infoAt": "2026-11-17T22:19:45.090Z"
     },
     {
       "d": "2027-02-14",
@@ -3496,7 +3514,7 @@
         "Kreisfreundschaftsspiele",
         "Kreisliga A"
       ],
-      "games": 21,
+      "games": 22,
       "homeGames": 10,
       "first": "2026-10-27",
       "last": "2027-05-30",
