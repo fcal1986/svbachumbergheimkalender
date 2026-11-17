@@ -81,6 +81,9 @@ try {
   // Regression #135: Beim Wischen darf die Höllenbergkampfbahn KEINE Halle anzeigen.
   // Donnerstag 17:25 läuft in Bergheim-Schule die E3. Diese ist am Außen-Spielort unsichtbar.
   await page.evaluate(() => {
+    // Unabhängig von Live-Daten: Am 11.11. abends wurde die E3-Hallenzeit am 12.11. freigegeben (Commit 7bcc73c),
+    // seitdem schlug die Prüfung fehl. Für den Test gilt der Regelplan ohne Absagen an diesem Tag.
+    TRAINING.forEach(t => { if (Array.isArray(t.cancelled)) t.cancelled = t.cancelled.filter(d => d !== '2026-11-12'); });
     startSel = '2026-11-12';
     START_VENUE = 'home';
     delete START_CUR[startSel];
