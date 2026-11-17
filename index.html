@@ -1463,7 +1463,7 @@
           <select id="f-team" onchange="onTeamChange()" tabindex="-1">
             <optgroup label="Jugend"><option>G-Jugend</option><option selected>F-Jugend</option><option>E-Jugend</option><option>D-Jugend</option><option>C-Jugend</option><option>B-Jugend</option><option>A-Jugend</option></optgroup>
             <optgroup label="Senioren"><option>1. Herren</option><option>2. Herren</option><option>3. Herren</option></optgroup>
-            <optgroup label="Sonstige"><option>Torwarttraining</option><option>Alle Teams</option><option>Vorstand</option></optgroup>
+            <optgroup label="Sonstige"><option>Ü32 / Ü50</option><option>Torwarttraining</option><option>Alle Teams</option><option>Vorstand</option></optgroup>
           </select>
           <div id="f-squad-field"><div class="seg" id="f-squad">
             <button type="button" class="on" data-squad="1" onclick="setSquad(this)">1</button>
@@ -1786,7 +1786,7 @@
    Trainingszeiten + Benutzer: nur Admin.
    ========================================================= */
 
-const APP_VERSION='17.11.2026 · 1';
+const APP_VERSION='17.11.2026 · 2';
 let CFG=null, EVENTS=[], USERS=[], TRAINING=[], SEASONS=[], LOCKS=[], session=null;
 let START_VENUE='home', FORM_VENUE='home'; // Spielort auf Start und im Terminformular
 let deferredInstallPrompt=null; // Android/Chrome: vom "beforeinstallprompt"-Event gesetzt, ermöglicht Ein-Klick-Installation
