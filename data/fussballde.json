@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-17T02:55:00.278Z",
+  "updated": "2026-11-17T13:20:18.253Z",
   "games": [
     {
       "d": "2026-10-29",
@@ -2094,6 +2094,23 @@
     },
     {
       "d": "2026-11-21",
+      "t": "12:00",
+      "team": "A-Junioren",
+      "squad": 1,
+      "ownName": "SV Bachum/Bergheim",
+      "opponent": "JSG Lippetal (SG Oestinghausen)",
+      "competition": "Kreisfreundschaftsspiele",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/jsg-lippetal-sg-oestinghausen-sv-bachum-bergheim/-/spiel/032NST2G98000000VS5489BTVSIO88SN",
+      "gameNo": "240059035",
+      "staffelId": "240059",
+      "staffelName": "Freundschaftsspiele Kreis Soest",
+      "staffelUrl": "https://www.fussball.de/spieltag/fs-aj-k-fs-so-1-kreis-soest-a-junioren-kreis-fs-a-junioren-saison2627-westfalen/-/spieldatum/2026-11-21/staffel/0313NA4MVO000000VS5489BUVSBBVPEU-D",
+      "venue": "Kunstrasenplatz, Kunstrasenplatz Herzfeld, Diestedder Str. 52, 59510 Lippetal",
+      "infoAt": "2026-11-17T13:20:17.846Z"
+    },
+    {
+      "d": "2026-11-21",
       "t": "14:00",
       "team": "D-Junioren",
       "squad": 1,
@@ -3263,9 +3280,10 @@
       ],
       "competitions": [
         "Kreispokal",
-        "Kreisliga A"
+        "Kreisliga A",
+        "Kreisfreundschaftsspiele"
       ],
-      "games": 13,
+      "games": 14,
       "homeGames": 7,
       "first": "2026-11-04",
       "last": "2027-05-21",
