@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-17T22:19:45.502Z",
+  "updated": "2026-11-18T07:23:37.525Z",
   "games": [
     {
       "d": "2026-10-29",
@@ -1607,22 +1607,6 @@
   ],
   "awayGames": [
     {
-      "d": "2026-10-27",
-      "t": "19:30",
-      "team": "Herren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "opponent": "TuS Niederense",
-      "competition": "Kreisfreundschaftsspiele",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/tus-niederense-sv-bachum-bergheim/-/spiel/032D333LT8000000VS5489BUVV5V31CI",
-      "gameNo": "240038204",
-      "staffelId": "240038",
-      "staffelName": "Freundschaftsspiele Kreis Soest",
-      "venue": "Kunstrasenplatz, Sportplatz am Heuerwerth -Kunst-, Heuerwerth 7, 59469 Ense",
-      "infoAt": "2026-10-21T23:17:11.176Z"
-    },
-    {
       "d": "2026-10-30",
       "t": "19:30",
       "team": "Herren",
@@ -2090,8 +2074,8 @@
       "staffelId": "200280",
       "staffelName": "Kreispokal 2026/27",
       "staffelUrl": "https://www.fussball.de/spieltag/endspiel-kreis-arnsberg-c-junioren-kreispokal-c-junioren-saison2627-westfalen/-/spieldatum/2026-11-21/staffel/031JUVKAMO000004VS5489BUVVKNMR0J-R",
-      "infoAt": "2026-11-17T22:19:44.331Z",
-      "venue": "Kunstrasenplatz, Ruhr-Möhne-Sportplatz Neheim, Zum Besenberg, 59755 Arnsberg"
+      "venue": "Kunstrasenplatz, Ruhr-Möhne-Sportplatz Neheim, Zum Besenberg, 59755 Arnsberg",
+      "infoAt": "2026-11-17T22:19:44.331Z"
     },
     {
       "d": "2026-11-21",
@@ -3507,18 +3491,17 @@
         "SV Bachum/Bergheim"
       ],
       "teamIds": [
-        "027IVI3RO8000000VS5489B1VUA37ON8",
         "011MIANBCK000000VTVG0001VTR8C1K7"
       ],
       "competitions": [
-        "Kreisfreundschaftsspiele",
-        "Kreisliga A"
+        "Kreisliga A",
+        "Kreisfreundschaftsspiele"
       ],
-      "games": 22,
+      "games": 21,
       "homeGames": 10,
-      "first": "2026-10-27",
+      "first": "2026-10-30",
       "last": "2027-05-30",
-      "teamId": "027IVI3RO8000000VS5489B1VUA37ON8"
+      "teamId": "011MIANBCK000000VTVG0001VTR8C1K7"
     },
     {
       "type": "Herren",
@@ -3558,6 +3541,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-10-27",
+  "teamsFrom": "2026-10-28",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
