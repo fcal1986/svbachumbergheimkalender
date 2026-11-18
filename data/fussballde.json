@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-18T07:23:37.525Z",
+  "updated": "2026-11-18T17:14:11.357Z",
   "games": [
     {
       "d": "2026-10-29",
@@ -2113,7 +2113,7 @@
       "infoAt": "2026-11-13T23:31:13.976Z"
     },
     {
-      "d": "2026-12-04",
+      "d": "2026-11-27",
       "t": "19:30",
       "team": "A-Junioren",
       "squad": 1,
@@ -2122,13 +2122,18 @@
       "competition": "Kreisliga A",
       "score": null,
       "link": "https://www.fussball.de/spiel/jsg-hachen-langscheid-enkhausen-westenfeld-stockum-sv-bachum-bergheim/-/spiel/031JKQC6DO000000VS5489BUVVKNMR0J",
+      "movedFrom": {
+        "d": "2026-12-04",
+        "t": "19:30"
+      },
+      "movedAt": "2026-11-18T17:14:10.740Z",
       "gameNo": "211375040",
       "matchday": 8,
       "staffelId": "211375",
       "staffelName": "KL A",
-      "staffelUrl": "https://www.fussball.de/spieltag/kl-a-kreis-arnsberg-a-junioren-kreisliga-a-a-junioren-saison2627-westfalen/-/spieldatum/2026-12-04/staffel/031JKJK6Q0000004VS5489BUVVKNMR0J-G",
+      "staffelUrl": "https://www.fussball.de/spieltag/kl-a-kreis-arnsberg-a-junioren-kreisliga-a-a-junioren-saison2627-westfalen/-/spieldatum/2026-11-27/staffel/031JKJK6Q0000004VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Sportplatz Hachen Hüttenwiese, Am Sportplatz 13, 59846 Sundern (Sauerland)",
-      "infoAt": "2026-11-13T23:31:14.752Z"
+      "infoAt": "2026-11-18T17:14:10.947Z"
     },
     {
       "d": "2026-12-05",
