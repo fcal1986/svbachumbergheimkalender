@@ -20,7 +20,7 @@
       "phone": "015224897699",
       "contactPublic": "none",
       "contactEmail": "fab.calcagno@gmail.com",
-      "emailNotificationsEnabled": false,
+      "emailNotificationsEnabled": true,
       "notifyPrefs": {
         "push": {
           "other": true,
