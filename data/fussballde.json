@@ -1,23 +1,6 @@
 {
-  "updated": "2026-11-21T20:30:42.015Z",
+  "updated": "2026-11-22T02:12:19.714Z",
   "games": [
-    {
-      "d": "2026-10-31",
-      "t": "13:14",
-      "team": "D-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum-Bergheim",
-      "gameNo": "191351008",
-      "opponent": "Concordia Wiemelhausen III",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-concordia-wiemelhausen-iii/-/spiel/031S94RMHG000000VS5489BTVTPHHFPR",
-      "staffelId": "191351",
-      "staffelName": "Hölzkener Herbstturnier D- Junioren Kreisliga A & höher",
-      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-b-kreis-unna-hamm-d-junioren-vereinsturnier-d-junioren-saison2627-westfalen/-/spieldatum/2026-10-31/staffel/031S94FR18000000VS5489BTVTPHHFPR-G",
-      "venue": "Kunstrasenplatz, Sportplatz TuS Lohauserholz (Kunstrasen), Am Hahnenbach 11, 59067 Hamm",
-      "infoAt": "2026-10-30T19:20:12.704Z"
-    },
     {
       "d": "2026-11-02",
       "t": "18:30",
@@ -1590,40 +1573,6 @@
   ],
   "awayGames": [
     {
-      "d": "2026-10-31",
-      "t": "14:10",
-      "team": "D-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum-Bergheim",
-      "opponent": "SV Westfalia Rhynern II",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-westfalia-rhynern-ii-sv-bachum-bergheim/-/spiel/031S94RMI0000000VS5489BTVTPHHFPR",
-      "gameNo": "191351009",
-      "staffelId": "191351",
-      "staffelName": "Hölzkener Herbstturnier D- Junioren Kreisliga A & höher",
-      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-b-kreis-unna-hamm-d-junioren-vereinsturnier-d-junioren-saison2627-westfalen/-/spieldatum/2026-10-31/staffel/031S94FR18000000VS5489BTVTPHHFPR-G",
-      "venue": "Kunstrasenplatz, Sportplatz TuS Lohauserholz (Kunstrasen), Am Hahnenbach 11, 59067 Hamm",
-      "infoAt": "2026-10-30T19:20:49.407Z"
-    },
-    {
-      "d": "2026-10-31",
-      "t": "15:06",
-      "team": "D-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum-Bergheim",
-      "opponent": "SV Wanne 1911",
-      "competition": "Vereinsturnier",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-wanne-1911-sv-bachum-bergheim/-/spiel/031S94RMMC000000VS5489BTVTPHHFPR",
-      "gameNo": "191351011",
-      "staffelId": "191351",
-      "staffelName": "Hölzkener Herbstturnier D- Junioren Kreisliga A & höher",
-      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-b-kreis-unna-hamm-d-junioren-vereinsturnier-d-junioren-saison2627-westfalen/-/spieldatum/2026-10-31/staffel/031S94FR18000000VS5489BTVTPHHFPR-G",
-      "venue": "Kunstrasenplatz, Sportplatz TuS Lohauserholz (Kunstrasen), Am Hahnenbach 11, 59067 Hamm",
-      "infoAt": "2026-10-27T17:59:16.856Z"
-    },
-    {
       "d": "2026-11-02",
       "t": "19:30",
       "team": "Herren Ü32",
@@ -2164,7 +2113,7 @@
       "staffelName": "Freundschaftsspiele Kreis Lüdenscheid",
       "staffelUrl": "https://www.fussball.de/spieltag/fs-dj-k-fs-ls-1-kreis-luedenscheid-d-junioren-kreis-fs-d-junioren-saison2627-westfalen/-/spieldatum/2026-12-12/staffel/0317TAS04K000000VS5489BUVSBBVPEU-D",
       "venue": "Kunstrasenplatz, Sportplatz Winkhausen, Volmestr. 161, 58515 Lüdenscheid",
-      "infoAt": "2026-11-15T01:52:56.842Z"
+      "infoAt": "2026-11-22T02:12:19.307Z"
     },
     {
       "d": "2026-12-12",
@@ -3319,22 +3268,21 @@
       "type": "D-Junioren",
       "squad": 1,
       "names": [
-        "SV Bachum-Bergheim",
         "SV Bachum-Bergh. I",
+        "SV Bachum-Bergheim",
         "SV Bachum-Berg. I"
       ],
       "teamIds": [
         "011MI9U4VO000000VTVG0001VTR8C1K7"
       ],
       "competitions": [
-        "Vereinsturnier",
         "Kreisliga A",
         "Kreisfreundschaftsspiele",
         "Kreispokal"
       ],
-      "games": 20,
-      "homeGames": 8,
-      "first": "2026-10-31",
+      "games": 17,
+      "homeGames": 7,
+      "first": "2026-11-07",
       "last": "2027-06-05",
       "teamId": "011MI9U4VO000000VTVG0001VTR8C1K7"
     },
@@ -3506,6 +3454,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-10-31",
+  "teamsFrom": "2026-11-01",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
