@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-22T09:43:45.417Z",
+  "updated": "2026-11-22T17:48:16.818Z",
   "games": [
     {
       "d": "2026-11-02",
@@ -440,6 +440,22 @@
     },
     {
       "d": "2026-11-28",
+      "t": "11:30",
+      "team": "E-Junioren",
+      "squad": 1,
+      "ownName": "SV Bachum/Bergheim 1",
+      "gameNo": "193625011",
+      "opponent": "SSV Kalthof",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-ssv-kalthof/-/spiel/032PI38UC8000000VS5489BTVSIO88SN",
+      "staffelId": "193625",
+      "staffelName": "Nikolausturnier E1-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-e-junioren-vereinsturnier-e-junioren-saison2627-westfalen/-/spieldatum/2026-11-28/staffel/032PI2RPLC000000VS5489BTVSIO88SN-G",
+      "infoAt": "2026-11-22T17:48:11.867Z"
+    },
+    {
+      "d": "2026-11-28",
       "t": "11:45",
       "team": "C-Junioren",
       "squad": 1,
@@ -455,6 +471,40 @@
       "staffelUrl": "https://www.fussball.de/spieltag/kl-a-kreis-arnsberg-c-junioren-kreisliga-a-c-junioren-saison2627-westfalen/-/spieldatum/2026-11-28/staffel/031I05QOSK000004VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
       "infoAt": "2026-11-21T03:12:04.626Z"
+    },
+    {
+      "d": "2026-11-28",
+      "t": "12:51",
+      "team": "E-Junioren",
+      "squad": 1,
+      "ownName": "SV Bachum/Bergheim 1",
+      "gameNo": "193625020",
+      "opponent": "JSG Hachen/Langscheid-Enkhausen 1",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-jsg-hachen-langscheid-enkhausen-1/-/spiel/032PI38UIC000000VS5489BTVSIO88SN",
+      "staffelId": "193625",
+      "staffelName": "Nikolausturnier E1-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-e-junioren-vereinsturnier-e-junioren-saison2627-westfalen/-/spieldatum/2026-11-28/staffel/032PI2RPLC000000VS5489BTVSIO88SN-G",
+      "venue": "Halle, Sporthalle Balve Am Schulzentrum, Am Krumpaul 4, 58802 Balve",
+      "infoAt": "2026-11-22T17:48:12.623Z"
+    },
+    {
+      "d": "2026-11-28",
+      "t": "13:45",
+      "team": "E-Junioren",
+      "squad": 1,
+      "ownName": "SV Bachum/Bergheim 1",
+      "gameNo": "193625026",
+      "opponent": "SV Affeln",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-1-sv-affeln/-/spiel/032PI38UM4000000VS5489BTVSIO88SN",
+      "staffelId": "193625",
+      "staffelName": "Nikolausturnier E1-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-e-junioren-vereinsturnier-e-junioren-saison2627-westfalen/-/spieldatum/2026-11-28/staffel/032PI2RPLC000000VS5489BTVSIO88SN-G",
+      "venue": "Halle, Sporthalle Balve Am Schulzentrum, Am Krumpaul 4, 58802 Balve",
+      "infoAt": "2026-11-22T17:48:13.387Z"
     },
     {
       "d": "2026-11-28",
@@ -2028,6 +2078,74 @@
       "infoAt": "2026-11-18T17:14:10.947Z"
     },
     {
+      "d": "2026-11-28",
+      "t": "10:00",
+      "team": "E-Junioren",
+      "squad": 1,
+      "ownName": "SV Bachum/Bergheim 1",
+      "opponent": "SG Balve/Garbeck 1",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sg-balve-garbeck-1-sv-bachum-bergheim-1/-/spiel/032PI38U6G000000VS5489BTVSIO88SN",
+      "gameNo": "193625001",
+      "staffelId": "193625",
+      "staffelName": "Nikolausturnier E1-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-e-junioren-vereinsturnier-e-junioren-saison2627-westfalen/-/spieldatum/2026-11-28/staffel/032PI2RPLC000000VS5489BTVSIO88SN-G",
+      "venue": "Halle, Sporthalle Balve Am Schulzentrum, Am Krumpaul 4, 58802 Balve",
+      "infoAt": "2026-11-22T17:48:14.133Z"
+    },
+    {
+      "d": "2026-11-28",
+      "t": "10:45",
+      "team": "E-Junioren",
+      "squad": 1,
+      "ownName": "SV Bachum/Bergheim 1",
+      "opponent": "JSG Vosswinkel/Echthausen",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/jsg-vosswinkel-echthausen-sv-bachum-bergheim-1/-/spiel/032PI38U9C000000VS5489BTVSIO88SN",
+      "gameNo": "193625006",
+      "staffelId": "193625",
+      "staffelName": "Nikolausturnier E1-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-e-junioren-vereinsturnier-e-junioren-saison2627-westfalen/-/spieldatum/2026-11-28/staffel/032PI2RPLC000000VS5489BTVSIO88SN-G",
+      "venue": "Halle, Sporthalle Balve Am Schulzentrum, Am Krumpaul 4, 58802 Balve",
+      "infoAt": "2026-11-22T17:48:14.895Z"
+    },
+    {
+      "d": "2026-11-28",
+      "t": "12:15",
+      "team": "E-Junioren",
+      "squad": 1,
+      "ownName": "SV Bachum/Bergheim 1",
+      "opponent": "JSG Langenholthausen/Küntrop/Mellen/Beckum",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/jsg-langenholthausen-kuentrop-mellen-beckum-sv-bachum-bergheim-1/-/spiel/032PI38UFO000000VS5489BTVSIO88SN",
+      "gameNo": "193625016",
+      "staffelId": "193625",
+      "staffelName": "Nikolausturnier E1-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-e-junioren-vereinsturnier-e-junioren-saison2627-westfalen/-/spieldatum/2026-11-28/staffel/032PI2RPLC000000VS5489BTVSIO88SN-G",
+      "venue": "Halle, Sporthalle Balve Am Schulzentrum, Am Krumpaul 4, 58802 Balve",
+      "infoAt": "2026-11-22T17:48:15.661Z"
+    },
+    {
+      "d": "2026-11-28",
+      "t": "13:18",
+      "team": "E-Junioren",
+      "squad": 1,
+      "ownName": "SV Bachum/Bergheim 1",
+      "opponent": "DJK Grün-Weiß Menden 1",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/djk-gruen-weiss-menden-1-sv-bachum-bergheim-1/-/spiel/032PI38UK8000000VS5489BTVSIO88SN",
+      "gameNo": "193625023",
+      "staffelId": "193625",
+      "staffelName": "Nikolausturnier E1-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-e-junioren-vereinsturnier-e-junioren-saison2627-westfalen/-/spieldatum/2026-11-28/staffel/032PI2RPLC000000VS5489BTVSIO88SN-G",
+      "venue": "Halle, Sporthalle Balve Am Schulzentrum, Am Krumpaul 4, 58802 Balve",
+      "infoAt": "2026-11-22T17:48:16.409Z"
+    },
+    {
       "d": "2026-12-05",
       "t": "13:00",
       "team": "C-Junioren",
@@ -2044,6 +2162,17 @@
       "staffelUrl": "https://www.fussball.de/spieltag/kl-a-kreis-arnsberg-c-junioren-kreisliga-a-c-junioren-saison2627-westfalen/-/spieldatum/2026-12-05/staffel/031I05QOSK000004VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Röhrtalstadion Sundern, Hauptstr. 189 A, 59846 Sundern (Sauerland)",
       "infoAt": "2026-11-21T03:12:24.207Z"
+    },
+    {
+      "d": "2026-12-06",
+      "t": "10:00",
+      "team": "G-Junioren",
+      "squad": 1,
+      "ownName": "SV Bachum/Bergheim",
+      "opponent": "SG Balve/Garbeck - Kinderfestival",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": null
     },
     {
       "d": "2026-12-06",
@@ -3308,16 +3437,18 @@
       "type": "E-Junioren",
       "squad": 1,
       "names": [
-        "SV Bachum/Bergheim I"
+        "SV Bachum/Bergheim I",
+        "SV Bachum/Bergheim 1"
       ],
       "teamIds": [
         "011MIBAMEC000000VTVG0001VTR8C1K7"
       ],
       "competitions": [
-        "Kreisliga A"
+        "Kreisliga A",
+        "Vereinsturnier"
       ],
-      "games": 10,
-      "homeGames": 5,
+      "games": 17,
+      "homeGames": 8,
       "first": "2026-11-07",
       "last": "2027-06-12",
       "teamId": "011MIBAMEC000000VTVG0001VTR8C1K7"
@@ -3377,6 +3508,24 @@
       "first": "2026-11-07",
       "last": "2026-11-21",
       "teamId": "011MIAKB1G000000VTVG0001VTR8C1K7"
+    },
+    {
+      "type": "G-Junioren",
+      "squad": 1,
+      "names": [
+        "SV Bachum/Bergheim"
+      ],
+      "teamIds": [
+        "023VO81ADC000000VS548985VVRPGK5E"
+      ],
+      "competitions": [
+        "Vereinsturnier"
+      ],
+      "games": 1,
+      "homeGames": 0,
+      "first": "2026-12-06",
+      "last": "2026-12-06",
+      "teamId": "023VO81ADC000000VS548985VVRPGK5E"
     },
     {
       "type": "Herren Ü32",
