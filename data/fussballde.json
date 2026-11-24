@@ -1,28 +1,6 @@
 {
-  "updated": "2026-11-23T20:11:39.067Z",
+  "updated": "2026-11-24T04:46:07.323Z",
   "games": [
-    {
-      "d": "2026-11-02",
-      "t": "18:30",
-      "team": "C-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum-Bergh. I",
-      "gameNo": "200226013",
-      "opponent": "JSG Balve/Garb./La/Be/Aff I",
-      "competition": "Kreispokal",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-jsg-balve-garbeck-la-be-aff-i/-/spiel/031JUVN2GK000000VS5489BUVVKNMR0J",
-      "movedFrom": {
-        "d": "2026-10-29",
-        "t": "18:30"
-      },
-      "movedAt": "2026-10-22T17:08:16.340Z",
-      "staffelId": "200226",
-      "staffelName": "Kreispokal 2026/27",
-      "staffelUrl": "https://www.fussball.de/spieltag/runde-3-kreis-arnsberg-c-junioren-kreispokal-c-junioren-saison2627-westfalen/-/spieldatum/2026-11-02/staffel/031JUUE97G000004VS5489BUVVKNMR0J-R",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-29T19:37:11.999Z"
-    },
     {
       "d": "2026-11-03",
       "t": "18:00",
@@ -1623,28 +1601,6 @@
   ],
   "awayGames": [
     {
-      "d": "2026-11-02",
-      "t": "19:30",
-      "team": "Herren Ü32",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "opponent": "TuS Bruchhausen",
-      "competition": "Kreispokal",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/tus-bruchhausen-sv-bachum-bergheim/-/spiel/0327PMS1UO000000VS5489BTVUCVBQ5B",
-      "movedFrom": {
-        "d": "2026-11-09",
-        "t": "19:30"
-      },
-      "movedAt": "2026-10-20T17:00:32.111Z",
-      "gameNo": "200208013",
-      "staffelId": "200208",
-      "staffelName": "Krombacher Kreispokal Ü32",
-      "staffelUrl": "https://www.fussball.de/spieltag/viertelfinale-kreis-arnsberg-herren-ue32-kreispokal-herren-ue32-saison2627-westfalen/-/spieldatum/2026-11-02/staffel/031GJ8ORAO000002VS5489BTVVG7L386-R",
-      "venue": "Kunstrasenplatz, Sportpark An der Hiag, Am Hackeland 1, 59759 Arnsberg",
-      "infoAt": "2026-10-27T17:59:17.544Z"
-    },
-    {
       "d": "2026-11-07",
       "t": "12:00",
       "team": "D-Junioren",
@@ -1731,6 +1687,23 @@
       "staffelUrl": "https://www.fussball.de/spieltag/fs-dj-k-fs-hsk-1-kreis-hochsauerlandkreis-d-junioren-kreis-fs-d-junioren-saison2627-westfalen/-/spieldatum/2026-11-08/staffel/031ARMJOT0000000VS5489BUVV628VP4-D",
       "venue": "Kunstrasenplatz, REMBE-Sport-Park Stadion, Zur Jakobuslinde 38, 59929 Brilon",
       "infoAt": "2026-11-06T21:29:37.769Z"
+    },
+    {
+      "d": "2026-11-09",
+      "t": "19:30",
+      "team": "Herren Ü32",
+      "squad": 1,
+      "ownName": "SV Bachum/Bergheim",
+      "opponent": "TuS Bruchhausen",
+      "competition": "Kreispokal",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/tus-bruchhausen-sv-bachum-bergheim/-/spiel/0327PMS1UO000000VS5489BTVUCVBQ5B",
+      "gameNo": "200208013",
+      "staffelId": "200208",
+      "staffelName": "Krombacher Kreispokal Ü32",
+      "staffelUrl": "https://www.fussball.de/spieltag/viertelfinale-kreis-arnsberg-herren-ue32-kreispokal-herren-ue32-saison2627-westfalen/-/spieldatum/2026-11-02/staffel/031GJ8ORAO000002VS5489BTVVG7L386-R",
+      "venue": "Kunstrasenplatz, Sportpark An der Hiag, Am Hackeland 1, 59759 Arnsberg",
+      "infoAt": "2026-10-27T17:59:17.544Z"
     },
     {
       "d": "2026-11-11",
@@ -3358,20 +3331,20 @@
       "type": "C-Junioren",
       "squad": 1,
       "names": [
-        "SV Bachum-Bergh. I",
-        "SV Bachum-Bergheim"
+        "SV Bachum-Bergheim",
+        "SV Bachum-Bergh. I"
       ],
       "teamIds": [
         "011MIB6N6S000000VTVG0001VTR8C1K7"
       ],
       "competitions": [
-        "Kreispokal",
         "Kreisfreundschaftsspiele",
-        "Kreisliga A"
+        "Kreisliga A",
+        "Kreispokal"
       ],
-      "games": 14,
-      "homeGames": 7,
-      "first": "2026-11-02",
+      "games": 13,
+      "homeGames": 6,
+      "first": "2026-11-07",
       "last": "2027-06-05",
       "teamId": "011MIB6N6S000000VTVG0001VTR8C1K7"
     },
@@ -3542,7 +3515,7 @@
       ],
       "games": 2,
       "homeGames": 0,
-      "first": "2026-11-02",
+      "first": "2026-11-09",
       "last": "2026-11-16",
       "teamId": "01OR4F5HES000000VV0AG811VS8BP574"
     },
@@ -3603,6 +3576,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-11-02",
+  "teamsFrom": "2026-11-03",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
