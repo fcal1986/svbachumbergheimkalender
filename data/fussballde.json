@@ -1,9 +1,9 @@
 {
-  "updated": "2026-11-24T17:38:53.837Z",
+  "updated": "2026-11-25T02:23:25.120Z",
   "games": [
     {
-      "d": "2026-11-03",
-      "t": "18:00",
+      "d": "2026-11-04",
+      "t": "18:30",
       "team": "B-Junioren",
       "squad": 1,
       "ownName": "SV Bachum/Bergheim",
@@ -12,6 +12,11 @@
       "competition": "Kreispokal",
       "score": null,
       "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-sundern/-/spiel/031JUP018O000000VS5489BUVVKNMR0J",
+      "movedFrom": {
+        "d": "2026-11-03",
+        "t": "18:00"
+      },
+      "movedAt": "2026-11-25T02:23:24.311Z",
       "staffelId": "200278",
       "staffelName": "B.- Jugend Kreispokal",
       "staffelUrl": "https://www.fussball.de/spieltag/runde-2-kreis-arnsberg-b-junioren-kreispokal-b-junioren-saison2627-westfalen/-/spieldatum/2026-11-03/staffel/031JUN2LL8000009VS5489BUVVKNMR0J-R",
@@ -2284,7 +2289,7 @@
       "staffelName": "Freundschaftsspiele Kreis Soest",
       "staffelUrl": "https://www.fussball.de/spieltag/fs-h-k-fs-so-1-kreis-soest-kreis-fs-herren-saison2627-westfalen/-/spieldatum/2027-01-29/staffel/03126PPR10000000VS5489BTVT51B5B5-D",
       "venue": "Kunstrasenplatz, Karl-Kleine Stadion Höingen, Schützenstr. 72, 59469 Ense",
-      "infoAt": "2026-11-17T22:19:45.090Z"
+      "infoAt": "2026-11-25T02:23:24.715Z"
     },
     {
       "d": "2027-01-31",
@@ -3323,7 +3328,7 @@
       ],
       "games": 20,
       "homeGames": 11,
-      "first": "2026-11-03",
+      "first": "2026-11-04",
       "last": "2027-06-13",
       "teamId": "02B9BQVPIG000000VS5489B1VU20GQ5T"
     },
@@ -3576,6 +3581,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-11-03",
+  "teamsFrom": "2026-11-04",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
