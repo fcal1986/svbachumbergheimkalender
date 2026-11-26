@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-26T10:50:53.340Z",
+  "updated": "2026-11-26T21:28:28.235Z",
   "games": [
     {
       "d": "2026-11-06",
@@ -523,6 +523,56 @@
       "infoAt": "2026-11-21T03:12:08.129Z"
     },
     {
+      "d": "2026-12-05",
+      "t": "14:20",
+      "team": "D-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum-Bergheim 2",
+      "gameNo": "192251003",
+      "opponent": "Rot-Weiß Lüdenscheid II",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-rot-weiss-luedenscheid-ii/-/spiel/032QTLPI5C000000VS5489BTVTGPOAEA",
+      "staffelId": "192251",
+      "staffelName": "Nikolausturnier D2/D3-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-d-junioren-vereinsturnier-d-junioren-saison2627-westfalen/-/spieldatum/2026-12-05/staffel/032QTKRRF0000001VS5489BTVTGPOAEA-G",
+      "venue": "Halle, Sporthalle Balve Am Schulzentrum, Am Krumpaul 4, 58802 Balve",
+      "infoAt": "2026-11-26T21:28:18.433Z"
+    },
+    {
+      "d": "2026-12-05",
+      "t": "15:20",
+      "team": "D-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum-Bergheim 2",
+      "gameNo": "192251009",
+      "opponent": "DJK Grün-Weiß Menden 2",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-djk-gruen-weiss-menden-2/-/spiel/032QTLPI7S000000VS5489BTVTGPOAEA",
+      "staffelId": "192251",
+      "staffelName": "Nikolausturnier D2/D3-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-d-junioren-vereinsturnier-d-junioren-saison2627-westfalen/-/spieldatum/2026-12-05/staffel/032QTKRRF0000001VS5489BTVTGPOAEA-G",
+      "venue": "Halle, Sporthalle Balve Am Schulzentrum, Am Krumpaul 4, 58802 Balve",
+      "infoAt": "2026-11-26T21:28:19.112Z"
+    },
+    {
+      "d": "2026-12-05",
+      "t": "17:00",
+      "team": "D-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum-Bergheim 2",
+      "gameNo": "192251019",
+      "opponent": "Werler TV II",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-werler-tv-ii/-/spiel/032QTLPICO000000VS5489BTVTGPOAEA",
+      "staffelId": "192251",
+      "staffelName": "Nikolausturnier D2/D3-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-d-junioren-vereinsturnier-d-junioren-saison2627-westfalen/-/spieldatum/2026-12-05/staffel/032QTKRRF0000001VS5489BTVTGPOAEA-G",
+      "infoAt": "2026-11-26T21:28:19.787Z"
+    },
+    {
       "d": "2026-12-06",
       "t": "11:00",
       "team": "Herren",
@@ -543,7 +593,7 @@
       "staffelName": "Kreisliga D Arnsberg",
       "staffelUrl": "https://www.fussball.de/spieltag/kreisliga-d-arnsberg-kreis-arnsberg-kreisliga-d-herren-saison2627-westfalen/-/spieldatum/2026-12-06/staffel/031IU83U78000009VS5489BTVSRD0UH9-G",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-11-19T20:32:11.842Z"
+      "infoAt": "2026-11-26T21:28:20.415Z"
     },
     {
       "d": "2026-12-06",
@@ -562,6 +612,57 @@
       "staffelUrl": "https://www.fussball.de/spieltag/kreisliga-b-arnsberg-kreis-arnsberg-kreisliga-b-herren-saison2627-westfalen/-/spieldatum/2026-12-06/staffel/031I0V20RC00000AVS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
       "infoAt": "2026-11-21T03:12:09.035Z"
+    },
+    {
+      "d": "2026-12-06",
+      "t": "14:50",
+      "team": "C-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum-Bergheim 2",
+      "gameNo": "193561003",
+      "opponent": "TuS Warstein II",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-tus-warstein-ii/-/spiel/032QTOIN1K000000VS5489BTVTGPOAEA",
+      "staffelId": "193561",
+      "staffelName": "Nikolausturnier C-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-c-junioren-vereinsturnier-c-junioren-saison2627-westfalen/-/spieldatum/2026-12-06/staffel/032QTNK2KS000000VS5489BTVTGPOAEA-G",
+      "venue": "Halle, Sporthalle Balve Am Schulzentrum, Am Krumpaul 4, 58802 Balve",
+      "infoAt": "2026-11-26T21:28:21.207Z"
+    },
+    {
+      "d": "2026-12-06",
+      "t": "15:50",
+      "team": "C-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum-Bergheim 2",
+      "gameNo": "193561009",
+      "opponent": "DJK SG Bösperde",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-djk-sg-boesperde/-/spiel/032QTOIN5S000000VS5489BTVTGPOAEA",
+      "staffelId": "193561",
+      "staffelName": "Nikolausturnier C-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-c-junioren-vereinsturnier-c-junioren-saison2627-westfalen/-/spieldatum/2026-12-06/staffel/032QTNK2KS000000VS5489BTVTGPOAEA-G",
+      "venue": "Halle, Sporthalle Balve Am Schulzentrum, Am Krumpaul 4, 58802 Balve",
+      "infoAt": "2026-11-26T21:28:22.009Z"
+    },
+    {
+      "d": "2026-12-06",
+      "t": "17:30",
+      "team": "C-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum-Bergheim 2",
+      "gameNo": "193561019",
+      "opponent": "JSG Meschede/Eversberg/Heinr./Wehrst.",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-2-jsg-meschede-eversberg-heinr-wehrst/-/spiel/032QTOINB8000000VS5489BTVTGPOAEA",
+      "staffelId": "193561",
+      "staffelName": "Nikolausturnier C-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-c-junioren-vereinsturnier-c-junioren-saison2627-westfalen/-/spieldatum/2026-12-06/staffel/032QTNK2KS000000VS5489BTVTGPOAEA-G",
+      "venue": "Halle, Sporthalle Balve Am Schulzentrum, Am Krumpaul 4, 58802 Balve",
+      "infoAt": "2026-11-26T21:28:22.694Z"
     },
     {
       "d": "2026-12-11",
@@ -2103,6 +2204,57 @@
       "infoAt": "2026-11-21T03:12:24.207Z"
     },
     {
+      "d": "2026-12-05",
+      "t": "14:50",
+      "team": "D-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum-Bergheim 2",
+      "opponent": "JSG Balve/Garbeck/La/Kü/Me 3",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/jsg-balve-garbeck-la-kue-me-3-sv-bachum-bergheim-2/-/spiel/032QTLPI6O000000VS5489BTVTGPOAEA",
+      "gameNo": "192251006",
+      "staffelId": "192251",
+      "staffelName": "Nikolausturnier D2/D3-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-d-junioren-vereinsturnier-d-junioren-saison2627-westfalen/-/spieldatum/2026-12-05/staffel/032QTKRRF0000001VS5489BTVTGPOAEA-G",
+      "venue": "Halle, Sporthalle Balve Am Schulzentrum, Am Krumpaul 4, 58802 Balve",
+      "infoAt": "2026-11-26T21:28:23.477Z"
+    },
+    {
+      "d": "2026-12-05",
+      "t": "15:50",
+      "team": "D-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum-Bergheim 2",
+      "opponent": "TuS Sundern II",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/tus-sundern-ii-sv-bachum-bergheim-2/-/spiel/032QTLPI9C000000VS5489BTVTGPOAEA",
+      "gameNo": "192251012",
+      "staffelId": "192251",
+      "staffelName": "Nikolausturnier D2/D3-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-d-junioren-vereinsturnier-d-junioren-saison2627-westfalen/-/spieldatum/2026-12-05/staffel/032QTKRRF0000001VS5489BTVTGPOAEA-G",
+      "venue": "Halle, Sporthalle Balve Am Schulzentrum, Am Krumpaul 4, 58802 Balve",
+      "infoAt": "2026-11-26T21:28:24.150Z"
+    },
+    {
+      "d": "2026-12-05",
+      "t": "16:20",
+      "team": "D-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum-Bergheim 2",
+      "opponent": "JSG Balve/Garbeck/La/Kü/Me 2",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/jsg-balve-garbeck-la-kue-me-2-sv-bachum-bergheim-2/-/spiel/032QTLPIAS000000VS5489BTVTGPOAEA",
+      "gameNo": "192251015",
+      "staffelId": "192251",
+      "staffelName": "Nikolausturnier D2/D3-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-d-junioren-vereinsturnier-d-junioren-saison2627-westfalen/-/spieldatum/2026-12-05/staffel/032QTKRRF0000001VS5489BTVTGPOAEA-G",
+      "venue": "Halle, Sporthalle Balve Am Schulzentrum, Am Krumpaul 4, 58802 Balve",
+      "infoAt": "2026-11-26T21:28:24.816Z"
+    },
+    {
       "d": "2026-12-06",
       "t": "10:00",
       "team": "G-Junioren",
@@ -2165,6 +2317,57 @@
       "staffelUrl": "https://www.fussball.de/spieltag/kreisliga-a-arnsberg-kreis-arnsberg-kreisliga-a-herren-saison2627-westfalen/-/spieldatum/2026-12-06/staffel/031I0AE5E8000009VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Ruhr-Möhne-Sportplatz Neheim, Zum Besenberg, 59755 Arnsberg",
       "infoAt": "2026-11-21T03:12:26.886Z"
+    },
+    {
+      "d": "2026-12-06",
+      "t": "15:20",
+      "team": "C-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum-Bergheim 2",
+      "opponent": "JSG Balve/Garbeck/La/Be/Aff II",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/jsg-balve-garbeck-la-be-aff-ii-sv-bachum-bergheim-2/-/spiel/032QTOIN34000000VS5489BTVTGPOAEA",
+      "gameNo": "193561006",
+      "staffelId": "193561",
+      "staffelName": "Nikolausturnier C-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-c-junioren-vereinsturnier-c-junioren-saison2627-westfalen/-/spieldatum/2026-12-06/staffel/032QTNK2KS000000VS5489BTVTGPOAEA-G",
+      "venue": "Halle, Sporthalle Balve Am Schulzentrum, Am Krumpaul 4, 58802 Balve",
+      "infoAt": "2026-11-26T21:28:25.596Z"
+    },
+    {
+      "d": "2026-12-06",
+      "t": "16:20",
+      "team": "C-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum-Bergheim 2",
+      "opponent": "JSG Bödefeld/Henne-Rartal/Remblinghausen",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/jsg-boedefeld-henne-rartal-remblinghausen-sv-bachum-bergheim-2/-/spiel/032QTOIN7C000000VS5489BTVTGPOAEA",
+      "gameNo": "193561012",
+      "staffelId": "193561",
+      "staffelName": "Nikolausturnier C-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-c-junioren-vereinsturnier-c-junioren-saison2627-westfalen/-/spieldatum/2026-12-06/staffel/032QTNK2KS000000VS5489BTVTGPOAEA-G",
+      "venue": "Halle, Sporthalle Balve Am Schulzentrum, Am Krumpaul 4, 58802 Balve",
+      "infoAt": "2026-11-26T21:28:26.272Z"
+    },
+    {
+      "d": "2026-12-06",
+      "t": "16:50",
+      "team": "C-Junioren",
+      "squad": 2,
+      "ownName": "SV Bachum-Bergheim 2",
+      "opponent": "JSG Balve/Garbeck/La/Be/Aff I",
+      "competition": "Vereinsturnier",
+      "score": null,
+      "link": "https://www.fussball.de/spiel/jsg-balve-garbeck-la-be-aff-i-sv-bachum-bergheim-2/-/spiel/032QTOIN98000000VS5489BTVTGPOAEA",
+      "gameNo": "193561015",
+      "staffelId": "193561",
+      "staffelName": "Nikolausturnier C-Jugend 2026",
+      "staffelUrl": "https://www.fussball.de/spieltag/gruppe-a-kreis-arnsberg-c-junioren-vereinsturnier-c-junioren-saison2627-westfalen/-/spieldatum/2026-12-06/staffel/032QTNK2KS000000VS5489BTVTGPOAEA-G",
+      "venue": "Halle, Sporthalle Balve Am Schulzentrum, Am Krumpaul 4, 58802 Balve",
+      "infoAt": "2026-11-26T21:28:27.046Z"
     },
     {
       "d": "2026-12-12",
@@ -2267,7 +2470,7 @@
       "staffelName": "Freundschaftsspiele Kreis Soest",
       "staffelUrl": "https://www.fussball.de/spieltag/fs-h-k-fs-so-1-kreis-soest-kreis-fs-herren-saison2627-westfalen/-/spieldatum/2027-01-31/staffel/03126PPR10000000VS5489BTVT51B5B5-D",
       "venue": "Kunstrasenplatz, Sportplatz am Heuerwerth -Kunst-, Heuerwerth 7, 59469 Ense",
-      "infoAt": "2026-11-19T20:32:12.622Z"
+      "infoAt": "2026-11-26T21:28:27.826Z"
     },
     {
       "d": "2027-02-14",
@@ -3316,16 +3519,18 @@
       "type": "C-Junioren",
       "squad": 2,
       "names": [
-        "SV Bachum-Bergh. II"
+        "SV Bachum-Bergh. II",
+        "SV Bachum-Bergheim 2"
       ],
       "teamIds": [
         "031A86T3J0000000VS5489BSVU0ORN69"
       ],
       "competitions": [
-        "Kreisliga B"
+        "Kreisliga B",
+        "Vereinsturnier"
       ],
-      "games": 8,
-      "homeGames": 4,
+      "games": 14,
+      "homeGames": 7,
       "first": "2026-11-07",
       "last": "2027-06-05",
       "teamId": "031A86T3J0000000VS5489BSVU0ORN69"
@@ -3356,16 +3561,18 @@
       "type": "D-Junioren",
       "squad": 2,
       "names": [
-        "SV Bachum-Bergheim II"
+        "SV Bachum-Bergheim II",
+        "SV Bachum-Bergheim 2"
       ],
       "teamIds": [
         "02PU7K56SO000000VS5489B2VSE05932"
       ],
       "competitions": [
-        "Kreisliga B"
+        "Kreisliga B",
+        "Vereinsturnier"
       ],
-      "games": 9,
-      "homeGames": 4,
+      "games": 15,
+      "homeGames": 7,
       "first": "2026-11-07",
       "last": "2027-06-05",
       "teamId": "02PU7K56SO000000VS5489B2VSE05932"
