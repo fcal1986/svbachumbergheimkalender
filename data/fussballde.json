@@ -1,45 +1,6 @@
 {
-  "updated": "2026-11-25T14:17:52.084Z",
+  "updated": "2026-11-26T00:18:40.647Z",
   "games": [
-    {
-      "d": "2026-11-04",
-      "t": "18:30",
-      "team": "B-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "gameNo": "200278005",
-      "opponent": "TuS Sundern",
-      "competition": "Kreispokal",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-sundern/-/spiel/031JUP018O000000VS5489BUVVKNMR0J",
-      "movedFrom": {
-        "d": "2026-11-03",
-        "t": "18:00"
-      },
-      "movedAt": "2026-11-25T02:23:24.311Z",
-      "staffelId": "200278",
-      "staffelName": "B.- Jugend Kreispokal",
-      "staffelUrl": "https://www.fussball.de/spieltag/runde-2-kreis-arnsberg-b-junioren-kreispokal-b-junioren-saison2627-westfalen/-/spieldatum/2026-11-03/staffel/031JUN2LL8000009VS5489BUVVKNMR0J-R",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-10-30T19:20:13.435Z"
-    },
-    {
-      "d": "2026-11-04",
-      "t": "19:00",
-      "team": "A-Junioren",
-      "squad": 1,
-      "ownName": "SV Bachum/Bergheim",
-      "gameNo": "200276005",
-      "opponent": "TuS Sundern",
-      "competition": "Kreispokal",
-      "score": null,
-      "link": "https://www.fussball.de/spiel/sv-bachum-bergheim-tus-sundern/-/spiel/031JUJSA64000000VS5489BUVVKNMR0J",
-      "staffelId": "200276",
-      "staffelName": "Kreispokal 2026/27",
-      "staffelUrl": "https://www.fussball.de/spieltag/runde-2-kreis-arnsberg-a-junioren-kreispokal-a-junioren-saison2627-westfalen/-/spieldatum/2026-11-04/staffel/031JUH8C4S000009VS5489BUVVKNMR0J-R",
-      "venue": "Kunstrasenplatz, Höllenbergkampfbahn Bachum/Bergheim, Neheimer Str., 59757 Arnsberg",
-      "infoAt": "2026-11-01T23:34:12.825Z"
-    },
     {
       "d": "2026-11-06",
       "t": "16:15",
@@ -2053,7 +2014,7 @@
       "staffelName": "KL A",
       "staffelUrl": "https://www.fussball.de/spieltag/kl-a-kreis-arnsberg-a-junioren-kreisliga-a-a-junioren-saison2627-westfalen/-/spieldatum/2026-11-27/staffel/031JKJK6Q0000004VS5489BUVVKNMR0J-G",
       "venue": "Kunstrasenplatz, Sportplatz Hachen Hüttenwiese, Am Sportplatz 13, 59846 Sundern (Sauerland)",
-      "infoAt": "2026-11-18T17:14:10.947Z"
+      "infoAt": "2026-11-26T00:18:40.238Z"
     },
     {
       "d": "2026-11-28",
@@ -3302,13 +3263,12 @@
         "027IVI3RO8000000VS5489B1VUA37ON8"
       ],
       "competitions": [
-        "Kreispokal",
         "Kreisliga A",
         "Kreisfreundschaftsspiele"
       ],
-      "games": 14,
-      "homeGames": 7,
-      "first": "2026-11-04",
+      "games": 13,
+      "homeGames": 6,
+      "first": "2026-11-09",
       "last": "2027-05-21",
       "teamId": "027IVI3RO8000000VS5489B1VUA37ON8"
     },
@@ -3322,13 +3282,12 @@
         "02B9BQVPIG000000VS5489B1VU20GQ5T"
       ],
       "competitions": [
-        "Kreispokal",
         "Kreisfreundschaftsspiele",
         "Bezirksliga"
       ],
-      "games": 20,
-      "homeGames": 11,
-      "first": "2026-11-04",
+      "games": 19,
+      "homeGames": 10,
+      "first": "2026-11-07",
       "last": "2027-06-13",
       "teamId": "02B9BQVPIG000000VS5489B1VU20GQ5T"
     },
@@ -3581,6 +3540,6 @@
       "teamId": "02M8390780000000VS5489B2VUHJA7LU"
     }
   ],
-  "teamsFrom": "2026-11-04",
+  "teamsFrom": "2026-11-05",
   "strategy": "C (fussball.de HTML-Spielplan)"
 }
