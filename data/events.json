@@ -472,6 +472,27 @@
       "address": "Große Wiese",
       "ownerId": "935d13de-b21e-43c5-a35f-405bfaf4cc6c",
       "ownerName": "Fabrizio Calcagno"
+    },
+    {
+      "id": "7fe8dc01-9420-493b-acdc-d694d2e51c45",
+      "d": "2026-11-28",
+      "t": "11:45",
+      "bis": "13:00",
+      "title": "Training",
+      "kind": "training",
+      "team": "B-Jugend",
+      "squad": 1,
+      "pitch": null,
+      "halle": {
+        "thirds": [
+          2
+        ]
+      },
+      "res": [],
+      "venueId": "binnerfeld",
+      "note": "",
+      "ownerId": "af1a6546-fdc2-4059-bef4-5a4966181701",
+      "ownerName": "Michael Raneck"
     }
   ]
 }
