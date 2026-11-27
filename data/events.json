@@ -493,6 +493,27 @@
       "note": "",
       "ownerId": "af1a6546-fdc2-4059-bef4-5a4966181701",
       "ownerName": "Michael Raneck"
+    },
+    {
+      "id": "ca7aaa1b-33e4-43d3-87e5-38a9f04294e3",
+      "d": "2026-11-28",
+      "t": "11:45",
+      "bis": "13:00",
+      "title": "Training",
+      "kind": "training",
+      "team": "B-Jugend",
+      "squad": 1,
+      "pitch": null,
+      "halle": {
+        "thirds": [
+          1
+        ]
+      },
+      "res": [],
+      "venueId": "binnerfeld",
+      "note": "",
+      "ownerId": "af1a6546-fdc2-4059-bef4-5a4966181701",
+      "ownerName": "Michael Raneck"
     }
   ]
 }
