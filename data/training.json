@@ -1079,6 +1079,18 @@
           "res": [],
           "halle": null,
           "venueId": "home"
+        },
+        "2026-12-17": {
+          "from": "17:30",
+          "to": "18:30",
+          "pitch": null,
+          "res": [],
+          "halle": {
+            "thirds": [
+              1
+            ]
+          },
+          "venueId": "bergheim-schule"
         }
       }
     },
